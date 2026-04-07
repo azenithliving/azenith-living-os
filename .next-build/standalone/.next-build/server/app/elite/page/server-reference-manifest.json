@@ -1,0 +1,89 @@
+{
+  "node": {
+    "0010db2892cfe8492ad0edb8e5afd572089790a1db": {
+      "workers": {
+        "app/elite/page": {
+          "moduleId": 63453,
+          "async": false,
+          "exportedName": "logoutEliteUser",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "logoutEliteUser",
+      "filename": "app/elite/actions/elite-actions.ts"
+    },
+    "006a4205075dc57afac190f6aeb4270ee682d8cd1a": {
+      "workers": {
+        "app/elite/page": {
+          "moduleId": 63453,
+          "async": false,
+          "exportedName": "checkEliteAuth",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "checkEliteAuth",
+      "filename": "app/elite/actions/elite-actions.ts"
+    },
+    "4000d1af8fc1601b815c92ef9305b9505b6302e9e2": {
+      "workers": {
+        "app/elite/page": {
+          "moduleId": 63453,
+          "async": false,
+          "exportedName": "initiateWhatsAppLogin",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "initiateWhatsAppLogin",
+      "filename": "app/elite/actions/elite-actions.ts"
+    },
+    "403e463ef9e04ee902c22ab19c45040766c71b0915": {
+      "workers": {
+        "app/elite/page": {
+          "moduleId": 63453,
+          "async": false,
+          "exportedName": "getEliteDashboardData",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "getEliteDashboardData",
+      "filename": "app/elite/actions/elite-actions.ts"
+    },
+    "40576ee52c012e3223ab8363de331ee8be5e7275c0": {
+      "workers": {
+        "app/elite/page": {
+          "moduleId": 63453,
+          "async": false,
+          "exportedName": "getEliteHomeData",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "getEliteHomeData",
+      "filename": "app/elite/actions/elite-actions.ts"
+    },
+    "40ea94c45bff5271123e75442b5651a79df1ee0b7a": {
+      "workers": {
+        "app/elite/page": {
+          "moduleId": 63453,
+          "async": false,
+          "exportedName": "validateEliteToken",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "validateEliteToken",
+      "filename": "app/elite/actions/elite-actions.ts"
+    },
+    "4037f1d43cbe0c258df8d03f75cd8769bbf58bd9f1": {
+      "workers": {
+        "app/elite/page": {
+          "moduleId": 63453,
+          "async": false,
+          "exportedName": "subscribeToNewsletter",
+          "filename": "app/actions/subscribeAction.ts"
+        }
+      },
+      "exportedName": "subscribeToNewsletter",
+      "filename": "app/actions/subscribeAction.ts"
+    }
+  },
+  "edge": {}
+}

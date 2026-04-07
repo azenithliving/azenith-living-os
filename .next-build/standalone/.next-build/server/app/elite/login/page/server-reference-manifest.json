@@ -1,0 +1,17 @@
+{
+  "node": {
+    "4000d1af8fc1601b815c92ef9305b9505b6302e9e2": {
+      "workers": {
+        "app/elite/login/page": {
+          "moduleId": 20363,
+          "async": false,
+          "exportedName": "initiateWhatsAppLogin",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "initiateWhatsAppLogin",
+      "filename": "app/elite/actions/elite-actions.ts"
+    }
+  },
+  "edge": {}
+}
