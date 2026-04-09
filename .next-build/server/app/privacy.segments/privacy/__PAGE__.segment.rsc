@@ -1,5 +1,0 @@
-1:"$Sreact.fragment"
-2:I[97367,["/_next/static/chunks/0mgsvj2sic69s.js","/_next/static/chunks/0ro.xpxsokg_w.js","/_next/static/chunks/0g3zz~cnjbuhf.js"],"OutletBoundary"]
-3:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","main",null,{"className":"px-6 py-12 md:px-10 lg:px-16","children":["$","div",null,{"className":"mx-auto max-w-4xl space-y-6 rounded-[2rem] border border-white/10 bg-white/[0.03] p-8","children":[["$","h1",null,{"className":"font-serif text-4xl text-white md:text-5xl","children":"سياسة الخصوصية"}],["$","p",null,{"className":"text-base leading-8 text-white/68","children":"نجمع بيانات التواصل والاهتمام التي يشاركها الزائر داخل النماذج لتحسين التوصيات، متابعة الطلبات، وتشغيل مسار التحويل التجاري. لا يتم استخدام هذه البيانات خارج أغراض الخدمة، ويمكن طلب تعديلها أو حذفها عبر البريد المخصص للخصوصية."}]]}]}],null,["$","$L2",null,{"children":["$","$3",null,{"name":"Next.MetadataOutlet","children":"$@4"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"1KC1NxP8eIpWXfhAGVkx_"}
-4:null
