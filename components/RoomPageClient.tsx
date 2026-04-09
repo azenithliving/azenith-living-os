@@ -248,13 +248,13 @@ export default function RoomPageClient({
 
   // Rate limiting: Track last fetch time
   const lastFetchTimeRef = useRef<number>(0);
-  const RATE_LIMIT_MS = 1000; // 1 second between fetches
+  const RATE_LIMIT_MS = 3000; // 3 seconds between fetches to avoid API loop
 
   // Load more images with AI-powered page-based filtering
   const loadMoreImages = useCallback(async () => {
     if (isFetchingRef.current || !hasMore || isLoadingMore) return;
     
-    // Rate limiting check (1 second between fetches)
+    // Rate limiting check (3 second cooldown between fetches)
     const now = Date.now();
     const timeSinceLastFetch = now - lastFetchTimeRef.current;
     if (timeSinceLastFetch < RATE_LIMIT_MS) {
@@ -524,11 +524,17 @@ export default function RoomPageClient({
             fill
             sizes="(max-width: 768px) 100vw, 1200px"
             className="object-cover"
-            priority
+            priority={true}
+            loading="eager"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-white/[0.03]">
-            <span className="text-white/40">لا توجد صورة متاحة</span>
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-amber-900/20 to-black">
+            <div className="relative">
+              <div className="h-20 w-20 animate-pulse rounded-full bg-amber-500/20 blur-xl" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-amber-500/30 border-t-amber-500" />
+              </div>
+            </div>
           </div>
         )}
         <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all hover:bg-black/30 hover:opacity-100">
@@ -588,8 +594,14 @@ export default function RoomPageClient({
       </div>
 
       {gallery.length === 0 && !loading && (
-        <div className="flex min-h-60 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-center text-sm text-white/60">
-          لا توجد صور إضافية متاحة الآن. أعد المحاولة بعد قليل.
+        <div className="flex min-h-60 flex-col items-center justify-center gap-4 rounded-xl border border-white/10 bg-gradient-to-br from-amber-900/10 to-black p-8 text-center">
+          <div className="relative">
+            <div className="h-16 w-16 animate-pulse rounded-full bg-amber-500/20 blur-xl" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-amber-500/30 border-t-amber-500" />
+            </div>
+          </div>
+          <p className="text-sm text-white/60">جاري تحميل المزيد من الصور...</p>
         </div>
       )}
 

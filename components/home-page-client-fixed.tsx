@@ -403,7 +403,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
 
   return (
     <>
-      <section className="relative z-20">
+      <section className="relative z-20" suppressHydrationWarning>
         <div className="relative z-10 mx-auto max-w-7xl bg-transparent px-6 pb-40 pt-20">
           <div className="relative z-20 bg-transparent">
             <div className="mb-16 bg-transparent">

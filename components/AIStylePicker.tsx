@@ -21,7 +21,7 @@ const AIStylePicker: React.FC<AIStylePickerProps> = ({ selectedStyle, onStyleCha
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="flex flex-col items-center mb-16 px-4">
+    <div className="flex flex-col items-center mb-16 px-4" suppressHydrationWarning>
       <div className="relative flex flex-wrap justify-center items-center bg-white/[0.03] backdrop-blur-md p-1.5 rounded-full border border-white/10">
         {options.map((style) => {
           const isActive = selectedStyle === style.id;
