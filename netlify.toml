@@ -6,5 +6,4 @@
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+# شيلنا الـ Plugin يدوي عشان نيتلايف يستخدم أحدث نسخة أوتوماتيك
