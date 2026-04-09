@@ -125,6 +125,8 @@ export default function RoomPageClient({
   const [currentPage, setCurrentPage] = useState(1);
   const [seed, setSeed] = useState<number>(0); // Start with 0, set real seed in useEffect after hydration
   const [poolSize, setPoolSize] = useState<number>(0); // Track available pool size
+  const [isFetching, setIsFetching] = useState(false); // Global fetching flag for throttling
+  const [rateLimitFreezeUntil, setRateLimitFreezeUntil] = useState<number>(0); // 5s freeze on 429
 
   // Initialize seed after hydration to avoid mismatch
   useEffect(() => {
@@ -132,6 +134,15 @@ export default function RoomPageClient({
       setSeed(Date.now());
     }
   }, [seed]);
+
+  // State Synchronization: Merge initialPhotos with client state after store rehydration
+  // This prevents empty state if store rehydration clears the images
+  useEffect(() => {
+    if (isHydrated && initialPhotos.length > 0 && photos.length === 0) {
+      console.log('[State Sync] Restoring initialPhotos after store rehydration');
+      setPhotos(initialPhotos.slice(0, INITIAL_LOAD_COUNT));
+    }
+  }, [isHydrated, initialPhotos, photos.length]);
 
   const [loading, setLoading] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -255,21 +266,31 @@ export default function RoomPageClient({
 
   // Rate limiting: Track last fetch time
   const lastFetchTimeRef = useRef<number>(0);
-  const RATE_LIMIT_MS = 3000; // 3 seconds between fetches to avoid API loop
+  const RATE_LIMIT_MS = 2000; // 2 seconds minimum between fetches
+  const RATE_LIMIT_FREEZE_MS = 5000; // 5 second freeze when 429 received
 
   // Load more images with AI-powered page-based filtering
   const loadMoreImages = useCallback(async () => {
-    if (isFetchingRef.current || !hasMore || isLoadingMore) return;
+    // Check global fetching flag
+    if (isFetching || isFetchingRef.current || !hasMore || isLoadingMore) return;
     
-    // Rate limiting check (3 second cooldown between fetches)
     const now = Date.now();
+    
+    // Check 429 freeze period
+    if (now < rateLimitFreezeUntil) {
+      console.log(`[AI Infinite Scroll] Frozen due to rate limit, retry after ${rateLimitFreezeUntil - now}ms`);
+      return;
+    }
+    
+    // Rate limiting check (2 second minimum between fetches)
     const timeSinceLastFetch = now - lastFetchTimeRef.current;
     if (timeSinceLastFetch < RATE_LIMIT_MS) {
-      console.log(`[AI Infinite Scroll] Rate limited, waiting ${RATE_LIMIT_MS - timeSinceLastFetch}ms`);
+      console.log(`[AI Infinite Scroll] Throttled, waiting ${RATE_LIMIT_MS - timeSinceLastFetch}ms`);
       await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_MS - timeSinceLastFetch));
     }
     
     isFetchingRef.current = true;
+    setIsFetching(true);
     setIsLoadingMore(true);
     lastFetchTimeRef.current = Date.now();
     
@@ -292,31 +313,35 @@ export default function RoomPageClient({
       const query = `${styleHint} luxury interior design ${room.query}`;
       const pexelsResponse = await fetch(
         `/api/pexels?query=${encodeURIComponent(query)}&per_page=${LOAD_MORE_COUNT}&page=${nextPage}`
-      );
+      ).catch((err) => {
+        console.error('[AI Infinite Scroll] Pexels fetch error:', err);
+        return null;
+      });
+
+      if (!pexelsResponse) {
+        setIsLoadingMore(false);
+        isFetchingRef.current = false;
+        setIsFetching(false);
+        return;
+      }
 
       if (!pexelsResponse.ok) {
-        // Rate limit (429) - fallback to initialPhotos from SSR instead of showing empty
+        // Rate limit (429) - freeze for 5s and use placeholder strategy
         if (pexelsResponse.status === 429) {
-          console.warn('[AI Infinite Scroll] Rate limited (429), falling back to SSR initialPhotos');
-          // Use initialPhotos as fallback, shuffle them for variety
-          const fallbackPhotos = initialPhotos.length > 0 
-            ? initialPhotos 
-            : Array.from({ length: 5 }, (_, i) => ({
-                id: 100000 + i,
-                src: { large: getFallbackImage(room.id, i), large2x: getFallbackImage(room.id, i) },
-                alt: `${room.title} fallback ${i + 1}`,
-              }));
-          // Slice to get fresh batch from fallback
-          const startIdx = ((currentPage - 1) * LOAD_MORE_COUNT) % fallbackPhotos.length;
-          const batch = fallbackPhotos.slice(startIdx, startIdx + LOAD_MORE_COUNT);
-          if (batch.length > 0) {
-            setPhotos(prev => [...prev, ...batch]);
-            setCurrentPage(nextPage);
-            // Don't set hasMore to false, keep trying for real API on next scroll
-          }
+          console.warn('[AI Infinite Scroll] Rate limited (429), freezing for 5s');
+          setRateLimitFreezeUntil(Date.now() + RATE_LIMIT_FREEZE_MS);
+          // Placeholder Strategy: Keep showing current images, don't clear them
+          // Just increment page so next attempt tries different batch
+          setCurrentPage(nextPage);
+          setIsLoadingMore(false);
+          isFetchingRef.current = false;
+          setIsFetching(false);
           return;
         }
         setHasMore(false);
+        setIsLoadingMore(false);
+        isFetchingRef.current = false;
+        setIsFetching(false);
         return;
       }
 
@@ -336,7 +361,17 @@ export default function RoomPageClient({
           page: nextPage,
           photos: pexelsData.photos,
         }),
+      }).catch((err) => {
+        console.error('[AI Infinite Scroll] Curation API error:', err);
+        return null;
       });
+
+      if (!curatedResponse) {
+        setIsLoadingMore(false);
+        isFetchingRef.current = false;
+        setIsFetching(false);
+        return;
+      }
 
       if (!curatedResponse.ok) {
         console.warn("[AI Infinite Scroll] AI filtering failed");
@@ -351,23 +386,25 @@ export default function RoomPageClient({
       sessionCacheRef.current.set(cacheKey, approvedPhotos);
       
       if (approvedPhotos.length > 0) {
+        // Placeholder Strategy: Only swap photos when curated batch is 100% ready
         setPhotos(prev => [...prev, ...approvedPhotos]);
         setDisplayedCount(prev => prev + approvedPhotos.length);
         setCurrentPage(nextPage);
         console.log(`[AI Infinite Scroll] Gemini curated ${approvedPhotos.length}/${pexelsData.photos.length} images (source: ${curatedData.source})`);
       } else {
-        // If AI rejected all, try next page
+        // If AI rejected all, try next page but don't clear existing photos
         console.log("[AI Infinite Scroll] All images rejected by AI, trying next page");
         setCurrentPage(nextPage);
       }
     } catch (error) {
       console.error("[AI Infinite Scroll] Failed to load more images:", error);
-      setHasMore(false);
+      // Don't clear photos on error - keep showing what we have
     } finally {
       setIsLoadingMore(false);
       isFetchingRef.current = false;
+      setIsFetching(false);
     }
-  }, [currentPage, currentStyle, hasMore, isLoadingMore, room.id, room.query, getCacheKey]);
+  }, [currentPage, currentStyle, hasMore, isLoadingMore, isFetching, room.id, room.query, getCacheKey, rateLimitFreezeUntil]);
 
   // Debounce ref for infinite scroll to prevent rapid triggers
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -377,7 +414,7 @@ export default function RoomPageClient({
     // Disconnect any existing observer first to prevent memory leaks
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isFetchingRef.current) {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isFetchingRef.current && !isFetching) {
           // Clear any existing debounce timer
           if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
@@ -405,7 +442,7 @@ export default function RoomPageClient({
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [hasMore, isLoadingMore, loadMoreImages]);
+  }, [hasMore, isLoadingMore, isFetching, loadMoreImages]);
 
   // Handle style change with instant refresh
   const handleStyleChange = useCallback(

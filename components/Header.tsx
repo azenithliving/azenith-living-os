@@ -72,6 +72,7 @@ export default function Header() {
           onClick={() => setIsMobileMenuOpen((current) => !current)}
           aria-label={isMobileMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
           aria-expanded={isMobileMenuOpen}
+          suppressHydrationWarning
           className="relative z-50 flex h-8 w-8 flex-col items-center justify-center gap-1.5 md:hidden"
         >
           <span className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-2" : ""}`} />
@@ -83,6 +84,7 @@ export default function Header() {
           <button
             type="button"
             onClick={handleLogoClick}
+            suppressHydrationWarning
             className="relative h-20 w-48 cursor-pointer select-none transition-transform duration-500 hover:scale-105 md:h-32 md:w-64"
           >
             <Image

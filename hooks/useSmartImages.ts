@@ -98,6 +98,9 @@ export function useSmartImages({
           roomType,
           style,
         }),
+      }).catch((err) => {
+        console.error("[Smart Images] Network error during curation:", err);
+        throw new Error("Network error - please check your connection");
       });
 
       // Handle 429 with backoff retry
