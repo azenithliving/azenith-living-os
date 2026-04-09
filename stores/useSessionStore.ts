@@ -41,13 +41,14 @@ export interface PsychologicalProfile {
     hoverScore: number; // +2 per image hover
     modalScore: number; // +5 per modal open
     downloadScore: number; // +10 per download
+    rejectScore: number; // +1 per reject
     total: number;
   };
   // Raw interaction data for Gemini analysis
   interactedImages: Array<{
     id: number;
     timestamp: number;
-    interactionType: "hover" | "modal" | "download";
+    interactionType: "hover" | "modal" | "download" | "reject";
     metadata?: {
       colorPalette?: string[];
       materials?: string[];
@@ -118,7 +119,7 @@ export interface SessionState {
   // Neural Analytics: Track weighted interactions
   trackNeuralInteraction: (
     imageId: number,
-    interactionType: "hover" | "modal" | "download",
+    interactionType: "hover" | "modal" | "download" | "reject",
     metadata?: {
       colorPalette?: string[];
       materials?: string[];
@@ -213,6 +214,7 @@ const useSessionStore = create<SessionState>()(
           hoverScore: 0,
           modalScore: 0,
           downloadScore: 0,
+          rejectScore: 0,
           total: 0,
         },
         interactedImages: [],
@@ -299,7 +301,7 @@ const useSessionStore = create<SessionState>()(
 
       // Neural Analytics: Track weighted interactions with psychological profiling
       trackNeuralInteraction: (imageId, interactionType, metadata) => set((state) => {
-        const weights = { hover: 2, modal: 5, download: 10 };
+        const weights = { hover: 2, modal: 5, download: 10, reject: 1 };
         const weight = weights[interactionType];
         const now = Date.now();
         
@@ -405,6 +407,7 @@ const useSessionStore = create<SessionState>()(
             hoverScore: 0,
             modalScore: 0,
             downloadScore: 0,
+            rejectScore: 0,
             total: 0,
           },
           interactedImages: [],
