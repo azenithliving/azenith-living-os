@@ -14,6 +14,7 @@ import useSessionStore from "@/stores/useSessionStore";
 
 type HomePageClientProps = {
   runtimeConfig: RuntimeConfig;
+  initialRoomImages?: Record<string, string>;
 };
 
 type LandingRoom = {
@@ -93,25 +94,6 @@ const BASE_ROOMS: LandingRoom[] = [
     summary: "غرف تجمع بين الشخصية والعملية بحلول قابلة للتطوير بدل التغيير السريع.",
   },
 ];
-
-const STYLE_COPY: Record<string, { headline: string; desc: string }> = {
-  modern: {
-    headline: "ذكاء التصميم وبساطة المستقبل",
-    desc: "مساحات تعكس نمط حياتك السريع بلمسات هادئة وحلول تنظيمية ذكية.",
-  },
-  classic: {
-    headline: "فخامة خالدة وتفاصيل ملكية",
-    desc: "دفء بصري وأناقة ثابتة تمنح المساحة حضورًا غنيًا بدون مبالغة.",
-  },
-  industrial: {
-    headline: "جرأة الخامة وروح المدينة",
-    desc: "مزيج واضح بين المعدن والخشب يخلق شخصية قوية وعملية للمكان.",
-  },
-  scandinavian: {
-    headline: "هدوء الطبيعة ودفء المنزل",
-    desc: "ألوان هادئة وإضاءة مريحة تمنحك إحساسًا بالنظافة والسكينة في كل زاوية.",
-  },
-};
 
 const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { eyebrow: string; title: string; summary: string }>> = {
   "master-bedroom": {
@@ -248,7 +230,7 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { eyebrow: string; 
   },
 };
 
-export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
+export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }: HomePageClientProps) {
   const intent = useSessionStore((state) => state.intent);
   const updateProfile = useSessionStore((state) => state.updateProfile);
   const trackEvent = useSessionStore((state) => state.trackEvent);
@@ -262,8 +244,9 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
   const styleSwitches = useSessionStore((state) => state.styleSwitches);
   const isHydrated = useSessionStore((state) => state.isHydrated);
 
-  const [roomImages, setRoomImages] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
+  // Use server-fetched images as initial state to eliminate loading flash
+  const [roomImages, setRoomImages] = useState<Record<string, string>>(initialRoomImages);
+  const [loading, setLoading] = useState(Object.keys(initialRoomImages).length === 0);
   // Local state for immediate UI feedback - synced to store
   const [styleSwitchCount, setStyleSwitchCount] = useState(styleSwitches);
   const styleSwitchRef = useRef(styleSwitches);
@@ -428,7 +411,7 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
             </div>
 
             <div className="relative z-20 grid grid-cols-1 gap-10 bg-transparent md:grid-cols-2 lg:grid-cols-3">
-              {roomList.slice(0, 6).map((room) => (
+              {roomList.slice(0, 6).map((room, index) => (
                 <div key={room.slug} className="group relative z-20">
                   <Link
                     href={`/room/${room.slug}?style=${displayStyle}`}
@@ -443,6 +426,8 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="absolute inset-0 object-cover transition-transform duration-1000 group-hover:scale-110"
+                      priority={index < 6}
+                      loading={index < 6 ? "eager" : "lazy"}
                     />
                     <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 z-20 p-8 text-right">
