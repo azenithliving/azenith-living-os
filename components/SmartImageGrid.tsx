@@ -109,7 +109,7 @@ export default function SmartImageGrid({
 
           return (
             <ImageHoverWrapper
-              key={image.id}
+              key={`${image.id}-${index}`}
               imageIndex={index + 1}
               onHoverStart={() => setHoveredImage(image.id)}
               onHoverEnd={() => setHoveredImage(null)}

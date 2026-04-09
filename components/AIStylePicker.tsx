@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 
 const styles = [
   { id: "modern", label: "مودرن" },
@@ -18,11 +18,18 @@ interface AIStylePickerProps {
 }
 
 const AIStylePicker: React.FC<AIStylePickerProps> = ({ selectedStyle, onStyleChange, options = styles }) => {
-  const shouldReduceMotion = useReducedMotion();
+  const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+    // Check reduced motion preference only on client side
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setShouldReduceMotion(mediaQuery.matches);
+    
+    const handler = (e: MediaQueryListEvent) => setShouldReduceMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
   return (

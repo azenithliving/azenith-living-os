@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface SmartImage {
   id: number;
@@ -52,12 +52,28 @@ export function useSmartImages({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [curationStats, setCurationStats] = useState<UseSmartImagesReturn["curationStats"]>(null);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const prevInitialImages = useRef(initialImages);
+  const isFirstRun = useRef(true);
+  
+  // Backoff retry refs
+  const retryCount = useRef(0);
+  const retryTimer = useRef<NodeJS.Timeout | null>(null);
+  const MAX_RETRIES = 3;
+  const BASE_RETRY_DELAY = 2000; // 2 seconds
 
-  const curateImages = useCallback(async () => {
+  const curateImages = useCallback(async (isRetry = false) => {
     if (!initialImages || initialImages.length === 0) {
       setImages([]);
       return;
     }
+
+    // Skip if images haven't actually changed (prevents infinite loops)
+    if (!isFirstRun.current && !isRetry && JSON.stringify(prevInitialImages.current) === JSON.stringify(initialImages)) {
+      return;
+    }
+    prevInitialImages.current = initialImages;
+    isFirstRun.current = false;
 
     setLoading(true);
     setError(null);
@@ -84,9 +100,36 @@ export function useSmartImages({
         }),
       });
 
+      // Handle 429 with backoff retry
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        const waitTime = retryAfter ? parseInt(retryAfter, 10) * 1000 : BASE_RETRY_DELAY * Math.pow(2, retryCount.current);
+        
+        if (retryCount.current < MAX_RETRIES) {
+          retryCount.current++;
+          console.log(`[Smart Images] 429 rate limited. Auto-retry ${retryCount.current}/${MAX_RETRIES} in ${waitTime}ms...`);
+          
+          if (retryTimer.current) {
+            clearTimeout(retryTimer.current);
+          }
+          
+          retryTimer.current = setTimeout(() => {
+            curateImages(true);
+          }, waitTime);
+          
+          return; // Don't set loading false yet - we're retrying
+        } else {
+          console.warn('[Smart Images] Max retries exceeded. Using fallback.');
+          throw new Error('Rate limited - max retries exceeded');
+        }
+      }
+
       if (!response.ok) {
         throw new Error(`Curation failed: ${response.statusText}`);
       }
+
+      // Reset retry count on success
+      retryCount.current = 0;
 
       const result = await response.json();
 
@@ -138,9 +181,32 @@ export function useSmartImages({
     }
   }, [initialImages, intent, budget, roomType, style]);
 
-  // Run curation when dependencies change
+  // Run curation when dependencies change with debounce
   useEffect(() => {
-    curateImages();
+    // Clear existing timers
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    if (retryTimer.current) {
+      clearTimeout(retryTimer.current);
+    }
+    
+    // Reset retry count on dependency change
+    retryCount.current = 0;
+    
+    // Debounce the curation call by 500ms
+    debounceTimer.current = setTimeout(() => {
+      curateImages();
+    }, 500);
+    
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+      if (retryTimer.current) {
+        clearTimeout(retryTimer.current);
+      }
+    };
   }, [curateImages]);
 
   return {

@@ -123,7 +123,7 @@ export default function RoomPageClient({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true); // Reservoir always has more
   const [currentPage, setCurrentPage] = useState(1);
-  const [seed, setSeed] = useState<number>(Date.now()); // For reservoir randomization
+  const [seed, setSeed] = useState<number>(() => Date.now()); // Lazy init to avoid hydration mismatch
   const [poolSize, setPoolSize] = useState<number>(0); // Track available pool size
 
   const [loading, setLoading] = useState(false);
@@ -161,18 +161,19 @@ export default function RoomPageClient({
       const currentPref = stylePrefs?.[currentStyle] || { roomCount: 0, totalTimeSpent: 0, lastViewedAt: 0 };
       
       // Prepare pending update
+      const now = Date.now();
       const updatedStylePrefs = {
         ...stylePrefs,
         [currentStyle]: {
           roomCount: currentPref.roomCount + 1,
           totalTimeSpent: currentPref.totalTimeSpent,
-          lastViewedAt: Date.now(),
+          lastViewedAt: now,
         },
       };
       
       pendingUpdateRef.current = {
         stylePrefs: updatedStylePrefs,
-        timestamp: Date.now(),
+        timestamp: now,
       };
       
       // Smart Aggregation: Clear existing timer
@@ -340,8 +341,9 @@ export default function RoomPageClient({
     }
   }, [currentPage, currentStyle, hasMore, isLoadingMore, room.id, room.query, getCacheKey]);
 
-  // Infinite scroll observer
+  // Infinite scroll observer with proper cleanup
   useEffect(() => {
+    // Disconnect any existing observer first to prevent memory leaks
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isFetchingRef.current) {
@@ -357,9 +359,8 @@ export default function RoomPageClient({
     }
 
     return () => {
-      if (currentGalleryEnd) {
-        observer.unobserve(currentGalleryEnd);
-      }
+      // Always disconnect the entire observer on cleanup
+      observer.disconnect();
     };
   }, [hasMore, isLoadingMore, loadMoreImages]);
 

@@ -1,6 +1,7 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 
 export const slides = [
   {
@@ -97,6 +98,12 @@ export const slides = [
 
 export default function AzenithLegacy() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [videoError, setVideoError] = useState<Record<number, boolean>>({});
+
+  const handleVideoError = useCallback((slideId: number) => {
+    console.warn(`[AzenithLegacy] Video failed to load for slide ${slideId}, using fallback image`);
+    setVideoError(prev => ({ ...prev, [slideId]: true }));
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -139,14 +146,25 @@ export default function AzenithLegacy() {
             background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)",
           }}
         >
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 z-0 h-full w-full object-cover"
-            src={slides[currentIndex].video}
-          />
+          {videoError[slides[currentIndex].id] ? (
+            <Image
+              src="/images/room-placeholder.jpg"
+              alt={slides[currentIndex].ariaLabel}
+              fill
+              className="absolute inset-0 z-0 object-cover"
+              priority
+            />
+          ) : (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 z-0 h-full w-full object-cover"
+              src={slides[currentIndex].video}
+              onError={() => handleVideoError(slides[currentIndex].id)}
+            />
+          )}
 
           <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/50 via-transparent to-black/70" />
           <div className="absolute inset-0 z-10 bg-black/20 backdrop-blur-[1px]" />
