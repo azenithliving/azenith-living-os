@@ -1,6 +1,5 @@
-﻿import Link from "next/link";
-
-import { roomDefinitions } from "@/lib/site-content";
+﻿import { roomDefinitions } from "@/lib/site-content";
+import RoomLink from "@/components/RoomLink";
 
 export default function RoomsPage() {
   return (
@@ -14,7 +13,11 @@ export default function RoomsPage() {
 
         <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
           {roomDefinitions.map((room) => (
-            <Link key={room.slug} href={`/room/${room.slug}`} className="group rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 transition-all hover:border-brand-primary hover:bg-brand-primary/[0.05] hover:-translate-y-2">
+            <RoomLink
+              key={room.slug}
+              roomSlug={room.slug}
+              className="group rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 transition-all hover:border-brand-primary hover:bg-brand-primary/[0.05] hover:-translate-y-2"
+            >
               <p className="text-sm text-brand-primary group-hover:text-brand-primary/80">{room.eyebrow}</p>
               <h2 className="mt-3 text-2xl font-semibold text-white">{room.title}</h2>
               <p className="mt-3 text-sm leading-7 text-white/60">{room.summary}</p>
@@ -32,7 +35,7 @@ export default function RoomsPage() {
                   <span className="text-white/60 hover:text-white font-medium cursor-pointer">عرض الأثاث</span>
                 )}
               </div>
-            </Link>
+            </RoomLink>
           ))}
         </div>
       </div>

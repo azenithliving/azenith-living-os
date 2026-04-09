@@ -1,6 +1,6 @@
 {
   "node": {
-    "0010db2892cfe8492ad0edb8e5afd572089790a1db": {
+    "0050e04bc5ef3f5776de5b7f126a3f5f9cbbad3787": {
       "workers": {
         "app/elite/page": {
           "moduleId": 63453,
@@ -12,7 +12,7 @@
       "exportedName": "logoutEliteUser",
       "filename": "app/elite/actions/elite-actions.ts"
     },
-    "006a4205075dc57afac190f6aeb4270ee682d8cd1a": {
+    "00e8c888a5d4a3ea299257de1f70e977ff1d5e5877": {
       "workers": {
         "app/elite/page": {
           "moduleId": 63453,
@@ -24,43 +24,7 @@
       "exportedName": "checkEliteAuth",
       "filename": "app/elite/actions/elite-actions.ts"
     },
-    "4000d1af8fc1601b815c92ef9305b9505b6302e9e2": {
-      "workers": {
-        "app/elite/page": {
-          "moduleId": 63453,
-          "async": false,
-          "exportedName": "initiateWhatsAppLogin",
-          "filename": "app/elite/actions/elite-actions.ts"
-        }
-      },
-      "exportedName": "initiateWhatsAppLogin",
-      "filename": "app/elite/actions/elite-actions.ts"
-    },
-    "403e463ef9e04ee902c22ab19c45040766c71b0915": {
-      "workers": {
-        "app/elite/page": {
-          "moduleId": 63453,
-          "async": false,
-          "exportedName": "getEliteDashboardData",
-          "filename": "app/elite/actions/elite-actions.ts"
-        }
-      },
-      "exportedName": "getEliteDashboardData",
-      "filename": "app/elite/actions/elite-actions.ts"
-    },
-    "40576ee52c012e3223ab8363de331ee8be5e7275c0": {
-      "workers": {
-        "app/elite/page": {
-          "moduleId": 63453,
-          "async": false,
-          "exportedName": "getEliteHomeData",
-          "filename": "app/elite/actions/elite-actions.ts"
-        }
-      },
-      "exportedName": "getEliteHomeData",
-      "filename": "app/elite/actions/elite-actions.ts"
-    },
-    "40ea94c45bff5271123e75442b5651a79df1ee0b7a": {
+    "40472a6a72819a86cefd5faf405adc04a905a0560b": {
       "workers": {
         "app/elite/page": {
           "moduleId": 63453,
@@ -72,7 +36,43 @@
       "exportedName": "validateEliteToken",
       "filename": "app/elite/actions/elite-actions.ts"
     },
-    "4037f1d43cbe0c258df8d03f75cd8769bbf58bd9f1": {
+    "404bb591588baf3a9a355841eeaa46bc752e2a21ac": {
+      "workers": {
+        "app/elite/page": {
+          "moduleId": 63453,
+          "async": false,
+          "exportedName": "initiateWhatsAppLogin",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "initiateWhatsAppLogin",
+      "filename": "app/elite/actions/elite-actions.ts"
+    },
+    "4052d006f2909b847ec414e7eb938d2b36c4031e2d": {
+      "workers": {
+        "app/elite/page": {
+          "moduleId": 63453,
+          "async": false,
+          "exportedName": "getEliteDashboardData",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "getEliteDashboardData",
+      "filename": "app/elite/actions/elite-actions.ts"
+    },
+    "40808cb778bebb4a3b0e694719cf14a310eb2afce1": {
+      "workers": {
+        "app/elite/page": {
+          "moduleId": 63453,
+          "async": false,
+          "exportedName": "getEliteHomeData",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "getEliteHomeData",
+      "filename": "app/elite/actions/elite-actions.ts"
+    },
+    "4046f6000b17786ce9c3817dd744aadfa1f110a72b": {
       "workers": {
         "app/elite/page": {
           "moduleId": 63453,

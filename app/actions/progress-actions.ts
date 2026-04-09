@@ -17,18 +17,24 @@ import type { RequestRecord, RequestUpdate } from "@/lib/progress-types";
 // Re-export type for components
 export type { RequestRecord } from "@/lib/progress-types";
 
-// Gmail credentials
-const GMAIL_USER = process.env.GMAIL_USER || 'azenithliving@gmail.com';
-const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || 'mmnz nwhk itgo ayac';
+// Gmail credentials - must be set in environment
+const GMAIL_USER = process.env.GMAIL_USER;
+const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
 
-// Create transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: GMAIL_USER,
-    pass: GMAIL_APP_PASSWORD,
-  },
-});
+if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
+  console.warn('[Email] Gmail credentials not configured. Email notifications will be skipped.');
+}
+
+// Create transporter only if credentials are available
+const transporter = GMAIL_USER && GMAIL_APP_PASSWORD 
+  ? nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: GMAIL_USER,
+        pass: GMAIL_APP_PASSWORD,
+      },
+    })
+  : null;
 
 /**
  * Update request progress
@@ -192,26 +198,11 @@ async function sendStageCompleteNotification(
     message += `\n\n🎉 تم إكمال المشروع بنجاح!`;
   }
   
-  // Send WhatsApp
-  await sendWhatsAppNotification(request.client_phone, message);
-  
-  // Send Email
-  await sendEmailNotification(
-    request.client_email,
-    `اكتمال ${stageName}`,
-    message
-  );
+  // Send notifications
+  await sendNotification(request, `اكتمال ${stageName}`, message);
   
   // Mark as notified
-  await supabase
-    .from("requests")
-    .update({
-      last_notification_sent_at: new Date().toISOString(),
-      last_notification_type: 'stage_complete',
-      last_notified_stage: stage,
-      last_notified_step: step,
-    })
-    .eq("id", requestId);
+  await markAsNotified(requestId, stage, step, 'stage_complete');
 }
 
 /**
@@ -257,22 +248,44 @@ async function sendPrePaymentNotification(
     message += `تفاصيل المرحلة الحالية: نحن في الخطوة ${step} من ${MAX_STEPS_PER_STAGE[stage]}`;
   }
   
+  // Send notifications
+  await sendNotification(request, `اقتراب إتمام ${stageName}`, message);
+  
+  // Mark as notified
+  await markAsNotified(requestId, stage, step, 'pre_payment');
+}
+
+/**
+ * Helper: Send both WhatsApp and Email notifications
+ */
+async function sendNotification(
+  request: RequestRecord,
+  subject: string,
+  message: string
+): Promise<void> {
   // Send WhatsApp
   await sendWhatsAppNotification(request.client_phone, message);
   
   // Send Email
-  await sendEmailNotification(
-    request.client_email,
-    `اقتراب إتمام ${stageName}`,
-    message
-  );
+  await sendEmailNotification(request.client_email, subject, message);
+}
+
+/**
+ * Helper: Mark request as notified to prevent duplicates
+ */
+async function markAsNotified(
+  requestId: string,
+  stage: StageNumber,
+  step: number,
+  notificationType: 'stage_complete' | 'pre_payment'
+): Promise<void> {
+  const supabase = getSupabaseAdminClient();
   
-  // Mark as notified
   await supabase
     .from("requests")
     .update({
       last_notification_sent_at: new Date().toISOString(),
-      last_notification_type: 'pre_payment',
+      last_notification_type: notificationType,
       last_notified_stage: stage,
       last_notified_step: step,
     })
@@ -319,6 +332,11 @@ async function sendWhatsAppNotification(phone: string, message: string): Promise
  * Send Email notification using Gmail SMTP
  */
 async function sendEmailNotification(to: string, subject: string, body: string): Promise<void> {
+  if (!transporter) {
+    console.log(`[Email] Skipping email to ${to} - transporter not configured`);
+    return;
+  }
+  
   try {
     await transporter.sendMail({
       from: `"Azenith Living" <${GMAIL_USER}>`,

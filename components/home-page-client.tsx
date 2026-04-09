@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import { ArrowLeft, CheckCircle2, Compass, MessageCircle, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
@@ -8,7 +8,9 @@ import Link from "next/link";
 import { buildWhatsAppUrl } from "@/lib/conversion-engine";
 import type { RuntimeConfig } from "@/lib/runtime-config";
 import { executionTimeline, packageLadder, roomDefinitions, trustPoints } from "@/lib/site-content";
+import { generateUserInsight } from "@/lib/neural-analytics";
 import AIStylePicker from "./AIStylePicker";
+import ImageHoverWrapper from "./ImageHoverWrapper";
 import useSessionStore from "@/stores/useSessionStore";
 
 type HomePageClientProps = {
@@ -27,7 +29,7 @@ const roomQueries: Record<string, string> = {
   'dining-room': 'elegant dining',
   'home-office': 'luxury home office',
   'youth-room': 'modern youth bedroom',
-  'interior-design': 'luxury interior design home'
+  'interior-design': 'luxury interior architecture'
 };
 
 export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
@@ -38,11 +40,40 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
   const serviceType = useSessionStore((state) => state.serviceType);
   const updateProfile = useSessionStore((state) => state.updateProfile);
   const trackEvent = useSessionStore((state) => state.trackEvent);
+  const psychologicalProfile = useSessionStore((state) => state.psychologicalProfile);
+  const trackNeuralInteraction = useSessionStore((state) => state.trackNeuralInteraction);
 
   const [roomImages, setRoomImages] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState(true);
   const [selectedStyle, setSelectedStyle] = useState<string>('modern');
   const [styleSwitchCount] = useState(0);
+  const [insight, setInsight] = useState<string | null>(null);
+  
+  // Neural Analytics: Handle image hover (+2 Interest)
+  const handleImageHover = useCallback((imageIndex: number) => {
+    console.log(`[Neural Analytics] Hover on image ${imageIndex}: +2 Interest`);
+    trackNeuralInteraction(imageIndex, "hover", {
+      roomType: roomType || "interior-design",
+    });
+  }, [trackNeuralInteraction, roomType]);
+
+  // Neural Analytics: Handle download (+10 Commitment)
+  const handleDownload = useCallback((imageIndex: number) => {
+    console.log(`[Neural Analytics] Download image ${imageIndex}: +10 Commitment`);
+    trackNeuralInteraction(imageIndex, "download", {
+      roomType: roomType || "interior-design",
+    });
+  }, [trackNeuralInteraction, roomType]);
+
+  // Neural Analytics: Generate insight from Gemini
+  const handleGenerateInsight = async () => {
+    if (psychologicalProfile.interactedImages.length < 3) {
+      setInsight("استكشف المزيد من الصور لكشف ذوقك الخفي...");
+      return;
+    }
+    const result = await generateUserInsight(psychologicalProfile);
+    setInsight(result.summary);
+  };
 
   useEffect(() => {
     const fetchRoomImages = async () => {
@@ -123,25 +154,37 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
                   styleSwitchCount={styleSwitchCount}
                 />
                 <div className="grid grid-cols-2 gap-4 md:gap-6">
-                  {roomDefinitions.map((room) => (
-                    <Link 
-                      key={room.slug} 
-                      href={`/room/${room.slug}`} 
-                      className="group relative rounded-[1.75rem] overflow-hidden transition-all hover:scale-105 hover:shadow-2xl"
+                  {roomDefinitions.map((room, index) => (
+                    <ImageHoverWrapper
+                      key={room.slug}
+                      imageIndex={index + 1}
+                      onHoverStart={handleImageHover}
+                      onHoverEnd={() => {}}
+                      onDownload={() => handleDownload(index + 1)}
+                      imageUrl={roomImages[room.slug]}
+                      onImageClick={() => {
+                        // Navigate to room page on click
+                        window.location.href = `/room/${room.slug}`;
+                      }}
                     >
-                      <div 
-                        className="absolute inset-0 bg-cover bg-center hover:scale-110 transition-transform duration-500"
-                        style={{ 
-                          backgroundImage: `url(${roomImages[room.slug] || `https://source.unsplash.com/600x400/?${room.title.replace(/\\s+/g, '-').toLowerCase()}`})`
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
-                      <div className="relative z-10 p-4 md:p-6 h-full flex flex-col justify-end">
-                        <p className="text-xs text-brand-primary/90 group-hover:text-brand-primary">{room.eyebrow}</p>
-                        <h2 className="mt-1 text-lg font-semibold text-white">{room.title}</h2>
-                        <p className="mt-1 text-sm leading-5 text-white/90 line-clamp-2">{room.summary}</p>
-                      </div>
-                    </Link>
+                      <Link 
+                        href={`/room/${room.slug}`} 
+                        className="group relative rounded-[1.75rem] overflow-hidden transition-all hover:scale-105 hover:shadow-2xl block h-full"
+                      >
+                        <div 
+                          className="absolute inset-0 bg-cover bg-center hover:scale-110 transition-transform duration-500"
+                          style={{ 
+                            backgroundImage: `url(${roomImages[room.slug] || `https://source.unsplash.com/600x400/?${room.title.replace(/\\s+/g, '-').toLowerCase()}`})`
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
+                        <div className="relative z-10 p-4 md:p-6 h-full flex flex-col justify-end">
+                          <p className="text-xs text-brand-primary/90 group-hover:text-brand-primary">{room.eyebrow}</p>
+                          <h2 className="mt-1 text-lg font-semibold text-white">{room.title}</h2>
+                          <p className="mt-1 text-sm leading-5 text-white/90 line-clamp-2">{room.summary}</p>
+                        </div>
+                      </Link>
+                    </ImageHoverWrapper>
                   ))}
                 </div>
                 {loading && <div className="col-span-2 text-center text-white/50 py-8">جاري تحميل الصور...</div>}

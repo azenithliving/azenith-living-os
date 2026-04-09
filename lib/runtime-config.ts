@@ -42,7 +42,9 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
 
   // Fallback to environment variables if no tenant found
   const brandName = tenant?.name ?? readEnv("BRAND_NAME") ?? "Azenith Living";
-  const whatsappNumber = tenant?.whatsapp ? normalizePhoneNumber(tenant.whatsapp) : normalizePhoneNumber(readEnv("WHATSAPP_DEFAULT_NUMBER"));
+  const whatsappNumber = tenant?.whatsapp
+    ? normalizePhoneNumber(tenant.whatsapp)
+    : normalizePhoneNumber(readEnv("WHATSAPP_DEFAULT_NUMBER")) ?? "201090819584";
   const primaryColor = tenant?.primary_color ?? "#C5A059";
 
   return {
@@ -51,12 +53,11 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
     freeHookOffer: readEnv("FREE_HOOK_OFFER") ?? "تصميم مبدئي خلال 24 ساعة",
     whatsappNumber,
     primaryDomain: readEnv("PRIMARY_DOMAIN"),
-    contactEmail: readEnv("CONTACT_EMAIL"),
-    contactPhone: normalizePhoneNumber(readEnv("CONTACT_PHONE")),
-    businessAddress: readEnv("BUSINESS_ADDRESS"),
+    contactEmail: readEnv("CONTACT_EMAIL") ?? "azenithliving@gmail.com",
+    contactPhone: normalizePhoneNumber(readEnv("CONTACT_PHONE")) ?? "201090819584",
+    businessAddress: readEnv("BUSINESS_ADDRESS") ?? "al salam_cairo_egypt",
     logoPath: tenant?.logo ?? "/logo.png",
     faviconPath: "/favicon.png",
     primaryColor,
   };
 }
-

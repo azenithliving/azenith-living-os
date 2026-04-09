@@ -1,20 +1,15 @@
 ﻿import type { Metadata } from "next";
 
-import { getRuntimeConfig } from "@/lib/runtime-config";
 import { Toaster } from "react-hot-toast";
 
 import { Providers } from "./providers";
 import "./globals.css";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const appConfig = await getRuntimeConfig();
-
-  return {
-    title: `${appConfig.brandNameAr} | تصميم داخلي فاخر`,
-    description: `${appConfig.freeHookOffer} مع تجربة عربية أولًا ومسار تحويل واضح من الاستكشاف حتى التواصل.`,
-    icons: { icon: appConfig.faviconPath },
-  };
-}
+export const metadata: Metadata = {
+  title: "أزينث ليفينج | تصميم داخلي فاخر",
+  description: "تصميم مبدئي خلال 24 ساعة مع تجربة عربية أولًا ومسار تحويل واضح من الاستكشاف حتى التواصل.",
+  icons: { icon: "/favicon.png" },
+};
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

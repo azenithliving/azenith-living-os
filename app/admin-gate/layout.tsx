@@ -28,8 +28,8 @@ export default async function AdminGateLayout({
 
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-sm text-white">{user.email}</p>
-                <p className="text-xs text-white/50">Authenticated</p>
+                <p className="text-sm text-white">alaa aziz</p>
+                <p className="text-xs text-white/50">owner</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-primary/10 text-brand-primary">
                 <svg

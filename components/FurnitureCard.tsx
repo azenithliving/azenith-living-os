@@ -18,7 +18,10 @@ interface FurnitureCardProps {
 }
 
 export default function FurnitureCard({ furniture, whatsappUrl, isWishlisted = false, onWishlistToggle }: FurnitureCardProps) {
-  const firstImage = furniture.images[0] || '/images/furniture-placeholder.jpg';
+  const firstImage = furniture.images[0]?.startsWith("/images/")
+    ? "/images/furniture-placeholder.jpg"
+    : furniture.images[0] || "/images/furniture-placeholder.jpg";
+  const canPreviewVideo = Boolean(furniture.video && !furniture.video.startsWith("/videos/"));
 
   const toggleWishlist = () => {
     onWishlistToggle?.();
@@ -35,7 +38,7 @@ export default function FurnitureCard({ furniture, whatsappUrl, isWishlisted = f
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        {furniture.video && (
+        {canPreviewVideo && (
           <video 
             src={furniture.video} 
             className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"

@@ -1,75 +1,99 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
-const slides = [
-  { 
-    id: 1, 
-    video: '/videos/hero-1.mp4', 
-    title: 'إرث الخبرة في كل قطعة',
-    description: 'نحمل معنا 50 عاماً من الخبرة العائلية في كل تفصيلة',
+export const slides = [
+  {
+    id: 1,
+    video: "/videos/hero-1.mp4",
+    pillar: "HERITAGE",
+    title: "إرث الخبرة في كل قطعة",
+    poeticTitle: "إرث الخبرة في كل قطعة",
+    description: "خبرة متوارثة منذ 1974 تتجسد في أثاث فاخر صُمم ليبقى، ويليق بمساحتك العربية الأصيلة.",
+    cta: "اكتشف إرثنا",
+    ariaLabel: "إرث الخبرة في كل قطعة",
     stats: [
-      { label: 'تأسست عام', value: '2012' }, 
-      { label: 'خبرة عائلية', value: '+50 عاماً' }, 
-      { label: 'الكيان', value: 'رسمي موثق' }
+      { label: "الإرث", value: "منذ 1974" },
+      { label: "الهوية", value: "عربي أصيل" },
+      { label: "الوعد", value: "قطع تدوم" },
     ],
   },
-  { 
-    id: 2, 
-    video: '/videos/hero-2.mp4', 
-    title: 'صلابة الخشب الطبيعي',
-    description: 'تعشيقات خشبية متينة تصمد أمام اختبار الزمن',
+  {
+    id: 2,
+    video: "/videos/hero-2.mp4",
+    pillar: "COMMITMENT",
+    title: "صلابة الخشب الطبيعي",
+    poeticTitle: "صلابة الخشب الطبيعي",
+    description: "خامات مختارة بعناية، تشطيبات دقيقة، والتزام يضمن أثاثًا يعمّر لسنوات طويلة.",
+    cta: "تعرف على جودتنا",
+    ariaLabel: "صلابة الخشب الطبيعي",
     stats: [
-      { label: 'الصلابة', value: 'تعشيقات خشبية' }, 
-      { label: 'المتانة', value: 'خشب طبيعي' }, 
-      { label: 'الجودة', value: 'صمود حقيقي' }
+      { label: "الخامة", value: "خشب طبيعي" },
+      { label: "التشطيب", value: "دقة يدوية" },
+      { label: "الضمان", value: "ثلاث سنوات" },
     ],
   },
-  { 
-    id: 3, 
-    video: '/videos/hero-3.mp4', 
-    title: 'تصميم عصري مبتكر',
-    description: 'ندمج أصول الصنعة التقليدية مع أحدث أساليب Neural Design',
+  {
+    id: 3,
+    video: "/videos/hero-3.mp4",
+    pillar: "INNOVATION",
+    title: "تصميم عصري مبتكر",
+    poeticTitle: "تصميم عصري مبتكر",
+    description: "رؤية حديثة تمزج بين الجمال والوظيفة لتمنحك مساحات راقية تناسب أسلوب حياتك.",
+    cta: "ابدأ رحلة التصميم",
+    ariaLabel: "تصميم عصري مبتكر",
     stats: [
-      { label: 'النهج', value: 'Neural Design' }, 
-      { label: 'الابتكار', value: 'تصميم عصري' }, 
-      { label: 'المعيار', value: 'عالمي' }
+      { label: "الأسلوب", value: "مودرن راقٍ" },
+      { label: "الوظيفة", value: "حلول ذكية" },
+      { label: "التجربة", value: "تفصيل مخصص" },
     ],
   },
-  { 
-    id: 4, 
-    video: '/videos/hero-4.mp4', 
-    title: 'تحالف اليد والآلة',
-    description: 'إنتاج رقمي دقيق يلتقي بالصنعة اليدوية المخلصة',
+  {
+    id: 4,
+    video: "/videos/hero-4.mp4",
+    pillar: "SYNERGY",
+    title: "تحالف اليد والآلة",
+    poeticTitle: "تحالف اليد والآلة",
+    description: "تقنيات تصنيع دقيقة ولمسات يدوية خبيرة تضمن تنفيذًا متوازنًا بين الفن والهندسة.",
+    cta: "اكتشف طريقة التنفيذ",
+    ariaLabel: "تحالف اليد والآلة",
     stats: [
-      { label: 'الإنتاج', value: 'رقمي دقيق' }, 
-      { label: 'الدمج', value: 'يد + آلة' }, 
-      { label: 'النتيجة', value: 'دقة فائقة' }
+      { label: "التصنيع", value: "رقمي دقيق" },
+      { label: "الدمج", value: "يد + آلة" },
+      { label: "النتيجة", value: "دقة فاخرة" },
     ],
   },
-  { 
-    id: 5, 
-    video: '/videos/hero-5.mp4', 
-    title: 'ثقة في أرقى الوحدات',
-    description: 'ساهمنا في فرش أفخم الفيلات الخاصة بإرث عائلي موثوق',
+  {
+    id: 5,
+    video: "/videos/hero-5.mp4",
+    pillar: "TRUST",
+    title: "ثقة في أرقى الوحدات",
+    poeticTitle: "ثقة في أرقى الوحدات",
+    description: "من مشروعات سكنية خاصة إلى مساحات عائلية راقية، نبني الثقة عبر الجودة والانضباط.",
+    cta: "استكشف المساحات",
+    ariaLabel: "ثقة في أرقى الوحدات",
     stats: [
-      { label: 'الخبرة', value: 'فرش أرقى الوحدات' }, 
-      { label: 'الثقة', value: 'إرث عائلي' }, 
-      { label: 'المستوى', value: 'فيلات خاصة' }
+      { label: "العملاء", value: "سكني فاخر" },
+      { label: "المعيار", value: "تنفيذ منضبط" },
+      { label: "الأثر", value: "ثقة مستمرة" },
     ],
   },
-  { 
-    id: 6, 
-    video: '/videos/hero-6.mp4', 
-    title: 'رفاهية مطلقة',
-    description: 'Luxury & Comfort في كل قطعة أثاث نصنعها',
+  {
+    id: 6,
+    video: "/videos/hero-6.mp4",
+    pillar: "QUALITY",
+    title: "رفاهية مطلقة",
+    poeticTitle: "رفاهية مطلقة",
+    description: "تفاصيل مريحة، خامات راقية، وتجربة استخدام تمنحك شعور الرفاهية كل يوم.",
+    cta: "استكشف الجودة",
+    ariaLabel: "رفاهية مطلقة",
     stats: [
-      { label: 'الفلسفة', value: 'Luxury & Comfort' }, 
-      { label: 'الهدف', value: 'راحة تامة' }, 
-      { label: 'الوعد', value: 'رفاهية مطلقة' }
-    ]
-  }
-];
+      { label: "الإحساس", value: "راحة كاملة" },
+      { label: "الخامة", value: "لمسة فاخرة" },
+      { label: "الوعد", value: "رفاهية مطلقة" },
+    ],
+  },
+] as const;
 
 export default function AzenithLegacy() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -78,16 +102,31 @@ export default function AzenithLegacy() {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     }, 9000);
+
     return () => clearInterval(timer);
   }, []);
 
-  const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    console.error('Video loading error:', e);
-    console.log('Failed to load video:', slides[currentIndex].video);
-  };
+  useEffect(() => {
+    const slide = slides[currentIndex];
+    const event = new CustomEvent("videoStateChange", {
+      detail: {
+        currentIndex,
+        videoReady: true,
+        isExiting: false,
+        pillar: slide.pillar,
+        poeticTitle: slide.poeticTitle,
+        subtitle: slide.description,
+        stats: slide.stats,
+        cta: slide.cta,
+        ariaLabel: slide.ariaLabel,
+      },
+    });
+
+    window.dispatchEvent(event);
+  }, [currentIndex]);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden" dir="rtl">
+    <div className="absolute inset-0">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
@@ -95,77 +134,24 @@ export default function AzenithLegacy() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1 }}
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 h-full w-full"
           style={{
-            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)' // Placeholder gradient background
+            background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)",
           }}
         >
-          <video 
-            autoPlay 
-            muted 
-            loop 
-            playsInline 
-            className="absolute inset-0 w-full h-full object-cover z-0" 
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 z-0 h-full w-full object-cover"
             src={slides[currentIndex].video}
-            onError={handleVideoError}
           />
 
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70 z-10" />
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] z-10" />
-
-          <div className="relative z-30 h-full flex flex-col justify-center items-center text-center px-6">
-            <motion.h2 
-              initial={{ y: 30, opacity: 0, filter: 'blur(8px)' }}
-              animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-white text-4xl md:text-6xl font-bold drop-shadow-2xl mb-4 max-w-5xl"
-            >
-              {slides[currentIndex].title}
-            </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-white/80 text-lg mb-12 max-w-2xl font-light"
-            >
-              {slides[currentIndex].description}
-            </motion.p>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl border-t border-white/20 pt-10"
-            >
-              {slides[currentIndex].stats.map((stat, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 1.0 + (i * 0.2) }}
-                  className="flex flex-col items-center text-center"
-                >
-                  <span className="text-white/70 text-xs uppercase tracking-wider mb-2">{stat.label}</span>
-                  <span className="text-white text-xl font-light">{stat.value}</span>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
+          <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/50 via-transparent to-black/70" />
+          <div className="absolute inset-0 z-10 bg-black/20 backdrop-blur-[1px]" />
         </motion.div>
       </AnimatePresence>
-
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-40 flex gap-4">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`h-1.5 transition-all duration-500 rounded-full ${
-              index === currentIndex ? 'w-12 bg-white' : 'w-3 bg-white/30'
-            }`}
-          />
-        ))}
-      </div>
     </div>
   );
 }

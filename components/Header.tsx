@@ -1,17 +1,26 @@
 "use client";
-import React, { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+const SOVEREIGN_ACCESS_KEY = "sovereign_access";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const router = useRouter();
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  useEffect(() => {
+    return () => {
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+      }
+    };
+  }, []);
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
@@ -21,17 +30,16 @@ export default function Header() {
     const newCount = clickCount + 1;
     setClickCount(newCount);
 
-    // 5 clicks detected - set secret flag and redirect to admin-gate
     if (newCount === 5) {
-      sessionStorage.setItem("sovereign_access", "granted");
-      window.location.href = "/admin-gate";
+      sessionStorage.setItem(SOVEREIGN_ACCESS_KEY, "granted");
+      router.push("/admin-gate");
       return;
     }
 
-    // Reset count after 1.5 seconds if no more clicks
     if (clickTimerRef.current) {
       clearTimeout(clickTimerRef.current);
     }
+
     clickTimerRef.current = setTimeout(() => {
       setClickCount(0);
     }, 1500);
@@ -39,36 +47,43 @@ export default function Header() {
 
   return (
     <>
-      {/* FROSTED GLASS EFFECT - ONLY BEHIND HEADER ELEMENTS */}
-      <div className="fixed top-0 left-0 w-full z-40 h-20 bg-[#1A1A1B]/70 backdrop-blur-md border-b border-white/10 pointer-events-none" />
-      
+      <div className="pointer-events-none fixed left-0 top-0 z-40 h-20 w-full border-b border-white/10 bg-[#1A1A1B]/70 backdrop-blur-md" />
+
       <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="fixed top-0 left-0 w-full z-[100] h-20 md:h-24 px-6 md:px-12 flex justify-between items-center overflow-visible"
+        className="fixed left-0 top-0 z-[100] flex h-20 w-full items-center justify-between overflow-visible px-6 md:h-24 md:px-12"
       >
-        {/* Desktop Navigation */}
-        <nav dir="rtl" className="hidden md:flex gap-10 text-white font-medium text-sm">
-          <Link href="/" className="hover:text-[#C5A059] transition-colors">إرثنا</Link>
-          <Link href="/rooms" className="hover:text-[#C5A059] transition-colors">استكشف المساحات</Link>
-          <Link href="/contact" className="hover:text-[#C5A059] transition-colors">تواصل معنا</Link>
+        <nav dir="rtl" className="hidden gap-10 text-sm font-medium text-white md:flex">
+          <Link href="/about" className="transition-colors hover:text-[#C5A059]">
+            إرثنا
+          </Link>
+          <Link href="/rooms" className="transition-colors hover:text-[#C5A059]">
+            استكشف المساحات
+          </Link>
+          <Link href="/request" className="transition-colors hover:text-[#C5A059]">
+            تواصل معنا
+          </Link>
         </nav>
 
-        {/* Mobile Hamburger Menu */}
         <button
-          onClick={toggleMobileMenu}
-          className="md:hidden relative w-8 h-8 flex flex-col justify-center items-center gap-1.5 z-50"
+          type="button"
+          onClick={() => setIsMobileMenuOpen((current) => !current)}
+          aria-label={isMobileMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
+          aria-expanded={isMobileMenuOpen}
+          className="relative z-50 flex h-8 w-8 flex-col items-center justify-center gap-1.5 md:hidden"
         >
-          <span className={`w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
-          <span className={`w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
+          <span className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-2" : ""}`} />
+          <span className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""}`} />
+          <span className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
         </button>
 
-        {/* اليسار: اللوجو (logo.png) with Secret Gate */}
-        <div className="flex items-center h-full">
-          <div 
+        <div className="flex h-full items-center">
+          <button
+            type="button"
             onClick={handleLogoClick}
-            className="relative h-20 w-48 md:h-32 md:w-64 transition-transform duration-500 hover:scale-105 cursor-pointer select-none"
+            className="relative h-20 w-48 cursor-pointer select-none transition-transform duration-500 hover:scale-105 md:h-32 md:w-64"
           >
             <Image
               src="/logo.png"
@@ -78,45 +93,32 @@ export default function Header() {
               sizes="(max-width: 768px) 48px, 64px"
               priority
             />
-          </div>
+          </button>
         </div>
       </motion.header>
 
-      {/* Mobile Menu Slide-in */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
+        {isMobileMenuOpen ? (
           <motion.div
-            initial={{ x: '100%' }}
+            initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.3, ease: "easeInOut" }}
-            className="fixed top-20 md:top-24 right-0 left-0 w-full h-screen backdrop-blur-lg z-40 md:hidden"
+            className="fixed left-0 right-0 top-20 z-40 h-[calc(100dvh-5rem)] w-full overflow-y-auto backdrop-blur-lg md:hidden"
           >
-            <div className="flex flex-col items-end px-6 py-8 space-y-6" dir="rtl">
-              <Link 
-                href="/"
-                onClick={closeMobileMenu}
-                className="text-white text-lg font-light hover:text-[#C5A059] transition-colors"
-              >
+            <div className="flex flex-col items-end space-y-6 px-6 py-8" dir="rtl">
+              <Link href="/about" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
                 إرثنا
               </Link>
-              <Link 
-                href="/rooms"
-                onClick={closeMobileMenu}
-                className="text-white text-lg font-light hover:text-[#C5A059] transition-colors"
-              >
+              <Link href="/rooms" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
                 استكشف المساحات
               </Link>
-              <Link 
-                href="/contact"
-                onClick={closeMobileMenu}
-                className="text-white text-lg font-light hover:text-[#C5A059] transition-colors"
-              >
+              <Link href="/request" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
                 تواصل معنا
               </Link>
             </div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </>
   );

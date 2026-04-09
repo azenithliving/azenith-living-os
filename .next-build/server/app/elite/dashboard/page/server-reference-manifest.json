@@ -1,6 +1,6 @@
 {
   "node": {
-    "0071350f62429be12ac57b31de8d96b234df7510d9": {
+    "003bedc5e1fea3189148c612fce7df4c3689ad98a3": {
       "workers": {
         "app/elite/dashboard/page": {
           "moduleId": 83672,
@@ -12,7 +12,7 @@
       "exportedName": "$$RSC_SERVER_ACTION_0",
       "filename": "app/elite/dashboard/page.tsx"
     },
-    "0010db2892cfe8492ad0edb8e5afd572089790a1db": {
+    "0050e04bc5ef3f5776de5b7f126a3f5f9cbbad3787": {
       "workers": {
         "app/elite/dashboard/page": {
           "moduleId": 83672,
@@ -24,7 +24,7 @@
       "exportedName": "logoutEliteUser",
       "filename": "app/elite/actions/elite-actions.ts"
     },
-    "006a4205075dc57afac190f6aeb4270ee682d8cd1a": {
+    "00e8c888a5d4a3ea299257de1f70e977ff1d5e5877": {
       "workers": {
         "app/elite/dashboard/page": {
           "moduleId": 83672,
@@ -36,7 +36,19 @@
       "exportedName": "checkEliteAuth",
       "filename": "app/elite/actions/elite-actions.ts"
     },
-    "4000d1af8fc1601b815c92ef9305b9505b6302e9e2": {
+    "40472a6a72819a86cefd5faf405adc04a905a0560b": {
+      "workers": {
+        "app/elite/dashboard/page": {
+          "moduleId": 83672,
+          "async": false,
+          "exportedName": "validateEliteToken",
+          "filename": "app/elite/actions/elite-actions.ts"
+        }
+      },
+      "exportedName": "validateEliteToken",
+      "filename": "app/elite/actions/elite-actions.ts"
+    },
+    "404bb591588baf3a9a355841eeaa46bc752e2a21ac": {
       "workers": {
         "app/elite/dashboard/page": {
           "moduleId": 83672,
@@ -48,7 +60,7 @@
       "exportedName": "initiateWhatsAppLogin",
       "filename": "app/elite/actions/elite-actions.ts"
     },
-    "403e463ef9e04ee902c22ab19c45040766c71b0915": {
+    "4052d006f2909b847ec414e7eb938d2b36c4031e2d": {
       "workers": {
         "app/elite/dashboard/page": {
           "moduleId": 83672,
@@ -60,7 +72,7 @@
       "exportedName": "getEliteDashboardData",
       "filename": "app/elite/actions/elite-actions.ts"
     },
-    "40576ee52c012e3223ab8363de331ee8be5e7275c0": {
+    "40808cb778bebb4a3b0e694719cf14a310eb2afce1": {
       "workers": {
         "app/elite/dashboard/page": {
           "moduleId": 83672,
@@ -70,18 +82,6 @@
         }
       },
       "exportedName": "getEliteHomeData",
-      "filename": "app/elite/actions/elite-actions.ts"
-    },
-    "40ea94c45bff5271123e75442b5651a79df1ee0b7a": {
-      "workers": {
-        "app/elite/dashboard/page": {
-          "moduleId": 83672,
-          "async": false,
-          "exportedName": "validateEliteToken",
-          "filename": "app/elite/actions/elite-actions.ts"
-        }
-      },
-      "exportedName": "validateEliteToken",
       "filename": "app/elite/actions/elite-actions.ts"
     }
   },

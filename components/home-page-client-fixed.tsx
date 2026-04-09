@@ -1,29 +1,244 @@
 "use client";
 
-import Footer from './Footer';
-import { useEffect, useMemo, useState, useRef } from 'react';
-import Link from 'next/link';
-import { CheckCircle2, MessageCircle, Sparkles } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { MessageCircle, Sparkles } from "lucide-react";
 
-import { buildWhatsAppUrl } from '@/lib/conversion-engine';
-import type { RuntimeConfig } from '@/lib/runtime-config';
-import { executionTimeline, TONE_MAP, packageLadder, roomDefinitions, trustPoints } from '@/lib/site-content';
-import AIStylePicker from './AIStylePicker';
-import useSessionStore from '@/stores/useSessionStore';
+import Footer from "./Footer";
+import AIStylePicker from "./AIStylePicker";
+
+import { buildWhatsAppUrl } from "@/lib/conversion-engine";
+import type { RuntimeConfig } from "@/lib/runtime-config";
+import useSessionStore from "@/stores/useSessionStore";
 
 type HomePageClientProps = {
   runtimeConfig: RuntimeConfig;
 };
 
-const roomQueries: Record<string, string> = {
-  'master-bedroom': 'luxury master bedroom',
-  'living-room': 'modern living room',
-  'kitchen': 'luxury kitchen',
-  'dressing-room': 'walk-in closet',
-  'dining-room': 'elegant dining',
-  'home-office': 'luxury home office',
-  'youth-room': 'modern youth bedroom',
-  'interior-design': 'luxury interior design home'
+type LandingRoom = {
+  slug: string;
+  eyebrow: string;
+  title: string;
+  summary: string;
+};
+
+const ROOM_QUERIES: Record<string, string> = {
+  "master-bedroom": "luxury master bedroom",
+  "living-room": "modern living room",
+  kitchen: "luxury kitchen",
+  "dressing-room": "walk-in closet",
+  "dining-room": "elegant dining",
+  "home-office": "luxury home office",
+  "youth-room": "modern youth bedroom",
+  "interior-design": "luxury interior design home",
+};
+
+const STYLE_QUERY_HINTS: Record<string, string> = {
+  modern: "modern minimal luxury",
+  classic: "classic elegant luxury",
+  industrial: "industrial loft luxury",
+  scandinavian: "scandinavian cozy luxury",
+};
+
+const STYLE_RESULT_PAGE: Record<string, number> = {
+  modern: 1,
+  classic: 2,
+  industrial: 3,
+  scandinavian: 4,
+};
+
+const BASE_ROOMS: LandingRoom[] = [
+  {
+    slug: "master-bedroom",
+    eyebrow: "خصوصية محسوبة",
+    title: "غرف النوم الرئيسية",
+    summary: "مساحة هادئة بتفاصيل فندقية وتخزين ذكي وخامات تعيش سنوات طويلة.",
+  },
+  {
+    slug: "living-room",
+    eyebrow: "استقبال بثقة",
+    title: "غرف المعيشة",
+    summary: "جلسات مدروسة بصريًا وعمليًا بمشهد راقٍ وحركة مريحة للعائلة والضيوف.",
+  },
+  {
+    slug: "kitchen",
+    eyebrow: "أداء يومي أنظف",
+    title: "المطابخ",
+    summary: "مطابخ حديثة تجمع بين الوظيفة وسهولة الاستخدام مع تخزين محسوب وتشطيب متقن.",
+  },
+  {
+    slug: "dressing-room",
+    eyebrow: "تنظيم فاخر",
+    title: "غرف الملابس",
+    summary: "تقسيم واضح وإضاءة ومرايا تجعل التجربة اليومية أكثر راحة وأناقة.",
+  },
+  {
+    slug: "home-office",
+    eyebrow: "تركيز بدون تشويش",
+    title: "المكاتب المنزلية",
+    summary: "مساحة عمل تحافظ على هوية المنزل وتدعم ساعات التركيز الطويلة.",
+  },
+  {
+    slug: "youth-room",
+    eyebrow: "مرونة تنمو مع الوقت",
+    title: "غرف الشباب والأطفال",
+    summary: "غرف تجمع بين الشخصية والعملية بحلول قابلة للتطوير بدل التغيير السريع.",
+  },
+];
+
+const STYLE_COPY: Record<string, { headline: string; desc: string }> = {
+  modern: {
+    headline: "ذكاء التصميم وبساطة المستقبل",
+    desc: "مساحات تعكس نمط حياتك السريع بلمسات هادئة وحلول تنظيمية ذكية.",
+  },
+  classic: {
+    headline: "فخامة خالدة وتفاصيل ملكية",
+    desc: "دفء بصري وأناقة ثابتة تمنح المساحة حضورًا غنيًا بدون مبالغة.",
+  },
+  industrial: {
+    headline: "جرأة الخامة وروح المدينة",
+    desc: "مزيج واضح بين المعدن والخشب يخلق شخصية قوية وعملية للمكان.",
+  },
+  scandinavian: {
+    headline: "هدوء الطبيعة ودفء المنزل",
+    desc: "ألوان هادئة وإضاءة مريحة تمنحك إحساسًا بالنظافة والسكينة في كل زاوية.",
+  },
+};
+
+const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { eyebrow: string; title: string; summary: string }>> = {
+  "master-bedroom": {
+    modern: {
+      eyebrow: "نقاء عصري",
+      title: "غرف نوم مينيمال",
+      summary: "خطوط نظيفة وتصميم مينيمال يمنحك هدوءاً عصرياً مع تخزين ذكي خفي.",
+    },
+    classic: {
+      eyebrow: "فخامة ملكية",
+      title: "غرف نوم كلاسيكية",
+      summary: "فخامة ملكية وتفاصيل غنية تعيد تعريف الرقي الكلاسيكي في كل زاوية.",
+    },
+    industrial: {
+      eyebrow: "خامة أصيلة",
+      title: "غرف نوم صناعية",
+      summary: "مساحة هادئة بتفاصيل فندقية وخامات راقية تجمع بين القوة والدفء.",
+    },
+    scandinavian: {
+      eyebrow: "دفء شمالي",
+      title: "غرف نوم سكاندينافية",
+      summary: "ألوان هادئة وخشب طبيعي يخلق ملاذاً للراحة والاسترخاء العميق.",
+    },
+  },
+  "living-room": {
+    modern: {
+      eyebrow: "أناقة معاصرة",
+      title: "صالات مودرن",
+      summary: "تصميم مفتوح وخطوط نقية تجمع بين البساطة والوظيفة العالية.",
+    },
+    classic: {
+      eyebrow: "عراقة وجمال",
+      title: "صالات كلاسيكية",
+      summary: "تفاصيل نحتية وثريات فاخرة تمنح المكان روحاً تاريخية عريقة.",
+    },
+    industrial: {
+      eyebrow: "روح المدينة",
+      title: "صالات لوفت",
+      summary: "جدران طوبية وأسقف عالية مع لمسات معدنية جريئة وشخصية قوية.",
+    },
+    scandinavian: {
+      eyebrow: "بساطة شمالية",
+      title: "صالات سكاندينافية",
+      summary: "إضاءة طبيعية وقماش مريح يجعل كل لحظة استرخاء تجربة فريدة.",
+    },
+  },
+  kitchen: {
+    modern: {
+      eyebrow: "أداء ذكي",
+      title: "مطابخ عصرية",
+      summary: "أسطح خشبية نظيفة وأجهزة مخفية لمساحة طهي أنيقة وعملية.",
+    },
+    classic: {
+      eyebrow: "تراث الطبخ",
+      title: "مطابخ كلاسيكية",
+      summary: "خزائن خشبية نقشية وأرضيات رخامية تعكس أصالة المطبخ التقليدي.",
+    },
+    industrial: {
+      eyebrow: "قوة الخامة",
+      title: "مطابخ صناعية",
+      summary: "أسطح معدنية ولمسات خشبية قوية للطهاة المحترفين والمحبي الجرأة.",
+    },
+    scandinavian: {
+      eyebrow: "نقاء وضوء",
+      title: "مطابخ شمالية",
+      summary: "أبيض نقي وخشب فاتح مع إضاءة طبيعية تمنح الطاقة والنظافة.",
+    },
+  },
+  "dressing-room": {
+    modern: {
+      eyebrow: "تنظيم عصري",
+      title: "خزائن ملابس مينيمال",
+      summary: "أدراج مخفية وإضاءة LED ذكية لتجربة ملابس منظمة وهادئة.",
+    },
+    classic: {
+      eyebrow: "خزائن ملكية",
+      title: "غرف ملابس كلاسيكية",
+      summary: "مرايا مزخرفة وخزائن خشبية ثقيلة بتفاصيل ذهبية راقية.",
+    },
+    industrial: {
+      eyebrow: "عرض جريء",
+      title: "خزائن ملابس مفتوحة",
+      summary: "أنابيب معدنية ورفوف خشبية لعرض الملابس بأسلوب لوفت عصري.",
+    },
+    scandinavian: {
+      eyebrow: "بساطة عملية",
+      title: "خزائن ملابس شمالية",
+      summary: "تنظيم واضح وإضاءة ناعمة مع خشب فاتح لراحة يومية.",
+    },
+  },
+  "home-office": {
+    modern: {
+      eyebrow: "تركيز عصري",
+      title: "مكاتب ذكية",
+      summary: "خطوط نظيفة وتقنية متكاملة لبيئة عمل منتجة بدون تشويش.",
+    },
+    classic: {
+      eyebrow: "مكتب تنفيذي",
+      title: "مكاتب كلاسيكية",
+      summary: "خشب داكن وجلد فاخر يخلقان حضوراً مهنياً يليق بالقرارات الكبرى.",
+    },
+    industrial: {
+      eyebrow: "إبداع صناعي",
+      title: "مكاتب لوفت",
+      summary: "جدران طوبية وطاولات معدنية لمساحة عمل ملهمة وقوية الشخصية.",
+    },
+    scandinavian: {
+      eyebrow: "توازن وهدوء",
+      title: "مكاتب شمالية",
+      summary: "ضوء طبيعي ونباتات وألوان هادئة تدعم الإنتاجية والراحة النفسية.",
+    },
+  },
+  "youth-room": {
+    modern: {
+      eyebrow: "مرونة عصرية",
+      title: "غرف شباب مودرن",
+      summary: "تصميم متكيف مع مساحات تخزين ذكية تنمو مع احتياجات الشباب المتغيرة.",
+    },
+    classic: {
+      eyebrow: "أناقة شبابية",
+      title: "غرف شباب كلاسيكية",
+      summary: "خشب نقي وتفاصيل دافئة تمنح الأبناء قيمة الجودة منذ الصغر.",
+    },
+    industrial: {
+      eyebrow: "شخصية قوية",
+      title: "غرف شباب صناعية",
+      summary: "لمسات معدنية وخشب خام لمساحة تعبر عن الجرأة والاستقلالية.",
+    },
+    scandinavian: {
+      eyebrow: "نمو بصحة",
+      title: "غرف شباب شمالية",
+      summary: "ألوان هادئة وإضاءة طبيعية تخلق بيئة مثالية للدراسة والراحة.",
+    },
+  },
 };
 
 export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
@@ -36,101 +251,145 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
   const budget = useSessionStore((state) => state.budget);
   const serviceType = useSessionStore((state) => state.serviceType);
 
-  const [roomImages, setRoomImages] = useState<{[key: string]: string}>({});
+  // PERSISTED UI STATE - Read from store instead of local state
+  const selectedStyle = useSessionStore((state) => state.selectedStyle);
+  const setSelectedStyle = useSessionStore((state) => state.setSelectedStyle);
+  const styleSwitches = useSessionStore((state) => state.styleSwitches);
+  const isHydrated = useSessionStore((state) => state.isHydrated);
+  const roomIntent = useSessionStore((state) => state.roomIntent);
+
+  const [roomImages, setRoomImages] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [selectedStyle, setSelectedStyle] = useState('modern');
-  const [styleSwitchCount, setStyleSwitchCount] = useState(0);
-  const styleSwitchRef = useRef(0);
-  const [viewedRooms, setViewedRooms] = useState(0);
-  const [toastVisible, setToastVisible] = useState(false);
-  const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  // Local state for immediate UI feedback - synced to store
+  const [styleSwitchCount, setStyleSwitchCount] = useState(styleSwitches);
+  const styleSwitchRef = useRef(styleSwitches);
+  const timersRef = useRef<Map<string, number>>(new Map());
+
+  // Hydration guard - show loading state or default during hydration
+  const displayStyle = isHydrated ? selectedStyle : "modern";
+
+  // Sync local ref with store when hydrated
+  useEffect(() => {
+    if (isHydrated) {
+      styleSwitchRef.current = styleSwitches;
+      setStyleSwitchCount(styleSwitches);
+    }
+  }, [isHydrated, styleSwitches]);
 
   const handleStyleChange = (newStyle: string) => {
     if (selectedStyle !== newStyle) {
-      processInteraction('style_switch', 2);
-      const newCount = styleSwitchRef.current + 1;
-      styleSwitchRef.current = newCount;
-      setStyleSwitchCount(newCount);
+      // Update store (handles persistence and interaction tracking)
+      setSelectedStyle(newStyle);
+      // Update local ref for immediate UI feedback
+      const nextCount = styleSwitchRef.current + 1;
+      styleSwitchRef.current = nextCount;
+      setStyleSwitchCount(nextCount);
     }
-    processInteraction('style_select', 1);
-    setSelectedStyle(newStyle);
-    trackEvent('ui_auto_optimization_triggered');
+    trackEvent("ui_auto_optimization_triggered");
   };
 
   const startRoomTimer = (roomSlug: string) => {
     if (timersRef.current.has(roomSlug)) return;
-    const timer = setTimeout(() => {
-      trackEvent('room_intent_hover_long');
-      setViewedRooms(prev => prev + 1);
+
+    const timer = window.setTimeout(() => {
+      trackEvent("room_intent_hover_long");
       timersRef.current.delete(roomSlug);
     }, 3000);
+
     timersRef.current.set(roomSlug, timer);
   };
 
   const clearRoomTimer = (roomSlug: string) => {
-    if (timersRef.current.has(roomSlug)) {
-      clearTimeout(timersRef.current.get(roomSlug));
-      timersRef.current.delete(roomSlug);
-    }
+    const timer = timersRef.current.get(roomSlug);
+    if (!timer) return;
+    window.clearTimeout(timer);
+    timersRef.current.delete(roomSlug);
   };
 
   const roomList = useMemo(() => {
-    const ranked = [...roomDefinitions];
-    if (selectedStyle === 'modern') {
-      const livingIndex = ranked.findIndex(r => r.slug === 'living-room');
+    const ranked = BASE_ROOMS.map((room) => {
+      const styleDesc = ROOM_STYLE_DESCRIPTIONS[room.slug]?.[displayStyle];
+      if (styleDesc) {
+        return {
+          ...room,
+          eyebrow: styleDesc.eyebrow,
+          title: styleDesc.title,
+          summary: styleDesc.summary,
+        };
+      }
+      return { ...room };
+    });
+
+    if (displayStyle === "modern") {
+      const livingIndex = ranked.findIndex((room) => room.slug === "living-room");
       if (livingIndex > 0) {
-        const living = ranked.splice(livingIndex, 1)[0];
-        ranked.unshift(living);
+        const [livingRoom] = ranked.splice(livingIndex, 1);
+        ranked.unshift(livingRoom);
       }
-    } else if (selectedStyle === 'industrial') {
-      const officeIndex = ranked.findIndex(r => r.slug === 'home-office');
+    } else if (displayStyle === "industrial") {
+      const officeIndex = ranked.findIndex((room) => room.slug === "home-office");
       if (officeIndex > 0) {
-        const office = ranked.splice(officeIndex, 1)[0];
-        ranked.unshift(office);
+        const [officeRoom] = ranked.splice(officeIndex, 1);
+        ranked.unshift(officeRoom);
       }
     }
-    if (ranked[0] && TONE_MAP[selectedStyle]) {
-      ranked[0].title = TONE_MAP[selectedStyle].headline;
-      ranked[0].summary = TONE_MAP[selectedStyle].desc;
-    }
+
     return ranked;
-  }, [selectedStyle]);
+  }, [displayStyle]);
 
   useEffect(() => {
-    if (viewedRooms > 5 && !toastVisible) {
-      const timeout = setTimeout(() => setToastVisible(true), 500);
-      return () => clearTimeout(timeout);
-    }
-  }, [viewedRooms, toastVisible]);
-
-  useEffect(() => {
-    const timers = timersRef.current;
     return () => {
-      timers.forEach(timer => clearTimeout(timer));
+      const timers = timersRef.current;
+      for (const [, timer] of timers) {
+        window.clearTimeout(timer);
+      }
       timers.clear();
     };
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchRoomImages = async () => {
+      setRoomImages({});
       setLoading(true);
-      const imagePromises = roomList.map(async (room) => {
-        try {
-          const query = `${selectedStyle} ${roomQueries[room.slug] || room.title}`;
-          const res = await fetch(`/api/pexels?query=${encodeURIComponent(query)}`);
-          const data = await res.json();
-          const img = data.photos?.[0]?.src?.large || `https://source.unsplash.com/600x400/?${room.slug}`;
-          return { [room.slug]: img };
-        } catch {
-          return { [room.slug]: `https://source.unsplash.com/600x400/?${room.slug}` };
+
+      try {
+        const imagePromises = roomList.map(async (room, index) => {
+          try {
+            const query = `${STYLE_QUERY_HINTS[displayStyle] || displayStyle} luxury interior design ${ROOM_QUERIES[room.slug] || room.title}`;
+            const randomPage = Math.floor(Math.random() * 5) + 1;
+            const page = STYLE_RESULT_PAGE[displayStyle] + index + randomPage;
+            const res = await fetch(`/api/pexels?query=${encodeURIComponent(query)}&per_page=1&page=${page}`, {
+              signal: controller.signal,
+            });
+
+            if (!res.ok) {
+              throw new Error(`API returned ${res.status}`);
+            }
+
+            const data = await res.json();
+            const img = data.photos?.[0]?.src?.large || "/placeholder-room.jpg";
+            return { [room.slug]: img };
+          } catch {
+            return { [room.slug]: "/placeholder-room.jpg" };
+          }
+        });
+
+        const images = await Promise.all(imagePromises);
+        if (!controller.signal.aborted) {
+          setRoomImages(Object.assign({}, ...images));
         }
-      });
-      const images = await Promise.all(imagePromises);
-      setRoomImages(Object.assign({}, ...images));
-      setLoading(false);
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
     };
-    fetchRoomImages();
-  }, [roomList, selectedStyle]);
+
+    void fetchRoomImages();
+    return () => controller.abort();
+  }, [roomList, displayStyle]);
 
   useEffect(() => {
     updateProfile({ lastPage: "/" });
@@ -138,10 +397,16 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
   }, [trackEvent, updateProfile]);
 
   const isGoldenCTA = leadScore > 15;
-  const exploreCTA = isGoldenCTA ? "احصل على عرض سعري مخصص لذوقك" : "استكشف المساحات";
-  const primaryCtaText = styleSwitchCount > 3 ? "حائر بين الستايلات؟ اطلب استشارة دمج مجانية" : (intent === "buyer" && runtimeConfig.whatsappNumber ? "تحدث مع مهندس التصميم الآن" : "ابدأ رحلة التصميم");
-  const profile = { roomType, budget, style: selectedStyle, serviceType, intent };
-  const whatsappUrl = runtimeConfig.whatsappNumber ? buildWhatsAppUrl(runtimeConfig.whatsappNumber, profile, runtimeConfig.brandNameAr) : "/start";
+  const primaryCtaText =
+    styleSwitchCount > 3
+      ? "حائر بين الستايلات؟ اطلب استشارة دمج مجانية"
+      : intent === "buyer" && runtimeConfig.whatsappNumber
+        ? "تحدث مع مهندس التصميم الآن"
+        : "ابدأ رحلة التصميم";
+  const profile = { roomType, budget, style: displayStyle, serviceType, intent };
+  const whatsappUrl = runtimeConfig.whatsappNumber
+    ? buildWhatsAppUrl(runtimeConfig.whatsappNumber, profile, runtimeConfig.brandNameAr)
+    : "/start";
   const primaryHref = intent === "buyer" && runtimeConfig.whatsappNumber ? whatsappUrl : "/start";
 
   const handlePrimaryClick = () => {
@@ -150,192 +415,163 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
 
   return (
     <>
-      {/* Main Experience Grid */}
       <section className="relative z-20">
-        <div className="max-w-7xl mx-auto bg-transparent px-6 pt-20 pb-40 relative z-10">
-          <div className="bg-transparent relative z-20">
+        <div className="relative z-10 mx-auto max-w-7xl bg-transparent px-6 pb-40 pt-20">
+          <div className="relative z-20 bg-transparent">
             <div className="mb-16 bg-transparent">
-              <AIStylePicker
-                selectedStyle={selectedStyle}
-                onStyleChange={handleStyleChange}
-              />
+              <AIStylePicker selectedStyle={displayStyle} onStyleChange={handleStyleChange} />
             </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 bg-transparent relative z-20">
-            {/* Index 0-5: Regular Room Cards */}
-            {roomList.slice(0, 6).map((room, index) => (
-              <div key={room.slug} className="group bg-transparent relative z-20">
+            <div className="relative z-20 grid grid-cols-1 gap-10 bg-transparent md:grid-cols-2 lg:grid-cols-3">
+              {roomList.slice(0, 6).map((room) => (
+                <div key={room.slug} className="group relative z-20">
+                  <Link
+                    href={`/room/${room.slug}?style=${displayStyle}`}
+                    onMouseEnter={() => startRoomTimer(room.slug)}
+                    onMouseLeave={() => clearRoomTimer(room.slug)}
+                    className="relative block aspect-[16/10] cursor-pointer overflow-hidden rounded-[2.5rem] border border-white/5 shadow-2xl transition-all duration-500 hover:-translate-y-3 hover:scale-[1.02] hover:border-brand-primary/30 hover:shadow-[0_20px_40px_rgba(197,160,89,0.3)]"
+                  >
+                    <Image
+                      key={`${displayStyle}-${room.slug}-${roomImages[room.slug] || "placeholder"}`}
+                      src={roomImages[room.slug] || "/placeholder-room.jpg"}
+                      alt={room.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="absolute inset-0 object-cover transition-transform duration-1000 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 z-20 p-8 text-right">
+                      <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-brand-primary">{room.eyebrow}</span>
+                      <h3 className="mb-2 text-2xl font-serif font-bold text-white">{room.title}</h3>
+                      <p className="line-clamp-2 text-sm leading-relaxed text-white/70">{room.summary}</p>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+
+              <div className="group relative z-20">
                 <Link
-                  href={`/room/${room.slug}`}
-                  onMouseEnter={() => startRoomTimer(room.slug)}
-                  onMouseLeave={() => clearRoomTimer(room.slug)}
-                  className="block aspect-[16/10] rounded-[2.5rem] overflow-hidden relative border border-white/5 shadow-2xl transition-all duration-500 group-hover:-translate-y-3 group-hover:border-brand-primary/30"
+                  href={`/room/interior-design?style=${displayStyle}`}
+                  onMouseEnter={() => startRoomTimer("interior-design")}
+                  onMouseLeave={() => clearRoomTimer("interior-design")}
+                  className="relative block aspect-[16/10] cursor-pointer overflow-hidden rounded-[2.5rem] border border-white/5 shadow-2xl transition-all duration-500 hover:-translate-y-3 hover:scale-[1.02] hover:border-brand-primary/30 hover:shadow-[0_20px_40px_rgba(197,160,89,0.3)]"
                 >
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
-                    style={{ backgroundImage: `url(${roomImages[room.slug] || '/placeholder-room.jpg'})` }}
+                  <Image
+                    key={`${displayStyle}-interior-design-${roomImages["interior-design"] || "placeholder"}`}
+                    src={roomImages["interior-design"] || "/placeholder-room.jpg"}
+                    alt="Interior design"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="absolute inset-0 object-cover transition-transform duration-1000 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-8 text-right z-20">
-                    <span className="text-brand-primary text-xs uppercase tracking-widest font-bold mb-2 block">{room.eyebrow}</span>
-                    <h3 className="text-2xl font-serif text-white font-bold mb-2">{room.title}</h3>
-                    <p className="text-white/70 text-sm line-clamp-2 leading-relaxed">{room.summary}</p>
+                  <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 z-20 p-8 text-right">
+                    <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-brand-primary">تصميم شامل</span>
+                    <h3 className="mb-2 text-2xl font-serif font-bold text-white">تصميم داخلي شامل</h3>
+                    <p className="line-clamp-2 text-sm leading-relaxed text-white/70">حلول متكاملة لتصميم مساحتك بالكامل.</p>
                   </div>
                 </Link>
               </div>
-            ))}
-            
-            {/* Index 6: Full Interior Design Card */}
-            <div className="group bg-transparent relative z-20">
-              <Link
-                href={`/room/interior-design`}
-                onMouseEnter={() => startRoomTimer('interior-design')}
-                onMouseLeave={() => clearRoomTimer('interior-design')}
-                className="block aspect-[16/10] rounded-[2.5rem] overflow-hidden relative border border-white/5 shadow-2xl transition-all duration-500 group-hover:-translate-y-3 group-hover:border-brand-primary/30"
-              >
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${roomImages['interior-design'] || '/placeholder-room.jpg'})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-8 text-right z-20">
-                  <span className="text-brand-primary text-xs uppercase tracking-widest font-bold mb-2 block">تصميم شامل</span>
-                  <h3 className="text-2xl font-serif text-white font-bold mb-2">تصميم داخلي شامل</h3>
-                  <p className="text-white/70 text-sm line-clamp-2 leading-relaxed">حلول متكاملة لتصميم مساحتك بالكامل</p>
-                </div>
-              </Link>
-            </div>
 
-            {/* Index 7: Explore Spaces Luxury Card - Standard Size with Dynamic Logic */}
-            <div className="group bg-transparent relative z-20">
-              <div className="block aspect-[16/10] rounded-[2.5rem] overflow-hidden relative border border-white/5 shadow-2xl transition-all duration-500 group-hover:-translate-y-3 group-hover:border-brand-primary/30 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1A1A1B] via-[#0D0D0E] to-black border-2 border-[#C5A059] shadow-[0_0_50px_rgba(197,160,89,0.3)]">
-                {/* Content Container */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                  {/* Top Badge with Pulse */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="h-3 w-3 text-[#C5A059] animate-pulse" />
-                    <span className="text-[#C5A059] text-[8px] font-bold tracking-[0.3em] uppercase animate-pulse">
-                      الخطوة الحصرية
-                    </span>
+              <div className="group relative z-20 bg-transparent">
+                <div className="relative block aspect-[16/10] overflow-hidden rounded-[2.5rem] border-2 border-[#C5A059] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1A1A1B] via-[#0D0D0E] to-black shadow-[0_0_50px_rgba(197,160,89,0.3)] transition-all duration-500 group-hover:-translate-y-3 group-hover:border-brand-primary/30">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                    <div className="mb-4 flex items-center gap-2">
+                      <Sparkles className="h-3 w-3 animate-pulse text-[#C5A059]" />
+                      <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-[#C5A059] animate-pulse">الخطوة الحصرية</span>
+                    </div>
+                    <h2 className="mb-4 text-xl font-black leading-tight text-white md:text-2xl">
+                      استكشف <span className="bg-gradient-to-r from-[#C5A059] to-[#E5C170] bg-clip-text text-transparent">المساحات</span>
+                    </h2>
+                    <p className="mb-6 max-w-[200px] text-xs leading-relaxed text-white/50 md:text-sm">
+                      {styleSwitchCount > 2 ? "وجدنا الستايل المناسب لك.. لنبدأ التنفيذ" : "اكتشف إبداعاتنا في التصميم الداخلي المبتكر."}
+                    </p>
+                    <Link
+                      href={styleSwitchCount > 2 ? primaryHref : "/rooms"}
+                      onClick={styleSwitchCount > 2 ? handlePrimaryClick : undefined}
+                      className="w-full rounded-xl bg-gradient-to-r from-[#C5A059] to-[#E5C170] px-4 py-3 text-center text-sm font-black text-black shadow-[0_15px_30px_-10px_rgba(197,160,89,0.6)] transition-all hover:shadow-[0_0_20px_rgba(197,160,89,0.5)] active:scale-95"
+                    >
+                      {styleSwitchCount > 2 ? "اطلب استشارة دمج مجانية" : "استكشف المساحات"}
+                    </Link>
+                    <span className="mt-4 text-[8px] font-medium text-white/40">تصاميم فريدة • جودة استثنائية</span>
                   </div>
-
-                  {/* Main Title - Bold with Gold Gradient */}
-                  <h2 className="text-xl md:text-2xl font-black text-white mb-4 leading-tight">
-                    استكشف <span className="bg-gradient-to-r from-[#C5A059] to-[#E5C170] bg-clip-text text-transparent">المساحات</span>
-                  </h2>
-
-                  {/* Subtext */}
-                  <p className="text-white/50 text-xs md:text-sm mb-6 max-w-[200px] leading-relaxed">
-                    {styleSwitchCount > 2 ? "وجدنا الستايل المناسب لك.. لنبدأ التنفيذ" : "اكتشف إبداعاتنا في التصميم الداخلي المبتكر"}
-                  </p>
-
-                  {/* The Action Button - Dynamic Text */}
-                  <Link 
-                    href={styleSwitchCount > 2 ? primaryHref : "/rooms"}
-                    onClick={styleSwitchCount > 2 ? handlePrimaryClick : undefined}
-                    className="bg-gradient-to-r from-[#C5A059] to-[#E5C170] text-black font-black text-sm py-3 px-4 rounded-xl hover:shadow-[0_0_20px_rgba(197,160,89,0.5)] transition-all active:scale-95 shadow-[0_15px_30px_-10px_rgba(197,160,89,0.6)] text-center w-full"
-                  >
-                    {styleSwitchCount > 2 ? "حائر بين الستايلات؟ اطلب استشارة دمج مجانية" : "استكشف المساحات"}
-                  </Link>
-
-                  {/* Bottom Micro-copy */}
-                  <span className="mt-4 text-[8px] text-white/40 font-medium">تصاميم فريدة • جودة استثنائية</span>
                 </div>
               </div>
-            </div>
 
-            {/* Index 8: Start Design Journey Card - Static State */}
-            <div className="relative z-50 md:col-span-2 lg:col-span-1 transform transition-all duration-500 hover:scale-105 aspect-[16/10] rounded-[2.5rem] overflow-hidden shadow-[0_0_50px_rgba(197,160,89,0.3)] border-2 border-[#C5A059] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1A1A1B] via-[#0D0D0E] to-black flex flex-col items-center justify-center p-8 text-center">
-              {/* Top Badge with Pulse */}
-              <div className="flex items-center gap-2 mb-6">
-                <Sparkles className="h-4 w-4 text-[#C5A059] animate-pulse" />
-                <span className="text-[#C5A059] text-[10px] font-bold tracking-[0.3em] uppercase animate-pulse">
-                  الخطوة الحصرية
-                </span>
+              <div className="relative z-50 flex aspect-[16/10] transform flex-col items-center justify-center overflow-hidden rounded-[2.5rem] border-2 border-[#C5A059] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1A1A1B] via-[#0D0D0E] to-black p-8 text-center shadow-[0_0_50px_rgba(197,160,89,0.3)] transition-all duration-500 hover:scale-105 md:col-span-2 lg:col-span-1">
+                <div className="mb-6 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 animate-pulse text-[#C5A059]" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C5A059] animate-pulse">الخطوة الحصرية</span>
+                </div>
+                <h4 className="mb-4 text-xl font-bold text-white">جاهز لتصميم مساحتك؟</h4>
+                <p className="mb-6 text-sm leading-tight text-white/80">ابدأ الآن مسار تصميم مخصص يناسب ذوقك واحتياجك الحقيقي.</p>
+                <Link
+                  href="/start"
+                  className="w-full rounded-xl bg-gradient-to-r from-[#C5A059] to-[#E5C170] py-4 text-center text-lg font-black text-black shadow-[0_15px_30px_-10px_rgba(197,160,89,0.6)] transition-all hover:shadow-[0_0_20px_rgba(197,160,89,0.5)] active:scale-95"
+                >
+                  ابدأ رحلة التصميم
+                </Link>
+                <span className="mt-6 text-[10px] font-medium text-white/40">عقد تنفيذ مضمون</span>
               </div>
-
-              {/* Main Title */}
-              <h4 className="text-white text-xl font-bold mb-4">جاهز لتصميم مساحتك؟</h4>
-              <p className="text-white/80 text-sm mb-6 leading-tight">اضغط للبدء في رحلة تصميم مخصصة لذوقك</p>
-
-              {/* The Action Button - Static "ابدأ رحلة التصميم" */}
-              <Link 
-                href="/start"
-                className="bg-gradient-to-r from-[#C5A059] to-[#E5C170] text-black font-black text-lg py-4 w-full rounded-xl hover:shadow-[0_0_20px_rgba(197,160,89,0.5)] transition-all active:scale-95 shadow-[0_15px_30px_-10px_rgba(197,160,89,0.6)] text-center"
-              >
-                ابدأ رحلة التصميم
-              </Link>
-
-              {/* Bottom Micro-copy */}
-              <span className="mt-6 text-[10px] text-white/40 font-medium">عقد تنفيذ مضمون</span>
             </div>
-          </div>
 
-          {loading && (
-            <div className="text-center py-20 bg-transparent relative z-20">
-            <div className="w-10 h-10 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-white/40">تنسيق المساحات البصرية...</p>
-            </div>
-          )}
+            {loading ? (
+              <div className="relative z-20 bg-transparent py-20 text-center">
+                <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-brand-primary border-t-transparent" />
+                <p className="text-white/40">تنسيق المساحات البصرية...</p>
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
 
-      {/* Corporate Identity Section - Legacy & Trust */}
-      <section className="relative z-20 overflow-hidden px-6 pt-24 pb-32 md:px-12 bg-gradient-to-b from-black via-[#0A0A0A] to-black">
-        <div className="absolute inset-0 bg-[url('/dining-bg.jpg')] bg-cover bg-center opacity-20"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/60"></div>
-        
-        <div className="relative z-30 max-w-7xl mx-auto">
-          {/* Main Content */}
-          <div className="grid lg:grid-cols-2 gap-16 items-start mb-20">
-            {/* Left: Text Content */}
+      <section className="relative z-20 overflow-hidden bg-gradient-to-b from-black via-[#0A0A0A] to-black px-6 pb-32 pt-24 md:px-12">
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/60" />
+
+        <div className="relative z-30 mx-auto max-w-7xl">
+          <div className="grid items-start gap-16 lg:grid-cols-2">
             <div className="space-y-8">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight tracking-tight">
+              <h2 className="text-4xl font-serif font-bold leading-tight tracking-tight text-white md:text-5xl lg:text-6xl">
                 أزينث ليفينج: كيان تأسس على خبرة نصف قرن.
               </h2>
-              <p className="text-white/80 text-lg md:text-xl leading-relaxed max-w-2xl">
-                تأسست أزينث ليفينج عام 2012 برؤيةٍ تدمج بين دقة التخطيط المؤسسي وإرثٍ عائلي في صناعة الأثاث يمتد لأكثر من 50 عاماً. نحن لا ننظر إلى الأثاث كقطعة خشب، بل كمعادلة هندسية تبدأ من اختيار المواد الخام وفق معايير عالمية، وتمر عبر نظامنا التشغيلي (Azenith OS) لضمان تنفيذٍ يطابق التصورات بدقةٍ متناهية، وتنتهي بضمانٍ يمتد لثلاث سنوات. نحن الكيان الذي يحول المخططات إلى واقعٍ مستدام في مساحتك الخاصة.
+              <p className="max-w-2xl text-lg leading-relaxed text-white/80 md:text-xl">
+                تأسست أزينث ليفينج عام 2012 برؤية تمزج بين دقة التخطيط المؤسسي وإرث عائلي في صناعة الأثاث يمتد لأكثر من 50 عامًا. نحن نحول المخططات إلى واقع متماسك بخامات منضبطة وتنفيذ محسوب وضمان واضح.
               </p>
             </div>
-            
-            {/* Right: Legacy Stats Pillars */}
+
             <div className="grid grid-cols-1 gap-6">
-              {/* Pillar 1: 50 Years */}
-              <div className="p-8 rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent backdrop-blur-sm">
+              <div className="rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent p-8 backdrop-blur-sm">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-5xl md:text-6xl font-black text-[#C5A059]">50</span>
-                  <span className="text-2xl font-bold text-[#C5A059]">عاماً</span>
+                  <span className="text-5xl font-black text-[#C5A059] md:text-6xl">50</span>
+                  <span className="text-2xl font-bold text-[#C5A059]">عامًا</span>
                 </div>
-                <p className="text-white/70 text-lg mt-3">من الشغف في ورش الأثاث الفاخر.</p>
+                <p className="mt-3 text-lg text-white/70">من الشغف والخبرة في ورش الأثاث الفاخر.</p>
               </div>
-              
-              {/* Pillar 2: 2012 */}
-              <div className="p-8 rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent backdrop-blur-sm">
+
+              <div className="rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent p-8 backdrop-blur-sm">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-5xl md:text-6xl font-black text-[#C5A059]">2012</span>
+                  <span className="text-5xl font-black text-[#C5A059] md:text-6xl">2012</span>
                 </div>
-                <p className="text-white/70 text-lg mt-3">عام التأسيس (الاستقرار المؤسسي).</p>
+                <p className="mt-3 text-lg text-white/70">عام التأسيس والانطلاق المؤسسي للعلامة.</p>
               </div>
-              
-              {/* Pillar 3: 3 Years Warranty */}
-              <div className="p-8 rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent backdrop-blur-sm">
+
+              <div className="rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent p-8 backdrop-blur-sm">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-5xl md:text-6xl font-black text-[#C5A059]">3</span>
+                  <span className="text-5xl font-black text-[#C5A059] md:text-6xl">3</span>
                   <span className="text-2xl font-bold text-[#C5A059]">سنوات</span>
                 </div>
-                <p className="text-white/70 text-lg mt-3">الضمان الذهبي (الالتزام بعد البيع).</p>
+                <p className="mt-3 text-lg text-white/70">ضمان ذهبي يعكس التزام ما بعد البيع.</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Mobile Floating CTA */}
-      <div className="fixed bottom-6 inset-x-6 z-50 md:hidden">
-        <Link 
+      <div className="fixed inset-x-6 bottom-6 z-50 md:hidden">
+        <Link
           href={primaryHref}
-          className="flex items-center justify-center gap-3 bg-brand-primary py-5 rounded-2xl text-brand-accent font-bold shadow-2xl relative z-50"
+          onClick={handlePrimaryClick}
+          className="relative z-50 flex items-center justify-center gap-3 rounded-2xl bg-brand-primary py-5 font-bold text-brand-accent shadow-2xl"
         >
           <MessageCircle className="h-6 w-6" />
           {primaryCtaText}

@@ -380,6 +380,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../app/api/admin/analyze-lead/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/analyze-lead">> = Specific
+  const handler = {} as typeof import("../../app/api/admin/analyze-lead/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../app/api/analytics/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/analytics">> = Specific
@@ -474,6 +483,42 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/content-generator">> = Specific
   const handler = {} as typeof import("../../app/api/content-generator/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/curate-images/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/curate-images">> = Specific
+  const handler = {} as typeof import("../../app/api/curate-images/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/curated-images/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/curated-images">> = Specific
+  const handler = {} as typeof import("../../app/api/curated-images/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/curated-pages/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/curated-pages">> = Specific
+  const handler = {} as typeof import("../../app/api/curated-pages/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/enhance-image/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/enhance-image">> = Specific
+  const handler = {} as typeof import("../../app/api/enhance-image/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

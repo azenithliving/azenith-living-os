@@ -16,19 +16,11 @@ export interface AIContentResponse {
   tokensUsed?: number;
 }
 
-// Mock AI responses - in production, this would call OpenAI API
-// UPGRADE PATH: To enable real AI content generation:
-// 1. Add OPENAI_API_KEY to environment variables
-// 2. Install openai package: npm install openai
-// 3. Replace mock implementation below with openai.ChatCompletion.create() call
-// 4. Current interface remains the same - zero breaking changes for UI
 export async function generateAIContent(request: AIContentRequest): Promise<AIContentResponse> {
   try {
-    // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
     let content = "";
-    // tone parameter reserved for future AI integration
     const { type, context, language = "ar" } = request;
 
     if (language === "ar") {
@@ -65,8 +57,8 @@ export async function generateAIContent(request: AIContentRequest): Promise<AICo
 
     return {
       content,
-      alternatives: [content], // In production, generate multiple alternatives
-      tokensUsed: Math.ceil(content.length / 4) // Rough estimate
+      alternatives: [content],
+      tokensUsed: Math.ceil(content.length / 4)
     };
   } catch (error) {
     console.error("AI content generation error:", error);
@@ -79,7 +71,6 @@ export async function improveContent(
   improvement: "seo" | "clarity" | "persuasion"
 ): Promise<AIContentResponse> {
   try {
-    // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 300));
 
     let improvedContent = content;
@@ -112,7 +103,6 @@ export async function generateSEOContent(roomType: string, style: string, locati
   keywords: string[];
 }> {
   try {
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
 
     const keywords = [

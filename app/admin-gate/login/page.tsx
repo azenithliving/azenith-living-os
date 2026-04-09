@@ -120,14 +120,6 @@ export default function AdminGateLogin() {
             </button>
           </form>
 
-          {/* Help Text */}
-          <div className="mt-6 rounded-xl border border-white/5 bg-white/[0.02] p-4">
-            <p className="text-xs text-white/40">
-              <strong className="text-white/60">Default Admin:</strong><br />
-              Email: azenithliving@gmail.com<br />
-              Password: 3laa92aziz
-            </p>
-          </div>
         </div>
 
         {/* Security Notice */}
