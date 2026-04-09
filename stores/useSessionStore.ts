@@ -53,6 +53,7 @@ export interface PsychologicalProfile {
       colorPalette?: string[];
       materials?: string[];
       roomType?: string;
+      style?: string;
     };
   }>;
 }
@@ -124,6 +125,7 @@ export interface SessionState {
       colorPalette?: string[];
       materials?: string[];
       roomType?: string;
+      style?: string;
     }
   ) => void;
 }
