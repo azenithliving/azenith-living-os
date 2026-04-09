@@ -116,8 +116,21 @@ export default function RoomPageClient({
   const intent = useSessionStore((state) => state.intent);
   const budget = useSessionStore((state) => state.budget);
 
-  // Local state
-  const [photos, setPhotos] = useState(initialPhotos.slice(0, INITIAL_LOAD_COUNT));
+  // Mounting shield - don't render client-side until mounted to prevent hydration mismatch
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Immediate Sync: Store initialPhotos in a ref that persists through SessionStore rehydration
+  const initialPhotosRef = useRef(initialPhotos);
+  // Keep ref updated if initialPhotos changes (e.g., from SSR)
+  useEffect(() => {
+    initialPhotosRef.current = initialPhotos;
+  }, [initialPhotos]);
+
+  // Local state - initialize from ref to ensure persistence through rehydration
+  const [photos, setPhotos] = useState(() => initialPhotosRef.current.slice(0, INITIAL_LOAD_COUNT));
   const [currentStyle, setCurrentStyle] = useState(initialStyle);
   const [displayedCount, setDisplayedCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -127,6 +140,9 @@ export default function RoomPageClient({
   const [poolSize, setPoolSize] = useState<number>(0); // Track available pool size
   const [isFetching, setIsFetching] = useState(false); // Global fetching flag for throttling
   const [rateLimitFreezeUntil, setRateLimitFreezeUntil] = useState<number>(0); // 5s freeze on 429
+
+  // Force refresh counter to trigger React re-render after throttled wait
+  const [forceRefresh, setForceRefresh] = useState(0);
 
   // Initialize seed after hydration to avoid mismatch
   useEffect(() => {
@@ -141,8 +157,20 @@ export default function RoomPageClient({
     if (isHydrated && initialPhotos.length > 0 && photos.length === 0) {
       console.log('[State Sync] Restoring initialPhotos after store rehydration');
       setPhotos(initialPhotos.slice(0, INITIAL_LOAD_COUNT));
+      setForceRefresh(prev => prev + 1); // Force React to re-render
     }
   }, [isHydrated, initialPhotos, photos.length]);
+
+  // Force refresh mechanism: trigger re-render after throttle wait completes
+  useEffect(() => {
+    if (!isFetching && !isLoadingMore && mounted) {
+      // Small delay to ensure React processes the state change
+      const timer = setTimeout(() => {
+        setForceRefresh(prev => prev + 1);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isFetching, isLoadingMore, mounted]);
 
   const [loading, setLoading] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -548,8 +576,10 @@ export default function RoomPageClient({
     };
   }, [room.id, updateProfile, userProfile]);
 
-  const heroImage = photos[0];
-  const gallery = photos.slice(1);
+  // Use ref-backed photos for rendering to survive rehydration
+  const displayPhotos = mounted ? photos : initialPhotosRef.current.slice(0, INITIAL_LOAD_COUNT);
+  const heroImage = displayPhotos[0];
+  const gallery = displayPhotos.slice(1);
 
   const displayCategory = styleDesc?.category ?? room.category;
   const displayDescription = styleDesc?.description ?? room.description;
@@ -641,8 +671,10 @@ export default function RoomPageClient({
       )}
 
       {/* AI-Powered Masonry Gallery Grid with Quality Scores */}
-      {gallery.length > 0 && (
+      {/* Mounting Shield: Only render gallery after mounted to prevent hydration mismatch */}
+      {mounted && gallery.length > 0 && (
         <SmartImageGrid
+          key={`gallery-${forceRefresh}`} // Force re-render on refresh
           roomType={room.id}
           style={currentStyle}
           intent={intent || "exploring"}
@@ -659,6 +691,23 @@ export default function RoomPageClient({
             });
           }}
         />
+      )}
+      {/* Show SSR initial images while mounting/shielded */}
+      {!mounted && initialPhotosRef.current.length > 1 && (
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {initialPhotosRef.current.slice(1, 9).map((photo, idx) => (
+            <div key={`fallback-${photo.id}-${idx}`} className="relative aspect-square overflow-hidden rounded-lg">
+              <Image
+                src={photo.src?.large2x || photo.src?.large || "/placeholder-room.jpg"}
+                alt={`${room.title} ${idx + 1}`}
+                fill
+                sizes="(max-width: 768px) 50vw, 25vw"
+                className="object-cover"
+                loading="lazy"
+              />
+            </div>
+          ))}
+        </div>
       )}
 
       {/* Infinite Scroll Sentinel & GoldPulse Loader */}
@@ -685,27 +734,29 @@ export default function RoomPageClient({
         </div>
       )}
 
-      {/* Image Lightbox with scroll tracking */}
-      <ImageLightbox
-        isOpen={lightboxOpen}
-        images={photos}
-        currentIndex={lightboxIndex}
-        onClose={() => setLightboxOpen(false)}
-        onNext={nextImage}
-        onPrev={prevImage}
-        onNavigate={navigateToImage}
-        onDownload={(index) => {
-          // Track download with psychological signal (+10 Commitment) from modal
-          console.log(`[Psychological Signal] Critical Interest: Download (+10) from Modal`);
-          console.log(`[Neural Analytics] Download image ${index + 1}: +10 points (Modal)`);
-          trackNeuralInteraction?.(index + 1, "download", {
-            roomType: room.id,
-            style: currentStyle,
-            imageId: photos[index]?.id,
-            source: "modal",
-          });
-        }}
-      />
+      {/* Image Lightbox with scroll tracking - only mount after client-side hydration */}
+      {mounted && (
+        <ImageLightbox
+          isOpen={lightboxOpen}
+          images={displayPhotos}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxOpen(false)}
+          onNext={nextImage}
+          onPrev={prevImage}
+          onNavigate={navigateToImage}
+          onDownload={(index) => {
+            // Track download with psychological signal (+10 Commitment) from modal
+            console.log(`[Psychological Signal] Critical Interest: Download (+10) from Modal`);
+            console.log(`[Neural Analytics] Download image ${index + 1}: +10 points (Modal)`);
+            trackNeuralInteraction?.(index + 1, "download", {
+              roomType: room.id,
+              style: currentStyle,
+              imageId: displayPhotos[index]?.id,
+              source: "modal",
+            });
+          }}
+        />
+      )}
     </>
   );
 }
