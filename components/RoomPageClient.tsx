@@ -123,8 +123,15 @@ export default function RoomPageClient({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true); // Reservoir always has more
   const [currentPage, setCurrentPage] = useState(1);
-  const [seed, setSeed] = useState<number>(() => Date.now()); // Lazy init to avoid hydration mismatch
+  const [seed, setSeed] = useState<number>(0); // Start with 0, set real seed in useEffect after hydration
   const [poolSize, setPoolSize] = useState<number>(0); // Track available pool size
+
+  // Initialize seed after hydration to avoid mismatch
+  useEffect(() => {
+    if (seed === 0) {
+      setSeed(Date.now());
+    }
+  }, [seed]);
 
   const [loading, setLoading] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -288,6 +295,27 @@ export default function RoomPageClient({
       );
 
       if (!pexelsResponse.ok) {
+        // Rate limit (429) - fallback to initialPhotos from SSR instead of showing empty
+        if (pexelsResponse.status === 429) {
+          console.warn('[AI Infinite Scroll] Rate limited (429), falling back to SSR initialPhotos');
+          // Use initialPhotos as fallback, shuffle them for variety
+          const fallbackPhotos = initialPhotos.length > 0 
+            ? initialPhotos 
+            : Array.from({ length: 5 }, (_, i) => ({
+                id: 100000 + i,
+                src: { large: getFallbackImage(room.id, i), large2x: getFallbackImage(room.id, i) },
+                alt: `${room.title} fallback ${i + 1}`,
+              }));
+          // Slice to get fresh batch from fallback
+          const startIdx = ((currentPage - 1) * LOAD_MORE_COUNT) % fallbackPhotos.length;
+          const batch = fallbackPhotos.slice(startIdx, startIdx + LOAD_MORE_COUNT);
+          if (batch.length > 0) {
+            setPhotos(prev => [...prev, ...batch]);
+            setCurrentPage(nextPage);
+            // Don't set hasMore to false, keep trying for real API on next scroll
+          }
+          return;
+        }
         setHasMore(false);
         return;
       }
@@ -341,13 +369,25 @@ export default function RoomPageClient({
     }
   }, [currentPage, currentStyle, hasMore, isLoadingMore, room.id, room.query, getCacheKey]);
 
-  // Infinite scroll observer with proper cleanup
+  // Debounce ref for infinite scroll to prevent rapid triggers
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Infinite scroll observer with proper cleanup and debounce
   useEffect(() => {
     // Disconnect any existing observer first to prevent memory leaks
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isFetchingRef.current) {
-          loadMoreImages();
+          // Clear any existing debounce timer
+          if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+          }
+          // Debounce: wait 500ms after intersection to ensure previous batch rendered
+          debounceTimerRef.current = setTimeout(() => {
+            if (!isFetchingRef.current && !isLoadingMore) {
+              loadMoreImages();
+            }
+          }, 500);
         }
       },
       { rootMargin: `${SCROLL_THRESHOLD}px` }
@@ -361,6 +401,9 @@ export default function RoomPageClient({
     return () => {
       // Always disconnect the entire observer on cleanup
       observer.disconnect();
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
     };
   }, [hasMore, isLoadingMore, loadMoreImages]);
 
