@@ -7,7 +7,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const emailSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("البريد الإلكتروني غير صالح."),
   source: z.string().optional().default("footer_elite_form"),
   utmSource: z.string().optional(),
   utmMedium: z.string().optional(),
@@ -58,7 +58,7 @@ export async function subscribeToNewsletter(
     if (!checkRateLimit(email.toLowerCase())) {
       return {
         success: false,
-        error: "Too many attempts. Please try again in a minute.",
+        error: "تم تجاوز عدد المحاولات. حاول مرة أخرى بعد دقيقة.",
       };
     }
 
@@ -73,7 +73,7 @@ export async function subscribeToNewsletter(
     if (!validationResult.success) {
       return {
         success: false,
-        error: "Please enter a valid email address.",
+        error: "أدخل بريدًا إلكترونيًا صحيحًا.",
       };
     }
 
@@ -90,7 +90,7 @@ export async function subscribeToNewsletter(
       if (existingSubscriber.status === "active") {
         return {
           success: false,
-          error: "This email is already subscribed to our Elite Access list.",
+          error: "هذا البريد مشترك بالفعل في قائمة النخبة.",
         };
       } else {
         const { error: updateError } = await supabase
@@ -112,7 +112,7 @@ export async function subscribeToNewsletter(
           console.error("Error updating subscriber:", updateError);
           return {
             success: false,
-            error: "Failed to resubscribe. Please try again later.",
+            error: "تعذر إعادة تفعيل الاشتراك الآن. حاول لاحقًا.",
           };
         }
 
@@ -120,7 +120,7 @@ export async function subscribeToNewsletter(
 
         return {
           success: true,
-          message: "Welcome back! Your subscription has been reactivated.",
+          message: "عاد اشتراكك للعمل بنجاح. أهلًا بعودتك.",
         };
       }
     }
@@ -144,7 +144,7 @@ export async function subscribeToNewsletter(
       console.error("Error inserting subscriber:", insertError);
       return {
         success: false,
-        error: "Failed to subscribe. Please try again later.",
+        error: "تعذر إتمام الاشتراك الآن. حاول لاحقًا.",
       };
     }
 
@@ -152,13 +152,13 @@ export async function subscribeToNewsletter(
 
     return {
       success: true,
-      message: "Welcome to Elite Access! Check your email for confirmation.",
+      message: "تم الاشتراك بنجاح. راجع بريدك الإلكتروني للتأكيد.",
     };
   } catch (error) {
     console.error("Newsletter subscription error:", error);
     return {
       success: false,
-      error: "An unexpected error occurred. Please try again later.",
+      error: "حدث خطأ غير متوقع. حاول مرة أخرى لاحقًا.",
     };
   }
 }
@@ -168,7 +168,7 @@ async function sendWelcomeEmail(email: string): Promise<void> {
     await resend.emails.send({
       from: "Azenith Living <noreply@azenithliving.com>",
       to: email,
-      subject: "Welcome to Elite Access | Azenith Living",
+      subject: "مرحبًا بك في قائمة النخبة | Azenith Living",
       html: `
         <!DOCTYPE html>
         <html lang="en" dir="ltr">

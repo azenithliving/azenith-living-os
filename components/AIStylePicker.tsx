@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import React from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
 const styles = [
   { id: "modern", label: "مودرن" },
@@ -18,19 +18,7 @@ interface AIStylePickerProps {
 }
 
 const AIStylePicker: React.FC<AIStylePickerProps> = ({ selectedStyle, onStyleChange, options = styles }) => {
-  const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-    // Check reduced motion preference only on client side
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setShouldReduceMotion(mediaQuery.matches);
-    
-    const handler = (e: MediaQueryListEvent) => setShouldReduceMotion(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <div className="flex flex-col items-center mb-16 px-4">
@@ -50,7 +38,7 @@ const AIStylePicker: React.FC<AIStylePickerProps> = ({ selectedStyle, onStyleCha
                 {style.label}
               </span>
 
-              {isMounted && isActive && (
+              {isActive && (
                 <motion.div
                   layoutId="active-pill"
                   className="absolute inset-0 bg-white/10 rounded-full border border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.05)]"

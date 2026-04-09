@@ -55,7 +55,7 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
     primaryDomain: readEnv("PRIMARY_DOMAIN"),
     contactEmail: readEnv("CONTACT_EMAIL") ?? "azenithliving@gmail.com",
     contactPhone: normalizePhoneNumber(readEnv("CONTACT_PHONE")) ?? "201090819584",
-    businessAddress: readEnv("BUSINESS_ADDRESS") ?? "al salam_cairo_egypt",
+    businessAddress: readEnv("BUSINESS_ADDRESS") ?? "السلام، القاهرة، مصر",
     logoPath: tenant?.logo ?? "/logo.png",
     faviconPath: "/favicon.png",
     primaryColor,

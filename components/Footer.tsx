@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { subscribeToNewsletter } from "@/app/actions/subscribeAction";
+import type { RuntimeConfig } from "@/lib/runtime-config";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -31,19 +32,24 @@ const columnVariants = {
   },
 };
 
-const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "azenithliving@gmail.com";
-const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || "201090819584";
-const officeAddress = process.env.NEXT_PUBLIC_OFFICE_ADDRESS || "al salam_cairo_egypt";
+type FooterProps = {
+  contactEmail?: RuntimeConfig["contactEmail"];
+  contactPhone?: RuntimeConfig["contactPhone"];
+  businessAddress?: RuntimeConfig["businessAddress"];
+};
 
-export default function Footer() {
+export default function Footer({ contactEmail, contactPhone, businessAddress }: FooterProps) {
   const [eliteEmail, setEliteEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const email = contactEmail ?? "azenithliving@gmail.com";
+  const phone = contactPhone ?? "201090819584";
+  const officeAddress = businessAddress ?? "السلام، القاهرة، مصر";
 
   const handleEliteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!eliteEmail.trim()) {
-      toast.error("Please enter your email address");
+      toast.error("أدخل بريدك الإلكتروني أولًا.");
       return;
     }
 
@@ -63,7 +69,7 @@ export default function Footer() {
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error("حدث خطأ غير متوقع. حاول مرة أخرى.");
       console.error("Newsletter subscription error:", error);
     } finally {
       setIsLoading(false);
@@ -168,7 +174,7 @@ export default function Footer() {
                 {isLoading ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#C5A059]/30 border-t-[#C5A059]" />
-                    Processing...
+                    جارٍ الإرسال...
                   </span>
                 ) : (
                   <>

@@ -3,6 +3,29 @@ import React, { useEffect, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 
+type SlideStat = {
+  label: string;
+  value: string;
+};
+
+export type VideoStateChangeDetail = {
+  currentIndex: number;
+  videoReady: boolean;
+  isExiting: boolean;
+  pillar: string;
+  poeticTitle: string;
+  subtitle: string;
+  stats: ReadonlyArray<SlideStat>;
+  cta: string;
+  ariaLabel: string;
+};
+
+declare global {
+  interface WindowEventMap {
+    videoStateChange: CustomEvent<VideoStateChangeDetail>;
+  }
+}
+
 export const slides = [
   {
     id: 1,
@@ -115,7 +138,7 @@ export default function AzenithLegacy() {
 
   useEffect(() => {
     const slide = slides[currentIndex];
-    const event = new CustomEvent("videoStateChange", {
+    const event = new CustomEvent<VideoStateChangeDetail>("videoStateChange", {
       detail: {
         currentIndex,
         videoReady: true,

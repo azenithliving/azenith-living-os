@@ -5,20 +5,16 @@ import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { slides } from "./AzenithLegacy";
 
-type HeroProps = {
-  runtimeConfig: any;
-};
-
 interface ManifestoState {
   pillar: string;
   poeticTitle: string;
   subtitle: string;
-  stats: Array<{ label: string; value: string }>;
+  stats: ReadonlyArray<{ label: string; value: string }>;
   cta: string;
   ariaLabel: string;
 }
 
-export default function Hero({ runtimeConfig }: HeroProps) {
+export default function Hero() {
   const initialSlide = slides[0];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -46,7 +42,7 @@ export default function Hero({ runtimeConfig }: HeroProps) {
   }, []);
 
   useEffect(() => {
-    const handleVideoStateChange = (event: CustomEvent) => {
+    const handleVideoStateChange = (event: WindowEventMap["videoStateChange"]) => {
       const { currentIndex: nextIndex, videoReady, isExiting: exiting, pillar, poeticTitle, subtitle, stats, cta, ariaLabel } = event.detail;
       setCurrentIndex(nextIndex);
       setIsVideoReady(videoReady);
@@ -64,9 +60,9 @@ export default function Hero({ runtimeConfig }: HeroProps) {
       }
     };
 
-    window.addEventListener("videoStateChange", handleVideoStateChange as EventListener);
+    window.addEventListener("videoStateChange", handleVideoStateChange);
     return () => {
-      window.removeEventListener("videoStateChange", handleVideoStateChange as EventListener);
+      window.removeEventListener("videoStateChange", handleVideoStateChange);
     };
   }, []);
 
@@ -120,7 +116,11 @@ export default function Hero({ runtimeConfig }: HeroProps) {
   const titleWords = manifestoState?.poeticTitle.split(" ") || [];
 
   return (
-    <section ref={containerRef} className="relative flex h-screen items-center justify-center overflow-hidden font-['GE_SS_Two','Cairo','sans-serif']">
+    <section
+      ref={containerRef}
+      aria-labelledby="hero-title"
+      className="relative flex h-screen items-center justify-center overflow-hidden font-['GE_SS_Two','Cairo','sans-serif']"
+    >
       <AnimatePresence mode="wait">
         {isVideoReady && !isExiting && manifestoState ? (
           <motion.div
@@ -138,11 +138,10 @@ export default function Hero({ runtimeConfig }: HeroProps) {
             className={`relative z-20 px-6 text-center md:px-24 ${isMobile ? "max-w-full" : "mx-auto max-w-6xl"}`}
             style={{ textShadow: "rgba(0,0,0,0.4) 0px 2px 4px" }}
           >
-            <h2
+            <h1
+              id="hero-title"
               className={`mb-8 font-serif font-bold leading-tight tracking-tight text-white md:mb-12 ${isMobile ? "text-2xl" : "text-4xl md:text-6xl"}`}
               aria-label={manifestoState.ariaLabel}
-              role="heading"
-              aria-level={1}
             >
               {titleWords.map((word, wordIndex) => (
                 <motion.span
@@ -162,7 +161,7 @@ export default function Hero({ runtimeConfig }: HeroProps) {
                   {word}
                 </motion.span>
               ))}
-            </h2>
+            </h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}

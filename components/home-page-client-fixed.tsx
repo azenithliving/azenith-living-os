@@ -23,6 +23,13 @@ type LandingRoom = {
   summary: string;
 };
 
+const STYLE_LABELS: Record<string, string> = {
+  modern: "مودرن",
+  classic: "كلاسيك",
+  industrial: "صناعي",
+  scandinavian: "سكاندينافي",
+};
+
 const ROOM_QUERIES: Record<string, string> = {
   "master-bedroom": "luxury master bedroom",
   "living-room": "modern living room",
@@ -244,8 +251,6 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { eyebrow: string; 
 export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
   const intent = useSessionStore((state) => state.intent);
   const updateProfile = useSessionStore((state) => state.updateProfile);
-  const processInteraction = useSessionStore((state) => state.processInteraction);
-  const leadScore = useSessionStore((state) => state.leadScore);
   const trackEvent = useSessionStore((state) => state.trackEvent);
   const roomType = useSessionStore((state) => state.roomType);
   const budget = useSessionStore((state) => state.budget);
@@ -256,7 +261,6 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
   const setSelectedStyle = useSessionStore((state) => state.setSelectedStyle);
   const styleSwitches = useSessionStore((state) => state.styleSwitches);
   const isHydrated = useSessionStore((state) => state.isHydrated);
-  const roomIntent = useSessionStore((state) => state.roomIntent);
 
   const [roomImages, setRoomImages] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -338,8 +342,9 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
   }, [displayStyle]);
 
   useEffect(() => {
+    const timers = timersRef.current;
+
     return () => {
-      const timers = timersRef.current;
       for (const [, timer] of timers) {
         window.clearTimeout(timer);
       }
@@ -396,7 +401,6 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
     trackEvent("page_view");
   }, [trackEvent, updateProfile]);
 
-  const isGoldenCTA = leadScore > 15;
   const primaryCtaText =
     styleSwitchCount > 3
       ? "حائر بين الستايلات؟ اطلب استشارة دمج مجانية"
@@ -412,6 +416,7 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
   const handlePrimaryClick = () => {
     trackEvent(intent === "buyer" && runtimeConfig.whatsappNumber ? "whatsapp_click" : "click_cta");
   };
+  const styleAltLabel = STYLE_LABELS[displayStyle] ?? displayStyle;
 
   return (
     <>
@@ -434,7 +439,7 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
                     <Image
                       key={`${displayStyle}-${room.slug}-${roomImages[room.slug] || "placeholder"}`}
                       src={roomImages[room.slug] || "/placeholder-room.jpg"}
-                      alt={room.title}
+                      alt={`${room.title} بتصميم ${styleAltLabel}`}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="absolute inset-0 object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -459,7 +464,7 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
                   <Image
                     key={`${displayStyle}-interior-design-${roomImages["interior-design"] || "placeholder"}`}
                     src={roomImages["interior-design"] || "/placeholder-room.jpg"}
-                    alt="Interior design"
+                    alt={`تصميم داخلي شامل بأسلوب ${styleAltLabel}`}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="absolute inset-0 object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -578,7 +583,11 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
         </Link>
       </div>
 
-      <Footer />
+      <Footer
+        contactEmail={runtimeConfig.contactEmail}
+        contactPhone={runtimeConfig.contactPhone}
+        businessAddress={runtimeConfig.businessAddress}
+      />
     </>
   );
 }
