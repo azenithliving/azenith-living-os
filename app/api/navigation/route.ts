@@ -4,6 +4,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
     const { searchParams } = new URL(request.url);
     const tenantId = searchParams.get('tenantId');
 
