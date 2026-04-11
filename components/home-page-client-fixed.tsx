@@ -60,72 +60,97 @@ const STYLE_RESULT_PAGE: Record<string, number> = {
   scandinavian: 4,
 };
 
+// 15 Interior Sections matching database/CMS slugs exactly
 const BASE_ROOMS: LandingRoom[] = [
-  {
-    slug: "master-bedroom",
-    eyebrow: "خصوصية ملكية",
-    title: "غرف النوم الرئيسية",
-    summary: "ملاذ هادئ يجمع بين الفخامة الفندقية والراحة الشخصية بتفاصيل متقنة.",
-  },
-  {
-    slug: "children-room",
-    eyebrow: "أحلام صغيرة",
-    title: "غرف الأطفال",
-    summary: "مساحة آمنة ومبهجة تنمو مع طفلك، تجمع بين المرح والوظيفة.",
-  },
-  {
-    slug: "teen-room",
-    eyebrow: "شخصية ناشئة",
-    title: "غرف المراهقين",
-    summary: "تصميم يناسب مرحلة النضج مع مساحات للدراسة والتعبير الذاتي.",
-  },
   {
     slug: "living-room",
     eyebrow: "استقبال بثقة",
-    title: "غرف المعيشة",
+    title: "غرفة المعيشة",
     summary: "جلسات مدروسة بصريًا لاستقبال الضيوف ولحظات عائلية لا تُنسى.",
   },
   {
     slug: "dining-room",
     eyebrow: "ولائم عائلية",
-    title: "غرف الطعام",
+    title: "غرفة الطعام",
     summary: "تجارب طعام مريحة بأناقة دافئة تناسب كل مناسبة.",
+  },
+  {
+    slug: "kitchen",
+    eyebrow: "فن الطهي",
+    title: "المطبخ",
+    summary: "مساحة عمل أنيقة تجمع بين الوظيفة والجمال لتجربة طهي فاخرة.",
+  },
+  {
+    slug: "master-bedroom",
+    eyebrow: "خصوصية ملكية",
+    title: "غرفة النوم الرئيسية",
+    summary: "ملاذ هادئ يجمع بين الفخامة الفندقية والراحة الشخصية بتفاصيل متقنة.",
+  },
+  {
+    slug: "guest-bedroom",
+    eyebrow: "ضيافة أنيقة",
+    title: "غرفة نوم الضيوف",
+    summary: "راحة فاخرة لضيوفك مع تصميم دافئ يلائم كل الأذواق.",
+  },
+  {
+    slug: "kids-bedroom",
+    eyebrow: "أحلام صغيرة",
+    title: "غرفة الأطفال",
+    summary: "مساحة آمنة ومبهجة تنمو مع طفلك، تجمع بين المرح والوظيفة.",
+  },
+  {
+    slug: "teen-room",
+    eyebrow: "شخصية ناشئة",
+    title: "غرفة المراهقين",
+    summary: "تصميم يناسب مرحلة النضج مع مساحات للدراسة والتعبير الذاتي.",
+  },
+  {
+    slug: "dressing-room",
+    eyebrow: "تنظيم فاخر",
+    title: "غرفة الملابس",
+    summary: "تجربة ملابس يومية أنيقة بتقسيم ذكي وإضاءة مثالية.",
+  },
+  {
+    slug: "home-office",
+    eyebrow: "إنتاجية متقنة",
+    title: "مكتب المنزل",
+    summary: "بيئة عمل محفزة تحافظ على التوازن بين المهنية والراحة المنزلية.",
+  },
+  {
+    slug: "study-room",
+    eyebrow: "تركيز وهدوء",
+    title: "غرفة الدراسة",
+    summary: "بيئة مثالية للقراءة والتعلم بعيدًا عن المشتتات.",
+  },
+  {
+    slug: "bathroom",
+    eyebrow: "رفاهية يومية",
+    title: "الحمام",
+    summary: "تصميم حمامات فاخرة تجمع بين الوظيفة والاسترخاء.",
+  },
+  {
+    slug: "guest-bathroom",
+    eyebrow: "ضيافة مثالية",
+    title: "حمام الضيوف",
+    summary: "أناقة عملية لحمام الضيوف مع لمسات فاخرة.",
+  },
+  {
+    slug: "entrance-lobby",
+    eyebrow: "انطباع أول",
+    title: "المدخل",
+    summary: "مدخل مهيب يعكس أناقة منزلك من أول خطوة.",
   },
   {
     slug: "corner-sofa",
     eyebrow: "راحة مطلقة",
-    title: "الكنب الزاوية",
+    title: "كنب الزاوية",
     summary: "قطع مفروشات فاخرة تضيف لمسة عصرية ومساحة جلوس واسعة.",
   },
   {
     slug: "lounge",
     eyebrow: "استرخاء أنيق",
-    title: "اللاونج",
+    title: "الاستراحة",
     summary: "زاوية خاصة للاسترخاء والقراءة بلمسات أنيقة وخامات ناعمة.",
-  },
-  {
-    slug: "dressing-room",
-    eyebrow: "تنظيم فاخر",
-    title: "غرف الملابس",
-    summary: "تجربة ملابس يومية أنيقة بتقسيم ذكي وإضاءة مثالية.",
-  },
-  {
-    slug: "kitchen",
-    eyebrow: "فن الطهي",
-    title: "المطابخ",
-    summary: "مساحة عمل أنيقة تجمع بين الوظيفة والجمال لتجربة طهي فاخرة.",
-  },
-  {
-    slug: "home-office",
-    eyebrow: "إنتاجية متقنة",
-    title: "المكاتب المنزلية",
-    summary: "بيئة عمل محفزة تحافظ على التوازن بين المهنية والراحة المنزلية.",
-  },
-  {
-    slug: "interior-design",
-    eyebrow: "رؤية متكاملة",
-    title: "التصميم الداخلي الشامل",
-    summary: "تجربة تصميم متناسقة للمنزل بالكامل بلغة بصرية موحدة.",
   },
 ];
 
@@ -524,7 +549,34 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
       setLoading(true);
 
       try {
+        // Step 1: Try to fetch CMS images from database first
+        let cmsImages: Record<string, string> = {};
+        try {
+          const cmsRes = await fetch('/api/room-sections', {
+            signal: controller.signal,
+          });
+          if (cmsRes.ok) {
+            const cmsData = await cmsRes.json();
+            if (cmsData.sections) {
+              cmsData.sections.forEach((section: { slug: string; cmsImageUrl: string | null }) => {
+                if (section.cmsImageUrl) {
+                  cmsImages[section.slug] = section.cmsImageUrl;
+                }
+              });
+            }
+          }
+        } catch (cmsError) {
+          console.warn('[CMS] Failed to fetch CMS images, falling back to Pexels:', cmsError);
+        }
+
+        // Step 2: For rooms without CMS images, fetch from Pexels API
         const imagePromises = roomList.map(async (room, index) => {
+          // If CMS image exists, use it
+          if (cmsImages[room.slug]) {
+            return { [room.slug]: cmsImages[room.slug] };
+          }
+
+          // Otherwise, fall back to Pexels API
           try {
             const query = `${STYLE_QUERY_HINTS[displayStyle] || displayStyle} luxury interior design ${ROOM_QUERIES[room.slug] || room.title}`;
             const randomPage = Math.floor(Math.random() * 5) + 1;
@@ -591,7 +643,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
             </div>
 
             <div className="relative z-20 grid grid-cols-1 gap-10 bg-transparent md:grid-cols-2 lg:grid-cols-3">
-              {roomList.slice(0, 6).map((room, index) => (
+              {roomList.map((room, index) => (
                 <div key={room.slug} className="group relative z-20">
                   <Link
                     href={`/room/${room.slug}?style=${displayStyle}`}
