@@ -23,9 +23,12 @@ interface SessionData {
 
 /**
  * Generate secure device fingerprint
+ * Uses only client-provided data (userAgent + IP) - server secret is NOT used
  */
 function generateDeviceFingerprint(userAgent: string, ip: string): string {
-  const data = `${userAgent}:${ip}:${process.env.VAULT_MASTER_KEY}`;
+  // IMPORTANT: Never include server secrets like VAULT_MASTER_KEY here
+  // This data is used for device recognition, not cryptographic security
+  const data = `${userAgent}:${ip}`;
   return createHash("sha256").update(data).digest("hex").slice(0, 32);
 }
 
@@ -92,14 +95,14 @@ export async function createSession(
     path: "/admin-gate",
   });
   
-  // Set device cookie (for trusted device recognition, non-HttpOnly for JS access)
+  // Set device cookie (HttpOnly, Secure, SameSite=Strict for security)
   if (isTrustedDevice) {
     await cookieStore.set({
       name: TRUSTED_DEVICE_COOKIE_NAME,
       value: deviceId,
-      httpOnly: false, // Allow JavaScript to check for device
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      httpOnly: true, // Prevent JavaScript access - XSS protection
+      secure: true, // Always require HTTPS
+      sameSite: "strict", // CSRF protection
       expires: expiresAt,
       path: "/",
     });

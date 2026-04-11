@@ -6,6 +6,7 @@ import { classifyIntent } from "@/lib/conversion-engine";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { getTenantByHost } from "@/lib/tenant";
 import { processAutomation } from "@/lib/automation";
+import { fireAndForget } from "@/lib/background-processor";
 
 export const leadSubmissionSchema = z.object({
   sessionId: z.string().min(1),
@@ -74,19 +75,23 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
       throw new Error(`Failed to create user session: ${insertUserError.message}`);
     }
 
-    // Trigger automation for new lead
-    await processAutomation({
-      type: "lead_created",
-      leadId: userId,
-      leadData: {
-        score: payload.score,
-        intent,
-        roomType: payload.roomType,
-        budget: payload.budget,
-        style: payload.style,
-        serviceType: payload.serviceType
-      }
-    });
+    // Trigger automation for new lead - ASYNC (non-blocking)
+    fireAndForget(
+      () => processAutomation({
+        type: "lead_created",
+        leadId: userId,
+        leadData: {
+          score: payload.score,
+          intent,
+          roomType: payload.roomType,
+          budget: payload.budget,
+          style: payload.style,
+          serviceType: payload.serviceType,
+          isDiamond: payload.score >= 60, // Flag for Diamond leads
+        }
+      }),
+      (error) => console.error("[Leads] Automation error (new lead):", error)
+    );
   } else {
     // Update existing user with new session data
     const { error: updateUserError } = await supabase
@@ -106,19 +111,23 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
       throw new Error(`Failed to update user session: ${updateUserError.message}`);
     }
 
-    // Trigger automation for updated lead
-    await processAutomation({
-      type: "lead_updated",
-      leadId: userId,
-      leadData: {
-        score: payload.score,
-        intent,
-        roomType: payload.roomType,
-        budget: payload.budget,
-        style: payload.style,
-        serviceType: payload.serviceType
-      }
-    });
+    // Trigger automation for updated lead - ASYNC (non-blocking)
+    fireAndForget(
+      () => processAutomation({
+        type: "lead_updated",
+        leadId: userId,
+        leadData: {
+          score: payload.score,
+          intent,
+          roomType: payload.roomType,
+          budget: payload.budget,
+          style: payload.style,
+          serviceType: payload.serviceType,
+          isDiamond: payload.score >= 60, // Flag for Diamond leads
+        }
+      }),
+      (error) => console.error("[Leads] Automation error (updated lead):", error)
+    );
   }
 
   const requestId = crypto.randomUUID();

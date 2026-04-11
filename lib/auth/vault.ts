@@ -17,14 +17,15 @@ const IV_LENGTH = 16;
 const AUTH_TAG_LENGTH = 16;
 const KEY_LENGTH = 32;
 
-// Get encryption key from environment
+// Get encryption key from environment - server-only, never exposed to client
 function getEncryptionKey(): Buffer {
   const key = process.env.VAULT_MASTER_KEY;
   if (!key) {
-    throw new Error("VAULT_MASTER_KEY not configured");
+    throw new Error("System Configuration Error");
   }
-  // Derive 32-byte key using PBKDF2
-  return pbkdf2Sync(key, "azenith_sovereign_salt", 100000, KEY_LENGTH, "sha256");
+  // Derive 32-byte key using PBKDF2 with server-only salt
+  const salt = process.env.VAULT_ENCRYPTION_SALT || "azenith_sovereign_salt";
+  return pbkdf2Sync(key, salt, 100000, KEY_LENGTH, "sha256");
 }
 
 /**
@@ -98,7 +99,7 @@ export async function initializeVault(adminId: string): Promise<{
   encryptedCodes: string;
 }> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("System Configuration Error");
   
   // Generate recovery codes
   const recoveryCodes = generateRecoveryCodes();
@@ -141,7 +142,7 @@ export async function initializeVault(adminId: string): Promise<{
  */
 export async function verifyRecoveryCode(adminId: string, code: string): Promise<boolean> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("System Configuration Error");
   
   const { data: vault } = await supabase
     .from("recovery_vault")
@@ -191,7 +192,7 @@ export async function addTrustedDevice(
   device: TrustedDevice
 ): Promise<void> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("System Configuration Error");
   
   const { data } = await supabase
     .from("recovery_vault")
@@ -229,7 +230,7 @@ export async function verifyTrustedDevice(
   fingerprint: string
 ): Promise<boolean> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("System Configuration Error");
   
   const { data } = await supabase
     .from("recovery_vault")
@@ -252,7 +253,7 @@ export async function verifyTrustedDevice(
  */
 export async function revokeAllDevices(adminId: string): Promise<void> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("System Configuration Error");
   
   await supabase
     .from("recovery_vault")
@@ -293,7 +294,7 @@ async function logAuditEvent(
   payload: Record<string, unknown>
 ): Promise<void> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("System Configuration Error");
   
   await supabase.from("sovereign_audit_logs").insert({
     actor_id: actorId,
@@ -310,7 +311,7 @@ async function logAuditEvent(
  */
 export async function hasVault(adminId: string): Promise<boolean> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("System Configuration Error");
   
   const { count } = await supabase
     .from("recovery_vault")
@@ -325,7 +326,7 @@ export async function hasVault(adminId: string): Promise<boolean> {
  */
 export async function getRemainingRecoveryCodes(adminId: string): Promise<number> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("System Configuration Error");
   
   const { data } = await supabase
     .from("recovery_vault")

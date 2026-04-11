@@ -1,6 +1,6 @@
 import { getSupabaseAdminClient } from "./supabase-admin";
 import { getCurrentTenant } from "./tenant";
-import { notifyDiamondLead } from "./whatsapp-dossier";
+import { notifyDiamondLead, notifyDiamondLeadAsync } from "./whatsapp-dossier";
 
 export interface AutomationTrigger {
   type: "booking_status_changed" | "lead_created" | "lead_updated";
@@ -267,15 +267,11 @@ async function sendWhatsAppMessage(
     if (tenant.whatsapp && trigger.leadData?.isDiamond) {
       console.log(`[Automation] 🚨 DIAMOND LEAD ALERT to Admin ${tenant.whatsapp}: ${message}`);
       console.log(`[Automation] Lead Details: ${user.full_name} | Score: ${user.score} | Scope: ${trigger.leadData?.scope}`);
-      
-      // Trigger full WhatsApp dossier for Diamond leads
-      console.log(`[Automation] Triggering notifyDiamondLead for lead ${trigger.leadId}`);
-      const result = await notifyDiamondLead(trigger.leadId, tenant.id, tenant.whatsapp);
-      if (result.success) {
-        console.log(`[Automation] ✅ WhatsApp dossier sent successfully`);
-      } else {
-        console.error(`[Automation] ❌ Failed to send WhatsApp dossier:`, result.error);
-      }
+
+      // Trigger full WhatsApp dossier for Diamond leads - ASYNC (non-blocking)
+      console.log(`[Automation] Triggering notifyDiamondLeadAsync for lead ${trigger.leadId}`);
+      notifyDiamondLeadAsync(trigger.leadId, tenant.id, tenant.whatsapp);
+      console.log(`[Automation] ✅ WhatsApp dossier queued for background processing`);
     }
   }
   // Handle booking_status_changed trigger

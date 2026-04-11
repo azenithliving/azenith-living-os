@@ -1,7 +1,17 @@
 import "server-only";
 
 import { askOpenRouter } from "@/lib/ai-orchestrator";
+import { executeWithTimeout, fireAndForget, createBackgroundTask } from "@/lib/background-processor";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+
+// Default StyleDNA for immediate response
+const DEFAULT_STYLE_DNA: StyleDNA = {
+  dominantStyles: ["modern-luxury"],
+  colorPalette: ["neutral", "gold-accents"],
+  materials: ["marble", "wood"],
+  moodKeywords: ["elegant", "sophisticated"],
+  complexity: "balanced",
+};
 
 /**
  * Azenith Semantic PDF Inspiration Engine
@@ -40,19 +50,10 @@ export type LeadDossier = {
 };
 
 /**
- * Analyze Style DNA from viewed images using Claude 3.5
+ * Core AI analysis function - internal use only
+ * Performs the actual AI API call for Style DNA analysis
  */
-export async function analyzeStyleDNA(imageUrls: string[]): Promise<StyleDNA> {
-  if (imageUrls.length === 0) {
-    return {
-      dominantStyles: ["modern-luxury"],
-      colorPalette: ["neutral", "gold-accents"],
-      materials: ["marble", "wood"],
-      moodKeywords: ["elegant", "sophisticated"],
-      complexity: "balanced",
-    };
-  }
-
+async function performStyleDNAAnalysis(imageUrls: string[]): Promise<StyleDNA> {
   const prompt = `Analyze these interior design images and extract the "Style DNA":
 
 Viewed Images: ${imageUrls.slice(0, 5).join(", ")}
@@ -73,37 +74,106 @@ Return ONLY valid JSON, no markdown formatting.`;
   });
 
   if (!result.success) {
-    console.error("[StyleDNA] Analysis failed:", result.error);
-    return {
-      dominantStyles: ["modern-luxury"],
-      colorPalette: ["neutral", "gold-accents"],
-      materials: ["marble", "wood"],
-      moodKeywords: ["elegant", "sophisticated"],
-      complexity: "balanced",
-    };
+    throw new Error(result.error || "AI analysis failed");
+  }
+
+  const cleaned = result.content.replace(/```json\n?|```\n?/g, "").trim();
+  const parsed = JSON.parse(cleaned);
+
+  return {
+    dominantStyles: parsed.dominantStyles || DEFAULT_STYLE_DNA.dominantStyles,
+    colorPalette: parsed.colorPalette || DEFAULT_STYLE_DNA.colorPalette,
+    materials: parsed.materials || DEFAULT_STYLE_DNA.materials,
+    moodKeywords: parsed.moodKeywords || DEFAULT_STYLE_DNA.moodKeywords,
+    complexity: parsed.complexity || DEFAULT_STYLE_DNA.complexity,
+  };
+}
+
+/**
+ * Analyze Style DNA from viewed images using Claude 3.5
+ * SYNCHRONOUS VERSION - Blocks until complete (may take 5-10s)
+ * Use for background processing only
+ */
+export async function analyzeStyleDNA(imageUrls: string[]): Promise<StyleDNA> {
+  if (imageUrls.length === 0) {
+    return { ...DEFAULT_STYLE_DNA };
   }
 
   try {
-    const cleaned = result.content.replace(/```json\n?|```\n?/g, "").trim();
-    const parsed = JSON.parse(cleaned);
-    
-    return {
-      dominantStyles: parsed.dominantStyles || ["modern-luxury"],
-      colorPalette: parsed.colorPalette || ["neutral", "gold-accents"],
-      materials: parsed.materials || ["marble", "wood"],
-      moodKeywords: parsed.moodKeywords || ["elegant", "sophisticated"],
-      complexity: parsed.complexity || "balanced",
-    };
-  } catch (e) {
-    console.error("[StyleDNA] JSON parse failed:", e);
-    return {
-      dominantStyles: ["modern-luxury"],
-      colorPalette: ["neutral", "gold-accents"],
-      materials: ["marble", "wood"],
-      moodKeywords: ["elegant", "sophisticated"],
-      complexity: "balanced",
-    };
+    return await performStyleDNAAnalysis(imageUrls);
+  } catch (error) {
+    console.error("[StyleDNA] Analysis failed:", error);
+    return { ...DEFAULT_STYLE_DNA };
   }
+}
+
+/**
+ * Analyze Style DNA with 2-second timeout
+ * NON-BLOCKING VERSION - Returns immediately with default or processing status
+ * If AI takes >2s, returns default and processes in background
+ */
+export async function analyzeStyleDNAFast(
+  imageUrls: string[],
+  options?: {
+    userId?: string;
+    tenantId?: string;
+    onComplete?: (result: StyleDNA) => void;
+  }
+): Promise<{ styleDNA: StyleDNA; status: "complete" | "processing" }> {
+  if (imageUrls.length === 0) {
+    return { styleDNA: { ...DEFAULT_STYLE_DNA }, status: "complete" };
+  }
+
+  // Try to get result within 2 seconds
+  const { result, timedOut, error } = await executeWithTimeout(
+    () => performStyleDNAAnalysis(imageUrls),
+    2000 // 2 second timeout
+  );
+
+  // If completed within timeout, return the result
+  if (!timedOut && result) {
+    return { styleDNA: result, status: "complete" };
+  }
+
+  // If timed out or errored, trigger background processing and return default
+  if (timedOut) {
+    console.log("[StyleDNA] Analysis timed out (>2s), processing in background...");
+
+    // Fire-and-forget background processing
+    fireAndForget(async () => {
+      try {
+        const backgroundResult = await performStyleDNAAnalysis(imageUrls);
+
+        // Store result for later retrieval
+        const supabase = getSupabaseAdminClient();
+        if (supabase && options?.userId) {
+          await supabase.from("events").insert({
+            id: crypto.randomUUID(),
+            company_id: options.tenantId || "system",
+            user_id: options.userId,
+            type: "style_dna_completed",
+            value: "completed",
+            metadata: {
+              styleDNA: backgroundResult,
+              imageCount: imageUrls.length,
+            },
+          });
+        }
+
+        // Call completion callback if provided
+        if (options?.onComplete) {
+          options.onComplete(backgroundResult);
+        }
+
+        console.log("[StyleDNA] Background analysis completed");
+      } catch (bgError) {
+        console.error("[StyleDNA] Background analysis failed:", bgError);
+      }
+    });
+  }
+
+  // Return default DNA immediately (non-blocking)
+  return { styleDNA: { ...DEFAULT_STYLE_DNA }, status: "processing" };
 }
 
 /**

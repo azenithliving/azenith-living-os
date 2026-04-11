@@ -1,7 +1,8 @@
 import "server-only";
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-import { analyzeStyleDNA, LeadDossier, StyleDNA } from "@/lib/pdf-generator";
+import { analyzeStyleDNAFast, LeadDossier, StyleDNA } from "@/lib/pdf-generator";
+import { fireAndForget } from "@/lib/background-processor";
 
 /**
  * WhatsApp Lead Dossier System
@@ -115,10 +116,19 @@ export async function buildLeadDossier(leadId: string, tenantId: string): Promis
     priority = "medium";
   }
 
-  // Analyze Style DNA if images available
+  // Analyze Style DNA with 2s timeout - non-blocking
+  // Returns default immediately if AI takes too long, processes in background
   let styleDNA: StyleDNA;
   if (viewedImages.length > 0) {
-    styleDNA = await analyzeStyleDNA(viewedImages);
+    const { styleDNA: fastResult, status } = await analyzeStyleDNAFast(viewedImages, {
+      userId: leadId,
+      tenantId: tenantId,
+    });
+    styleDNA = fastResult;
+
+    if (status === "processing") {
+      console.log(`[WhatsAppDossier] StyleDNA analysis processing in background for lead ${leadId}`);
+    }
   } else {
     styleDNA = {
       dominantStyles: user.style ? [user.style] : ["modern-luxury"],
@@ -296,6 +306,7 @@ export async function sendWhatsAppDossier(
 
 /**
  * Auto-trigger WhatsApp for Diamond leads
+ * SYNCHRONOUS VERSION - Blocks until complete
  */
 export async function notifyDiamondLead(
   leadId: string,
@@ -313,4 +324,27 @@ export async function notifyDiamondLead(
   }
 
   return sendWhatsAppDossier(dossier, adminPhone, tenantId);
+}
+
+/**
+ * Auto-trigger WhatsApp for Diamond leads - ASYNC VERSION
+ * Non-blocking: Creates background task and returns immediately
+ * Perfect for API endpoints that need <500ms response times
+ */
+export function notifyDiamondLeadAsync(
+  leadId: string,
+  tenantId: string,
+  adminPhone: string
+): void {
+  // Fire-and-forget pattern - don't await, don't block
+  fireAndForget(async () => {
+    const result = await notifyDiamondLead(leadId, tenantId, adminPhone);
+    if (result.success) {
+      console.log(`[notifyDiamondLeadAsync] ✅ Diamond lead notification sent for ${leadId}`);
+    } else {
+      console.error(`[notifyDiamondLeadAsync] ❌ Failed for ${leadId}:`, result.error);
+    }
+  }, (error) => {
+    console.error(`[notifyDiamondLeadAsync] Critical error for ${leadId}:`, error);
+  });
 }

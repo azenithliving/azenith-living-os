@@ -136,9 +136,10 @@ const DEFAULT_STYLE = "modern";
 const UPDATE_THROTTLE_MS = 500; // 500ms throttle for store updates
 
 // Throttle utility for store updates
+// Uses ReturnType<typeof setTimeout> for browser+Node.js compatibility
 let lastUpdateTime = 0;
 let pendingUpdate: (() => void) | null = null;
-let throttleTimer: NodeJS.Timeout | null = null;
+let throttleTimer: ReturnType<typeof setTimeout> | null = null;
 
 function throttledSet(setFn: () => void) {
   const now = Date.now();

@@ -6,6 +6,7 @@ import {
   initializeVault,
 } from "@/lib/auth/vault";
 import { createSession } from "@/lib/auth/session";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 /**
  * POST /api/auth/recovery - Verify recovery code
@@ -35,14 +36,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Get adminId from email lookup in Supabase Auth
-    // For now, we need the adminId to verify the code
+    // Get adminId from email lookup in Supabase Auth
     const adminId = await getAdminIdByEmail(email);
 
     if (!adminId) {
+      // Return generic error to prevent account enumeration
       return NextResponse.json(
-        { error: "Account not found" },
-        { status: 404 }
+        { error: "Invalid credentials" },
+        { status: 401 }
       );
     }
 
@@ -126,7 +127,8 @@ export async function GET(request: NextRequest) {
     const adminId = await getAdminIdByEmail(email);
 
     if (!adminId) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+      // Return generic error to prevent account enumeration
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
     const remaining = await getRemainingRecoveryCodes(adminId);
@@ -147,13 +149,33 @@ export async function GET(request: NextRequest) {
 
 /**
  * Helper: Get adminId from email via Supabase Auth
+ * Performs lookup in auth.users table via admin client
  */
 async function getAdminIdByEmail(email: string): Promise<string | null> {
-  // TODO: Implement proper lookup via Supabase Auth
-  // This should query the auth.users table or your user mapping table
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    throw new Error("System Configuration Error");
+  }
 
-  // Placeholder: For testing, return a consistent ID based on email hash
-  const { createHash } = await import("crypto");
-  const hash = createHash("sha256").update(email).digest("hex").slice(0, 32);
-  return `admin-${hash}`;
+  // Query auth.users table for the user by email
+  const { data, error } = await supabase
+    .from("admin_profiles")
+    .select("id")
+    .eq("email", email.toLowerCase().trim())
+    .single();
+
+  if (error || !data) {
+    // Also check auth.users as fallback
+    const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+    
+    if (authError) {
+      console.error("[Recovery] Error querying auth users:", authError);
+      return null;
+    }
+
+    const user = authData?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase().trim());
+    return user?.id || null;
+  }
+
+  return data.id;
 }

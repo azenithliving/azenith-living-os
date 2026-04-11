@@ -31,5 +31,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/admin-gate/:path*",
+    "/elite/:path*",
   ],
 };
