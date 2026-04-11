@@ -4,6 +4,10 @@ import Hero from "@/components/Hero";
 import HomePageClient from "@/components/home-page-client-fixed";
 import { getRuntimeConfig } from "@/lib/runtime-config";
 
+// Force dynamic rendering to prevent static generation timeout
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Server-side room image fetching for initial load
 async function fetchInitialRoomImages() {
   const roomQueries: Record<string, string> = {

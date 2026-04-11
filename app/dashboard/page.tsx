@@ -112,10 +112,10 @@ export default async function Dashboard() {
           <div className="space-y-3">
             {snapshot.leads.length === 0 ? <p className="text-sm text-white/55">لا توجد Leads محفوظة بعد.</p> : snapshot.leads.map((lead) => (
               <div key={lead.id} className="grid gap-3 rounded-[1.5rem] border border-white/8 bg-[#111112] px-4 py-4 text-sm text-white/72 md:grid-cols-[1.2fr_0.9fr_0.6fr_0.8fr]">
-                <span>{lead.roomType}</span>
-                <span>{lead.serviceType}</span>
+                <span>{lead.fullName}</span>
+                <span>{lead.scope}</span>
                 <span>Score: {lead.score}</span>
-                <span>{lead.intent}</span>
+                <span>{lead.tier}</span>
               </div>
             ))}
           </div>

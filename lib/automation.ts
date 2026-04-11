@@ -1,5 +1,6 @@
 import { getSupabaseAdminClient } from "./supabase-admin";
 import { getCurrentTenant } from "./tenant";
+import { notifyDiamondLead } from "./whatsapp-dossier";
 
 export interface AutomationTrigger {
   type: "booking_status_changed" | "lead_created" | "lead_updated";
@@ -74,6 +75,17 @@ async function getDefaultAutomationRules(): Promise<AutomationRule[]> {
       actions: [{
         type: "send_whatsapp",
         message: "نعتذر، لم نتمكن من قبول حجزك حالياً. سنتواصل معك لمناقشة البدائل."
+      }],
+      enabled: true
+    },
+    {
+      id: "diamond_lead_whatsapp",
+      name: "إشعار Lead ماسي جديد - أولوية عالية",
+      trigger: "lead_created",
+      conditions: { isDiamond: true },
+      actions: [{
+        type: "send_whatsapp",
+        message: "🚨 LEAD MASI: New high-value inquiry received! Check dashboard immediately for details."
       }],
       enabled: true
     },
@@ -216,32 +228,90 @@ async function sendWhatsAppMessage(
   trigger: AutomationTrigger,
   tenant: { id: string; whatsapp: string; name: string }
 ) {
-  // Get booking details including phone number
   const supabase = getSupabaseAdminClient();
-
-  // Get booking request details
-  const { data: request } = await supabase
-    .from("requests")
-    .select("user_id")
-    .eq("id", trigger.bookingId)
-    .eq("company_id", tenant.id)
-    .single();
-
-  if (!request) return;
-
-  // Get user session data and events for phone number
-  const { data: events } = await supabase
-    .from("events")
-    .select("metadata")
-    .eq("company_id", tenant.id)
-    .eq("type", "booking_request")
-    .eq("metadata->>requestId", trigger.bookingId);
-
-  const event = events?.[0];
-  if (!event?.metadata?.phone) return;
-
-  const phoneNumber = event.metadata.phone;
   const message = action.message;
+  let userId: string | null = null;
+  let phoneNumber: string | null = null;
+  let metadata: Record<string, unknown> = {};
+
+  // Handle lead_created trigger
+  if (trigger.type === "lead_created" && trigger.leadId) {
+    // Get lead details from users table
+    const { data: user } = await supabase
+      .from("users")
+      .select("id, phone, full_name, score, tier")
+      .eq("id", trigger.leadId)
+      .eq("company_id", tenant.id)
+      .single();
+
+    if (!user?.phone) {
+      console.log("[Automation] No phone number for lead:", trigger.leadId);
+      return;
+    }
+
+    userId = user.id;
+    phoneNumber = user.phone;
+    metadata = {
+      leadId: trigger.leadId,
+      leadName: user.full_name,
+      leadScore: user.score,
+      leadTier: user.tier,
+      isDiamond: trigger.leadData?.isDiamond,
+      scope: trigger.leadData?.scope,
+      budget: trigger.leadData?.budget,
+    };
+
+    // Send to admin WhatsApp number for Diamond leads
+    if (tenant.whatsapp && trigger.leadData?.isDiamond) {
+      console.log(`[Automation] 🚨 DIAMOND LEAD ALERT to Admin ${tenant.whatsapp}: ${message}`);
+      console.log(`[Automation] Lead Details: ${user.full_name} | Score: ${user.score} | Scope: ${trigger.leadData?.scope}`);
+      
+      // Trigger full WhatsApp dossier for Diamond leads
+      console.log(`[Automation] Triggering notifyDiamondLead for lead ${trigger.leadId}`);
+      const result = await notifyDiamondLead(trigger.leadId, tenant.id, tenant.whatsapp);
+      if (result.success) {
+        console.log(`[Automation] ✅ WhatsApp dossier sent successfully`);
+      } else {
+        console.error(`[Automation] ❌ Failed to send WhatsApp dossier:`, result.error);
+      }
+    }
+  }
+  // Handle booking_status_changed trigger
+  else if (trigger.bookingId) {
+    // Get booking request details
+    const { data: request } = await supabase
+      .from("requests")
+      .select("user_id")
+      .eq("id", trigger.bookingId)
+      .eq("company_id", tenant.id)
+      .single();
+
+    if (!request) return;
+
+    // Get user session data and events for phone number
+    const { data: events } = await supabase
+      .from("events")
+      .select("metadata")
+      .eq("company_id", tenant.id)
+      .eq("type", "booking_request")
+      .eq("metadata->>requestId", trigger.bookingId);
+
+    const event = events?.[0];
+    if (!event?.metadata?.phone) return;
+
+    userId = request.user_id;
+    phoneNumber = event.metadata.phone;
+    metadata = {
+      bookingId: trigger.bookingId,
+      oldStatus: trigger.oldStatus,
+      newStatus: trigger.newStatus,
+    };
+  }
+
+  if (!phoneNumber || !userId) {
+    console.log("[Automation] Missing phone or user ID, skipping WhatsApp");
+    return;
+  }
 
   // Log the automation action
   // Note: In production, integrate with WhatsApp Business API to send actual messages
@@ -252,16 +322,14 @@ async function sendWhatsAppMessage(
     .from("events")
     .insert({
       company_id: tenant.id,
-      user_id: request.user_id,
+      user_id: userId,
       type: "automation_whatsapp_sent",
       value: "notification",
       metadata: {
-        bookingId: trigger.bookingId,
         message: message,
         phoneNumber: phoneNumber,
         trigger: trigger.type,
-        oldStatus: trigger.oldStatus,
-        newStatus: trigger.newStatus
+        ...metadata,
       }
     });
 }

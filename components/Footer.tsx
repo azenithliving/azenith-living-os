@@ -164,13 +164,11 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
                   placeholder="أدخل بريدك الإلكتروني"
                   className="w-full border-0 border-b border-[#C5A059]/30 bg-transparent px-0 py-3 text-sm font-light text-white transition-all duration-500 placeholder:font-light placeholder:text-gray-600 focus:border-[#C5A059] focus:outline-none"
                   required
-                  suppressHydrationWarning
-                />
+                                  />
               </div>
               <button
                 type="submit"
                 disabled={isLoading}
-                suppressHydrationWarning
                 className="group flex w-full items-center justify-center gap-2 border border-[#C5A059] px-6 py-4 text-xs font-light uppercase tracking-widest text-[#C5A059] transition-all duration-500 hover:bg-[#C5A059] hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isLoading ? (

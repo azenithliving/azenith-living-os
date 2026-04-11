@@ -5,14 +5,32 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LanguageSwitcher } from "./elite/LanguageSwitcher";
+import type { Language } from "@/lib/multilingual-engine";
 
 const SOVEREIGN_ACCESS_KEY = "sovereign_access";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [clickCount, setClickCount] = useState(0);
+  const [currentLang, setCurrentLang] = useState<Language>("ar");
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
+
+  // Load saved language preference on mount
+  useEffect(() => {
+    const savedLang = localStorage.getItem("azenith-language") as Language;
+    if (savedLang && (savedLang === "ar" || savedLang === "en")) {
+      setCurrentLang(savedLang);
+    }
+  }, []);
+
+  const handleLanguageChange = (lang: Language) => {
+    setCurrentLang(lang);
+    localStorage.setItem("azenith-language", lang);
+    // Dispatch custom event for other components to listen
+    window.dispatchEvent(new CustomEvent("languagechange", { detail: lang }));
+  };
 
   useEffect(() => {
     return () => {
@@ -55,7 +73,7 @@ export default function Header() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="fixed left-0 top-0 z-[100] flex h-20 w-full items-center justify-between overflow-visible px-6 md:h-24 md:px-12"
       >
-        <nav dir="rtl" className="hidden gap-10 text-sm font-medium text-white md:flex">
+        <nav dir="rtl" className="hidden items-center gap-8 text-sm font-medium text-white md:flex">
           <Link href="/about" className="transition-colors hover:text-[#C5A059]">
             إرثنا
           </Link>
@@ -65,6 +83,11 @@ export default function Header() {
           <Link href="/request" className="transition-colors hover:text-[#C5A059]">
             تواصل معنا
           </Link>
+          <LanguageSwitcher 
+            currentLang={currentLang} 
+            onChange={handleLanguageChange}
+            className="border-[#C5A059]/30"
+          />
         </nav>
 
         <button
@@ -72,7 +95,6 @@ export default function Header() {
           onClick={() => setIsMobileMenuOpen((current) => !current)}
           aria-label={isMobileMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
           aria-expanded={isMobileMenuOpen}
-          suppressHydrationWarning
           className="relative z-50 flex h-8 w-8 flex-col items-center justify-center gap-1.5 md:hidden"
         >
           <span className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-2" : ""}`} />
@@ -84,7 +106,6 @@ export default function Header() {
           <button
             type="button"
             onClick={handleLogoClick}
-            suppressHydrationWarning
             className="relative h-20 w-48 cursor-pointer select-none transition-transform duration-500 hover:scale-105 md:h-32 md:w-64"
           >
             <Image
@@ -118,6 +139,13 @@ export default function Header() {
               <Link href="/request" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
                 تواصل معنا
               </Link>
+              <div className="pt-4 border-t border-white/10 w-full">
+                <LanguageSwitcher 
+                  currentLang={currentLang} 
+                  onChange={handleLanguageChange}
+                  className="border-[#C5A059]/30"
+                />
+              </div>
             </div>
           </motion.div>
         ) : null}

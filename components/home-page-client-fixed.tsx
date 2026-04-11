@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { MessageCircle, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Sparkles, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 import Footer from "./Footer";
 import AIStylePicker from "./AIStylePicker";
@@ -32,14 +33,17 @@ const STYLE_LABELS: Record<string, string> = {
 };
 
 const ROOM_QUERIES: Record<string, string> = {
-  "master-bedroom": "luxury master bedroom",
-  "living-room": "modern living room",
-  kitchen: "luxury kitchen",
-  "dressing-room": "walk-in closet",
-  "dining-room": "elegant dining",
-  "home-office": "luxury home office",
-  "youth-room": "modern youth bedroom",
-  "interior-design": "luxury interior design home",
+  "master-bedroom": "luxury master bedroom suite hotel interior design",
+  "children-room": "luxury kids bedroom interior design playful elegant",
+  "teen-room": "modern teenager bedroom study area contemporary design",
+  "living-room": "luxury modern living room high-end interior design architectural digest lounge",
+  "dining-room": "bespoke dining area luxury interior dining modern chandelier dining room",
+  "corner-sofa": "luxury corner sofa sectional living room high-end furniture",
+  lounge: "luxury lounge seating area interior design modern elegant",
+  "dressing-room": "bespoke walk-in closet luxury dressing room interior",
+  kitchen: "luxury high-end kitchen marble bespoke interior design",
+  "home-office": "luxury home office study room executive interior",
+  "interior-design": "luxury comprehensive interior design whole house architecture",
 };
 
 const STYLE_QUERY_HINTS: Record<string, string> = {
@@ -59,39 +63,69 @@ const STYLE_RESULT_PAGE: Record<string, number> = {
 const BASE_ROOMS: LandingRoom[] = [
   {
     slug: "master-bedroom",
-    eyebrow: "خصوصية محسوبة",
+    eyebrow: "خصوصية ملكية",
     title: "غرف النوم الرئيسية",
-    summary: "مساحة هادئة بتفاصيل فندقية وتخزين ذكي وخامات تعيش سنوات طويلة.",
+    summary: "ملاذ هادئ يجمع بين الفخامة الفندقية والراحة الشخصية بتفاصيل متقنة.",
+  },
+  {
+    slug: "children-room",
+    eyebrow: "أحلام صغيرة",
+    title: "غرف الأطفال",
+    summary: "مساحة آمنة ومبهجة تنمو مع طفلك، تجمع بين المرح والوظيفة.",
+  },
+  {
+    slug: "teen-room",
+    eyebrow: "شخصية ناشئة",
+    title: "غرف المراهقين",
+    summary: "تصميم يناسب مرحلة النضج مع مساحات للدراسة والتعبير الذاتي.",
   },
   {
     slug: "living-room",
     eyebrow: "استقبال بثقة",
     title: "غرف المعيشة",
-    summary: "جلسات مدروسة بصريًا وعمليًا بمشهد راقٍ وحركة مريحة للعائلة والضيوف.",
+    summary: "جلسات مدروسة بصريًا لاستقبال الضيوف ولحظات عائلية لا تُنسى.",
   },
   {
-    slug: "kitchen",
-    eyebrow: "أداء يومي أنظف",
-    title: "المطابخ",
-    summary: "مطابخ حديثة تجمع بين الوظيفة وسهولة الاستخدام مع تخزين محسوب وتشطيب متقن.",
+    slug: "dining-room",
+    eyebrow: "ولائم عائلية",
+    title: "غرف الطعام",
+    summary: "تجارب طعام مريحة بأناقة دافئة تناسب كل مناسبة.",
+  },
+  {
+    slug: "corner-sofa",
+    eyebrow: "راحة مطلقة",
+    title: "الكنب الزاوية",
+    summary: "قطع مفروشات فاخرة تضيف لمسة عصرية ومساحة جلوس واسعة.",
+  },
+  {
+    slug: "lounge",
+    eyebrow: "استرخاء أنيق",
+    title: "اللاونج",
+    summary: "زاوية خاصة للاسترخاء والقراءة بلمسات أنيقة وخامات ناعمة.",
   },
   {
     slug: "dressing-room",
     eyebrow: "تنظيم فاخر",
     title: "غرف الملابس",
-    summary: "تقسيم واضح وإضاءة ومرايا تجعل التجربة اليومية أكثر راحة وأناقة.",
+    summary: "تجربة ملابس يومية أنيقة بتقسيم ذكي وإضاءة مثالية.",
+  },
+  {
+    slug: "kitchen",
+    eyebrow: "فن الطهي",
+    title: "المطابخ",
+    summary: "مساحة عمل أنيقة تجمع بين الوظيفة والجمال لتجربة طهي فاخرة.",
   },
   {
     slug: "home-office",
-    eyebrow: "تركيز بدون تشويش",
+    eyebrow: "إنتاجية متقنة",
     title: "المكاتب المنزلية",
-    summary: "مساحة عمل تحافظ على هوية المنزل وتدعم ساعات التركيز الطويلة.",
+    summary: "بيئة عمل محفزة تحافظ على التوازن بين المهنية والراحة المنزلية.",
   },
   {
-    slug: "youth-room",
-    eyebrow: "مرونة تنمو مع الوقت",
-    title: "غرف الشباب والأطفال",
-    summary: "غرف تجمع بين الشخصية والعملية بحلول قابلة للتطوير بدل التغيير السريع.",
+    slug: "interior-design",
+    eyebrow: "رؤية متكاملة",
+    title: "التصميم الداخلي الشامل",
+    summary: "تجربة تصميم متناسقة للمنزل بالكامل بلغة بصرية موحدة.",
   },
 ];
 
@@ -228,9 +262,120 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { eyebrow: string; 
       summary: "ألوان هادئة وإضاءة طبيعية تخلق بيئة مثالية للدراسة والراحة.",
     },
   },
+  "dining-room": {
+    modern: {
+      eyebrow: "تجمع عصري",
+      title: "غرف طعام مودرن",
+      summary: "طاولات نظيفة وإضاءة معمارية لجلسات طعام أنيقة وعصرية.",
+    },
+    classic: {
+      eyebrow: "ولائم تقليدية",
+      title: "غرف طعام كلاسيكية",
+      summary: "أثاث نقشي وثريات كريستال لجلسات عائلية ذات طابع تاريخي.",
+    },
+    industrial: {
+      eyebrow: "طعام بروح المدينة",
+      title: "غرف طعام صناعية",
+      summary: "طاولات خشبية ثقيلة ولمسات معدنية لأجواء طعام جريئة.",
+    },
+    scandinavian: {
+      eyebrow: "دفء المائدة",
+      title: "غرف طعام سكاندينافية",
+      summary: "خشب فاتح وإضاءة شمعدانية لجلسات طعام دافئة ومريحة.",
+    },
+  },
+  "children-room": {
+    modern: {
+      eyebrow: "عالم ألوان",
+      title: "غرف أطفال مودرن",
+      summary: "تصميم آمن ومبهج يناسب تطور طفلك مع ألوان متناسقة.",
+    },
+    classic: {
+      eyebrow: "أحلام دافئة",
+      title: "غرف أطفال كلاسيكية",
+      summary: "تفاصيل دافئة وخشب نقي لبيئة آمنة ومريحة.",
+    },
+    industrial: {
+      eyebrow: "مغامرة صغيرة",
+      title: "غرف أطفال صناعية",
+      summary: "لمسات معدنية وخشبية تناسب روح المغامرة لدى الأطفال.",
+    },
+    scandinavian: {
+      eyebrow: "نقاء ومرح",
+      title: "غرف أطفال شمالية",
+      summary: "ألوان هادئة ومساحات آمنة للعب والنمو.",
+    },
+  },
+  "teen-room": {
+    modern: {
+      eyebrow: "استقلالية عصرية",
+      title: "غرف مراهقين مودرن",
+      summary: "مساحة متكاملة للدراسة والاسترخاء بتصميم عصري.",
+    },
+    classic: {
+      eyebrow: "أناقة ناشئة",
+      title: "غرف مراهقين كلاسيكية",
+      summary: "خشب داكن وتفاصيل راقية تناسب مرحلة النضج.",
+    },
+    industrial: {
+      eyebrow: "شخصية جريئة",
+      title: "غرف مراهقين صناعية",
+      summary: "لمسات معدنية وخشب خام تعبر عن الاستقلالية.",
+    },
+    scandinavian: {
+      eyebrow: "تركيز وهدوء",
+      title: "غرف مراهقين شمالية",
+      summary: "إضاءة طبيعية وتنظيم واضح للدراسة والراحة.",
+    },
+  },
+  "corner-sofa": {
+    modern: {
+      eyebrow: "أناقة عملية",
+      title: "كنب زاوية مودرن",
+      summary: "تصميم عصري يوفر مساحة جلوس واسعة بأناقة.",
+    },
+    classic: {
+      eyebrow: "فخامة تقليدية",
+      title: "كنب زاوية كلاسيكي",
+      summary: "خامات فاخرة وتفاصيل نقشية لجلسات راقية.",
+    },
+    industrial: {
+      eyebrow: "خامة أصيلة",
+      title: "كنب زاوية صناعي",
+      summary: "جلد طبيعي وهيكل معدني لمساحة جريئة.",
+    },
+    scandinavian: {
+      eyebrow: "راحة شمالية",
+      title: "كنب زاوية سكاندينافي",
+      summary: "قماش ناعم وألوان فاتحة لراحة مطلقة.",
+    },
+  },
+  lounge: {
+    modern: {
+      eyebrow: "زاوية هادئة",
+      title: "لاونج مودرن",
+      summary: "مساحة استرخاء عصرية بتصميم مينيمال أنيق.",
+    },
+    classic: {
+      eyebrow: "أناقة قراءة",
+      title: "لاونج كلاسيكي",
+      summary: "كرسي استرخاء فاخر وإضاءة دافئة للقراءة.",
+    },
+    industrial: {
+      eyebrow: "استرخاء صناعي",
+      title: "لاونج لوفت",
+      summary: "كرسي جلد وطاولة خشبية خام لزاوية مميزة.",
+    },
+    scandinavian: {
+      eyebrow: "دفء وقراءة",
+      title: "لاونج شمالي",
+      summary: "كرسي ناعم وإضاءة طبيعية لزاوية قراءة مريحة.",
+    },
+  },
 };
 
 export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }: HomePageClientProps) {
+  const router = useRouter();
   const intent = useSessionStore((state) => state.intent);
   const updateProfile = useSessionStore((state) => state.updateProfile);
   const trackEvent = useSessionStore((state) => state.trackEvent);
@@ -291,6 +436,16 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
     if (!timer) return;
     window.clearTimeout(timer);
     timersRef.current.delete(roomSlug);
+  };
+
+  // Room card click handler - clear images and show loading before navigation
+  const handleRoomClick = (roomSlug: string) => {
+    // 1. Clear images array to prevent showing stale data
+    setRoomImages({});
+    // 2. Set loading state to show spinner
+    setLoading(true);
+    // 3. Navigate to room page
+    router.push(`/room/${roomSlug}?style=${displayStyle}`);
   };
 
   const roomList = useMemo(() => {
@@ -403,7 +558,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
 
   return (
     <>
-      <section className="relative z-20" suppressHydrationWarning>
+      <section className="relative z-20">
         <div className="relative z-10 mx-auto max-w-7xl bg-transparent px-6 pb-40 pt-20">
           <div className="relative z-20 bg-transparent">
             <div className="mb-16 bg-transparent">
@@ -417,6 +572,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
                     href={`/room/${room.slug}?style=${displayStyle}`}
                     onMouseEnter={() => startRoomTimer(room.slug)}
                     onMouseLeave={() => clearRoomTimer(room.slug)}
+                    onClick={() => handleRoomClick(room.slug)}
                     className="relative block aspect-[16/10] cursor-pointer overflow-hidden rounded-[2.5rem] border border-white/5 shadow-2xl transition-all duration-500 hover:-translate-y-3 hover:scale-[1.02] hover:border-brand-primary/30 hover:shadow-[0_20px_40px_rgba(197,160,89,0.3)]"
                   >
                     <Image
@@ -444,6 +600,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
                   href={`/room/interior-design?style=${displayStyle}`}
                   onMouseEnter={() => startRoomTimer("interior-design")}
                   onMouseLeave={() => clearRoomTimer("interior-design")}
+                  onClick={() => handleRoomClick("interior-design")}
                   className="relative block aspect-[16/10] cursor-pointer overflow-hidden rounded-[2.5rem] border border-white/5 shadow-2xl transition-all duration-500 hover:-translate-y-3 hover:scale-[1.02] hover:border-brand-primary/30 hover:shadow-[0_20px_40px_rgba(197,160,89,0.3)]"
                 >
                   <Image

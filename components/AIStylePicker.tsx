@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 const styles = [
@@ -18,10 +18,35 @@ interface AIStylePickerProps {
 }
 
 const AIStylePicker: React.FC<AIStylePickerProps> = ({ selectedStyle, onStyleChange, options = styles }) => {
+  const [mounted, setMounted] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render buttons until mounted to prevent fdprocessedid hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="flex flex-col items-center mb-16 px-4">
+        <div className="relative flex flex-wrap justify-center items-center bg-white/[0.03] backdrop-blur-md p-1.5 rounded-full border border-white/10">
+          {options.map((style) => (
+            <div
+              key={style.id}
+              className="relative px-8 py-2.5 text-sm md:text-base text-white/40"
+            >
+              <span className="relative z-20 font-medium tracking-widest">
+                {style.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center mb-16 px-4" suppressHydrationWarning>
+    <div className="flex flex-col items-center mb-16 px-4">
       <div className="relative flex flex-wrap justify-center items-center bg-white/[0.03] backdrop-blur-md p-1.5 rounded-full border border-white/10">
         {options.map((style) => {
           const isActive = selectedStyle === style.id;

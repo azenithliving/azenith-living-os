@@ -86,21 +86,6 @@ export default function SmartImageGrid({
 
   return (
     <div className="space-y-4">
-      {/* Curation Stats */}
-      {curationStats && (
-        <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-2">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-amber-400" />
-            <span className="text-sm text-white/80">
-              AI Curated: {curationStats.approved} of {curationStats.total} images
-            </span>
-          </div>
-          <span className="text-xs text-white/50">
-            {curationStats.rejectionRate}% rejected
-          </span>
-        </div>
-      )}
-
       {/* Masonry Grid */}
       <div className="grid auto-rows-[200px] grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
         {filteredImages.map((image, index) => {
