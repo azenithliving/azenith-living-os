@@ -80,6 +80,26 @@ export interface FactoryStatus {
  */
 export async function getMasterDashboardSnapshot(): Promise<MasterDashboardSnapshot> {
   const supabase = getSupabaseAdminClient();
+  
+  if (!supabase) {
+    console.warn("[admin-data] Supabase not available, returning default snapshot");
+    return {
+      totalTenants: 0,
+      totalLeads: 0,
+      totalRequests: 0,
+      totalBookings: 0,
+      totalSubscribers: 0,
+      totalWhatsAppClicks: 0,
+      recentLeads: 0,
+      recentRequests: 0,
+      recentSubscribers: 0,
+      tenants: [],
+      topRoomTypes: [],
+      topStyles: [],
+      intentDistribution: [],
+      recentActivity: [],
+    };
+  }
 
   // Get all tenants
   const { data: tenants } = await supabase
@@ -261,6 +281,7 @@ export async function getMasterDashboardSnapshot(): Promise<MasterDashboardSnaps
  */
 export async function getAllSubscribers(limit = 100, offset = 0): Promise<NewsletterSubscriber[]> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) return [];
 
   const { data } = await supabase
     .from("newsletter_subscribers")
@@ -283,6 +304,16 @@ export async function getAllSubscribers(limit = 100, offset = 0): Promise<Newsle
  */
 export async function getFactoryStatus(): Promise<FactoryStatus> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    return {
+      totalRequests: 0,
+      byStatus: {},
+      pendingPayment: 0,
+      inProduction: 0,
+      delivered: 0,
+      recentCompletions: [],
+    };
+  }
 
   // Get all requests with their status
   const { data: requests } = await supabase
@@ -352,6 +383,7 @@ export async function getLeads(tenantId?: string, limit = 50): Promise<Array<{
   createdAt: string;
 }>> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) return [];
 
   let query = supabase
     .from("users")

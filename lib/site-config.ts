@@ -37,6 +37,11 @@ export async function getSiteConfig(): Promise<SiteConfigData> {
   try {
     const supabase = getSupabaseAdminClient();
     
+    if (!supabase) {
+      console.warn("[site-config] Supabase not available, returning default config");
+      return defaultConfig;
+    }
+    
     // Get the first company (master tenant)
     const { data: company } = await supabase
       .from("companies")

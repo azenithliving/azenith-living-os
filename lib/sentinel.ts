@@ -231,8 +231,12 @@ export async function getSystemHealth(): Promise<HealthSnapshot> {
   let dbHealth = true;
   try {
     const supabase = getSupabaseAdminClient();
-    const { error } = await supabase.from("users").select("count", { count: "exact", head: true });
-    if (error) dbHealth = false;
+    if (!supabase) {
+      dbHealth = false;
+    } else {
+      const { error } = await supabase.from("users").select("count", { count: "exact", head: true });
+      if (error) dbHealth = false;
+    }
   } catch {
     dbHealth = false;
   }

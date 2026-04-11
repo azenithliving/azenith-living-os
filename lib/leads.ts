@@ -26,7 +26,7 @@ export type LeadSubmission = z.infer<typeof leadSubmissionSchema>;
 
 export type PersistLeadResult =
   | { ok: true; requestId: string; userId: string; companyId: string }
-  | { ok: false; reason: "tenant_not_configured"; host: string | null };
+  | { ok: false; reason: "tenant_not_configured" | "database_unavailable"; host: string | null };
 
 export async function persistLeadSubmission(payload: LeadSubmission, host: string | null): Promise<PersistLeadResult> {
   const tenant = await getTenantByHost(host);
@@ -36,6 +36,11 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
   }
 
   const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    console.error("[leads] Supabase not available, cannot capture lead");
+    return { ok: false, reason: "database_unavailable", host };
+  }
+  
   const intent = payload.intent ?? classifyIntent(payload.score);
 
   const { data: existingUser, error: existingUserError } = await supabase
