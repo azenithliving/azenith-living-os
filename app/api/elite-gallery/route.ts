@@ -94,12 +94,13 @@ export async function GET(request: NextRequest) {
     console.log(`[Elite Gallery API] Fetching: ${roomId}/${style} (seed: ${seed})`);
     
     // Fetch images from curated database
+    // NOTE: is_active column removed - add it via migration if needed:
+    // ALTER TABLE curated_images ADD COLUMN is_active BOOLEAN DEFAULT true;
     const { data: images, error } = await supabase!
       .from("curated_images")
       .select("*")
       .eq("room_type", roomId)
       .eq("style", style)
-      .eq("is_active", true)
       .limit(1000); // Get large pool for shuffling
     
     if (error) {
