@@ -412,6 +412,20 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
     }
   }, [isHydrated, styleSwitches]);
 
+  // HYDRATION FALLBACK: Force isHydrated to true after 3 seconds if stuck
+  useEffect(() => {
+    if (isHydrated) return;
+    
+    console.log("[HYDRATION] Waiting for store rehydration...");
+    const hydrationTimer = setTimeout(() => {
+      console.warn("[HYDRATION FALLBACK] Forcing isHydrated to true after timeout");
+      const setHydrated = useSessionStore.getState().setHydrated;
+      setHydrated(true);
+    }, 3000);
+    
+    return () => clearTimeout(hydrationTimer);
+  }, [isHydrated]);
+
   const handleStyleChange = (newStyle: string) => {
     if (selectedStyle !== newStyle) {
       // Update store (handles persistence and interaction tracking)
@@ -494,6 +508,14 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
     };
   }, []);
 
+  // BRUTE FORCE: Kill loading after 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -528,9 +550,8 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
           setRoomImages(Object.assign({}, ...images));
         }
       } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
+        // ALWAYS clear loading state, even if aborted
+        setLoading(false);
       }
     };
 

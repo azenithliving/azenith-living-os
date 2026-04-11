@@ -246,6 +246,18 @@ export default function DynamicGallery({
     setFactCardTip(getRandomDesignTip(roomId));
   }, []);
 
+  // SAFETY TIMEOUT: Force mounted to true after 4 seconds if stuck
+  useEffect(() => {
+    if (mounted) return;
+    
+    const safetyTimer = setTimeout(() => {
+      console.warn("[SAFETY] DynamicGallery mounted forced to true after timeout");
+      setMounted(true);
+    }, 4000);
+    
+    return () => clearTimeout(safetyTimer);
+  }, [mounted]);
+
   // Reset when style/room changes
   useEffect(() => {
     setCurrentBatch(0);

@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ar-EG" dir="rtl" className="h-full antialiased" data-scroll-behavior="smooth">
-      <body className="min-h-full bg-brand-secondary font-sans text-brand-accent">
+    <html lang="ar-EG" dir="rtl" className="h-full antialiased" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <body className="min-h-full bg-brand-secondary font-sans text-brand-accent" suppressHydrationWarning>
         <Providers>{children}</Providers>
         <Toaster
           position="bottom-center"
