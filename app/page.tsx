@@ -57,8 +57,13 @@ async function fetchInitialRoomImages() {
 }
 
 export default async function Home() {
+  console.log("[SERVER] Home() started - fetching runtime config...");
   const runtimeConfig = await getRuntimeConfig();
+  console.log("[SERVER] Runtime config loaded, brand:", runtimeConfig.brandName);
+  
+  console.log("[SERVER] Fetching initial room images...");
   const initialRoomImages = await fetchInitialRoomImages();
+  console.log("[SERVER] Images loaded, count:", Object.keys(initialRoomImages).length);
 
   return (
     <main id="main-content" className="relative min-h-screen">

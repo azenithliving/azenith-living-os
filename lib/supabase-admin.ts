@@ -7,7 +7,8 @@ export function getSupabaseAdminClient() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceRoleKey) {
-    throw new Error("Supabase admin credentials are not configured.");
+    console.warn("[supabase-admin] Missing credentials - URL:", !!url, "ServiceRoleKey:", !!serviceRoleKey);
+    return null;
   }
 
   return createClient(url, serviceRoleKey, {

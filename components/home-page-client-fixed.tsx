@@ -375,6 +375,8 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { eyebrow: string; 
 };
 
 export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }: HomePageClientProps) {
+  console.log("[CLIENT] HomePageClient mounted, isHydrated:", useSessionStore.getState().isHydrated, "initialImages:", Object.keys(initialRoomImages).length);
+  
   const router = useRouter();
   const intent = useSessionStore((state) => state.intent);
   const updateProfile = useSessionStore((state) => state.updateProfile);
@@ -392,6 +394,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
   // Use server-fetched images as initial state to eliminate loading flash
   const [roomImages, setRoomImages] = useState<Record<string, string>>(initialRoomImages);
   const [loading, setLoading] = useState(Object.keys(initialRoomImages).length === 0);
+  console.log("[CLIENT] Initial loading state:", Object.keys(initialRoomImages).length === 0);
   // Local state for immediate UI feedback - synced to store
   const [styleSwitchCount, setStyleSwitchCount] = useState(styleSwitches);
   const styleSwitchRef = useRef(styleSwitches);
@@ -399,6 +402,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
 
   // Hydration guard - show loading state or default during hydration
   const displayStyle = isHydrated ? selectedStyle : "modern";
+  console.log("[CLIENT] displayStyle:", displayStyle, "isHydrated:", isHydrated);
 
   // Sync local ref with store when hydrated
   useEffect(() => {
