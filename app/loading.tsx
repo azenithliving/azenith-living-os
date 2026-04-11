@@ -1,4 +1,29 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 export default function Loading() {
+  const [visible, setVisible] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // FORCED TERMINATION: Kill loading screen after 500ms max
+  useEffect(() => {
+    setMounted(true);
+    
+    const killTimer = setTimeout(() => {
+      console.warn("[EMERGENCY] Loading shield killed after 500ms");
+      setVisible(false);
+    }, 500);
+
+    return () => clearTimeout(killTimer);
+  }, []);
+
+  // CLIENT-ONLY: Don't render on server to prevent hydration freeze
+  if (!mounted) return null;
+  
+  // BYPASS: Always return null after timeout to unblock rendering
+  if (!visible) return null;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#050505] px-6 text-white">
       <div className="flex max-w-md flex-col items-center gap-6 text-center">

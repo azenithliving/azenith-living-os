@@ -1,69 +1,51 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import AzenithLegacy from "@/components/AzenithLegacy";
 import Hero from "@/components/Hero";
 import HomePageClient from "@/components/home-page-client-fixed";
-import { getRuntimeConfig } from "@/lib/runtime-config";
 
-// Force dynamic rendering to prevent static generation timeout
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// BYPASS: Force render immediately without server-side blocking
+export default function Home() {
+  const [mounted, setMounted] = useState(false);
 
-// Server-side room image fetching for initial load
-async function fetchInitialRoomImages() {
-  const roomQueries: Record<string, string> = {
-    "master-bedroom": "luxury master bedroom",
-    "living-room": "modern living room",
-    kitchen: "luxury kitchen",
-    "dressing-room": "walk-in closet",
-    "home-office": "luxury home office",
-    "youth-room": "modern youth bedroom",
-    "interior-design": "luxury interior design home",
+  // KILL SWITCH: Force mount after 1 second max
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.warn("[BYPASS] Forcing mount after 1s");
+      setMounted(true);
+    }, 1000);
+    
+    setMounted(true); // Also set immediately
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Minimal placeholder while mounting (avoids hydration mismatch)
+  if (!mounted) {
+    return (
+      <div style={{ background: '#000', height: '100vh', width: '100vw' }} />
+    );
+  }
+
+  // Static runtime config (bypasses server fetch)
+  const runtimeConfig = {
+    brandName: "Azenith Living",
+    brandNameAr: "أزينث ليفينج",
+    freeHookOffer: "تصميم مبدئي خلال 24 ساعة",
+    whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201090819584",
+    primaryDomain: null,
+    contactEmail: "azenithliving@gmail.com",
+    contactPhone: "201090819584",
+    businessAddress: "السلام، القاهرة، مصر",
+    logoPath: "/logo.png",
+    faviconPath: "/favicon.png",
+    primaryColor: "#C5A059",
   };
 
-  const styleHint = "modern minimal luxury";
-  const roomSlugs = Object.keys(roomQueries);
-
-  try {
-    const imagePromises = roomSlugs.map(async (slug, index) => {
-      try {
-        const query = `${styleHint} luxury interior design ${roomQueries[slug]}`;
-        const page = 1 + index;
-
-        // Use absolute URL for server-side fetch
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || "http://localhost:3000";
-        const res = await fetch(
-          `${baseUrl}/api/pexels?query=${encodeURIComponent(query)}&per_page=1&page=${page}`,
-          { next: { revalidate: 3600 } }
-        );
-
-        if (!res.ok) {
-          throw new Error(`API returned ${res.status}`);
-        }
-
-        const data = await res.json();
-        const img = data.photos?.[0]?.src?.large || "/placeholder-room.jpg";
-        return { [slug]: img };
-      } catch {
-        return { [slug]: "/placeholder-room.jpg" };
-      }
-    });
-
-    const images = await Promise.all(imagePromises);
-    return Object.assign({}, ...images);
-  } catch {
-    // Return all placeholders on error
-    return roomSlugs.reduce((acc, slug) => ({ ...acc, [slug]: "/placeholder-room.jpg" }), {});
-  }
-}
-
-export default async function Home() {
-  console.log("[SERVER] Home() started - fetching runtime config...");
-  const runtimeConfig = await getRuntimeConfig();
-  console.log("[SERVER] Runtime config loaded, brand:", runtimeConfig.brandName);
-  
-  console.log("[SERVER] Fetching initial room images...");
-  const initialRoomImages = await fetchInitialRoomImages();
-  console.log("[SERVER] Images loaded, count:", Object.keys(initialRoomImages).length);
+  // Empty initial images (client will fetch)
+  const initialRoomImages = {};
 
   return (
     <main id="main-content" className="relative min-h-screen">
