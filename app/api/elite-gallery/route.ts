@@ -11,18 +11,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Initialize Supabase client with error handling
+// DEBUG: Log environment variables (mask sensitive parts)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error("[Elite Gallery API] Missing Supabase environment variables");
-}
+console.log("[Elite Gallery API] ENV CHECK:", {
+  hasUrl: !!supabaseUrl,
+  urlPreview: supabaseUrl ? supabaseUrl.substring(0, 20) + "..." : "MISSING",
+  hasKey: !!supabaseKey,
+  keyPreview: supabaseKey ? supabaseKey.substring(0, 10) + "..." : "MISSING"
+});
 
-const supabase = createClient(
-  supabaseUrl || "",
-  supabaseKey || ""
-);
+// Only create client if env vars exist
+let supabase: ReturnType<typeof createClient> | null = null;
+if (supabaseUrl && supabaseKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey);
+    console.log("[Elite Gallery API] Supabase client initialized");
+  } catch (err) {
+    console.error("[Elite Gallery API] Failed to create Supabase client:", err);
+  }
+} else {
+  console.error("[Elite Gallery API] Missing Supabase environment variables - will use fallback only");
+}
 
 // ============================================
 // FISHER-YATES SHUFFLE ALGORITHM
@@ -61,9 +72,9 @@ function shuffleArray<T>(array: T[], seed: number): T[] {
 
 export async function GET(request: NextRequest) {
   try {
-    // Check environment variables early
-    if (!supabaseUrl || !supabaseKey) {
-      console.error("[Elite Gallery API] Supabase not configured, using Pexels fallback");
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error("[Elite Gallery API] Supabase client not available, using Pexels fallback");
       const { searchParams } = new URL(request.url);
       const roomId = searchParams.get("roomId") || "interior-design";
       const style = searchParams.get("style") || "modern";
@@ -83,7 +94,7 @@ export async function GET(request: NextRequest) {
     console.log(`[Elite Gallery API] Fetching: ${roomId}/${style} (seed: ${seed})`);
     
     // Fetch images from curated database
-    const { data: images, error } = await supabase
+    const { data: images, error } = await supabase!
       .from("curated_images")
       .select("*")
       .eq("room_type", roomId)
@@ -110,21 +121,22 @@ export async function GET(request: NextRequest) {
     const shuffled = shuffleArray(images, seed);
     
     // Transform to Photo format
-    const photos = shuffled.slice(0, limit).map(image => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const photos = shuffled.slice(0, limit).map((image: any) => ({
       id: image.id,
       src: {
-        large2x: image.url,
-        large: image.url,
-        medium: image.url.replace("?auto=compress&cs=tinysrgb&h=650&w=940", "?auto=compress&cs=tinysrgb&h=400&w=600"),
-        original: image.url
+        large2x: image.url as string,
+        large: image.url as string,
+        medium: (image.url as string).replace("?auto=compress&cs=tinysrgb&h=650&w=940", "?auto=compress&cs=tinysrgb&h=400&w=600"),
+        original: image.url as string
       },
       alt: `${roomId} ${style} design`,
-      photographer: image.metadata?.photographer || "Azenith Elite",
+      photographer: (image.metadata?.photographer as string) || "Azenith Elite",
       metadata: {
-        aiScore: image.metadata?.overall || image.metadata?.aiScore,
-        luxury: image.metadata?.luxury,
-        quality: image.metadata?.quality,
-        reason: image.metadata?.reason
+        aiScore: (image.metadata?.overall as number) || (image.metadata?.aiScore as number),
+        luxury: image.metadata?.luxury as number,
+        quality: image.metadata?.quality as number,
+        reason: image.metadata?.reason as string
       }
     }));
     
