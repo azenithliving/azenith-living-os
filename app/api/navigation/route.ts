@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
     const { searchParams } = new URL(request.url);
     const tenantId = searchParams.get('tenantId');
     const navigation = await request.json();

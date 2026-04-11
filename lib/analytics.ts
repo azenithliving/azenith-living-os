@@ -28,6 +28,7 @@ export async function getAnalyticsMetrics(period?: AnalyticsPeriod): Promise<Ana
     }
 
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     // Calculate date range
     const endDate = new Date();
@@ -180,6 +181,7 @@ export async function getTimeSeriesData(metric: "leads" | "bookings" | "conversi
     }
 
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
     const endDate = new Date();
     const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
 

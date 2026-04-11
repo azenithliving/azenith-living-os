@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     }
 
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     // Create or get dev user
     const devEmail = "dev@azenithliving.local";

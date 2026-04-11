@@ -18,6 +18,7 @@ export async function GET(
 
     const { id: pageId } = await params;
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     const { data: sections, error } = await supabase
       .from("page_sections")

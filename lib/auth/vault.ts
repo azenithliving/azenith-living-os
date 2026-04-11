@@ -98,6 +98,7 @@ export async function initializeVault(adminId: string): Promise<{
   encryptedCodes: string;
 }> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   // Generate recovery codes
   const recoveryCodes = generateRecoveryCodes();
@@ -140,6 +141,7 @@ export async function initializeVault(adminId: string): Promise<{
  */
 export async function verifyRecoveryCode(adminId: string, code: string): Promise<boolean> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   const { data: vault } = await supabase
     .from("recovery_vault")
@@ -189,6 +191,7 @@ export async function addTrustedDevice(
   device: TrustedDevice
 ): Promise<void> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   const { data } = await supabase
     .from("recovery_vault")
@@ -226,6 +229,7 @@ export async function verifyTrustedDevice(
   fingerprint: string
 ): Promise<boolean> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   const { data } = await supabase
     .from("recovery_vault")
@@ -248,6 +252,7 @@ export async function verifyTrustedDevice(
  */
 export async function revokeAllDevices(adminId: string): Promise<void> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   await supabase
     .from("recovery_vault")
@@ -288,6 +293,7 @@ async function logAuditEvent(
   payload: Record<string, unknown>
 ): Promise<void> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   await supabase.from("sovereign_audit_logs").insert({
     actor_id: actorId,
@@ -304,6 +310,7 @@ async function logAuditEvent(
  */
 export async function hasVault(adminId: string): Promise<boolean> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   const { count } = await supabase
     .from("recovery_vault")
@@ -318,6 +325,7 @@ export async function hasVault(adminId: string): Promise<boolean> {
  */
 export async function getRemainingRecoveryCodes(adminId: string): Promise<number> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   const { data } = await supabase
     .from("recovery_vault")

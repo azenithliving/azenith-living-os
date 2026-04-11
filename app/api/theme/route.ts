@@ -54,6 +54,7 @@ export async function PATCH(request: Request) {
 
     const body: ThemeSettings = await request.json();
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     // Update the primary color in companies table
     // In a full implementation, this would update a theme_settings table

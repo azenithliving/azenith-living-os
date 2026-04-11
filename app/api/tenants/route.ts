@@ -13,6 +13,7 @@ type TenantPayload = {
 export async function GET() {
   try {
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
     const { data: tenants, error } = await supabase
       .from("companies")
       .select("id, name, domain, logo, primary_color, whatsapp, created_at")
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
   try {
     const body: TenantPayload = await request.json();
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     if (!body.name || !body.domain) {
       return NextResponse.json({ ok: false, message: "Name and domain are required" }, { status: 400 });

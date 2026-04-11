@@ -12,6 +12,7 @@ export async function GET() {
     }
 
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
     
     // Get the first company (master tenant)
     const { data: company } = await supabase
@@ -62,6 +63,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     // Get the first company (master tenant)
     const { data: company } = await supabase

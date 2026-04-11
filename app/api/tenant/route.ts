@@ -38,6 +38,7 @@ export async function PATCH(request: Request) {
 
     const body = await request.json();
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     // Update tenant
     const { error } = await supabase

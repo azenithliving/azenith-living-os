@@ -29,6 +29,7 @@ export async function POST(request: Request) {
 
     const body: BookingRequest = await request.json();
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     // First, get or create the user
     const { data: existingUser, error: userError } = await supabase
@@ -134,6 +135,7 @@ export async function GET() {
     }
 
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     // Get bookings with user info
     const { data: bookings, error } = await supabase

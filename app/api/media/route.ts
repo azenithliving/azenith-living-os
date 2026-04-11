@@ -14,6 +14,7 @@ export async function GET() {
     }
 
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     const { data: assets, error } = await supabase
       .from("images")
@@ -54,6 +55,14 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
+
+    if (!body || !body.url) {
+      return NextResponse.json(
+        { ok: false, message: "Invalid request body" },
+        { status: 400 }
+      );
+    }
 
     const { data: asset, error } = await supabase
       .from("images")

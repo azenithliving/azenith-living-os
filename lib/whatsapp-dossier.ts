@@ -56,6 +56,7 @@ export type WhatsAppDossier = {
  */
 export async function buildLeadDossier(leadId: string, tenantId: string): Promise<WhatsAppDossier | null> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
 
   // Fetch user/lead data
   const { data: user, error: userError } = await supabase
@@ -253,6 +254,7 @@ export async function sendWhatsAppDossier(
   console.log(`[WhatsAppDossier] DEBUG: Tier=${dossier.qualification.tier}, Phone=${adminPhone}`);
   
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
 
   try {
     const message = formatWhatsAppDossier(dossier);

@@ -16,6 +16,7 @@ const DAYS_TO_ANALYZE = 7;
  */
 export async function generateWeeklyReport(): Promise<WeeklyReport | null> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   const endDate = new Date();
   const startDate = new Date();

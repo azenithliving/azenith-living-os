@@ -115,6 +115,7 @@ export async function findSimilarDesigns(
   excludeImageIds: string[]
 ): Promise<DesignConcept[]> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
 
   // Build search terms from Style DNA
   const searchTerms = [

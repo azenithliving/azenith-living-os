@@ -116,6 +116,7 @@ async function getDefaultAutomationRules(): Promise<AutomationRule[]> {
 
 async function getAutomationRules(tenantId: string, triggerType: string): Promise<AutomationRule[]> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
 
   try {
     // Try to load rules from database
@@ -229,6 +230,7 @@ async function sendWhatsAppMessage(
   tenant: { id: string; whatsapp: string; name: string }
 ) {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   const message = action.message;
   let userId: string | null = null;
   let phoneNumber: string | null = null;
@@ -336,6 +338,7 @@ async function sendWhatsAppMessage(
 
 async function updateLeadScore(leadId: string, score: number, tenantId: string) {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
 
   const { error } = await supabase
     .from("users")
@@ -352,6 +355,7 @@ async function updateLeadScore(leadId: string, score: number, tenantId: string) 
 
 async function updateLeadIntent(leadId: string, intent: string, tenantId: string) {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
 
   const { error } = await supabase
     .from("users")

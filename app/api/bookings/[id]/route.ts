@@ -29,6 +29,7 @@ export async function PATCH(
     }
 
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     // Get current booking status before update
     const { data: currentBooking } = await supabase

@@ -19,6 +19,7 @@ export async function getDashboardSnapshot() {
     }
 
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
     const [usersResult, requestsResult, whatsappResult, eventsResult] = await Promise.all([
       supabase.from("users").select("id, room_type, score, intent, service_type, style, budget, created_at", { count: "exact" }).eq("company_id", tenant.id).order("created_at", { ascending: false }).limit(20),
       supabase.from("requests").select("id, user_id, room_type, budget, quote_snapshot, created_at", { count: "exact" }).eq("company_id", tenant.id),

@@ -14,6 +14,7 @@ export async function GET() {
     }
 
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     const { data: pages, error } = await supabase
       .from("pages")
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     const { data: page, error } = await supabase
       .from("pages")

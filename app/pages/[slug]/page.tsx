@@ -35,6 +35,7 @@ async function getPageData(slug: string): Promise<PageData | null> {
   }
 
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
 
   // Get the page
   const { data: page, error: pageError } = await supabase

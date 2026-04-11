@@ -79,6 +79,7 @@ export async function subscribeToNewsletter(
 
     const validatedData = validationResult.data;
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     const { data: existingSubscriber } = await supabase
       .from("newsletter_subscribers")

@@ -24,6 +24,7 @@ export type PurgeResult = {
  */
 export async function purgeOldCustomerData(): Promise<PurgeResult> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   const result: PurgeResult = {
     deletedImages: 0,
     anonymizedLeads: 0,
@@ -148,6 +149,7 @@ export async function purgeOldCustomerData(): Promise<PurgeResult> {
  */
 export async function purgeSpecificUser(userId: string): Promise<PurgeResult> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   const result: PurgeResult = {
     deletedImages: 0,
     anonymizedLeads: 0,
@@ -231,6 +233,7 @@ export async function getPurgeStats(): Promise<{
   pendingPurges: number;
 }> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
 
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - RETENTION_DAYS);

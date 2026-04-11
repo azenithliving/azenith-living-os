@@ -46,6 +46,7 @@ export async function updateRequestProgress(
   step: number
 ): Promise<{ success: boolean; notificationSent?: boolean; error?: string }> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   try {
     // Validate inputs
@@ -124,6 +125,7 @@ export async function updateRequestPrice(
   totalPrice: number
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   try {
     // Calculate exact payments
@@ -161,6 +163,7 @@ async function sendStageCompleteNotification(
   percentage: number
 ): Promise<void> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   // Get request details
   const { data: request } = await supabase
@@ -216,6 +219,7 @@ async function sendPrePaymentNotification(
   percentage: number
 ): Promise<void> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   // Get request details
   const { data: request } = await supabase
@@ -280,6 +284,7 @@ async function markAsNotified(
   notificationType: 'stage_complete' | 'pre_payment'
 ): Promise<void> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   await supabase
     .from("requests")
@@ -355,6 +360,7 @@ async function sendEmailNotification(to: string, subject: string, body: string):
  */
 export async function getRequestWithProgress(requestId: string): Promise<RequestRecord | null> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   const { data } = await supabase
     .from("requests")
@@ -370,6 +376,7 @@ export async function getRequestWithProgress(requestId: string): Promise<Request
  */
 export async function getCompanyRequests(companyId: string): Promise<RequestRecord[]> {
   const supabase = getSupabaseAdminClient();
+  if (!supabase) throw new Error('Supabase not initialized');
   
   const { data } = await supabase
     .from("requests")

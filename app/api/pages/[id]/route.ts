@@ -18,6 +18,7 @@ export async function GET(
 
     const { id } = await params;
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     const { data: page, error } = await supabase
       .from("pages")
@@ -63,6 +64,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
     const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new Error('Supabase not initialized');
 
     const { error } = await supabase
       .from("pages")
