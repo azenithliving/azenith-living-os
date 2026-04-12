@@ -13,6 +13,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import fs from "fs";
 import path from "path";
+import { applySuggestion as applySandboxSuggestion, isFileAllowed } from "./sandbox-executor";
 
 export interface CommandLogEntry {
   id: number;
@@ -31,6 +32,12 @@ export interface EvolutionSuggestion {
   proposedAction: string;
   affectedFile?: string;
   codeSnippet?: string;
+  // Actionable fields for self-execution
+  action?: "add_comment" | "add_function" | "modify_code" | "add_caching";
+  targetFile?: string;
+  searchPattern?: string;
+  replacement?: string;
+  canAutoApply?: boolean;
 }
 
 export interface EvolutionAnalysis {
@@ -109,6 +116,12 @@ const COMMAND_ALIASES = {
   "${cmd}": "${cmd}",
   "${cmd.slice(0, 2)}": "${cmd}" // shorthand alias
 };`,
+        // Actionable fields for self-execution
+        action: "add_comment",
+        targetFile: "lib/command-executor.ts",
+        searchPattern: "// ============================================",
+        replacement: `// Alias for frequently used command "${cmd}" (${count} times today)\n// ============================================`,
+        canAutoApply: true,
       });
     }
   }
@@ -124,7 +137,7 @@ const COMMAND_ALIASES = {
 
   if (slowCommands.length > 0) {
     const uniqueSlowCmds = [...new Set(slowCommands.map(c => c.command_text.split(' ')[0]))];
-    
+
     for (const cmd of uniqueSlowCmds.slice(0, 2)) { // Limit to first 2 slow commands
       suggestions.push({
         type: "optimize_performance",
@@ -136,6 +149,12 @@ const COMMAND_ALIASES = {
 const CACHE_TTL = 60; // Cache for 1 minute
 const cachedResult = cache.get("${cmd}");
 if (cachedResult) return cachedResult;`,
+        // Actionable fields for self-execution
+        action: "add_comment",
+        targetFile: "lib/command-executor.ts",
+        searchPattern: `// ============================================\n// ${cmd.toUpperCase().replace(/_/g, " ")}`,
+        replacement: `// ============================================\n// ${cmd.toUpperCase().replace(/_/g, " ")} - OPTIMIZED: Consider adding caching`,
+        canAutoApply: true,
       });
     }
   }
@@ -460,4 +479,70 @@ export async function simulateApplyPatches(
       `3. إذا نجحت، ادمج التغييرات: git merge\n\n` +
       `⚠️ **ملاحظة:** هذه تعديلات مقترحة فقط. يرجى مراجعتها قبل التطبيق.`,
   };
+}
+
+/**
+ * Execute a suggestion safely in sandbox
+ * This is the self-execution entry point
+ */
+export async function executeSuggestion(
+  suggestion: EvolutionSuggestion
+): Promise<{ success: boolean; message: string }> {
+  console.log("[SelfEvolution] Executing suggestion:", suggestion.description);
+
+  // Validate suggestion has required fields
+  if (!suggestion.targetFile || !suggestion.searchPattern || !suggestion.replacement) {
+    return {
+      success: false,
+      message: "❌ الاقتراح غير مكتمل (نقص targetFile, searchPattern, أو replacement)",
+    };
+  }
+
+  // Check if auto-apply is allowed
+  if (!suggestion.canAutoApply) {
+    return {
+      success: false,
+      message: "⚠️ هذا الاقتراح يتطلب تطبيقاً يدوياً (canAutoApply = false)",
+    };
+  }
+
+  // Execute via sandbox
+  const result = await applySandboxSuggestion({
+    type: suggestion.type,
+    targetFile: suggestion.targetFile,
+    searchPattern: suggestion.searchPattern,
+    replacement: suggestion.replacement,
+    description: suggestion.description,
+  });
+
+  return result;
+}
+
+/**
+ * Log self-execution to immutable command log
+ */
+export async function logSelfExecution(
+  supabase: SupabaseClient,
+  suggestion: EvolutionSuggestion,
+  result: { success: boolean; message: string },
+  userId: string
+): Promise<void> {
+  try {
+    await supabase.from("immutable_command_log").insert({
+      command_text: "SELF_EXECUTE_SUGGESTION",
+      signature: userId,
+      executor_ip: null,
+      executed_at: new Date().toISOString(),
+      status: result.success ? "executed" : "failed",
+      result_summary: result.message.substring(0, 200),
+      parameters: {
+        suggestion_type: suggestion.type,
+        target_file: suggestion.targetFile,
+        description: suggestion.description,
+        auto_applied: suggestion.canAutoApply,
+      },
+    });
+  } catch (error) {
+    console.error("[SelfEvolution] Failed to log self-execution:", error);
+  }
 }

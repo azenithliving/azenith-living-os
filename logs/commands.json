@@ -28,5 +28,635 @@
     "status": "executed",
     "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 2 أمر\n❌ 0 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n✅ **لا توجد تحسينات مقترحة حالياً**\n\nالنظام يعمل بكفاءة! لم يتم اكتشاف مشاكل كبيرة في الأوامر المنفذة.",
     "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:20:33.721Z",
+    "status": "executed",
+    "result_summary": "Found 18 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "show_stats ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:20:41.800Z",
+    "status": "executed",
+    "result_summary": "Statistics for last 7 days",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:20:53.784Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 5 أمر\n❌ 0 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 5 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. تحسين الأداء**\n   أمر \"list_keys\" قد يستغرق وقتاً طويلاً بسبب العمليات على قاعدة البيانات.\n   💡 **الإجراء المقترح:** جرب تفعيل التخزين المؤقت (caching) لنتائج list_keys لتقليل وقت الاستجابة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. تحسين الأداء**\n   أمر \"backup_db\" قد يستغرق وقتاً طويلاً بسبب العمليات على قاعدة البيانات.\n   💡 **الإجراء المقترح:** جرب تفعيل التخزين المؤقت (caching) لنتائج backup_db لتقليل وقت الاستجابة.\n   📁 **الملف:** lib/command-executor.ts\n\n\n**لتطبيق هذه التحسينات، اكتب \"نعم\"**\n(سأقوم بإنشاء تعديلات مقترحة في بيئة معزولة)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:21:23.995Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 6 أمر\n❌ 0 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 6 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. تحسين الأداء**\n   أمر \"list_keys\" قد يستغرق وقتاً طويلاً بسبب العمليات على قاعدة البيانات.\n   💡 **الإجراء المقترح:** جرب تفعيل التخزين المؤقت (caching) لنتائج list_keys لتقليل وقت الاستجابة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. تحسين الأداء**\n   أمر \"backup_db\" قد يستغرق وقتاً طويلاً بسبب العمليات على قاعدة البيانات.\n   💡 **الإجراء المقترح:** جرب تفعيل التخزين المؤقت (caching) لنتائج backup_db لتقليل وقت الاستجابة.\n   📁 **الملف:** lib/command-executor.ts\n\n\n**لتطبيق هذه التحسينات، اكتب \"نعم\"**\n(سأقوم بإنشاء تعديلات مقترحة في بيئة معزولة)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:31:31.873Z",
+    "status": "executed",
+    "result_summary": "Found 18 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:31:39.122Z",
+    "status": "executed",
+    "result_summary": "Found 18 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "check_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:46:17.529Z",
+    "status": "failed",
+    "result_summary": "فشل فحص المفاتيح: Failed to fetch keys: column api_keys.is_backup does not exist",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:46:39.253Z",
+    "status": "executed",
+    "result_summary": "Found 18 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:47:06.405Z",
+    "status": "executed",
+    "result_summary": "Found 18 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:49:26.481Z",
+    "status": "executed",
+    "result_summary": "Found 18 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "add_key openrouter sk-or-v1-f5b...1e0",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T22:57:24.965Z",
+    "status": "failed",
+    "result_summary": "Failed to add key: Could not find the 'is_backup' column of 'api_keys' in the schema cache (code: PGRST204)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "add_key openrouter sk-or-v1-f5b...1e0",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:01:25.491Z",
+    "status": "failed",
+    "result_summary": "Failed to add key: Could not find the 'is_backup' column of 'api_keys' in the schema cache (code: PGRST204)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "add_key openrouter sk-or-v1-f5b...1e0",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:03:13.854Z",
+    "status": "executed",
+    "result_summary": "✅ API key added for openrouter\nID: 19\nStatus: Active",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "add_key openrouter sk-or-v1-01a...999",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:03:49.090Z",
+    "status": "executed",
+    "result_summary": "✅ API key added for openrouter\nID: 20\nStatus: Active",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:04:05.491Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:04:33.613Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:12:30.495Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:12:46.593Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "backup_db ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:12:59.497Z",
+    "status": "executed",
+    "result_summary": "Database backup created: 3 tables",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:13:05.361Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:13:10.622Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:13:16.592Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:13:36.254Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:13:41.863Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 26 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 26 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 15 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"add_key\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. تحسين الأداء**\n   أمر \"list_keys\" قد يستغرق وقتاً طويلاً بسبب العمليات على قاعدة البيانات.\n   💡 **الإجراء المقترح:** جرب تفعيل التخزين المؤقت (caching) لنتائج list_keys لتقليل وقت الاستجابة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. تحسين الأداء**\n   أمر \"backup_db\" قد يستغرق وقتاً طويلاً بسبب العمليات على قاعدة البيانات.\n   💡 **",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:14:12.230Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 27 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 27 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 15 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"add_key\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. تحسين الأداء**\n   أمر \"list_keys\" قد يستغرق وقتاً طويلاً بسبب العمليات على قاعدة البيانات.\n   💡 **ا",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:14:23.434Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 28 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 28 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 15 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 5 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"add_key\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. تحسين الأداء**\n   أمر \"list_keys\" قد يستغرق وقتاً طويلاً بسبب العمليات على قاعدة البيانات.\n   💡 **ا",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:15:16.767Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 29 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 29 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 15 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 6 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"add_key\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. تحسين الأداء**\n   أمر \"list_keys\" قد يستغرق وقتاً طويلاً بسبب العمليات على قاعدة البيانات.\n   💡 **ا",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:24:14.191Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:24:22.337Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:24:28.351Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:24:33.350Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "backup_db ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:24:39.796Z",
+    "status": "executed",
+    "result_summary": "Database backup created: 3 tables",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "backup_db ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:24:45.158Z",
+    "status": "executed",
+    "result_summary": "Database backup created: 3 tables",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "show_stats ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:24:51.728Z",
+    "status": "executed",
+    "result_summary": "Statistics for last 7 days",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:25:03.887Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 37 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 37 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 19 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"backup_db\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"backup_db\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 7 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **ا",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:31:44.793Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:31:53.072Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:31:56.808Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:32:01.105Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:32:09.694Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 42 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 42 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 23 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"backup_db\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"backup_db\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 8 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **ا",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:34:51.255Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:34:55.715Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:34:59.249Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:35:02.984Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:35:09.021Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:35:18.179Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 48 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 48 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 28 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"backup_db\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"backup_db\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 9 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **ا",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:38:33.042Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:38:38.265Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:38:42.657Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:38:50.877Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 52 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 52 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 31 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"backup_db\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"backup_db\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 10 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:41:23.307Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 53 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 53 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 31 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"backup_db\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"backup_db\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 11 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:44:58.657Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:45:04.692Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:45:07.509Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:45:15.834Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 57 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 57 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 34 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"backup_db\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"backup_db\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 12 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:48:43.374Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:48:47.027Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:48:49.703Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:48:57.339Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 61 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 61 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 37 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"backup_db\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"backup_db\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 13 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:51:43.803Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:51:47.079Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:51:50.987Z",
+    "status": "executed",
+    "result_summary": "Found 20 active key(s)",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "evolve ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-12T23:52:00.422Z",
+    "status": "executed",
+    "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 65 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 65 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 40 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"backup_db\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"backup_db\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 14 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **",
+    "parameters": null
   }
 ]

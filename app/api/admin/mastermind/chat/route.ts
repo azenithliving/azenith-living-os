@@ -7,9 +7,28 @@ import {
   loadHistory,
   saveMessage
 } from '@/lib/mastermind-ai';
-import { executeCommand } from '@/lib/command-executor';
+import { executeCommand, hasPendingSuggestion, getPendingSuggestion, executePendingSuggestion } from '@/lib/command-executor';
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { checkKeysUsage, startKeyMonitoring } from '@/lib/key-monitor';
+
+// ============================================
+// KEY MONITORING SCHEDULER
+// Run key usage check every hour (only in production or when explicitly enabled)
+// ============================================
+const MONITORING_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+const isMonitoringEnabled = process.env.NODE_ENV === 'production' || process.env.ENABLE_KEY_MONITORING === 'true';
+
+let monitoringInterval: NodeJS.Timeout | null = null;
+let lastMonitoringRun: Date | null = null;
+
+// Start monitoring on module load (server-side only) using imported function
+if (typeof window === 'undefined') {
+  // Run immediately on startup using the imported startKeyMonitoring from key-monitor.ts
+  import('@/lib/key-monitor').then(({ startKeyMonitoring }) => {
+    startKeyMonitoring(60); // Start with 60 minute interval
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,6 +86,47 @@ export async function POST(req: NextRequest) {
     // Detect if message is a command
     const detectedCommand = detectCommand(message);
     const isCommand = detectedCommand && detectedCommand.confidence > 0.8;
+
+    // Check for pending suggestion confirmation (interactive evolve)
+    const hasPending = hasPendingSuggestion();
+    if (hasPending && !isCommand) {
+      // Check if user responded with yes/no to a pending suggestion
+      const lowerMsg = message.toLowerCase().trim();
+      const approvalWords = ['yes', 'نعم', 'أوافق', 'موافق', 'تطبيق', 'apply', 'ok', 'تمام', 'sure'];
+      const rejectionWords = ['no', 'لا', 'رفض', 'cancel', 'إلغاء', 'stop', 'أوقف'];
+
+      const isApproval = approvalWords.some(word => lowerMsg.includes(word));
+      const isRejection = rejectionWords.some(word => lowerMsg.includes(word));
+
+      if (isApproval || isRejection) {
+        const supabaseClient = createSupabaseClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          { auth: { autoRefreshToken: false, persistSession: false } }
+        );
+
+        const confirmResult = await executePendingSuggestion(isApproval, {
+          supabase: supabaseClient,
+          userId: user?.id || "00000000-0000-0000-0000-000000000000",
+          userEmail: user?.email || "admin@azenithliving.com",
+          bypassRls: bypassAuth,
+          isOwner,
+        });
+
+        return NextResponse.json({
+          success: true,
+          result: {
+            type: "command",
+            message: confirmResult.message,
+            command: {
+              name: "evolve_confirm",
+              result: confirmResult,
+            },
+          },
+          mode: 'command',
+        });
+      }
+    }
 
     let result;
 

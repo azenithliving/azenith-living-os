@@ -13,6 +13,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { executeCommand } from "./command-executor";
+import { incrementKeyUsage } from "./key-monitor";
 
 // ============================================
 // API CONFIGURATION
@@ -247,6 +248,8 @@ async function callGroq(
       }
 
       console.log(`[MastermindAI] [${requestId}] Success! Model: ${data.model}`);
+      // Track successful usage
+      incrementKeyUsage("groq", apiKey);
       return data;
     } catch (error) {
       console.error(`[MastermindAI] [${requestId}] Exception calling Groq:`, error);
@@ -333,6 +336,8 @@ async function callMistral(
       }
 
       console.log(`[MastermindAI] [${requestId}] Success! Model: ${data.model}`);
+      // Track successful usage
+      incrementKeyUsage("mistral", apiKey);
       return data;
     } catch (error) {
       console.error(`[MastermindAI] [${requestId}] Exception calling Mistral:`, error);
@@ -421,6 +426,8 @@ async function callOpenRouter(
       }
 
       console.log(`[MastermindAI] [${requestId}] Success! Model: ${data.model}`);
+      // Track successful usage
+      incrementKeyUsage("openrouter", apiKey);
       return data;
     } catch (error) {
       console.error(`[MastermindAI] [${requestId}] Exception calling OpenRouter:`, error);
@@ -556,7 +563,7 @@ const MASTERMIND_SYSTEM_PROMPT = `أنت Mastermind - النظام الذكي ل
 // ============================================
 
 const AVAILABLE_COMMANDS = [
-  "add_key", "remove_key", "list_keys", "rate_limit",
+  "add_key", "remove_key", "list_keys", "check_keys", "rate_limit",
   "send_notification", "show_stats", "clear_cache",
   "restart_service", "backup_db", "evolve", "help"
 ];
@@ -593,6 +600,14 @@ function detectCommand(message: string): DetectedCommand | null {
       /المفاتيح/i,
       /keys\s+list/i,
       /show.*keys/i,
+    ],
+    check_keys: [
+      /فحص.*المفاتيح/i,
+      /check.*keys/i,
+      /حالة.*المفاتيح/i,
+      /key.*status/i,
+      /usage.*check/i,
+      /مراقبة.*المفاتيح/i,
     ],
     show_stats: [
       /إحصائيات/i,

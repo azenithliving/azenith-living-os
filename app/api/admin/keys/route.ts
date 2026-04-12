@@ -80,6 +80,7 @@ export async function GET() {
       provider: k.provider,
       key: maskKey(k.key),
       is_active: k.is_active,
+      is_backup: k.is_backup || false,
       cooldown_until: k.cooldown_until,
       total_requests: k.total_requests,
       last_used_at: k.last_used_at,
@@ -106,13 +107,13 @@ export async function GET() {
 
 /**
  * POST /api/admin/keys
- * Add new key: { provider, key }
+ * Add new key: { provider, key, is_backup? }
  * Test key: { provider, key, test: true }
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { provider, key, test } = body;
+    const { provider, key, test, is_backup = false } = body;
 
     if (!provider || !key) {
       return NextResponse.json(
@@ -140,12 +141,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Insert key
+    // Insert key (backup keys start inactive)
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("api_keys")
-      .insert({ provider, key })
-      .select("id, provider, is_active, created_at")
+      .insert({
+        provider,
+        key,
+        is_active: is_backup ? false : true, // Backup keys start inactive
+        is_backup: is_backup || false,
+      })
+      .select("id, provider, is_active, is_backup, created_at")
       .single();
 
     if (error) {
@@ -165,7 +171,74 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       key: { ...data, key: maskKey(key) },
-      message: "Key added successfully",
+      message: is_backup ? "Backup key added successfully (inactive)" : "Key added successfully",
+    });
+  } catch (error) {
+    console.error("[Keys API] Error:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PATCH /api/admin/keys
+ * Update key: { id, is_backup?, is_active? }
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, is_backup, is_active } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Missing key id" },
+        { status: 400 }
+      );
+    }
+
+    const supabase = await createClient();
+
+    // Build update object
+    const updateData: Record<string, any> = {};
+    if (typeof is_backup === "boolean") {
+      updateData.is_backup = is_backup;
+      // If marking as backup, deactivate it
+      if (is_backup) {
+        updateData.is_active = false;
+      }
+    }
+    if (typeof is_active === "boolean") {
+      updateData.is_active = is_active;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        { success: false, error: "No fields to update" },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from("api_keys")
+      .update(updateData)
+      .eq("id", id)
+      .select("id, provider, is_active, is_backup, updated_at")
+      .single();
+
+    if (error) {
+      console.error("[Keys API] Error updating key:", error);
+      return NextResponse.json(
+        { success: false, error: "Failed to update key" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      key: data,
+      message: "Key updated successfully",
     });
   } catch (error) {
     console.error("[Keys API] Error:", error);
