@@ -571,9 +571,6 @@ export async function executeCommand(
   const cmd = parts[0].toLowerCase();
   const args = parts.slice(1);
 
-  // Log command execution start
-  await logCommandStart(context, commandText);
-
   let result: CommandResult;
 
   switch (cmd) {
@@ -617,8 +614,8 @@ export async function executeCommand(
       };
   }
 
-  // Log command execution end
-  await logCommandEnd(context, commandText, result);
+  // Log command execution to immutable table
+  await logCommandToImmutableTable(context, commandText, result);
 
   return result;
 }
@@ -626,49 +623,34 @@ export async function executeCommand(
 // ============================================
 // LOGGING FUNCTIONS
 // ============================================
-async function logCommandStart(context: CommandContext, command: string) {
-  try {
-    await context.supabase.from("immutable_command_log").insert({
-      user_id: context.userId,
-      command_text: command,
-      status: "pending",
-      executed_at: new Date().toISOString(),
-    });
-  } catch (e) {
-    console.error("Failed to log command start:", e);
-  }
-}
 
-async function logCommandEnd(
+/**
+ * Log a command execution to the immutable_command_log table
+ * This always inserts a new record with the complete information
+ */
+async function logCommandToImmutableTable(
   context: CommandContext,
-  command: string,
+  commandText: string,
   result: CommandResult
 ) {
   try {
-    // Update the most recent pending command for this user
-    const { data: pendingCommands } = await context.supabase
-      .from("immutable_command_log")
-      .select("id")
-      .eq("user_id", context.userId)
-      .eq("status", "pending")
-      .eq("command_text", command)
-      .order("executed_at", { ascending: false })
-      .limit(1);
+    const { error } = await context.supabase.from("immutable_command_log").insert({
+      user_id: context.userId,
+      command_text: commandText,
+      signature: context.userEmail || null,
+      executor_ip: null, // Can be filled from request context if needed
+      executed_at: new Date().toISOString(),
+      status: result.success ? "executed" : "failed",
+      result_summary: result.message?.substring(0, 1000) || null, // Limit to 1000 chars
+      parameters: null, // Can be extended to store command args
+    });
 
-    const pending = pendingCommands?.[0];
-
-    if (pending?.id) {
-      await context.supabase
-        .from("immutable_command_log")
-        .update({
-          status: result.success ? "executed" : "failed",
-          result_summary: result.message,
-          completed_at: new Date().toISOString(),
-        })
-        .eq("id", pending.id);
+    if (error) {
+      console.error("[CommandExecutor] Failed to log command:", error.message);
+    } else {
+      console.log("[CommandExecutor] Command logged successfully:", commandText.split(" ")[0]);
     }
   } catch (e) {
-    // Silently fail - logging is not critical
-    console.error("[CommandExecutor] Failed to log command end:", e);
+    console.error("[CommandExecutor] Exception logging command:", e);
   }
 }
