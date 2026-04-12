@@ -5,6 +5,8 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { analyzeCommandLogs, formatEvolutionReport } from "./self-evolution";
+import fs from "fs";
+import path from "path";
 
 export interface CommandResult {
   success: boolean;
@@ -633,24 +635,62 @@ async function logCommandToImmutableTable(
   commandText: string,
   result: CommandResult
 ) {
+  const logEntry = {
+    user_id: context.userId,
+    command_text: commandText,
+    signature: context.userEmail || null,
+    executor_ip: null,
+    executed_at: new Date().toISOString(),
+    status: result.success ? "executed" : "failed",
+    result_summary: result.message?.substring(0, 1000) || null,
+    parameters: null,
+  };
+
+  // Log to Supabase
   try {
-    const { error } = await context.supabase.from("immutable_command_log").insert({
-      user_id: context.userId,
-      command_text: commandText,
-      signature: context.userEmail || null,
-      executor_ip: null, // Can be filled from request context if needed
-      executed_at: new Date().toISOString(),
-      status: result.success ? "executed" : "failed",
-      result_summary: result.message?.substring(0, 1000) || null, // Limit to 1000 chars
-      parameters: null, // Can be extended to store command args
-    });
+    const { error } = await context.supabase.from("immutable_command_log").insert(logEntry);
 
     if (error) {
-      console.error("[CommandExecutor] Failed to log command:", error.message);
+      console.error("[CommandExecutor] Failed to log command to Supabase:", error.message);
     } else {
-      console.log("[CommandExecutor] Command logged successfully:", commandText.split(" ")[0]);
+      console.log("[CommandExecutor] Command logged to Supabase:", commandText.split(" ")[0]);
     }
   } catch (e) {
-    console.error("[CommandExecutor] Exception logging command:", e);
+    console.error("[CommandExecutor] Exception logging to Supabase:", e);
+  }
+
+  // Log to local file as backup
+  try {
+    const logsDir = path.join(process.cwd(), "logs");
+    const logFile = path.join(logsDir, "commands.json");
+
+    // Ensure logs directory exists
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+
+    // Read existing logs
+    let logs: any[] = [];
+    if (fs.existsSync(logFile)) {
+      const content = fs.readFileSync(logFile, "utf-8");
+      try {
+        logs = JSON.parse(content);
+        if (!Array.isArray(logs)) logs = [];
+      } catch {
+        logs = [];
+      }
+    }
+
+    // Add new entry (keep only last 100 to prevent file from growing too large)
+    logs.push(logEntry);
+    if (logs.length > 100) {
+      logs = logs.slice(-100);
+    }
+
+    // Write back to file
+    fs.writeFileSync(logFile, JSON.stringify(logs, null, 2));
+    console.log("[CommandExecutor] Command logged to local file:", commandText.split(" ")[0]);
+  } catch (e) {
+    console.error("[CommandExecutor] Exception logging to local file:", e);
   }
 }

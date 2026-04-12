@@ -11,6 +11,8 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import fs from "fs";
+import path from "path";
 
 export interface CommandLogEntry {
   id: number;
@@ -40,6 +42,43 @@ export interface EvolutionAnalysis {
 }
 
 /**
+ * Read local logs from file as fallback
+ */
+function readLocalLogs(): CommandLogEntry[] {
+  try {
+    const logFile = path.join(process.cwd(), "logs", "commands.json");
+    if (!fs.existsSync(logFile)) {
+      console.log("[SelfEvolution] Local log file not found:", logFile);
+      return [];
+    }
+
+    const content = fs.readFileSync(logFile, "utf-8");
+    const logs = JSON.parse(content);
+    
+    if (!Array.isArray(logs)) {
+      console.log("[SelfEvolution] Local log file is not an array");
+      return [];
+    }
+
+    console.log(`[SelfEvolution] Read ${logs.length} entries from local file`);
+    
+    // Map local format to CommandLogEntry format
+    return logs.map((log: any) => ({
+      id: log.id || Date.now(),
+      user_id: log.user_id,
+      command_text: log.command_text,
+      status: log.status,
+      result_summary: log.result_summary,
+      executed_at: log.executed_at,
+      completed_at: log.executed_at, // Use same timestamp for completed
+    }));
+  } catch (e) {
+    console.error("[SelfEvolution] Failed to read local logs:", e);
+    return [];
+  }
+}
+
+/**
  * Analyze last 50 commands from immutable_command_log
  */
 export async function analyzeCommandLogs(
@@ -47,8 +86,11 @@ export async function analyzeCommandLogs(
 ): Promise<EvolutionAnalysis> {
   console.log("[SelfEvolution] Analyzing command logs...");
 
+  let commands: CommandLogEntry[] = [];
+  let useLocal = false;
+
   try {
-    // Fetch last 50 commands
+    // Fetch last 50 commands from Supabase
     const { data: logs, error } = await supabase
       .from("immutable_command_log")
       .select("*")
@@ -56,17 +98,26 @@ export async function analyzeCommandLogs(
       .limit(50);
 
     if (error) {
-      console.error("[SelfEvolution] Failed to fetch logs:", error);
-      return {
-        totalAnalyzed: 0,
-        failedCommands: 0,
-        slowCommands: 0,
-        suggestions: [],
-        patterns: [],
-      };
+      console.error("[SelfEvolution] Failed to fetch from Supabase:", error.message);
+      useLocal = true;
+    } else if (!logs || logs.length === 0) {
+      console.log("[SelfEvolution] No logs in Supabase, checking local file...");
+      useLocal = true;
+    } else {
+      commands = logs as CommandLogEntry[];
+      console.log(`[SelfEvolution] Fetched ${commands.length} entries from Supabase`);
     }
+  } catch (e) {
+    console.error("[SelfEvolution] Exception fetching from Supabase:", e);
+    useLocal = true;
+  }
 
-    const commands = (logs || []) as CommandLogEntry[];
+  // Fallback to local file if Supabase failed or returned empty
+  if (useLocal) {
+    commands = readLocalLogs();
+  }
+
+  try {
     const failedCommands = commands.filter((c) => c.status === "failed");
     const slowCommands = commands.filter((c) => {
       if (!c.completed_at || !c.executed_at) return false;
