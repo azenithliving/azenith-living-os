@@ -1,28 +1,157 @@
 /**
  * Mastermind AI System - Natural Language Intelligence
- * 
+ *
  * "I understand you, not just your commands."
- * 
+ *
  * This module provides:
  * 1. Natural language understanding (Arabic & English)
- * 2. OpenRouter-powered intelligent responses
+ * 2. Multi-provider AI with round-robin key management
  * 3. Automatic command detection and execution
  * 4. Context-aware conversation memory
+ * 5. Intelligent fallback between providers (Groq → Mistral → OpenRouter)
  */
 
 import { createClient } from "@supabase/supabase-js";
 import { executeCommand } from "./command-executor";
 
 // ============================================
-// GROQ API CONFIGURATION
+// API CONFIGURATION
 // ============================================
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions";
+const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-// Groq model to use (llama-3.3-70b-versatile is fast and capable)
+// Models
 const GROQ_MODEL = "llama-3.3-70b-versatile";
+const MISTRAL_MODEL = "mistral-large-latest";
+const OPENROUTER_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
 
-interface GroqResponse {
+// ============================================
+// KEY MANAGEMENT - Round Robin & Cooldown
+// ============================================
+
+interface APIKeyRecord {
+  id: number;
+  provider: string;
+  key: string;
+  is_active: boolean;
+  cooldown_until: string | null;
+  total_requests: number;
+  last_used_at: string;
+  created_at: string;
+}
+
+// In-memory storage for round-robin indices and cooldown tracking
+const roundRobinIndices: Record<string, number> = {};
+const keyCooldowns: Record<string, number> = {}; // key -> cooldown expiry timestamp
+
+/**
+ * Get all active keys from database for a provider
+ */
+async function getActiveKeysFromDB(
+  supabase: any,
+  provider: string
+): Promise<APIKeyRecord[]> {
+  try {
+    console.log(`[MastermindAI] Fetching active keys for ${provider} from database...`);
+
+    const { data, error } = await supabase
+      .from("api_keys")
+      .select("*")
+      .eq("provider", provider)
+      .eq("is_active", true)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error(`[MastermindAI] Database error fetching ${provider} keys:`, error.message);
+      return [];
+    }
+
+    // Filter out keys that are in cooldown
+    const now = Date.now();
+    const rawKeys = (data || []) as unknown as APIKeyRecord[];
+    const availableKeys = rawKeys.filter((key: APIKeyRecord) => {
+      const cooldownExpiry = keyCooldowns[key.key] || 0;
+      return cooldownExpiry < now;
+    });
+
+    console.log(`[MastermindAI] Found ${availableKeys.length} available ${provider} keys (${rawKeys.length} total, ${rawKeys.length - availableKeys.length} in cooldown)`);
+
+    return availableKeys;
+  } catch (err) {
+    console.error(`[MastermindAI] Exception fetching ${provider} keys:`, err);
+    return [];
+  }
+}
+
+/**
+ * Get next key using round-robin algorithm
+ */
+async function roundRobinKey(
+  supabase: any,
+  provider: string
+): Promise<string | null> {
+  const keys = await getActiveKeysFromDB(supabase, provider);
+
+  if (keys.length === 0) {
+    console.warn(`[MastermindAI] No active ${provider} keys available`);
+    return null;
+  }
+
+  // Initialize or increment round-robin index
+  if (!(provider in roundRobinIndices)) {
+    roundRobinIndices[provider] = 0;
+  }
+
+  const currentIndex = roundRobinIndices[provider] % keys.length;
+  roundRobinIndices[provider] = (roundRobinIndices[provider] + 1) % keys.length;
+
+  const selectedKey = keys[currentIndex];
+
+  // Log key usage (first 6 chars only for security)
+  const keyPrefix = selectedKey.key.substring(0, 6);
+  console.log(`[MastermindAI] Using ${provider} key: ${keyPrefix}... (${keys.length} keys available)`);
+
+  return selectedKey.key;
+}
+
+/**
+ * Mark a key as being in cooldown (temporary failure)
+ */
+function markKeyCooldown(provider: string, key: string, minutes: number): void {
+  const cooldownMs = minutes * 60 * 1000;
+  keyCooldowns[key] = Date.now() + cooldownMs;
+  const keyPrefix = key.substring(0, 6);
+  console.log(`[MastermindAI] ${provider} key ${keyPrefix}... put in cooldown for ${minutes} minutes`);
+}
+
+/**
+ * Get environment key as fallback
+ */
+function getEnvKey(provider: string): string | null {
+  const envVars: Record<string, string | undefined> = {
+    groq: process.env.GROQ_API_KEY,
+    mistral: process.env.MISTRAL_API_KEY,
+    openrouter: process.env.OPENROUTER_API_KEY,
+  };
+
+  const key = envVars[provider];
+  if (key) {
+    const keyPrefix = key.substring(0, 6);
+    console.log(`[MastermindAI] Using ${provider} key from environment: ${keyPrefix}... (fallback)`);
+    return key;
+  }
+
+  console.warn(`[MastermindAI] No ${provider} API key found in environment`);
+  return null;
+}
+
+// ============================================
+// API RESPONSE TYPES
+// ============================================
+
+interface AIProviderResponse {
   choices: Array<{
     message: {
       content: string;
@@ -42,136 +171,307 @@ interface GroqResponse {
   };
 }
 
-/**
- * Fetch a valid Groq API key from the database
- */
-async function getGroqKey(supabase: ReturnType<typeof createClient>): Promise<string | null> {
-  try {
-    console.log("[MastermindAI] Fetching Groq key from database...");
-    
-    const { data, error } = await supabase
-      .from("api_keys")
-      .select("key")
-      .eq("provider", "groq")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false })
-      .limit(1);
-    
-    if (error) {
-      console.error("[MastermindAI] Database error fetching key:", error.message);
-      return null;
-    }
-    
-    if (data && data.length > 0) {
-      console.log("[MastermindAI] Found active Groq key in database");
-      const keyRecord = data[0] as { key: string };
-      return keyRecord.key;
-    }
-    
-    console.warn("[MastermindAI] No active Groq keys found in database");
-    return null;
-  } catch (err) {
-    console.error("[MastermindAI] Exception fetching key:", err);
-    return null;
-  }
-}
+// ============================================
+// PROVIDER API CALLS
+// ============================================
 
 /**
- * Get Groq API key from environment variables (fallback)
+ * Call Groq API with retry logic and key rotation
  */
-function getEnvGroqKey(): string | null {
-  if (process.env.GROQ_API_KEY) {
-    console.log("[MastermindAI] Using GROQ_API_KEY from env");
-    return process.env.GROQ_API_KEY;
+async function callGroq(
+  messages: Array<{ role: string; content: string }>,
+  supabase: any,
+  retries = 2
+): Promise<AIProviderResponse | null> {
+  const requestId = Math.random().toString(36).substring(7);
+
+  console.log(`[MastermindAI] [${requestId}] Groq request with ${retries} retries available`);
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    let apiKey: string | null = null;
+
+    // Try database keys first, then env fallback
+    apiKey = await roundRobinKey(supabase, "groq");
+    if (!apiKey) {
+      apiKey = getEnvKey("groq");
+    }
+
+    if (!apiKey) {
+      console.error(`[MastermindAI] [${requestId}] No Groq API key available`);
+      return null;
+    }
+
+    const keyPrefix = apiKey.substring(0, 6);
+    console.log(`[MastermindAI] [${requestId}] Attempt ${attempt + 1} using key: ${keyPrefix}...`);
+
+    try {
+      const response = await fetch(GROQ_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages,
+          temperature: 0.7,
+          max_tokens: 1024,
+        }),
+      });
+
+      console.log(`[MastermindAI] [${requestId}] Response status: ${response.status}`);
+
+      // Handle rate limiting (429) and server errors (5xx)
+      if (response.status === 429 || response.status >= 500) {
+        const cooldownMinutes = response.status === 429 ? 5 : 1;
+        markKeyCooldown("groq", apiKey, cooldownMinutes);
+
+        if (attempt < retries) {
+          console.log(`[MastermindAI] [${requestId}] Retrying with next key...`);
+          continue;
+        }
+        return null;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[MastermindAI] [${requestId}] API error (${response.status}):`, errorText);
+        return null;
+      }
+
+      const data = await response.json() as AIProviderResponse;
+
+      if (data.error) {
+        console.error(`[MastermindAI] [${requestId}] API returned error:`, data.error);
+        return null;
+      }
+
+      console.log(`[MastermindAI] [${requestId}] Success! Model: ${data.model}`);
+      return data;
+    } catch (error) {
+      console.error(`[MastermindAI] [${requestId}] Exception calling Groq:`, error);
+      markKeyCooldown("groq", apiKey, 2); // 2 min cooldown on network errors
+
+      if (attempt < retries) {
+        console.log(`[MastermindAI] [${requestId}] Retrying with next key...`);
+        continue;
+      }
+      return null;
+    }
   }
-  
-  console.error("[MastermindAI] No Groq API key found in environment!");
+
   return null;
 }
 
 /**
- * Make request to Groq API with detailed logging
+ * Call Mistral API with retry logic and key rotation
  */
-async function callGroq(
+async function callMistral(
   messages: Array<{ role: string; content: string }>,
-  apiKey: string,
-  model: string = GROQ_MODEL
-): Promise<GroqResponse | null> {
+  supabase: any,
+  retries = 2
+): Promise<AIProviderResponse | null> {
   const requestId = Math.random().toString(36).substring(7);
-  
-  console.log(`[MastermindAI] [${requestId}] Groq request:`);
-  console.log(`[MastermindAI] [${requestId}] Model: ${model}`);
-  console.log(`[MastermindAI] [${requestId}] Messages count: ${messages.length}`);
-  
-  try {
-    const response = await fetch(GROQ_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature: 0.7,
-        max_tokens: 1024,
-      }),
-    });
-    
-    console.log(`[MastermindAI] [${requestId}] Response status: ${response.status}`);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[MastermindAI] [${requestId}] API error (${response.status}):`, errorText);
+
+  console.log(`[MastermindAI] [${requestId}] Mistral request with ${retries} retries available`);
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    let apiKey: string | null = null;
+
+    apiKey = await roundRobinKey(supabase, "mistral");
+    if (!apiKey) {
+      apiKey = getEnvKey("mistral");
+    }
+
+    if (!apiKey) {
+      console.error(`[MastermindAI] [${requestId}] No Mistral API key available`);
       return null;
     }
-    
-    const data = await response.json() as GroqResponse;
-    
-    if (data.error) {
-      console.error(`[MastermindAI] [${requestId}] API returned error:`, data.error);
+
+    const keyPrefix = apiKey.substring(0, 6);
+    console.log(`[MastermindAI] [${requestId}] Attempt ${attempt + 1} using key: ${keyPrefix}...`);
+
+    try {
+      const response = await fetch(MISTRAL_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: MISTRAL_MODEL,
+          messages,
+          temperature: 0.7,
+          max_tokens: 1024,
+        }),
+      });
+
+      console.log(`[MastermindAI] [${requestId}] Response status: ${response.status}`);
+
+      if (response.status === 429 || response.status >= 500) {
+        const cooldownMinutes = response.status === 429 ? 5 : 1;
+        markKeyCooldown("mistral", apiKey, cooldownMinutes);
+
+        if (attempt < retries) {
+          console.log(`[MastermindAI] [${requestId}] Retrying with next key...`);
+          continue;
+        }
+        return null;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[MastermindAI] [${requestId}] API error (${response.status}):`, errorText);
+        return null;
+      }
+
+      const data = await response.json() as AIProviderResponse;
+
+      if (data.error) {
+        console.error(`[MastermindAI] [${requestId}] API returned error:`, data.error);
+        return null;
+      }
+
+      console.log(`[MastermindAI] [${requestId}] Success! Model: ${data.model}`);
+      return data;
+    } catch (error) {
+      console.error(`[MastermindAI] [${requestId}] Exception calling Mistral:`, error);
+      markKeyCooldown("mistral", apiKey, 2);
+
+      if (attempt < retries) {
+        console.log(`[MastermindAI] [${requestId}] Retrying with next key...`);
+        continue;
+      }
       return null;
     }
-    
-    console.log(`[MastermindAI] [${requestId}] Success! Model used: ${data.model}`);
-    console.log(`[MastermindAI] [${requestId}] Tokens used:`, data.usage);
-    
-    return data;
-  } catch (error) {
-    console.error(`[MastermindAI] [${requestId}] Exception calling Groq:`, error);
-    return null;
   }
+
+  return null;
 }
 
 /**
- * Generate AI response with Groq
+ * Call OpenRouter API with retry logic and key rotation
  */
-async function generateAIResponseWithGroq(
+async function callOpenRouter(
+  messages: Array<{ role: string; content: string }>,
+  supabase: any,
+  retries = 2
+): Promise<AIProviderResponse | null> {
+  const requestId = Math.random().toString(36).substring(7);
+
+  console.log(`[MastermindAI] [${requestId}] OpenRouter request with ${retries} retries available`);
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    let apiKey: string | null = null;
+
+    apiKey = await roundRobinKey(supabase, "openrouter");
+    if (!apiKey) {
+      apiKey = getEnvKey("openrouter");
+    }
+
+    if (!apiKey) {
+      console.error(`[MastermindAI] [${requestId}] No OpenRouter API key available`);
+      return null;
+    }
+
+    const keyPrefix = apiKey.substring(0, 6);
+    console.log(`[MastermindAI] [${requestId}] Attempt ${attempt + 1} using key: ${keyPrefix}...`);
+
+    try {
+      const response = await fetch(OPENROUTER_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "https://azenithliving.com",
+          "X-Title": "Azenith Living Mastermind",
+        },
+        body: JSON.stringify({
+          model: OPENROUTER_MODEL,
+          messages,
+          temperature: 0.7,
+          max_tokens: 1024,
+        }),
+      });
+
+      console.log(`[MastermindAI] [${requestId}] Response status: ${response.status}`);
+
+      if (response.status === 429 || response.status >= 500) {
+        const cooldownMinutes = response.status === 429 ? 5 : 1;
+        markKeyCooldown("openrouter", apiKey, cooldownMinutes);
+
+        if (attempt < retries) {
+          console.log(`[MastermindAI] [${requestId}] Retrying with next key...`);
+          continue;
+        }
+        return null;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[MastermindAI] [${requestId}] API error (${response.status}):`, errorText);
+        return null;
+      }
+
+      const data = await response.json() as AIProviderResponse;
+
+      if (data.error) {
+        console.error(`[MastermindAI] [${requestId}] API returned error:`, data.error);
+        return null;
+      }
+
+      console.log(`[MastermindAI] [${requestId}] Success! Model: ${data.model}`);
+      return data;
+    } catch (error) {
+      console.error(`[MastermindAI] [${requestId}] Exception calling OpenRouter:`, error);
+      markKeyCooldown("openrouter", apiKey, 2);
+
+      if (attempt < retries) {
+        console.log(`[MastermindAI] [${requestId}] Retrying with next key...`);
+        continue;
+      }
+      return null;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Generate AI response with provider fallback: Groq → Mistral → OpenRouter
+ */
+async function generateAIResponseWithProviderFallback(
   messages: Array<{ role: string; content: string }>,
   supabase: any
 ): Promise<string | null> {
-  
-  // 1. Try database keys first
-  let apiKey = await getGroqKey(supabase);
-  
-  // 2. Fall back to environment variables
-  if (!apiKey) {
-    apiKey = getEnvGroqKey();
+
+  // Try Groq first
+  console.log("[MastermindAI] Attempting with Groq provider...");
+  const groqResponse = await callGroq(messages, supabase);
+
+  if (groqResponse?.choices?.[0]?.message?.content) {
+    return groqResponse.choices[0].message.content.trim();
   }
-  
-  if (!apiKey) {
-    console.error("[MastermindAI] No API key available - cannot generate response");
-    return null;
+
+  console.log("[MastermindAI] Groq failed, trying Mistral...");
+
+  // Fallback to Mistral
+  const mistralResponse = await callMistral(messages, supabase);
+
+  if (mistralResponse?.choices?.[0]?.message?.content) {
+    return mistralResponse.choices[0].message.content.trim();
   }
-  
-  // 3. Call Groq API
-  const response = await callGroq(messages, apiKey, GROQ_MODEL);
-  
-  if (response?.choices?.[0]?.message?.content) {
-    return response.choices[0].message.content.trim();
+
+  console.log("[MastermindAI] Mistral failed, trying OpenRouter...");
+
+  // Final fallback to OpenRouter
+  const openRouterResponse = await callOpenRouter(messages, supabase);
+
+  if (openRouterResponse?.choices?.[0]?.message?.content) {
+    return openRouterResponse.choices[0].message.content.trim();
   }
-  
-  console.error("[MastermindAI] Groq API call failed");
+
+  console.error("[MastermindAI] All providers failed");
   return null;
 }
 
@@ -402,8 +702,8 @@ async function generateAIResponse(
   
   console.log("[MastermindAI] Generating AI response with Groq...");
   
-  // Call Groq with proper error handling
-  const response = await generateAIResponseWithGroq(messages, supabase);
+  // Call AI with provider fallback (Groq → Mistral → OpenRouter)
+  const response = await generateAIResponseWithProviderFallback(messages, supabase);
   
   if (response) {
     return response;
