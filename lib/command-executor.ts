@@ -4,6 +4,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { analyzeCommandLogs, formatEvolutionReport } from "./self-evolution";
 
 export interface CommandResult {
   success: boolean;
@@ -482,7 +483,45 @@ export async function backupDb(
 }
 
 // ============================================
-// 10. HELP - Show available commands
+// 10. EVOLVE - Self-evolution analysis
+// ============================================
+export async function evolve(
+  args: string[],
+  context: CommandContext
+): Promise<CommandResult> {
+  try {
+    console.log("[CommandExecutor] Running self-evolution analysis...");
+
+    // Analyze command logs
+    const analysis = await analyzeCommandLogs(context.supabase);
+
+    // Format the report for display
+    const report = formatEvolutionReport(analysis);
+
+    return {
+      success: true,
+      message: report,
+      data: {
+        totalAnalyzed: analysis.totalAnalyzed,
+        failedCommands: analysis.failedCommands,
+        slowCommands: analysis.slowCommands,
+        suggestionCount: analysis.suggestions.length,
+        patterns: analysis.patterns,
+      },
+    };
+  } catch (error) {
+    console.error("[CommandExecutor] Evolve error:", error);
+    return {
+      success: false,
+      message: error instanceof Error
+        ? `فشل تحليل التطور الذاتي: ${error.message}`
+        : "فشل تحليل التطور الذاتي",
+    };
+  }
+}
+
+// ============================================
+// 11. HELP - Show available commands
 // ============================================
 export async function help(
   args: string[],
@@ -498,6 +537,7 @@ export async function help(
     { cmd: "clear_cache [type]", desc: "مسح الذاكرة المؤقتة" },
     { cmd: "restart_service <service>", desc: "إعادة تشغيل خدمة" },
     { cmd: "backup_db", desc: "إنشاء نسخة احتياطية" },
+    { cmd: "evolve", desc: "تحليل التطور الذاتي واقتراح تحسينات" },
     { cmd: "help", desc: "عرض هذه القائمة" },
   ];
 
@@ -563,6 +603,9 @@ export async function executeCommand(
       break;
     case "backup_db":
       result = await backupDb(args, context);
+      break;
+    case "evolve":
+      result = await evolve(args, context);
       break;
     case "help":
       result = await help(args, context);

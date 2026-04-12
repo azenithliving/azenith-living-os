@@ -558,7 +558,7 @@ const MASTERMIND_SYSTEM_PROMPT = `أنت Mastermind - النظام الذكي ل
 const AVAILABLE_COMMANDS = [
   "add_key", "remove_key", "list_keys", "rate_limit",
   "send_notification", "show_stats", "clear_cache",
-  "restart_service", "backup_db", "help"
+  "restart_service", "backup_db", "evolve", "help"
 ];
 
 interface DetectedCommand {
@@ -627,6 +627,15 @@ function detectCommand(message: string): DetectedCommand | null {
       /help/i,
       /ما.*الأوامر/i,
       /commands/i,
+    ],
+    evolve: [
+      /تطور/i,
+      /evolve/i,
+      /تحسين/i,
+      /تحليل/i,
+      /تعلم/i,
+      /self.*improve/i,
+      /learn.*from.*mistakes/i,
     ],
   };
   
