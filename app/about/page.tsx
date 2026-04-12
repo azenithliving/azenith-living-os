@@ -1,9 +1,28 @@
-import Link from "next/link";
-import { getRuntimeConfig } from "@/lib/runtime-config";
-import { aboutData } from "@/lib/site-content";
+"use client";
 
-export default async function AboutPage() {
-  const runtimeConfig = await getRuntimeConfig();
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { aboutData } from "@/lib/site-content";
+import { TranslatedText } from "@/components/TranslatedText";
+import useSessionStore from "@/stores/useSessionStore";
+import { getTranslation } from "@/lib/multilingual-engine";
+
+interface RuntimeConfig {
+  whatsappNumber?: string;
+}
+
+export default function AboutPage() {
+  const language = useSessionStore((state) => state.language);
+  const t = (key: string) => getTranslation(key, language);
+  const [runtimeConfig, setRuntimeConfig] = useState<RuntimeConfig>({});
+
+  useEffect(() => {
+    // Load runtime config client-side
+    fetch("/api/config")
+      .then((res) => res.json())
+      .then((data) => setRuntimeConfig(data))
+      .catch(() => setRuntimeConfig({}));
+  }, []);
 
   return (
     <main className="px-6 py-12 md:px-10 lg:px-16">
@@ -37,20 +56,20 @@ export default async function AboutPage() {
               href="/rooms" 
               className="block w-full rounded-full bg-brand-primary text-brand-accent px-8 py-4 font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-[#d8b56d] transition-all"
             >
-              استكشف غرفنا
+              {t("nav.rooms")}
             </Link>
             {runtimeConfig.whatsappNumber && (
               <Link 
-                href={`https://wa.me/${runtimeConfig.whatsappNumber}?text=مرحبا، أنا مهتم بـ ${aboutData.title}`} 
+                href={`https://wa.me/${runtimeConfig.whatsappNumber}?text=${language === "ar" ? "مرحبا، أنا مهتم بـ" : "Hello, I'm interested in"} ${aboutData.title}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="block w-full rounded-full border-2 border-brand-primary/50 bg-transparent text-brand-primary px-8 py-4 font-semibold text-lg hover:bg-brand-primary/10 hover:border-brand-primary transition-all"
               >
-                تواصل معنا
+                {t("nav.contact")}
               </Link>
             )}
             <Link href="/furniture" className="block w-full rounded-full border border-white/20 bg-white/[0.05] text-white px-8 py-4 font-semibold hover:border-brand-primary hover:bg-brand-primary/10 transition-all">
-              تصفح الأثاث
+              {language === "ar" ? "تصفح الأثاث" : "Browse Furniture"}
             </Link>
           </div>
         </section>

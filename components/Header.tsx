@@ -7,29 +7,28 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LanguageSwitcher } from "./elite/LanguageSwitcher";
 import type { Language } from "@/lib/multilingual-engine";
+import useSessionStore from "@/stores/useSessionStore";
+import { getTranslation } from "@/lib/multilingual-engine";
 
 const SOVEREIGN_ACCESS_KEY = "sovereign_access";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [clickCount, setClickCount] = useState(0);
-  const [currentLang, setCurrentLang] = useState<Language>("ar");
-  const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
-  // Load saved language preference on mount
-  useEffect(() => {
-    const savedLang = localStorage.getItem("azenith-language") as Language;
-    if (savedLang && (savedLang === "ar" || savedLang === "en")) {
-      setCurrentLang(savedLang);
-    }
-  }, []);
+  // Use session store for language state
+  const currentLang = useSessionStore((state) => state.language);
+  const setLanguage = useSessionStore((state) => state.setLanguage);
+  const isHydrated = useSessionStore((state) => state.isHydrated);
+
+  // Translation helper
+  const t = (key: string) => getTranslation(key, currentLang);
 
   const handleLanguageChange = (lang: Language) => {
-    setCurrentLang(lang);
-    localStorage.setItem("azenith-language", lang);
-    // Dispatch custom event for other components to listen
-    window.dispatchEvent(new CustomEvent("languagechange", { detail: lang }));
+    if (lang === currentLang) return;
+    setLanguage(lang);
   };
 
   useEffect(() => {
@@ -75,16 +74,16 @@ export default function Header() {
       >
         <nav dir="rtl" className="hidden items-center gap-8 text-sm font-medium text-white md:flex">
           <Link href="/about" className="transition-colors hover:text-[#C5A059]">
-            إرثنا
+            {t("nav.about")}
           </Link>
           <Link href="/rooms" className="transition-colors hover:text-[#C5A059]">
-            استكشف المساحات
+            {t("nav.rooms")}
           </Link>
           <Link href="/request" className="transition-colors hover:text-[#C5A059]">
-            تواصل معنا
+            {t("nav.contact")}
           </Link>
-          <LanguageSwitcher 
-            currentLang={currentLang} 
+          <LanguageSwitcher
+            currentLang={currentLang}
             onChange={handleLanguageChange}
             className="border-[#C5A059]/30"
           />
@@ -131,17 +130,17 @@ export default function Header() {
           >
             <div className="flex flex-col items-end space-y-6 px-6 py-8" dir="rtl">
               <Link href="/about" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                إرثنا
+                {t("nav.about")}
               </Link>
               <Link href="/rooms" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                استكشف المساحات
+                {t("nav.rooms")}
               </Link>
               <Link href="/request" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                تواصل معنا
+                {t("nav.contact")}
               </Link>
               <div className="pt-4 border-t border-white/10 w-full">
-                <LanguageSwitcher 
-                  currentLang={currentLang} 
+                <LanguageSwitcher
+                  currentLang={currentLang}
                   onChange={handleLanguageChange}
                   className="border-[#C5A059]/30"
                 />

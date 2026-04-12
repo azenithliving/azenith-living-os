@@ -4,24 +4,23 @@ import { Building2, Users, Mail, Factory } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { isMasterAdmin } from "@/lib/admin";
 import { getMasterDashboardSnapshot } from "@/lib/admin-data";
-import { 
-  MetricCard, 
-  TenantTable, 
+import {
+  MetricCard,
+  TenantTable,
   ActivityFeed,
-  DistributionChart 
+  DistributionChart
 } from "@/components/admin/master-dashboard-components";
-import { AdminGateGatekeeper } from "@/components/admin/admin-gate-gatekeeper";
 
 export default async function AdminGateDashboard() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
-    redirect("/admin-gate/login");
+    redirect("/login");
   }
 
   const isAdmin = await isMasterAdmin();
-  
+
   if (!isAdmin) {
     return (
       <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-8 text-center">
@@ -36,8 +35,7 @@ export default async function AdminGateDashboard() {
   const snapshot = await getMasterDashboardSnapshot();
 
   return (
-    <AdminGateGatekeeper>
-      <div className="space-y-8">
+    <div className="space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -168,6 +166,6 @@ export default async function AdminGateDashboard() {
           </div>
         </div>
       </div>
-    </AdminGateGatekeeper>
   );
 }
+

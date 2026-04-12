@@ -1,12 +1,56 @@
 "use client";
 
-import { useState } from "react";
-import { askOpenRouter } from "@/lib/ai-orchestrator";
+import { useState, useCallback } from "react";
+import { askOpenRouter } from "./ai-orchestrator";
+import {
+  checkTranslationCache,
+  saveTranslationToCache,
+} from "./translation-vault";
 
 /**
  * Multilingual Sovereign Engine
  * Context-aware translation for High-Society Egyptian (AR) and International Luxury (EN)
+ * With 3s AI timeout fallback to static translations
  */
+
+// Translation cache to avoid repeated API calls
+const translationCache = new Map<string, string>();
+
+/**
+ * Execute a function with timeout
+ * Returns { timedOut: true } if function takes longer than timeoutMs
+ */
+async function executeWithTimeout<T>(
+  fn: () => Promise<T>,
+  timeoutMs: number
+): Promise<{ result?: T; timedOut: boolean; error?: Error }> {
+  return new Promise((resolve) => {
+    let isSettled = false;
+
+    const timeout = setTimeout(() => {
+      if (!isSettled) {
+        isSettled = true;
+        resolve({ timedOut: true });
+      }
+    }, timeoutMs);
+
+    fn()
+      .then((result) => {
+        if (!isSettled) {
+          isSettled = true;
+          clearTimeout(timeout);
+          resolve({ result, timedOut: false });
+        }
+      })
+      .catch((error) => {
+        if (!isSettled) {
+          isSettled = true;
+          clearTimeout(timeout);
+          resolve({ error, timedOut: false });
+        }
+      });
+  });
+}
 
 export type Language = "ar" | "en";
 
@@ -210,18 +254,65 @@ TEXT TO TRANSLATE:
 
 Return ONLY the English translation, no explanations.`;
 
-  const result = await askOpenRouter(prompt, undefined, {
-    model: "anthropic/claude-3.5-sonnet",
-    temperature: 0.3,
-    maxTokens: 1024,
-  });
-
-  if (!result.success) {
-    console.error("[MultilingualEngine] Translation failed:", result.error);
-    return text; // Fallback to original
+  // Step A: Check server-side vault first (Zero AI cost if cached)
+  const vaultCache = await checkTranslationCache(text, context?.scope);
+  if (vaultCache) {
+    console.log("[MultilingualEngine] Server vault cache HIT");
+    return vaultCache;
   }
 
-  return result.content.trim();
+  // Step B: Check local memory cache
+  const cacheKey = `${text}:${targetLang}:${context?.scope || "default"}`;
+  if (translationCache.has(cacheKey)) {
+    return translationCache.get(cacheKey)!;
+  }
+
+  // Step C: Execute with 3s timeout
+  const { result, timedOut, error } = await executeWithTimeout(
+    async () => {
+      const response = await askOpenRouter(prompt, undefined, {
+        model: "anthropic/claude-3.5-sonnet",
+        temperature: 0.3,
+        maxTokens: 1024,
+      });
+      return response;
+    },
+    3000 // 3 second timeout
+  );
+
+  // Handle timeout
+  if (timedOut) {
+    console.warn("[MultilingualEngine] Translation timed out (>3s), using static fallback");
+    // Try to get from static translations if it's a UI key
+    const staticTranslation = UI_TRANSLATIONS[targetLang][text] || UI_TRANSLATIONS["en"][text];
+    if (staticTranslation) {
+      translationCache.set(cacheKey, staticTranslation);
+      return staticTranslation;
+    }
+    // Otherwise return original text
+    translationCache.set(cacheKey, text);
+    return text;
+  }
+
+  // Handle error
+  if (error || !result?.success) {
+    console.error("[MultilingualEngine] Translation failed:", error || result?.error);
+    // Fallback to static translation or original
+    const fallback = UI_TRANSLATIONS[targetLang][text] || UI_TRANSLATIONS["en"][text] || text;
+    translationCache.set(cacheKey, fallback);
+    return fallback;
+  }
+
+  // Success - cache in memory and save to server vault
+  const translatedText = result.content.trim();
+  translationCache.set(cacheKey, translatedText);
+
+  // Save to Supabase vault for future users (fire-and-forget)
+  saveTranslationToCache(text, translatedText, context?.scope).catch((err) =>
+    console.error("[MultilingualEngine] Failed to save to vault:", err)
+  );
+
+  return translatedText;
 }
 
 /**
@@ -317,16 +408,51 @@ export function formatCurrency(amount: number, lang: Language): string {
 }
 
 /**
- * React hook for translations
+ * React hook for translations - Store Integrated Version
+ * Uses session store for persistence across components
  */
-export function useMultilingualEngine(initialLang: Language = "en") {
-  const [language, setLanguage] = useState<Language>(initialLang);
+export function useMultilingualEngine(initialLang: Language = "ar") {
+  const [language, setLocalLanguage] = useState<Language>(initialLang);
+  const [storeLoaded, setStoreLoaded] = useState(false);
 
-  const t = (key: string) => getTranslation(key, language);
-  
-  const translate = async (text: string, context?: Partial<TranslationContext>) => {
+  // Load store language on mount
+  useState(() => {
+    if (typeof window !== "undefined") {
+      import("@/stores/useSessionStore").then((mod) => {
+        const defaultExport = mod.default;
+        if (defaultExport) {
+          const storeLang = defaultExport.getState().language;
+          if (storeLang) {
+            setLocalLanguage(storeLang);
+          }
+          setStoreLoaded(true);
+        }
+      });
+    }
+  });
+
+  const setLanguage = useCallback((lang: Language) => {
+    setLocalLanguage(lang);
+    // Update store if available
+    if (typeof window !== "undefined" && storeLoaded) {
+      import("@/stores/useSessionStore").then((mod) => {
+        const defaultExport = mod.default;
+        if (defaultExport) {
+          defaultExport.getState().setLanguage(lang);
+        }
+      });
+    }
+    // Dispatch event for non-store components
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("languagechange", { detail: lang }));
+    }
+  }, [storeLoaded]);
+
+  const t = useCallback((key: string) => getTranslation(key, language), [language]);
+
+  const translate = useCallback(async (text: string, context?: Partial<TranslationContext>) => {
     return translateWithContext(text, language, context);
-  };
+  }, [language]);
 
   return {
     language,

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import { classifyIntent, getEventWeight, type Intent } from "@/lib/conversion-engine";
+import type { Language } from "@/lib/multilingual-engine";
 
 export interface UserPersona {
   certainty: "Low" | "Medium" | "High";
@@ -99,10 +100,13 @@ export interface SessionState {
   selectedStyle: string;
   roomIntent: string[];
 
+  // Multilingual Engine State
+  language: Language;
+
   // Behavioral Intelligence
   userPersona: UserPersona;
   behavioralReport: BehavioralReport | null;
-  
+
   // Neural Analytics: Deep Psychological Profile
   psychologicalProfile: PsychologicalProfile;
 
@@ -110,13 +114,14 @@ export interface SessionState {
   isHydrated: boolean;
 
   // Actions
-  updateProfile: (updates: Partial<Omit<SessionState, "updateProfile" | "trackEvent" | "toggleWishlist" | "processInteraction" | "setSelectedStyle" | "addRoomIntent" | "setHydrated" | "trackNeuralInteraction">>) => void;
+  updateProfile: (updates: Partial<Omit<SessionState, "updateProfile" | "trackEvent" | "toggleWishlist" | "processInteraction" | "setSelectedStyle" | "addRoomIntent" | "setHydrated" | "trackNeuralInteraction" | "setLanguage">>) => void;
   trackEvent: (type: string, value?: string) => void;
   toggleWishlist: (slug: string) => void;
   processInteraction: (type: string, weight: number) => void;
   setSelectedStyle: (style: string) => void;
   addRoomIntent: (roomSlug: string) => void;
   setHydrated: (value: boolean) => void;
+  setLanguage: (lang: Language) => void;
   resetSession: () => void;
   // Neural Analytics: Track weighted interactions
   trackNeuralInteraction: (
@@ -133,6 +138,7 @@ export interface SessionState {
 }
 
 const DEFAULT_STYLE = "modern";
+const DEFAULT_LANGUAGE: Language = "ar"; // Default to Arabic for Egyptian market
 const UPDATE_THROTTLE_MS = 500; // 500ms throttle for store updates
 
 // Throttle utility for store updates
@@ -191,6 +197,9 @@ const useSessionStore = create<SessionState>()(
       // UI State (persisted)
       selectedStyle: DEFAULT_STYLE,
       roomIntent: [],
+
+      // Multilingual Engine State
+      language: DEFAULT_LANGUAGE,
 
       // Behavioral Intelligence - starts with defaults
       userPersona: {
@@ -304,6 +313,14 @@ const useSessionStore = create<SessionState>()(
 
       setHydrated: (value: boolean) => set((state) => ({ ...state, isHydrated: value })),
 
+      setLanguage: (lang: Language) => set((state) => {
+        // Dispatch custom event for components that aren't using the store directly
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("languagechange", { detail: lang }));
+        }
+        return { ...state, language: lang };
+      }),
+
       // Neural Analytics: Track weighted interactions with psychological profiling
       trackNeuralInteraction: (imageId, interactionType, metadata) => set((state) => {
         const weights = { hover: 2, modal: 5, download: 10, reject: 1 };
@@ -391,6 +408,7 @@ const useSessionStore = create<SessionState>()(
         userProfile: {},
         selectedStyle: DEFAULT_STYLE,
         roomIntent: [],
+        language: DEFAULT_LANGUAGE,
         userPersona: { certainty: "Low", interestLevel: "Low" },
         behavioralReport: null,
         psychologicalProfile: {
@@ -441,6 +459,7 @@ const useSessionStore = create<SessionState>()(
         userProfile: state.userProfile,
         selectedStyle: state.selectedStyle,
         roomIntent: state.roomIntent,
+        language: state.language,
         userPersona: state.userPersona,
         behavioralReport: state.behavioralReport,
       }),

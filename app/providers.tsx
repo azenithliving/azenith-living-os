@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PostHogProvider } from "posthog-js/react";
+import { TranslationProvider } from "@/contexts/TranslationContext";
 
 // ENVIRONMENT DEBUG: Check if Supabase URL is visible to browser
 console.log("[ENV DEBUG] Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
@@ -39,8 +40,14 @@ export function Providers({ children }: ProvidersProps) {
 
   const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
+  const content = (
+    <TranslationProvider>
+      {children}
+    </TranslationProvider>
+  );
+
   if (!apiKey) {
-    return <>{children}</>;
+    return content;
   }
 
   return (
@@ -52,7 +59,7 @@ export function Providers({ children }: ProvidersProps) {
         persistence: "localStorage+cookie",
       }}
     >
-      {children}
+      {content}
     </PostHogProvider>
   );
 }

@@ -3,11 +3,18 @@
 import { Toaster } from "react-hot-toast";
 
 import { Providers } from "./providers";
+import { SITE_METADATA } from "@/lib/metadata-translations";
 import "./globals.css";
 
+// Default metadata (Arabic - primary market)
 export const metadata: Metadata = {
-  title: "أزينث ليفينج | تصميم داخلي فاخر",
-  description: "تصميم مبدئي خلال 24 ساعة مع تجربة عربية أولًا ومسار تحويل واضح من الاستكشاف حتى التواصل.",
+  title: SITE_METADATA.ar.title,
+  description: SITE_METADATA.ar.description,
+  keywords: SITE_METADATA.ar.keywords,
+  openGraph: {
+    title: SITE_METADATA.ar.ogTitle,
+    description: SITE_METADATA.ar.ogDescription,
+  },
   icons: { icon: "/favicon.png" },
 };
 

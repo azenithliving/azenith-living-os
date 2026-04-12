@@ -1,0 +1,376 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  role          UserRole  @default(USER)
+  permissions   String[]  @default([])
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  tasks         AITask[]
+  actions       AIAction[]
+  approvalsGiven Approval[] @relation("ApprovalGiver")
+  notifications Notification[]
+  
+  @@map("users")
+}
+
+model AITask {
+  id            String        @id @default(uuid())
+  title         String
+  description   String?
+  type          TaskType
+  status        TaskStatus    @default(PENDING)
+  priority      TaskPriority  @default(MEDIUM)
+  payload       Json?
+  result        Json?
+  error         String?
+  
+  createdById   String
+  createdBy     User          @relation(fields: [createdById], references: [id])
+  
+  assignedTo    String?
+  parentTaskId  String?
+  parentTask    AITask?       @relation("TaskChildren", fields: [parentTaskId], references: [id])
+  subTasks      AITask[]      @relation("TaskChildren")
+  
+  workflowId    String?
+  workflow      Workflow?     @relation(fields: [workflowId], references: [id])
+  
+  actions       AIAction[]
+  events        Event[]
+  
+  startedAt     DateTime?
+  completedAt   DateTime?
+  failedAt      DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  retries       Int           @default(0)
+  maxRetries    Int           @default(3)
+  
+  @@index([status])
+  @@index([type])
+  @@index([createdById])
+  @@index([workflowId])
+  @@map("ai_tasks")
+}
+
+model AIAction {
+  id            String        @id @default(uuid())
+  type          ActionType
+  status        ActionStatus  @default(PENDING)
+  
+  taskId        String
+  task          AITask        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  payload       Json
+  result        Json?
+  error         String?
+  
+  riskScore     Int?
+  requiresApproval Boolean   @default(false)
+  
+  approval      Approval?
+  
+  executedById  String?
+  executedBy    User?         @relation(fields: [executedById], references: [id])
+  
+  rollbackData  Json?
+  canRollback   Boolean       @default(false)
+  
+  executionLogs ExecutionLog[]
+  
+  createdAt     DateTime      @default(now())
+  executedAt    DateTime?
+  completedAt   DateTime?
+  
+  @@index([status])
+  @@index([taskId])
+  @@index([type])
+  @@map("ai_actions")
+}
+
+model Approval {
+  id            String          @id @default(uuid())
+  actionId      String          @unique
+  action        AIAction        @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  
+  status        ApprovalStatus  @default(PENDING)
+  requestedBy   String
+  requestedAt   DateTime        @default(now())
+  
+  approvedById  String?
+  approvedBy    User?           @relation("ApprovalGiver", fields: [approvedById], references: [id])
+  approvedAt    DateTime?
+  
+  rejectedById  String?
+  rejectedAt    DateTime?
+  rejectionReason String?
+  
+  expiresAt     DateTime
+  
+  @@index([status])
+  @@index([actionId])
+  @@map("approvals")
+}
+
+model ExecutionLog {
+  id            String    @id @default(uuid())
+  actionId      String
+  action        AIAction  @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  
+  step          String
+  status        String
+  details       Json?
+  timestamp     DateTime  @default(now())
+  
+  @@index([actionId])
+  @@map("execution_logs")
+}
+
+model Event {
+  id            String    @id @default(uuid())
+  type          String
+  source        String
+  payload       Json?
+  
+  taskId        String?
+  task          AITask?   @relation(fields: [taskId], references: [id])
+  
+  processed     Boolean   @default(false)
+  processedAt   DateTime?
+  error         String?
+  
+  createdAt     DateTime  @default(now())
+  
+  @@index([type])
+  @@index([processed])
+  @@index([createdAt])
+  @@map("events")
+}
+
+model Notification {
+  id            String            @id @default(uuid())
+  type          NotificationType
+  channel       NotificationChannel
+  status        NotificationStatus @default(PENDING)
+  
+  recipientId   String
+  recipient     User              @relation(fields: [recipientId], references: [id])
+  
+  title         String
+  message       String
+  data          Json?
+  
+  sentAt        DateTime?
+  error         String?
+  
+  createdAt     DateTime          @default(now())
+  
+  @@index([recipientId])
+  @@index([status])
+  @@map("notifications")
+}
+
+model Workflow {
+  id            String          @id @default(uuid())
+  name          String
+  description   String?
+  definition    Json            // Workflow DAG definition
+  status        WorkflowStatus  @default(DRAFT)
+  version       Int             @default(1)
+  
+  tasks         AITask[]
+  
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  @@map("workflows")
+}
+
+model SystemLog {
+  id            String    @id @default(uuid())
+  level         LogLevel
+  service       String
+  message       String
+  metadata      Json?
+  traceId       String?
+  
+  createdAt     DateTime  @default(now())
+  
+  @@index([level])
+  @@index([service])
+  @@index([createdAt])
+  @@map("system_logs")
+}
+
+model Capability {
+  id            String            @id @default(uuid())
+  name          String            @unique
+  description   String
+  version       String
+  status        CapabilityStatus  @default(DRAFT)
+  
+  // Self-extension system
+  proposedBy    String            // Agent that proposed
+  proposedAt    DateTime          @default(now())
+  
+  simulationResult  Json?
+  securityReview    Json?
+  
+  approvedById  String?
+  approvedAt    DateTime?
+  
+  activatedAt   DateTime?
+  deactivatedAt DateTime?
+  
+  code          String?           // Generated code for the capability
+  manifest      Json              // Capability manifest
+  
+  dependencies  String[]          @default([])
+  
+  @@map("capabilities")
+}
+
+model JobQueue {
+  id            String    @id @default(uuid())
+  name          String    @unique
+  queueType     String
+  config        Json?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@map("job_queues")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  OPERATOR
+  SECURITY_OFFICER
+  SYSTEM
+}
+
+enum TaskType {
+  CODE_GENERATION
+  CODE_REVIEW
+  DEPLOYMENT
+  ANALYSIS
+  MONITORING
+  SECURITY_SCAN
+  TESTING
+  NOTIFICATION
+  EVOLUTION
+  CUSTOM
+}
+
+enum TaskStatus {
+  PENDING
+  QUEUED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+  RETRYING
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ActionType {
+  WRITE_CODE
+  EXECUTE_COMMAND
+  DEPLOY
+  DELETE_RESOURCE
+  MODIFY_CONFIG
+  SEND_NOTIFICATION
+  CREATE_PR
+  MERGE_CODE
+  ROLLBACK
+  CUSTOM
+}
+
+enum ActionStatus {
+  PENDING
+  AWAITING_APPROVAL
+  APPROVED
+  REJECTED
+  EXECUTING
+  COMPLETED
+  FAILED
+  ROLLED_BACK
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+  APPROVAL_REQUIRED
+  SECURITY_ALERT
+}
+
+enum NotificationChannel {
+  DASHBOARD
+  EMAIL
+  TELEGRAM
+  SLACK
+  WEBHOOK
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  DELIVERED
+}
+
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
+}
+
+enum CapabilityStatus {
+  DRAFT
+  IN_SIMULATION
+  SECURITY_REVIEW
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  DEPRECATED
+  REJECTED
+}

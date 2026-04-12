@@ -10,6 +10,7 @@ import AIStylePicker from "./AIStylePicker";
 import GoldPulseLoader from "./GoldPulseLoader";
 import useSessionStore, { type StylePreference } from "@/stores/useSessionStore";
 import { useImageTracking } from "@/hooks/useImageTracking";
+import { getTranslation } from "@/lib/multilingual-engine";
 
 // Client-only gallery to avoid hydration issues
 const DynamicGallery = dynamic(() => import("./DynamicGallery"), { ssr: false });
@@ -18,8 +19,11 @@ interface RoomPageClientProps {
   room: {
     id: string;
     title: string;
+    titleEn: string;
     category: string;
+    categoryEn: string;
     description: string;
+    descriptionEn: string;
     query: string;
   };
   initialPhotos: Array<{
@@ -27,7 +31,7 @@ interface RoomPageClientProps {
     src: { large2x?: string; large?: string; medium?: string };
     alt?: string;
   }>;
-  styleDesc?: { category: string; description: string };
+  styleDesc?: { category: string; categoryEn: string; description: string; descriptionEn: string };
 }
 
 export default function RoomPageClient({
@@ -47,6 +51,16 @@ export default function RoomPageClient({
   const trackNeuralInteraction = useSessionStore((state) => state.trackNeuralInteraction);
   const intent = useSessionStore((state) => state.intent);
   const budget = useSessionStore((state) => state.budget);
+  const language = useSessionStore((state) => state.language);
+
+  // Translation helper
+  const t = (key: string) => getTranslation(key, language);
+  const isRTL = language === "ar";
+
+  // Get room data based on language
+  const roomTitle = isRTL ? room.title : (room.titleEn || room.title);
+  const roomCategory = isRTL ? room.category : (room.categoryEn || room.category);
+  const roomDescription = isRTL ? room.description : (room.descriptionEn || room.description);
 
   // Simplified local state
   const [photos, setPhotos] = useState(initialPhotos);
@@ -232,9 +246,9 @@ export default function RoomPageClient({
       <div className="mb-10 flex items-start justify-between">
         <div>
           <span className="text-sm uppercase tracking-wider text-amber-500">
-            {styleDesc?.category ?? room.category}
+            {isRTL ? (styleDesc?.category ?? roomCategory) : (styleDesc?.categoryEn ?? roomCategory)}
           </span>
-          <h1 className="mt-2 text-4xl font-bold md:text-6xl">{room.title}</h1>
+          <h1 className="mt-2 text-4xl font-bold md:text-6xl">{roomTitle}</h1>
         </div>
         <button
           onClick={handleShuffle}
@@ -244,7 +258,7 @@ export default function RoomPageClient({
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Shuffle
+          {isRTL ? "تبديل" : "Shuffle"}
         </button>
       </div>
 
@@ -257,7 +271,7 @@ export default function RoomPageClient({
         {heroImage ? (
           <Image
             src={heroImage.src?.large2x || heroImage.src?.large || "/placeholder-room.jpg"}
-            alt={room.title}
+            alt={roomTitle}
             fill
             sizes="(max-width: 768px) 100vw, 1200px"
             className="object-cover"
@@ -271,27 +285,27 @@ export default function RoomPageClient({
         )}
         <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all hover:bg-black/30 hover:opacity-100">
           <span className="rounded-full bg-white/20 px-6 py-3 text-white backdrop-blur-sm">
-            انقر للتكبير
+            {isRTL ? "انقر للتكبير" : "Click to enlarge"}
           </span>
         </div>
       </motion.div>
 
       <div className="mb-12">
         <p className="border-r-2 border-amber-500 pr-6 text-xl italic leading-relaxed text-gray-400">
-          &ldquo;{styleDesc?.description ?? room.description}&rdquo;
+          &ldquo;{isRTL ? (styleDesc?.description ?? roomDescription) : (styleDesc?.descriptionEn ?? roomDescription)}&rdquo;
         </p>
       </div>
 
       {loading && (
         <div className="mb-8 flex items-center justify-center py-12">
-          <GoldPulseLoader text="جاري تحديث الصور..." size="md" />
+          <GoldPulseLoader text={isRTL ? "جاري تحديث الصور..." : "Updating images..."} size="md" />
         </div>
       )}
 
       {/* Client-Only Gallery */}
       <DynamicGallery
         roomId={room.id}
-        roomTitle={room.title}
+        roomTitle={roomTitle}
         roomQuery={room.query}
         initialPhotos={initialPhotos}
         currentStyle={currentStyle}

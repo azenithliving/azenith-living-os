@@ -1,5 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { rateLimiter, getClientIP } from "@/lib/rate-limit";
+
+// Apply rate limiting to all handlers
+async function checkRateLimit(request: NextRequest): Promise<NextResponse | null> {
+  const ip = getClientIP(request);
+  const { success, limit, remaining, reset } = await rateLimiter.limit(ip);
+
+  if (!success) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Rate limit exceeded",
+        limit,
+        remaining,
+        reset,
+      },
+      { status: 429 }
+    );
+  }
+  return null;
+}
 
 // Smart Key Rotation Manager with Blacklisting
 class KeyRotationManager {
@@ -144,9 +165,13 @@ interface CuratedResult {
 
 export async function POST(req: NextRequest) {
   try {
+    // Check rate limit
+    const rateLimitResponse = await checkRateLimit(req);
+    if (rateLimitResponse) return rateLimitResponse;
+
     // Log at request time to verify env in server context
     console.log('[Curate API] Request received, key available:', !!(process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY));
-    
+
     const { images, intent, budget, roomType, style } = await req.json();
 
     if (!images || !Array.isArray(images) || images.length === 0) {

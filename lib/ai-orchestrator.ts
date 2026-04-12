@@ -1,10 +1,15 @@
 /**
  * AI Orchestrator - The Sovereign Neural Spine
- * 18 Rotating Keys with Round-Robin Distribution & Fault Tolerance
- * 100% Stability | Zero Downtime
+ * Phase 2: Unlimited Intelligence
+ * 
+ * This is now a simplified facade over the Mastermind Graph system.
+ * For complex workflows, use mastermind-graph.ts directly.
  */
 
-// Parse key pools from environment
+import { runMastermind } from "./mastermind-graph";
+import { routeRequest, getBestModelForTask } from "./openrouter-service";
+
+// Parse key pools from environment (legacy support)
 const parseKeyPool = (envValue: string | undefined): string[] => {
   if (!envValue) return [];
   return envValue.split(",").map(k => k.trim()).filter(k => k.length > 0);
@@ -264,6 +269,37 @@ export class AIOrchestrator {
       openRouterConfigured: health.openrouter.healthy,
       mistralConfigured: health.mistral.healthy,
     };
+  }
+
+  /**
+   * Process a command using the Mastermind Graph workflow
+   * Phase 2: Unlimited Intelligence
+   */
+  async processWithMastermind(
+    command: string,
+    userId: string,
+    context?: Record<string, unknown>
+  ): Promise<{ success: boolean; result?: unknown; error?: string }> {
+    try {
+      const state = await runMastermind(command, userId, context);
+      
+      return {
+        success: state.errors.length === 0,
+        result: {
+          analysis: state.analysis,
+          plan: state.plan,
+          results: state.results,
+          finalReport: state.finalReport,
+          logs: state.logs,
+        },
+        error: state.errors.length > 0 ? state.errors.join("\n") : undefined,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Mastermind processing failed",
+      };
+    }
   }
 }
 

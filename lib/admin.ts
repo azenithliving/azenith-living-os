@@ -10,8 +10,11 @@ const MASTER_DOMAINS = [
   "127.0.0.1:3000",
 ];
 
-// Hardcoded master admin email for identity-based authorization
-const MASTER_ADMIN_EMAIL = "azenithliving@gmail.com";
+// Master admin emails from environment variable (comma-separated)
+const getMasterAdminEmails = (): string[] => {
+  const emails = process.env.MASTER_ADMIN_EMAILS || "";
+  return emails.split(",").map(e => e.trim()).filter(Boolean);
+};
 
 export interface AdminContext {
   isMasterAdmin: boolean;
@@ -29,7 +32,8 @@ export async function getAdminContext(): Promise<AdminContext> {
   const { data: { user } } = await supabase.auth.getUser();
   
   const userEmail = user?.email || null;
-  const isMasterByEmail = userEmail === MASTER_ADMIN_EMAIL;
+  const masterEmails = getMasterAdminEmails();
+  const isMasterByEmail = userEmail ? masterEmails.includes(userEmail) : false;
 
   // Get tenant info
   const tenant = await getCurrentTenant();
