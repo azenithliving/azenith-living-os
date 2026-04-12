@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  processIntelligentMessage, 
-  processLegacyMessage, 
-  isAIModeEnabled 
+import {
+  processIntelligentMessage,
+  isAIModeEnabled,
+  detectCommand,
+  generateAIResponse,
+  loadHistory,
+  saveMessage
 } from '@/lib/mastermind-ai';
+import { executeCommand } from '@/lib/command-executor';
 import { createClient } from '@/utils/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export async function POST(req: NextRequest) {
   try {
@@ -59,23 +64,71 @@ export async function POST(req: NextRequest) {
       bypassAuth = process.env.NODE_ENV !== 'production';
     }
 
-    // Process based on MASTERMIND_MODE
-    const aiMode = isAIModeEnabled();
+    // Detect if message is a command
+    const detectedCommand = detectCommand(message);
+    const isCommand = detectedCommand && detectedCommand.confidence > 0.8;
 
     let result;
-    if (aiMode) {
-      // Intelligent AI mode - natural language processing
-      result = await processIntelligentMessage(message, {
-        sessionId,
-        userId: user?.id,
-        userEmail: user?.email,
-        userSignature: effectiveSignature,
-        bypassAuth,
-        isOwner,
-      });
+
+    if (isCommand) {
+      // It's a known command - execute it with AI response
+      const supabaseClient = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      );
+
+      // Load history for context
+      const history = user?.id ? await loadHistory(user.id) : [];
+
+      try {
+        const commandResult = await executeCommand(
+          `${detectedCommand.command} ${detectedCommand.args.join(" ")}`,
+          {
+            supabase: supabaseClient,
+            userId: user?.id || "00000000-0000-0000-0000-000000000000",
+            userEmail: user?.email || "admin@azenithliving.com",
+            bypassRls: bypassAuth,
+            isOwner,
+          }
+        );
+
+        // Generate AI response about the command result
+        const aiMessage = await generateAIResponse(message, history, {
+          commandExecuted: detectedCommand.command,
+          commandResult: commandResult,
+        });
+
+        result = {
+          type: "mixed",
+          message: aiMessage,
+          command: {
+            name: detectedCommand.command,
+            args: detectedCommand.args,
+            result: commandResult,
+          },
+        };
+      } catch (error) {
+        // Command failed - generate AI explanation
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const aiMessage = await generateAIResponse(message, history, {
+          commandExecuted: detectedCommand.command,
+          commandResult: { success: false, error: errorMessage },
+        });
+
+        result = {
+          type: "mixed",
+          message: aiMessage,
+          command: {
+            name: detectedCommand.command,
+            args: detectedCommand.args,
+            result: { success: false, error: errorMessage },
+          },
+        };
+      }
     } else {
-      // Legacy command mode - rigid command execution
-      result = await processLegacyMessage(message, {
+      // Not a command - use intelligent AI response
+      result = await processIntelligentMessage(message, {
         sessionId,
         userId: user?.id,
         userEmail: user?.email,
@@ -86,10 +139,10 @@ export async function POST(req: NextRequest) {
     }
     
     // Build response
-    const response = NextResponse.json({ 
-      success: true, 
+    const response = NextResponse.json({
+      success: true,
       result,
-      mode: aiMode ? 'ai' : 'legacy',
+      mode: isCommand ? 'command' : 'ai',
     });
     
     // Set session cookie if not exists
