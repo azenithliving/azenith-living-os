@@ -79,6 +79,160 @@ function readLocalLogs(): CommandLogEntry[] {
 }
 
 /**
+ * Generate smart suggestions based on command analysis
+ */
+export function generateSuggestions(commands: CommandLogEntry[]): EvolutionSuggestion[] {
+  const suggestions: EvolutionSuggestion[] = [];
+  
+  if (commands.length === 0) return suggestions;
+
+  // 1. Detect repeated commands (>3 times in a day)
+  const today = new Date().toISOString().split('T')[0];
+  const todayCommands = commands.filter(c => c.executed_at.startsWith(today));
+  
+  const commandCounts: Record<string, number> = {};
+  todayCommands.forEach(c => {
+    const cmd = c.command_text.split(' ')[0].toLowerCase();
+    commandCounts[cmd] = (commandCounts[cmd] || 0) + 1;
+  });
+
+  for (const [cmd, count] of Object.entries(commandCounts)) {
+    if (count > 3) {
+      suggestions.push({
+        type: "add_feature",
+        severity: "medium",
+        description: `تم تنفيذ أمر "${cmd}" ${count} مرات اليوم. هذا يشير إلى استخدام متكرر.`,
+        proposedAction: `أقترح إضافة اختصار للأمر "${cmd}" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.`,
+        affectedFile: "lib/command-executor.ts",
+        codeSnippet: `// Add alias for frequently used command
+const COMMAND_ALIASES = {
+  "${cmd}": "${cmd}",
+  "${cmd.slice(0, 2)}": "${cmd}" // shorthand alias
+};`,
+      });
+    }
+  }
+
+  // 2. Detect slow commands (>2 seconds estimated)
+  // Since we don't have exact duration, we estimate based on command type
+  const slowCommandTypes = ["backup_db", "show_stats", "list_keys"];
+  const slowCommands = commands.filter(c => {
+    const cmd = c.command_text.split(' ')[0].toLowerCase();
+    // These commands typically take longer due to database operations
+    return slowCommandTypes.includes(cmd) && c.status === "executed";
+  });
+
+  if (slowCommands.length > 0) {
+    const uniqueSlowCmds = [...new Set(slowCommands.map(c => c.command_text.split(' ')[0]))];
+    
+    for (const cmd of uniqueSlowCmds.slice(0, 2)) { // Limit to first 2 slow commands
+      suggestions.push({
+        type: "optimize_performance",
+        severity: "medium",
+        description: `أمر "${cmd}" قد يستغرق وقتاً طويلاً بسبب العمليات على قاعدة البيانات.`,
+        proposedAction: `جرب تفعيل التخزين المؤقت (caching) لنتائج ${cmd} لتقليل وقت الاستجابة.`,
+        affectedFile: "lib/command-executor.ts",
+        codeSnippet: `// Add caching for ${cmd} command
+const CACHE_TTL = 60; // Cache for 1 minute
+const cachedResult = cache.get("${cmd}");
+if (cachedResult) return cachedResult;`,
+      });
+    }
+  }
+
+  // 3. Analyze errors from result_summary
+  const failedCommands = commands.filter(c => c.status === "failed");
+  
+  if (failedCommands.length > 0) {
+    // Group errors by type
+    const errorTypes: Record<string, CommandLogEntry[]> = {};
+    
+    failedCommands.forEach(cmd => {
+      const summary = cmd.result_summary?.toLowerCase() || "";
+      let errorType = "general";
+      
+      if (summary.includes("api") || summary.includes("key") || summary.includes("unauthorized")) {
+        errorType = "api_error";
+      } else if (summary.includes("database") || summary.includes("db") || summary.includes("connection")) {
+        errorType = "db_error";
+      } else if (summary.includes("timeout") || summary.includes("time")) {
+        errorType = "timeout_error";
+      } else if (summary.includes("not found") || summary.includes("غير معروف") || summary.includes("unknown")) {
+        errorType = "unknown_command";
+      }
+      
+      if (!errorTypes[errorType]) errorTypes[errorType] = [];
+      errorTypes[errorType].push(cmd);
+    });
+
+    // Generate suggestions for each error type
+    for (const [errorType, cmds] of Object.entries(errorTypes)) {
+      const cmdNames = [...new Set(cmds.map(c => c.command_text.split(' ')[0]))].join(', ');
+      
+      if (errorType === "api_error") {
+        suggestions.push({
+          type: "add_backup_key",
+          severity: "high",
+          description: `${cmds.length} أمر فشل بسبب مشاكل في مفاتيح API (${cmdNames}).`,
+          proposedAction: "تحقق من صلاحية مفاتيح API وأضف مفاتيح احتياطية من مزودين مختلفين.",
+          affectedFile: "lib/mastermind-ai.ts",
+          codeSnippet: `// Add backup API key fallback
+const backupKeys = process.env.BACKUP_API_KEYS?.split(',');
+if (primaryKeyFailed && backupKeys) {
+  await useBackupKey(backupKeys[0]);
+}`,
+        });
+      } else if (errorType === "db_error") {
+        suggestions.push({
+          type: "optimize_performance",
+          severity: "high",
+          description: `${cmds.length} أمر فشل بسبب مشاكل في قاعدة البيانات (${cmdNames}).`,
+          proposedAction: "تحقق من اتصال Supabase وأضف منطق إعادة المحاولة (retry logic).",
+          affectedFile: "lib/command-executor.ts",
+          codeSnippet: `// Add retry logic for database operations
+async function withRetry<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      await sleep(1000 * (i + 1)); // Exponential backoff
+    }
+  }
+  throw new Error("Max retries exceeded");
+}`,
+        });
+      } else if (errorType === "unknown_command") {
+        suggestions.push({
+          type: "add_feature",
+          severity: "low",
+          description: `${cmds.length} محاولة لتنفيذ أوامر غير معروفة (${cmdNames}).`,
+          proposedAction: "أضف مطابقة غامضة (fuzzy matching) لاكتشاف الأوامر المكتوبة بشكل خاطئ.",
+          affectedFile: "lib/mastermind-ai.ts",
+          codeSnippet: `// Add fuzzy command matching
+function findSimilarCommand(input: string): string | null {
+  const commands = ['list_keys', 'backup_db', 'show_stats'];
+  return commands.find(cmd => cmd.includes(input.toLowerCase())) || null;
+}`,
+        });
+      }
+    }
+  }
+
+  // 4. General optimization suggestions
+  if (commands.length > 10 && suggestions.length === 0) {
+    suggestions.push({
+      type: "optimize_performance",
+      severity: "low",
+      description: `تم تنفيذ ${commands.length} أمر حتى الآن. النظام يعمل بشكل جيد!`,
+      proposedAction: "استمر في مراقبة الأداء. لا توجد مشاكل كبيرة مكتشفة حالياً.",
+    });
+  }
+
+  return suggestions;
+}
+
+/**
  * Analyze last 50 commands from immutable_command_log
  */
 export async function analyzeCommandLogs(
@@ -122,129 +276,31 @@ export async function analyzeCommandLogs(
     const slowCommands = commands.filter((c) => {
       if (!c.completed_at || !c.executed_at) return false;
       const duration = new Date(c.completed_at).getTime() - new Date(c.executed_at).getTime();
-      return duration > 5000; // Commands taking > 5 seconds
+      return duration > 2000; // Commands taking > 2 seconds (reduced from 5s)
     });
 
     console.log(
       `[SelfEvolution] Analyzed ${commands.length} commands: ${failedCommands.length} failed, ${slowCommands.length} slow`
     );
 
-    // Generate suggestions based on analysis
-    const suggestions: EvolutionSuggestion[] = [];
+    // Use the new smart suggestion generator
+    const suggestions = generateSuggestions(commands);
+    
+    // Generate patterns for reporting
     const patterns: string[] = [];
-
-    // Pattern 1: API Key failures
-    const keyFailures = failedCommands.filter(
-      (c) =>
-        c.result_summary?.toLowerCase().includes("key") ||
-        c.result_summary?.toLowerCase().includes("api") ||
-        c.result_summary?.toLowerCase().includes("unauthorized") ||
-        c.result_summary?.toLowerCase().includes("401") ||
-        c.result_summary?.toLowerCase().includes("403")
-    );
-
-    if (keyFailures.length > 0) {
-      patterns.push(`API key failures detected: ${keyFailures.length} failed commands`);
-      suggestions.push({
-        type: "add_backup_key",
-        severity: keyFailures.length > 3 ? "critical" : "high",
-        description: `Detected ${keyFailures.length} commands failing due to API key issues (rate limits, invalid keys, or expiration).`,
-        proposedAction:
-          "Add backup API keys from multiple providers (Groq, Mistral, OpenRouter) to ensure redundancy.",
-        affectedFile: "lib/mastermind-ai.ts",
-        codeSnippet: `// Add this to your .env.local:
-// BACKUP_GROQ_API_KEY=your_backup_key_here
-// BACKUP_MISTRAL_API_KEY=your_backup_key_here`,
-      });
+    
+    if (failedCommands.length > 0) {
+      patterns.push(`${failedCommands.length} أمر فشل`);
     }
-
-    // Pattern 2: Database operation failures
-    const dbFailures = failedCommands.filter(
-      (c) =>
-        c.result_summary?.toLowerCase().includes("database") ||
-        c.result_summary?.toLowerCase().includes("db") ||
-        c.result_summary?.toLowerCase().includes("connection") ||
-        c.result_summary?.toLowerCase().includes("timeout")
-    );
-
-    if (dbFailures.length > 0) {
-      patterns.push(`Database issues: ${dbFailures.length} failed operations`);
-      suggestions.push({
-        type: "optimize_performance",
-        severity: "high",
-        description: `Detected ${dbFailures.length} database-related failures (connection timeouts, query errors).`,
-        proposedAction:
-          "Implement connection pooling and retry logic for database operations.",
-        affectedFile: "lib/command-executor.ts",
-        codeSnippet: `// Add retry logic to database operations:
-async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
-  for (let i = 0; i < retries; i++) {
-    try { return await fn(); } catch (e) { if (i === retries - 1) throw e; }
-  }
-  throw new Error("Max retries reached");
-}`,
-      });
+    if (slowCommands.length > 0) {
+      patterns.push(`${slowCommands.length} أمر بطيء (>2 ثانية)`);
     }
-
-    // Pattern 3: Slow commands (performance issues)
-    if (slowCommands.length > 5) {
-      patterns.push(`Performance issues: ${slowCommands.length} slow commands detected`);
-      suggestions.push({
-        type: "optimize_performance",
-        severity: "medium",
-        description: `Detected ${slowCommands.length} commands taking > 5 seconds to complete.`,
-        proposedAction:
-          "Add caching layer for frequently accessed data and optimize database queries.",
-        affectedFile: "lib/semantic-cache.ts",
-        codeSnippet: `// Enable semantic caching for repeated queries:
-const cache = new SemanticCache({ ttl: 300 }); // 5 minutes TTL`,
-      });
-    }
-
-    // Pattern 4: Unknown commands (user experience)
-    const unknownCmds = failedCommands.filter((c) =>
-      c.result_summary?.toLowerCase().includes("unknown") ||
-      c.result_summary?.toLowerCase().includes("غير معروف")
-    );
-
-    if (unknownCmds.length > 0) {
-      patterns.push(`User confusion: ${unknownCmds.length} unknown command attempts`);
-      suggestions.push({
-        type: "add_feature",
-        severity: "low",
-        description: `Users attempted ${unknownCmds.length} unrecognized commands. Consider expanding command recognition.`,
-        proposedAction:
-          "Add fuzzy matching for command detection and better error messages with suggestions.",
-        affectedFile: "lib/mastermind-ai.ts",
-        codeSnippet: `// Add fuzzy matching in detectCommand():
-function findSimilarCommand(input: string): string | null {
-  const similarity = (a: string, b: string) => {
-    // Levenshtein distance or similar
-  };
-  // Return closest match
-}`,
-      });
-    }
-
-    // Pattern 5: Notification failures
-    const notifyFailures = failedCommands.filter(
-      (c) =>
-        c.command_text.includes("notification") &&
-        c.status === "failed"
-    );
-
-    if (notifyFailures.length > 0) {
-      suggestions.push({
-        type: "fix_error_pattern",
-        severity: "medium",
-        description: `Notification system failed ${notifyFailures.length} times.`,
-        proposedAction: "Check Telegram bot token and network connectivity to notification service.",
-        affectedFile: "lib/telegram-notify.ts",
-        codeSnippet: `// Add fallback notification channel (email/Discord)
-if (telegramFailed) {
-  await sendEmailNotification(message); // Fallback
-}`,
-      });
+    if (commands.length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const todayCount = commands.filter(c => c.executed_at.startsWith(today)).length;
+      if (todayCount > 0) {
+        patterns.push(`${todayCount} أمر تم تنفيذه اليوم`);
+      }
     }
 
     return {
