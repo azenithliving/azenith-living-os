@@ -646,15 +646,16 @@ async function logCommandEnd(
 ) {
   try {
     // Update the most recent pending command for this user
-    const { data: pending } = await context.supabase
+    const { data: pendingCommands } = await context.supabase
       .from("immutable_command_log")
       .select("id")
       .eq("user_id", context.userId)
       .eq("status", "pending")
       .eq("command_text", command)
       .order("executed_at", { ascending: false })
-      .limit(1)
-      .single();
+      .limit(1);
+
+    const pending = pendingCommands?.[0];
 
     if (pending?.id) {
       await context.supabase
@@ -662,10 +663,12 @@ async function logCommandEnd(
         .update({
           status: result.success ? "executed" : "failed",
           result_summary: result.message,
+          completed_at: new Date().toISOString(),
         })
         .eq("id", pending.id);
     }
   } catch (e) {
-    console.error("Failed to log command end:", e);
+    // Silently fail - logging is not critical
+    console.error("[CommandExecutor] Failed to log command end:", e);
   }
 }

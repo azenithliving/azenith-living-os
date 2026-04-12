@@ -219,8 +219,25 @@ if (telegramFailed) {
  * Format evolution analysis for display in chat
  */
 export function formatEvolutionReport(analysis: EvolutionAnalysis): string {
+  // Check if table doesn't exist or no records
   if (analysis.totalAnalyzed === 0) {
-    return "⚠️ لا يمكن تحليل السجلات حالياً. حاول مرة أخرى لاحقاً.";
+    if (analysis.patterns.length > 0 && analysis.patterns[0].includes("Error")) {
+      // Table doesn't exist or connection error
+      return "⚠️ **لا يمكن الوصول إلى سجلات الأوامر**\n\n" +
+        "قد يكون جدول `immutable_command_log` غير موجود أو هناك مشكلة في الاتصال.\n\n" +
+        "**الحل:**\n" +
+        "1. تأكد من تشغيل migration: `npx supabase migration up`\n" +
+        "2. أو قم بإنشاء الجدول يدوياً في Supabase Dashboard\n\n" +
+        "📚 [دليل الإعداد](https://github.com/azenithliving/azenith-living-os/blob/main/docs/SETUP.md)";
+    }
+
+    // Table exists but no records
+    return "📊 **تقرير التطور الذاتي**\n\n" +
+      "⚠️ **لا توجد سجلات كافية للتحليل**\n\n" +
+      "قم بتنفيذ بعض الأوامر أولاً (مثل: `list_keys`, `show_stats`) ثم شغّل `evolve` مرة أخرى.\n\n" +
+      "💡 **اقتراح:**\n" +
+      "- شغّل `help` لعرض قائمة الأوامر المتاحة\n" +
+      "- نفذ 5-10 أوامر مختلفة للحصول على تحليل دقيق";
   }
 
   let report = `📊 **تقرير التطور الذاتي**\n\n`;
@@ -253,7 +270,8 @@ export function formatEvolutionReport(analysis: EvolutionAnalysis): string {
     report += `\n**لتطبيق هذه التحسينات، اكتب "نعم"**\n`;
     report += `(سأقوم بإنشاء تعديلات مقترحة في بيئة معزولة)`;
   } else {
-    report += `✅ **النظام يعمل بكفاءة!** لا توجد مشاكل كبيرة مكتشفة.`;
+    report += `✅ **لا توجد تحسينات مقترحة حالياً**\n\n`;
+    report += `النظام يعمل بكفاءة! لم يتم اكتشاف مشاكل كبيرة في الأوامر المنفذة.`;
   }
 
   return report;
