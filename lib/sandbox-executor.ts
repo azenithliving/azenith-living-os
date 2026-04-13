@@ -216,6 +216,14 @@ export async function applySuggestion(suggestion: {
   replacement: string;
   description: string;
 }): Promise<{ success: boolean; message: string }> {
+  // Security check 0: Disable in production (Vercel has read-only filesystem)
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+    return {
+      success: false,
+      message: "🚫 التنفيذ الذاتي معطل في بيئة الإنتاج (Vercel filesystem is read-only)",
+    };
+  }
+
   // Security check 1: Self-execution enabled?
   if (process.env.ENABLE_SELF_EXECUTION !== "true") {
     return {
