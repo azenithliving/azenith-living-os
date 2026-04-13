@@ -32,7 +32,7 @@ coverage
 # Misc
 *.md
 !.github/**/*.md
-scripts
+# scripts - keep translate.js for build process
 docs
 *.test.ts
 *.test.tsx
