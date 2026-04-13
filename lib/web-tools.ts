@@ -12,54 +12,35 @@ import * as cheerio from "cheerio";
 const APIFY_TOKEN = process.env.APIFY_API_TOKEN;
 
 /**
- * Search the web using Apify Google Search Scraper
+ * Search the web using DuckDuckGo Lite
  * Returns top 5 results with title and link
  */
 export async function searchWeb(query: string): Promise<string[]> {
-  const token = process.env.APIFY_API_TOKEN;
-  if (!token) {
-    return ["⚠️ Apify API token غير موجود. أضف APIFY_API_TOKEN إلى متغيرات البيئة."];
-  }
-
   try {
-    // استخدام Actor جوجل الرسمي من Apify
-    const runResponse = await axios.post(
-      'https://api.apify.com/v2/acts/apify~google-search-scraper/runs',
-      {
-        "searchKeywords": query,
-        "maxResults": 5,
-        "resultsPerPage": 5,
+    const url = `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(query)}`;
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
-      {
-        params: { token },
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 15000,
+      timeout: 15000,
+    });
+    const $ = cheerio.load(response.data);
+    const results: string[] = [];
+    $('.result-link').each((i, el) => {
+      const title = $(el).text().trim();
+      const link = $(el).attr('href');
+      if (title && link && !link.includes('//duckduckgo.com')) {
+        results.push(`${title}: ${link}`);
       }
-    );
-
-    const runId = runResponse.data.data.id;
-    // انتظر قليلاً لانتهاء التشغيل (يمكن تحسينه)
-    await new Promise(resolve => setTimeout(resolve, 8000));
-
-    const datasetResponse = await axios.get(
-      `https://api.apify.com/v2/actor-runs/${runId}/dataset/items`,
-      { params: { token, format: 'json' }, timeout: 10000 }
-    );
-
-    const items = datasetResponse.data;
-    if (!items || items.length === 0) {
+      if (results.length >= 5) return false;
+    });
+    if (results.length === 0) {
       return [`لا توجد نتائج لـ "${query}"`];
     }
-
-    const results = items.slice(0, 5).map((item: any) => {
-      const title = item.title || 'بدون عنوان';
-      const link = item.link || '#';
-      return `${title}: ${link}`;
-    });
     return results;
   } catch (error: any) {
-    console.error('[Search] Apify error:', error.response?.data || error.message);
-    return [`❌ فشل البحث: ${error.message}. تأكد من التوكن وحصة الاستخدام.`];
+    console.error('[Search] DuckDuckGo error:', error.message);
+    return [`❌ فشل البحث: ${error.message}`];
   }
 }
 
