@@ -187,7 +187,7 @@ export default function AzenithLegacy() {
               muted
               loop
               playsInline
-              className="absolute inset-0 z-0 h-full w-full object-contain bg-black md:object-cover md:bg-transparent"
+              className="absolute inset-0 z-0 h-full w-full object-cover"
               src={slides[currentIndex].video}
               onError={() => handleVideoError(slides[currentIndex].id)}
             />
