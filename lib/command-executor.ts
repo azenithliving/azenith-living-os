@@ -1071,7 +1071,7 @@ export async function executeCommand(
       result = await addBackupKeyCommand(args, context);
       break;
     case "search":
-      result = await searchCommand(args, context);
+      result = { success: false, message: "🔧 عذراً، خدمة البحث تحت الصيانة حالياً. سيتم إصلاحها قريباً." };
       break;
     case "read":
       result = await readCommand(args, context);
