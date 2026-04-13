@@ -7,11 +7,22 @@ import { routing } from './i18n/routing';
 const intlMiddleware = createMiddleware(routing);
 
 export async function middleware(request: NextRequest) {
+  // Skip middleware for API routes and static files
+  const pathname = request.nextUrl.pathname;
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/_vercel') ||
+    pathname.includes('.')
+  ) {
+    return NextResponse.next();
+  }
+
   // First, handle internationalization
   const intlResponse = intlMiddleware(request);
   
-  // If intl middleware returns a redirect/rewrite, respect it
-  if (intlResponse.status !== 200) {
+  // If intl middleware returns a redirect, respect it
+  if (intlResponse.status >= 300 && intlResponse.status < 400) {
     return intlResponse;
   }
 
@@ -20,8 +31,8 @@ export async function middleware(request: NextRequest) {
 
   // Check if accessing admin-gate (except login page)
   if (
-    request.nextUrl.pathname.startsWith("/admin-gate") &&
-    !request.nextUrl.pathname.startsWith("/admin-gate/login") &&
+    pathname.startsWith("/admin-gate") &&
+    !pathname.startsWith("/admin-gate/login") &&
     !user
   ) {
     // No user, redirect to login
@@ -31,7 +42,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // User is logged in, trying to access login page
-  if (request.nextUrl.pathname.startsWith("/admin-gate/login") && user) {
+  if (pathname.startsWith("/admin-gate/login") && user) {
     // Redirect to dashboard
     const url = request.nextUrl.clone();
     url.pathname = "/admin-gate";
