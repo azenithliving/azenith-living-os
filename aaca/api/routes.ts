@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { createClient } from '@supabase/supabase-js';
 import { QueueManager } from '../queues/queue-manager';
 import { EventBus } from '../events/event-bus';
 import { OrchestratorService } from '../agents/orchestrator-service';
@@ -11,8 +12,8 @@ import { EvolutionAgentService } from '../agents/evolution-agent-service';
 import { ApprovalSystem } from '../approval/approval-system';
 import { ExecutionEngine } from '../execution/execution-engine';
 import { prisma } from '../database/prisma-client';
-import { 
-  TaskType, 
+import {
+  TaskType,
   TaskPriority,
   TaskStatus,
   ActionType,
@@ -21,6 +22,17 @@ import {
   NotificationChannel,
   NotificationType
 } from '../types';
+
+const authMiddleware = async (req: any, res: any, next: any) => {
+  if (req.path === '/health') return next();
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'غير مصرح' });
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return res.status(401).json({ error: 'جلسة غير صالحة' });
+  req.user = user;
+  next();
+};
 
 export function createAPIRouter(
   orchestrator: OrchestratorService,
@@ -36,6 +48,9 @@ export function createAPIRouter(
   eventBus: EventBus
 ): Router {
   const router = Router();
+
+  // Apply auth middleware to all routes except health
+  router.use(authMiddleware);
 
   // ==========================================
   // Task Routes

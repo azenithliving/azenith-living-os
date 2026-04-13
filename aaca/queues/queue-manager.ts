@@ -41,7 +41,8 @@ export class QueueManager {
   constructor(redisUrl: string, eventBus: EventBus) {
     this.redisConnection = new IORedis(redisUrl, {
       maxRetriesPerRequest: null,
-      enableReadyCheck: false
+      enableReadyCheck: false,
+      tls: redisUrl.startsWith('rediss://') ? {} : undefined,
     });
     this.logger = new Logger('QueueManager');
     this.eventBus = eventBus;

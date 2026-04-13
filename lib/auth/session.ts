@@ -92,7 +92,7 @@ export async function createSession(
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     expires: expiresAt,
-    path: "/admin-gate",
+    path: "/",
   });
   
   // Set device cookie (HttpOnly, Secure, SameSite=Strict for security)
@@ -181,7 +181,7 @@ export async function destroySession(): Promise<void> {
   
   await cookieStore.delete({
     name: SESSION_COOKIE_NAME,
-    path: "/admin-gate",
+    path: "/",
   });
   
   await cookieStore.delete({
@@ -222,7 +222,7 @@ export async function extendSession(): Promise<SessionData | null> {
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     expires: expiresAt,
-    path: "/admin-gate",
+    path: "/",
   });
   
   console.log(`[Sovereign Vault] Session extended for ${session.email}`);
@@ -233,26 +233,30 @@ export async function extendSession(): Promise<SessionData | null> {
 /**
  * Check if device is trusted
  */
-export async function isTrustedDevice(adminId: string): Promise<boolean> {
+export async function isTrustedDevice(
+  adminId: string,
+  userAgent: string = "",
+  ip: string = ""
+): Promise<boolean> {
   const cookieStore = await cookies();
   const deviceCookie = cookieStore.get(TRUSTED_DEVICE_COOKIE_NAME);
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
-  
+
   if (!deviceCookie?.value || !sessionCookie?.value) {
     return false;
   }
-  
+
   try {
     const sessionData = JSON.parse(
       Buffer.from(sessionCookie.value, "base64").toString("utf8")
     ) as SessionData;
-    
+
     if (sessionData.adminId !== adminId) {
       return false;
     }
-    
+
     // Verify in vault
-    const fingerprint = generateDeviceFingerprint("", ""); // Will be updated with actual values
+    const fingerprint = generateDeviceFingerprint(userAgent, ip);
     return await verifyTrustedDevice(adminId, deviceCookie.value, fingerprint);
   } catch {
     return false;

@@ -24,7 +24,10 @@ function getEncryptionKey(): Buffer {
     throw new Error("System Configuration Error");
   }
   // Derive 32-byte key using PBKDF2 with server-only salt
-  const salt = process.env.VAULT_ENCRYPTION_SALT || "azenith_sovereign_salt";
+  const salt = process.env.VAULT_ENCRYPTION_SALT;
+  if (!salt) {
+    throw new Error('خطأ: VAULT_ENCRYPTION_SALT غير موجود.');
+  }
   return pbkdf2Sync(key, salt, 100000, KEY_LENGTH, "sha256");
 }
 

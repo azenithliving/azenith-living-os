@@ -249,128 +249,42 @@ model JobQueue {
   name          String    @unique
   queueType     String
   config        Json?
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
   @@map("job_queues")
 }
 
-enum UserRole {
-  USER
-  ADMIN
-  OPERATOR
-  SECURITY_OFFICER
-  SYSTEM
+model Company {
+  id            String    @id @default(uuid())
+  name          String
+  domain        String?
+  primaryColor  String?
+  whatsapp      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  roomSections  RoomSection[]
+
+  @@map("companies")
 }
 
-enum TaskType {
-  CODE_GENERATION
-  CODE_REVIEW
-  DEPLOYMENT
-  ANALYSIS
-  MONITORING
-  SECURITY_SCAN
-  TESTING
-  NOTIFICATION
-  EVOLUTION
-  CUSTOM
-}
+model RoomSection {
+  id            String    @id @default(uuid())
+  companyId     String    @map("company_id")
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  slug          String
+  name          String
+  nameAr        String?   @map("name_ar")
+  description   String?
+  displayOrder  Int       @default(0) @map("display_order")
+  isActive      Boolean   @default(true) @map("is_active")
+  icon          String?
+  metadata      Json      @default("{}")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
-enum TaskStatus {
-  PENDING
-  QUEUED
-  IN_PROGRESS
-  COMPLETED
-  FAILED
-  CANCELLED
-  RETRYING
-}
-
-enum TaskPriority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum ActionType {
-  WRITE_CODE
-  EXECUTE_COMMAND
-  DEPLOY
-  DELETE_RESOURCE
-  MODIFY_CONFIG
-  SEND_NOTIFICATION
-  CREATE_PR
-  MERGE_CODE
-  ROLLBACK
-  CUSTOM
-}
-
-enum ActionStatus {
-  PENDING
-  AWAITING_APPROVAL
-  APPROVED
-  REJECTED
-  EXECUTING
-  COMPLETED
-  FAILED
-  ROLLED_BACK
-}
-
-enum ApprovalStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  EXPIRED
-}
-
-enum NotificationType {
-  INFO
-  WARNING
-  ERROR
-  SUCCESS
-  APPROVAL_REQUIRED
-  SECURITY_ALERT
-}
-
-enum NotificationChannel {
-  DASHBOARD
-  EMAIL
-  TELEGRAM
-  SLACK
-  WEBHOOK
-}
-
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  DELIVERED
-}
-
-enum WorkflowStatus {
-  DRAFT
-  ACTIVE
-  PAUSED
-  ARCHIVED
-}
-
-enum LogLevel {
-  DEBUG
-  INFO
-  WARN
-  ERROR
-  FATAL
-}
-
-enum CapabilityStatus {
-  DRAFT
-  IN_SIMULATION
-  SECURITY_REVIEW
-  PENDING_APPROVAL
-  APPROVED
-  ACTIVE
-  DEPRECATED
-  REJECTED
+  @@unique([companyId, slug])
+  @@map("room_sections")
 }

@@ -381,10 +381,17 @@ export class ExecutionEngine {
             }
           }
           
-          const content = change.encoding === 'base64' 
+          const content = change.encoding === 'base64'
             ? Buffer.from(change.content, 'base64').toString('utf8')
             : change.content;
-          
+
+          // Path traversal protection
+          const allowedBase = process.env.WORKSPACE_ROOT || process.cwd();
+          const resolvedPath = path.resolve(allowedBase, filePath);
+          if (!resolvedPath.startsWith(allowedBase)) {
+            throw new Error('كتابة خارج المسار المسموح به.');
+          }
+
           await fs.writeFile(filePath, content, 'utf8');
         }
         
@@ -443,7 +450,7 @@ export class ExecutionEngine {
 
     const { stdout, stderr } = await execAsync(command, {
       cwd,
-      env: { ...process.env, ...env },
+      env: { ...env },
       timeout: timeoutMs,
       killSignal: 'SIGTERM'
     });

@@ -344,6 +344,13 @@ export class DevAgentService {
       throw new Error(`Invalid path: ${filePath}`);
     }
 
+    // Validate file extension for security
+    const allowedExtensions = ['.ts', '.tsx', '.js', '.json', '.md', '.css'];
+    const ext = path.extname(filePath);
+    if (!allowedExtensions.includes(ext)) {
+      throw new Error(`نوع الملف ${ext} غير مسموح به لأسباب أمنية.`);
+    }
+
     // Create backup if file exists
     if (createBackup) {
       try {
