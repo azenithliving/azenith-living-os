@@ -2,7 +2,8 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import { classifyIntent, getEventWeight, type Intent } from "@/lib/conversion-engine";
-import type { Language } from "@/lib/multilingual-engine";
+
+type Language = 'ar' | 'en';
 
 export interface UserPersona {
   certainty: "Low" | "Medium" | "High";

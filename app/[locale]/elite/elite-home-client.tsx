@@ -13,7 +13,7 @@ import { EliteHero } from "@/components/elite/home/elite-hero";
 import { EliteRoomShowcase } from "@/components/elite/home/elite-room-showcase";
 import { EliteLegacySection } from "@/components/elite/home/elite-legacy-section";
 import Footer from "@/components/Footer";
-import { logoutEliteUser } from "@/app/elite/actions/elite-actions";
+import { logoutEliteUser } from "./actions/elite-actions";
 import type { ProjectInsight, SmartCTA } from "@/lib/elite/feature-engine";
 
 interface EliteHomeData {

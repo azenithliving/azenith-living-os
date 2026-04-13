@@ -1,18 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations, useLocale } from 'next-intl';
 import Header from "@/components/Header";
 import AzenithLegacy from "@/components/AzenithLegacy";
 import Hero from "@/components/Hero";
 import HomePageClient from "@/components/home-page-client-fixed";
-import { TranslatedText } from "@/components/TranslatedText";
-import useSessionStore from "@/stores/useSessionStore";
-import { getTranslation } from "@/lib/multilingual-engine";
 
-// BYPASS: Force render immediately without server-side blocking
 export default function Home() {
   const [mounted, setMounted] = useState(false);
-  const language = useSessionStore((state) => state.language);
+  const locale = useLocale();
+  const t = useTranslations('HomePage');
 
   // KILL SWITCH: Force mount after 1 second max
   useEffect(() => {
@@ -26,24 +24,21 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Translation helper
-  const t = (key: string) => getTranslation(key, language);
-
-  // Static runtime config (bypasses server fetch)
+  // Static runtime config
   const runtimeConfig = {
-    brandName: language === "ar" ? "أزينث ليفينج" : "Azenith Living",
-    brandNameAr: "أزينث ليفينج",
+    brandName: t('brandName'),
+    brandNameAr: t('brandNameAr'),
     brandNameEn: "Azenith Living",
-    freeHookOffer: language === "ar" ? "تصميم مبدئي خلال 24 ساعة" : "Initial Design in 24 Hours",
+    freeHookOffer: t('freeHookOffer'),
     whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201090819584",
     primaryDomain: null,
-    contactEmail: "azenithliving@gmail.com",
+    contactEmail: t('contact.email'),
     contactPhone: "201090819584",
-    businessAddress: language === "ar" ? "السلام، القاهرة، مصر" : "Al-Salam, Cairo, Egypt",
+    businessAddress: t('contact.address'),
     logoPath: "/logo.png",
     faviconPath: "/favicon.png",
     primaryColor: "#C5A059",
-    language,
+    language: locale,
   };
 
   // Empty initial images (client will fetch)
@@ -62,7 +57,7 @@ export default function Home() {
         href="#inventory-section"
         className="sr-only absolute right-4 top-4 z-[120] rounded-full bg-white px-4 py-2 text-sm font-medium text-black focus:not-sr-only"
       >
-        <TranslatedText>{language === "ar" ? "تجاوز إلى المحتوى" : "Skip to content"}</TranslatedText>
+        {t('skipToContent')}
       </a>
 
       <Header />

@@ -1,0 +1,49 @@
+{
+  "HomePage": {
+    "title": "Azinthe Living | Exquisite Interior Design in Egypt",
+    "description": "We transform spaces into exquisite experiences, offering distinctive interior design services for homes and corporations throughout Cairo and all of Egypt.",
+    "skipToContent": "Proceed to content",
+    "brandName": "Azinthe Living",
+    "brandNameAr": "Azinthe",
+    "freeHookOffer": "Initial design concept delivered within 24 hours",
+    "contact": {
+      "email": "azenithliving@gmail.com",
+      "phone": "01090819584",
+      "address": "Peace, Cairo, Egypt"
+    },
+    "nav": {
+      "home": "Home",
+      "rooms": "Spaces",
+      "gallery": "Showroom of Masterpieces",
+      "about": "About Us",
+      "contact": "Contact Us",
+      "eliteBrief": "Design Consultation"
+    },
+    "hero": {
+      "title": "We craft spaces that reflect your story",
+      "subtitle": "Exquisite interior design tailored to your refined lifestyle",
+      "cta": "Embark on Your Journey",
+      "scrollDown": "Scroll down"
+    },
+    "sections": {
+      "featured": "Exquisite Projects",
+      "services": "Our Bespoke Services",
+      "testimonials": "Client Testimonials",
+      "contact": "Connect with us"
+    },
+    "common": {
+      "loading": "Loading in progress",
+      "error": "An error has occurred",
+      "success": "It was accomplished with success",
+      "continue": "Continuation",
+      "back": "Return to Elegance",
+      "close": "Closure",
+      "submit": "Submit"
+    }
+  },
+  "Metadata": {
+    "title": "Azinthe Living | Exquisite Interior Design in Egypt",
+    "description": "We transform spaces into exquisite experiences, offering distinctive interior design services for homes and corporations in Cairo and throughout Egypt.",
+    "keywords": "Exquisite interior design, opulent decor, and refined luxury, epitomized in Egypt, Cairo, where masterfully crafted furniture and sophisticated design converge to create sumptuous spaces, courtesy of Azinthe."
+  }
+}

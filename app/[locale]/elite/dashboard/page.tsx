@@ -8,7 +8,7 @@
 
 import { redirect } from "next/navigation";
 import { getEliteSession } from "@/lib/elite/auth";
-import { getEliteDashboardData } from "@/app/elite/actions/elite-actions";
+import { getEliteDashboardData } from "../actions/elite-actions";
 import { EliteDashboardClient } from "@/components/elite/dashboard/elite-dashboard-client";
 
 interface DashboardPageProps {
@@ -33,7 +33,7 @@ export default async function EliteDashboardPage({ searchParams }: DashboardPage
       activeTab={params.tab || "overview"}
       onLogout={async () => {
         "use server";
-        const { logoutEliteUser } = await import("@/app/elite/actions/elite-actions");
+        const { logoutEliteUser } = await import("../actions/elite-actions");
         await logoutEliteUser();
       }}
     />

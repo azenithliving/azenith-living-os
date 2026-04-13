@@ -2,31 +2,26 @@
 
 import { roomDefinitions } from "@/lib/site-content";
 import RoomLink from "@/components/RoomLink";
-import { TranslatedText } from "@/components/TranslatedText";
-import useSessionStore from "@/stores/useSessionStore";
-import { getTranslation } from "@/lib/multilingual-engine";
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function RoomsPage() {
-  const language = useSessionStore((state) => state.language);
-  const t = (key: string) => getTranslation(key, language);
+  const locale = useLocale();
+  const t = useTranslations('HomePage');
+  const isRTL = locale === "ar";
   return (
     <main className="px-6 py-12 md:px-10 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 space-y-4">
           <p className="text-sm uppercase tracking-[0.3em] text-brand-primary/70">
-            {language === "ar" ? "Vertical hubs" : "Spaces"}
+            {isRTL ? "المساحات" : "Spaces"}
           </p>
           <h1 className="font-serif text-4xl text-white md:text-6xl">
-            <TranslatedText scope="rooms" tier="luxury">
-              {language === "ar" ? "اختر المساحة التي تريد بدءها." : "Choose the space you want to start with."}
-            </TranslatedText>
+            {isRTL ? "اختر المساحة التي تريد بدءها." : "Choose the space you want to start with."}
           </h1>
           <p className="max-w-3xl text-base leading-8 text-white/65">
-            <TranslatedText scope="rooms" tier="luxury">
-              {language === "ar" 
-                ? "كل مساحة لها منطق توزيع، خامات، وخطوات قرار مختلفة. هذه الصفحة تقسم العرض بشكل عملي بدل عرض عام ومبهم."
-                : "Each space has its own layout logic, materials, and decision steps. This page breaks down the offering practically instead of a vague general presentation."}
-            </TranslatedText>
+            {isRTL 
+              ? "كل مساحة لها منطق توزيع، خامات، وخطوات قرار مختلفة. هذه الصفحة تقسم العرض بشكل عملي بدل عرض عام ومبهم."
+              : "Each space has its own layout logic, materials, and decision steps. This page breaks down the offering practically instead of a vague general presentation."}
           </p>
         </div>
 
@@ -54,7 +49,7 @@ export default function RoomsPage() {
                 </span>
                 {(room.furniture || []).length > 0 && (
                   <span className="text-white/60 hover:text-white font-medium cursor-pointer">
-                    {language === "ar" ? "عرض الأثاث" : "View Furniture"}
+                    {isRTL ? "عرض الأثاث" : "View Furniture"}
                   </span>
                 )}
               </div>

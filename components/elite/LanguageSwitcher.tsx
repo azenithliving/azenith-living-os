@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { Language } from "@/lib/multilingual-engine";
 
 /**
  * Language Switcher Component
  * Header switcher for AR/EN toggle with luxury styling
  */
+
+type Language = 'ar' | 'en';
 
 interface LanguageSwitcherProps {
   currentLang: Language;

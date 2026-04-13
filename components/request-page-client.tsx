@@ -9,7 +9,7 @@ import { buildWhatsAppUrl } from "@/lib/conversion-engine";
 import { estimateQuote, getPackageRecommendations } from "@/lib/quote-estimator";
 import type { RuntimeConfig } from "@/lib/runtime-config";
 import useSessionStore from "@/stores/useSessionStore";
-import { getTranslation } from "@/lib/multilingual-engine";
+import { useTranslations, useLocale } from 'next-intl';
 
 type RequestPageClientProps = {
   runtimeConfig: RuntimeConfig;
@@ -27,11 +27,9 @@ export default function RequestPageClient({ runtimeConfig }: RequestPageClientPr
   const serviceType = useSessionStore((state) => state.serviceType);
   const updateProfile = useSessionStore((state) => state.updateProfile);
   const trackEvent = useSessionStore((state) => state.trackEvent);
-  const language = useSessionStore((state) => state.language);
-
-  // Translation helper
-  const t = (key: string) => getTranslation(key, language);
-  const isRTL = language === "ar";
+  const locale = useLocale();
+  const t = useTranslations('HomePage');
+  const isRTL = locale === "ar";
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");

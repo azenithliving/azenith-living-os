@@ -1,9 +1,9 @@
-import type { Language } from "./multilingual-engine";
-
 /**
  * Metadata Translations
  * SEO and page metadata in both Arabic and English
  */
+
+type Language = 'ar' | 'en';
 
 export const SITE_METADATA: Record<Language, {
   title: string;

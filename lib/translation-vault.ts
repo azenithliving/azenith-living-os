@@ -12,7 +12,8 @@
  */
 
 import { sovereignOrchestrator } from "./resource-orchestrator";
-import type { Language } from "./multilingual-engine";
+
+type Language = 'ar' | 'en';
 
 // Re-export types
 export interface TranslationCacheEntry {

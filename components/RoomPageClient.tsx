@@ -10,7 +10,7 @@ import AIStylePicker from "./AIStylePicker";
 import GoldPulseLoader from "./GoldPulseLoader";
 import useSessionStore, { type StylePreference } from "@/stores/useSessionStore";
 import { useImageTracking } from "@/hooks/useImageTracking";
-import { getTranslation } from "@/lib/multilingual-engine";
+import { useTranslations, useLocale } from 'next-intl';
 
 // Client-only gallery to avoid hydration issues
 const DynamicGallery = dynamic(() => import("./DynamicGallery"), { ssr: false });
@@ -51,11 +51,11 @@ export default function RoomPageClient({
   const trackNeuralInteraction = useSessionStore((state) => state.trackNeuralInteraction);
   const intent = useSessionStore((state) => state.intent);
   const budget = useSessionStore((state) => state.budget);
-  const language = useSessionStore((state) => state.language);
 
-  // Translation helper
-  const t = (key: string) => getTranslation(key, language);
-  const isRTL = language === "ar";
+  // next-intl hooks
+  const locale = useLocale();
+  const t = useTranslations('HomePage');
+  const isRTL = locale === "ar";
 
   // Get room data based on language
   const roomTitle = isRTL ? room.title : (room.titleEn || room.title);

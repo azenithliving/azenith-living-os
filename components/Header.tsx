@@ -4,11 +4,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { LanguageSwitcher } from "./elite/LanguageSwitcher";
-import type { Language } from "@/lib/multilingual-engine";
+import { useRouter, usePathname } from "next/navigation";
+import { useLocale, useTranslations } from 'next-intl';
 import useSessionStore from "@/stores/useSessionStore";
-import { getTranslation } from "@/lib/multilingual-engine";
 
 const SOVEREIGN_ACCESS_KEY = "sovereign_access";
 
@@ -17,18 +15,21 @@ export default function Header() {
   const [clickCount, setClickCount] = useState(0);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations('HomePage');
 
   // Use session store for language state
   const currentLang = useSessionStore((state) => state.language);
   const setLanguage = useSessionStore((state) => state.setLanguage);
   const isHydrated = useSessionStore((state) => state.isHydrated);
 
-  // Translation helper
-  const t = (key: string) => getTranslation(key, currentLang);
-
-  const handleLanguageChange = (lang: Language) => {
+  const handleLanguageChange = (lang: 'ar' | 'en') => {
     if (lang === currentLang) return;
     setLanguage(lang);
+    // Navigate to the same page with the new locale
+    const newPath = pathname.replace(/^\/(ar|en)/, `/${lang}`);
+    router.push(newPath);
   };
 
   useEffect(() => {
@@ -82,11 +83,21 @@ export default function Header() {
           <Link href="/request" className="transition-colors hover:text-[#C5A059]">
             {t("nav.contact")}
           </Link>
-          <LanguageSwitcher
-            currentLang={currentLang}
-            onChange={handleLanguageChange}
-            className="border-[#C5A059]/30"
-          />
+          <div className="flex items-center gap-2 border border-[#C5A059]/30 rounded-lg px-3 py-1">
+            <button
+              onClick={() => handleLanguageChange('ar')}
+              className={`text-sm ${currentLang === 'ar' ? 'text-[#C5A059] font-bold' : 'text-white/60'}`}
+            >
+              AR
+            </button>
+            <span className="text-white/30">|</span>
+            <button
+              onClick={() => handleLanguageChange('en')}
+              className={`text-sm ${currentLang === 'en' ? 'text-[#C5A059] font-bold' : 'text-white/60'}`}
+            >
+              EN
+            </button>
+          </div>
         </nav>
 
         <button
@@ -138,12 +149,22 @@ export default function Header() {
               <Link href="/request" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
                 {t("nav.contact")}
               </Link>
-              <div className="pt-4 border-t border-white/10 w-full">
-                <LanguageSwitcher
-                  currentLang={currentLang}
-                  onChange={handleLanguageChange}
-                  className="border-[#C5A059]/30"
-                />
+              <div className="pt-4 border-t border-white/10 w-full flex justify-end">
+                <div className="flex items-center gap-2 border border-[#C5A059]/30 rounded-lg px-3 py-1">
+                  <button
+                    onClick={() => handleLanguageChange('ar')}
+                    className={`text-sm ${currentLang === 'ar' ? 'text-[#C5A059] font-bold' : 'text-white/60'}`}
+                  >
+                    AR
+                  </button>
+                  <span className="text-white/30">|</span>
+                  <button
+                    onClick={() => handleLanguageChange('en')}
+                    className={`text-sm ${currentLang === 'en' ? 'text-[#C5A059] font-bold' : 'text-white/60'}`}
+                  >
+                    EN
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>

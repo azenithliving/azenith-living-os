@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocale, useTranslations } from 'next-intl';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { EliteIntelligenceForm, FormData, LeadQualification } from "@/components/elite/EliteIntelligenceForm";
@@ -11,13 +12,13 @@ import { InvestmentBrackets, InvestmentTier } from "@/components/elite/Investmen
 import { LanguageSwitcher } from "@/components/elite/LanguageSwitcher";
 import { getOfficeStatus, formatNextOpening, OfficeStatus } from "@/lib/office-hours";
 import { getViewedImageUrls } from "@/lib/image-tracking";
-import { translateForAdmin } from "@/lib/multilingual-engine";
-import type { Language } from "@/lib/multilingual-engine";
 
 /**
  * Elite Intelligence Page - Unified Creative Visionary Suite
- * Integrates: Multi-step Form, Aesthetic Advisor, Investment Brackets, Multilingual Engine
+ * Integrates: Multi-step Form, Aesthetic Advisor, Investment Brackets
  */
+
+type Language = 'ar' | 'en';
 
 type SubmissionStage = 
   | "form" 
@@ -32,11 +33,6 @@ interface CompleteSubmissionData {
   aestheticAdvice: AestheticAdvice | null;
   language: Language;
   viewedImages: string[];
-  adminTranslation?: {
-    original: string;
-    arabic: string;
-    summary: string;
-  };
 }
 
 function EliteIntelligenceContent() {
@@ -100,15 +96,9 @@ function EliteIntelligenceContent() {
     setSubmitError(null);
 
     try {
-      // Prepare admin translation if client wrote special requests in English
-      let adminTranslation = undefined;
-      if (language === "en" && form.specialRequests) {
-        adminTranslation = await translateForAdmin(form.specialRequests, {
-          scope: form.scope || undefined,
-          tier: form.qualification.tier,
-          clientName: form.fullName,
-        });
-      }
+      // Admin translation feature temporarily disabled (multilingual-engine removed)
+      // Future: Re-implement using next-intl or direct API calls
+      const adminTranslation = undefined;
 
       const payload = {
         sessionId: crypto.randomUUID(),

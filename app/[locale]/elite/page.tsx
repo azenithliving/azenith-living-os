@@ -8,7 +8,7 @@
 
 import { redirect } from "next/navigation";
 import { getEliteSession } from "@/lib/elite/auth";
-import { validateEliteToken } from "@/app/elite/actions/elite-actions";
+import { validateEliteToken } from "./actions/elite-actions";
 import EliteHomeClient from "./elite-home-client";
 
 interface ElitePageProps {
@@ -33,7 +33,7 @@ export default async function ElitePage({ searchParams }: ElitePageProps) {
   const session = await getEliteSession();
   
   // Get home data (authenticated or default)
-  const { getEliteHomeData } = await import("@/app/elite/actions/elite-actions");
+  const { getEliteHomeData } = await import("./actions/elite-actions");
   const homeData = await getEliteHomeData(session?.clientAccessId || null);
   
   return <EliteHomeClient initialData={homeData} isAuthenticated={!!session} />;
