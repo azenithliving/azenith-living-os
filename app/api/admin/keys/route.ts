@@ -80,11 +80,11 @@ export async function GET() {
       provider: k.provider,
       key: maskKey(k.key),
       is_active: k.is_active,
-      is_backup: k.is_backup || false,
+      is_backup: (k as any).is_backup || false,
       cooldown_until: k.cooldown_until,
-      total_requests: k.total_requests,
+      total_requests: (k as any).total_requests,
       last_used_at: k.last_used_at,
-      created_at: k.created_at,
+      created_at: (k as any).created_at,
     }));
 
     // Group by provider
