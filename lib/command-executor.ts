@@ -6,6 +6,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { analyzeCommandLogs, formatEvolutionReport, executeSuggestion, logSelfExecution, type EvolutionSuggestion } from "./self-evolution";
 import { checkKeysUsage, formatKeyCheckResult, getKeyUsageSummary, addBackupKey as addBackupKeyFromMonitor } from "./key-monitor";
+import { searchWeb, readPage, formatSearchResults, formatPageContent } from "./web-tools";
 import fs from "fs";
 import path from "path";
 
@@ -848,7 +849,97 @@ export async function checkKeysCommand(
 }
 
 // ============================================
-// 13. ADD BACKUP KEY - Add a backup API key
+// 13. SEARCH - Search the web using DuckDuckGo
+// ============================================
+export async function searchCommand(
+  args: string[],
+  context: CommandContext
+): Promise<CommandResult> {
+  const query = args.join(" ");
+
+  if (!query.trim()) {
+    return {
+      success: false,
+      message: "استخدم: search <كلمة البحث>\nمثال: search latest AI news",
+    };
+  }
+
+  try {
+    const result = await searchWeb(query);
+
+    if (!result.success || !result.results) {
+      return {
+        success: false,
+        message: result.message || "فشل البحث",
+      };
+    }
+
+    const formattedResults = formatSearchResults(result.results);
+
+    return {
+      success: true,
+      message: `🔍 نتائج البحث عن "${query}":\n\n${formattedResults}`,
+      data: {
+        query,
+        results_count: result.results.length,
+        results: result.results,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `خطأ في البحث: ${error instanceof Error ? error.message : "Unknown error"}`,
+    };
+  }
+}
+
+// ============================================
+// 14. READ - Read and summarize a web page
+// ============================================
+export async function readCommand(
+  args: string[],
+  context: CommandContext
+): Promise<CommandResult> {
+  const url = args[0];
+
+  if (!url) {
+    return {
+      success: false,
+      message: "استخدم: read <رابط>\nمثال: read https://example.com/article",
+    };
+  }
+
+  try {
+    const result = await readPage(url);
+
+    if (!result.success || !result.content) {
+      return {
+        success: false,
+        message: result.message || "فشل قراءة الصفحة",
+      };
+    }
+
+    const formattedContent = formatPageContent(result.title || "No title", result.content);
+
+    return {
+      success: true,
+      message: formattedContent,
+      data: {
+        url,
+        title: result.title,
+        content_length: result.content.length,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `خطأ في قراءة الصفحة: ${error instanceof Error ? error.message : "Unknown error"}`,
+    };
+  }
+}
+
+// ============================================
+// 15. ADD BACKUP KEY - Add a backup API key
 // ============================================
 export async function addBackupKeyCommand(
   args: string[],
@@ -976,6 +1067,12 @@ export async function executeCommand(
       break;
     case "add_backup_key":
       result = await addBackupKeyCommand(args, context);
+      break;
+    case "search":
+      result = await searchCommand(args, context);
+      break;
+    case "read":
+      result = await readCommand(args, context);
       break;
     case "simulate_key_usage":
       result = await simulateKeyUsage(args, context);
