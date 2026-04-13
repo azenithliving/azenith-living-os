@@ -13,129 +13,53 @@ const APIFY_TOKEN = process.env.APIFY_API_TOKEN;
 
 /**
  * Search the web using Apify Google Search Scraper
- * Returns top 5 results with title, link, and snippet
+ * Returns top 5 results with title and link
  */
-export async function searchWeb(query: string): Promise<{
-  success: boolean;
-  results?: Array<{
-    title: string;
-    link: string;
-    snippet: string;
-  }>;
-  message?: string;
-}> {
-  try {
-    if (!APIFY_TOKEN) {
-      return {
-        success: false,
-        message: "APIFY_API_TOKEN not configured",
-      };
-    }
+export async function searchWeb(query: string): Promise<string[]> {
+  const token = process.env.APIFY_API_TOKEN;
+  if (!token) {
+    return ["⚠️ Apify API token غير موجود. أضف APIFY_API_TOKEN إلى متغيرات البيئة."];
+  }
 
-    // Start Apify actor run
-    const startResponse = await axios.post(
-      "https://api.apify.com/v2/acts/apify~google-search-scraper/runs",
+  try {
+    // استخدام Actor جوجل الرسمي من Apify
+    const runResponse = await axios.post(
+      'https://api.apify.com/v2/acts/apify~google-search-scraper/runs',
       {
-        queries: query,
-        maxResults: 5,
+        "searchKeywords": query,
+        "maxResults": 5,
+        "resultsPerPage": 5,
       },
       {
-        headers: {
-          Authorization: `Bearer ${APIFY_TOKEN}`,
-          "Content-Type": "application/json",
-        },
+        params: { token },
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 15000,
       }
     );
 
-    const runId = startResponse.data.data.id;
+    const runId = runResponse.data.data.id;
+    // انتظر قليلاً لانتهاء التشغيل (يمكن تحسينه)
+    await new Promise(resolve => setTimeout(resolve, 8000));
 
-    // Wait for the run to complete (poll every 2 seconds, max 30 seconds)
-    let attempts = 0;
-    const maxAttempts = 15;
+    const datasetResponse = await axios.get(
+      `https://api.apify.com/v2/actor-runs/${runId}/dataset/items`,
+      { params: { token, format: 'json' }, timeout: 10000 }
+    );
 
-    while (attempts < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const statusResponse = await axios.get(
-        `https://api.apify.com/v2/acts/apify~google-search-scraper/runs/${runId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${APIFY_TOKEN}`,
-          },
-        }
-      );
-
-      const status = statusResponse.data.data.status;
-
-      if (status === "SUCCEEDED") {
-        // Get the dataset items
-        const datasetResponse = await axios.get(
-          `https://api.apify.com/v2/acts/apify~google-search-scraper/runs/${runId}/dataset/items`,
-          {
-            headers: {
-              Authorization: `Bearer ${APIFY_TOKEN}`,
-            },
-          }
-        );
-
-        const items = datasetResponse.data;
-
-        if (!items || items.length === 0) {
-          return {
-            success: false,
-            message: "لم يتم العثور على نتائج للبحث",
-          };
-        }
-
-        // Parse results from Apify output
-        const results: Array<{ title: string; link: string; snippet: string }> = [];
-
-        for (const item of items) {
-          if (item.organicResults) {
-            for (const result of item.organicResults.slice(0, 5)) {
-              if (results.length >= 5) break;
-              results.push({
-                title: result.title || "No title",
-                link: result.url || result.link || "",
-                snippet: result.description || result.snippet || "No description available",
-              });
-            }
-          }
-        }
-
-        if (results.length === 0) {
-          return {
-            success: false,
-            message: "لم يتم العثور على نتائج للبحث",
-          };
-        }
-
-        return {
-          success: true,
-          results,
-        };
-      }
-
-      if (status === "FAILED" || status === "ABORTED" || status === "TIMED-OUT") {
-        return {
-          success: false,
-          message: `Search failed with status: ${status}`,
-        };
-      }
-
-      attempts++;
+    const items = datasetResponse.data;
+    if (!items || items.length === 0) {
+      return [`لا توجد نتائج لـ "${query}"`];
     }
 
-    return {
-      success: false,
-      message: "Search timed out",
-    };
-  } catch (error) {
-    console.error("[WebTools] Search error:", error);
-    return {
-      success: false,
-      message: `خطأ في البحث: ${error instanceof Error ? error.message : "Unknown error"}`,
-    };
+    const results = items.slice(0, 5).map((item: any) => {
+      const title = item.title || 'بدون عنوان';
+      const link = item.link || '#';
+      return `${title}: ${link}`;
+    });
+    return results;
+  } catch (error: any) {
+    console.error('[Search] Apify error:', error.response?.data || error.message);
+    return [`❌ فشل البحث: ${error.message}. تأكد من التوكن وحصة الاستخدام.`];
   }
 }
 
