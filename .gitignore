@@ -47,3 +47,7 @@ next-env.d.ts
 
 # Local Netlify folder
 .netlify
+
+# Large video files (must be compressed under 4.5MB for Vercel)
+/public/videos/*.backup
+*.mp4.backup
