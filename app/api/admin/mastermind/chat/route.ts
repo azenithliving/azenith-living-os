@@ -83,7 +83,42 @@ export async function POST(req: NextRequest) {
       bypassAuth = process.env.NODE_ENV !== 'production';
     }
 
-    // Detect if message is a command
+    // Direct command detection - check first word against known commands
+    const knownCommands = ['search', 'read', 'list_keys', 'check_keys', 'evolve', 'backup_db', 'add_key', 'add_backup_key', 'clear_cache', 'show_stats', 'help', 'rate_limit', 'send_notification', 'restart_service', 'remove_key', 'simulate_key_usage'];
+    const firstWord = message.trim().split(/\s+/)[0].toLowerCase();
+    const isDirectCommand = knownCommands.includes(firstWord);
+
+    // If it's a direct command, execute immediately without AI
+    if (isDirectCommand) {
+      const supabaseClient = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      );
+
+      const commandResult = await executeCommand(message, {
+        supabase: supabaseClient,
+        userId: user?.id || "00000000-0000-0000-0000-000000000000",
+        userEmail: user?.email || "admin@azenithliving.com",
+        bypassRls: bypassAuth,
+        isOwner,
+      });
+
+      return NextResponse.json({
+        success: true,
+        result: {
+          type: "command",
+          message: commandResult.message,
+          command: {
+            name: firstWord,
+            result: commandResult,
+          },
+        },
+        mode: 'command',
+      });
+    }
+
+    // Detect if message is a command (fallback AI detection)
     const detectedCommand = detectCommand(message);
     const isCommand = detectedCommand && detectedCommand.confidence > 0.8;
 
