@@ -1,11 +1,11 @@
 {
   "HomePage": {
     "title": "Azinthe Living | Exquisite Interior Design in Egypt",
-    "description": "We transform spaces into exquisite experiences, offering distinctive interior design services for homes and corporations in Cairo and throughout Egypt.",
+    "description": "We transform spaces into exquisite experiences, offering distinctive interior design services for homes and businesses in Cairo and throughout Egypt.",
     "skipToContent": "Proceed to content",
     "brandName": "Azinthe Living",
     "brandNameAr": "Azinthe",
-    "freeHookOffer": "Initial design concept presented within 24 hours",
+    "freeHookOffer": "Initial design concept within 24 hours",
     "contact": {
       "email": "azenithliving@gmail.com",
       "phone": "01090819584",
@@ -16,7 +16,7 @@
       "rooms": "Spaces",
       "gallery": "Showroom of Masterpieces",
       "about": "About Us",
-      "contact": "Connect with Us",
+      "contact": "Contact Us",
       "eliteBrief": "Design Consultation"
     },
     "hero": {
@@ -26,15 +26,15 @@
       "scrollDown": "Scroll down"
     },
     "sections": {
-      "featured": "Exquisite Projects",
+      "featured": "Exceptional Projects",
       "services": "Our Bespoke Services",
       "testimonials": "Testimonials from Our Discerning Clients",
-      "contact": "Connect with Us"
+      "contact": "Contact Us"
     },
     "common": {
-      "loading": "Loading in Progress",
+      "loading": "Loading in progress",
       "error": "An error has occurred",
-      "success": "It was accomplished with success",
+      "success": "Completed with success",
       "continue": "Continuation",
       "back": "Return to Elegance",
       "close": "Closure",
@@ -43,7 +43,7 @@
   },
   "Metadata": {
     "title": "Azinthe Living | Exquisite Interior Design in Egypt",
-    "description": "We transform spaces into exquisite experiences, offering discerning interior design services for residences and corporations throughout Cairo and all of Egypt.",
-    "keywords": "Elegant interior design, refined decor, opulence, Egypt, Cairo, exquisite furniture, sophisticated design, interior elegance, Azinthe"
+    "description": "We transform spaces into exquisite experiences, offering distinctive interior design services for homes and businesses in Cairo and throughout Egypt.",
+    "keywords": "Exquisite interior design, opulent decor, and refined luxury, nestled in the heart of Egypt, Cairo, where masterfully crafted furniture and sophisticated interior design converge to create an ambiance of unbridled elegance, courtesy of Azinth."
   }
 }
