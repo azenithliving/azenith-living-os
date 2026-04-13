@@ -1,16 +1,18 @@
 /**
  * Web Tools - Search and Read Web Pages
- * 
+ *
  * Provides web browsing capabilities for Mastermind AI
- * - searchWeb: Search using DuckDuckGo (no API key required)
+ * - searchWeb: Search using Apify Google Search Scraper
  * - readPage: Read and summarize web page content
  */
 
 import axios from "axios";
 import * as cheerio from "cheerio";
 
+const APIFY_TOKEN = process.env.APIFY_API_TOKEN;
+
 /**
- * Search the web using DuckDuckGo HTML interface
+ * Search the web using Apify Google Search Scraper
  * Returns top 5 results with title, link, and snippet
  */
 export async function searchWeb(query: string): Promise<{
@@ -23,65 +25,110 @@ export async function searchWeb(query: string): Promise<{
   message?: string;
 }> {
   try {
-    // DuckDuckGo HTML search endpoint
-    const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-    
-    const response = await axios.get(searchUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate",
-        "Connection": "keep-alive",
-      },
-      timeout: 10000,
-    });
-
-    const $ = cheerio.load(response.data);
-    const results: Array<{ title: string; link: string; snippet: string }> = [];
-
-    // Parse search results from DuckDuckGo HTML
-    $(".result").each((_, element) => {
-      if (results.length >= 5) return; // Limit to 5 results
-
-      const $el = $(element);
-      const titleEl = $el.find(".result__a").first();
-      const snippetEl = $el.find(".result__snippet").first();
-
-      const title = titleEl.text().trim();
-      let link = titleEl.attr("href") || "";
-      const snippet = snippetEl.text().trim();
-
-      // Clean up DuckDuckGo redirect URLs
-      if (link.startsWith("//duckduckgo.com/l/")) {
-        // Extract actual URL from the redirect
-        const urlMatch = link.match(/uddg=([^&]+)/);
-        if (urlMatch) {
-          link = decodeURIComponent(urlMatch[1]);
-        }
-      } else if (link.startsWith("/")) {
-        link = `https://duckduckgo.com${link}`;
-      }
-
-      if (title && link) {
-        results.push({
-          title,
-          link,
-          snippet: snippet || "No description available",
-        });
-      }
-    });
-
-    if (results.length === 0) {
+    if (!APIFY_TOKEN) {
       return {
         success: false,
-        message: "لم يتم العثور على نتائج للبحث",
+        message: "APIFY_API_TOKEN not configured",
       };
     }
 
+    // Start Apify actor run
+    const startResponse = await axios.post(
+      "https://api.apify.com/v2/acts/apify~google-search-scraper/runs",
+      {
+        queries: query,
+        maxResults: 5,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${APIFY_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const runId = startResponse.data.data.id;
+
+    // Wait for the run to complete (poll every 2 seconds, max 30 seconds)
+    let attempts = 0;
+    const maxAttempts = 15;
+
+    while (attempts < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      const statusResponse = await axios.get(
+        `https://api.apify.com/v2/acts/apify~google-search-scraper/runs/${runId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${APIFY_TOKEN}`,
+          },
+        }
+      );
+
+      const status = statusResponse.data.data.status;
+
+      if (status === "SUCCEEDED") {
+        // Get the dataset items
+        const datasetResponse = await axios.get(
+          `https://api.apify.com/v2/acts/apify~google-search-scraper/runs/${runId}/dataset/items`,
+          {
+            headers: {
+              Authorization: `Bearer ${APIFY_TOKEN}`,
+            },
+          }
+        );
+
+        const items = datasetResponse.data;
+
+        if (!items || items.length === 0) {
+          return {
+            success: false,
+            message: "لم يتم العثور على نتائج للبحث",
+          };
+        }
+
+        // Parse results from Apify output
+        const results: Array<{ title: string; link: string; snippet: string }> = [];
+
+        for (const item of items) {
+          if (item.organicResults) {
+            for (const result of item.organicResults.slice(0, 5)) {
+              if (results.length >= 5) break;
+              results.push({
+                title: result.title || "No title",
+                link: result.url || result.link || "",
+                snippet: result.description || result.snippet || "No description available",
+              });
+            }
+          }
+        }
+
+        if (results.length === 0) {
+          return {
+            success: false,
+            message: "لم يتم العثور على نتائج للبحث",
+          };
+        }
+
+        return {
+          success: true,
+          results,
+        };
+      }
+
+      if (status === "FAILED" || status === "ABORTED" || status === "TIMED-OUT") {
+        return {
+          success: false,
+          message: `Search failed with status: ${status}`,
+        };
+      }
+
+      attempts++;
+    }
+
     return {
-      success: true,
-      results,
+      success: false,
+      message: "Search timed out",
     };
   } catch (error) {
     console.error("[WebTools] Search error:", error);
