@@ -23,6 +23,23 @@ export interface CommandContext {
   isOwner?: boolean;
 }
 
+// ============================================
+// API KEYS TABLE INTERFACE
+// ============================================
+export interface ApiKey {
+  id: string;
+  provider: string;
+  key: string;
+  is_active: boolean;
+  is_backup?: boolean;
+  total_requests?: number;
+  last_used_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
+  cooldown_until?: string | null;
+}
+
 // Alias for frequently used command "list_keys" (37 times today)
 // Alias for frequently used command "list_keys" (40 times today)
 // ============================================
@@ -288,13 +305,12 @@ export async function listKeys(
     let query;
 
     if (isBypassMode || isOwner) {
-      // Owner or bypass mode: fetch ALL keys without user_id filter
+      // Owner or bypass mode: fetch ALL keys without user_id filter and without is_active filter
       query = context.supabase
         .from("api_keys")
-        .select("id, provider, is_active, last_used_at, created_at, user_id")
-        .eq("is_active", true);
+        .select("id, provider, key, is_active, is_backup, total_requests, last_used_at, created_at, updated_at, user_id");
     } else {
-      // Normal mode: filter by user_id
+      // Normal mode: filter by user_id and only active keys
       query = context.supabase
         .from("api_keys")
         .select("id, provider, is_active, last_used_at, created_at")
@@ -316,7 +332,7 @@ export async function listKeys(
 
     return {
       success: true,
-      message: `Found ${data?.length || 0} active key(s)`,
+      message: `Found ${data?.length || 0} key(s)`,
       data: {
         total: data?.length || 0,
         providers,
@@ -326,7 +342,13 @@ export async function listKeys(
           status: k.is_active ? "active" : "inactive",
           lastUsed: k.last_used_at,
           created: k.created_at,
-          ...(isBypassMode && { userId: (k as any).user_id }), // Include user_id in bypass mode
+          ...(isBypassMode && {
+            userId: (k as any).user_id,
+            key: maskKey((k as any).key),
+            isBackup: (k as any).is_backup || false,
+            totalRequests: (k as any).total_requests || 0,
+            updatedAt: (k as any).updated_at,
+          }),
         })) || [],
       },
     };
