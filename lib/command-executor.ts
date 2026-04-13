@@ -5,7 +5,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { analyzeCommandLogs, formatEvolutionReport, executeSuggestion, logSelfExecution, type EvolutionSuggestion } from "./self-evolution";
-import { checkKeysUsage, formatKeyCheckResult, getKeyUsageSummary, addBackupKey } from "./key-monitor";
+import { checkKeysUsage, formatKeyCheckResult, getKeyUsageSummary, addBackupKey as addBackupKeyFromMonitor } from "./key-monitor";
 import fs from "fs";
 import path from "path";
 
@@ -98,90 +98,6 @@ export async function addKey(
         provider: normalizedProvider, 
         id: inserted.id,
         maskedKey: maskKey(key) 
-      },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
-    };
-  }
-}
-
-// ============================================
-// 1B. ADD BACKUP KEY - Add backup API key (inactive)
-// ============================================
-export async function addBackupKey(
-  args: string[],
-  context: CommandContext
-): Promise<CommandResult> {
-  const [provider, ...keyParts] = args;
-  const key = keyParts.join(" ");
-
-  if (!provider || !key) {
-    return { success: false, message: "Usage: add_backup_key <provider> <key>" };
-  }
-
-  const normalizedProvider = provider.toLowerCase();
-
-  try {
-    // Check for duplicate keys
-    const { data: existingKeys, error: checkError } = await context.supabase
-      .from("api_keys")
-      .select("id, provider, key")
-      .eq("provider", normalizedProvider);
-
-    if (checkError) {
-      console.error("[addBackupKey] Error checking existing keys:", checkError);
-    }
-
-    // Check if this exact key already exists
-    const duplicateKey = existingKeys?.find(k => k.key === key);
-    if (duplicateKey) {
-      return {
-        success: false,
-        message: `Key already exists for ${normalizedProvider} (ID: ${duplicateKey.id})`,
-      };
-    }
-
-    // Insert backup key (inactive by default)
-    const insertData = {
-      provider: normalizedProvider,
-      key: key,
-      is_active: false,
-      is_backup: true,
-      total_requests: 0,
-      user_id: context.userId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    console.log("[addBackupKey] Attempting to insert backup key:", { ...insertData, key: "***REDACTED***" });
-
-    const { data: inserted, error } = await context.supabase
-      .from("api_keys")
-      .insert(insertData)
-      .select("id, provider, is_active, is_backup, created_at")
-      .single();
-
-    if (error) {
-      console.error("[addBackupKey] Supabase insert error:", error);
-      console.error("[addBackupKey] Error code:", error.code);
-      console.error("[addBackupKey] Error details:", error.details);
-      console.error("[addBackupKey] Error hint:", error.hint);
-      return { success: false, message: `Failed to add backup key: ${error.message} (code: ${error.code})` };
-    }
-
-    console.log("[addBackupKey] Insert successful:", inserted);
-
-    return {
-      success: true,
-      message: `✅ Backup API key added for ${normalizedProvider}\nID: ${inserted.id}\nStatus: Inactive (Backup)`,
-      data: {
-        provider: normalizedProvider,
-        id: inserted.id,
-        isBackup: true,
-        maskedKey: maskKey(key),
       },
     };
   } catch (error) {
@@ -942,7 +858,7 @@ export async function addBackupKeyCommand(
   }
 
   try {
-    const result = await addBackupKey(provider, key);
+    const result = await addBackupKeyFromMonitor(provider, key);
 
     return {
       success: result.success,
@@ -1047,7 +963,7 @@ export async function executeCommand(
       result = await checkKeysCommand(args, context);
       break;
     case "add_backup_key":
-      result = await addBackupKey(args, context);
+      result = await addBackupKeyCommand(args, context);
       break;
     case "simulate_key_usage":
       result = await simulateKeyUsage(args, context);
