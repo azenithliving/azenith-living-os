@@ -26,10 +26,14 @@ declare global {
   }
 }
 
+// Vercel Blob URLs for production, local paths for development
+const isDev = process.env.NODE_ENV === 'development';
+const BLOB_BASE = "https://ovnuuxdhjjkfsk6k.public.blob.vercel-storage.com/videos";
+
 export const slides = [
   {
     id: 1,
-    video: "/videos/hero-1.mp4",
+    video: isDev ? "/videos/hero-1.mp4" : `${BLOB_BASE}/hero-1.mp4`,
     pillar: "HERITAGE",
     title: "إرث الخبرة في كل قطعة",
     poeticTitle: "إرث الخبرة في كل قطعة",
@@ -44,7 +48,7 @@ export const slides = [
   },
   {
     id: 2,
-    video: "/videos/hero-2.mp4",
+    video: isDev ? "/videos/hero-2.mp4" : `${BLOB_BASE}/hero-2.mp4`,
     pillar: "COMMITMENT",
     title: "صلابة الخشب الطبيعي",
     poeticTitle: "صلابة الخشب الطبيعي",
@@ -59,7 +63,7 @@ export const slides = [
   },
   {
     id: 3,
-    video: "/videos/hero-3.mp4",
+    video: isDev ? "/videos/hero-3.mp4" : `${BLOB_BASE}/hero-3.mp4`,
     pillar: "INNOVATION",
     title: "تصميم عصري مبتكر",
     poeticTitle: "تصميم عصري مبتكر",
@@ -74,7 +78,7 @@ export const slides = [
   },
   {
     id: 4,
-    video: "/videos/hero-4.mp4",
+    video: isDev ? "/videos/hero-4.mp4" : `${BLOB_BASE}/hero-4.mp4`,
     pillar: "SYNERGY",
     title: "تحالف اليد والآلة",
     poeticTitle: "تحالف اليد والآلة",
@@ -89,7 +93,7 @@ export const slides = [
   },
   {
     id: 5,
-    video: "/videos/hero-5.mp4",
+    video: isDev ? "/videos/hero-5.mp4" : `${BLOB_BASE}/hero-5.mp4`,
     pillar: "TRUST",
     title: "ثقة في أرقى الوحدات",
     poeticTitle: "ثقة في أرقى الوحدات",
@@ -104,7 +108,7 @@ export const slides = [
   },
   {
     id: 6,
-    video: "/videos/hero-6.mp4",
+    video: isDev ? "/videos/hero-6.mp4" : `${BLOB_BASE}/hero-6.mp4`,
     pillar: "QUALITY",
     title: "رفاهية مطلقة",
     poeticTitle: "رفاهية مطلقة",
