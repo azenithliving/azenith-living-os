@@ -12,11 +12,11 @@ import path from "path";
 // Usage threshold (90% of daily quota)
 const USAGE_THRESHOLD_PERCENT = 90;
 
-// Daily request limits by provider (approximate)
+// Daily request limits by provider (user-specified limits)
 const DAILY_LIMITS: Record<string, number> = {
-  groq: 14400,        // 10 requests per second = 600 per minute = 36000 per hour, limited by tier
-  openrouter: 1000,   // Varies by tier
-  mistral: 1000,      // Varies by tier
+  groq: 1000,         // 1000 requests per day
+  openrouter: 500,    // 500 requests per day
+  mistral: 500,       // 500 requests per day
   pexels: 200,        // 200 requests per hour
 };
 

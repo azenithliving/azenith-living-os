@@ -658,5 +658,25 @@
     "status": "executed",
     "result_summary": "📊 **تقرير التطور الذاتي**\n\n📈 تم تحليل 65 أمر\n❌ 3 فشل\n⏱️ 0 بطيء (>5 ثوانٍ)\n\n**الأنماط المكتشفة:**\n• 3 أمر فشل\n• 65 أمر تم تنفيذه اليوم\n\n**اقتراحات التحسين:**\n\n🟡 **1. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"list_keys\" 40 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"list_keys\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **2. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"backup_db\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"backup_db\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **3. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"evolve\" 14 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **الإجراء المقترح:** أقترح إضافة اختصار للأمر \"evolve\" أو إنشاء أمر مجمع ينفذ عدة مهام دفعة واحدة.\n   📁 **الملف:** lib/command-executor.ts\n\n🟡 **4. إضافة ميزة جديدة**\n   تم تنفيذ أمر \"add_key\" 4 مرات اليوم. هذا يشير إلى استخدام متكرر.\n   💡 **",
     "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "add_key groq gsk_test_backup123",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-13T00:09:38.217Z",
+    "status": "executed",
+    "result_summary": "✅ API key added for groq\nID: 21\nStatus: Active",
+    "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "check_keys ",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-04-13T00:10:27.469Z",
+    "status": "executed",
+    "result_summary": "📊 <b>حالة المفاتيح</b>\n\n<b>المزودون:</b>\n🟢 <b>GROQ</b>: 7 نشط | ~67 طلب\n🟢 <b>MISTRAL</b>: 6 نشط | ~0 طلب\n🟢 <b>OPENROUTER</b>: 8 نشط | ~0 طلب\n\nاستخدم <code>check_keys</code> لتحديث العرض.",
+    "parameters": null
   }
 ]
