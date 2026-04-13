@@ -6,7 +6,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { analyzeCommandLogs, formatEvolutionReport, executeSuggestion, logSelfExecution, type EvolutionSuggestion } from "./self-evolution";
 import { checkKeysUsage, formatKeyCheckResult, getKeyUsageSummary, addBackupKey as addBackupKeyFromMonitor } from "./key-monitor";
-import { searchWeb, readPage, formatSearchResults, formatPageContent } from "./web-tools";
+import { readPage, formatPageContent } from "./web-tools";
 import fs from "fs";
 import path from "path";
 
@@ -849,48 +849,16 @@ export async function checkKeysCommand(
 }
 
 // ============================================
-// 13. SEARCH - Search the web using DuckDuckGo
+// 13. SEARCH - Search the web using DuckDuckGo (DISABLED)
 // ============================================
 export async function searchCommand(
   args: string[],
   context: CommandContext
 ): Promise<CommandResult> {
-  const query = args.join(" ");
-
-  if (!query.trim()) {
-    return {
-      success: false,
-      message: "استخدم: search <كلمة البحث>\nمثال: search latest AI news",
-    };
-  }
-
-  try {
-    const result = await searchWeb(query);
-
-    if (!result.success || !result.results) {
-      return {
-        success: false,
-        message: result.message || "فشل البحث",
-      };
-    }
-
-    const formattedResults = formatSearchResults(result.results);
-
-    return {
-      success: true,
-      message: `🔍 نتائج البحث عن "${query}":\n\n${formattedResults}`,
-      data: {
-        query,
-        results_count: result.results.length,
-        results: result.results,
-      },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: `خطأ في البحث: ${error instanceof Error ? error.message : "Unknown error"}`,
-    };
-  }
+  return {
+    success: false,
+    message: "🔍 تم إيقاف خدمة البحث مؤقتاً. يمكنك استخدام 'read <رابط>' لقراءة أي صفحة ويب.",
+  };
 }
 
 // ============================================
@@ -996,7 +964,6 @@ export async function help(
     { cmd: "evolve", desc: "تحليل التطور الذاتي واقتراح تحسينات" },
     { cmd: "check_keys", desc: "مراقبة استخدام المفاتيح وتفعيل الاحتياطية" },
     { cmd: "add_backup_key <provider> <key>", desc: "إضافة مفتاح احتياطي" },
-    { cmd: "search <query>", desc: "البحث في الويب باستخدام DuckDuckGo" },
     { cmd: "read <url>", desc: "قراءة وملخص محتوى صفحة ويب" },
     { cmd: "help", desc: "عرض هذه القائمة" },
   ];
@@ -1071,7 +1038,7 @@ export async function executeCommand(
       result = await addBackupKeyCommand(args, context);
       break;
     case "search":
-      result = { success: false, message: "🔧 عذراً، خدمة البحث تحت الصيانة حالياً. سيتم إصلاحها قريباً." };
+      result = { success: false, message: "� تم إيقاف خدمة البحث مؤقتاً. يمكنك استخدام 'read <رابط>' لقراءة أي صفحة ويب." };
       break;
     case "read":
       result = await readCommand(args, context);
