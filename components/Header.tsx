@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useLocale, useTranslations } from 'next-intl';
 import useSessionStore from "@/stores/useSessionStore";
 
 const SOVEREIGN_ACCESS_KEY = "sovereign_access";
@@ -16,8 +15,6 @@ export default function Header() {
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const locale = useLocale();
-  const t = useTranslations('HomePage');
 
   // Use session store for language state
   const currentLang = useSessionStore((state) => state.language);
@@ -27,9 +24,8 @@ export default function Header() {
   const handleLanguageChange = (lang: 'ar' | 'en') => {
     if (lang === currentLang) return;
     setLanguage(lang);
-    // Navigate to the same page with the new locale
-    const newPath = pathname.replace(/^\/(ar|en)/, `/${lang}`);
-    router.push(newPath);
+    // Refresh page to apply language changes
+    router.refresh();
   };
 
   useEffect(() => {
@@ -75,13 +71,13 @@ export default function Header() {
       >
         <nav dir="rtl" className="hidden items-center gap-8 text-sm font-medium text-white md:flex">
           <Link href="/about" className="transition-colors hover:text-[#C5A059]">
-            {t("nav.about")}
+            من نحن
           </Link>
           <Link href="/rooms" className="transition-colors hover:text-[#C5A059]">
-            {t("nav.rooms")}
+            المساحات
           </Link>
           <Link href="/request" className="transition-colors hover:text-[#C5A059]">
-            {t("nav.contact")}
+            تواصل معنا
           </Link>
           <div className="flex items-center gap-2 border border-[#C5A059]/30 rounded-lg px-3 py-1">
             <button
@@ -141,13 +137,13 @@ export default function Header() {
           >
             <div className="flex flex-col items-end space-y-6 px-6 py-8" dir="rtl">
               <Link href="/about" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                {t("nav.about")}
+                من نحن
               </Link>
               <Link href="/rooms" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                {t("nav.rooms")}
+                المساحات
               </Link>
               <Link href="/request" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                {t("nav.contact")}
+                تواصل معنا
               </Link>
               <div className="pt-4 border-t border-white/10 w-full flex justify-end">
                 <div className="flex items-center gap-2 border border-[#C5A059]/30 rounded-lg px-3 py-1">

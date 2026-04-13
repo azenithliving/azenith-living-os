@@ -11,7 +11,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Phone, ArrowLeft, MessageCircle, CheckCircle2 } from "lucide-react";
-import { initiateWhatsAppLogin } from "@/app/[locale]/elite/actions/elite-actions";
+import { initiateWhatsAppLogin } from "@/app/elite/actions/elite-actions";
 
 export function EliteLoginClient() {
   const [phone, setPhone] = useState("");

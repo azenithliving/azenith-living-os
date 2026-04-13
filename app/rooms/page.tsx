@@ -2,12 +2,9 @@
 
 import { roomDefinitions } from "@/lib/site-content";
 import RoomLink from "@/components/RoomLink";
-import { useTranslations, useLocale } from 'next-intl';
 
 export default function RoomsPage() {
-  const locale = useLocale();
-  const t = useTranslations('HomePage');
-  const isRTL = locale === "ar";
+  const isRTL = true;
   return (
     <main className="px-6 py-12 md:px-10 lg:px-16">
       <div className="mx-auto max-w-7xl">
@@ -45,7 +42,7 @@ export default function RoomsPage() {
               </div>
               <div className="mt-6 pt-6 border-t border-white/10 flex gap-4">
                 <span className="text-brand-primary hover:text-brand-primary/80 font-medium cursor-pointer">
-                  {t("nav.rooms")}
+                  المساحات
                 </span>
                 {(room.furniture || []).length > 0 && (
                   <span className="text-white/60 hover:text-white font-medium cursor-pointer">

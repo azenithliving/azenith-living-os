@@ -10,7 +10,6 @@ import AIStylePicker from "./AIStylePicker";
 import GoldPulseLoader from "./GoldPulseLoader";
 import useSessionStore, { type StylePreference } from "@/stores/useSessionStore";
 import { useImageTracking } from "@/hooks/useImageTracking";
-import { useTranslations, useLocale } from 'next-intl';
 
 // Client-only gallery to avoid hydration issues
 const DynamicGallery = dynamic(() => import("./DynamicGallery"), { ssr: false });
@@ -52,15 +51,13 @@ export default function RoomPageClient({
   const intent = useSessionStore((state) => state.intent);
   const budget = useSessionStore((state) => state.budget);
 
-  // next-intl hooks
-  const locale = useLocale();
-  const t = useTranslations('HomePage');
-  const isRTL = locale === "ar";
+  // Use Arabic by default
+  const isRTL = true;
 
-  // Get room data based on language
-  const roomTitle = isRTL ? room.title : (room.titleEn || room.title);
-  const roomCategory = isRTL ? room.category : (room.categoryEn || room.category);
-  const roomDescription = isRTL ? room.description : (room.descriptionEn || room.description);
+  // Get room data (Arabic only)
+  const roomTitle = room.title;
+  const roomCategory = room.category;
+  const roomDescription = room.description;
 
   // Simplified local state
   const [photos, setPhotos] = useState(initialPhotos);

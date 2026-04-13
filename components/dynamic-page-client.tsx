@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import type { RuntimeConfig } from "@/lib/runtime-config";
 import useSessionStore from "@/stores/useSessionStore";
-import type { PageData, SectionData } from "@/app/[locale]/pages/[slug]/page";
+import type { PageData, SectionData } from "@/app/pages/[slug]/page";
 
 type DynamicPageClientProps = {
   pageData: PageData;

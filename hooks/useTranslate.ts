@@ -1,29 +1,24 @@
 "use client";
 
-import { useTranslations, useLocale } from 'next-intl';
-
 interface UseTranslateOptions {
   namespace?: string;
 }
 
 /**
- * Simplified useTranslate hook using next-intl
- * Replaces the old complex translation system
+ * Simplified useTranslate hook - no translation, returns content as-is
+ * Removed next-intl dependency
  */
 export function useTranslate(
   content: string,
-  options: UseTranslateOptions = {}
+  _options: UseTranslateOptions = {}
 ): {
   t: (key: string) => string;
   translated: string;
   isLoading: boolean;
   error: string | null;
 } {
-  const locale = useLocale();
-  const t = useTranslations(options.namespace || 'HomePage');
-
   return {
-    t: (key: string) => t(key) || key,
+    t: (key: string) => key,
     translated: content,
     isLoading: false,
     error: null,
@@ -32,11 +27,11 @@ export function useTranslate(
 
 /**
  * Hook for translating arrays of content (e.g., cards, lists)
- * Simplified for next-intl
+ * Simplified - no actual translation
  */
 export function useTranslateArray(
   items: Array<{ id: string; text: string }>,
-  options: UseTranslateOptions = {}
+  _options: UseTranslateOptions = {}
 ): {
   translatedItems: Array<{ id: string; text: string; isLoading: boolean }>;
   isLoading: boolean;

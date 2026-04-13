@@ -3,16 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { aboutData } from "@/lib/site-content";
-import { useTranslations, useLocale } from 'next-intl';
 
 interface RuntimeConfig {
   whatsappNumber?: string;
 }
 
 export default function AboutPage() {
-  const locale = useLocale();
-  const t = useTranslations('HomePage');
-  const isRTL = locale === "ar";
+  const isRTL = true;
   const [runtimeConfig, setRuntimeConfig] = useState<RuntimeConfig>({});
 
   useEffect(() => {
@@ -55,7 +52,7 @@ export default function AboutPage() {
               href="/rooms" 
               className="block w-full rounded-full bg-brand-primary text-brand-accent px-8 py-4 font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-[#d8b56d] transition-all"
             >
-              {t("nav.rooms")}
+              المساحات
             </Link>
             {runtimeConfig.whatsappNumber && (
               <Link 
@@ -64,7 +61,7 @@ export default function AboutPage() {
                 rel="noopener noreferrer"
                 className="block w-full rounded-full border-2 border-brand-primary/50 bg-transparent text-brand-primary px-8 py-4 font-semibold text-lg hover:bg-brand-primary/10 hover:border-brand-primary transition-all"
               >
-                {t("nav.contact")}
+                تواصل معنا
               </Link>
             )}
             <Link href="/furniture" className="block w-full rounded-full border border-white/20 bg-white/[0.05] text-white px-8 py-4 font-semibold hover:border-brand-primary hover:bg-brand-primary/10 transition-all">

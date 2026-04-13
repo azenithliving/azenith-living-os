@@ -9,7 +9,6 @@ import { buildWhatsAppUrl } from "@/lib/conversion-engine";
 import { estimateQuote, getPackageRecommendations } from "@/lib/quote-estimator";
 import type { RuntimeConfig } from "@/lib/runtime-config";
 import useSessionStore from "@/stores/useSessionStore";
-import { useTranslations, useLocale } from 'next-intl';
 
 type RequestPageClientProps = {
   runtimeConfig: RuntimeConfig;
@@ -27,9 +26,7 @@ export default function RequestPageClient({ runtimeConfig }: RequestPageClientPr
   const serviceType = useSessionStore((state) => state.serviceType);
   const updateProfile = useSessionStore((state) => state.updateProfile);
   const trackEvent = useSessionStore((state) => state.trackEvent);
-  const locale = useLocale();
-  const t = useTranslations('HomePage');
-  const isRTL = locale === "ar";
+  const isRTL = true;
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -88,14 +85,14 @@ export default function RequestPageClient({ runtimeConfig }: RequestPageClientPr
             <p className="max-w-3xl text-base leading-8 text-white/65">{isRTL ? "هذه المرحلة تحفظ بيانات العميل وتجهز رسالة الإغلاق عبر واتساب." : "This stage saves client data and prepares the closing message via WhatsApp."}</p>
           </div>
           <form onSubmit={onSubmit} className="grid gap-5 rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 md:grid-cols-2">
-            <label className="space-y-2"><span className="text-sm text-white/65">{t("elite.contact.name")}</span><input required value={fullName} onChange={(event) => setFullName(event.target.value)} className="w-full rounded-2xl border border-white/10 bg-[#111112] px-4 py-3 text-white outline-none transition focus:border-brand-primary" /></label>
-            <label className="space-y-2"><span className="text-sm text-white/65">{t("elite.contact.phone")}</span><input required value={phone} onChange={(event) => setPhone(event.target.value)} className="w-full rounded-2xl border border-white/10 bg-[#111112] px-4 py-3 text-white outline-none transition focus:border-brand-primary" /></label>
-            <label className="space-y-2"><span className="text-sm text-white/65">{t("elite.contact.email")}</span><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="w-full rounded-2xl border border-white/10 bg-[#111112] px-4 py-3 text-white outline-none transition focus:border-brand-primary" /></label>
+            <label className="space-y-2"><span className="text-sm text-white/65">الاسم الكامل</span><input required value={fullName} onChange={(event) => setFullName(event.target.value)} className="w-full rounded-2xl border border-white/10 bg-[#111112] px-4 py-3 text-white outline-none transition focus:border-brand-primary" /></label>
+            <label className="space-y-2"><span className="text-sm text-white/65">رقم الهاتف</span><input required value={phone} onChange={(event) => setPhone(event.target.value)} className="w-full rounded-2xl border border-white/10 bg-[#111112] px-4 py-3 text-white outline-none transition focus:border-brand-primary" /></label>
+            <label className="space-y-2"><span className="text-sm text-white/65">البريد الإلكتروني</span><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="w-full rounded-2xl border border-white/10 bg-[#111112] px-4 py-3 text-white outline-none transition focus:border-brand-primary" /></label>
             <div className="rounded-2xl border border-white/10 bg-[#111112] px-4 py-3 text-sm text-white/72"><p className="text-white/45">{isRTL ? "الملف الحالي" : "Current Profile"}</p><p className="mt-2">{roomType || (isRTL ? "لم تُحدد المساحة بعد" : "Room not selected")} / {serviceType || (isRTL ? "لم تُحدد الخدمة بعد" : "Service not selected")}</p></div>
             <label className="space-y-2 md:col-span-2"><span className="text-sm text-white/65">{isRTL ? "ملاحظات إضافية" : "Additional Notes"}</span><textarea rows={5} value={notes} onChange={(event) => setNotes(event.target.value)} className="w-full rounded-2xl border border-white/10 bg-[#111112] px-4 py-3 text-white outline-none transition focus:border-brand-primary" /></label>
             {(errorMessage || statusMessage) ? <div className={`md:col-span-2 flex items-start gap-3 rounded-2xl px-4 py-3 text-sm ${errorMessage ? "border border-red-500/20 bg-red-500/10 text-red-100" : "border border-emerald-500/20 bg-emerald-500/10 text-emerald-100"}`}><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><span>{errorMessage || statusMessage}</span></div> : null}
             <div className="md:col-span-2 flex flex-col gap-4 sm:flex-row">
-              <button type="submit" disabled={isPending} className="inline-flex items-center justify-center gap-3 rounded-full bg-brand-primary px-7 py-4 text-base font-semibold text-brand-accent transition hover:bg-[#d8b56d] disabled:opacity-60">{isPending ? <LoaderCircle className="h-5 w-5 animate-spin" /> : null}{t("elite.submit")}</button>
+              <button type="submit" disabled={isPending} className="inline-flex items-center justify-center gap-3 rounded-full bg-brand-primary px-7 py-4 text-base font-semibold text-brand-accent transition hover:bg-[#d8b56d] disabled:opacity-60">{isPending ? <LoaderCircle className="h-5 w-5 animate-spin" /> : null}إرسال الطلب</button>
               <Link href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click")} className="inline-flex items-center justify-center gap-3 rounded-full border border-white/10 px-7 py-4 text-base font-semibold text-white transition hover:border-brand-primary hover:text-brand-primary"><MessageCircle className="h-5 w-5" />{isRTL ? "الانتقال إلى واتساب" : "Go to WhatsApp"}</Link>
             </div>
           </form>

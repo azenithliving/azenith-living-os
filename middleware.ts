@@ -1,19 +1,37 @@
-import createMiddleware from 'next-intl/middleware';
-import { NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from "next/server";
+import { updateSession } from "@/utils/supabase/middleware";
 
-const locales = ['ar', 'en'];
-const defaultLocale = 'ar';
+export async function middleware(request: NextRequest) {
+  // Handle Supabase session
+  const { supabaseResponse, user } = await updateSession(request);
 
-const intlMiddleware = createMiddleware({
-  locales,
-  defaultLocale,
-  localePrefix: 'as-needed'
-});
+  // Check if accessing admin-gate (except login page)
+  if (
+    request.nextUrl.pathname.startsWith("/admin-gate") &&
+    !request.nextUrl.pathname.startsWith("/admin-gate/login") &&
+    !user
+  ) {
+    // No user, redirect to login
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin-gate/login";
+    return NextResponse.redirect(url);
+  }
 
-export default function middleware(request: NextRequest) {
-  return intlMiddleware(request);
+  // User is logged in, trying to access login page
+  if (request.nextUrl.pathname.startsWith("/admin-gate/login") && user) {
+    // Redirect to dashboard
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin-gate";
+    return NextResponse.redirect(url);
+  }
+
+  // Important: return the supabaseResponse to ensure cookies are set
+  return supabaseResponse;
 }
 
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
+  matcher: [
+    "/admin-gate/:path*",
+    "/elite/:path*",
+  ],
 };

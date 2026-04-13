@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations, useLocale } from 'next-intl';
 import Header from "@/components/Header";
 import AzenithLegacy from "@/components/AzenithLegacy";
 import Hero from "@/components/Hero";
@@ -9,8 +8,6 @@ import HomePageClient from "@/components/home-page-client-fixed";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
-  const locale = useLocale();
-  const t = useTranslations('HomePage');
 
   // KILL SWITCH: Force mount after 1 second max
   useEffect(() => {
@@ -24,21 +21,21 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Static runtime config
+  // Static runtime config with Arabic text
   const runtimeConfig = {
-    brandName: t('brandName'),
-    brandNameAr: t('brandNameAr'),
+    brandName: "أزينث ليفينج",
+    brandNameAr: "أزينث",
     brandNameEn: "Azenith Living",
-    freeHookOffer: t('freeHookOffer'),
+    freeHookOffer: "تصميم مبدئي خلال 24 ساعة",
     whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201090819584",
     primaryDomain: null,
-    contactEmail: t('contact.email'),
+    contactEmail: "azenithliving@gmail.com",
     contactPhone: "201090819584",
-    businessAddress: t('contact.address'),
+    businessAddress: "السلام، القاهرة، مصر",
     logoPath: "/logo.png",
     faviconPath: "/favicon.png",
     primaryColor: "#C5A059",
-    language: locale,
+    language: "ar",
   };
 
   // Empty initial images (client will fetch)
@@ -57,7 +54,7 @@ export default function Home() {
         href="#inventory-section"
         className="sr-only absolute right-4 top-4 z-[120] rounded-full bg-white px-4 py-2 text-sm font-medium text-black focus:not-sr-only"
       >
-        {t('skipToContent')}
+        تجاوز إلى المحتوى
       </a>
 
       <Header />
