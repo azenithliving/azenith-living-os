@@ -62,7 +62,7 @@ export async function GET() {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("api_keys")
-      .select("id, provider, key, is_active, cooldown_until, total_requests, last_used_at, created_at")
+      .select("id, provider, key, is_active, is_backup, cooldown_until, total_requests, last_used_at, created_at")
       .order("provider", { ascending: true })
       .order("created_at", { ascending: false });
 
