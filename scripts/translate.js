@@ -19,8 +19,26 @@ const parseKeyPool = (envValue) => {
 const GROQ_KEYS = parseKeyPool(process.env.GROQ_KEYS);
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
+const messagesDir = path.join(__dirname, '..', 'messages');
+const enPath = path.join(messagesDir, 'en.json');
+
+// If no Groq keys available, check if en.json already exists
 if (GROQ_KEYS.length === 0) {
-  console.error('❌ No Groq API keys found in GROQ_KEYS environment variable');
+  console.log('⚠️  No Groq API keys found in GROQ_KEYS environment variable');
+  
+  if (fs.existsSync(enPath)) {
+    const enContent = JSON.parse(fs.readFileSync(enPath, 'utf8'));
+    const hasContent = Object.keys(enContent).length > 0;
+    
+    if (hasContent) {
+      console.log('✅ Using existing translations from messages/en.json');
+      console.log('   To update translations, add GROQ_KEYS to environment variables');
+      process.exit(0);
+    }
+  }
+  
+  console.error('❌ No existing translations found and no Groq keys available');
+  console.error('   Please add GROQ_KEYS environment variable or ensure messages/en.json exists');
   process.exit(1);
 }
 
