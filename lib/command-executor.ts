@@ -996,6 +996,8 @@ export async function help(
     { cmd: "evolve", desc: "تحليل التطور الذاتي واقتراح تحسينات" },
     { cmd: "check_keys", desc: "مراقبة استخدام المفاتيح وتفعيل الاحتياطية" },
     { cmd: "add_backup_key <provider> <key>", desc: "إضافة مفتاح احتياطي" },
+    { cmd: "search <query>", desc: "البحث في الويب باستخدام DuckDuckGo" },
+    { cmd: "read <url>", desc: "قراءة وملخص محتوى صفحة ويب" },
     { cmd: "help", desc: "عرض هذه القائمة" },
   ];
 
