@@ -302,21 +302,11 @@ export async function listKeys(
     isOwner;
 
   try {
-    let query;
-
-    if (isBypassMode || isOwner) {
-      // Owner or bypass mode: fetch ALL keys without user_id filter and without is_active filter
-      query = context.supabase
-        .from("api_keys")
-        .select("id, provider, key, is_active, is_backup, total_requests, last_used_at, created_at, updated_at, user_id");
-    } else {
-      // Normal mode: filter by user_id and only active keys
-      query = context.supabase
-        .from("api_keys")
-        .select("id, provider, is_active, last_used_at, created_at")
-        .eq("user_id", context.userId)
-        .eq("is_active", true);
-    }
+    // Fetch all active keys (like check_keys does)
+    let query = context.supabase
+      .from("api_keys")
+      .select("*")
+      .eq("is_active", true);
 
     if (provider) {
       query = query.eq("provider", provider.toLowerCase());
