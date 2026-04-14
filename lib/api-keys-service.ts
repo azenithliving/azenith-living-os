@@ -20,6 +20,7 @@ const ENV_KEY_POOLS = {
   openrouter: parseKeyPool(process.env.OPENROUTER_KEYS),
   mistral: parseKeyPool(process.env.MISTRAL_KEYS),
   pexels: parseKeyPool(process.env.PEXELS_KEYS),
+  deepseek: parseKeyPool(process.env.DEEPSEEK_KEYS),
 };
 
 // In-memory key state
@@ -35,6 +36,7 @@ const keyStates: Record<string, KeyState[]> = {
   openrouter: [],
   mistral: [],
   pexels: [],
+  deepseek: [],
 };
 
 let keysLoaded = false;
@@ -76,7 +78,7 @@ export async function loadKeysFromDB(): Promise<void> {
     }
 
     // Merge with env keys (avoid duplicates)
-    for (const provider of ["groq", "openrouter", "mistral", "pexels"] as const) {
+    for (const provider of ["groq", "openrouter", "mistral", "pexels", "deepseek"] as const) {
       const existingKeys = new Set(keyStates[provider].map((k) => k.key));
       for (const envKey of ENV_KEY_POOLS[provider]) {
         if (!existingKeys.has(envKey)) {
@@ -107,7 +109,7 @@ export async function loadKeysFromDB(): Promise<void> {
  * Fallback to environment keys only
  */
 function fallbackToEnvKeys(): void {
-  for (const provider of ["groq", "openrouter", "mistral", "pexels"] as const) {
+  for (const provider of ["groq", "openrouter", "mistral", "pexels", "deepseek"] as const) {
     keyStates[provider] = ENV_KEY_POOLS[provider].map((k) => ({
       key: k,
       cooldownUntil: null,
@@ -122,7 +124,7 @@ function fallbackToEnvKeys(): void {
  * Get a single key from database (preferred) or environment
  */
 export async function getKeyFromDB(
-  provider: "groq" | "openrouter" | "mistral" | "pexels"
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek"
 ): Promise<string | null> {
   try {
     const supabase = await createClient();
@@ -152,19 +154,20 @@ export async function getKeyFromDB(
   }
 }
 
-// Round-robin indices
+// Key rotation indices per provider
 const keyIndices: Record<string, number> = {
   groq: 0,
   openrouter: 0,
   mistral: 0,
   pexels: 0,
+  deepseek: 0,
 };
 
 /**
  * Get next available key using round-robin with cooldown support
  */
 export async function getNextAvailableKey(
-  provider: "groq" | "openrouter" | "mistral" | "pexels"
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek"
 ): Promise<{ key: string; index: number } | null> {
   if (!keysLoaded) {
     await loadKeysFromDB();
@@ -206,7 +209,7 @@ export async function getNextAvailableKey(
  * Set cooldown for a specific key
  */
 export async function setKeyCooldown(
-  provider: "groq" | "openrouter" | "mistral" | "pexels",
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek",
   key: string,
   durationMs: number
 ): Promise<void> {
@@ -239,7 +242,7 @@ export async function setKeyCooldown(
  * Increment request count for a key
  */
 export async function incrementKeyUsage(
-  provider: "groq" | "openrouter" | "mistral" | "pexels",
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek",
   key: string
 ): Promise<void> {
   // Update in-memory
@@ -269,7 +272,7 @@ export async function incrementKeyUsage(
 /**
  * Get all key stats for a provider
  */
-export async function getKeyStats(provider: "groq" | "openrouter" | "mistral" | "pexels"): Promise<{
+export async function getKeyStats(provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek"): Promise<{
   total: number;
   active: number;
   inCooldown: number;

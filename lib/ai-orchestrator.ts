@@ -20,6 +20,7 @@ const KEY_POOLS = {
   groq: parseKeyPool(process.env.GROQ_KEYS),
   openrouter: parseKeyPool(process.env.OPENROUTER_KEYS),
   mistral: parseKeyPool(process.env.MISTRAL_KEYS),
+  deepseek: parseKeyPool(process.env.DEEPSEEK_KEYS),
 };
 
 // Model Configuration
@@ -28,6 +29,7 @@ const CONFIG = {
   OPENROUTER_VISION_MODEL: "anthropic/claude-3.5-sonnet",
   MISTRAL_CODE_MODEL: "codestral-latest",
   MISTRAL_GENERAL_MODEL: "mistral-large-latest",
+  DEEPSEEK_MODEL: "deepseek-chat",
   MAX_RETRIES: 3,
   RETRY_DELAY_MS: 500,
 };
@@ -37,10 +39,11 @@ const keyIndices: Record<string, number> = {
   groq: 0,
   openrouter: 0,
   mistral: 0,
+  deepseek: 0,
 };
 
 // Get next key using round-robin
-const getNextKey = (provider: "groq" | "openrouter" | "mistral"): string | null => {
+const getNextKey = (provider: "groq" | "openrouter" | "mistral" | "deepseek"): string | null => {
   const pool = KEY_POOLS[provider];
   if (pool.length === 0) return null;
 
@@ -59,7 +62,7 @@ const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(r
 
 // Provider-specific fetch with retry logic
 async function fetchWithRetry<T>(
-  provider: "groq" | "openrouter" | "mistral",
+  provider: "groq" | "openrouter" | "mistral" | "deepseek",
   fetchFn: (key: string) => Promise<Response>,
   parseFn: (data: any) => T
 ): Promise<{ success: true; data: T } | { success: false; error: string; status?: number }> {
@@ -226,17 +229,56 @@ export async function askOpenRouter(
 }
 
 /**
+ * Ask DeepSeek - Primary for Arabic Content and General Intelligence
+ */
+export async function askDeepSeek(
+  prompt: string,
+  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const body: Record<string, unknown> = {
+    model: options?.model || CONFIG.DEEPSEEK_MODEL,
+    messages: [{ role: "user", content: prompt }],
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (options?.jsonMode) {
+    body.response_format = { type: "json_object" };
+  }
+
+  const result = await fetchWithRetry(
+    "deepseek",
+    (key) => fetch("https://api.deepseek.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  if (result.success) {
+    return { success: true, content: result.data };
+  }
+  return { success: false, content: "", error: result.error };
+}
+
+/**
  * Get health status of all key pools
  */
 export function getOrchestratorHealth(): {
   groq: { keys: number; healthy: boolean };
   openrouter: { keys: number; healthy: boolean };
   mistral: { keys: number; healthy: boolean };
+  deepseek: { keys: number; healthy: boolean };
 } {
   return {
     groq: { keys: KEY_POOLS.groq.length, healthy: KEY_POOLS.groq.length > 0 },
     openrouter: { keys: KEY_POOLS.openrouter.length, healthy: KEY_POOLS.openrouter.length > 0 },
     mistral: { keys: KEY_POOLS.mistral.length, healthy: KEY_POOLS.mistral.length > 0 },
+    deepseek: { keys: KEY_POOLS.deepseek.length, healthy: KEY_POOLS.deepseek.length > 0 },
   };
 }
 
@@ -258,16 +300,22 @@ export class AIOrchestrator {
     };
   }
 
+  async askDeepSeek(prompt: string, options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }): Promise<{ success: boolean; content: string; error?: string }> {
+    return askDeepSeek(prompt, options);
+  }
+
   getKeyStatus(): {
     groqConfigured: boolean;
     openRouterConfigured: boolean;
     mistralConfigured: boolean;
+    deepseekConfigured: boolean;
   } {
     const health = getOrchestratorHealth();
     return {
       groqConfigured: health.groq.healthy,
       openRouterConfigured: health.openrouter.healthy,
       mistralConfigured: health.mistral.healthy,
+      deepseekConfigured: health.deepseek.healthy,
     };
   }
 
