@@ -147,12 +147,14 @@ export async function POST(
       sessionId,
     });
 
-  } catch (error) {
-    console.error("[Consultant] Route error:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorStack = error instanceof Error ? error.stack : undefined;
+  } catch (error: any) {
+    console.error("[Consultant] Detailed error:", error);
     return NextResponse.json(
-      { error: errorMessage, stack: errorStack },
+      {
+        error: "Internal Server Error",
+        message: error?.message || "Unknown error",
+        stack: error?.stack || "No stack trace"
+      },
       { status: 500 }
     );
   }
