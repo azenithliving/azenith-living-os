@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, Mail, AlertCircle, Shield, QrCode } from "lucide-react";
+import { Lock, Mail, AlertCircle, Shield, KeyRound } from "lucide-react";
 
 const ADMIN_EMAIL = "azenithliving@gmail.com";
 const ADMIN_PASSWORD = "alaa92aziz";
+// Static 2FA secret - configure this same secret in Google Authenticator
+const TWO_FA_SECRET = "JBSWY3DPEHPK3PXP";
 
 export default function GateLoginPage() {
   const router = useRouter();
@@ -14,10 +16,7 @@ export default function GateLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [step, setStep] = useState<"login" | "2fa">("login");
-  const [qrCode, setQrCode] = useState("");
-  const [secret, setSecret] = useState("");
   const [token, setToken] = useState("");
-  const [isFirstSetup, setIsFirstSetup] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,36 +30,9 @@ export default function GateLoginPage() {
       return;
     }
 
-    // Setup 2FA
-    try {
-      const response = await fetch("/api/gate/2fa/setup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "فشل إعداد 2FA");
-        setLoading(false);
-        return;
-      }
-
-      setSecret(data.secret);
-      setIsFirstSetup(!data.isEnabled);
-      // Only show QR code if 2FA is not yet enabled (first time setup)
-      if (!data.isEnabled) {
-        setQrCode(data.qrCode);
-      } else {
-        setQrCode(""); // No QR for existing 2FA
-      }
-      setStep("2fa");
-      setLoading(false);
-    } catch {
-      setError("حدث خطأ أثناء إعداد 2FA");
-      setLoading(false);
-    }
+    // Go to 2FA step (always enabled with static secret)
+    setStep("2fa");
+    setLoading(false);
   };
 
   const handleVerify2FA = async (e: React.FormEvent) => {
@@ -72,12 +44,12 @@ export default function GateLoginPage() {
       const response = await fetch("/api/gate/2fa/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, token, secret, isFirstSetup }),
+        body: JSON.stringify({ token, secret: TWO_FA_SECRET }),
       });
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !data.success) {
         setError(data.error || "رمز 2FA غير صحيح");
         setLoading(false);
         return;
@@ -181,29 +153,16 @@ export default function GateLoginPage() {
               </>
             ) : (
               <>
-                {/* 2FA Section */}
+                {/* 2FA Section - Token Only */}
                 <div className="text-center mb-4">
                   <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#C5A059]/10">
-                    <QrCode className="h-8 w-8 text-[#C5A059]" />
+                    <KeyRound className="h-8 w-8 text-[#C5A059]" />
                   </div>
                   <h3 className="text-lg font-semibold text-white">التحقق بخطوتين</h3>
-                  {isFirstSetup ? (
-                    <p className="mt-2 text-sm text-white/50">
-                      امسح رمز QR باستخدام Google Authenticator
-                    </p>
-                  ) : (
-                    <p className="mt-2 text-sm text-white/50">
-                      أدخل رمز التحقق من تطبيق Google Authenticator
-                    </p>
-                  )}
+                  <p className="mt-2 text-sm text-white/50">
+                    أدخل رمز التحقق من تطبيق Google Authenticator
+                  </p>
                 </div>
-
-                {/* Show QR only for first time setup */}
-                {isFirstSetup && qrCode && (
-                  <div className="flex justify-center mb-4">
-                    <img src={qrCode} alt="2FA QR Code" className="rounded-xl" />
-                  </div>
-                )}
 
                 {/* 2FA Token Input */}
                 <div>
