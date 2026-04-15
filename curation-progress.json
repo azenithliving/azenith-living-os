@@ -1,0 +1,3391 @@
+{
+  "completed": 28,
+  "total": 28,
+  "results": [
+    {
+      "room": "living-room",
+      "style": "modern",
+      "fetched": 50,
+      "groqPassed": 49,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252439926.4106,
+          "pexelsId": 32421762,
+          "room": "living-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/32421762/pexels-photo-32421762.png?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/modern/32421762.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/modern/32421762.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2560,
+            "height": 2560,
+            "photographer": "The Ghazi",
+            "alt": "A sleek modern living room with marble features, stylish lighting, and minimalistic decor for elegant interiors.",
+            "avgColor": "#73736D",
+            "fileSize": 62286
+          },
+          "curatedAt": "2026-04-15T11:27:19.926Z"
+        },
+        {
+          "id": 1776252441625.8818,
+          "pexelsId": 5570230,
+          "room": "living-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/5570230/pexels-photo-5570230.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/modern/5570230.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/modern/5570230.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 5472,
+            "height": 3648,
+            "photographer": "Jonathan Borba",
+            "alt": "Modern interior of modern living room with second level space in minimalistic design in white color with wooden elements",
+            "avgColor": "#CDBDAA",
+            "fileSize": 66285
+          },
+          "curatedAt": "2026-04-15T11:27:21.625Z"
+        },
+        {
+          "id": 1776252442714.3694,
+          "pexelsId": 34549302,
+          "room": "living-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/34549302/pexels-photo-34549302.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/modern/34549302.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/modern/34549302.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6039,
+            "height": 4026,
+            "photographer": "Liuuu _61",
+            "alt": "Stylish modern living room featuring minimalist decor and sleek furniture in a bright setting.",
+            "avgColor": "#6B6A68",
+            "fileSize": 53100
+          },
+          "curatedAt": "2026-04-15T11:27:22.714Z"
+        },
+        {
+          "id": 1776252443754.2734,
+          "pexelsId": 12289395,
+          "room": "living-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/12289395/pexels-photo-12289395.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/modern/12289395.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/modern/12289395.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3840,
+            "height": 2160,
+            "photographer": "dada _design",
+            "alt": "A stylish and comfortable modern living room with a minimalist design and neutral tones.",
+            "avgColor": "#B2ABA1",
+            "fileSize": 46653
+          },
+          "curatedAt": "2026-04-15T11:27:23.754Z"
+        },
+        {
+          "id": 1776252444832.5825,
+          "pexelsId": 32421758,
+          "room": "living-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/32421758/pexels-photo-32421758.png?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/modern/32421758.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/modern/32421758.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2560,
+            "height": 2560,
+            "photographer": "The Ghazi",
+            "alt": "A sleek and modern living room with minimalist design, featuring a couch and contemporary lighting.",
+            "avgColor": "#726F66",
+            "fileSize": 65190
+          },
+          "curatedAt": "2026-04-15T11:27:24.832Z"
+        }
+      ]
+    },
+    {
+      "room": "living-room",
+      "style": "classic",
+      "fetched": 50,
+      "groqPassed": 45,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252466239.3176,
+          "pexelsId": 7015117,
+          "room": "living-room",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/7015117/pexels-photo-7015117.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/classic/7015117.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/classic/7015117.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3564,
+            "height": 5346,
+            "photographer": "Dmitry Sidorov",
+            "alt": "Cozy vintage-style living room with an ornate sofa and chandelier, perfect for classic interior design themes.",
+            "avgColor": "#7D7462",
+            "fileSize": 62105
+          },
+          "curatedAt": "2026-04-15T11:27:46.239Z"
+        },
+        {
+          "id": 1776252468615.793,
+          "pexelsId": 40504,
+          "room": "living-room",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/40504/living-room-victorian-historic-vintage-40504.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/classic/40504.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/classic/40504.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4184,
+            "height": 2698,
+            "photographer": "Pixabay",
+            "alt": "Luxurious vintage living room featuring antique furniture and rich decorative elements.",
+            "avgColor": "#5C4C37",
+            "fileSize": 133553
+          },
+          "curatedAt": "2026-04-15T11:27:48.615Z"
+        },
+        {
+          "id": 1776252470546.8943,
+          "pexelsId": 30992365,
+          "room": "living-room",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/30992365/pexels-photo-30992365.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/classic/30992365.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/classic/30992365.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4672,
+            "height": 7008,
+            "photographer": "Sueda Dilli",
+            "alt": "A classic vintage living room corner featuring an antique radio, lamp, and decorative furniture.",
+            "avgColor": "#9C8D78",
+            "fileSize": 48845
+          },
+          "curatedAt": "2026-04-15T11:27:50.546Z"
+        },
+        {
+          "id": 1776252472794.5793,
+          "pexelsId": 8860197,
+          "room": "living-room",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/8860197/pexels-photo-8860197.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/classic/8860197.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/classic/8860197.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4000,
+            "height": 6000,
+            "photographer": "cottonbro studio",
+            "alt": "An ornate vintage armchair sits in a stylish, beautifully decorated interior room, exuding class.",
+            "avgColor": "#394A52",
+            "fileSize": 39824
+          },
+          "curatedAt": "2026-04-15T11:27:52.794Z"
+        },
+        {
+          "id": 1776252474840.4539,
+          "pexelsId": 33296839,
+          "room": "living-room",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/33296839/pexels-photo-33296839.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/classic/33296839.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/classic/33296839.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4000,
+            "height": 5000,
+            "photographer": "Yusuf P",
+            "alt": "Elegant luxury living room filled with sunlight, featuring vintage furnishings and a classic chandelier.",
+            "avgColor": "#654934",
+            "fileSize": 58208
+          },
+          "curatedAt": "2026-04-15T11:27:54.840Z"
+        }
+      ]
+    },
+    {
+      "room": "living-room",
+      "style": "industrial",
+      "fetched": 50,
+      "groqPassed": 28,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252497022.691,
+          "pexelsId": 7045921,
+          "room": "living-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7045921/pexels-photo-7045921.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/industrial/7045921.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/industrial/7045921.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4843,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Comfortable green sofa placed in living room against kitchen zone in contemporary apartment",
+            "avgColor": "#56534B",
+            "fileSize": 84467
+          },
+          "curatedAt": "2026-04-15T11:28:17.022Z"
+        },
+        {
+          "id": 1776252498303.6223,
+          "pexelsId": 32984417,
+          "room": "living-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/32984417/pexels-photo-32984417.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/industrial/32984417.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/industrial/32984417.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3999,
+            "height": 5283,
+            "photographer": "Isaac Villavicencio",
+            "alt": "Spacious industrial loft featuring vintage furniture and large window.",
+            "avgColor": "#706255",
+            "fileSize": 65490
+          },
+          "curatedAt": "2026-04-15T11:28:18.303Z"
+        },
+        {
+          "id": 1776252499714.5305,
+          "pexelsId": 8089275,
+          "room": "living-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/8089275/pexels-photo-8089275.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/industrial/8089275.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/industrial/8089275.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Spacious modern loft living room with elegant décor and industrial design elements.",
+            "avgColor": "#80786D",
+            "fileSize": 103552
+          },
+          "curatedAt": "2026-04-15T11:28:19.714Z"
+        },
+        {
+          "id": 1776252502285.9695,
+          "pexelsId": 7045919,
+          "room": "living-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7045919/pexels-photo-7045919.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/industrial/7045919.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/industrial/7045919.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of spacious living room with comfortable sofas and panoramic windows placed in modern flat in evening time",
+            "avgColor": "#58564F",
+            "fileSize": 100003
+          },
+          "curatedAt": "2026-04-15T11:28:22.285Z"
+        },
+        {
+          "id": 1776252503699.0696,
+          "pexelsId": 7045941,
+          "room": "living-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7045941/pexels-photo-7045941.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/industrial/7045941.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/industrial/7045941.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of spacious modern living room with comfortable green and white sofas and panoramic windows in contemporary apartment in evening time",
+            "avgColor": "#514E4E",
+            "fileSize": 97535
+          },
+          "curatedAt": "2026-04-15T11:28:23.699Z"
+        }
+      ]
+    },
+    {
+      "room": "living-room",
+      "style": "scandinavian",
+      "fetched": 50,
+      "groqPassed": 30,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252524327.4985,
+          "pexelsId": 19866401,
+          "room": "living-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/19866401/pexels-photo-19866401.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/scandinavian/19866401.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/scandinavian/19866401.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 5999,
+            "height": 4000,
+            "photographer": "Lisa Anna",
+            "alt": "Bright and stylish living room featuring modern furniture and elegant decor with natural light.",
+            "avgColor": "#9A938B",
+            "fileSize": 65780
+          },
+          "curatedAt": "2026-04-15T11:28:44.327Z"
+        },
+        {
+          "id": 1776252525663.664,
+          "pexelsId": 7534275,
+          "room": "living-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/7534275/pexels-photo-7534275.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/scandinavian/7534275.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/scandinavian/7534275.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7195,
+            "height": 4802,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Stylish modern living room with minimalist decor, featuring a sleek sofa and elegant lighting.",
+            "avgColor": "#A39D97",
+            "fileSize": 76288
+          },
+          "curatedAt": "2026-04-15T11:28:45.663Z"
+        },
+        {
+          "id": 1776252528004.5796,
+          "pexelsId": 7546721,
+          "room": "living-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/7546721/pexels-photo-7546721.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/scandinavian/7546721.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/scandinavian/7546721.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7342,
+            "height": 4900,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Bright modern living room with a sofa, coffee table, and large window curtains.",
+            "avgColor": "#AF9F8B",
+            "fileSize": 68548
+          },
+          "curatedAt": "2026-04-15T11:28:48.004Z"
+        },
+        {
+          "id": 1776252528982.8496,
+          "pexelsId": 12289389,
+          "room": "living-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/12289389/pexels-photo-12289389.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/scandinavian/12289389.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/scandinavian/12289389.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3840,
+            "height": 2160,
+            "photographer": "dada _design",
+            "alt": "Stylish Scandinavian living room featuring elegant furniture and contemporary design elements.",
+            "avgColor": "#9F988E",
+            "fileSize": 55390
+          },
+          "curatedAt": "2026-04-15T11:28:48.982Z"
+        },
+        {
+          "id": 1776252530117.3606,
+          "pexelsId": 12289390,
+          "room": "living-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/12289390/pexels-photo-12289390.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/living-room/scandinavian/12289390.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/living-room/scandinavian/12289390.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3840,
+            "height": 2160,
+            "photographer": "dada _design",
+            "alt": "A cozy, minimalist Scandinavian living room with a gray couch and modern furniture.",
+            "avgColor": "#8C837A",
+            "fileSize": 59904
+          },
+          "curatedAt": "2026-04-15T11:28:50.117Z"
+        }
+      ]
+    },
+    {
+      "room": "bedroom",
+      "style": "modern",
+      "fetched": 50,
+      "groqPassed": 48,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252551125.7827,
+          "pexelsId": 3144580,
+          "room": "bedroom",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/3144580/pexels-photo-3144580.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/modern/3144580.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/modern/3144580.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 5210,
+            "height": 3473,
+            "photographer": "Jonathan Borba",
+            "alt": "Luxurious modern bedroom featuring elegant design elements, soft lighting, and cozy bedding.",
+            "avgColor": "#D3B89E",
+            "fileSize": 67739
+          },
+          "curatedAt": "2026-04-15T11:29:11.125Z"
+        },
+        {
+          "id": 1776252552198.461,
+          "pexelsId": 28456462,
+          "room": "bedroom",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/28456462/pexels-photo-28456462.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/modern/28456462.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/modern/28456462.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3840,
+            "height": 2160,
+            "photographer": "Salman Saqib",
+            "alt": "Contemporary bedroom with sleek decor and natural lighting.",
+            "avgColor": "#A6A19B",
+            "fileSize": 69833
+          },
+          "curatedAt": "2026-04-15T11:29:12.198Z"
+        },
+        {
+          "id": 1776252553112.6519,
+          "pexelsId": 8089073,
+          "room": "bedroom",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/8089073/pexels-photo-8089073.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/modern/8089073.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/modern/8089073.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Spacious modern bedroom featuring a gray bed and wall-mounted TV with ambient lighting.",
+            "avgColor": "#A6A29F",
+            "fileSize": 51569
+          },
+          "curatedAt": "2026-04-15T11:29:13.112Z"
+        },
+        {
+          "id": 1776252554007.8713,
+          "pexelsId": 6782578,
+          "room": "bedroom",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/6782578/pexels-photo-6782578.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/modern/6782578.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/modern/6782578.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7184,
+            "height": 4659,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of modern light bedroom with pillows and blanket on bed under lamps next to pouf near glass wall with curtain",
+            "avgColor": "#A2948A",
+            "fileSize": 51288
+          },
+          "curatedAt": "2026-04-15T11:29:14.007Z"
+        },
+        {
+          "id": 1776252554685.8115,
+          "pexelsId": 7018838,
+          "room": "bedroom",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/7018838/pexels-photo-7018838.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/modern/7018838.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/modern/7018838.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Minimalist interior of contemporary bedroom with bed with headrest and bedsides under stylish lamps",
+            "avgColor": "#ADA8AA",
+            "fileSize": 31739
+          },
+          "curatedAt": "2026-04-15T11:29:14.685Z"
+        }
+      ]
+    },
+    {
+      "room": "bedroom",
+      "style": "classic",
+      "fetched": 50,
+      "groqPassed": 45,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252574769.6917,
+          "pexelsId": 6663039,
+          "room": "bedroom",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/6663039/pexels-photo-6663039.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/classic/6663039.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/classic/6663039.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 5616,
+            "height": 3744,
+            "photographer": "Claire  Rendall",
+            "alt": "Elegant bedroom interior featuring ornate decor and warm lighting.",
+            "avgColor": "#877367",
+            "fileSize": 90501
+          },
+          "curatedAt": "2026-04-15T11:29:34.769Z"
+        },
+        {
+          "id": 1776252575665.675,
+          "pexelsId": 4234540,
+          "room": "bedroom",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/4234540/pexels-photo-4234540.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/classic/4234540.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/classic/4234540.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3840,
+            "height": 5760,
+            "photographer": "alleksana",
+            "alt": "Sophisticated bedroom featuring vintage decor, elegant chandelier, and plush furnishings.",
+            "avgColor": "#625C55",
+            "fileSize": 43902
+          },
+          "curatedAt": "2026-04-15T11:29:35.665Z"
+        },
+        {
+          "id": 1776252578035.8953,
+          "pexelsId": 8141958,
+          "room": "bedroom",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/8141958/pexels-photo-8141958.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/classic/8141958.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/classic/8141958.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Luxurious classic bedroom with ornate furniture and natural lighting.",
+            "avgColor": "#AF8E7D",
+            "fileSize": 75094
+          },
+          "curatedAt": "2026-04-15T11:29:38.035Z"
+        },
+        {
+          "id": 1776252579095.4587,
+          "pexelsId": 20705876,
+          "room": "bedroom",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/20705876/pexels-photo-20705876.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/classic/20705876.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/classic/20705876.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3986,
+            "height": 5979,
+            "photographer": "Алан Албегов",
+            "alt": "Luxurious bedroom showcasing elegant decor with a classic touch, featuring a wooden floor.",
+            "avgColor": "#958E84",
+            "fileSize": 41726
+          },
+          "curatedAt": "2026-04-15T11:29:39.095Z"
+        },
+        {
+          "id": 1776252580268.1968,
+          "pexelsId": 8135289,
+          "room": "bedroom",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/8135289/pexels-photo-8135289.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/classic/8135289.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/classic/8135289.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3939,
+            "height": 3200,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Elegant bedroom with classic decor and luxury furnishings, perfect for a luxury home or hotel.",
+            "avgColor": "#977655",
+            "fileSize": 77171
+          },
+          "curatedAt": "2026-04-15T11:29:40.268Z"
+        }
+      ]
+    },
+    {
+      "room": "bedroom",
+      "style": "industrial",
+      "fetched": 50,
+      "groqPassed": 12,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252602531.2927,
+          "pexelsId": 9675987,
+          "room": "bedroom",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/9675987/pexels-photo-9675987.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/industrial/9675987.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/industrial/9675987.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3024,
+            "height": 4032,
+            "photographer": "Аlex Ugolkov",
+            "alt": "Industrial-style bedroom with brick walls, potted plants, and soft lighting creating a warm ambiance.",
+            "avgColor": "#453D32",
+            "fileSize": 63061
+          },
+          "curatedAt": "2026-04-15T11:30:02.531Z"
+        },
+        {
+          "id": 1776252603505.0198,
+          "pexelsId": 12928296,
+          "room": "bedroom",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/12928296/pexels-photo-12928296.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/industrial/12928296.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/industrial/12928296.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3956,
+            "height": 2225,
+            "photographer": "Pușcaș Adryan",
+            "alt": "Stylish loft bedroom featuring a bed, workspace, ladder, and chic interior design.",
+            "avgColor": "#3C352F",
+            "fileSize": 58830
+          },
+          "curatedAt": "2026-04-15T11:30:03.505Z"
+        },
+        {
+          "id": 1776252604405.0872,
+          "pexelsId": 12913379,
+          "room": "bedroom",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/12913379/pexels-photo-12913379.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/industrial/12913379.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/industrial/12913379.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2986,
+            "height": 1680,
+            "photographer": "Pușcaș Adryan",
+            "alt": "Stylish modern lofted bedroom with a computer desk and cozy decor.",
+            "avgColor": "#2E2A27",
+            "fileSize": 50083
+          },
+          "curatedAt": "2026-04-15T11:30:04.405Z"
+        },
+        {
+          "id": 1776252608781.2803,
+          "pexelsId": 7018253,
+          "room": "bedroom",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7018253/pexels-photo-7018253.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/industrial/7018253.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/industrial/7018253.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Bed between television and brick wall with empty panel in modern apartment with shiny lamps",
+            "avgColor": "#8E796D",
+            "fileSize": 107806
+          },
+          "curatedAt": "2026-04-15T11:30:08.781Z"
+        },
+        {
+          "id": 1776252609846.0747,
+          "pexelsId": 12913382,
+          "room": "bedroom",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/12913382/pexels-photo-12913382.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/industrial/12913382.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/industrial/12913382.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2986,
+            "height": 1680,
+            "photographer": "Pușcaș Adryan",
+            "alt": "A cozy, minimalist bed with stone wall accent in a modern interior setting.",
+            "avgColor": "#4B4A46",
+            "fileSize": 54179
+          },
+          "curatedAt": "2026-04-15T11:30:09.846Z"
+        }
+      ]
+    },
+    {
+      "room": "bedroom",
+      "style": "scandinavian",
+      "fetched": 50,
+      "groqPassed": 32,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252632066.784,
+          "pexelsId": 15131055,
+          "room": "bedroom",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/15131055/pexels-photo-15131055.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/scandinavian/15131055.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/scandinavian/15131055.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4075,
+            "height": 2647,
+            "photographer": "İbrahim Doğan",
+            "alt": "Bright Scandinavian style bedroom with minimalist decor and neutral tones.",
+            "avgColor": "#C7C1B5",
+            "fileSize": 58263
+          },
+          "curatedAt": "2026-04-15T11:30:32.066Z"
+        },
+        {
+          "id": 1776252633014.6487,
+          "pexelsId": 7587775,
+          "room": "bedroom",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/7587775/pexels-photo-7587775.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/scandinavian/7587775.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/scandinavian/7587775.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6055,
+            "height": 4879,
+            "photographer": "Max Vakhtbovych",
+            "alt": "A stylish modern bedroom with white bedding and gray curtains, emphasizing minimalist decor.",
+            "avgColor": "#A4A7AB",
+            "fileSize": 46331
+          },
+          "curatedAt": "2026-04-15T11:30:33.014Z"
+        },
+        {
+          "id": 1776252634311.327,
+          "pexelsId": 34978180,
+          "room": "bedroom",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/34978180/pexels-photo-34978180.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/scandinavian/34978180.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/scandinavian/34978180.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 15871,
+            "height": 9184,
+            "photographer": "Ananda",
+            "alt": "Warm and inviting winter bedroom interior with a scenic view in Luleå, Sweden.",
+            "avgColor": "#776861",
+            "fileSize": 78683
+          },
+          "curatedAt": "2026-04-15T11:30:34.311Z"
+        },
+        {
+          "id": 1776252635843.9482,
+          "pexelsId": 36353419,
+          "room": "bedroom",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/36353419/pexels-photo-36353419.png?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/scandinavian/36353419.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/scandinavian/36353419.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3840,
+            "height": 2543,
+            "photographer": "The Ghazi",
+            "alt": "A warm, modern bedroom featuring a large window with serene outdoor view, wooden accents, and soft lighting.",
+            "avgColor": "#7A6B5E",
+            "fileSize": 84384
+          },
+          "curatedAt": "2026-04-15T11:30:35.843Z"
+        },
+        {
+          "id": 1776252636504.9272,
+          "pexelsId": 8251920,
+          "room": "bedroom",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/8251920/pexels-photo-8251920.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bedroom/scandinavian/8251920.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bedroom/scandinavian/8251920.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4000,
+            "height": 6000,
+            "photographer": "PNW Production",
+            "alt": "A serene Japandi-style bedroom showcasing minimalist decor with a wooden cabinet, round table, and soft candlelight.",
+            "avgColor": "#908685",
+            "fileSize": 26209
+          },
+          "curatedAt": "2026-04-15T11:30:36.504Z"
+        }
+      ]
+    },
+    {
+      "room": "dining-room",
+      "style": "modern",
+      "fetched": 50,
+      "groqPassed": 44,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252656797.4578,
+          "pexelsId": 27562218,
+          "room": "dining-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/27562218/pexels-photo-27562218.png?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/modern/27562218.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/modern/27562218.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3112,
+            "height": 2336,
+            "photographer": "Ansar Muhammad",
+            "alt": "Elegant dining room with modern chandelier, minimalist design, and luxury furnishings.",
+            "avgColor": "#645245",
+            "fileSize": 62294
+          },
+          "curatedAt": "2026-04-15T11:30:56.797Z"
+        },
+        {
+          "id": 1776252658337.638,
+          "pexelsId": 29303037,
+          "room": "dining-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/29303037/pexels-photo-29303037.png?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/modern/29303037.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/modern/29303037.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2400,
+            "height": 3000,
+            "photographer": "Luiza Venanci",
+            "alt": "Sleek contemporary interior design featuring an open-plan kitchen and dining area with elegant lighting.",
+            "avgColor": "#B4A795",
+            "fileSize": 41431
+          },
+          "curatedAt": "2026-04-15T11:30:58.337Z"
+        },
+        {
+          "id": 1776252659754.0225,
+          "pexelsId": 7195894,
+          "room": "dining-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/7195894/pexels-photo-7195894.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/modern/7195894.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/modern/7195894.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4760,
+            "height": 3177,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Wooden table with chairs placed near window in light spacious apartment with empty shelves and minimalist interior at home",
+            "avgColor": "#B0ABA7",
+            "fileSize": 52014
+          },
+          "curatedAt": "2026-04-15T11:30:59.754Z"
+        },
+        {
+          "id": 1776252661691.7014,
+          "pexelsId": 13806235,
+          "room": "dining-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/13806235/pexels-photo-13806235.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/modern/13806235.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/modern/13806235.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 5947,
+            "height": 3965,
+            "photographer": "Nicholas Derio Palacios",
+            "alt": "Stylish dining area with soft lighting, contemporary furniture, and a cozy feel.",
+            "avgColor": "#565342",
+            "fileSize": 60124
+          },
+          "curatedAt": "2026-04-15T11:31:01.691Z"
+        },
+        {
+          "id": 1776252662584.6536,
+          "pexelsId": 7587743,
+          "room": "dining-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/7587743/pexels-photo-7587743.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/modern/7587743.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/modern/7587743.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Bright minimalist dining area with white furniture and modern kitchen design.",
+            "avgColor": "#C3C6C8",
+            "fileSize": 49069
+          },
+          "curatedAt": "2026-04-15T11:31:02.584Z"
+        }
+      ]
+    },
+    {
+      "room": "dining-room",
+      "style": "classic",
+      "fetched": 50,
+      "groqPassed": 48,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252682000.9165,
+          "pexelsId": 33296869,
+          "room": "dining-room",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/33296869/pexels-photo-33296869.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/classic/33296869.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/classic/33296869.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4000,
+            "height": 5000,
+            "photographer": "Yusuf P",
+            "alt": "A luxurious dining room featuring an ornate chandelier and classic furnishings, creating a warm ambiance.",
+            "avgColor": "#513529",
+            "fileSize": 55299
+          },
+          "curatedAt": "2026-04-15T11:31:22.000Z"
+        },
+        {
+          "id": 1776252683444.5305,
+          "pexelsId": 8092433,
+          "room": "dining-room",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/8092433/pexels-photo-8092433.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/classic/8092433.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/classic/8092433.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "A beautifully decorated dining room featuring a long wooden table and ornate curtains, exuding elegance and luxury.",
+            "avgColor": "#B09687",
+            "fileSize": 98266
+          },
+          "curatedAt": "2026-04-15T11:31:23.444Z"
+        },
+        {
+          "id": 1776252684835.259,
+          "pexelsId": 8092429,
+          "room": "dining-room",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/8092429/pexels-photo-8092429.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/classic/8092429.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/classic/8092429.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "A luxurious dining room showcasing vintage ceramics and classic furniture.",
+            "avgColor": "#B3A290",
+            "fileSize": 77958
+          },
+          "curatedAt": "2026-04-15T11:31:24.835Z"
+        },
+        {
+          "id": 1776252687250.4944,
+          "pexelsId": 29071945,
+          "room": "dining-room",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/29071945/pexels-photo-29071945.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/classic/29071945.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/classic/29071945.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6000,
+            "height": 4000,
+            "photographer": "Bruno Cervera",
+            "alt": "Sophisticated vintage dining room featuring elegant decor, candleholders, and classic artwork. Perfect for a luxurious setting.",
+            "avgColor": "#373634",
+            "fileSize": 83762
+          },
+          "curatedAt": "2026-04-15T11:31:27.250Z"
+        },
+        {
+          "id": 1776252689184.6904,
+          "pexelsId": 34961480,
+          "room": "dining-room",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/34961480/pexels-photo-34961480.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/classic/34961480.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/classic/34961480.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2736,
+            "height": 3648,
+            "photographer": "Viliam Kudelka",
+            "alt": "Ornate dining room featuring antique furniture and intricate wooden decor under a grand chandelier.",
+            "avgColor": "#4B3E38",
+            "fileSize": 70112
+          },
+          "curatedAt": "2026-04-15T11:31:29.184Z"
+        }
+      ]
+    },
+    {
+      "room": "dining-room",
+      "style": "industrial",
+      "fetched": 50,
+      "groqPassed": 14,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252710343.7974,
+          "pexelsId": 7045914,
+          "room": "dining-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7045914/pexels-photo-7045914.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/industrial/7045914.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/industrial/7045914.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of spacious dining room with round table and comfortable soft chairs placed in modern apartment",
+            "avgColor": "#79736F",
+            "fileSize": 94164
+          },
+          "curatedAt": "2026-04-15T11:31:50.343Z"
+        },
+        {
+          "id": 1776252711641.4358,
+          "pexelsId": 7045924,
+          "room": "dining-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7045924/pexels-photo-7045924.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/industrial/7045924.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/industrial/7045924.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of spacious dining room with round table with bouquet of flowers and comfortable chairs against glass wall in modern apartment",
+            "avgColor": "#7B6D6C",
+            "fileSize": 81434
+          },
+          "curatedAt": "2026-04-15T11:31:51.641Z"
+        },
+        {
+          "id": 1776252713709.2036,
+          "pexelsId": 17677330,
+          "room": "dining-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/17677330/pexels-photo-17677330.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/industrial/17677330.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/industrial/17677330.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6720,
+            "height": 4480,
+            "photographer": "yaman ozuduru",
+            "alt": "Retro industrial chairs in vibrant colors around a wooden table, indoor loft setting.",
+            "avgColor": "#865F3E",
+            "fileSize": 84715
+          },
+          "curatedAt": "2026-04-15T11:31:53.709Z"
+        },
+        {
+          "id": 1776252716462.9255,
+          "pexelsId": 6657686,
+          "room": "dining-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/6657686/pexels-photo-6657686.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/industrial/6657686.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/industrial/6657686.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6606,
+            "height": 4404,
+            "photographer": "RDNE Stock project",
+            "alt": "Sophisticated dining scene with cake, wine, and candles on a wooden table in a stylish loft.",
+            "avgColor": "#A1938A",
+            "fileSize": 90404
+          },
+          "curatedAt": "2026-04-15T11:31:56.462Z"
+        },
+        {
+          "id": 1776252718201.0586,
+          "pexelsId": 12625640,
+          "room": "dining-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/12625640/pexels-photo-12625640.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/industrial/12625640.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/industrial/12625640.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4672,
+            "height": 7008,
+            "photographer": "Yunus Tuğ",
+            "alt": "Stylish interior featuring a warm brick wall, chandelier, and wooden table.",
+            "avgColor": "#855638",
+            "fileSize": 51039
+          },
+          "curatedAt": "2026-04-15T11:31:58.201Z"
+        }
+      ]
+    },
+    {
+      "room": "dining-room",
+      "style": "scandinavian",
+      "fetched": 50,
+      "groqPassed": 19,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252742017.751,
+          "pexelsId": 30925016,
+          "room": "dining-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/30925016/pexels-photo-30925016.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/scandinavian/30925016.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/scandinavian/30925016.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2670,
+            "height": 4000,
+            "photographer": "Adamowicz Adamsky",
+            "alt": "Elegant Scandinavian dining area with glass table and wooden chairs in Warsaw.",
+            "avgColor": "#A59C95",
+            "fileSize": 24307
+          },
+          "curatedAt": "2026-04-15T11:32:22.017Z"
+        },
+        {
+          "id": 1776252743094.115,
+          "pexelsId": 7060817,
+          "room": "dining-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/7060817/pexels-photo-7060817.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/scandinavian/7060817.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/scandinavian/7060817.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of modern kitchen with cabinets in white and wooden design and dining room with table and chairs placed in middle of room",
+            "avgColor": "#9B9A91",
+            "fileSize": 61687
+          },
+          "curatedAt": "2026-04-15T11:32:23.094Z"
+        },
+        {
+          "id": 1776252744396.2454,
+          "pexelsId": 33054907,
+          "room": "dining-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/33054907/pexels-photo-33054907.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/scandinavian/33054907.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/scandinavian/33054907.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3072,
+            "height": 2047,
+            "photographer": "Mateusz Pielech",
+            "alt": "Bright dining area in Kraków, featuring a wooden table, wicker lamp, and minimalist design.",
+            "avgColor": "#9F9F9F",
+            "fileSize": 49270
+          },
+          "curatedAt": "2026-04-15T11:32:24.396Z"
+        },
+        {
+          "id": 1776252745217.2722,
+          "pexelsId": 36260589,
+          "room": "dining-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/36260589/pexels-photo-36260589.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/scandinavian/36260589.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/scandinavian/36260589.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2773,
+            "height": 4160,
+            "photographer": "Sinara Bianchet",
+            "alt": "Stylish Scandinavian dining chairs with wooden details in a bright indoor setting.",
+            "avgColor": "#A99797",
+            "fileSize": 36585
+          },
+          "curatedAt": "2026-04-15T11:32:25.217Z"
+        },
+        {
+          "id": 1776252746700.7595,
+          "pexelsId": 6523299,
+          "room": "dining-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/6523299/pexels-photo-6523299.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/dining-room/scandinavian/6523299.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/dining-room/scandinavian/6523299.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4640,
+            "height": 3093,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Wooden chairs at round table placed between couch and kitchen counter with white cabinet in modern light apartment with window",
+            "avgColor": "#BEB8AE",
+            "fileSize": 52371
+          },
+          "curatedAt": "2026-04-15T11:32:26.700Z"
+        }
+      ]
+    },
+    {
+      "room": "kitchen",
+      "style": "modern",
+      "fetched": 50,
+      "groqPassed": 50,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252768678.3003,
+          "pexelsId": 8142046,
+          "room": "kitchen",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/8142046/pexels-photo-8142046.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/modern/8142046.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/modern/8142046.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4800,
+            "height": 3200,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Elegant and modern kitchen with marble countertops and sleek design elements.",
+            "avgColor": "#4C4950",
+            "fileSize": 55519
+          },
+          "curatedAt": "2026-04-15T11:32:48.678Z"
+        },
+        {
+          "id": 1776252770335.4944,
+          "pexelsId": 8134781,
+          "room": "kitchen",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/8134781/pexels-photo-8134781.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/modern/8134781.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/modern/8134781.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7229,
+            "height": 4825,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Spacious modern kitchen interior blending minimalist design and natural light.",
+            "avgColor": "#B2A69A",
+            "fileSize": 55882
+          },
+          "curatedAt": "2026-04-15T11:32:50.335Z"
+        },
+        {
+          "id": 1776252773902.5798,
+          "pexelsId": 7214450,
+          "room": "kitchen",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/7214450/pexels-photo-7214450.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/modern/7214450.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/modern/7214450.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6877,
+            "height": 4677,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of spacious kitchen with new white furniture with wooden details in luxury apartment in daylight",
+            "avgColor": "#BCB6AB",
+            "fileSize": 63539
+          },
+          "curatedAt": "2026-04-15T11:32:53.902Z"
+        },
+        {
+          "id": 1776252775577.8691,
+          "pexelsId": 7166942,
+          "room": "kitchen",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/7166942/pexels-photo-7166942.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/modern/7166942.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/modern/7166942.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Sleek modern kitchen with dining area, featuring neutral tones and minimalist design.",
+            "avgColor": "#A3998D",
+            "fileSize": 62466
+          },
+          "curatedAt": "2026-04-15T11:32:55.577Z"
+        },
+        {
+          "id": 1776252776190.2002,
+          "pexelsId": 20348123,
+          "room": "kitchen",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/20348123/pexels-photo-20348123.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/modern/20348123.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/modern/20348123.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4001,
+            "height": 5233,
+            "photographer": "Mateusz Pielech",
+            "alt": "A luxurious minimalist kitchen features marble backsplash and golden faucet.",
+            "avgColor": "#C4BFBC",
+            "fileSize": 22414
+          },
+          "curatedAt": "2026-04-15T11:32:56.190Z"
+        }
+      ]
+    },
+    {
+      "room": "kitchen",
+      "style": "classic",
+      "fetched": 50,
+      "groqPassed": 20,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252799758.0886,
+          "pexelsId": 21038559,
+          "room": "kitchen",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/21038559/pexels-photo-21038559.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/classic/21038559.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/classic/21038559.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 5458,
+            "height": 3639,
+            "photographer": "Алан Албегов",
+            "alt": "Explore the charm of a vintage-inspired kitchen with elegant cabinetry and stylish decor.",
+            "avgColor": "#978A7A",
+            "fileSize": 86591
+          },
+          "curatedAt": "2026-04-15T11:33:19.758Z"
+        },
+        {
+          "id": 1776252801102.4653,
+          "pexelsId": 8141955,
+          "room": "kitchen",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/8141955/pexels-photo-8141955.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/classic/8141955.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/classic/8141955.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Spacious kitchen with dark wooden cabinetry and elegant decor, featuring a central island.",
+            "avgColor": "#988274",
+            "fileSize": 93185
+          },
+          "curatedAt": "2026-04-15T11:33:21.102Z"
+        },
+        {
+          "id": 1776252803022.1062,
+          "pexelsId": 7587482,
+          "room": "kitchen",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/7587482/pexels-photo-7587482.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/classic/7587482.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/classic/7587482.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7300,
+            "height": 4872,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Discover an elegant vintage-style kitchen with classic cabinets and ornate chandelier.",
+            "avgColor": "#848888",
+            "fileSize": 98026
+          },
+          "curatedAt": "2026-04-15T11:33:23.022Z"
+        },
+        {
+          "id": 1776252804656.9412,
+          "pexelsId": 8092436,
+          "room": "kitchen",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/8092436/pexels-photo-8092436.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/classic/8092436.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/classic/8092436.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Luxury traditional kitchen featuring ornate cabinetry and a marble island.",
+            "avgColor": "#BCAA96",
+            "fileSize": 94868
+          },
+          "curatedAt": "2026-04-15T11:33:24.656Z"
+        },
+        {
+          "id": 1776252805589.764,
+          "pexelsId": 9899864,
+          "room": "kitchen",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/9899864/pexels-photo-9899864.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/classic/9899864.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/classic/9899864.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3648,
+            "height": 5472,
+            "photographer": "Erik Mclean",
+            "alt": "Warm and inviting kitchen with wooden cabinetry and granite countertops, perfect for home interiors.",
+            "avgColor": "#685841",
+            "fileSize": 49317
+          },
+          "curatedAt": "2026-04-15T11:33:25.589Z"
+        }
+      ]
+    },
+    {
+      "room": "kitchen",
+      "style": "industrial",
+      "fetched": 50,
+      "groqPassed": 19,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252829740.354,
+          "pexelsId": 7045940,
+          "room": "kitchen",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7045940/pexels-photo-7045940.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/industrial/7045940.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/industrial/7045940.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of spacious kitchen area with modern furniture placed in luxury apartment in loft style",
+            "avgColor": "#625551",
+            "fileSize": 105016
+          },
+          "curatedAt": "2026-04-15T11:33:49.740Z"
+        },
+        {
+          "id": 1776252831279.7615,
+          "pexelsId": 7045939,
+          "room": "kitchen",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7045939/pexels-photo-7045939.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/industrial/7045939.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/industrial/7045939.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of spacious kitchen area with stylish furniture against living room in modern apartment in evening time",
+            "avgColor": "#625757",
+            "fileSize": 99971
+          },
+          "curatedAt": "2026-04-15T11:33:51.279Z"
+        },
+        {
+          "id": 1776252833827.698,
+          "pexelsId": 6580414,
+          "room": "kitchen",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/6580414/pexels-photo-6580414.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/industrial/6580414.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/industrial/6580414.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7015,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Sleek modern kitchen with a minimalist style and elegant lighting.",
+            "avgColor": "#6E6257",
+            "fileSize": 70988
+          },
+          "curatedAt": "2026-04-15T11:33:53.827Z"
+        },
+        {
+          "id": 1776252835181.3674,
+          "pexelsId": 7587805,
+          "room": "kitchen",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7587805/pexels-photo-7587805.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/industrial/7587805.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/industrial/7587805.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7342,
+            "height": 4900,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Spacious and stylish kitchen featuring modern industrial design with wooden and metal elements.",
+            "avgColor": "#A98F79",
+            "fileSize": 97952
+          },
+          "curatedAt": "2026-04-15T11:33:55.181Z"
+        },
+        {
+          "id": 1776252839004.1711,
+          "pexelsId": 7587808,
+          "room": "kitchen",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7587808/pexels-photo-7587808.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/industrial/7587808.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/industrial/7587808.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Spacious kitchen interior with industrial design, featuring brick walls and wooden accents.",
+            "avgColor": "#AA8B71",
+            "fileSize": 112064
+          },
+          "curatedAt": "2026-04-15T11:33:59.004Z"
+        }
+      ]
+    },
+    {
+      "room": "kitchen",
+      "style": "scandinavian",
+      "fetched": 50,
+      "groqPassed": 33,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252860686.7063,
+          "pexelsId": 7060817,
+          "room": "kitchen",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/7060817/pexels-photo-7060817.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/scandinavian/7060817.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/scandinavian/7060817.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of modern kitchen with cabinets in white and wooden design and dining room with table and chairs placed in middle of room",
+            "avgColor": "#9B9A91",
+            "fileSize": 61687
+          },
+          "curatedAt": "2026-04-15T11:34:20.686Z"
+        },
+        {
+          "id": 1776252861442.8608,
+          "pexelsId": 9869373,
+          "room": "kitchen",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/9869373/pexels-photo-9869373.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/scandinavian/9869373.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/scandinavian/9869373.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3462,
+            "height": 5193,
+            "photographer": "Ron Lach",
+            "alt": "Modern kitchen interior featuring pendant lights, wooden countertop, and utensils.",
+            "avgColor": "#6F6764",
+            "fileSize": 33353
+          },
+          "curatedAt": "2026-04-15T11:34:21.442Z"
+        },
+        {
+          "id": 1776252863520.143,
+          "pexelsId": 6920443,
+          "room": "kitchen",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/6920443/pexels-photo-6920443.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/scandinavian/6920443.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/scandinavian/6920443.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Sleek Scandinavian style kitchen with white cabinets and minimalist design.",
+            "avgColor": "#AFADAE",
+            "fileSize": 43170
+          },
+          "curatedAt": "2026-04-15T11:34:23.520Z"
+        },
+        {
+          "id": 1776252865652.9841,
+          "pexelsId": 20088153,
+          "room": "kitchen",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/20088153/pexels-photo-20088153.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/scandinavian/20088153.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/scandinavian/20088153.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4560,
+            "height": 3040,
+            "photographer": "Алан Албегов",
+            "alt": "Bright kitchen with contemporary furniture and potted plant, exuding a serene natural feel.",
+            "avgColor": "#89877B",
+            "fileSize": 89175
+          },
+          "curatedAt": "2026-04-15T11:34:25.652Z"
+        },
+        {
+          "id": 1776252867746.986,
+          "pexelsId": 6920453,
+          "room": "kitchen",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/6920453/pexels-photo-6920453.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kitchen/scandinavian/6920453.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kitchen/scandinavian/6920453.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Elegant minimalist kitchen interior with white cabinets and modern lighting.",
+            "avgColor": "#B5B4B5",
+            "fileSize": 42367
+          },
+          "curatedAt": "2026-04-15T11:34:27.746Z"
+        }
+      ]
+    },
+    {
+      "room": "bathroom",
+      "style": "modern",
+      "fetched": 50,
+      "groqPassed": 50,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252889643.4587,
+          "pexelsId": 8089093,
+          "room": "bathroom",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/8089093/pexels-photo-8089093.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/modern/8089093.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/modern/8089093.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Sleek modern bathroom featuring a minimalist sink and elegant hanging lights.",
+            "avgColor": "#625751",
+            "fileSize": 58212
+          },
+          "curatedAt": "2026-04-15T11:34:49.643Z"
+        },
+        {
+          "id": 1776252890560.7793,
+          "pexelsId": 6588586,
+          "room": "bathroom",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/6588586/pexels-photo-6588586.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/modern/6588586.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/modern/6588586.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7236,
+            "height": 4907,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Interior of modern light bathroom with bathtub and shower next to sink with cabinet near door",
+            "avgColor": "#B1B1B1",
+            "fileSize": 39583
+          },
+          "curatedAt": "2026-04-15T11:34:50.560Z"
+        },
+        {
+          "id": 1776252891656.7974,
+          "pexelsId": 7195883,
+          "room": "bathroom",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/7195883/pexels-photo-7195883.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/modern/7195883.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/modern/7195883.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7340,
+            "height": 4899,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Modern bathroom featuring a luxurious marble design and a sleek freestanding bathtub.",
+            "avgColor": "#B7B8BA",
+            "fileSize": 53101
+          },
+          "curatedAt": "2026-04-15T11:34:51.656Z"
+        },
+        {
+          "id": 1776252893120.902,
+          "pexelsId": 6920613,
+          "room": "bathroom",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/6920613/pexels-photo-6920613.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/modern/6920613.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/modern/6920613.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4865,
+            "height": 7289,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Contemporary bathroom with marble accents, featuring a minimalist sink and black countertop.",
+            "avgColor": "#9D9C96",
+            "fileSize": 38013
+          },
+          "curatedAt": "2026-04-15T11:34:53.120Z"
+        },
+        {
+          "id": 1776252894266.2617,
+          "pexelsId": 8146211,
+          "room": "bathroom",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/8146211/pexels-photo-8146211.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/modern/8146211.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/modern/8146211.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Elegant marble bathroom featuring a modern double vanity design.",
+            "avgColor": "#BABCBB",
+            "fileSize": 61944
+          },
+          "curatedAt": "2026-04-15T11:34:54.266Z"
+        }
+      ]
+    },
+    {
+      "room": "bathroom",
+      "style": "classic",
+      "fetched": 50,
+      "groqPassed": 32,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252915704.7786,
+          "pexelsId": 20771835,
+          "room": "bathroom",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/20771835/pexels-photo-20771835.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/classic/20771835.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/classic/20771835.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 5458,
+            "height": 3639,
+            "photographer": "Алан Албегов",
+            "alt": "Luxurious vintage bathroom featuring a chandelier, bathtub, and elegant decor. Perfect for interior design inspiration.",
+            "avgColor": "#AE9485",
+            "fileSize": 88237
+          },
+          "curatedAt": "2026-04-15T11:35:15.704Z"
+        },
+        {
+          "id": 1776252917115.8794,
+          "pexelsId": 20705920,
+          "room": "bathroom",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/20705920/pexels-photo-20705920.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/classic/20705920.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/classic/20705920.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3999,
+            "height": 5998,
+            "photographer": "Алан Албегов",
+            "alt": "A stylish retro bathroom featuring a vintage washbasin and elegant tile designs.",
+            "avgColor": "#9F8C7B",
+            "fileSize": 44624
+          },
+          "curatedAt": "2026-04-15T11:35:17.115Z"
+        },
+        {
+          "id": 1776252918162.3782,
+          "pexelsId": 36650041,
+          "room": "bathroom",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/36650041/pexels-photo-36650041.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/classic/36650041.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/classic/36650041.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7470,
+            "height": 5148,
+            "photographer": "Optical Chemist",
+            "alt": "Luxurious bathroom featuring a classic white bathtub against elegant marble walls, creating a serene ambiance.",
+            "avgColor": "#483528",
+            "fileSize": 66768
+          },
+          "curatedAt": "2026-04-15T11:35:18.162Z"
+        },
+        {
+          "id": 1776252920465.6338,
+          "pexelsId": 8092397,
+          "room": "bathroom",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/8092397/pexels-photo-8092397.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/classic/8092397.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/classic/8092397.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Spacious bathroom with vintage decor, featuring striped wallpaper and wooden furniture.",
+            "avgColor": "#AC9689",
+            "fileSize": 74595
+          },
+          "curatedAt": "2026-04-15T11:35:20.465Z"
+        },
+        {
+          "id": 1776252921532.2698,
+          "pexelsId": 36650049,
+          "room": "bathroom",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/36650049/pexels-photo-36650049.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/classic/36650049.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/classic/36650049.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7906,
+            "height": 5461,
+            "photographer": "Optical Chemist",
+            "alt": "Elegant brass faucet fixture with a luxurious marble wall background.",
+            "avgColor": "#3C3028",
+            "fileSize": 64979
+          },
+          "curatedAt": "2026-04-15T11:35:21.532Z"
+        }
+      ]
+    },
+    {
+      "room": "bathroom",
+      "style": "industrial",
+      "fetched": 50,
+      "groqPassed": 12,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252941697.4927,
+          "pexelsId": 28297761,
+          "room": "bathroom",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/28297761/pexels-photo-28297761.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/industrial/28297761.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/industrial/28297761.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3024,
+            "height": 4032,
+            "photographer": "Alan Quirván",
+            "alt": "Stylish bathroom featuring a freestanding tub and industrial brick wall.",
+            "avgColor": "#B8A69C",
+            "fileSize": 41105
+          },
+          "curatedAt": "2026-04-15T11:35:41.697Z"
+        },
+        {
+          "id": 1776252942512.7122,
+          "pexelsId": 36718391,
+          "room": "bathroom",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/36718391/pexels-photo-36718391.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/industrial/36718391.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/industrial/36718391.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3871,
+            "height": 5806,
+            "photographer": "Guilherme Simão",
+            "alt": "A modern bathroom sink with a sleek black basin and brass faucet, complemented by a stylish interior design.",
+            "avgColor": "#3A362B",
+            "fileSize": 25765
+          },
+          "curatedAt": "2026-04-15T11:35:42.512Z"
+        },
+        {
+          "id": 1776252943531.7244,
+          "pexelsId": 36650049,
+          "room": "bathroom",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/36650049/pexels-photo-36650049.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/industrial/36650049.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/industrial/36650049.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7906,
+            "height": 5461,
+            "photographer": "Optical Chemist",
+            "alt": "Elegant brass faucet fixture with a luxurious marble wall background.",
+            "avgColor": "#3C3028",
+            "fileSize": 64979
+          },
+          "curatedAt": "2026-04-15T11:35:43.531Z"
+        },
+        {
+          "id": 1776252944885.8274,
+          "pexelsId": 5644328,
+          "room": "bathroom",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/5644328/pexels-photo-5644328.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/industrial/5644328.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/industrial/5644328.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3064,
+            "height": 4592,
+            "photographer": "Polina ⠀",
+            "alt": "Modern bathroom featuring a wooden vanity, large mirror, industrial lamps, and a sleek gray tile wall.",
+            "avgColor": "#776855",
+            "fileSize": 37961
+          },
+          "curatedAt": "2026-04-15T11:35:44.885Z"
+        },
+        {
+          "id": 1776252946315.9067,
+          "pexelsId": 35189678,
+          "room": "bathroom",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/35189678/pexels-photo-35189678.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/industrial/35189678.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/industrial/35189678.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4500,
+            "height": 3213,
+            "photographer": "Rana Matloob Hussain",
+            "alt": "Luxurious modern shower with dark textured tiles and copper fixtures for a sophisticated bathroom design.",
+            "avgColor": "#836855",
+            "fileSize": 82727
+          },
+          "curatedAt": "2026-04-15T11:35:46.315Z"
+        }
+      ]
+    },
+    {
+      "room": "bathroom",
+      "style": "scandinavian",
+      "fetched": 50,
+      "groqPassed": 8,
+      "visionScored": 8,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252969071.3074,
+          "pexelsId": 2207894,
+          "room": "bathroom",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/2207894/pexels-photo-2207894.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/scandinavian/2207894.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/scandinavian/2207894.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3024,
+            "height": 4032,
+            "photographer": "julie aagaard",
+            "alt": "A sleek and contemporary Scandinavian bathroom with modern fixtures and ambient lighting.",
+            "avgColor": "#59524A",
+            "fileSize": 33178
+          },
+          "curatedAt": "2026-04-15T11:36:09.071Z"
+        },
+        {
+          "id": 1776252969774.1748,
+          "pexelsId": 6634896,
+          "room": "bathroom",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/6634896/pexels-photo-6634896.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/scandinavian/6634896.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/scandinavian/6634896.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4010,
+            "height": 6015,
+            "photographer": "Vlada Karpovich",
+            "alt": "Elegant freestanding bathtub in a bright, minimalist bathroom with large windows and potted plants.",
+            "avgColor": "#C3B2A5",
+            "fileSize": 32151
+          },
+          "curatedAt": "2026-04-15T11:36:09.774Z"
+        },
+        {
+          "id": 1776252971495.1633,
+          "pexelsId": 36353409,
+          "room": "bathroom",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/36353409/pexels-photo-36353409.png?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/scandinavian/36353409.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/scandinavian/36353409.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3840,
+            "height": 2543,
+            "photographer": "The Ghazi",
+            "alt": "Elegant bathroom with wooden accents and modern fixtures for a stylish look.",
+            "avgColor": "#786F65",
+            "fileSize": 73151
+          },
+          "curatedAt": "2026-04-15T11:36:11.495Z"
+        },
+        {
+          "id": 1776252973188.9976,
+          "pexelsId": 34000143,
+          "room": "bathroom",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/34000143/pexels-photo-34000143.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/scandinavian/34000143.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/scandinavian/34000143.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2500,
+            "height": 1875,
+            "photographer": "Juventa Bathroom Furniture",
+            "alt": "Stylish modern bathroom with wooden and gray elements, featuring minimalist fixtures.",
+            "avgColor": "#847D77",
+            "fileSize": 67608
+          },
+          "curatedAt": "2026-04-15T11:36:13.188Z"
+        },
+        {
+          "id": 1776252974726.219,
+          "pexelsId": 9565974,
+          "room": "bathroom",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/9565974/pexels-photo-9565974.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/bathroom/scandinavian/9565974.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/bathroom/scandinavian/9565974.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3803,
+            "height": 5705,
+            "photographer": "Taryn Elliott",
+            "alt": "A serene minimalist bathroom features a bathtub with Scandinavian design elements, creating a calming space.",
+            "avgColor": "#A1A29D",
+            "fileSize": 30027
+          },
+          "curatedAt": "2026-04-15T11:36:14.726Z"
+        }
+      ]
+    },
+    {
+      "room": "office",
+      "style": "modern",
+      "fetched": 50,
+      "groqPassed": 42,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776252996942.1611,
+          "pexelsId": 34549315,
+          "room": "office",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/34549315/pexels-photo-34549315.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/modern/34549315.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/modern/34549315.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4032,
+            "height": 6048,
+            "photographer": "Liuuu _61",
+            "alt": "Sleek home office with dark wood decor, leather sofa, and laptop on a table.",
+            "avgColor": "#4B4746",
+            "fileSize": 23058
+          },
+          "curatedAt": "2026-04-15T11:36:36.942Z"
+        },
+        {
+          "id": 1776252997919.891,
+          "pexelsId": 34549322,
+          "room": "office",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/34549322/pexels-photo-34549322.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/modern/34549322.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/modern/34549322.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 5480,
+            "height": 3653,
+            "photographer": "Liuuu _61",
+            "alt": "Sleek and stylish home office with wooden furniture and modern decor, exuding a minimalist aesthetic.",
+            "avgColor": "#5B5653",
+            "fileSize": 47943
+          },
+          "curatedAt": "2026-04-15T11:36:37.919Z"
+        },
+        {
+          "id": 1776252998967.878,
+          "pexelsId": 8082224,
+          "room": "office",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/8082224/pexels-photo-8082224.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/modern/8082224.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/modern/8082224.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "A stylish and modern home office space featuring contemporary furniture and decor.",
+            "avgColor": "#ACA9A2",
+            "fileSize": 58452
+          },
+          "curatedAt": "2026-04-15T11:36:38.967Z"
+        },
+        {
+          "id": 1776253000031.2412,
+          "pexelsId": 8082233,
+          "room": "office",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/8082233/pexels-photo-8082233.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/modern/8082233.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/modern/8082233.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Elegant modern home office featuring luxury furniture and sophisticated design.",
+            "avgColor": "#B2A9A0",
+            "fileSize": 68614
+          },
+          "curatedAt": "2026-04-15T11:36:40.031Z"
+        },
+        {
+          "id": 1776253000870.7139,
+          "pexelsId": 34717361,
+          "room": "office",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/34717361/pexels-photo-34717361.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/modern/34717361.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/modern/34717361.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2752,
+            "height": 4128,
+            "photographer": "Daniel Lee",
+            "alt": "A sleek lounge chair in a modern home office with ambient lighting and shelving.",
+            "avgColor": "#72604C",
+            "fileSize": 44957
+          },
+          "curatedAt": "2026-04-15T11:36:40.870Z"
+        }
+      ]
+    },
+    {
+      "room": "office",
+      "style": "classic",
+      "fetched": 50,
+      "groqPassed": 20,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776253022238.613,
+          "pexelsId": 12900435,
+          "room": "office",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/12900435/pexels-photo-12900435.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/classic/12900435.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/classic/12900435.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6016,
+            "height": 4016,
+            "photographer": "Vitali Adutskevich",
+            "alt": "An ornate study room featuring antique wooden furniture, books, and a classic lamp.",
+            "avgColor": "#3D261E",
+            "fileSize": 63883
+          },
+          "curatedAt": "2026-04-15T11:37:02.238Z"
+        },
+        {
+          "id": 1776253023573.391,
+          "pexelsId": 11593476,
+          "room": "office",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/11593476/pexels-photo-11593476.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/classic/11593476.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/classic/11593476.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4000,
+            "height": 2668,
+            "photographer": "Curtis Adams",
+            "alt": "A well-designed home office featuring a wooden desk and elegant chairs with natural lighting.",
+            "avgColor": "#9A9084",
+            "fileSize": 84320
+          },
+          "curatedAt": "2026-04-15T11:37:03.573Z"
+        },
+        {
+          "id": 1776253024338.5464,
+          "pexelsId": 7053631,
+          "room": "office",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/7053631/pexels-photo-7053631.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/classic/7053631.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/classic/7053631.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3334,
+            "height": 5000,
+            "photographer": "Céline  |",
+            "alt": "A vintage room featuring wooden furniture, orchids, and classic decor elements, creating an elegant atmosphere.",
+            "avgColor": "#8B8279",
+            "fileSize": 38510
+          },
+          "curatedAt": "2026-04-15T11:37:04.338Z"
+        },
+        {
+          "id": 1776253026069.4307,
+          "pexelsId": 7166632,
+          "room": "office",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/7166632/pexels-photo-7166632.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/classic/7166632.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/classic/7166632.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4800,
+            "height": 3200,
+            "photographer": "Max Vakhtbovych",
+            "alt": "A luxury home office with elegant furnishings and sophisticated decor.",
+            "avgColor": "#8B6D56",
+            "fileSize": 82511
+          },
+          "curatedAt": "2026-04-15T11:37:06.069Z"
+        },
+        {
+          "id": 1776253027460.603,
+          "pexelsId": 5502224,
+          "room": "office",
+          "style": "classic",
+          "url": "https://images.pexels.com/photos/5502224/pexels-photo-5502224.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/classic/5502224.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/classic/5502224.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6000,
+            "height": 4000,
+            "photographer": "Curtis Adams",
+            "alt": "Luxurious home office featuring wooden cabinetry and elegant decor.",
+            "avgColor": "#9A9085",
+            "fileSize": 87208
+          },
+          "curatedAt": "2026-04-15T11:37:07.460Z"
+        }
+      ]
+    },
+    {
+      "room": "office",
+      "style": "industrial",
+      "fetched": 50,
+      "groqPassed": 14,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776253051768.2249,
+          "pexelsId": 16451357,
+          "room": "office",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/16451357/pexels-photo-16451357.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/industrial/16451357.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/industrial/16451357.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6336,
+            "height": 8448,
+            "photographer": "Nadin Sh",
+            "alt": "Bright modern loft with brick walls, sunlight, and contemporary furniture.",
+            "avgColor": "#5C5A5B",
+            "fileSize": 54789
+          },
+          "curatedAt": "2026-04-15T11:37:31.768Z"
+        },
+        {
+          "id": 1776253053706.5486,
+          "pexelsId": 32559171,
+          "room": "office",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/32559171/pexels-photo-32559171.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/industrial/32559171.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/industrial/32559171.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6048,
+            "height": 4032,
+            "photographer": "Đan Thy Nguyễn Mai",
+            "alt": "A nostalgic workspace featuring a typewriter, map, and industrial window setting.",
+            "avgColor": "#434142",
+            "fileSize": 69787
+          },
+          "curatedAt": "2026-04-15T11:37:33.706Z"
+        },
+        {
+          "id": 1776253054538.8699,
+          "pexelsId": 6045081,
+          "room": "office",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/6045081/pexels-photo-6045081.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/industrial/6045081.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/industrial/6045081.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 2448,
+            "height": 3696,
+            "photographer": "Skylar Kang",
+            "alt": "Interior of contemporary workspace with large windows in brick wall and computer on wooden furniture",
+            "avgColor": "#545454",
+            "fileSize": 38271
+          },
+          "curatedAt": "2026-04-15T11:37:34.538Z"
+        },
+        {
+          "id": 1776253055451.572,
+          "pexelsId": 36559905,
+          "room": "office",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/36559905/pexels-photo-36559905.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/industrial/36559905.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/industrial/36559905.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4003,
+            "height": 5933,
+            "photographer": "Cencial _",
+            "alt": "Bright loft interior featuring a modern staircase and exposed industrial elements.",
+            "avgColor": "#877C78",
+            "fileSize": 51561
+          },
+          "curatedAt": "2026-04-15T11:37:35.451Z"
+        },
+        {
+          "id": 1776253056737.1218,
+          "pexelsId": 5644358,
+          "room": "office",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/5644358/pexels-photo-5644358.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/industrial/5644358.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/industrial/5644358.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4541,
+            "height": 3030,
+            "photographer": "Polina ⠀",
+            "alt": "Contemporary interior featuring wooden cabinets and an industrial metal staircase, illuminated by spotlights.",
+            "avgColor": "#634F3A",
+            "fileSize": 79151
+          },
+          "curatedAt": "2026-04-15T11:37:36.737Z"
+        }
+      ]
+    },
+    {
+      "room": "office",
+      "style": "scandinavian",
+      "fetched": 50,
+      "groqPassed": 34,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776253076451.3225,
+          "pexelsId": 8092417,
+          "room": "office",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/8092417/pexels-photo-8092417.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/scandinavian/8092417.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/scandinavian/8092417.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6715,
+            "height": 4477,
+            "photographer": "www.kaboompics.com",
+            "alt": "Minimalist desk setup with a ceramic vase, dried grass, mug, and notebook in a modern interior.",
+            "avgColor": "#CFCECC",
+            "fileSize": 35256
+          },
+          "curatedAt": "2026-04-15T11:37:56.451Z"
+        },
+        {
+          "id": 1776253077328.5347,
+          "pexelsId": 13377807,
+          "room": "office",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/13377807/pexels-photo-13377807.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/scandinavian/13377807.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/scandinavian/13377807.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3000,
+            "height": 4000,
+            "photographer": "Moroglexis K",
+            "alt": "Minimalist Scandinavian workspace featuring a wooden desk, Danish art, and warm tones.",
+            "avgColor": "#B4ACA9",
+            "fileSize": 40145
+          },
+          "curatedAt": "2026-04-15T11:37:57.328Z"
+        },
+        {
+          "id": 1776253078511.1504,
+          "pexelsId": 8092311,
+          "room": "office",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/8092311/pexels-photo-8092311.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/scandinavian/8092311.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/scandinavian/8092311.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4480,
+            "height": 6720,
+            "photographer": "www.kaboompics.com",
+            "alt": "Stylish minimalist workspace with gold chair, white desk, and modern decor.",
+            "avgColor": "#D6D3CE",
+            "fileSize": 23936
+          },
+          "curatedAt": "2026-04-15T11:37:58.511Z"
+        },
+        {
+          "id": 1776253079749.7703,
+          "pexelsId": 8003999,
+          "room": "office",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/8003999/pexels-photo-8003999.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/scandinavian/8003999.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/scandinavian/8003999.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3500,
+            "height": 2333,
+            "photographer": "Darina Belonogova",
+            "alt": "Stylish home office desk featuring a gold lamp, white decor, and minimalist aesthetic.",
+            "avgColor": "#ADAEA8",
+            "fileSize": 42926
+          },
+          "curatedAt": "2026-04-15T11:37:59.749Z"
+        },
+        {
+          "id": 1776253081394.1582,
+          "pexelsId": 6913722,
+          "room": "office",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/6913722/pexels-photo-6913722.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/office/scandinavian/6913722.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/office/scandinavian/6913722.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4000,
+            "height": 6000,
+            "photographer": "Teona Swift",
+            "alt": "Modern workplace with table and green potted fresh plants near netbook in daylight",
+            "avgColor": "#969691",
+            "fileSize": 48706
+          },
+          "curatedAt": "2026-04-15T11:38:01.394Z"
+        }
+      ]
+    },
+    {
+      "room": "kids-room",
+      "style": "modern",
+      "fetched": 50,
+      "groqPassed": 17,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776253102970.9026,
+          "pexelsId": 6670652,
+          "room": "kids-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/6670652/pexels-photo-6670652.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/modern/6670652.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/modern/6670652.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6048,
+            "height": 4024,
+            "photographer": "Huy Quang Nguyễn",
+            "alt": "Chic kids' bedroom featuring a comfy bed, study desk, and playful decor in a modern design.",
+            "avgColor": "#968D88",
+            "fileSize": 63664
+          },
+          "curatedAt": "2026-04-15T11:38:22.970Z"
+        },
+        {
+          "id": 1776253104197.9832,
+          "pexelsId": 7045947,
+          "room": "kids-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/7045947/pexels-photo-7045947.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/modern/7045947.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/modern/7045947.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6988,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Creative design of bedroom with built in wardrobe and bed between collection of toys in light house",
+            "avgColor": "#777678",
+            "fileSize": 72661
+          },
+          "curatedAt": "2026-04-15T11:38:24.197Z"
+        },
+        {
+          "id": 1776253105752.8723,
+          "pexelsId": 8089165,
+          "room": "kids-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/8089165/pexels-photo-8089165.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/modern/8089165.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/modern/8089165.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7268,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Bright and cozy children's bedroom featuring twin beds and minimalist decor.",
+            "avgColor": "#C7BDB1",
+            "fileSize": 47096
+          },
+          "curatedAt": "2026-04-15T11:38:25.752Z"
+        },
+        {
+          "id": 1776253106760.9817,
+          "pexelsId": 7018835,
+          "room": "kids-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/7018835/pexels-photo-7018835.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/modern/7018835.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/modern/7018835.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Empty kid bedroom furnished with bunk bed and gymnastic rings opposite shelf with TV set under play zone",
+            "avgColor": "#ADA297",
+            "fileSize": 61176
+          },
+          "curatedAt": "2026-04-15T11:38:26.760Z"
+        },
+        {
+          "id": 1776253107879.1501,
+          "pexelsId": 12277293,
+          "room": "kids-room",
+          "style": "modern",
+          "url": "https://images.pexels.com/photos/12277293/pexels-photo-12277293.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/modern/12277293.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/modern/12277293.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3840,
+            "height": 2160,
+            "photographer": "dada _design",
+            "alt": "Cozy modern minimalist bedroom with neutral tones and natural lighting.",
+            "avgColor": "#ADA59A",
+            "fileSize": 52471
+          },
+          "curatedAt": "2026-04-15T11:38:27.879Z"
+        }
+      ]
+    },
+    {
+      "room": "kids-room",
+      "style": "classic",
+      "fetched": 50,
+      "groqPassed": 0,
+      "visionScored": 0,
+      "finalSelected": 0,
+      "images": []
+    },
+    {
+      "room": "kids-room",
+      "style": "industrial",
+      "fetched": 50,
+      "groqPassed": 10,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776253150149.933,
+          "pexelsId": 36777929,
+          "room": "kids-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/36777929/pexels-photo-36777929.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/industrial/36777929.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/industrial/36777929.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 8000,
+            "height": 5336,
+            "photographer": "Curtis Adams",
+            "alt": "A captivating children's bedroom featuring a white lofted bunk bed and leafy ceiling decor.",
+            "avgColor": "#A29B91",
+            "fileSize": 81761
+          },
+          "curatedAt": "2026-04-15T11:39:10.149Z"
+        },
+        {
+          "id": 1776253150931.5168,
+          "pexelsId": 7018827,
+          "room": "kids-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7018827/pexels-photo-7018827.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/industrial/7018827.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/industrial/7018827.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4883,
+            "height": 7317,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Contemporary children room interior design with comfy bunk bed creative chandelier and colorful walls",
+            "avgColor": "#AD9B86",
+            "fileSize": 37622
+          },
+          "curatedAt": "2026-04-15T11:39:10.931Z"
+        },
+        {
+          "id": 1776253152509.7075,
+          "pexelsId": 7018835,
+          "room": "kids-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/7018835/pexels-photo-7018835.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/industrial/7018835.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/industrial/7018835.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 7360,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Empty kid bedroom furnished with bunk bed and gymnastic rings opposite shelf with TV set under play zone",
+            "avgColor": "#ADA297",
+            "fileSize": 61176
+          },
+          "curatedAt": "2026-04-15T11:39:12.509Z"
+        },
+        {
+          "id": 1776253154018.88,
+          "pexelsId": 27526089,
+          "room": "kids-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/27526089/pexels-photo-27526089.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/industrial/27526089.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/industrial/27526089.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3024,
+            "height": 4032,
+            "photographer": "Thới Nam Cao",
+            "alt": "Modern pink-themed children's room with lofted beds and cozy chair.",
+            "avgColor": "#967971",
+            "fileSize": 35131
+          },
+          "curatedAt": "2026-04-15T11:39:14.018Z"
+        },
+        {
+          "id": 1776253156421.6365,
+          "pexelsId": 36777939,
+          "room": "kids-room",
+          "style": "industrial",
+          "url": "https://images.pexels.com/photos/36777939/pexels-photo-36777939.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/industrial/36777939.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/industrial/36777939.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 8000,
+            "height": 5336,
+            "photographer": "Curtis Adams",
+            "alt": "Bright children's room with a loft bed, playful decor, and filled bookshelf for a fun retreat.",
+            "avgColor": "#A4A097",
+            "fileSize": 70683
+          },
+          "curatedAt": "2026-04-15T11:39:16.421Z"
+        }
+      ]
+    },
+    {
+      "room": "kids-room",
+      "style": "scandinavian",
+      "fetched": 50,
+      "groqPassed": 18,
+      "visionScored": 10,
+      "finalSelected": 5,
+      "images": [
+        {
+          "id": 1776253178316.9097,
+          "pexelsId": 15131055,
+          "room": "kids-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/15131055/pexels-photo-15131055.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/scandinavian/15131055.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/scandinavian/15131055.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 4075,
+            "height": 2647,
+            "photographer": "İbrahim Doğan",
+            "alt": "Bright Scandinavian style bedroom with minimalist decor and neutral tones.",
+            "avgColor": "#C7C1B5",
+            "fileSize": 58263
+          },
+          "curatedAt": "2026-04-15T11:39:38.316Z"
+        },
+        {
+          "id": 1776253179673.4548,
+          "pexelsId": 36353419,
+          "room": "kids-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/36353419/pexels-photo-36353419.png?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/scandinavian/36353419.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/scandinavian/36353419.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3840,
+            "height": 2543,
+            "photographer": "The Ghazi",
+            "alt": "A warm, modern bedroom featuring a large window with serene outdoor view, wooden accents, and soft lighting.",
+            "avgColor": "#7A6B5E",
+            "fileSize": 84384
+          },
+          "curatedAt": "2026-04-15T11:39:39.673Z"
+        },
+        {
+          "id": 1776253180894.0535,
+          "pexelsId": 7220424,
+          "room": "kids-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/7220424/pexels-photo-7220424.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/scandinavian/7220424.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/scandinavian/7220424.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3654,
+            "height": 5473,
+            "photographer": "Pavel Danilyuk",
+            "alt": "A charming children's room featuring a play tent, white bicycle, and soft decor elements.",
+            "avgColor": "#BCB9B1",
+            "fileSize": 27103
+          },
+          "curatedAt": "2026-04-15T11:39:40.894Z"
+        },
+        {
+          "id": 1776253181599.3835,
+          "pexelsId": 7055872,
+          "room": "kids-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/7055872/pexels-photo-7055872.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/scandinavian/7055872.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/scandinavian/7055872.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 3948,
+            "height": 5914,
+            "photographer": "Pavel Danilyuk",
+            "alt": "Minimalist children's room with canopy, wooden toys, and pastel decor.",
+            "avgColor": "#B7B4B4",
+            "fileSize": 30234
+          },
+          "curatedAt": "2026-04-15T11:39:41.599Z"
+        },
+        {
+          "id": 1776253183354.7385,
+          "pexelsId": 7045947,
+          "room": "kids-room",
+          "style": "scandinavian",
+          "url": "https://images.pexels.com/photos/7045947/pexels-photo-7045947.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+          "storagePath": "curated/kids-room/scandinavian/7045947.jpg",
+          "storageUrl": "https://dmavypdmtbxzwrexqesu.supabase.co/storage/v1/object/public/curated-images/curated/kids-room/scandinavian/7045947.jpg",
+          "scores": {
+            "groqRelevance": true,
+            "visionScore": 8,
+            "visionReason": "Test mode - simulated high score"
+          },
+          "metadata": {
+            "width": 6988,
+            "height": 4912,
+            "photographer": "Max Vakhtbovych",
+            "alt": "Creative design of bedroom with built in wardrobe and bed between collection of toys in light house",
+            "avgColor": "#777678",
+            "fileSize": 72661
+          },
+          "curatedAt": "2026-04-15T11:39:43.354Z"
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "2026-04-15T11:39:43.456Z"
+}

@@ -1,86 +1,213 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { filterImagesWithAI, type PhotoCandidate } from "@/utils/aiImageFilter";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
   process.env.SUPABASE_SERVICE_ROLE_KEY || ""
 );
 
-// Constants for reservoir pattern
-const POOL_SIZE = 80; // Total curated images to store per room-style
-const DELIVERY_SIZE = 15; // Images delivered per request
-const POOL_TTL_DAYS = 30; // Refresh pool every 30 days
+// Constants
+const DELIVERY_SIZE = 30; // Images delivered per request
 
-export interface CuratedReservoirRequest {
-  roomId: string;
-  style: string;
-  seed?: number; // For deterministic randomization during session
-  forceRefresh?: boolean;
-}
-
-export interface CuratedReservoirResponse {
-  photos: PhotoCandidate[];
-  source: "reservoir" | "ai_curated" | "fallback";
-  poolSize: number;
-  deliveredCount: number;
-  isRefreshing: boolean;
-}
-
-interface ImagePool {
-  id: string;
-  room_id: string;
-  style: string;
-  pool: PhotoCandidate[];
-  metadata: {
-    totalCurated: number;
-    lastRefreshed: string;
+export interface PhotoCandidate {
+  id: number;
+  url: string;
+  src: {
+    original?: string;
+    large2x?: string;
+    large?: string;
+    medium?: string;
+    small?: string;
   };
-  created_at: string;
+  alt?: string;
+  photographer?: string;
+}
+
+export interface CuratedImagesResponse {
+  photos: PhotoCandidate[];
+  source: "storage" | "pexels_fallback" | "none";
+  count: number;
+  folder: string;
 }
 
 /**
- * Shuffle array using Fisher-Yates algorithm with seeded random
+ * GET /api/curated-images?room=living-room&style=modern
+ * Fetch curated images from Supabase Storage with Pexels fallback
  */
-function shuffleArray<T>(array: T[], seed?: number): T[] {
-  const shuffled = [...array];
-  let currentSeed = seed || Date.now();
-  
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    // Simple seeded random
-    currentSeed = (currentSeed * 9301 + 49297) % 233280;
-    const j = Math.floor((currentSeed / 233280) * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+export async function GET(request: NextRequest): Promise<NextResponse<CuratedImagesResponse | { error: string }>> {
+  try {
+    const { searchParams } = new URL(request.url);
+    const room = searchParams.get("room");
+    const style = searchParams.get("style");
+    const page = Math.max(Number(searchParams.get("page") || "1"), 1);
+    const perPage = Math.min(Math.max(Number(searchParams.get("per_page") || "30"), 1), 50);
+
+    if (!room || !style) {
+      return NextResponse.json(
+        { error: "Missing required query parameters: room, style" },
+        { status: 400 }
+      );
+    }
+
+    const folderPath = `curated/${room}/${style}`;
+    console.log(`[Curated Images] Fetching from: ${folderPath}`);
+
+    // 1. Try to get images from Supabase Storage
+    const { data: storageFiles, error: storageError } = await supabase.storage
+      .from("images")
+      .list(folderPath);
+
+    if (storageError) {
+      console.error(`[Curated Images] Storage error:`, storageError);
+    }
+
+    // Filter for image files only
+    const imageFiles = storageFiles?.filter(
+      file => file.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)
+    ) || [];
+
+    console.log(`[Curated Images] Found ${imageFiles.length} images in storage`);
+
+    // 2. If we have stored images, return them
+    if (imageFiles.length > 0) {
+      // Calculate pagination
+      const startIdx = (page - 1) * perPage;
+      const endIdx = startIdx + perPage;
+      const paginatedFiles = imageFiles.slice(startIdx, endIdx);
+
+      // Generate public URLs
+      const photos: PhotoCandidate[] = paginatedFiles.map((file, index) => {
+        const { data: urlData } = supabase.storage
+          .from("images")
+          .getPublicUrl(`${folderPath}/${file.name}`);
+
+        return {
+          id: index + startIdx + 1,
+          url: urlData.publicUrl,
+          src: {
+            original: urlData.publicUrl,
+            large2x: urlData.publicUrl,
+            large: urlData.publicUrl,
+            medium: urlData.publicUrl,
+            small: urlData.publicUrl,
+          },
+          alt: `${room} ${style} design ${index + startIdx + 1}`,
+          photographer: "Azenith Curated Collection",
+        };
+      });
+
+      return NextResponse.json({
+        photos,
+        source: "storage",
+        count: photos.length,
+        folder: folderPath,
+      });
+    }
+
+    // 3. Fallback to Pexels API
+    console.log(`[Curated Images] No stored images, falling back to Pexels`);
+    
+    const pexelsPhotos = await fetchFromPexels(room, style, perPage, page);
+    
+    return NextResponse.json({
+      photos: pexelsPhotos,
+      source: pexelsPhotos.length > 0 ? "pexels_fallback" : "none",
+      count: pexelsPhotos.length,
+      folder: folderPath,
+    });
+
+  } catch (error) {
+    console.error("[Curated Images] Route error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
-  
-  return shuffled;
 }
 
 /**
- * Get random subset from pool
+ * Fetch images from Pexels as fallback
  */
-function getRandomSubset<T>(pool: T[], count: number, seed?: number): T[] {
-  const shuffled = shuffleArray(pool, seed);
-  return shuffled.slice(0, Math.min(count, shuffled.length));
-}
+async function fetchFromPexels(
+  room: string,
+  style: string,
+  perPage: number,
+  page: number
+): Promise<PhotoCandidate[]> {
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_PEXELS_API_KEY || process.env.PEXELS_API_KEY;
+    if (!apiKey) {
+      console.error("[Curated Images] No Pexels API key available");
+      return [];
+    }
 
-/**
- * Check if pool needs refresh (30+ days old)
- */
-function isPoolStale(createdAt: string): boolean {
-  const poolDate = new Date(createdAt);
-  const cutoffDate = new Date(Date.now() - POOL_TTL_DAYS * 24 * 60 * 60 * 1000);
-  return poolDate < cutoffDate;
+    const roomQueries: Record<string, string> = {
+      "master-bedroom": "luxury master bedroom interior",
+      "living-room": "luxury living room lounge",
+      "kitchen": "modern high-end kitchen",
+      "dressing-room": "walk-in closet design",
+      "home-office": "luxury home office study",
+      "youth-room": "modern youth bedroom",
+      "dining-room": "luxury dining room",
+      "interior-design": "luxury interior design",
+      "bedroom": "luxury bedroom interior",
+      "bathroom": "luxury bathroom interior",
+    };
+
+    const styleHints: Record<string, string> = {
+      modern: "modern minimal",
+      classic: "classic elegant",
+      industrial: "industrial loft",
+      scandinavian: "scandinavian cozy",
+      minimalist: "minimalist clean",
+      luxury: "luxury premium",
+      contemporary: "contemporary design",
+    };
+
+    const roomQuery = roomQueries[room] || `${room} interior`;
+    const styleHint = styleHints[style] || style;
+    const query = `${styleHint} ${roomQuery}`;
+
+    console.log(`[Curated Images] Pexels query: ${query}`);
+
+    const response = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${perPage}&page=${page}`,
+      {
+        headers: {
+          Authorization: apiKey,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error(`[Curated Images] Pexels API error: ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+    
+    return (data.photos || []).map((p: unknown) => ({
+      id: (p as { id: number }).id,
+      url: (p as { url: string }).url,
+      src: (p as { src: PhotoCandidate["src"] }).src,
+      alt: (p as { alt?: string }).alt,
+      photographer: (p as { photographer?: string }).photographer,
+    }));
+
+  } catch (error) {
+    console.error("[Curated Images] Pexels fetch error:", error);
+    return [];
+  }
 }
 
 /**
  * POST /api/curated-images
- * Dynamic Content Reservoir with rotation
+ * Backward compatibility - redirects to storage-based logic
  */
-export async function POST(request: NextRequest): Promise<NextResponse<CuratedReservoirResponse | { error: string }>> {
+export async function POST(request: NextRequest): Promise<NextResponse<CuratedImagesResponse | { error: string }>> {
   try {
-    const body: CuratedReservoirRequest = await request.json();
-    const { roomId, style, seed, forceRefresh = false } = body;
+    const body = await request.json();
+    const { roomId, style, seed, page = 1, perPage = 30 } = body;
 
     if (!roomId || !style) {
       return NextResponse.json(
@@ -89,269 +216,23 @@ export async function POST(request: NextRequest): Promise<NextResponse<CuratedRe
       );
     }
 
-    const poolKey = `${roomId}-${style}`;
-    const startTime = Date.now();
+    // Redirect to GET handler with query params
+    const url = new URL(request.url);
+    url.searchParams.set("room", roomId);
+    url.searchParams.set("style", style);
+    url.searchParams.set("page", String(page));
+    url.searchParams.set("per_page", String(perPage));
 
-    // 1. Check for existing pool in database
-    let poolData: ImagePool | null = null;
-    let isRefreshing = false;
-
-    try {
-      const { data, error } = await supabase
-        .from("curated_reservoirs")
-        .select("*")
-        .eq("id", poolKey)
-        .single();
-
-      if (!error && data) {
-        poolData = data as ImagePool;
-      }
-    } catch (err) {
-      console.log(`[Reservoir] No existing pool for ${poolKey}`);
-    }
-
-    // 2. Check if pool needs refresh (30+ days old or forced)
-    const needsRefresh = !poolData || 
-                        forceRefresh || 
-                        isPoolStale(poolData.created_at) ||
-                        (poolData.pool?.length || 0) < POOL_SIZE / 2;
-
-    if (needsRefresh && !isRefreshing) {
-      isRefreshing = true;
-      
-      // Trigger background refresh (don't await)
-      refreshPoolInBackground(roomId, style, poolKey);
-    }
-
-    // 3. If we have a valid pool, deliver random subset
-    if (poolData && poolData.pool && poolData.pool.length > 0) {
-      const deliveredPhotos = getRandomSubset(poolData.pool, DELIVERY_SIZE, seed);
-      
-      console.log(`[Reservoir] Delivered ${deliveredPhotos.length}/${poolData.pool.length} images from ${poolKey} (refreshing: ${isRefreshing})`);
-      
-      return NextResponse.json({
-        photos: deliveredPhotos,
-        source: "reservoir",
-        poolSize: poolData.pool.length,
-        deliveredCount: deliveredPhotos.length,
-        isRefreshing,
-      });
-    }
-
-    // 4. No pool available - fallback to on-demand curation
-    console.log(`[Reservoir] No pool available, falling back to on-demand for ${poolKey}`);
-    
-    // Fetch from Pexels
-    const roomQueries: Record<string, string> = {
-      "master-bedroom": "luxury master bedroom interior -office -desk",
-      "living-room": "luxury living room lounge architecture",
-      "kitchen": "modern high-end kitchen marble",
-      "dressing-room": "bespoke walk-in closet furniture design",
-      "home-office": "luxury home office study room -bedroom -living",
-      "youth-room": "modern youth bedroom design",
-      "dining-room": "luxury dining room interior",
-      "interior-design": "luxury interior design architecture",
-    };
-
-    const query = roomQueries[roomId] || `${roomId} luxury interior`;
-    const pexelsResponse = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${POOL_SIZE}&page=1`,
-      {
-        headers: {
-          Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY || "",
-        },
-      }
-    );
-
-    if (!pexelsResponse.ok) {
-      return NextResponse.json(
-        { photos: [], source: "fallback", poolSize: 0, deliveredCount: 0, isRefreshing: false },
-        { status: 200 }
-      );
-    }
-
-    const pexelsData = await pexelsResponse.json();
-    const rawPhotos: PhotoCandidate[] = pexelsData.photos?.map((p: unknown) => ({
-      id: (p as { id: number }).id,
-      url: (p as { url: string }).url,
-      src: (p as { src: PhotoCandidate["src"] }).src,
-      alt: (p as { alt?: string }).alt,
-    })) || [];
-
-    // Filter with AI
-    const roomTypeMap: Record<string, string> = {
-      "master-bedroom": "luxury master bedroom",
-      "living-room": "luxury living room",
-      "kitchen": "modern high-end kitchen",
-      "dressing-room": "bespoke walk-in closet",
-      "home-office": "luxury home office",
-      "youth-room": "modern kids bedroom",
-      "dining-room": "luxury dining room",
-      "interior-design": "luxury interior design",
-    };
-
-    const filterResult = await filterImagesWithAI(rawPhotos, roomTypeMap[roomId] || roomId, style);
-    
-    // Deliver subset
-    const deliveredPhotos = getRandomSubset(filterResult.approvedPhotos, DELIVERY_SIZE, seed);
-
-    // Store new pool (fire and forget)
-    if (filterResult.approvedPhotos.length > 0) {
-      storePool(poolKey, roomId, style, filterResult.approvedPhotos);
-    }
-
-    return NextResponse.json({
-      photos: deliveredPhotos,
-      source: "ai_curated",
-      poolSize: filterResult.approvedPhotos.length,
-      deliveredCount: deliveredPhotos.length,
-      isRefreshing: false,
-    });
+    // Create a new request with the updated URL
+    const getRequest = new NextRequest(url);
+    return GET(getRequest);
 
   } catch (error) {
-    console.error("[Reservoir] Route error:", error);
+    console.error("[Curated Images] POST error:", error);
     return NextResponse.json(
-      { photos: [], source: "fallback", poolSize: 0, deliveredCount: 0, isRefreshing: false },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
 }
 
-/**
- * Background pool refresh with Empty Batch Rule
- * If batch yields 0 perfect matches, auto-fetch next batch until MIN_PERFECT_MATCHES found
- */
-const MIN_PERFECT_MATCHES = 6;
-const MAX_FETCH_ATTEMPTS = 5;
-
-async function refreshPoolInBackground(roomId: string, style: string, poolKey: string): Promise<void> {
-  try {
-    console.log(`[Reservoir] Starting background refresh for ${poolKey} with Empty Batch Rule`);
-    
-    // Fetch fresh images from Pexels (multiple pages for variety)
-    const roomQueries: Record<string, string> = {
-      "master-bedroom": "luxury master bedroom interior -office -desk",
-      "living-room": "luxury living room lounge architecture",
-      "kitchen": "modern high-end kitchen marble",
-      "dressing-room": "bespoke walk-in closet furniture design",
-      "home-office": "luxury home office study room -bedroom -living",
-      "youth-room": "modern youth bedroom design",
-      "dining-room": "luxury dining room interior",
-      "interior-design": "luxury open-plan penthouse architecture",
-    };
-
-    const query = roomQueries[roomId] || `${roomId} luxury interior`;
-    const roomTypeMap: Record<string, string> = {
-      "master-bedroom": "luxury master bedroom",
-      "living-room": "luxury living room",
-      "kitchen": "modern high-end kitchen",
-      "dressing-room": "bespoke walk-in closet",
-      "home-office": "luxury home office",
-      "youth-room": "modern kids bedroom",
-      "dining-room": "luxury dining room",
-      "interior-design": "luxury interior design",
-    };
-
-    let allApprovedPhotos: PhotoCandidate[] = [];
-    let fetchAttempts = 0;
-    let currentPage = 1;
-
-    // EMPTY BATCH RULE: Keep fetching until we have at least MIN_PERFECT_MATCHES
-    while (allApprovedPhotos.length < MIN_PERFECT_MATCHES && fetchAttempts < MAX_FETCH_ATTEMPTS) {
-      fetchAttempts++;
-      console.log(`[Reservoir] Fetch attempt ${fetchAttempts}: Need ${MIN_PERFECT_MATCHES - allApprovedPhotos.length} more perfect images`);
-      
-      const batchRawPhotos: PhotoCandidate[] = [];
-      
-      // Fetch 2 pages per attempt (80 images raw)
-      for (let pageOffset = 0; pageOffset < 2; pageOffset++) {
-        const page = currentPage + pageOffset;
-        const response = await fetch(
-          `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=40&page=${page}`,
-          {
-            headers: {
-              Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY || "",
-            },
-          }
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          const photos = data.photos?.map((p: unknown) => ({
-            id: (p as { id: number }).id,
-            url: (p as { url: string }).url,
-            src: (p as { src: PhotoCandidate["src"] }).src,
-            alt: (p as { alt?: string }).alt,
-          })) || [];
-          batchRawPhotos.push(...photos);
-        }
-        
-        // Rate limit between requests
-        if (pageOffset < 1) await new Promise(r => setTimeout(r, 1000));
-      }
-      
-      currentPage += 2;
-
-      // Filter this batch with AI (Extreme Strictness)
-      const filterResult = await filterImagesWithAI(batchRawPhotos, roomTypeMap[roomId] || roomId, style);
-      
-      console.log(`[Reservoir] Batch ${fetchAttempts}: ${filterResult.approvedPhotos.length}/${batchRawPhotos.length} passed AI filter`);
-      
-      // Add approved photos to our collection
-      allApprovedPhotos.push(...filterResult.approvedPhotos);
-      
-      // If this batch had 0 matches, log warning and continue to next batch (Empty Batch Rule)
-      if (filterResult.approvedPhotos.length === 0) {
-        console.warn(`[Reservoir] EMPTY BATCH detected - 0 perfect matches. Fetching next batch...`);
-      }
-      
-      // Rate limit between batches
-      if (fetchAttempts < MAX_FETCH_ATTEMPTS && allApprovedPhotos.length < MIN_PERFECT_MATCHES) {
-        await new Promise(r => setTimeout(r, 2000));
-      }
-    }
-
-    // Store refreshed pool if we have any approved photos
-    if (allApprovedPhotos.length > 0) {
-      await storePool(poolKey, roomId, style, allApprovedPhotos);
-      console.log(`[Reservoir] Background refresh complete: ${allApprovedPhotos.length} perfect images stored (${fetchAttempts} fetch attempts)`);
-      
-      if (allApprovedPhotos.length < MIN_PERFECT_MATCHES) {
-        console.warn(`[Reservoir] WARNING: Only ${allApprovedPhotos.length} perfect images found after ${fetchAttempts} attempts (target: ${MIN_PERFECT_MATCHES})`);
-      }
-    } else {
-      console.error(`[Reservoir] CRITICAL: No perfect images found after ${MAX_FETCH_ATTEMPTS} fetch attempts`);
-    }
-  } catch (error) {
-    console.error("[Reservoir] Background refresh failed:", error);
-  }
-}
-
-/**
- * Store pool in Supabase
- */
-async function storePool(
-  poolKey: string, 
-  roomId: string, 
-  style: string, 
-  photos: PhotoCandidate[]
-): Promise<void> {
-  try {
-    await supabase.from("curated_reservoirs").upsert({
-      id: poolKey,
-      room_id: roomId,
-      style,
-      pool: photos,
-      metadata: {
-        totalCurated: photos.length,
-        lastRefreshed: new Date().toISOString(),
-      },
-      created_at: new Date().toISOString(),
-    }, {
-      onConflict: "id",
-    });
-    console.log(`[Reservoir] Stored ${photos.length} images for ${poolKey}`);
-  } catch (err) {
-    console.error("[Reservoir] Failed to store pool:", err);
-  }
-}

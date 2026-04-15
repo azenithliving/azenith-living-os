@@ -307,32 +307,23 @@ export default function RoomPageClient({
   // Load more images handler
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore || batchPage >= MAX_BATCHES) return;
-    
+
     setIsLoadingMore(true);
     const nextPage = batchPage + 1;
-    
+
     try {
-      // Build query based on room and style
-      const styleHints: Record<string, string> = {
-        modern: "modern minimal luxury",
-        classic: "classic elegant luxury",
-        industrial: "industrial loft luxury",
-        scandinavian: "scandinavian cozy luxury",
-      };
-      const styleHint = styleHints[currentStyle] || currentStyle;
-      const query = `${styleHint} ${room.query}`;
-      
+      // Fetch from curated-images API (Supabase Storage with Pexels fallback)
       const response = await fetch(
-        `/api/pexels?query=${encodeURIComponent(query)}&per_page=${PHOTOS_PER_BATCH}&page=${nextPage}`,
+        `/api/curated-images?room=${encodeURIComponent(room.id)}&style=${encodeURIComponent(currentStyle)}&per_page=${PHOTOS_PER_BATCH}&page=${nextPage}`,
         { cache: "no-store" }
       );
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.photos && data.photos.length > 0) {
         setAllBatchPhotos(prev => [...prev, ...data.photos]);
         setBatchPage(nextPage);
@@ -345,7 +336,7 @@ export default function RoomPageClient({
     } finally {
       setIsLoadingMore(false);
     }
-  }, [batchPage, currentStyle, isLoadingMore, room.query]);
+  }, [batchPage, currentStyle, isLoadingMore, room.id]);
 
   const nextImage = useCallback(() => {
     setLightboxIndex((prev) => (prev + 1) % photos.length);
