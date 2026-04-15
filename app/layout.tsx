@@ -3,7 +3,6 @@
 import { Toaster } from "react-hot-toast";
 
 import { Providers } from "./providers";
-import VirtualDesignerWidget from "@/components/VirtualDesignerWidget";
 import ConsultantWidgetWrapper from "./ConsultantWidgetWrapper";
 import "./globals.css";
 
@@ -48,7 +47,6 @@ export default function RootLayout({
             },
           }}
         />
-        <VirtualDesignerWidget />
         <ConsultantWidgetWrapper />
       </body>
     </html>
