@@ -48,7 +48,7 @@ const CONFIG = {
   
   // Curation settings
   IMAGES_TO_FETCH: 500,        // Images to fetch per combination
-  IMAGES_TO_KEEP: 50,          // Top images to keep after filtering
+  IMAGES_TO_KEEP: 100,         // Top images to keep after filtering
   PEXELS_PER_PAGE: 80,         // Max per Pexels request
   
   // Scoring thresholds
