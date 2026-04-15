@@ -12,6 +12,12 @@ import {
   Brain,
   Bot,
   TrendingUp,
+  History,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  MessageSquare,
 } from "lucide-react";
 
 interface Metrics {
@@ -256,6 +262,72 @@ export default function AdminOverviewPage() {
               </div>
               <h3 className="text-lg font-bold text-white">الرئيسية</h3>
               <p className="text-sm text-white/50 mt-2">لوحة المعلومات الشخصية - أنت هنا الآن</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Recent Activities & Alerts Grid */}
+        <section className="grid gap-6 md:grid-cols-2">
+          {/* Recent Activities */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <History className="w-5 h-5 text-[#C5A059]" />
+              آخر النشاطات
+            </h2>
+            <div className="space-y-3">
+              {[
+                { icon: Users, color: "text-blue-400", bg: "bg-blue-500/20", text: "عميل جديد مسجل", time: "منذ 5 دقائق", link: "/admin/sales" },
+                { icon: DollarSign, color: "text-emerald-400", bg: "bg-emerald-500/20", text: "صفقة مبيعات مكتملة", time: "منذ 15 دقيقة", link: "/admin/sales" },
+                { icon: Brain, color: "text-purple-400", bg: "bg-purple-500/20", text: "تحليل AI جديد متاح", time: "منذ 30 دقيقة", link: "/admin/intel" },
+                { icon: Bot, color: "text-cyan-400", bg: "bg-cyan-500/20", text: "أتمتة جديدة مفعلة", time: "منذ ساعة", link: "/admin/ops" },
+                { icon: MessageSquare, color: "text-[#C5A059]", bg: "bg-[#C5A059]/20", text: "رسالة دعم جديدة", time: "منذ ساعتين", link: "/admin/chat" },
+              ].map((activity, idx) => (
+                <Link
+                  key={idx}
+                  href={activity.link}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-[#C5A059]/30 hover:bg-white/[0.05] transition-all group"
+                >
+                  <div className={`rounded-lg ${activity.bg} p-2`}>
+                    <activity.icon className={`w-4 h-4 ${activity.color}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-white group-hover:text-[#C5A059] transition-colors">{activity.text}</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-white/40">
+                    <Clock className="w-3 h-3" />
+                    {activity.time}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Top Alerts */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-rose-400" />
+              أهم التنبيهات
+            </h2>
+            <div className="space-y-3">
+              {[
+                { icon: AlertTriangle, color: "text-rose-400", bg: "bg-rose-500/20 border-rose-500/30", text: "تأخير في متابعة 3 عملاء محتملين", subtext: "يحتاجون للرد خلال 24 ساعة", link: "/admin/sales" },
+                { icon: Zap, color: "text-amber-400", bg: "bg-amber-500/20 border-amber-500/30", text: "استخدام API مرتفع", subtext: "85% من الحصة اليومية", link: "/admin/intel" },
+                { icon: CheckCircle, color: "text-emerald-400", bg: "bg-emerald-500/20 border-emerald-500/30", text: "النسخ الاحتياطي مكتمل", subtext: "تم بنجاح الساعة 3:00 صباحاً", link: "/admin/ops" },
+              ].map((alert, idx) => (
+                <Link
+                  key={idx}
+                  href={alert.link}
+                  className={`flex items-start gap-3 p-4 rounded-xl border ${alert.bg} hover:opacity-80 transition-all group`}
+                >
+                  <div className="rounded-lg bg-black/20 p-2">
+                    <alert.icon className={`w-5 h-5 ${alert.color}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-white group-hover:text-[#C5A059] transition-colors">{alert.text}</p>
+                    <p className="text-xs text-white/60 mt-1">{alert.subtext}</p>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
