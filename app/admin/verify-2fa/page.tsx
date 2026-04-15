@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Key, AlertCircle, Smartphone, Shield } from "lucide-react";
 
 export default function Verify2FAPage() {
+  console.log("[Verify2FA] Component rendering");
+
   const router = useRouter();
   const [twoFactorCode, setTwoFactorCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,6 +14,7 @@ export default function Verify2FAPage() {
 
   const handle2FAVerification = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("[Verify2FA] Form submitted with code:", twoFactorCode);
     setError("");
     setLoading(true);
 
@@ -49,6 +52,8 @@ export default function Verify2FAPage() {
       setLoading(false);
     }
   };
+
+  console.log("[Verify2FA] Rendering form, twoFactorCode:", twoFactorCode);
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6">
