@@ -1,35 +1,223 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
 import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-components";
 
+interface AnalyticsData {
+  metrics: {
+    totalLeads: number;
+    conversionRate: number;
+    totalRequests: number;
+    totalBookings: number;
+    whatsappClicks: number;
+    uniqueVisitors: number;
+    averageLeadScore: number;
+  };
+}
+
+interface SystemHealthData {
+  health: {
+    status: string;
+    uptime: string;
+    memoryUsage: number;
+    cpuUsage: number;
+  };
+  pendingAlerts: Array<{
+    id: string;
+    severity: "critical" | "warning" | "info";
+    title: string;
+    description: string;
+  }>;
+}
+
+interface MastermindStatsData {
+  commands: {
+    total: number;
+    successful: number;
+    failed: number;
+    last24h: number;
+  };
+  security: {
+    failedAttempts24h: number;
+    has2FA: boolean;
+  };
+  recentCommands: Array<{
+    id: string;
+    command: string;
+    status: string;
+    executedAt: string;
+  }>;
+}
+
 export default function AdminPage() {
-  // Mock data for metrics
-  const metrics = [
-    { title: "العملاء المحتملين", value: 24, subtitle: "عميل نشط", icon: <Users className="h-6 w-6" />, color: "gold" as const, href: "/admin/sales" },
-    { title: "نسبة التحويل", value: "12.5%", subtitle: "زيادة 3%", icon: <TrendingUp className="h-6 w-6" />, color: "green" as const, trend: { value: 3, isPositive: true }, href: "/admin/sales" },
-    { title: "حالة النظام", value: "ممتازة", subtitle: "99.9% uptime", icon: <Shield className="h-6 w-6" />, color: "blue" as const, href: "/admin/intel" },
-    { title: "تفاعلات AI", value: 1247, subtitle: "هذا الشهر", icon: <Brain className="h-6 w-6" />, color: "purple" as const, href: "/admin/intel" },
-    { title: "أتمتة نشطة", value: 3, subtitle: "قواعد العمل", icon: <Bot className="h-6 w-6" />, color: "blue" as const, href: "/admin/ops" },
-    { title: "الزوار", value: 186, subtitle: "هذا الشهر", icon: <Clock className="h-6 w-6" />, color: "gold" as const, href: "/admin/ops" },
-  ];
+  // Real data states
+  const [metrics, setMetrics] = useState<Array<{
+    title: string;
+    value: number | string;
+    subtitle: string;
+    icon: React.ReactNode;
+    color: "gold" | "blue" | "green" | "purple";
+    trend?: { value: number; isPositive: boolean };
+    href: string;
+  }> | null>(null);
 
-  // Mock activities
-  const activities = [
-    { id: "1", type: "lead" as const, tenantName: "شركة الأفق", description: "عميل جديد مسجل في النظام", timestamp: new Date(Date.now() - 5 * 60000).toISOString() },
-    { id: "2", type: "booking" as const, tenantName: "فيلا النخيل", description: "حجز جديد مؤكد", timestamp: new Date(Date.now() - 15 * 60000).toISOString() },
-    { id: "3", type: "request" as const, tenantName: "برج المستقبل", description: "طلب عرض سعر جديد", timestamp: new Date(Date.now() - 30 * 60000).toISOString() },
-    { id: "4", type: "subscriber" as const, tenantName: "النشرة البريدية", description: "مشترك جديد", timestamp: new Date(Date.now() - 60 * 60000).toISOString() },
-    { id: "5", type: "lead" as const, tenantName: "قصر الواحة", description: "عميل محتمل جديد", timestamp: new Date(Date.now() - 120 * 60000).toISOString() },
-  ];
+  const [activities, setActivities] = useState<Array<{
+    id: string;
+    type: "lead" | "booking" | "request" | "subscriber";
+    tenantName: string;
+    description: string;
+    timestamp: string;
+  }> | null>(null);
 
-  // Mock alerts
-  const alerts = [
-    { icon: AlertTriangle, color: "rose", text: "3 عملاء محتملين بحاجة للمتابعة", subtext: "تأخير الرد أكثر من 24 ساعة", link: "/admin/sales" },
-    { icon: Zap, color: "amber", text: "استخدام API مرتفع", subtext: "85% من الحصة اليومية مستخدمة", link: "/admin/intel" },
-    { icon: CheckCircle, color: "emerald", text: "النسخ الاحتياطي مكتمل", subtext: "تم بنجاح الساعة 3:00 صباحاً", link: "/admin/ops" },
-  ];
+  const [alerts, setAlerts] = useState<Array<{
+    icon: React.ElementType;
+    color: "rose" | "amber" | "emerald";
+    text: string;
+    subtext: string;
+    link: string;
+  }> | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch real data from APIs
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch all APIs in parallel
+        const [analyticsRes, healthRes, mastermindRes] = await Promise.all([
+          fetch("/api/analytics?period=30days"),
+          fetch("/api/system-health"),
+          fetch("/api/admin/mastermind/stats"),
+        ]);
+
+        const analytics: AnalyticsData = analyticsRes.ok ? await analyticsRes.json() : { metrics: {} };
+        const health: SystemHealthData = healthRes.ok ? await healthRes.json() : { health: {}, pendingAlerts: [] };
+        const mastermind: MastermindStatsData = mastermindRes.ok ? await mastermindRes.json() : { commands: {}, security: {}, recentCommands: [] };
+
+        // Map real data to metrics
+        const realMetrics = [
+          {
+            title: "العملاء المحتملين",
+            value: analytics.metrics?.totalLeads || 0,
+            subtitle: analytics.metrics?.totalLeads ? "عميل نشط" : "لا توجد بيانات",
+            icon: <Users className="h-6 w-6" />,
+            color: "gold" as const,
+            href: "/admin/sales",
+          },
+          {
+            title: "نسبة التحويل",
+            value: (analytics.metrics?.conversionRate || 0) + "%",
+            subtitle: "معدل التحويل الإجمالي",
+            icon: <TrendingUp className="h-6 w-6" />,
+            color: "green" as const,
+            trend: {
+              value: Math.round(analytics.metrics?.conversionRate || 0),
+              isPositive: (analytics.metrics?.conversionRate || 0) > 5,
+            },
+            href: "/admin/sales",
+          },
+          {
+            title: "حالة النظام",
+            value: health.health?.status === "optimal" ? "ممتازة" : health.health?.status === "stable" ? "مستقرة" : "غير معروفة",
+            subtitle: health.health?.uptime ? `${health.health.uptime} uptime` : "غير متاح",
+            icon: <Shield className="h-6 w-6" />,
+            color: health.health?.status === "optimal" ? "blue" : "blue" as const,
+            href: "/admin/intel",
+          },
+          {
+            title: "تفاعلات AI",
+            value: mastermind.commands?.total || 0,
+            subtitle: mastermind.commands?.last24h ? `${mastermind.commands.last24h} في آخر 24 ساعة` : "هذا الشهر",
+            icon: <Brain className="h-6 w-6" />,
+            color: "purple" as const,
+            href: "/admin/intel",
+          },
+          {
+            title: "طلبات الحجز",
+            value: analytics.metrics?.totalRequests || 0,
+            subtitle: analytics.metrics?.totalBookings ? `${analytics.metrics.totalBookings} حجز مؤكد` : "قيد الانتظار",
+            icon: <Bot className="h-6 w-6" />,
+            color: "blue" as const,
+            href: "/admin/ops",
+          },
+          {
+            title: "الزوار الفريدين",
+            value: analytics.metrics?.uniqueVisitors || 0,
+            subtitle: analytics.metrics?.whatsappClicks ? `${analytics.metrics.whatsappClicks} نقر واتساب` : "هذا الشهر",
+            icon: <Clock className="h-6 w-6" />,
+            color: "gold" as const,
+            href: "/admin/ops",
+          },
+        ];
+
+        setMetrics(realMetrics);
+
+        // Generate activities from recent commands or fallback to empty
+        const realActivities = mastermind.recentCommands?.slice(0, 5).map((cmd, index) => ({
+          id: cmd.id || `cmd-${index}`,
+          type: (cmd.status === "executed" ? "booking" : cmd.status === "failed" ? "request" : "lead") as "lead" | "booking" | "request" | "subscriber",
+          tenantName: cmd.command?.split(" ")[0] || "نظام",
+          description: cmd.command?.slice(0, 50) + (cmd.command?.length > 50 ? "..." : "") || "أمر تم تنفيذه",
+          timestamp: cmd.executedAt || new Date().toISOString(),
+        })) || [];
+
+        setActivities(realActivities.length > 0 ? realActivities : []);
+
+        // Generate alerts from system health
+        const realAlerts = [];
+        
+        // Add security alert if there are failed attempts
+        if (mastermind.security?.failedAttempts24h > 0) {
+          realAlerts.push({
+            icon: AlertTriangle,
+            color: "rose" as const,
+            text: `${mastermind.security.failedAttempts24h} محاولة دخول فاشلة`,
+            subtext: "في آخر 24 ساعة - تحقق من الأمان",
+            link: "/admin/intel",
+          });
+        }
+
+        // Add system health alerts
+        if (health.pendingAlerts && health.pendingAlerts.length > 0) {
+          health.pendingAlerts.slice(0, 2).forEach((alert) => {
+            realAlerts.push({
+              icon: alert.severity === "critical" ? AlertTriangle : CheckCircle,
+              color: alert.severity === "critical" ? "rose" : alert.severity === "warning" ? "amber" : "emerald" as const,
+              text: alert.title,
+              subtext: alert.description,
+              link: "/admin/intel",
+            });
+          });
+        }
+
+        // Default alert if none exist
+        if (realAlerts.length === 0) {
+          realAlerts.push({
+            icon: CheckCircle,
+            color: "emerald" as const,
+            text: "النظام يعمل بكفاءة",
+            subtext: "لا توجد مشاكل أو تنبيهات حالية",
+            link: "/admin/ops",
+          });
+        }
+
+        setAlerts(realAlerts);
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        setError("فشل في تحميل البيانات. يرجى تحديث الصفحة.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const colorClasses: Record<string, string> = {
     rose: "border-rose-500/30 bg-rose-500/10",
@@ -72,54 +260,86 @@ export default function AdminPage() {
             <TrendingUp className="w-5 h-5 text-[#C5A059]" />
             المؤشرات الرئيسية
           </h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {metrics.map((metric, idx) => (
-              <Link key={idx} href={metric.href} className="block">
-                <MetricCard
-                  title={metric.title}
-                  value={metric.value}
-                  subtitle={metric.subtitle}
-                  icon={metric.icon}
-                  color={metric.color}
-                  trend={metric.trend}
-                />
-              </Link>
-            ))}
-          </div>
-        </section>
+          
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-[#C5A059] animate-spin" />
+              <span className="mr-3 text-white/60">جاري تحميل البيانات...</span>
+            </div>
+          )}
 
-        {/* Activities & Alerts */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Recent Activities */}
-          <ActivityFeed activities={activities} />
+          {/* Error State */}
+          {error && !loading && (
+            <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-6 text-center">
+              <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-2" />
+              <p className="text-rose-400">{error}</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-4 px-4 py-2 bg-[#C5A059] text-[#1a1a1a] rounded-lg hover:bg-[#d8b56d]"
+              >
+                إعادة المحاولة
+              </button>
+            </div>
+          )}
 
-          {/* Top Alerts */}
-          <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
-            <h2 className="text-2xl font-semibold text-white flex items-center gap-2">
-              <AlertTriangle className="w-6 h-6 text-rose-400" />
-              أهم التنبيهات
-            </h2>
-            <p className="mt-1 text-sm text-white/60">تنبيهات تتطلب الانتباه</p>
-
-            <div className="mt-6 space-y-4">
-              {alerts.map((alert, idx) => (
-                <Link
-                  key={idx}
-                  href={alert.link}
-                  className={`flex items-start gap-3 p-4 rounded-xl border ${colorClasses[alert.color]} hover:opacity-80 transition-all`}
-                >
-                  <div className="rounded-lg bg-black/20 p-2">
-                    <alert.icon className={`w-5 h-5 ${iconColors[alert.color]}`} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-white">{alert.text}</p>
-                    <p className="text-xs text-white/60 mt-1">{alert.subtext}</p>
-                  </div>
+          {/* Metrics Grid */}
+          {!loading && !error && metrics && (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {metrics.map((metric, idx) => (
+                <Link key={idx} href={metric.href} className="block">
+                  <MetricCard
+                    title={metric.title}
+                    value={metric.value}
+                    subtitle={metric.subtitle}
+                    icon={metric.icon}
+                    color={metric.color}
+                    trend={metric.trend}
+                  />
                 </Link>
               ))}
             </div>
+          )}
+        </section>
+
+        {/* Activities & Alerts */}
+        {!loading && !error && (
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Recent Activities */}
+            <ActivityFeed activities={activities || []} />
+
+            {/* Top Alerts */}
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
+              <h2 className="text-2xl font-semibold text-white flex items-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-rose-400" />
+                أهم التنبيهات
+              </h2>
+              <p className="mt-1 text-sm text-white/60">تنبيهات تتطلب الانتباه</p>
+
+              <div className="mt-6 space-y-4">
+                {alerts && alerts.length > 0 ? (
+                  alerts.map((alert, idx) => (
+                    <Link
+                      key={idx}
+                      href={alert.link}
+                      className={`flex items-start gap-3 p-4 rounded-xl border ${colorClasses[alert.color]} hover:opacity-80 transition-all`}
+                    >
+                      <div className="rounded-lg bg-black/20 p-2">
+                        <alert.icon className={`w-5 h-5 ${iconColors[alert.color]}`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-white">{alert.text}</p>
+                        <p className="text-xs text-white/60 mt-1">{alert.subtext}</p>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-center text-white/40 py-4">لا توجد تنبيهات حالية</p>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Quick Navigation */}
         <section>

@@ -1,29 +1,50 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Brain, BarChart3, Target, Code, Globe, Palette, Zap, Shield, Server, Activity, TrendingUp, AlertTriangle, CheckCircle, Clock, Search, Sparkles, Send, X, Menu, ChevronRight, ChevronDown, Users } from "lucide-react";
+import { Brain, BarChart3, Target, Code, Globe, Palette, Zap, Shield, Server, Activity, TrendingUp, AlertTriangle, CheckCircle, Clock, Search, Sparkles, Send, X, Menu, ChevronRight, ChevronDown, Users, Loader2, MemoryStick, Cpu, Key } from "lucide-react";
 import Link from "next/link";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // أنواع البيانات
 // ═══════════════════════════════════════════════════════════════════════════════
-interface WarRoomData {
-  swarm: {
-    totalNodes: number;
-    activeNodes: number;
-    collectiveIntelligence: number;
-    consensusRate: number;
+interface SystemHealthData {
+  health: {
+    status: "optimal" | "stable" | "degraded" | "under_attack" | string;
+    uptime: string;
+    memoryUsage: number;
+    cpuUsage: number;
   };
-  defense: {
-    systemHealth: "optimal" | "stable" | "degraded" | "under_attack";
-    activeThreats: number;
-    blockedIPs: number;
-    avgLatency: number;
+  pendingAlerts: Array<{
+    id: string;
+    severity: "critical" | "warning" | "info";
+    title: string;
+    description: string;
+  }>;
+}
+
+interface ArsenalData {
+  keys?: {
+    activeCount: number;
+    totalCount: number;
   };
-  cache: {
-    hitRate: number;
-    costSavings: number;
-    entries: number;
+  cache?: {
+    size: number;
+    hitRate?: number;
+  };
+  systemStats?: {
+    memoryUsage?: number;
+    cpuUsage?: number;
+  };
+}
+
+interface MastermindStatsData {
+  commands: {
+    total: number;
+    last24h: number;
+  };
+  security: {
+    failedAttempts24h: number;
+    has2FA: boolean;
   };
 }
 
@@ -57,14 +78,54 @@ interface ThemeSettings {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// تبويب غرفة العمليات - War Room
+// تبويب غرفة العمليات - War Room (REAL DATA)
 // ═══════════════════════════════════════════════════════════════════════════════
 function WarRoomTab() {
-  const [data, setData] = useState<WarRoomData>({
-    swarm: { totalNodes: 12, activeNodes: 11, collectiveIntelligence: 94, consensusRate: 98 },
-    defense: { systemHealth: "optimal", activeThreats: 0, blockedIPs: 127, avgLatency: 45 },
-    cache: { hitRate: 96, costSavings: 1240, entries: 15420 },
-  });
+  const [health, setHealth] = useState<SystemHealthData | null>(null);
+  const [arsenal, setArsenal] = useState<ArsenalData | null>(null);
+  const [mastermind, setMastermind] = useState<MastermindStatsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchWarRoomData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [healthRes, arsenalRes, mastermindRes] = await Promise.all([
+        fetch("/api/system-health"),
+        fetch("/api/admin/arsenal"),
+        fetch("/api/admin/mastermind/stats"),
+      ]);
+
+      const healthData = healthRes.ok ? await healthRes.json() : null;
+      const arsenalData = arsenalRes.ok ? await arsenalRes.json() : null;
+      const mastermindData = mastermindRes.ok ? await mastermindRes.json() : null;
+
+      if (healthData) setHealth(healthData);
+      if (arsenalData) setArsenal(arsenalData);
+      if (mastermindData) setMastermind(mastermindData);
+
+      // Check if at least one API failed
+      const failedApis = [];
+      if (!healthRes.ok) failedApis.push("system-health");
+      if (!arsenalRes.ok) failedApis.push("arsenal");
+      if (!mastermindRes.ok) failedApis.push("mastermind");
+
+      if (failedApis.length > 0 && !healthData && !arsenalData) {
+        setError(`تعذر تحميل البيانات من: ${failedApis.join(", ")}`);
+      }
+    } catch (err) {
+      console.error("WarRoom fetch error:", err);
+      setError("فشل الاتصال بالخوادم. يرجى المحاولة لاحقًا.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWarRoomData();
+  }, []);
 
   const healthColors = {
     optimal: "bg-emerald-500",
@@ -73,68 +134,201 @@ function WarRoomTab() {
     under_attack: "bg-rose-500 animate-pulse",
   };
 
+  const getHealthStatusText = (status: string) => {
+    switch (status) {
+      case "optimal": return "ممتاز";
+      case "stable": return "مستقر";
+      case "degraded": return "منخفض";
+      case "under_attack": return "هجوم";
+      default: return status || "غير معروف";
+    }
+  };
+
+  // Loading State
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <Loader2 className="w-10 h-10 text-[#C5A059] animate-spin mb-4" />
+        <p className="text-white/60">جاري تحميل بيانات غرفة العمليات...</p>
+      </div>
+    );
+  }
+
+  // Error State
+  if (error && !health && !arsenal) {
+    return (
+      <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-8 text-center">
+        <AlertTriangle className="w-10 h-10 text-rose-400 mx-auto mb-4" />
+        <p className="text-rose-400 text-lg mb-4">{error}</p>
+        <button
+          onClick={fetchWarRoomData}
+          className="px-6 py-3 bg-[#C5A059] text-[#1a1a1a] rounded-lg font-medium hover:bg-[#d8b56d] transition-colors"
+        >
+          إعادة المحاولة
+        </button>
+      </div>
+    );
+  }
+
+  const systemStatus = health?.health?.status || "unknown";
+  const memoryUsage = health?.health?.memoryUsage || arsenal?.systemStats?.memoryUsage || 0;
+  const cpuUsage = health?.health?.cpuUsage || arsenal?.systemStats?.cpuUsage || 0;
+
   return (
     <div className="space-y-6">
+      {/* Header with Status */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">غرفة العمليات</h2>
           <p className="text-sm text-[#C5A059]">مركز القيادة والمراقبة اللحظية</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`w-3 h-3 rounded-full ${healthColors[data.defense.systemHealth]}`} />
+          <span className={`w-3 h-3 rounded-full ${healthColors[systemStatus as keyof typeof healthColors] || "bg-gray-500"}`} />
           <span className="text-sm text-white/60">
-            {data.defense.systemHealth === "optimal" ? "ممتاز" : 
-             data.defense.systemHealth === "stable" ? "مستقر" : 
-             data.defense.systemHealth === "degraded" ? "منخفض" : "هجوم"}
+            {getHealthStatusText(systemStatus)}
           </span>
+          {error && (
+            <span className="text-xs text-amber-400 mr-2">(بيانات جزئية)</span>
+          )}
         </div>
       </div>
 
+      {/* Main Metrics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard icon={Zap} title="العقد النشطة" value={`${data.swarm.activeNodes}/${data.swarm.totalNodes}`} subtitle="نظام السرب" color="amber" />
-        <MetricCard icon={Brain} title="الذكاء الجماعي" value={`${data.swarm.collectiveIntelligence}%`} subtitle="مستوى الأداء" color="purple" />
-        <MetricCard icon={Shield} title="التهديدات" value={data.defense.activeThreats.toString()} subtitle="مهاجمون نشطون" color="emerald" />
-        <MetricCard icon={Server} title="الحظر" value={data.defense.blockedIPs.toString()} subtitle="IP محظور" color="blue" />
+        {/* System Health Card */}
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${systemStatus === "optimal" ? "bg-emerald-500/20 text-emerald-400" : systemStatus === "stable" ? "bg-blue-500/20 text-blue-400" : "bg-amber-500/20 text-amber-400"}`}>
+            <Activity className="w-5 h-5" />
+          </div>
+          <p className="text-sm text-white/50">حالة النظام</p>
+          <p className="text-2xl font-bold text-white mt-1">{getHealthStatusText(systemStatus)}</p>
+          <p className="text-xs text-white/40 mt-1">
+            {health?.health?.uptime ? `Uptime: ${health.health.uptime}` : "غير متاح"}
+          </p>
+        </div>
+
+        {/* Memory Usage Card */}
+        <MetricCard 
+          icon={MemoryStick} 
+          title="استخدام الذاكرة" 
+          value={`${Math.round(memoryUsage)}%`} 
+          subtitle={memoryUsage > 80 ? "مرتفع" : "طبيعي"} 
+          color={memoryUsage > 80 ? "rose" : "blue"} 
+        />
+
+        {/* CPU Usage Card */}
+        <MetricCard 
+          icon={Cpu} 
+          title="استخدام المعالج" 
+          value={`${Math.round(cpuUsage)}%`} 
+          subtitle={cpuUsage > 70 ? "مرتفع" : "طبيعي"} 
+          color={cpuUsage > 70 ? "amber" : "purple"} 
+        />
+
+        {/* Active Keys Card */}
+        <MetricCard 
+          icon={Key} 
+          title="المفاتيح النشطة" 
+          value={arsenal?.keys?.activeCount?.toString() || "0"} 
+          subtitle={`من ${arsenal?.keys?.totalCount || 0} مفتاح`} 
+          color="amber" 
+        />
       </div>
 
+      {/* Secondary Metrics & Alerts */}
       <div className="grid gap-4 md:grid-cols-2">
+        {/* Cache Stats */}
         <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6">
           <h3 className="font-medium text-white mb-4 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#C5A059]" />
-            أداء الكاش
+            <Zap className="w-4 h-4 text-[#C5A059]" />
+            أداء النظام
           </h3>
           <div className="space-y-4">
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-white/60">معدل الإصابة</span>
-                <span className="text-white">{data.cache.hitRate}%</span>
+                <span className="text-white/60">حجم الكاش</span>
+                <span className="text-white">{arsenal?.cache?.size?.toLocaleString() || 0} عنصر</span>
               </div>
               <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                <div className="h-full bg-[#C5A059] rounded-full" style={{ width: `${data.cache.hitRate}%` }} />
+                <div 
+                  className="h-full bg-[#C5A059] rounded-full" 
+                  style={{ width: `${Math.min((arsenal?.cache?.size || 0) / 1000 * 100, 100)}%` }} 
+                />
               </div>
             </div>
             <div className="flex justify-between">
-              <span className="text-white/60">التوفير:</span>
-              <span className="text-[#C5A059]">${data.cache.costSavings.toLocaleString()}</span>
+              <span className="text-white/60">أوامر 24 ساعة:</span>
+              <span className="text-[#C5A059]">{mastermind?.commands?.last24h || 0}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-white/60">الإدخالات:</span>
-              <span className="text-white">{data.cache.entries.toLocaleString()}</span>
+              <span className="text-white/60">إجمالي الأوامر:</span>
+              <span className="text-white">{mastermind?.commands?.total || 0}</span>
             </div>
           </div>
         </div>
 
+        {/* Security Stats */}
         <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6">
           <h3 className="font-medium text-white mb-4 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#C5A059]" />
-            سرعة الاستجابة
+            <Shield className="w-4 h-4 text-[#C5A059]" />
+            الحالة الأمنية
           </h3>
-          <div className="text-center py-4">
-            <p className="text-4xl font-bold text-white">{data.defense.avgLatency}<span className="text-lg text-white/60">ms</span></p>
-            <p className="text-sm text-white/50 mt-2">متوسط زمن الاستجابة</p>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-white/60">محاولات الدخول الفاشلة (24h):</span>
+              <span className={`font-bold ${(mastermind?.security?.failedAttempts24h || 0) > 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                {mastermind?.security?.failedAttempts24h || 0}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white/60">حماية 2FA:</span>
+              <span className={mastermind?.security?.has2FA ? "text-emerald-400" : "text-amber-400"}>
+                {mastermind?.security?.has2FA ? "مفعلة" : "غير مفعلة"}
+              </span>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Active Alerts Section */}
+      {health?.pendingAlerts && health.pendingAlerts.length > 0 && (
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-6">
+          <h3 className="font-medium text-white mb-4 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-rose-400" />
+            التنبيهات النشطة ({health.pendingAlerts.length})
+          </h3>
+          <div className="space-y-3">
+            {health.pendingAlerts.map((alert) => (
+              <div 
+                key={alert.id} 
+                className={`p-3 rounded-lg border ${
+                  alert.severity === "critical" ? "border-rose-500/30 bg-rose-500/10" :
+                  alert.severity === "warning" ? "border-amber-500/30 bg-amber-500/10" :
+                  "border-blue-500/30 bg-blue-500/10"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`w-2 h-2 rounded-full ${
+                    alert.severity === "critical" ? "bg-rose-400" :
+                    alert.severity === "warning" ? "bg-amber-400" :
+                    "bg-blue-400"
+                  }`} />
+                  <span className="font-medium text-white text-sm">{alert.title}</span>
+                </div>
+                <p className="text-white/60 text-xs mr-4">{alert.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* No Alerts State */}
+      {(!health?.pendingAlerts || health.pendingAlerts.length === 0) && !loading && (
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-emerald-400" />
+          <span className="text-emerald-400 text-sm">لا توجد تنبيهات نشطة - النظام يعمل بكفاءة</span>
+        </div>
+      )}
     </div>
   );
 }

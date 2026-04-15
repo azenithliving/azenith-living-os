@@ -58,38 +58,178 @@ interface MediaAsset {
 // تبويب الأتمتة - Automation
 // ═══════════════════════════════════════════════════════════════════════════════
 function AutomationTab() {
-  const [rules, setRules] = useState<AutomationRule[]>([
-    {
-      id: "booking_accepted_whatsapp",
-      name: "إشعار قبول الحجز عبر واتساب",
-      trigger: "booking_status_changed",
-      conditions: { newStatus: "accepted" },
-      actions: [{ type: "send_whatsapp", message: "تم قبول حجزك! سنتواصل معك قريباً لترتيب التفاصيل." }],
-      enabled: true,
-    },
-    {
-      id: "booking_rejected_whatsapp",
-      name: "إشعار رفض الحجز عبر واتساب",
-      trigger: "booking_status_changed",
-      conditions: { newStatus: "rejected" },
-      actions: [{ type: "send_whatsapp", message: "نعتذر، لم نتمكن من قبول حجزك حالياً. سنتواصل معك لمناقشة البدائل." }],
-      enabled: true,
-    },
-    {
-      id: "lead_high_score_intent",
-      name: "تحديث نية العميل عالي النتيجة",
-      trigger: "lead_updated",
-      conditions: { score: { gte: 30 } },
-      actions: [{ type: "update_lead_intent", intent: "buyer" }],
-      enabled: true,
-    },
-  ]);
+  const [rules, setRules] = useState<AutomationRule[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editingRule, setEditingRule] = useState<AutomationRule | null>(null);
 
-  const toggleRule = (ruleId: string) => {
-    setRules(rules.map(rule =>
-      rule.id === ruleId ? { ...rule, enabled: !rule.enabled } : rule
-    ));
+  // Form state
+  const [formName, setFormName] = useState("");
+  const [formTrigger, setFormTrigger] = useState("");
+  const [formConditions, setFormConditions] = useState("{}");
+  const [formActions, setFormActions] = useState("{}");
+  const [formEnabled, setFormEnabled] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Load rules on mount
+  useEffect(() => {
+    loadRules();
+  }, []);
+
+  const loadRules = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/admin/automation");
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setRules(data.rules || []);
+      } else {
+        setError(data.error || "فشل في تحميل القواعد");
+      }
+    } catch (err) {
+      setError("خطأ في الاتصال بالخادم");
+      console.error("Failed to load rules:", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const toggleRule = async (rule: AutomationRule) => {
+    try {
+      const response = await fetch(`/api/admin/automation?id=${rule.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: !rule.enabled }),
+      });
+
+      if (response.ok) {
+        setRules(rules.map(r => r.id === rule.id ? { ...r, enabled: !r.enabled } : r));
+      } else {
+        console.error("Failed to toggle rule");
+      }
+    } catch (err) {
+      console.error("Error toggling rule:", err);
+    }
+  };
+
+  const deleteRule = async (ruleId: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذه القاعدة؟")) return;
+
+    try {
+      const response = await fetch(`/api/admin/automation?id=${ruleId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setRules(rules.filter(r => r.id !== ruleId));
+      } else {
+        const data = await response.json();
+        alert(data.error || "فشل في حذف القاعدة");
+      }
+    } catch (err) {
+      console.error("Error deleting rule:", err);
+      alert("خطأ في الاتصال بالخادم");
+    }
+  };
+
+  const openAddForm = () => {
+    setEditingRule(null);
+    setFormName("");
+    setFormTrigger("");
+    setFormConditions("{}");
+    setFormActions("{}");
+    setFormEnabled(true);
+    setShowForm(true);
+  };
+
+  const openEditForm = (rule: AutomationRule) => {
+    setEditingRule(rule);
+    setFormName(rule.name);
+    setFormTrigger(rule.trigger);
+    setFormConditions(JSON.stringify(rule.conditions || {}, null, 2));
+    setFormActions(JSON.stringify(rule.actions || {}, null, 2));
+    setFormEnabled(rule.enabled);
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingRule(null);
+  };
+
+  const submitForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      let conditions, actions;
+      try {
+        conditions = JSON.parse(formConditions || "{}");
+        actions = JSON.parse(formActions || "{}");
+      } catch (jsonErr) {
+        alert("تنسيق JSON غير صالح في الشروط أو الإجراءات");
+        setSubmitting(false);
+        return;
+      }
+
+      const body = {
+        name: formName,
+        trigger: formTrigger,
+        conditions,
+        actions,
+        enabled: formEnabled,
+      };
+
+      if (editingRule) {
+        // Update existing rule
+        const response = await fetch(`/api/admin/automation?id=${editingRule.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        if (response.ok) {
+          await loadRules();
+          closeForm();
+        } else {
+          const data = await response.json();
+          alert(data.error || "فشل في تحديث القاعدة");
+        }
+      } else {
+        // Create new rule
+        const response = await fetch("/api/admin/automation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        if (response.ok) {
+          await loadRules();
+          closeForm();
+        } else {
+          const data = await response.json();
+          alert(data.error || "فشل في إنشاء القاعدة");
+        }
+      }
+    } catch (err) {
+      console.error("Error submitting form:", err);
+      alert("خطأ في الاتصال بالخادم");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Available trigger options
+  const triggerOptions = [
+    { value: "page_visit", label: "زيارة صفحة" },
+    { value: "form_submit", label: "إرسال نموذج" },
+    { value: "booking_status_changed", label: "تغيير حالة الحجز" },
+    { value: "lead_updated", label: "تحديث عميل محتمل" },
+    { value: "time_delay", label: "تأخير زمني" },
+    { value: "user_registered", label: "تسجيل مستخدم جديد" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -98,37 +238,168 @@ function AutomationTab() {
           <h2 className="text-xl font-bold text-white">نظام الأتمتة</h2>
           <p className="text-sm text-[#C5A059]">قواعد العمل التلقائي</p>
         </div>
-        <button className="rounded-xl bg-[#C5A059] px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#d8b56d] flex items-center gap-2">
+        <button
+          onClick={openAddForm}
+          className="rounded-xl bg-[#C5A059] px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#d8b56d] flex items-center gap-2"
+        >
           <Plus className="w-4 h-4" />
           قاعدة جديدة
         </button>
       </div>
 
-      <div className="space-y-3">
-        {rules.map((rule) => (
-          <div key={rule.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => toggleRule(rule.id)}
-                  className={`w-10 h-6 rounded-full transition relative ${rule.enabled ? "bg-[#C5A059]" : "bg-white/20"}`}
+      {/* Add/Edit Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold text-white mb-4">
+              {editingRule ? "تعديل قاعدة" : "قاعدة جديدة"}
+            </h3>
+            <form onSubmit={submitForm} className="space-y-4">
+              <div>
+                <label className="block text-sm text-white/60 mb-1">الاسم</label>
+                <input
+                  type="text"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  required
+                  className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white"
+                  placeholder="مثال: إشعار قبول الحجز"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-white/60 mb-1">المشغل (Trigger)</label>
+                <select
+                  value={formTrigger}
+                  onChange={(e) => setFormTrigger(e.target.value)}
+                  required
+                  className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white"
                 >
-                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition ${rule.enabled ? "left-5" : "left-1"}`} />
+                  <option value="">اختر المشغل...</option>
+                  {triggerOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-white/60 mb-1">الشروط (JSON)</label>
+                <textarea
+                  value={formConditions}
+                  onChange={(e) => setFormConditions(e.target.value)}
+                  rows={4}
+                  className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white font-mono text-sm"
+                  placeholder='{"page": "/furniture"}'
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-white/60 mb-1">الإجراءات (JSON)</label>
+                <textarea
+                  value={formActions}
+                  onChange={(e) => setFormActions(e.target.value)}
+                  rows={4}
+                  className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white font-mono text-sm"
+                  placeholder='{"type": "whatsapp", "message": "تم قبول الحجز!"}'
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="enabled"
+                  checked={formEnabled}
+                  onChange={(e) => setFormEnabled(e.target.checked)}
+                  className="w-4 h-4 rounded border-white/20 bg-white/10"
+                />
+                <label htmlFor="enabled" className="text-sm text-white/80">مفعّل</label>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 rounded-lg bg-[#C5A059] px-4 py-2 text-[#1a1a1a] font-medium hover:bg-[#d8b56d] disabled:opacity-50"
+                >
+                  {submitting ? "جاري الحفظ..." : editingRule ? "حفظ التغييرات" : "إنشاء قاعدة"}
                 </button>
-                <div>
-                  <p className="font-medium text-white">{rule.name}</p>
-                  <p className="text-sm text-white/50">المشغل: {rule.trigger}</p>
+                <button
+                  type="button"
+                  onClick={closeForm}
+                  className="flex-1 rounded-lg bg-white/10 px-4 py-2 text-white hover:bg-white/20"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Rules List */}
+      {loading ? (
+        <div className="p-8 text-center text-white/60">
+          <div className="w-8 h-8 border-2 border-[#C5A059] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          جاري تحميل القواعد...
+        </div>
+      ) : error ? (
+        <div className="p-8 text-center">
+          <p className="text-rose-400 mb-4">{error}</p>
+          <button
+            onClick={loadRules}
+            className="rounded-lg bg-[#C5A059] px-4 py-2 text-[#1a1a1a] font-medium hover:bg-[#d8b56d]"
+          >
+            إعادة المحاولة
+          </button>
+        </div>
+      ) : rules.length === 0 ? (
+        <div className="p-8 text-center text-white/40">
+          <p className="mb-4">لا توجد قواعد أتمتة</p>
+          <button
+            onClick={openAddForm}
+            className="text-[#C5A059] hover:underline"
+          >
+            أنشئ أول قاعدة الآن
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {rules.map((rule) => (
+            <div key={rule.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => toggleRule(rule)}
+                    className={`w-10 h-6 rounded-full transition relative ${rule.enabled ? "bg-[#C5A059]" : "bg-white/20"}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition ${rule.enabled ? "left-5" : "left-1"}`} />
+                  </button>
+                  <div>
+                    <p className="font-medium text-white">{rule.name}</p>
+                    <p className="text-sm text-white/50">المشغل: {rule.trigger}</p>
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => openEditForm(rule)}
+                    className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5"
+                    title="تعديل"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => deleteRule(rule.id)}
+                    className="p-2 rounded-lg text-white/50 hover:text-rose-400 hover:bg-rose-500/10"
+                    title="حذف"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5">
-                  <Settings className="w-4 h-4" />
-                </button>
-              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

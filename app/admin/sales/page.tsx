@@ -542,98 +542,230 @@ function TenantsTab() {
 // تبويب الإدارة - Management
 // ═══════════════════════════════════════════════════════════════════════════════
 function ManagementTab() {
-  const [settings, setSettings] = useState({
-    siteTitle: "Azenith Living - تصميم داخلي فاخر",
-    siteDescription: "نحن متخصصون في تصميم الديكور الداخلي الفاخر",
-    keywords: "تصميم داخلي, ديكور, رياض, فاخر",
-    whatsapp: "",
-  });
+  const defaultSettings = {
+    seo_title: "Azenith Living - تصميم داخلي فاخر",
+    seo_description: "نحن متخصصون في تصميم الديكور الداخلي الفاخر",
+    seo_keywords: "تصميم داخلي, ديكور, رياض, فاخر",
+    primary_color: "#C5A059",
+    secondary_color: "#8B7355",
+    font_family: "Inter, sans-serif",
+    logo_url: "",
+    favicon_url: "",
+  };
+
+  const [settings, setSettings] = useState<Record<string, string>>(defaultSettings);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  // Load settings on mount
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/admin/settings");
+      const data = await response.json();
+      if (response.ok && data.success && data.settings) {
+        // Merge with defaults
+        setSettings(prev => ({
+          ...prev,
+          ...data.settings,
+        }));
+      }
+    } catch (err) {
+      console.error("[ManagementTab] Error loading settings:", err);
+      setError("فشل في تحميل الإعدادات");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveStatus("saving");
     try {
-      await fetch("/api/settings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
-      });
-    } catch (error) {
-      console.error("Failed to save settings:", error);
+      // Save SEO settings
+      const seoKeys = ["seo_title", "seo_description", "seo_keywords", "primary_color", "secondary_color", "font_family", "logo_url", "favicon_url"];
+      
+      for (const key of seoKeys) {
+        if (settings[key] !== undefined) {
+          await fetch("/api/admin/settings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key, value: settings[key] }),
+          });
+        }
+      }
+      
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
+    } catch (err) {
+      console.error("[ManagementTab] Error saving settings:", err);
+      setSaveStatus("error");
     } finally {
       setSaving(false);
     }
   };
+
+  const updateSetting = (key: string, value: string) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 text-center text-white/60">
+        <div className="w-8 h-8 border-2 border-[#C5A059] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        جاري تحميل الإعدادات...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">الإدارة والتحكم</h2>
-          <p className="text-sm text-[#C5A059]">الإعدادات والأمان والتحكم</p>
+          <p className="text-sm text-[#C5A059]">إعدادات SEO والثيم</p>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="rounded-xl bg-[#C5A059] px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#d8b56d] disabled:opacity-50"
-        >
-          {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-        </button>
+        <div className="flex items-center gap-3">
+          {saveStatus === "saved" && (
+            <span className="text-sm text-emerald-400 flex items-center gap-1">
+              <Check className="w-4 h-4" />
+              تم الحفظ
+            </span>
+          )}
+          {saveStatus === "error" && (
+            <span className="text-sm text-rose-400">فشل الحفظ</span>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-xl bg-[#C5A059] px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#d8b56d] disabled:opacity-50"
+          >
+            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
+          </button>
+        </div>
       </div>
 
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
+          {error}
+          <button onClick={loadSettings} className="mr-2 underline">إعادة المحاولة</button>
+        </div>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2">
+        {/* SEO Settings */}
         <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 space-y-4">
           <h3 className="font-medium text-white flex items-center gap-2">
             <Settings className="w-4 h-4 text-[#C5A059]" />
-            إعدادات الموقع
+            إعدادات SEO
           </h3>
           <div>
-            <label className="block text-sm text-white/60 mb-1">عنوان الموقع</label>
+            <label className="block text-sm text-white/60 mb-1">عنوان الموقع (SEO Title)</label>
             <input
-              value={settings.siteTitle}
-              onChange={(e) => setSettings({ ...settings, siteTitle: e.target.value })}
+              value={settings.seo_title || ""}
+              onChange={(e) => updateSetting("seo_title", e.target.value)}
               className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white"
+              placeholder="Azenith Living - تصميم داخلي فاخر"
             />
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1">الوصف</label>
+            <label className="block text-sm text-white/60 mb-1">وصف الموقع (SEO Description)</label>
             <textarea
-              value={settings.siteDescription}
-              onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })}
+              value={settings.seo_description || ""}
+              onChange={(e) => updateSetting("seo_description", e.target.value)}
               rows={2}
               className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white"
+              placeholder="نحن متخصصون في تصميم الديكور الداخلي الفاخر"
             />
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1">الكلمات المفتاحية</label>
+            <label className="block text-sm text-white/60 mb-1">الكلمات المفتاحية (SEO Keywords)</label>
             <input
-              value={settings.keywords}
-              onChange={(e) => setSettings({ ...settings, keywords: e.target.value })}
+              value={settings.seo_keywords || ""}
+              onChange={(e) => updateSetting("seo_keywords", e.target.value)}
               className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white"
+              placeholder="تصميم داخلي, ديكور, رياض, فاخر"
             />
           </div>
         </div>
 
+        {/* Theme Settings */}
         <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 space-y-4">
           <h3 className="font-medium text-white flex items-center gap-2">
             <Shield className="w-4 h-4 text-[#C5A059]" />
-            الأمان والحماية
+            إعدادات الثيم
           </h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02]">
-              <span className="text-white/70">المصادقة الثنائية (2FA)</span>
-              <Link href="/admin/setup-security" className="text-sm text-[#C5A059] hover:underline">
-                الإعداد
-              </Link>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-white/60 mb-1">اللون الأساسي</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={settings.primary_color || "#C5A059"}
+                  onChange={(e) => updateSetting("primary_color", e.target.value)}
+                  className="h-10 w-16 rounded border border-white/10 bg-transparent cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={settings.primary_color || ""}
+                  onChange={(e) => updateSetting("primary_color", e.target.value)}
+                  className="flex-1 rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white text-sm"
+                  placeholder="#C5A059"
+                />
+              </div>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02]">
-              <span className="text-white/70">المفتاح الرقمي</span>
-              <span className="text-sm text-emerald-400">مفعل</span>
+            <div>
+              <label className="block text-sm text-white/60 mb-1">اللون الثانوي</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={settings.secondary_color || "#8B7355"}
+                  onChange={(e) => updateSetting("secondary_color", e.target.value)}
+                  className="h-10 w-16 rounded border border-white/10 bg-transparent cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={settings.secondary_color || ""}
+                  onChange={(e) => updateSetting("secondary_color", e.target.value)}
+                  className="flex-1 rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white text-sm"
+                  placeholder="#8B7355"
+                />
+              </div>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02]">
-              <span className="text-white/70">سجل الأنشطة</span>
-              <span className="text-sm text-white/50">24 ساعة</span>
-            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1">الخط (Font Family)</label>
+            <input
+              value={settings.font_family || ""}
+              onChange={(e) => updateSetting("font_family", e.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white"
+              placeholder="Inter, sans-serif"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1">رابط الشعار (Logo URL)</label>
+            <input
+              value={settings.logo_url || ""}
+              onChange={(e) => updateSetting("logo_url", e.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white"
+              placeholder="https://..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1">رابط الأيقونة (Favicon URL)</label>
+            <input
+              value={settings.favicon_url || ""}
+              onChange={(e) => updateSetting("favicon_url", e.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white"
+              placeholder="https://..."
+            />
           </div>
         </div>
       </div>
@@ -645,31 +777,100 @@ function ManagementTab() {
 // تبويب CMS
 // ═══════════════════════════════════════════════════════════════════════════════
 function CMSTab() {
-  const [config, setConfig] = useState<SiteConfig>({
+  const defaultConfig: SiteConfig = {
     heroTitle: "ابدأ رحلة التصميم الذكي.",
     heroSubtitle: "أربع اختيارات فقط تكفي لبناء ملف العميل، تقدير مبدئي، ورسالة واتساب جاهزة للفريق التجاري.",
     budgetOptions: ["2,500 - 5,500 EGP", "5,500 - 12,000 EGP", "12,000 - 25,000 EGP", "25,000+ EGP"],
     styleOptions: ["مودرن دافئ", "هادئ فاخر", "عملي مع لمسة فندقية", "صناعي ناعم"],
     serviceOptions: ["تصميم فقط", "تصميم وتجهيز", "تصميم وتنفيذ", "تجديد لمساحة قائمة"],
     heroBackground: "/videos/hero-bg.mp4",
-  });
+  };
+
+  const [config, setConfig] = useState<SiteConfig>(defaultConfig);
+  const [loading, setLoading] = useState(true);
   const [activeSubTab, setActiveSubTab] = useState<"text" | "options" | "media">("text");
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  // Load config on mount
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  const loadConfig = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/admin/settings");
+      const data = await response.json();
+      if (response.ok && data.success && data.settings) {
+        const s = data.settings;
+        setConfig({
+          heroTitle: s.cms_hero_title || defaultConfig.heroTitle,
+          heroSubtitle: s.cms_hero_subtitle || defaultConfig.heroSubtitle,
+          budgetOptions: s.cms_budget_options || defaultConfig.budgetOptions,
+          styleOptions: s.cms_style_options || defaultConfig.styleOptions,
+          serviceOptions: s.cms_service_options || defaultConfig.serviceOptions,
+          heroBackground: s.cms_hero_background || defaultConfig.heroBackground,
+        });
+      }
+    } catch (err) {
+      console.error("[CMSTab] Error loading config:", err);
+      setError("فشل في تحميل الإعدادات");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const saveConfig = async () => {
     setSaving(true);
+    setSaveStatus("saving");
     try {
-      await fetch("/api/cms/config", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config),
-      });
-    } catch (error) {
-      console.error("Failed to save config:", error);
+      // Save each config item separately
+      const settingsToSave = [
+        { key: "cms_hero_title", value: config.heroTitle },
+        { key: "cms_hero_subtitle", value: config.heroSubtitle },
+        { key: "cms_budget_options", value: config.budgetOptions },
+        { key: "cms_style_options", value: config.styleOptions },
+        { key: "cms_service_options", value: config.serviceOptions },
+        { key: "cms_hero_background", value: config.heroBackground },
+      ];
+
+      for (const setting of settingsToSave) {
+        await fetch("/api/admin/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(setting),
+        });
+      }
+
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
+    } catch (err) {
+      console.error("[CMSTab] Error saving config:", err);
+      setSaveStatus("error");
     } finally {
       setSaving(false);
     }
   };
+
+  const updateArrayOption = (field: keyof SiteConfig, idx: number, value: string) => {
+    setConfig(prev => {
+      const arr = [...(prev[field] as string[])];
+      arr[idx] = value;
+      return { ...prev, [field]: arr };
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 text-center text-white/60">
+        <div className="w-8 h-8 border-2 border-[#C5A059] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        جاري تحميل الإعدادات...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -678,14 +879,32 @@ function CMSTab() {
           <h2 className="text-xl font-bold text-white">إدارة المحتوى</h2>
           <p className="text-sm text-[#C5A059]">CMS - تخصيص الموقع</p>
         </div>
-        <button
-          onClick={saveConfig}
-          disabled={saving}
-          className="rounded-xl bg-[#C5A059] px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#d8b56d] disabled:opacity-50"
-        >
-          {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-        </button>
+        <div className="flex items-center gap-3">
+          {saveStatus === "saved" && (
+            <span className="text-sm text-emerald-400 flex items-center gap-1">
+              <Check className="w-4 h-4" />
+              تم الحفظ
+            </span>
+          )}
+          {saveStatus === "error" && (
+            <span className="text-sm text-rose-400">فشل الحفظ</span>
+          )}
+          <button
+            onClick={saveConfig}
+            disabled={saving}
+            className="rounded-xl bg-[#C5A059] px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#d8b56d] disabled:opacity-50"
+          >
+            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
+          </button>
+        </div>
       </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
+          {error}
+          <button onClick={loadConfig} className="mr-2 underline">إعادة المحاولة</button>
+        </div>
+      )}
 
       <div className="flex gap-2">
         {[
@@ -738,11 +957,7 @@ function CMSTab() {
               <input
                 key={idx}
                 value={option}
-                onChange={(e) => {
-                  const newOptions = [...config.budgetOptions];
-                  newOptions[idx] = e.target.value;
-                  setConfig({ ...config, budgetOptions: newOptions });
-                }}
+                onChange={(e) => updateArrayOption("budgetOptions", idx, e.target.value)}
                 className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white mb-2"
               />
             ))}
@@ -753,11 +968,18 @@ function CMSTab() {
               <input
                 key={idx}
                 value={option}
-                onChange={(e) => {
-                  const newOptions = [...config.styleOptions];
-                  newOptions[idx] = e.target.value;
-                  setConfig({ ...config, styleOptions: newOptions });
-                }}
+                onChange={(e) => updateArrayOption("styleOptions", idx, e.target.value)}
+                className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white mb-2"
+              />
+            ))}
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+            <label className="block text-sm text-white/60 mb-3">الخدمات</label>
+            {config.serviceOptions.map((option, idx) => (
+              <input
+                key={idx}
+                value={option}
+                onChange={(e) => updateArrayOption("serviceOptions", idx, e.target.value)}
                 className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white mb-2"
               />
             ))}
