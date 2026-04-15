@@ -3,24 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Home, Settings, Briefcase, Globe, Target, Crown, Menu, X } from "lucide-react";
+import { Home, Shield, Brain, Bot, Menu, X } from "lucide-react";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Home,
-  Briefcase,
-  Globe,
-  Target,
-  Settings,
-  Crown,
+  Shield,
+  Brain,
+  Bot,
 };
 
 const navItems = [
   { href: "/admin", label: "الرئيسية", icon: "Home" },
-  { href: "/admin/sales-manager", label: "مدير المبيعات", icon: "Briefcase" },
-  { href: "/admin/site-manager", label: "مدير الموقع", icon: "Globe" },
-  { href: "/admin/war-room", label: "غرفة العمليات", icon: "Target" },
-  { href: "/admin/architect", label: "المهندس المعماري", icon: "Settings" },
-  { href: "/admin/chat", label: "مركز القيادة", icon: "Crown" },
+  { href: "/admin/sales", label: "المبيعات والإدارة", icon: "Shield" },
+  { href: "/admin/intel", label: "الاستخبارات والتطوير", icon: "Brain" },
+  { href: "/admin/ops", label: "العمليات والأتمتة", icon: "Bot" },
 ];
 
 export default function AdminLayoutClient({

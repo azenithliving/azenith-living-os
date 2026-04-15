@@ -6,23 +6,21 @@ import {
   Crown,
   Zap,
   Activity,
-  Building2,
   Users,
-  Briefcase,
-  TrendingUp,
+  Shield,
   Target,
-  Mail,
-  Settings,
-  Globe,
+  Brain,
+  Bot,
+  TrendingUp,
 } from "lucide-react";
 
 interface Metrics {
-  totalTenants: number;
   totalLeads: number;
   totalVisitors: number;
   conversionRate: number;
   systemHealth: string;
-  costSavings: number;
+  activeAutomations: number;
+  aiInteractions: number;
 }
 
 function MetricCard({
@@ -32,7 +30,6 @@ function MetricCard({
   icon: Icon,
   href,
   color,
-  trend,
 }: {
   title: string;
   value: string | number;
@@ -40,7 +37,6 @@ function MetricCard({
   icon: React.ComponentType<{ className?: string }>;
   href: string;
   color: string;
-  trend?: { value: number; isPositive: boolean };
 }) {
   const colorClasses: Record<string, string> = {
     gold: "bg-[#C5A059]/20 text-[#C5A059] border-[#C5A059]/30",
@@ -48,6 +44,7 @@ function MetricCard({
     purple: "bg-purple-500/20 text-purple-400 border-purple-500/30",
     emerald: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
     rose: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+    cyan: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
   };
 
   return (
@@ -59,15 +56,9 @@ function MetricCard({
         <div className={`rounded-xl p-3 border ${colorClasses[color] || colorClasses.gold}`}>
           <Icon className="h-6 w-6" />
         </div>
-        {trend && (
-          <span
-            className={`text-xs font-medium ${
-              trend.isPositive ? "text-emerald-400" : "text-rose-400"
-            }`}
-          >
-            {trend.isPositive ? "+" : "-"}{trend.value}%
-          </span>
-        )}
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-[#C5A059] text-sm">← انتقل</span>
+        </div>
       </div>
       <div className="mt-4">
         <h3 className="text-2xl font-bold text-white">{value}</h3>
@@ -78,72 +69,39 @@ function MetricCard({
   );
 }
 
-function QuickAction({
-  title,
-  desc,
-  icon: Icon,
-  href,
-}: {
-  title: string;
-  desc: string;
-  icon: React.ComponentType<{ className?: string }>;
-  href: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]"
-    >
-      <div className="rounded-xl bg-[#C5A059]/20 p-3 text-[#C5A059]">
-        <Icon className="h-6 w-6" />
-      </div>
-      <div>
-        <h4 className="font-medium text-white group-hover:text-[#C5A059] transition-colors">{title}</h4>
-        <p className="text-sm text-white/50">{desc}</p>
-      </div>
-    </Link>
-  );
-}
-
 export default function AdminOverviewPage() {
   const [metrics, setMetrics] = useState<Metrics>({
-    totalTenants: 0,
     totalLeads: 0,
     totalVisitors: 0,
     conversionRate: 0,
     systemHealth: "optimal",
-    costSavings: 0,
+    activeAutomations: 3,
+    aiInteractions: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchMetrics() {
       try {
-        // Fetch data from your APIs
-        const [tenantsRes, leadsRes, visitorsRes] = await Promise.all([
-          fetch("/api/admin/tenants").catch(() => null),
+        const [leadsRes, visitorsRes] = await Promise.all([
           fetch("/api/admin/leads").catch(() => null),
           fetch("/api/admin/visitors").catch(() => null),
         ]);
 
-        const tenants = tenantsRes?.ok ? await tenantsRes.json() : [];
         const leads = leadsRes?.ok ? await leadsRes.json() : [];
         const visitors = visitorsRes?.ok ? await visitorsRes.json() : [];
 
-        const totalTenants = Array.isArray(tenants) ? tenants.length : 0;
         const totalLeads = Array.isArray(leads) ? leads.length : 0;
         const totalVisitors = Array.isArray(visitors) ? visitors.length : 0;
-
-        // Calculate conversion rate
         const rate = totalVisitors > 0 ? Math.round((totalLeads / totalVisitors) * 100) : 0;
 
         setMetrics({
-          totalTenants,
           totalLeads,
           totalVisitors,
           conversionRate: rate,
           systemHealth: "optimal",
-          costSavings: totalTenants * 1500,
+          activeAutomations: 3,
+          aiInteractions: 1247,
         });
       } catch (error) {
         console.error("Error fetching metrics:", error);
@@ -157,14 +115,10 @@ export default function AdminOverviewPage() {
 
   const getHealthColor = (health: string) => {
     switch (health) {
-      case "optimal":
-        return "emerald";
-      case "stable":
-        return "blue";
-      case "degraded":
-        return "purple";
-      default:
-        return "rose";
+      case "optimal": return "emerald";
+      case "stable": return "blue";
+      case "degraded": return "purple";
+      default: return "rose";
     }
   };
 
@@ -209,110 +163,100 @@ export default function AdminOverviewPage() {
             المؤشرات الرئيسية
           </h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {/* MasterControlCenter Metrics (2) */}
+            {/* 2 from Sales */}
             <MetricCard
-              title="إجمالي الشركات"
-              value={metrics.totalTenants}
-              subtitle="شركة مسجلة في النظام"
-              icon={Building2}
-              href="/admin/chat"
-              color="gold"
-              trend={{ value: 12, isPositive: true }}
-            />
-            <MetricCard
-              title="العملاء النشطين"
+              title="العملاء المحتملين"
               value={metrics.totalLeads}
               subtitle="عميل في قاعدة البيانات"
               icon={Users}
-              href="/admin/chat"
-              color="blue"
-              trend={{ value: 8, isPositive: true }}
-            />
-
-            {/* SalesManager Metrics (2) */}
-            <MetricCard
-              title="إجمالي الزوار"
-              value={metrics.totalVisitors}
-              subtitle="زائر هذا الشهر"
-              icon={Briefcase}
-              href="/admin/sales-manager"
-              color="purple"
-              trend={{ value: 15, isPositive: true }}
+              href="/admin/sales"
+              color="gold"
             />
             <MetricCard
               title="نسبة التحويل"
               value={`${metrics.conversionRate}%`}
               subtitle="من الزوار إلى عملاء"
               icon={TrendingUp}
-              href="/admin/sales-manager"
+              href="/admin/sales"
               color="emerald"
-              trend={{ value: 5, isPositive: true }}
             />
 
-            {/* WarRoom Metrics (2) */}
+            {/* 2 from Intel */}
             <MetricCard
               title="حالة النظام"
-              value={
-                metrics.systemHealth === "optimal"
-                  ? "ممتازة"
-                  : metrics.systemHealth === "stable"
-                  ? "مستقرة"
-                  : "تحت المراقبة"
-              }
+              value={metrics.systemHealth === "optimal" ? "ممتازة" : "مستقرة"}
               subtitle="الأداء العام للنظام"
               icon={Target}
-              href="/admin/war-room"
+              href="/admin/intel"
               color={getHealthColor(metrics.systemHealth)}
             />
             <MetricCard
-              title="التوفير المالي"
-              value={`$${metrics.costSavings.toLocaleString()}`}
-              subtitle="بفضل التحسينات"
-              icon={Mail}
-              href="/admin/war-room"
-              color="gold"
-              trend={{ value: 23, isPositive: true }}
+              title="تفاعلات الذكاء"
+              value={metrics.aiInteractions.toLocaleString()}
+              subtitle="معالجة AI هذا الشهر"
+              icon={Brain}
+              href="/admin/intel"
+              color="purple"
+            />
+
+            {/* 2 from Ops */}
+            <MetricCard
+              title="أتمتة نشطة"
+              value={metrics.activeAutomations}
+              subtitle="قواعد العمل التلقائي"
+              icon={Bot}
+              href="/admin/ops"
+              color="cyan"
+            />
+            <MetricCard
+              title="إجمالي الزوار"
+              value={metrics.totalVisitors}
+              subtitle="زائر هذا الشهر"
+              icon={Shield}
+              href="/admin/ops"
+              color="blue"
             />
           </div>
         </section>
 
-        {/* Quick Actions */}
+        {/* Quick Navigation */}
         <section>
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Zap className="w-5 h-5 text-[#C5A059]" />
-            الوصول السريع
+            مراكز القوى الأربعة
           </h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <QuickAction
-              title="مركز القيادة"
-              desc="التحكم الكامل في النظام"
-              icon={Crown}
-              href="/admin/chat"
-            />
-            <QuickAction
-              title="مدير المبيعات"
-              desc="إدارة العملاء والتحويلات"
-              icon={Briefcase}
-              href="/admin/sales-manager"
-            />
-            <QuickAction
-              title="مدير الموقع"
-              desc="تحسين الموقع وSEO"
-              icon={Globe}
-              href="/admin/site-manager"
-            />
-            <QuickAction
-              title="غرفة العمليات"
-              desc="مراقبة الأداء والذكاء"
-              icon={Target}
-              href="/admin/war-room"
-            />
-            <QuickAction
-              title="المهندس المعماري"
-              desc="الإعدادات والتكوينات"
-              icon={Settings}
-              href="/admin/architect"
-            />
+          <div className="grid gap-4 md:grid-cols-4">
+            <Link href="/admin/sales" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
+              <div className="rounded-xl bg-[#C5A059]/20 p-3 w-fit mb-4">
+                <Shield className="w-6 h-6 text-[#C5A059]" />
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-[#C5A059] transition-colors">المبيعات والإدارة</h3>
+              <p className="text-sm text-white/50 mt-2">مدير المبيعات، العملاء، المستأجرين، الإدارة، CMS</p>
+            </Link>
+
+            <Link href="/admin/intel" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
+              <div className="rounded-xl bg-purple-500/20 p-3 w-fit mb-4">
+                <Brain className="w-6 h-6 text-purple-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">الاستخبارات والتطوير</h3>
+              <p className="text-sm text-white/50 mt-2">غرفة العمليات، التحليلات، الذكاء، التطوير</p>
+            </Link>
+
+            <Link href="/admin/ops" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
+              <div className="rounded-xl bg-cyan-500/20 p-3 w-fit mb-4">
+                <Bot className="w-6 h-6 text-cyan-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">العمليات والأتمتة</h3>
+              <p className="text-sm text-white/50 mt-2">الأتمتة، المحتوى، الحجوزات، الفواتير</p>
+            </Link>
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+              <div className="rounded-xl bg-emerald-500/20 p-3 w-fit mb-4">
+                <Crown className="w-6 h-6 text-emerald-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white">الرئيسية</h3>
+              <p className="text-sm text-white/50 mt-2">لوحة المعلومات الشخصية - أنت هنا الآن</p>
+            </div>
           </div>
         </section>
 
@@ -320,7 +264,7 @@ export default function AdminOverviewPage() {
         <div className="pt-8 border-t border-white/10">
           <div className="flex items-center justify-between text-sm text-white/40">
             <p>أزينث ليفينج © 2025</p>
-            <p>مركز القيادة السيادي الأسطوري v1.0</p>
+            <p>النظام البيئي السيادي v2.0 | 4 مراكز قوى</p>
           </div>
         </div>
       </div>
