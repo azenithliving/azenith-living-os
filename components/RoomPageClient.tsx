@@ -5,7 +5,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Lightbulb, ChevronDown } from "lucide-react";
+import { Lightbulb, ChevronDown, Heart, Star, X, Sparkles, MessageCircle, ExternalLink, Bookmark } from "lucide-react";
 import ImageLightbox from "./ImageLightbox";
 import AIStylePicker from "./AIStylePicker";
 import GoldPulseLoader from "./GoldPulseLoader";
@@ -78,8 +78,93 @@ export default function RoomPageClient({
   const MAX_BATCHES = 3;
   const PHOTOS_PER_BATCH = 30;
 
+  // Smart Design Assistant state
+  const [favorites, setFavorites] = useState<number[]>([]);
+  const [likedPhotos, setLikedPhotos] = useState<Set<number>>(new Set());
+  const [analysisModalOpen, setAnalysisModalOpen] = useState(false);
+  const [currentAnalysis, setCurrentAnalysis] = useState<{
+    photoId: number;
+    photoUrl: string;
+    detectedStyle: string;
+    styleAr: string;
+    description: string;
+    suggestions: Array<{ id: string; name: string; url: string }>;
+    message: string;
+  } | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showPriceMessage, setShowPriceMessage] = useState(false);
+
   // Image hover tracking
   const { score, hoveredImage, feedback, onHoverStart, onHoverEnd } = useImageTracking();
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem(`favorites_${room.id}`);
+    if (savedFavorites) {
+      try {
+        setFavorites(JSON.parse(savedFavorites));
+      } catch (e) {
+        console.error('Failed to parse favorites:', e);
+      }
+    }
+  }, [room.id]);
+
+  // Save favorites to localStorage
+  const saveToFavorites = useCallback((photoId: number) => {
+    setFavorites(prev => {
+      const newFavorites = prev.includes(photoId) ? prev : [...prev, photoId];
+      localStorage.setItem(`favorites_${room.id}`, JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  }, [room.id]);
+
+  // Handle like button click - triggers AI analysis
+  const handleLikePhoto = useCallback(async (photo: typeof initialPhotos[0], index: number) => {
+    // Mark as liked
+    setLikedPhotos(prev => {
+      const newSet = new Set(prev);
+      newSet.add(photo.id);
+      return newSet;
+    });
+
+    // Get image URL for analysis
+    const imageUrl = photo.src?.large2x || photo.src?.large || photo.src?.medium;
+    if (!imageUrl) return;
+
+    // Open modal and start analysis
+    setAnalysisModalOpen(true);
+    setIsAnalyzing(true);
+    setCurrentAnalysis(null);
+
+    try {
+      const response = await fetch('/api/analyze-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl,
+          currentRoomId: room.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setCurrentAnalysis({
+          photoId: photo.id,
+          photoUrl: imageUrl,
+          detectedStyle: data.analysis.detectedStyle,
+          styleAr: data.analysis.styleAr,
+          description: data.analysis.description,
+          suggestions: data.analysis.suggestions,
+          message: data.analysis.message,
+        });
+      }
+    } catch (error) {
+      console.error('Analysis failed:', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [room.id]);
 
   // Initialize tips when room/style changes
   useEffect(() => {
@@ -375,40 +460,83 @@ export default function RoomPageClient({
             <div key={batchIndex} className="space-y-6">
               {/* Photo Grid for this batch */}
               {batchPhotos.length > 0 && (
-                <div className="grid auto-rows-[200px] grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+                <div className="grid auto-rows-[240px] grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
                   {batchPhotos.map((photo, idx) => {
                     const globalIndex = startIdx + idx;
                     const isPriority = globalIndex < 4;
                     const isLarge = idx % 5 === 0;
+                    const isLiked = likedPhotos.has(photo.id);
+                    const isFavorited = favorites.includes(photo.id);
                     
                     return (
-                      <motion.div
+                      <div 
                         key={`${photo.id}-${globalIndex}`}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3, delay: idx * 0.03 }}
-                        className={`relative h-full w-full overflow-hidden rounded-xl border border-white/10 transition-all duration-300 hover:border-amber-500/30 cursor-pointer ${
+                        className={`group relative flex flex-col ${
                           isLarge ? "col-span-2 row-span-2" : "col-span-1 row-span-1"
                         }`}
-                        onClick={() => openLightbox(globalIndex)}
-                        whileHover={{ scale: 1.02 }}
                       >
-                        <Image
-                          src={photo.src?.large2x || photo.src?.large || photo.src?.medium || "/placeholder-room.jpg"}
-                          alt={photo.alt || `${roomTitle} - ${globalIndex + 1}`}
-                          fill
-                          sizes={isLarge ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 50vw, 33vw"}
-                          className="object-cover transition-transform duration-500 hover:scale-105"
-                          priority={isPriority}
-                          loading={isPriority ? "eager" : "lazy"}
-                          quality={85}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 hover:opacity-100">
-                          <span className="absolute bottom-3 left-3 text-xs text-white/80">
-                            {globalIndex + 1}
-                          </span>
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.3, delay: idx * 0.03 }}
+                          className="relative h-full w-full overflow-hidden rounded-xl border border-white/10 transition-all duration-300 hover:border-amber-500/30 cursor-pointer"
+                          onClick={() => openLightbox(globalIndex)}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <Image
+                            src={photo.src?.large2x || photo.src?.large || photo.src?.medium || "/placeholder-room.jpg"}
+                            alt={photo.alt || `${roomTitle} - ${globalIndex + 1}`}
+                            fill
+                            sizes={isLarge ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 50vw, 33vw"}
+                            className="object-cover transition-transform duration-500 hover:scale-105"
+                            priority={isPriority}
+                            loading={isPriority ? "eager" : "lazy"}
+                            quality={85}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 hover:opacity-100">
+                            <span className="absolute bottom-3 left-3 text-xs text-white/80">
+                              {globalIndex + 1}
+                            </span>
+                          </div>
+                        </motion.div>
+                        
+                        {/* Like & Favorite Buttons */}
+                        <div className="mt-2 flex items-center justify-center gap-3">
+                          <motion.button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLikePhoto(photo, globalIndex);
+                            }}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                              isLiked 
+                                ? "bg-rose-500/20 text-rose-400 border border-rose-500/30" 
+                                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
+                            }`}
+                          >
+                            <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-current" : ""}`} />
+                            <span>{isLiked ? "أعجبني" : "أعجبني"}</span>
+                          </motion.button>
+                          
+                          <motion.button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              saveToFavorites(photo.id);
+                            }}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                              isFavorited 
+                                ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" 
+                                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
+                            }`}
+                          >
+                            <Bookmark className={`h-3.5 w-3.5 ${isFavorited ? "fill-current" : ""}`} />
+                            <span>{isFavorited ? "محفوظ" : "حفظ"}</span>
+                          </motion.button>
                         </div>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>
@@ -489,6 +617,188 @@ export default function RoomPageClient({
           <p className="text-gray-500">
             لقد شاهدت جميع الدفعات المتاحة ({MAX_BATCHES} × {PHOTOS_PER_BATCH} صورة)
           </p>
+        </div>
+      )}
+
+      {/* Smart Design Assistant Modal */}
+      {analysisModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setAnalysisModalOpen(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 shadow-2xl"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-white/10 p-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-amber-400" />
+                <span className="font-bold text-white">مساعد التصميم الذكي</span>
+              </div>
+              <button
+                onClick={() => setAnalysisModalOpen(false)}
+                className="rounded-full p-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="max-h-[70vh] overflow-y-auto p-6">
+              {isAnalyzing ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <GoldPulseLoader text="جاري تحليل الصورة..." size="md" />
+                  <p className="mt-4 text-sm text-gray-400">
+                    الذكاء الاصطناعي يحلل استايل التصميم ويقترح لك غرف مشابهة
+                  </p>
+                </div>
+              ) : currentAnalysis ? (
+                <div className="space-y-6">
+                  {/* Analyzed Image */}
+                  <div className="relative aspect-video overflow-hidden rounded-xl">
+                    <Image
+                      src={currentAnalysis.photoUrl}
+                      alt="الصورة المحللة"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute left-4 top-4 rounded-full bg-amber-500/90 px-3 py-1 text-sm font-bold text-black">
+                      {currentAnalysis.styleAr}
+                    </div>
+                  </div>
+
+                  {/* AI Message */}
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
+                    <p className="text-amber-100 leading-relaxed">
+                      {currentAnalysis.message}
+                    </p>
+                  </div>
+
+                  {/* Style Suggestion */}
+                  <div>
+                    <h4 className="mb-3 flex items-center gap-2 font-bold text-white">
+                      <Star className="h-4 w-4 text-amber-400" />
+                      تحب تشوف صور أكتر من استايل {currentAnalysis.styleAr}؟
+                    </h4>
+                    <button
+                      onClick={() => {
+                        router.push(`/rooms/${room.id}?style=${currentAnalysis.detectedStyle}`);
+                        setAnalysisModalOpen(false);
+                      }}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 py-3 text-amber-400 transition-all hover:bg-amber-500/20"
+                    >
+                      <span>استكشف استايل {currentAnalysis.styleAr}</span>
+                      <ExternalLink className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {/* Room Suggestions */}
+                  {currentAnalysis.suggestions.length > 0 && (
+                    <div>
+                      <h4 className="mb-3 flex items-center gap-2 font-bold text-white">
+                        <MessageCircle className="h-4 w-4 text-amber-400" />
+                        بناءً على ذوقك، ممكن تعجبك:
+                      </h4>
+                      <div className="grid gap-3">
+                        {currentAnalysis.suggestions.map((suggestion) => (
+                          <motion.button
+                            key={suggestion.id}
+                            onClick={() => {
+                              router.push(suggestion.url);
+                              setAnalysisModalOpen(false);
+                            }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-right transition-all hover:border-amber-500/30 hover:bg-white/10"
+                          >
+                            <span className="font-medium text-white">{suggestion.name}</span>
+                            <ExternalLink className="h-4 w-4 text-amber-400" />
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Save to Favorites */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        saveToFavorites(currentAnalysis.photoId);
+                      }}
+                      className={`flex-1 rounded-xl py-3 font-medium transition-all ${
+                        favorites.includes(currentAnalysis.photoId)
+                          ? "bg-amber-500 text-black"
+                          : "border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                      }`}
+                    >
+                      {favorites.includes(currentAnalysis.photoId) 
+                        ? "✓ تم الحفظ في المفضلة" 
+                        : "حفظ في المفضلة"}
+                    </button>
+                    
+                    <button
+                      onClick={() => setShowPriceMessage(true)}
+                      className="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 font-medium text-white transition-all hover:bg-white/10"
+                    >
+                      معرفة السعر
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-gray-400">
+                  حدث خطأ في التحليل. يرجى المحاولة مرة أخرى.
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Price Message Modal */}
+      {showPriceMessage && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+            onClick={() => setShowPriceMessage(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative w-full max-w-md overflow-hidden rounded-2xl border border-green-500/30 bg-gradient-to-br from-zinc-900 to-zinc-800 p-6 shadow-2xl"
+          >
+            <button
+              onClick={() => setShowPriceMessage(false)}
+              className="absolute right-4 top-4 rounded-full p-2 text-white/60 transition-colors hover:bg-white/10"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
+              <MessageCircle className="h-8 w-8 text-green-400" />
+            </div>
+            
+            <h3 className="mb-3 text-xl font-bold text-white">لمعرفة الأسعار</h3>
+            <p className="mb-6 text-gray-300">
+              تواصل معنا مباشرة عبر واتساب للحصول على تفاصيل الأسعار وعرض خاص مناسب لميزانيتك.
+            </p>
+            
+            <a
+              href="https://wa.me/966500000000?text=مرحباً،%20أرغب%20في%20معرفة%20أسعار%20التصميم%20الداخلي"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 py-3 font-bold text-white transition-all hover:bg-green-600"
+            >
+              <MessageCircle className="h-5 w-5" />
+              <span>تواصل عبر واتساب</span>
+            </a>
+          </motion.div>
         </div>
       )}
 
