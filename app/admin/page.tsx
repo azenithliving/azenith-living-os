@@ -1,143 +1,47 @@
-﻿"use client";
+"use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  Crown,
-  Zap,
-  Activity,
-  Users,
-  Shield,
-  Target,
-  Brain,
-  Bot,
-  TrendingUp,
-  History,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  DollarSign,
-  MessageSquare,
-} from "lucide-react";
+import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-components";
 
-interface Metrics {
-  totalLeads: number;
-  totalVisitors: number;
-  conversionRate: number;
-  systemHealth: string;
-  activeAutomations: number;
-  aiInteractions: number;
-}
+export default function AdminPage() {
+  // Mock data for metrics
+  const metrics = [
+    { title: "العملاء المحتملين", value: 24, subtitle: "عميل نشط", icon: <Users className="h-6 w-6" />, color: "gold" as const, href: "/admin/sales" },
+    { title: "نسبة التحويل", value: "12.5%", subtitle: "زيادة 3%", icon: <TrendingUp className="h-6 w-6" />, color: "green" as const, trend: { value: 3, isPositive: true }, href: "/admin/sales" },
+    { title: "حالة النظام", value: "ممتازة", subtitle: "99.9% uptime", icon: <Shield className="h-6 w-6" />, color: "blue" as const, href: "/admin/intel" },
+    { title: "تفاعلات AI", value: 1247, subtitle: "هذا الشهر", icon: <Brain className="h-6 w-6" />, color: "purple" as const, href: "/admin/intel" },
+    { title: "أتمتة نشطة", value: 3, subtitle: "قواعد العمل", icon: <Bot className="h-6 w-6" />, color: "blue" as const, href: "/admin/ops" },
+    { title: "الزوار", value: 186, subtitle: "هذا الشهر", icon: <Clock className="h-6 w-6" />, color: "gold" as const, href: "/admin/ops" },
+  ];
 
-function MetricCard({
-  title,
-  value,
-  subtitle,
-  icon: Icon,
-  href,
-  color,
-}: {
-  title: string;
-  value: string | number;
-  subtitle: string;
-  icon: React.ComponentType<{ className?: string }>;
-  href: string;
-  color: string;
-}) {
+  // Mock activities
+  const activities = [
+    { id: "1", type: "lead" as const, tenantName: "شركة الأفق", description: "عميل جديد مسجل في النظام", timestamp: new Date(Date.now() - 5 * 60000).toISOString() },
+    { id: "2", type: "booking" as const, tenantName: "فيلا النخيل", description: "حجز جديد مؤكد", timestamp: new Date(Date.now() - 15 * 60000).toISOString() },
+    { id: "3", type: "request" as const, tenantName: "برج المستقبل", description: "طلب عرض سعر جديد", timestamp: new Date(Date.now() - 30 * 60000).toISOString() },
+    { id: "4", type: "subscriber" as const, tenantName: "النشرة البريدية", description: "مشترك جديد", timestamp: new Date(Date.now() - 60 * 60000).toISOString() },
+    { id: "5", type: "lead" as const, tenantName: "قصر الواحة", description: "عميل محتمل جديد", timestamp: new Date(Date.now() - 120 * 60000).toISOString() },
+  ];
+
+  // Mock alerts
+  const alerts = [
+    { icon: AlertTriangle, color: "rose", text: "3 عملاء محتملين بحاجة للمتابعة", subtext: "تأخير الرد أكثر من 24 ساعة", link: "/admin/sales" },
+    { icon: Zap, color: "amber", text: "استخدام API مرتفع", subtext: "85% من الحصة اليومية مستخدمة", link: "/admin/intel" },
+    { icon: CheckCircle, color: "emerald", text: "النسخ الاحتياطي مكتمل", subtext: "تم بنجاح الساعة 3:00 صباحاً", link: "/admin/ops" },
+  ];
+
   const colorClasses: Record<string, string> = {
-    gold: "bg-[#C5A059]/20 text-[#C5A059] border-[#C5A059]/30",
-    blue: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    purple: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    emerald: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    rose: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-    cyan: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+    rose: "border-rose-500/30 bg-rose-500/10",
+    amber: "border-amber-500/30 bg-amber-500/10",
+    emerald: "border-emerald-500/30 bg-emerald-500/10",
   };
 
-  return (
-    <Link
-      href={href}
-      className="group block rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]"
-    >
-      <div className="flex items-start justify-between">
-        <div className={`rounded-xl p-3 border ${colorClasses[color] || colorClasses.gold}`}>
-          <Icon className="h-6 w-6" />
-        </div>
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="text-[#C5A059] text-sm">← انتقل</span>
-        </div>
-      </div>
-      <div className="mt-4">
-        <h3 className="text-2xl font-bold text-white">{value}</h3>
-        <p className="mt-1 text-sm font-medium text-white/70">{title}</p>
-        <p className="mt-1 text-xs text-white/50">{subtitle}</p>
-      </div>
-    </Link>
-  );
-}
-
-export default function AdminOverviewPage() {
-  const [metrics, setMetrics] = useState<Metrics>({
-    totalLeads: 0,
-    totalVisitors: 0,
-    conversionRate: 0,
-    systemHealth: "optimal",
-    activeAutomations: 3,
-    aiInteractions: 0,
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchMetrics() {
-      try {
-        const [leadsRes, visitorsRes] = await Promise.all([
-          fetch("/api/admin/leads").catch(() => null),
-          fetch("/api/admin/visitors").catch(() => null),
-        ]);
-
-        const leads = leadsRes?.ok ? await leadsRes.json() : [];
-        const visitors = visitorsRes?.ok ? await visitorsRes.json() : [];
-
-        const totalLeads = Array.isArray(leads) ? leads.length : 0;
-        const totalVisitors = Array.isArray(visitors) ? visitors.length : 0;
-        const rate = totalVisitors > 0 ? Math.round((totalLeads / totalVisitors) * 100) : 0;
-
-        setMetrics({
-          totalLeads,
-          totalVisitors,
-          conversionRate: rate,
-          systemHealth: "optimal",
-          activeAutomations: 3,
-          aiInteractions: 1247,
-        });
-      } catch (error) {
-        console.error("Error fetching metrics:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchMetrics();
-  }, []);
-
-  const getHealthColor = (health: string) => {
-    switch (health) {
-      case "optimal": return "emerald";
-      case "stable": return "blue";
-      case "degraded": return "purple";
-      default: return "rose";
-    }
+  const iconColors: Record<string, string> = {
+    rose: "text-rose-400",
+    amber: "text-amber-400",
+    emerald: "text-emerald-400",
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C5A059] mx-auto" />
-          <p className="mt-4 text-white/50">جاري التحميل...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] p-6" dir="rtl">
@@ -152,7 +56,7 @@ export default function AdminOverviewPage() {
               </div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">لوحة التحكم الشخصية</h1>
+              <h1 className="text-2xl font-bold text-white">لوحة التحكم</h1>
               <p className="text-white/50">نظرة شاملة على أداء النظام</p>
             </div>
           </div>
@@ -162,173 +66,88 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Main Metrics Grid - 6 Key Indicators */}
+        {/* 6 Metric Cards */}
         <section>
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-[#C5A059]" />
+            <TrendingUp className="w-5 h-5 text-[#C5A059]" />
             المؤشرات الرئيسية
           </h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {/* 2 from Sales */}
-            <MetricCard
-              title="العملاء المحتملين"
-              value={metrics.totalLeads}
-              subtitle="عميل في قاعدة البيانات"
-              icon={Users}
-              href="/admin/sales"
-              color="gold"
-            />
-            <MetricCard
-              title="نسبة التحويل"
-              value={`${metrics.conversionRate}%`}
-              subtitle="من الزوار إلى عملاء"
-              icon={TrendingUp}
-              href="/admin/sales"
-              color="emerald"
-            />
-
-            {/* 2 from Intel */}
-            <MetricCard
-              title="حالة النظام"
-              value={metrics.systemHealth === "optimal" ? "ممتازة" : "مستقرة"}
-              subtitle="الأداء العام للنظام"
-              icon={Target}
-              href="/admin/intel"
-              color={getHealthColor(metrics.systemHealth)}
-            />
-            <MetricCard
-              title="تفاعلات الذكاء"
-              value={metrics.aiInteractions.toLocaleString()}
-              subtitle="معالجة AI هذا الشهر"
-              icon={Brain}
-              href="/admin/intel"
-              color="purple"
-            />
-
-            {/* 2 from Ops */}
-            <MetricCard
-              title="أتمتة نشطة"
-              value={metrics.activeAutomations}
-              subtitle="قواعد العمل التلقائي"
-              icon={Bot}
-              href="/admin/ops"
-              color="cyan"
-            />
-            <MetricCard
-              title="إجمالي الزوار"
-              value={metrics.totalVisitors}
-              subtitle="زائر هذا الشهر"
-              icon={Shield}
-              href="/admin/ops"
-              color="blue"
-            />
+            {metrics.map((metric, idx) => (
+              <Link key={idx} href={metric.href} className="block">
+                <MetricCard
+                  title={metric.title}
+                  value={metric.value}
+                  subtitle={metric.subtitle}
+                  icon={metric.icon}
+                  color={metric.color}
+                  trend={metric.trend}
+                />
+              </Link>
+            ))}
           </div>
         </section>
 
-        {/* Quick Navigation */}
-        <section>
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-[#C5A059]" />
-            مراكز القوى الأربعة
-          </h2>
-          <div className="grid gap-4 md:grid-cols-4">
-            <Link href="/admin/sales" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
-              <div className="rounded-xl bg-[#C5A059]/20 p-3 w-fit mb-4">
-                <Shield className="w-6 h-6 text-[#C5A059]" />
-              </div>
-              <h3 className="text-lg font-bold text-white group-hover:text-[#C5A059] transition-colors">المبيعات والإدارة</h3>
-              <p className="text-sm text-white/50 mt-2">مدير المبيعات، العملاء، المستأجرين، الإدارة، CMS</p>
-            </Link>
-
-            <Link href="/admin/intel" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
-              <div className="rounded-xl bg-purple-500/20 p-3 w-fit mb-4">
-                <Brain className="w-6 h-6 text-purple-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">الاستخبارات والتطوير</h3>
-              <p className="text-sm text-white/50 mt-2">غرفة العمليات، التحليلات، الذكاء، التطوير</p>
-            </Link>
-
-            <Link href="/admin/ops" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
-              <div className="rounded-xl bg-cyan-500/20 p-3 w-fit mb-4">
-                <Bot className="w-6 h-6 text-cyan-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">العمليات والأتمتة</h3>
-              <p className="text-sm text-white/50 mt-2">الأتمتة، المحتوى، الحجوزات، الفواتير</p>
-            </Link>
-
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-              <div className="rounded-xl bg-emerald-500/20 p-3 w-fit mb-4">
-                <Crown className="w-6 h-6 text-emerald-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white">الرئيسية</h3>
-              <p className="text-sm text-white/50 mt-2">لوحة المعلومات الشخصية - أنت هنا الآن</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Recent Activities & Alerts Grid */}
-        <section className="grid gap-6 md:grid-cols-2">
+        {/* Activities & Alerts */}
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Recent Activities */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <History className="w-5 h-5 text-[#C5A059]" />
-              آخر النشاطات
-            </h2>
-            <div className="space-y-3">
-              {[
-                { icon: Users, color: "text-blue-400", bg: "bg-blue-500/20", text: "عميل جديد مسجل", time: "منذ 5 دقائق", link: "/admin/sales" },
-                { icon: DollarSign, color: "text-emerald-400", bg: "bg-emerald-500/20", text: "صفقة مبيعات مكتملة", time: "منذ 15 دقيقة", link: "/admin/sales" },
-                { icon: Brain, color: "text-purple-400", bg: "bg-purple-500/20", text: "تحليل AI جديد متاح", time: "منذ 30 دقيقة", link: "/admin/intel" },
-                { icon: Bot, color: "text-cyan-400", bg: "bg-cyan-500/20", text: "أتمتة جديدة مفعلة", time: "منذ ساعة", link: "/admin/ops" },
-                { icon: MessageSquare, color: "text-[#C5A059]", bg: "bg-[#C5A059]/20", text: "رسالة دعم جديدة", time: "منذ ساعتين", link: "/admin/chat" },
-              ].map((activity, idx) => (
-                <Link
-                  key={idx}
-                  href={activity.link}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-[#C5A059]/30 hover:bg-white/[0.05] transition-all group"
-                >
-                  <div className={`rounded-lg ${activity.bg} p-2`}>
-                    <activity.icon className={`w-4 h-4 ${activity.color}`} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-white group-hover:text-[#C5A059] transition-colors">{activity.text}</p>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-white/40">
-                    <Clock className="w-3 h-3" />
-                    {activity.time}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
+          <ActivityFeed activities={activities} />
 
           {/* Top Alerts */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-rose-400" />
+          <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
+            <h2 className="text-2xl font-semibold text-white flex items-center gap-2">
+              <AlertTriangle className="w-6 h-6 text-rose-400" />
               أهم التنبيهات
             </h2>
-            <div className="space-y-3">
-              {[
-                { icon: AlertTriangle, color: "text-rose-400", bg: "bg-rose-500/20 border-rose-500/30", text: "تأخير في متابعة 3 عملاء محتملين", subtext: "يحتاجون للرد خلال 24 ساعة", link: "/admin/sales" },
-                { icon: Zap, color: "text-amber-400", bg: "bg-amber-500/20 border-amber-500/30", text: "استخدام API مرتفع", subtext: "85% من الحصة اليومية", link: "/admin/intel" },
-                { icon: CheckCircle, color: "text-emerald-400", bg: "bg-emerald-500/20 border-emerald-500/30", text: "النسخ الاحتياطي مكتمل", subtext: "تم بنجاح الساعة 3:00 صباحاً", link: "/admin/ops" },
-              ].map((alert, idx) => (
+            <p className="mt-1 text-sm text-white/60">تنبيهات تتطلب الانتباه</p>
+
+            <div className="mt-6 space-y-4">
+              {alerts.map((alert, idx) => (
                 <Link
                   key={idx}
                   href={alert.link}
-                  className={`flex items-start gap-3 p-4 rounded-xl border ${alert.bg} hover:opacity-80 transition-all group`}
+                  className={`flex items-start gap-3 p-4 rounded-xl border ${colorClasses[alert.color]} hover:opacity-80 transition-all`}
                 >
                   <div className="rounded-lg bg-black/20 p-2">
-                    <alert.icon className={`w-5 h-5 ${alert.color}`} />
+                    <alert.icon className={`w-5 h-5 ${iconColors[alert.color]}`} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-white group-hover:text-[#C5A059] transition-colors">{alert.text}</p>
+                    <p className="text-sm font-medium text-white">{alert.text}</p>
                     <p className="text-xs text-white/60 mt-1">{alert.subtext}</p>
                   </div>
                 </Link>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Quick Navigation */}
+        <section>
+          <h2 className="text-lg font-semibold text-white mb-4">مراكز القوى</h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Link href="/admin/sales" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
+              <div className="rounded-xl bg-[#C5A059]/20 p-3 w-fit mb-4">
+                <Shield className="w-6 h-6 text-[#C5A059]" />
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-[#C5A059] transition-colors">المبيعات</h3>
+              <p className="text-sm text-white/50 mt-2">العملاء، المستأجرين، الإدارة</p>
+            </Link>
+
+            <Link href="/admin/intel" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-purple-500/30 hover:bg-white/[0.05]">
+              <div className="rounded-xl bg-purple-500/20 p-3 w-fit mb-4">
+                <Brain className="w-6 h-6 text-purple-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">الاستخبارات</h3>
+              <p className="text-sm text-white/50 mt-2">التحليلات، الذكاء، التطوير</p>
+            </Link>
+
+            <Link href="/admin/ops" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-cyan-500/30 hover:bg-white/[0.05]">
+              <div className="rounded-xl bg-cyan-500/20 p-3 w-fit mb-4">
+                <Bot className="w-6 h-6 text-cyan-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">العمليات</h3>
+              <p className="text-sm text-white/50 mt-2">الأتمتة، المحتوى، الحجوزات</p>
+            </Link>
           </div>
         </section>
 
@@ -336,7 +155,7 @@ export default function AdminOverviewPage() {
         <div className="pt-8 border-t border-white/10">
           <div className="flex items-center justify-between text-sm text-white/40">
             <p>أزينث ليفينج © 2025</p>
-            <p>النظام البيئي السيادي v2.0 | 4 مراكز قوى</p>
+            <p>النظام البيئي السيادي v2.0</p>
           </div>
         </div>
       </div>
