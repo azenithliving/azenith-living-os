@@ -7,7 +7,7 @@ import { Lock, Mail, AlertCircle, Shield, KeyRound } from "lucide-react";
 const ADMIN_EMAIL = "azenithliving@gmail.com";
 const ADMIN_PASSWORD = "alaa92aziz";
 // Static 2FA secret - configure this same secret in Google Authenticator
-const TWO_FA_SECRET = "JBSWY3DPEHPK3PXP";
+const TWO_FA_SECRET = "J4YCU22VN5AGMSJRM5MFASKJEEVHC5CQFE7V24JXKE4WWWTNHBYA";
 
 export default function GateLoginPage() {
   const router = useRouter();
