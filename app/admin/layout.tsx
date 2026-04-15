@@ -59,12 +59,12 @@ export default function AdminLayout({
       <aside
         className={`
           fixed lg:static inset-y-0 right-0 z-50
-          w-[280px] lg:w-64 
-          border-l border-white/10 bg-[#0A0A0A] 
-          flex flex-col
+          w-[280px] lg:w-64
+          border-l border-white/10 bg-[#0A0A0A]
+          flex-col
           transform transition-transform duration-300 ease-in-out
-          lg:transform-none
-          ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
+          lg:transform-none lg:flex
+          ${isMobileMenuOpen ? "flex translate-x-0" : "hidden translate-x-full lg:translate-x-0"}
         `}
       >
         {/* Header مع زر الإغلاق للموبايل */}

@@ -1,16 +1,16 @@
-﻿import type { Metadata } from "next";
+﻿"use client";
 
 import { Toaster } from "react-hot-toast";
+import { usePathname } from "next/navigation";
 
 import { Providers } from "./providers";
 import VirtualDesignerWidget from "@/components/VirtualDesignerWidget";
 import ConsultantWidget from "@/components/ConsultantWidget";
 import "./globals.css";
 
-export const metadata: Metadata = {
+const metadata = {
   title: "أزينث ليفينج | تصميم داخلي فاخر في مصر",
   description: "نحول المساحات إلى تجارب فاخرة. خدمات تصميم داخلي متميزة للمنازل والشركات في القاهرة وكل مصر.",
-  icons: { icon: "/favicon.png" },
 };
 
 export default function RootLayout({
@@ -18,6 +18,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isAdminPage = pathname?.startsWith("/admin");
+
   return (
     <html lang="ar" dir="rtl" className="h-full antialiased" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className="min-h-full bg-brand-secondary font-sans text-brand-accent" suppressHydrationWarning>
@@ -49,7 +52,7 @@ export default function RootLayout({
           }}
         />
         <VirtualDesignerWidget />
-        <ConsultantWidget />
+        {!isAdminPage && <ConsultantWidget />}
       </body>
     </html>
   );
