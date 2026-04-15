@@ -137,13 +137,18 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("[AdminPage] Component mounted, starting data fetch...");
+
     // Fetch metrics from various sources
     const fetchMetrics = async () => {
       try {
         // Fetch Master Dashboard data
+        console.log("[AdminPage] Fetching /api/admin/dashboard...");
         const masterResponse = await fetch("/api/admin/dashboard");
+        console.log("[AdminPage] Dashboard response:", masterResponse.status, masterResponse.ok);
         if (masterResponse.ok) {
           const masterData = await masterResponse.json();
+          console.log("[AdminPage] Dashboard data:", masterData);
           setMetrics((prev) => ({
             ...prev,
             totalTenants: masterData.totalTenants || 0,
@@ -152,9 +157,12 @@ export default function AdminDashboardPage() {
         }
 
         // Fetch War Room data
+        console.log("[AdminPage] Fetching /api/admin/war-room...");
         const warRoomResponse = await fetch("/api/admin/war-room");
+        console.log("[AdminPage] War room response:", warRoomResponse.status, warRoomResponse.ok);
         if (warRoomResponse.ok) {
           const warRoomData = await warRoomResponse.json();
+          console.log("[AdminPage] War room data:", warRoomData);
           setMetrics((prev) => ({
             ...prev,
             systemHealth: warRoomData.data?.defense?.systemHealth || "optimal",
@@ -163,9 +171,12 @@ export default function AdminDashboardPage() {
         }
 
         // Fetch Sales data
+        console.log("[AdminPage] Fetching /api/sales-leader/visitors...");
         const salesResponse = await fetch("/api/sales-leader/visitors");
+        console.log("[AdminPage] Sales response:", salesResponse.status, salesResponse.ok);
         if (salesResponse.ok) {
           const salesData = await salesResponse.json();
+          console.log("[AdminPage] Sales data:", salesData);
           const visitors = salesData.visitors || [];
           const converted = visitors.filter((v: any) => v.conversion_stage === "converted").length;
           const rate = visitors.length > 0 ? Math.round((converted / visitors.length) * 100) : 0;
@@ -176,8 +187,9 @@ export default function AdminDashboardPage() {
           }));
         }
       } catch (error) {
-        console.error("Error fetching metrics:", error);
+        console.error("[AdminPage] Error fetching metrics:", error);
       } finally {
+        console.log("[AdminPage] Setting loading to false");
         setLoading(false);
       }
     };

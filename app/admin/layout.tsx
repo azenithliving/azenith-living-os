@@ -8,32 +8,65 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const cookieStore = await cookies();
+  console.log("[AdminLayout] Starting layout execution");
 
-  // التحقق من المصادقة
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const cookieStore = await cookies();
 
-  if (authError || !user) {
-    redirect("/admin-gate/login");
-  }
+    console.log("[AdminLayout] Supabase client created, checking auth...");
 
-  // التحقق من حالة 2FA للمستخدم
-  const { data: user2FA } = await supabase
-    .from("user_2fa")
-    .select("is_enabled")
-    .eq("user_id", user.id)
-    .single();
+    // التحقق من المصادقة
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  // إذا كان 2FA مفعلًا، تحقق مما إذا كان المستخدم قد تم التحقق منه في هذه الجلسة
-  if (user2FA?.is_enabled) {
-    const verified2FA = cookieStore.get("admin_2fa_verified")?.value;
+    console.log("[AdminLayout] Auth check result:", { hasUser: !!user, hasError: !!authError });
 
-    if (verified2FA !== "true") {
-      // المستخدم لم يتم التحقق من 2FA، قم بإعادة توجيهه إلى صفحة التحقق
-      redirect("/admin/verify-2fa");
+    if (authError) {
+      console.error("[AdminLayout] Auth error:", authError.message);
+      redirect("/admin-gate/login");
     }
-  }
 
-  return <AdminLayoutClient>{children}</AdminLayoutClient>;
+    if (!user) {
+      console.log("[AdminLayout] No user found, redirecting to login");
+      redirect("/admin-gate/login");
+    }
+
+    console.log("[AdminLayout] User authenticated:", user.id);
+
+    // التحقق من حالة 2FA للمستخدم
+    console.log("[AdminLayout] Checking 2FA status...");
+    const { data: user2FA, error: user2FAError } = await supabase
+      .from("user_2fa")
+      .select("is_enabled")
+      .eq("user_id", user.id)
+      .single();
+
+    if (user2FAError) {
+      console.log("[AdminLayout] 2FA check error (might be no record):", user2FAError.message);
+    } else {
+      console.log("[AdminLayout] 2FA status:", { enabled: user2FA?.is_enabled });
+    }
+
+    // إذا كان 2FA مفعلًا، تحقق مما إذا كان المستخدم قد تم التحقق منه في هذه الجلسة
+    if (user2FA?.is_enabled) {
+      const verified2FA = cookieStore.get("admin_2fa_verified")?.value;
+      console.log("[AdminLayout] 2FA cookie value:", verified2FA);
+
+      if (verified2FA !== "true") {
+        console.log("[AdminLayout] 2FA not verified, redirecting to verify-2fa");
+        redirect("/admin/verify-2fa");
+      }
+      console.log("[AdminLayout] 2FA verified");
+    } else {
+      console.log("[AdminLayout] 2FA not enabled for user, allowing access");
+    }
+
+    console.log("[AdminLayout] Rendering AdminLayoutClient");
+    return <AdminLayoutClient>{children}</AdminLayoutClient>;
+
+  } catch (error) {
+    console.error("[AdminLayout] Unexpected error:", error);
+    // Re-throw to let Next.js error boundary handle it
+    throw error;
+  }
 }
