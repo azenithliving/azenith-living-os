@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { askAllam } from "@/lib/ai-orchestrator";
+import { askNileChat } from "@/lib/ai-orchestrator";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -107,8 +107,8 @@ export async function POST(
     // Prepare prompt with system instructions and history
     const fullPrompt = buildPrompt(conversationHistory, userName);
 
-    // Get AI response using ALLaM (Gulf Arabic premium model)
-    const aiResult = await askAllam(fullPrompt, {
+    // Get AI response using Nile-Chat (Arabic conversational model)
+    const aiResult = await askNileChat(fullPrompt, {
       maxTokens: 2048,
       temperature: 0.7,
     });
@@ -254,7 +254,7 @@ ${conversationText}
 
 أرجع JSON فقط بدون أي شرح.`;
 
-    const result = await askAllam(insightPrompt, {
+    const result = await askNileChat(insightPrompt, {
       maxTokens: 1024,
       temperature: 0.5,
     });
