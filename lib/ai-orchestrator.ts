@@ -143,6 +143,11 @@ export async function askMistral(
   return { success: false, content: "", error: result.error };
 }
 
+interface GroqMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
 /**
  * Ask Groq - Primary for Semantic Data, Intent Scoring, and Rapid APIs
  */
@@ -153,6 +158,43 @@ export async function askGroq(
   const body: Record<string, unknown> = {
     model: options?.model || CONFIG.GROQ_MODEL,
     messages: [{ role: "user", content: prompt }],
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (options?.jsonMode) {
+    body.response_format = { type: "json_object" };
+  }
+
+  const result = await fetchWithRetry(
+    "groq",
+    (key) => fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  if (result.success) {
+    return { success: true, content: result.data };
+  }
+  return { success: false, content: "", error: result.error };
+}
+
+/**
+ * Ask Groq with Messages Array - For Conversational Context
+ */
+export async function askGroqMessages(
+  messages: GroqMessage[],
+  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const body: Record<string, unknown> = {
+    model: options?.model || CONFIG.GROQ_MODEL,
+    messages,
     temperature: options?.temperature ?? 0.7,
     max_tokens: options?.maxTokens ?? 2048,
   };

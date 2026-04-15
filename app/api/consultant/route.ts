@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { askGroq } from "@/lib/ai-orchestrator";
+import { askGroq, askGroqMessages } from "@/lib/ai-orchestrator";
+
+interface GroqMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -86,11 +91,11 @@ export async function POST(
     };
     conversationHistory.push(userMessage);
 
-    // Prepare prompt with system instructions and history
-    const fullPrompt = buildPrompt(conversationHistory, userName);
+    // Build messages array for Groq with system prompt and conversation history
+    const groqMessages = buildGroqMessages(conversationHistory, userName);
 
-    // Get AI response using Groq (llama-3.3-70b-versatile)
-    const aiResult = await askGroq(fullPrompt, {
+    // Get AI response using Groq with full conversation context
+    const aiResult = await askGroqMessages(groqMessages, {
       maxTokens: 2048,
       temperature: 0.7,
     });
@@ -150,30 +155,32 @@ function generateSessionId(): string {
 }
 
 /**
- * Build the full prompt with system instructions and conversation history
+ * Build Groq messages array with system prompt and conversation history
  */
-function buildPrompt(
+function buildGroqMessages(
   history: Message[],
   userName?: string
-): string {
-  let prompt = SYSTEM_PROMPT;
-
+): GroqMessage[] {
+  // Start with system message
+  let systemContent = SYSTEM_PROMPT;
   if (userName) {
-    prompt += `\n\nاسم الزائر: ${userName}`;
+    systemContent += `\n\nاسم الزائر: ${userName}`;
   }
 
-  prompt += "\n\nسجل المحادثة:\n";
+  const messages: GroqMessage[] = [
+    { role: "system", content: systemContent }
+  ];
 
   // Add conversation history (last 10 messages to avoid token limit)
   const recentHistory = history.slice(-10);
   for (const msg of recentHistory) {
-    const role = msg.role === "user" ? "الزائر" : "مستشار أزينث";
-    prompt += `${role}: ${msg.content}\n`;
+    messages.push({
+      role: msg.role === "user" ? "user" : "assistant",
+      content: msg.content
+    });
   }
 
-  prompt += "\nمستشار أزينث:";
-
-  return prompt;
+  return messages;
 }
 
 /**

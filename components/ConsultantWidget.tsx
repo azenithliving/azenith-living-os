@@ -188,6 +188,7 @@ export default function ConsultantWidget() {
           message: content.trim(),
           sessionId,
           userName: userName || undefined,
+          history: messages,
         }),
       });
 
