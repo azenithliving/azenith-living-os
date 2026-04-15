@@ -1,32 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { askNileChat } from "@/lib/ai-orchestrator";
+import { askGroq } from "@/lib/ai-orchestrator";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
   process.env.SUPABASE_SERVICE_ROLE_KEY || ""
 );
 
-// System Prompt for Azenith Consultant - Enhanced Intelligence
-const SYSTEM_PROMPT = `أنت "مُستشار أزينث"، مندوب مبيعات خبير في التصميم الداخلي الفاخر.
-
-مهمتك: فهم احتياج الزائر الحقيقي بأعمق صورة ممكنة. أنت حر في تحليل أي شيء يقوله الزائر:
-- حجم الأسرة وعدد الأفراد
-- الميزانية المتاحة
-- الذوق الشخصي والتفضيلات
-- مستوى الإلحاح والأولوية
-- الخبرة السابقة في التصميم
-- المخاوف والتحفظات
-- نمط الحياة (يعمل من البيت، يستقبل ضيوف، يحب الطبخ... إلخ)
-- أي تفاصيل شخصية يرغب في مشاركتها
-
-استخدم أسئلة مفتوحة وذكية لاستكشاف هذه الجوانب دون أن تكون مباشرًا. اسأل بذكاء وكن مهتمًا حقًا.
-
-بعد 3-5 تبادلات، لخص ما فهمته من احتياج الزائر في جملة واحدة، وقدم له اقتراحًا واحدًا مخصصًا.
-
-مثال: "أقترح عليك تصميم غرفة معيشة عائلية دافئة مع كنبة زاوية ووحدات تلفزيون مدمجة تناسب ميزانيتك المتوسطة."
-
-تحدث بلغة عربية فصحى راقية ومهذبة. خاطب الزائر باسمه إذا عرفته.`;
+// System Prompt for Azenith Consultant - Groq Optimized
+const SYSTEM_PROMPT = `أنت "مُستشار أزينث"، مندوب مبيعات خبير في التصميم الداخلي الفاخر. مهمتك فهم احتياج الزائر الحقيقي من خلال أسئلة مفتوحة وذكية. تحدث بلغة عربية فصحى راقية ومهذبة. خاطب الزائر باسمه إذا عرفته.`;
 
 // Types
 interface Message {
@@ -107,8 +89,8 @@ export async function POST(
     // Prepare prompt with system instructions and history
     const fullPrompt = buildPrompt(conversationHistory, userName);
 
-    // Get AI response using Nile-Chat (Arabic conversational model)
-    const aiResult = await askNileChat(fullPrompt, {
+    // Get AI response using Groq (llama-3.3-70b-versatile)
+    const aiResult = await askGroq(fullPrompt, {
       maxTokens: 2048,
       temperature: 0.7,
     });
@@ -258,9 +240,10 @@ ${conversationText}
 
 أرجع JSON فقط بدون أي شرح.`;
 
-    const result = await askNileChat(insightPrompt, {
+    const result = await askGroq(insightPrompt, {
       maxTokens: 1024,
       temperature: 0.5,
+      jsonMode: true,
     });
 
     if (result.success) {
