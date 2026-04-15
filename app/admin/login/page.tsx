@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
-import { Mail, Lock, AlertCircle, Shield } from "lucide-react";
+import { Lock, AlertCircle, Shield } from "lucide-react";
+
+const ADMIN_PASSWORD = "azenith2024";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -17,22 +17,17 @@ export default function AdminLoginPage() {
     setError("");
     setLoading(true);
 
-    const supabase = createClient();
-
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (authError) {
-      setError(authError.message === "Invalid login credentials" 
-        ? "Invalid email or password" 
-        : authError.message);
+    // Check password
+    if (password !== ADMIN_PASSWORD) {
+      setError("كلمة المرور غير صحيحة");
       setLoading(false);
       return;
     }
 
-    // Login successful - redirect to admin
+    // Set admin_auth cookie
+    document.cookie = "admin_auth=true; path=/; max-age=86400; SameSite=Lax";
+
+    // Redirect to admin
     router.push("/admin");
     router.refresh();
   };
@@ -53,32 +48,15 @@ export default function AdminLoginPage() {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <Shield className="h-8 w-8 text-brand-primary" />
               </div>
-              <h2 className="text-xl font-semibold text-white">Admin Login</h2>
+              <h2 className="text-xl font-semibold text-white">تسجيل الدخول</h2>
               <p className="mt-2 text-sm text-white/50">
-                Sign in with your admin credentials
+                أدخل كلمة المرور للوصول إلى لوحة التحكم
               </p>
-            </div>
-
-            {/* Email Input */}
-            <div>
-              <label className="mb-2 block text-sm text-white/70">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-[#111112] py-3 pr-4 pl-12 text-white outline-none transition focus:border-brand-primary"
-                  placeholder="admin@azenithliving.com"
-                  required
-                  autoFocus
-                />
-              </div>
             </div>
 
             {/* Password Input */}
             <div>
-              <label className="mb-2 block text-sm text-white/70">Password</label>
+              <label className="mb-2 block text-sm text-white/70">كلمة المرور</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
                 <input
@@ -86,8 +64,9 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-2xl border border-white/10 bg-[#111112] py-3 pr-4 pl-12 text-white outline-none transition focus:border-brand-primary"
-                  placeholder="Enter your password"
+                  placeholder="أدخل كلمة المرور"
                   required
+                  autoFocus
                 />
               </div>
             </div>
@@ -103,7 +82,7 @@ export default function AdminLoginPage() {
             {/* Login Button */}
             <button
               type="submit"
-              disabled={loading || !email || !password}
+              disabled={loading || !password}
               className="w-full rounded-full bg-brand-primary px-6 py-4 text-sm font-semibold text-brand-accent transition hover:bg-[#d8b56d] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (
@@ -112,10 +91,10 @@ export default function AdminLoginPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Signing in...
+                  جاري الدخول...
                 </span>
               ) : (
-                "Sign In"
+                "تسجيل الدخول"
               )}
             </button>
           </form>
