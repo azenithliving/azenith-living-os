@@ -15,7 +15,15 @@ interface ConsultantResponse {
   sessionId: string;
 }
 
-const WELCOME_MESSAGE = "أهلاً بك في أزينث ليفينج. أنا مُستشارك الشخصي. هل تسمح لي بمعرفة اسمك؟";
+interface SessionData {
+  sessionId: string;
+  messages: Message[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+const WELCOME_MESSAGE_NEW = "أهلاً بك في أزينث ليفينج. أنا مُستشارك الشخصي. هل تسمح لي بمعرفة اسمك؟";
+const WELCOME_MESSAGE_RETURNING = (name: string, topic: string) => `أهلاً بعودتك ${name}. هل ما زلت مهتمًا بـ ${topic}؟`;
 
 export default function ConsultantWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,6 +32,7 @@ export default function ConsultantWidget() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+  const [hasLoadedSession, setHasLoadedSession] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -86,17 +95,67 @@ export default function ConsultantWidget() {
     }
   }, [isOpen]);
 
-  // Send welcome message on first open if no messages
-  const handleOpen = useCallback(() => {
+  // Fetch session from API
+  const fetchSession = useCallback(async (sid: string) => {
+    try {
+      const response = await fetch(`/api/consultant?sessionId=${encodeURIComponent(sid)}`);
+      if (response.ok) {
+        const data: SessionData = await response.json();
+        if (data.messages && data.messages.length > 0) {
+          setMessages(data.messages);
+          // Extract name from first user message
+          const firstUserMsg = data.messages.find(m => m.role === "user");
+          if (firstUserMsg) {
+            const extractedName = firstUserMsg.content.split(/\s+/)[0];
+            if (extractedName.length > 1) {
+              setUserName(extractedName);
+            }
+          }
+          return data.messages;
+        }
+      }
+    } catch (error) {
+      console.error("[ConsultantWidget] Error fetching session:", error);
+    }
+    return null;
+  }, []);
+
+  // Send welcome message on first open
+  const handleOpen = useCallback(async () => {
     setIsOpen(true);
+
+    if (hasLoadedSession) return;
+    setHasLoadedSession(true);
+
+    // If we have a stored sessionId, try to fetch it
+    const storedSessionId = localStorage.getItem("azenith_consultant_session_id");
+    const storedName = localStorage.getItem("azenith_consultant_name");
+
+    if (storedSessionId) {
+      const sessionMessages = await fetchSession(storedSessionId);
+      if (sessionMessages && sessionMessages.length > 0) {
+        // Returning user - add welcome back message
+        const name = storedName || userName || "";
+        const lastTopic = extractLastTopic(sessionMessages);
+        const welcomeBackMsg: Message = {
+          role: "assistant",
+          content: WELCOME_MESSAGE_RETURNING(name, lastTopic),
+          timestamp: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, welcomeBackMsg]);
+        return;
+      }
+    }
+
+    // New user - show welcome message
     if (messages.length === 0) {
       setMessages([{
         role: "assistant",
-        content: WELCOME_MESSAGE,
+        content: WELCOME_MESSAGE_NEW,
         timestamp: new Date().toISOString(),
       }]);
     }
-  }, [messages.length]);
+  }, [hasLoadedSession, fetchSession, messages.length, userName]);
 
   // Send message to API
   const sendMessage = async (content: string) => {
@@ -168,6 +227,28 @@ export default function ConsultantWidget() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     sendMessage(inputMessage);
+  };
+
+  // Extract last topic from conversation
+  const extractLastTopic = (msgs: Message[]): string => {
+    // Look for room or style mentions in messages
+    const roomKeywords = ["غرفة", "صالة", "مطبخ", "حمام", "مكتب", "غرفة نوم", "غرفة أطفال"];
+    const styleKeywords = ["مودرن", "كلاسيك", "صناعي", "اسكندنافي", "مينيمال"];
+
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      const content = msgs[i].content;
+      for (const keyword of roomKeywords) {
+        if (content.includes(keyword)) {
+          return keyword;
+        }
+      }
+      for (const keyword of styleKeywords) {
+        if (content.includes(keyword)) {
+          return `التصميم ${keyword}`;
+        }
+      }
+    }
+    return "التصميم الداخلي";
   };
 
   const toggleChat = () => {

@@ -7,26 +7,26 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || ""
 );
 
-// System Prompt for Azenith Consultant
-const SYSTEM_PROMPT = `أنت "مُستشار أزينث"، مندوب مبيعات خبير في التصميم الداخلي الفاخر. 
-هدفك فهم احتياج الزائر الحقيقي من خلال أسئلة مفتوحة ذكية. 
-لا تعرض خيارات متعددة إلا للضرورة. 
-تحدث بلغة عربية فصحى راقية ومهذبة. 
-خاطب الزائر باسمه إذا عرفته. 
-بعد فهم احتياجه، قدم له اقتراحًا واحدًا مخصصًا.
+// System Prompt for Azenith Consultant - Enhanced Intelligence
+const SYSTEM_PROMPT = `أنت "مُستشار أزينث"، مندوب مبيعات خبير في التصميم الداخلي الفاخر.
 
-أنت تمثل شركة أزينث للتصميم الداخلي الفاخر. خدماتنا تشمل:
-- تصميم غرف المعيشة والنوم والمطابخ
-- التصاميم المودرن والكلاسيكية والصناعية والاسكندنافية
-- استشارات شخصية للتصميم الداخلي
+مهمتك: فهم احتياج الزائر الحقيقي بأعمق صورة ممكنة. أنت حر في تحليل أي شيء يقوله الزائر:
+- حجم الأسرة وعدد الأفراد
+- الميزانية المتاحة
+- الذوق الشخصي والتفضيلات
+- مستوى الإلحاح والأولوية
+- الخبرة السابقة في التصميم
+- المخاوف والتحفظات
+- نمط الحياة (يعمل من البيت، يستقبل ضيوف، يحب الطبخ... إلخ)
+- أي تفاصيل شخصية يرغب في مشاركتها
 
-اسأل عن:
-- نوع الغرفة المطلوبة
-- الاستايل المفضل
-- الميزانية التقريبية
-- أي متطلبات خاصة
+استخدم أسئلة مفتوحة وذكية لاستكشاف هذه الجوانب دون أن تكون مباشرًا. اسأل بذكاء وكن مهتمًا حقًا.
 
-كن لطيفًا، احترافيًا، ومهتمًا بفهم احتياجات العميل بعمق.`;
+بعد 3-5 تبادلات، لخص ما فهمته من احتياج الزائر في جملة واحدة، وقدم له اقتراحًا واحدًا مخصصًا.
+
+مثال: "أقترح عليك تصميم غرفة معيشة عائلية دافئة مع كنبة زاوية ووحدات تلفزيون مدمجة تناسب ميزانيتك المتوسطة."
+
+تحدث بلغة عربية فصحى راقية ومهذبة. خاطب الزائر باسمه إذا عرفته.`;
 
 // Types
 interface Message {
@@ -47,10 +47,24 @@ interface ConsultantResponse {
   sessionId: string;
 }
 
+interface Insights {
+  roomType?: string;
+  style?: string;
+  budget?: string;
+  urgency?: string;
+  familySize?: string;
+  lifestyle?: string;
+  concerns?: string;
+  lastTopic?: string;
+  summary?: string;
+  [key: string]: string | undefined;
+}
+
 interface ConsultantSession {
   id: string;
   session_id: string;
   messages: Array<{ role: "user" | "assistant"; content: string; timestamp: string }>;
+  insights?: Insights;
   created_at: string;
   updated_at: string;
 }
@@ -117,8 +131,14 @@ export async function POST(
     };
     conversationHistory.push(assistantMessage);
 
+    // Extract insights after 3-5 exchanges
+    let insights: Insights | undefined = existingSession?.insights;
+    if (conversationHistory.length >= 6 && conversationHistory.length <= 10) {
+      insights = await extractInsights(conversationHistory, userName);
+    }
+
     // Save session to database
-    await saveSession(sessionId, conversationHistory);
+    await saveSession(sessionId, conversationHistory, insights);
 
     console.log(`[Consultant] Session ${sessionId}: ${conversationHistory.length} messages`);
 
@@ -204,11 +224,63 @@ function normalizeMessages(messages: Array<{ role: "user" | "assistant"; content
 }
 
 /**
+ * Extract insights from conversation using AI
+ */
+async function extractInsights(
+  messages: Message[],
+  userName?: string
+): Promise<Insights | undefined> {
+  try {
+    // Build conversation text
+    const conversationText = messages
+      .map(m => `${m.role === "user" ? "الزائر" : "المستشار"}: ${m.content}`)
+      .join("\n");
+
+    const insightPrompt = `بناءً على هذه المحادثة بين مستشار التصميم الداخلي وزائر، استخرج الاستنتاجات التالية في شكل JSON:
+
+المحادثة:
+${conversationText}
+
+استخرج هذه الحقول (إذا كانت متوفرة):
+- roomType: نوع الغرفة/المساحة المطلوبة
+- style: الاستايل المفضل
+- budget: نطاق الميزانية
+- urgency: مستوى الإلحاح
+- familySize: حجم الأسرة
+- lifestyle: نمط الحياة
+- concerns: المخاوف أو التحفظات
+- lastTopic: آخر موضوع تم مناقشته
+- summary: ملخص موجز لاحتياجات الزائر
+
+أرجع JSON فقط بدون أي شرح.`;
+
+    const result = await askAllam(insightPrompt, {
+      maxTokens: 1024,
+      temperature: 0.5,
+    });
+
+    if (result.success) {
+      // Try to parse JSON from response
+      const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const insights = JSON.parse(jsonMatch[0]) as Insights;
+        console.log("[Consultant] Insights extracted:", insights);
+        return insights;
+      }
+    }
+  } catch (error) {
+    console.error("[Consultant] Error extracting insights:", error);
+  }
+  return undefined;
+}
+
+/**
  * Save session to database
  */
 async function saveSession(
   sessionId: string,
-  messages: Array<{ role: "user" | "assistant"; content: string; timestamp?: string }>
+  messages: Array<{ role: "user" | "assistant"; content: string; timestamp?: string }>,
+  insights?: Insights
 ): Promise<void> {
   try {
     const now = new Date().toISOString();
@@ -219,26 +291,34 @@ async function saveSession(
     // Check if session exists
     const existing = await getSession(sessionId);
 
+    const sessionData: Record<string, unknown> = {
+      messages: normalizedMessages,
+      updated_at: now,
+    };
+
+    // Add insights if provided
+    if (insights) {
+      sessionData.insights = insights;
+    }
+
     if (existing) {
       // Update existing session
       await supabase
         .from("consultant_sessions")
-        .update({
-          messages: normalizedMessages,
-          updated_at: now,
-        })
+        .update(sessionData)
         .eq("session_id", sessionId);
     } else {
       // Insert new session
       await supabase.from("consultant_sessions").insert({
         session_id: sessionId,
         messages: normalizedMessages,
+        insights: insights || null,
         created_at: now,
         updated_at: now,
       });
     }
 
-    console.log(`[Consultant] Session saved: ${sessionId}`);
+    console.log(`[Consultant] Session saved: ${sessionId}${insights ? " with insights" : ""}`);
   } catch (err) {
     console.error("[Consultant] Error saving session:", err);
   }
@@ -272,6 +352,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({
       sessionId: session.session_id,
       messages: session.messages,
+      insights: session.insights,
       createdAt: session.created_at,
       updatedAt: session.updated_at,
     });
