@@ -11,9 +11,9 @@ export default async function AdminLayout({
   const cookieStore = await cookies();
   const adminAuth = cookieStore.get("admin_auth");
 
-  // If no cookie or not "true", redirect to login
+  // If no cookie or not "true", redirect to gate login
   if (!adminAuth || adminAuth.value !== "true") {
-    redirect("/admin/login");
+    redirect("/gate/login");
   }
 
   return <AdminLayoutClient>{children}</AdminLayoutClient>;
