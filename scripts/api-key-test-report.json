@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-04-14T17:38:45.708Z",
+  "results": [
+    {
+      "provider": "Pexels",
+      "total": 5,
+      "valid": 5,
+      "failed": 0,
+      "failedDetails": []
+    },
+    {
+      "provider": "Groq",
+      "total": 6,
+      "valid": 6,
+      "failed": 0,
+      "failedDetails": []
+    },
+    {
+      "provider": "OpenRouter",
+      "total": 6,
+      "valid": 6,
+      "failed": 0,
+      "failedDetails": []
+    },
+    {
+      "provider": "Mistral",
+      "total": 6,
+      "valid": 0,
+      "failed": 6,
+      "failedDetails": [
+        {
+          "index": 1,
+          "error": "HTTP 401: {\"detail\":\"Unauthorized\"}"
+        },
+        {
+          "index": 2,
+          "error": "HTTP 401: {\"detail\":\"Unauthorized\"}"
+        },
+        {
+          "index": 3,
+          "error": "HTTP 401: {\"detail\":\"Unauthorized\"}"
+        },
+        {
+          "index": 4,
+          "error": "HTTP 401: {\"detail\":\"Unauthorized\"}"
+        },
+        {
+          "index": 5,
+          "error": "HTTP 401: {\"detail\":\"Unauthorized\"}"
+        },
+        {
+          "index": 6,
+          "error": "HTTP 401: {\"detail\":\"Unauthorized\"}"
+        }
+      ]
+    },
+    {
+      "provider": "DeepSeek",
+      "total": 6,
+      "valid": 6,
+      "failed": 0,
+      "failedDetails": []
+    },
+    {
+      "provider": "Gemini",
+      "total": 5,
+      "valid": 0,
+      "failed": 5,
+      "failedDetails": [
+        {
+          "index": 1,
+          "error": "HTTP 400: {\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key expired. Please renew the API key.\",\n    \"st"
+        },
+        {
+          "index": 2,
+          "error": "HTTP 400: {\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API Key not found. Please pass a valid API key.\",\n  "
+        },
+        {
+          "index": 3,
+          "error": "HTTP 400: {\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key expired. Please renew the API key.\",\n    \"st"
+        },
+        {
+          "index": 4,
+          "error": "HTTP 400: {\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key expired. Please renew the API key.\",\n    \"st"
+        },
+        {
+          "index": 5,
+          "error": "HTTP 400: {\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key expired. Please renew the API key.\",\n    \"st"
+        }
+      ]
+    }
+  ],
+  "deletedVars": [
+    "MISTRAL_KEYS",
+    "GOOGLE_AI_KEYS"
+  ],
+  "updatedVars": [
+    "PEXELS_KEYS (0 keys removed, 5 kept)",
+    "GROQ_KEYS (0 keys removed, 6 kept)",
+    "OPENROUTER_KEYS (0 keys removed, 6 kept)",
+    "DEEPSEEK_KEYS (0 keys removed, 6 kept)"
+  ]
+}

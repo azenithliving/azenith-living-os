@@ -7,6 +7,13 @@ import { generateAIContent, improveContent } from "@/lib/ai-content";
 export async function POST(request: NextRequest) {
   try {
     // Check rate limit
+    if (!rateLimiter) {
+      // Skip rate limiting if Redis is not configured
+      return NextResponse.json(
+        { ok: false, message: "Rate limiting not available" },
+        { status: 503 }
+      );
+    }
     const ip = getClientIP(request);
     const { success, limit, remaining, reset } = await rateLimiter.limit(ip);
 

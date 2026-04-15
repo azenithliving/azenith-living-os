@@ -54,7 +54,7 @@ export default function FurnitureTypePage() {
               return (
                 <section key={room.slug} className="space-y-8 animate-fadeInUp">
                   <div className="flex items-center gap-4">
-                    <Link href={`/room/${room.slug}`} className="inline-flex items-center gap-2 text-brand-primary hover:text-brand-primary/80 font-semibold">
+                    <Link href={`/rooms/${room.slug}`} className="inline-flex items-center gap-2 text-brand-primary hover:text-brand-primary/80 font-semibold">
                       <span>{room.title}</span>
                     </Link>
                     <div className="h-px flex-1 bg-gradient-to-l from-transparent via-white/30 to-transparent" />

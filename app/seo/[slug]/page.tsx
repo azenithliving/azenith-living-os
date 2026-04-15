@@ -30,7 +30,7 @@ export default async function SeoPage({ params }: SeoPageProps) {
 
         <div className="grid gap-5 md:grid-cols-2">
           {roomDefinitions.slice(0, 4).map((room) => (
-            <Link key={room.slug} href={`/room/${room.slug}`} className="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-5 transition hover:border-brand-primary">
+            <Link key={room.slug} href={`/rooms/${room.slug}`} className="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-5 transition hover:border-brand-primary">
               <p className="text-sm text-brand-primary">{room.eyebrow}</p>
               <h2 className="mt-2 text-xl font-semibold text-white">{room.title}</h2>
               <p className="mt-2 text-sm leading-7 text-white/60">{room.summary}</p>

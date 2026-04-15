@@ -4,6 +4,10 @@ import { rateLimiter, getClientIP } from "@/lib/rate-limit";
 
 // Apply rate limiting to all handlers
 async function checkRateLimit(request: NextRequest): Promise<NextResponse | null> {
+  // Skip rate limiting if Redis is not configured
+  if (!rateLimiter) {
+    return null;
+  }
   const ip = getClientIP(request);
   const { success, limit, remaining, reset } = await rateLimiter.limit(ip);
 

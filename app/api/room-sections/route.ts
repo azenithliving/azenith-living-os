@@ -21,7 +21,7 @@ export async function GET() {
     // Fetch all active room sections with their images
     const { data: sections, error } = await supabase
       .from("room_sections")
-      .select("slug, name, name_ar, description, icon, display_order, metadata")
+      .select("id, company_id, slug, name, name_ar, description, icon, display_order, is_active")
       .eq("company_id", company.id)
       .eq("is_active", true)
       .order("display_order", { ascending: true });
@@ -34,9 +34,8 @@ export async function GET() {
       );
     }
 
-    // Transform sections to include CMS image URLs from metadata
+    // Transform sections - metadata field not available in DB
     const transformedSections = sections?.map((section) => {
-      const metadata = (section.metadata as Record<string, unknown>) || {};
       return {
         slug: section.slug,
         name: section.name,
@@ -44,10 +43,9 @@ export async function GET() {
         description: section.description,
         icon: section.icon,
         displayOrder: section.display_order,
-        // CMS image URL from metadata.image_url or metadata.featured_image
-        cmsImageUrl: metadata.image_url || metadata.featured_image || null,
-        // Gallery images array if available
-        galleryImages: metadata.gallery_images || [],
+        // Placeholder for CMS images - metadata field removed
+        cmsImageUrl: null,
+        galleryImages: [],
       };
     }) || [];
 

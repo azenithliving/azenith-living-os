@@ -21,6 +21,11 @@ export const dynamic = "force-dynamic";
 
 // Rate limit check helper
 async function checkRateLimit(request: NextRequest): Promise<NextResponse | null> {
+  // Skip rate limiting if Redis is not configured
+  if (!rateLimiter) {
+    return null;
+  }
+
   const ip = getClientIP(request);
   const { success, limit, remaining, reset } = await rateLimiter.limit(ip);
 

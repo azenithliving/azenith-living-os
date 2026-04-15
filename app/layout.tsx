@@ -3,6 +3,7 @@
 import { Toaster } from "react-hot-toast";
 
 import { Providers } from "./providers";
+import VirtualDesignerWidget from "@/components/VirtualDesignerWidget";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -46,6 +47,7 @@ export default function RootLayout({
             },
           }}
         />
+        <VirtualDesignerWidget />
       </body>
     </html>
   );

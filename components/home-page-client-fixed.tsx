@@ -488,7 +488,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
     // 2. Set loading state to show spinner
     setLoading(true);
     // 3. Navigate to room page
-    router.push(`/room/${roomSlug}?style=${displayStyle}`);
+    router.push(`/rooms/${roomSlug}?style=${displayStyle}`);
   };
 
   const roomList = useMemo(() => {
@@ -646,7 +646,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
               {roomList.map((room, index) => (
                 <div key={room.slug} className="group relative z-20">
                   <Link
-                    href={`/room/${room.slug}?style=${displayStyle}`}
+                    href={`/rooms/${room.slug}?style=${displayStyle}`}
                     onMouseEnter={() => startRoomTimer(room.slug)}
                     onMouseLeave={() => clearRoomTimer(room.slug)}
                     onClick={() => handleRoomClick(room.slug)}
@@ -674,7 +674,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
 
               <div className="group relative z-20">
                 <Link
-                  href={`/room/interior-design?style=${displayStyle}`}
+                  href={`/rooms/interior-design?style=${displayStyle}`}
                   onMouseEnter={() => startRoomTimer("interior-design")}
                   onMouseLeave={() => clearRoomTimer("interior-design")}
                   onClick={() => handleRoomClick("interior-design")}

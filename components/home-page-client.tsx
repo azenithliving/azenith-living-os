@@ -164,11 +164,11 @@ export default function HomePageClient({ runtimeConfig }: HomePageClientProps) {
                       imageUrl={roomImages[room.slug]}
                       onImageClick={() => {
                         // Navigate to room page on click
-                        window.location.href = `/room/${room.slug}`;
+                        window.location.href = `/rooms/${room.slug}`;
                       }}
                     >
                       <Link 
-                        href={`/room/${room.slug}`} 
+                        href={`/rooms/${room.slug}`} 
                         className="group relative rounded-[1.75rem] overflow-hidden transition-all hover:scale-105 hover:shadow-2xl block h-full"
                       >
                         <div 

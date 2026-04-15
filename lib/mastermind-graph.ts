@@ -6,6 +6,7 @@
  */
 
 import { routeRequest, getBestModelForTask } from "./openrouter-service";
+import { askNileChat, askAllam } from "./ai-orchestrator";
 
 // Graph State Interface
 export interface MastermindState {
@@ -361,6 +362,47 @@ function detectTaskType(command: string): string {
   return "general";
 }
 
+// Detect Arabic dialect from command
+function detectArabicDialect(command: string): "egyptian" | "gulf" | "formal" | "none" {
+  const lower = command.toLowerCase();
+  
+  // Egyptian dialect indicators (Egyptian slang/Arabizi)
+  const egyptianPatterns = [
+    /\b(احنا|مش|عايز|عاوز|كده|يعني|بجد|والله|يا عم|يا باشا|فاهم|فاهمة|كلام|صح|غلط|ازيك|ازيكي)\b/,
+    /\b(ana|enta|enti|eh|leh|izaay|keda|mesh|awyz|3ayez|7ader|y3ny)\b/i,
+    /[3ع7ح8]/, // Arabizi numbers representing Arabic letters
+  ];
+  
+  // Gulf dialect indicators
+  const gulfPatterns = [
+    /\b(نبي|عندي|عندك|هذا|هذي|ايش|وش|شلون|وش في|دير|بالك)\b/,
+    /\b(shlon|ish|wesh|wain|haadha|hadhi|yalla|inshallah|alhamdulillah)\b/i,
+  ];
+  
+  // Formal Arabic indicators
+  const formalPatterns = [
+    /\b(المستخدم|العميل|الخدمة|النظام|طلب|يرجى|تفضل|شاكرين|التفاصيل)\b/,
+    /\b(فضلا|من فضلك|عزيزي|عزيزتي|السادة|الكريم|المحترم)\b/,
+  ];
+  
+  // Check for Egyptian dialect first
+  for (const pattern of egyptianPatterns) {
+    if (pattern.test(lower)) return "egyptian";
+  }
+  
+  // Check for Gulf dialect
+  for (const pattern of gulfPatterns) {
+    if (pattern.test(lower)) return "gulf";
+  }
+  
+  // Check for formal Arabic
+  for (const pattern of formalPatterns) {
+    if (pattern.test(lower)) return "formal";
+  }
+  
+  return "none";
+}
+
 function createFallbackPlan(state: MastermindState) {
   return {
     subtasks: [{
@@ -446,6 +488,23 @@ async function executeOpsTask(description: string, state: MastermindState): Prom
 }
 
 async function executeGeneralTask(description: string, state: MastermindState): Promise<string> {
+  // Detect Arabic dialect for intelligent routing
+  const dialect = detectArabicDialect(description);
+  
+  // Route to appropriate model based on dialect
+  if (dialect === "egyptian") {
+    const response = await askNileChat(description);
+    if (response.success) return response.content;
+    // Fallback to standard routing if Nile Chat fails
+    console.log("[Mastermind] Nile Chat failed, falling back to standard routing");
+  } else if (dialect === "gulf" || dialect === "formal") {
+    const response = await askAllam(description);
+    if (response.success) return response.content;
+    // Fallback to standard routing if ALLaM fails
+    console.log("[Mastermind] ALLaM failed, falling back to standard routing");
+  }
+  
+  // Standard routing for non-Arabic or fallback
   const response = await routeRequest({
     prompt: description,
   });

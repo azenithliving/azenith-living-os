@@ -31,7 +31,7 @@ export default function FurniturePage() {
             (room.furniture || []).length > 0 && (
               <section key={room.slug} className="space-y-8 animate-fadeInUp">
                 <div className="flex items-center gap-4">
-                  <Link href={`/room/${room.slug}`} className="inline-flex items-center gap-2 text-brand-primary hover:text-brand-primary/80">
+                  <Link href={`/rooms/${room.slug}`} className="inline-flex items-center gap-2 text-brand-primary hover:text-brand-primary/80">
                     <span>غرفة {room.title}</span>
                   </Link>
                   <div className="h-px flex-1 bg-gradient-to-l from-transparent via-white/30 to-transparent" />

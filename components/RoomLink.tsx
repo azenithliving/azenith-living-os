@@ -15,7 +15,7 @@ export default function RoomLink({ roomSlug, children, className }: RoomLinkProp
 
   // Use persisted style if available, otherwise default to modern
   const style = isHydrated ? selectedStyle : "modern";
-  const href = `/room/${roomSlug}?style=${style}`;
+  const href = `/rooms/${roomSlug}?style=${style}`;
 
   return (
     <Link href={href} className={className}>

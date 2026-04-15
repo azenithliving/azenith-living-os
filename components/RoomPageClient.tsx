@@ -102,7 +102,7 @@ export default function RoomPageClient({
     aggregationTimerRef.current = setTimeout(() => {
       if (pendingUpdateRef.current) {
         updateProfile({
-          lastPage: `/room/${room.id}`,
+          lastPage: `/rooms/${room.id}`,
           userProfile: {
             ...userProfile,
             stylePreferences: pendingUpdateRef.current.stylePrefs,
@@ -163,7 +163,7 @@ export default function RoomPageClient({
     // Update URL
     const params = new URLSearchParams(searchParams);
     params.set("style", newStyle);
-    router.replace(`/room/${room.id}?${params.toString()}`, { scroll: false });
+    router.replace(`/rooms/${room.id}?${params.toString()}`, { scroll: false });
 
     // Fetch new images
     try {
@@ -219,7 +219,7 @@ export default function RoomPageClient({
       }
       if (pendingUpdateRef.current) {
         updateProfile({
-          lastPage: `/room/${room.id}`,
+          lastPage: `/rooms/${room.id}`,
           userProfile: {
             ...userProfile,
             stylePreferences: pendingUpdateRef.current.stylePrefs,
