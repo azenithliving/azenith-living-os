@@ -62,17 +62,17 @@ const MetricCard = ({
   };
 
   return (
-    <Link href={href} className="block group">
+    <Link href={href} className="block group min-h-[44px]">
       <div
         className={cn(
-          "relative overflow-hidden rounded-2xl border bg-gradient-to-br p-6 transition-all duration-300",
+          "relative overflow-hidden rounded-2xl border bg-gradient-to-br p-4 md:p-6 transition-all duration-300",
           colorClasses[color]
         )}
       >
-        <div className="flex items-start justify-between">
-          <div>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
             <p className="text-xs uppercase tracking-wider text-white/50">{title}</p>
-            <p className="mt-2 text-3xl font-bold text-white">{value}</p>
+            <p className="mt-2 text-2xl md:text-3xl font-bold text-white">{value}</p>
             {subtitle && <p className="mt-1 text-xs text-white/60">{subtitle}</p>}
             {trend && (
               <div
@@ -86,8 +86,8 @@ const MetricCard = ({
               </div>
             )}
           </div>
-          <div className="rounded-xl bg-white/10 p-3 transition-colors group-hover:bg-white/20">
-            <Icon className="h-6 w-6 text-white/80" />
+          <div className="rounded-xl bg-white/10 p-2 md:p-3 transition-colors group-hover:bg-white/20 flex-shrink-0">
+            <Icon className="h-5 w-5 md:h-6 md:w-6 text-white/80" />
           </div>
         </div>
         <div className="mt-4 flex items-center gap-1 text-xs text-white/40 group-hover:text-white/60 transition-colors">
@@ -112,16 +112,16 @@ const QuickAction = ({
 }) => (
   <Link
     href={href}
-    className="flex items-center gap-4 p-4 rounded-xl border border-white/10 bg-white/5 hover:border-[#C5A059]/30 hover:bg-white/10 transition-all group"
+    className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl border border-white/10 bg-white/5 hover:border-[#C5A059]/30 hover:bg-white/10 transition-all group min-h-[44px]"
   >
-    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#C5A059]/10 text-[#C5A059] group-hover:bg-[#C5A059]/20 transition-colors">
-      <Icon className="h-6 w-6" />
+    <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-[#C5A059]/10 text-[#C5A059] group-hover:bg-[#C5A059]/20 transition-colors flex-shrink-0">
+      <Icon className="h-5 w-5 md:h-6 md:w-6" />
     </div>
-    <div className="flex-1">
-      <h3 className="font-medium text-white">{title}</h3>
-      <p className="text-sm text-white/50">{desc}</p>
+    <div className="flex-1 min-w-0">
+      <h3 className="font-medium text-white text-sm md:text-base">{title}</h3>
+      <p className="text-xs md:text-sm text-white/50">{desc}</p>
     </div>
-    <ArrowLeft className="w-5 h-5 text-white/30 group-hover:text-[#C5A059] transform rotate-180 transition-all" />
+    <ArrowLeft className="w-5 h-5 text-white/30 group-hover:text-[#C5A059] transform rotate-180 transition-all flex-shrink-0" />
   </Link>
 );
 
@@ -210,23 +210,23 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] p-6" dir="rtl">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#0A0A0A] px-4 md:px-6 lg:px-8 py-6" dir="rtl">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
             <div className="relative">
               <div className="absolute inset-0 bg-[#C5A059] blur-lg opacity-30 rounded-full animate-pulse" />
-              <div className="relative p-3 bg-gradient-to-br from-[#C5A059] to-[#8B7355] rounded-xl">
-                <Crown className="w-7 h-7 text-[#1a1a1a]" />
+              <div className="relative p-2 md:p-3 bg-gradient-to-br from-[#C5A059] to-[#8B7355] rounded-xl">
+                <Crown className="w-6 h-6 md:w-7 md:h-7 text-[#1a1a1a]" />
               </div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">لوحة التحكم الشخصية</h1>
-              <p className="text-white/50">نظرة شاملة على أداء النظام</p>
+              <h1 className="text-xl md:text-2xl font-bold text-white">لوحة التحكم الشخصية</h1>
+              <p className="text-sm text-white/50">نظرة شاملة على أداء النظام</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+          <div className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 min-h-[44px]">
             <Zap className="w-4 h-4 text-emerald-400" />
             <span className="text-sm text-emerald-400">النظام يعمل بكفاءة</span>
           </div>
@@ -234,11 +234,11 @@ export default function AdminDashboardPage() {
 
         {/* Main Metrics Grid - 6 Key Indicators */}
         <section>
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-[#C5A059]" />
+          <h2 className="text-base md:text-lg font-semibold text-white mb-3 md:mb-4 flex items-center gap-2">
+            <Activity className="w-4 h-4 md:w-5 md:h-5 text-[#C5A059]" />
             المؤشرات الرئيسية
           </h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {/* MasterControlCenter Metrics (2) */}
             <MetricCard
               title="إجمالي الشركات"
@@ -308,11 +308,11 @@ export default function AdminDashboardPage() {
 
         {/* Quick Actions */}
         <section>
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-[#C5A059]" />
+          <h2 className="text-base md:text-lg font-semibold text-white mb-3 md:mb-4 flex items-center gap-2">
+            <Zap className="w-4 h-4 md:w-5 md:h-5 text-[#C5A059]" />
             الوصول السريع
           </h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <QuickAction
               title="مركز القيادة"
               desc="التحكم الكامل في النظام"
@@ -347,8 +347,8 @@ export default function AdminDashboardPage() {
         </section>
 
         {/* Footer */}
-        <div className="pt-8 border-t border-white/10">
-          <div className="flex items-center justify-between text-sm text-white/40">
+        <div className="pt-6 md:pt-8 border-t border-white/10">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs md:text-sm text-white/40">
             <p>أزينث ليفينج © 2025</p>
             <p>مركز القيادة السيادي الأسطوري v1.0</p>
           </div>

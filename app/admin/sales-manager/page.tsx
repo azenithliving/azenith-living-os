@@ -441,26 +441,26 @@ export default function SalesManagerPage() {
   // ║                              الواجهة الرئيسية                               ║
   // ╚══════════════════════════════════════════════════════════════════════════════╝
   return (
-    <div className="h-screen flex bg-[#0A0A0A]">
+    <div className="h-[calc(100vh-64px)] lg:h-screen flex flex-col lg:flex-row bg-[#0A0A0A]">
       {/* ═══════════════════════════════════════════════════════════════════════════
-           القسم الرئيسي - المحادثة والتقارير (60%)
+           القسم الرئيسي - المحادثة والتقارير (العرض الكامل على الموبايل، 60% على الديسكتوب)
           ═══════════════════════════════════════════════════════════════════════════ */}
-      <div className="w-[60%] flex flex-col border-l border-white/10">
+      <div className="w-full lg:w-[60%] flex flex-col border-l-0 lg:border-l border-white/10 order-2 lg:order-1">
         {/* ═══════════════════════════════════════════════════════════════════════════
              Header مع علامات التبويب
             ═══════════════════════════════════════════════════════════════════════════ */}
-        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4 bg-[#C5A059]/10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/10 px-4 lg:px-6 py-3 lg:py-4 bg-[#C5A059]/10">
           <div className="flex items-center gap-3">
-            <MessageCircle className="h-6 w-6 text-[#C5A059]" />
+            <MessageCircle className="h-5 w-5 lg:h-6 lg:w-6 text-[#C5A059]" />
             <div>
-              <h1 className="text-lg font-semibold text-white">قائد المبيعات الاستراتيجي</h1>
-              <p className="text-xs text-white/60">الإصدار 2.0 - نظام المتدرب المطور</p>
+              <h1 className="text-base lg:text-lg font-semibold text-white">قائد المبيعات الاستراتيجي</h1>
+              <p className="text-xs text-white/60 hidden sm:block">الإصدار 2.0 - نظام المتدرب المطور</p>
             </div>
           </div>
-          <div className="flex gap-1 bg-zinc-800/50 rounded-lg p-1">
+          <div className="flex gap-1 bg-zinc-800/50 rounded-lg p-1 w-full sm:w-auto">
             <button
               onClick={() => setActiveTab("chat")}
-              className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
+              className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-sm transition-colors min-h-[44px] ${
                 activeTab === "chat" ? "bg-[#C5A059] text-white" : "text-white/60 hover:text-white"
               }`}
             >
@@ -468,7 +468,7 @@ export default function SalesManagerPage() {
             </button>
             <button
               onClick={() => setActiveTab("reports")}
-              className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
+              className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-sm transition-colors min-h-[44px] ${
                 activeTab === "reports" ? "bg-[#C5A059] text-white" : "text-white/60 hover:text-white"
               }`}
             >
@@ -483,8 +483,8 @@ export default function SalesManagerPage() {
         {activeTab === "chat" ? (
           <>
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto bg-[#0A0A0A] p-6">
-              <div className="space-y-4">
+            <div className="flex-1 overflow-y-auto bg-[#0A0A0A] p-3 md:p-6">
+              <div className="space-y-3 md:space-y-4">
                 {messages.map((msg, index) => (
                   <motion.div
                     key={index}
@@ -493,7 +493,7 @@ export default function SalesManagerPage() {
                     className={`flex ${msg.role === "user" ? "justify-start" : "justify-end"}`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                      className={`max-w-[85%] md:max-w-[80%] rounded-2xl px-3 md:px-4 py-2.5 md:py-3 ${
                         msg.role === "user"
                           ? "bg-[#C5A059] text-white rounded-tl-sm"
                           : "bg-zinc-800 text-gray-100 border border-white/10 rounded-tr-sm"
@@ -527,26 +527,26 @@ export default function SalesManagerPage() {
             </div>
 
             {/* Input Area */}
-            <form onSubmit={handleSubmit} className="border-t border-white/10 bg-zinc-900/50 p-4">
-              <div className="flex items-center gap-3">
+            <form onSubmit={handleSubmit} className="border-t border-white/10 bg-zinc-900/50 p-3 md:p-4">
+              <div className="flex items-center gap-2 md:gap-3">
                 <input
                   ref={inputRef}
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="اكتب معلومة جديدة بالصيغة: المفتاح | القيمة (مثال: سعر_الأريكة | تبدأ من 5000 جنيه)..."
-                  className="flex-1 rounded-xl border border-white/10 bg-zinc-800 px-4 py-3 text-white placeholder-gray-500 focus:border-[#C5A059] focus:outline-none"
+                  placeholder="اكتب معلومة جديدة..."
+                  className="flex-1 rounded-xl border border-white/10 bg-zinc-800 px-3 md:px-4 py-3 text-white placeholder-gray-500 focus:border-[#C5A059] focus:outline-none min-h-[44px]"
                   disabled={isLoading}
                 />
                 <button
                   type="submit"
                   disabled={!inputMessage.trim() || isLoading}
-                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#C5A059] text-white transition-colors hover:bg-[#d8b56d] disabled:opacity-50"
+                  className="flex h-12 w-12 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-[#C5A059] text-white transition-colors hover:bg-[#d8b56d] disabled:opacity-50"
                 >
                   <Send className="h-5 w-5" />
                 </button>
               </div>
-              <p className="text-xs text-white/40 mt-2 text-center">
+              <p className="text-xs text-white/40 mt-2 text-center hidden md:block">
                 استخدم الصيغة: المفتاح | القيمة - أو اكتب أي توجيه وسأقترح تحسينات
               </p>
             </form>
@@ -555,12 +555,12 @@ export default function SalesManagerPage() {
           /* ═══════════════════════════════════════════════════════════════════════════
               تبويب التقارير
              ═══════════════════════════════════════════════════════════════════════════ */
-          <div className="flex-1 overflow-y-auto bg-[#0A0A0A] p-6">
-            <div className="space-y-6">
+          <div className="flex-1 overflow-y-auto bg-[#0A0A0A] p-3 md:p-6">
+            <div className="space-y-4 md:space-y-6">
               {/* ═══════════════════════════════════════════════════════════════════════════
                    ملخص سريع
                   ═══════════════════════════════════════════════════════════════════════════ */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 <div className="bg-zinc-800/50 border border-white/10 rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Users className="h-4 w-4 text-[#C5A059]" />
@@ -667,16 +667,16 @@ export default function SalesManagerPage() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════════════
-           الشريط الجانبي الأيمن (40%)
+           الشريط الجانبي الأيمن (مخفي على الموبايل، 40% على الديسكتوب)
           ═══════════════════════════════════════════════════════════════════════════ */}
-      <div className="w-[40%] flex flex-col">
+      <div className="hidden lg:flex w-[40%] flex-col order-1 lg:order-2">
         {/* ═══════════════════════════════════════════════════════════════════════════
              قسم قاعدة المعرفة (مع usage_count)
             ═══════════════════════════════════════════════════════════════════════════ */}
         <div className="flex-1 border-b border-white/10 flex flex-col">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-zinc-900/30">
             <BookOpen className="h-5 w-5 text-[#C5A059]" />
-            <h2 className="font-semibold text-white">قاعدة المعرفة</h2>
+            <h2 className="font-semibold text-white text-sm lg:text-base">قاعدة المعرفة</h2>
             <span className="mr-auto text-xs bg-[#C5A059]/20 text-[#C5A059] px-2 py-1 rounded-full">
               {knowledge.length}
             </span>

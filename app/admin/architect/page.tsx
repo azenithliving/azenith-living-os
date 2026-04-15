@@ -470,42 +470,42 @@ export default function CommandHorizon() {
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col" dir="rtl">
       {/* Header */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-5xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 md:px-4 py-3 md:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg">
-                <Bot className="w-6 h-6 text-white" />
+                <Bot className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <h1 className="font-bold text-gray-900 dark:text-white text-lg">
+                <h1 className="font-bold text-gray-900 dark:text-white text-base md:text-lg">
                   المهندس الأول
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
                   الذكاء السيادي | Proactive Autonomy
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               {/* Status Indicator */}
               {status && (
-                <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                <div className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-1.5 md:py-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                   {getHealthIcon(status.health)}
-                  <div className="flex items-center gap-3 text-sm">
+                  <div className="flex items-center gap-1.5 md:gap-3 text-xs md:text-sm">
                     <span className="text-gray-600 dark:text-gray-400">
-                      {status.activeKeys} مفاتيح نشطة
+                      {status.activeKeys} مفاتيح
                     </span>
-                    <span className="text-gray-300 dark:text-gray-600">|</span>
-                    <span className="text-gray-600 dark:text-gray-400">
+                    <span className="text-gray-300 dark:text-gray-600 hidden md:inline">|</span>
+                    <span className="text-gray-600 dark:text-gray-400 hidden md:inline">
                       كفاءة {status.apiEfficiency}%
                     </span>
                   </div>
                 </div>
               )}
 
-              <Button variant="ghost" size="sm" onClick={() => setMessages([])}>
+              <Button variant="ghost" size="sm" onClick={() => setMessages([])} className="min-h-[44px]">
                 <RotateCcw className="w-4 h-4" />
-                محادثة جديدة
+                <span className="hidden sm:inline">محادثة جديدة</span>
               </Button>
             </div>
           </div>

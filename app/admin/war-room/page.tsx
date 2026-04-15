@@ -300,34 +300,34 @@ export default function WarRoomPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* HEADER */}
       <header className="border-b border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="mx-auto max-w-7xl px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-yellow-600">
-                <Target className="h-5 w-5 text-black" />
+        <div className="mx-auto max-w-7xl px-4 md:px-6 py-3 md:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-yellow-600 flex-shrink-0">
+                <Target className="h-4 w-4 md:h-5 md:w-5 text-black" />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight">
-                  WAR ROOM <span className="text-amber-500">//</span> AZENITH PRIME
+                <h1 className="text-lg md:text-xl font-bold tracking-tight">
+                  WAR ROOM <span className="text-amber-500">//</span> AZENITH
                 </h1>
-                <p className="text-xs text-white/50">Imperial Command Center v16.2</p>
+                <p className="text-xs text-white/50 hidden sm:block">Imperial Command Center v16.2</p>
               </div>
             </div>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 md:gap-6">
               <StatusIndicator 
                 status={demoData.defense.systemHealth} 
                 label={demoData.defense.systemHealth.replace("_", " ").toUpperCase()} 
               />
-              <div className="text-right">
+              <div className="text-right hidden sm:block">
                 <p className="text-xs text-white/40">Last Updated</p>
-                <p className="text-sm text-white/70">{lastUpdated.toLocaleTimeString()}</p>
+                <p className="text-xs md:text-sm text-white/70">{lastUpdated.toLocaleTimeString()}</p>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-4 md:px-6 py-4 md:py-8">
         {/* METRICS GRID */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard

@@ -173,47 +173,47 @@ export default function AzenithChatPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f] text-white" dir="rtl">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-[#C5A059]/20">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
               <button 
                 onClick={() => router.push("/admin")}
-                className="p-2 hover:bg-white/5 rounded-xl transition-colors"
+                className="p-2 hover:bg-white/5 rounded-xl transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <ChevronLeft className="w-5 h-5 text-[#C5A059]" />
               </button>
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 <div className="relative">
                   <div className="absolute inset-0 bg-[#C5A059] blur-lg opacity-30 rounded-full animate-pulse" />
-                  <div className="relative p-2.5 bg-gradient-to-br from-[#C5A059] to-[#8B7355] rounded-xl">
-                    <Crown className="w-6 h-6 text-[#1a1a1a]" />
+                  <div className="relative p-2 md:p-2.5 bg-gradient-to-br from-[#C5A059] to-[#8B7355] rounded-xl">
+                    <Crown className="w-5 h-5 md:w-6 md:h-6 text-[#1a1a1a]" />
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-[#C5A059]">Azenith Mind</h1>
-                  <p className="text-xs text-gray-400">العقل المدبر السيادي</p>
+                  <h1 className="text-lg md:text-xl font-bold text-[#C5A059]">Azenith Mind</h1>
+                  <p className="text-xs text-gray-400 hidden sm:block">العقل المدبر السيادي</p>
                 </div>
               </div>
             </div>
 
             {/* Status Indicators */}
-            <div className="hidden md:flex items-center gap-4">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#C5A059]/10 rounded-full border border-[#C5A059]/30">
+            <div className="hidden md:flex items-center gap-2 lg:gap-4">
+              <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1.5 bg-[#C5A059]/10 rounded-full border border-[#C5A059]/30">
                 <Zap className="w-4 h-4 text-[#C5A059]" />
-                <span className="text-sm text-[#C5A059]">{architectState.activeKeys} مفتاح</span>
+                <span className="text-xs lg:text-sm text-[#C5A059]">{architectState.activeKeys} مفتاح</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 rounded-full border border-green-500/30">
+              <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1.5 bg-green-500/10 rounded-full border border-green-500/30">
                 <Activity className="w-4 h-4 text-green-400" />
-                <span className="text-sm text-green-400">{architectState.collectiveIntelligence}%</span>
+                <span className="text-xs lg:text-sm text-green-400">{architectState.collectiveIntelligence}%</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#C5A059]/10 rounded-full border border-[#C5A059]/30">
+              <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1.5 bg-[#C5A059]/10 rounded-full border border-[#C5A059]/30 hidden lg:flex">
                 <Infinity className="w-4 h-4 text-[#C5A059]" />
-                <span className="text-sm text-[#C5A059]">{architectState.cacheHitRate}% cache</span>
+                <span className="text-xs lg:text-sm text-[#C5A059]">{architectState.cacheHitRate}% cache</span>
               </div>
             </div>
 
-            <button className="p-2 hover:bg-white/5 rounded-xl transition-colors">
+            <button className="p-2 hover:bg-white/5 rounded-xl transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
               <MoreVertical className="w-5 h-5 text-gray-400" />
             </button>
           </div>
@@ -221,7 +221,7 @@ export default function AzenithChatPage() {
       </header>
 
       {/* Main Content */}
-      <main className="pt-24 pb-32 px-6">
+      <main className="pt-20 md:pt-24 pb-24 md:pb-32 px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
           {/* Welcome Message */}
           {messages.length === 0 && (
