@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { askGroq, askGroqMessages } from "@/lib/ai-orchestrator";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 interface GroqMessage {
   role: "system" | "user" | "assistant";
   content: string;
 }
+
+// Admin configuration
+const MASTER_ADMIN_EMAILS = (process.env.MASTER_ADMIN_EMAILS || "")
+  .split(",")
+  .map(e => e.trim())
+  .filter(Boolean);
+
+// Admin session IDs (can be expanded as needed)
+const ADMIN_SESSION_IDS: string[] = [];
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -67,6 +77,13 @@ interface ConsultantRequest {
   sessionId?: string;
   history?: Message[];
   userName?: string;
+  userEmail?: string;
+}
+
+interface ConsultantLearning {
+  id: string;
+  instruction: string;
+  created_at: string;
 }
 
 interface ConsultantResponse {
@@ -97,6 +114,116 @@ interface ConsultantSession {
 }
 
 /**
+ * Check if user is admin based on sessionId or email
+ */
+function isAdmin(sessionId?: string, userEmail?: string): boolean {
+  // Check by email
+  if (userEmail && MASTER_ADMIN_EMAILS.includes(userEmail)) {
+    return true;
+  }
+  // Check by session ID
+  if (sessionId && ADMIN_SESSION_IDS.includes(sessionId)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Save learning instruction to database
+ */
+async function saveLearning(instruction: string): Promise<boolean> {
+  try {
+    const supabaseAdmin = getSupabaseAdminClient();
+    if (!supabaseAdmin) {
+      console.error("[Consultant] Supabase admin client not available");
+      return false;
+    }
+
+    const { error } = await supabaseAdmin
+      .from("consultant_learnings")
+      .insert({
+        instruction: instruction.trim(),
+        created_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error("[Consultant] Error saving learning:", error);
+      return false;
+    }
+
+    console.log("[Consultant] Learning saved:", instruction.substring(0, 50) + "...");
+    return true;
+  } catch (err) {
+    console.error("[Consultant] Exception saving learning:", err);
+    return false;
+  }
+}
+
+/**
+ * Get all learnings from database
+ */
+async function getLearnings(): Promise<string[]> {
+  try {
+    const supabaseAdmin = getSupabaseAdminClient();
+    if (!supabaseAdmin) {
+      console.error("[Consultant] Supabase admin client not available");
+      return [];
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("consultant_learnings")
+      .select("instruction")
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("[Consultant] Error fetching learnings:", error);
+      return [];
+    }
+
+    return (data || []).map((row: { instruction: string }) => row.instruction);
+  } catch (err) {
+    console.error("[Consultant] Exception fetching learnings:", err);
+    return [];
+  }
+}
+
+/**
+ * Send WhatsApp notification to admin about unknown question
+ */
+async function notifyAdminUnknownQuestion(question: string, sessionId: string): Promise<void> {
+  try {
+    const adminPhone = process.env.ADMIN_WHATSAPP_PHONE || "01090819584";
+    
+    const message = `🔔 *سؤال جديد للمستشار*
+
+السؤال: ${question}
+
+معرف الجلسة: ${sessionId}
+
+الرجاء الرد على هذا السؤال في وضع التعلم لتدريب المستشار.`;
+
+    console.log(`[Consultant] Would send WhatsApp to ${adminPhone}:`, message);
+    
+    // Log the notification
+    const supabaseAdmin = getSupabaseAdminClient();
+    if (supabaseAdmin) {
+      await supabaseAdmin.from("events").insert({
+        id: crypto.randomUUID(),
+        type: "consultant_unknown_question",
+        value: question.substring(0, 100),
+        metadata: {
+          session_id: sessionId,
+          admin_phone: adminPhone,
+          notified_at: new Date().toISOString(),
+        },
+      });
+    }
+  } catch (err) {
+    console.error("[Consultant] Error notifying admin:", err);
+  }
+}
+
+/**
  * POST /api/consultant
  * Main consultant endpoint for Azenith AI Advisor
  */
@@ -105,7 +232,7 @@ export async function POST(
 ): Promise<NextResponse<ConsultantResponse | { error: string }>> {
   try {
     const body: ConsultantRequest = await request.json();
-    const { message, sessionId: providedSessionId, history = [], userName } = body;
+    const { message, sessionId: providedSessionId, history = [], userName, userEmail } = body;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -117,6 +244,27 @@ export async function POST(
     // Generate or use existing session ID
     const sessionId = providedSessionId || generateSessionId();
 
+    // Check if in Admin Learning Mode
+    const adminMode = isAdmin(sessionId, userEmail);
+
+    // ADMIN LEARNING MODE
+    if (adminMode) {
+      console.log(`[Consultant] Admin learning mode - Session ${sessionId}`);
+      
+      // Save the instruction/learning
+      const saved = await saveLearning(message);
+      
+      const reply = saved 
+        ? "تم حفظ المعلومة. شكراً لك."
+        : "حدث خطأ أثناء حفظ المعلومة. الرجاء المحاولة مرة أخرى.";
+
+      return NextResponse.json({
+        reply,
+        sessionId,
+      });
+    }
+
+    // NORMAL VISITOR MODE
     // Fetch existing session from database
     const existingSession = await getSession(sessionId);
     
@@ -131,8 +279,11 @@ export async function POST(
     };
     conversationHistory.push(userMessage);
 
+    // Fetch all learnings and build enhanced system prompt
+    const learnings = await getLearnings();
+    
     // Build messages array for Groq with system prompt and conversation history
-    const groqMessages = buildGroqMessages(conversationHistory, userName);
+    const groqMessages = buildGroqMessages(conversationHistory, userName, learnings);
 
     // Get AI response using Groq with full conversation context
     const aiResult = await askGroqMessages(groqMessages, {
@@ -148,7 +299,26 @@ export async function POST(
       );
     }
 
-    const reply = aiResult.content.trim();
+    let reply = aiResult.content.trim();
+
+    // Check if AI indicated it doesn't know the answer
+    const unknownIndicators = [
+      "هذه المعلومة غير متاحة",
+      "لا أعرف",
+      "غير متأكد",
+      "لا أملك هذه المعلومة",
+      "غير موجودة في قاعدة البيانات",
+    ];
+    
+    const isUnknown = unknownIndicators.some(indicator => reply.includes(indicator));
+    
+    if (isUnknown) {
+      // Notify admin about the unknown question
+      await notifyAdminUnknownQuestion(message, sessionId);
+      
+      // Append message about admin notification
+      reply += "\n\n*تم إرسال سؤالك للفريق وسيتم الرد عليك قريباً.*";
+    }
 
     // Add AI response to history
     const assistantMessage: Message = {
@@ -195,16 +365,27 @@ function generateSessionId(): string {
 }
 
 /**
- * Build Groq messages array with system prompt and conversation history
+ * Build Groq messages array with system prompt, learnings, and conversation history
  */
 function buildGroqMessages(
   history: Message[],
-  userName?: string
+  userName?: string,
+  learnings: string[] = []
 ): GroqMessage[] {
   // Start with system message
   let systemContent = SYSTEM_PROMPT;
+  
+  // Add user name if provided
   if (userName) {
     systemContent += `\n\nاسم الزائر: ${userName}`;
+  }
+  
+  // Add learnings to system prompt if available
+  if (learnings.length > 0) {
+    systemContent += `\n\n---\n\n[توجيهات إضافية من الإدارة - استخدمها عند الرد على الأسئلة]:\n\n`;
+    learnings.forEach((learning, index) => {
+      systemContent += `${index + 1}. ${learning}\n`;
+    });
   }
 
   const messages: GroqMessage[] = [
