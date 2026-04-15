@@ -17,6 +17,7 @@ export default function GateLoginPage() {
   const [qrCode, setQrCode] = useState("");
   const [secret, setSecret] = useState("");
   const [token, setToken] = useState("");
+  const [isFirstSetup, setIsFirstSetup] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +47,14 @@ export default function GateLoginPage() {
         return;
       }
 
-      setQrCode(data.qrCode);
       setSecret(data.secret);
+      setIsFirstSetup(!data.isEnabled);
+      // Only show QR code if 2FA is not yet enabled (first time setup)
+      if (!data.isEnabled) {
+        setQrCode(data.qrCode);
+      } else {
+        setQrCode(""); // No QR for existing 2FA
+      }
       setStep("2fa");
       setLoading(false);
     } catch {
@@ -65,7 +72,7 @@ export default function GateLoginPage() {
       const response = await fetch("/api/gate/2fa/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, token, secret }),
+        body: JSON.stringify({ email, password, token, secret, isFirstSetup }),
       });
 
       const data = await response.json();
@@ -174,18 +181,25 @@ export default function GateLoginPage() {
               </>
             ) : (
               <>
-                {/* 2FA QR Code */}
+                {/* 2FA Section */}
                 <div className="text-center mb-4">
                   <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#C5A059]/10">
                     <QrCode className="h-8 w-8 text-[#C5A059]" />
                   </div>
                   <h3 className="text-lg font-semibold text-white">التحقق بخطوتين</h3>
-                  <p className="mt-2 text-sm text-white/50">
-                    امسح رمز QR باستخدام Google Authenticator
-                  </p>
+                  {isFirstSetup ? (
+                    <p className="mt-2 text-sm text-white/50">
+                      امسح رمز QR باستخدام Google Authenticator
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-sm text-white/50">
+                      أدخل رمز التحقق من تطبيق Google Authenticator
+                    </p>
+                  )}
                 </div>
 
-                {qrCode && (
+                {/* Show QR only for first time setup */}
+                {isFirstSetup && qrCode && (
                   <div className="flex justify-center mb-4">
                     <img src={qrCode} alt="2FA QR Code" className="rounded-xl" />
                   </div>
