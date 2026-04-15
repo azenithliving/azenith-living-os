@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MessageSquare, Home, Settings, Users, BarChart3, Briefcase } from "lucide-react";
+import { MessageSquare, Home, Settings, Users, BarChart3, Briefcase, Globe, Target, Crown } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "الرئيسية", icon: Home },
-  { href: "/admin/sales-manager", label: "مدير المبيعات 🤵", icon: Briefcase },
-  { href: "/admin/chat", label: "المحادثات", icon: MessageSquare },
-  { href: "/admin/war-room", label: "غرفة العمليات", icon: BarChart3 },
+  { href: "/admin/sales-manager", label: "مدير المبيعات", icon: Briefcase },
+  { href: "/admin/site-manager", label: "مدير الموقع", icon: Globe },
+  { href: "/admin/war-room", label: "غرفة العمليات", icon: Target },
   { href: "/admin/architect", label: "المهندس المعماري", icon: Settings },
+  { href: "/admin/chat", label: "مركز القيادة", icon: Crown },
 ];
 
 export default function AdminLayout({

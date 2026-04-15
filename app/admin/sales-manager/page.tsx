@@ -1,27 +1,60 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Send, Trash2, Edit2, Check, X, MessageCircle, BookOpen, HelpCircle } from "lucide-react";
+import { Send, Trash2, Edit2, Check, X, MessageCircle, BookOpen, HelpCircle, TrendingUp, Users, Lightbulb, BarChart3 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Types
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                     PROMPT المتدرب المطور                                    ║
+// ║  أنت متديرب ذكي في نظام "أزينث ليفينج" للمبيعات. مهمتك:                   ║
+// ║  1. اقتراح تحسينات على التوجيهات النشطة بناءً على usage_count              ║
+// ║  2. تحديد الأسئلة المتكررة في قائمة pending لإضافتها للمعرفة               ║
+// ║  3. تحليل تقارير الزوار واقتراح استراتيجيات تحويل                          ║
+// ║  4. تنبيه المدير عندما يكون سؤال مهم معلق (asked_count > 3)               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                 أنواع البيانات                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
 interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp?: string;
 }
 
-interface Learning {
+interface KnowledgeItem {
   id: string;
-  instruction: string;
+  key: string;
+  value: string;
+  category: string;
+  usage_count: number;
   created_at: string;
 }
 
 interface PendingQuestion {
   id: string;
   question: string;
-  session_id: string | null;
+  asked_count: number;
+  answered: boolean;
   created_at: string;
+}
+
+interface Visitor {
+  id: string;
+  session_id: string;
+  name: string | null;
+  mood: string;
+  conversion_stage: string;
+  conversation_count: number;
+  last_interaction_at: string;
+}
+
+interface WeeklyReport {
+  topQuestions: { question: string; count: number }[];
+  conversionStats: { stage: string; count: number }[];
+  suggestions: string[];
+  totalVisitors: number;
 }
 
 export default function SalesManagerPage() {
@@ -33,30 +66,44 @@ export default function SalesManagerPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Data state
-  const [learnings, setLearnings] = useState<Learning[]>([]);
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                                 حالة البيانات                               ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
+  
+  const [knowledge, setKnowledge] = useState<KnowledgeItem[]>([]);
   const [pendingQuestions, setPendingQuestions] = useState<PendingQuestion[]>([]);
+  const [visitors, setVisitors] = useState<Visitor[]>([]);
+  const [weeklyReport, setWeeklyReport] = useState<WeeklyReport | null>(null);
   const [editingQuestion, setEditingQuestion] = useState<string | null>(null);
+  const [editingKnowledge, setEditingKnowledge] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState("");
+  const [knowledgeValue, setKnowledgeValue] = useState("");
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [activeTab, setActiveTab] = useState<"chat" | "reports">("chat");
 
   // Generate session ID for admin on mount
   useEffect(() => {
     const newSessionId = `admin_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     setSessionId(newSessionId);
     
-    // Add welcome message
+    // ╔══════════════════════════════════════════════════════════════════════════════╗
+    // ║                              رسالة الترحيب                                  ║
+    // ╚══════════════════════════════════════════════════════════════════════════════╝
     setMessages([
       {
         role: "assistant",
-        content: "أهلاً بك في وضع تعليم المستشار. اكتب أي توجيه أو معلومة تريد أن يتعلمها المستشار.",
+        content: "👋 أهلاً بك في لوحة قائد المبيعات!\n\n📚 أنا المتدرب المطور الذكي. أقترح عليك:\n• التوجيهات الأكثر استخداماً لتحسينها\n• الأسئلة المتكررة لإضافتها للمعرفة\n• تحليل أسبوعي للزوار والتحويلات\n\n✍️ اكتب أي معلومة جديدة وسأحفظها في قاعدة المعرفة.",
         timestamp: new Date().toISOString(),
       },
     ]);
 
-    // Load data
-    loadLearnings();
+    // ╔══════════════════════════════════════════════════════════════════════════════╗
+    // ║                              تحميل البيانات                                 ║
+    // ╚══════════════════════════════════════════════════════════════════════════════╝
+    loadKnowledge();
     loadPendingQuestions();
+    loadVisitors();
+    loadWeeklyReport();
   }, []);
 
   // Scroll to bottom when messages change
@@ -69,31 +116,65 @@ export default function SalesManagerPage() {
     inputRef.current?.focus();
   }, []);
 
-  // Load learnings from Supabase
-  const loadLearnings = async () => {
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                          تحميل قاعدة المعرفة                                ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
+  const loadKnowledge = async () => {
     try {
-      const response = await fetch("/api/consultant/learnings");
+      const response = await fetch("/api/sales-leader/knowledge");
       if (response.ok) {
         const data = await response.json();
-        setLearnings(data.learnings || []);
+        setKnowledge(data.knowledge || []);
       }
     } catch (error) {
-      console.error("Error loading learnings:", error);
+      console.error("[SalesLeader] Error loading knowledge:", error);
     }
   };
 
-  // Load pending questions from Supabase
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                          تحميل الأسئلة المعلقة                              ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
   const loadPendingQuestions = async () => {
     try {
-      const response = await fetch("/api/consultant/pending-questions");
+      const response = await fetch("/api/sales-leader/pending");
       if (response.ok) {
         const data = await response.json();
-        setPendingQuestions(data.questions || []);
+        setPendingQuestions(data.pending || []);
       }
     } catch (error) {
-      console.error("Error loading pending questions:", error);
+      console.error("[SalesLeader] Error loading pending:", error);
     } finally {
       setIsLoadingData(false);
+    }
+  };
+
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                          تحميل بيانات الزوار                                ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
+  const loadVisitors = async () => {
+    try {
+      const response = await fetch("/api/sales-leader/visitors");
+      if (response.ok) {
+        const data = await response.json();
+        setVisitors(data.visitors || []);
+      }
+    } catch (error) {
+      console.error("[SalesLeader] Error loading visitors:", error);
+    }
+  };
+
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                          تحميل التقرير الأسبوعي                             ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
+  const loadWeeklyReport = async () => {
+    try {
+      const response = await fetch("/api/sales-leader/weekly-report");
+      if (response.ok) {
+        const data = await response.json();
+        setWeeklyReport(data.report);
+      }
+    } catch (error) {
+      console.error("[SalesLeader] Error loading weekly report:", error);
     }
   };
 
@@ -138,9 +219,12 @@ export default function SalesManagerPage() {
       };
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // Refresh learnings list after successful save
-      if (data.reply.includes("تم حفظ")) {
-        loadLearnings();
+      // ╔══════════════════════════════════════════════════════════════════════════════╗
+      // ║                    تحديث البيانات بعد الحفظ الناجح                          ║
+      // ╚══════════════════════════════════════════════════════════════════════════════╝
+      if (data.reply.includes("تم حفظ") || data.reply.includes("تمت الإضافة")) {
+        loadKnowledge();
+        loadPendingQuestions();
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -160,17 +244,54 @@ export default function SalesManagerPage() {
     sendMessage(inputMessage);
   };
 
-  // Delete a learning
-  const deleteLearning = async (id: string) => {
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                              حذف من المعرفة                                 ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
+  const deleteKnowledge = async (id: string) => {
     try {
-      const response = await fetch(`/api/consultant/learnings?id=${id}`, {
+      const response = await fetch(`/api/sales-leader/knowledge?id=${id}`, {
         method: "DELETE",
       });
       if (response.ok) {
-        setLearnings((prev) => prev.filter((l) => l.id !== id));
+        setKnowledge((prev) => prev.filter((k) => k.id !== id));
       }
     } catch (error) {
-      console.error("Error deleting learning:", error);
+      console.error("[SalesLeader] Error deleting knowledge:", error);
+    }
+  };
+
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                           تحديث قيمة المعرفة                                ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
+  const startEditingKnowledge = (id: string, currentValue: string) => {
+    setEditingKnowledge(id);
+    setKnowledgeValue(currentValue);
+  };
+
+  const cancelEditingKnowledge = () => {
+    setEditingKnowledge(null);
+    setKnowledgeValue("");
+  };
+
+  const saveKnowledgeUpdate = async (id: string) => {
+    if (!knowledgeValue.trim()) return;
+
+    try {
+      const response = await fetch(`/api/sales-leader/knowledge?id=${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: knowledgeValue.trim() }),
+      });
+
+      if (response.ok) {
+        setKnowledge((prev) =>
+          prev.map((k) => (k.id === id ? { ...k, value: knowledgeValue.trim() } : k))
+        );
+        setEditingKnowledge(null);
+        setKnowledgeValue("");
+      }
+    } catch (error) {
+      console.error("[SalesLeader] Error updating knowledge:", error);
     }
   };
 
@@ -186,7 +307,9 @@ export default function SalesManagerPage() {
     setAnswerText("");
   };
 
-  // Save answer to FAQ and remove from pending
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                    حفظ الإجابة ونقلها للمعرفة                               ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
   const saveAnswer = async (questionId: string) => {
     if (!answerText.trim()) return;
 
@@ -194,171 +317,449 @@ export default function SalesManagerPage() {
     if (!question) return;
 
     try {
-      const response = await fetch("/api/consultant/faq", {
+      const response = await fetch("/api/sales-leader/pending/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          question: question.question,
+          pendingId: questionId,
           answer: answerText.trim(),
-          originalPendingQuestionId: questionId,
+          key: question.question.substring(0, 50).replace(/\s+/g, '_'),
         }),
       });
 
       if (response.ok) {
-        // Remove from pending questions
+        // ╔══════════════════════════════════════════════════════════════════════════════╗
+        // ║                    تحديث الواجهة بعد الحفظ الناجح                           ║
+        // ╚══════════════════════════════════════════════════════════════════════════════╝
         setPendingQuestions((prev) => prev.filter((q) => q.id !== questionId));
         setEditingQuestion(null);
         setAnswerText("");
+        loadKnowledge();
 
-        // Add success message to chat
+        // ╔══════════════════════════════════════════════════════════════════════════════╗
+        // ║                    رسالة النجاح للمتدرب                                    ║
+        // ╚══════════════════════════════════════════════════════════════════════════════╝
         const successMessage: Message = {
           role: "assistant",
-          content: `تمت الإجابة على السؤال وحفظه في قاعدة المعرفة.`,
+          content: `✅ تمت الإجابة وحفظها في قاعدة المعرفة!\n\n🎯 اقتراح المتدرب: هذا السؤال طُرح ${question.asked_count} مرة. يُنصح بمراقبة استخدام الإجابة الجديدة.`,
           timestamp: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, successMessage]);
       }
     } catch (error) {
-      console.error("Error saving answer:", error);
+      console.error("[SalesLeader] Error saving answer:", error);
     }
   };
 
-  // Delete a pending question without answering
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                         حذف سؤال معلق بدون إجابة                            ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
   const deletePendingQuestion = async (id: string) => {
     try {
-      const response = await fetch(`/api/consultant/pending-questions?id=${id}`, {
+      const response = await fetch(`/api/sales-leader/pending?id=${id}`, {
         method: "DELETE",
       });
       if (response.ok) {
         setPendingQuestions((prev) => prev.filter((q) => q.id !== id));
       }
     } catch (error) {
-      console.error("Error deleting pending question:", error);
+      console.error("[SalesLeader] Error deleting pending question:", error);
     }
   };
 
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                    اقتراحات المتدرب المطور الذكية                           ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
+  const generateSuggestions = (): string[] => {
+    const suggestions: string[] = [];
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // اقتراح 1: الأسئلة المتكررة (asked_count > 3)
+    // ═══════════════════════════════════════════════════════════════════════════════
+    const highFrequencyQuestions = pendingQuestions.filter(q => q.asked_count >= 3);
+    if (highFrequencyQuestions.length > 0) {
+      suggestions.push(`🚨 ${highFrequencyQuestions.length} أسئلة طُرحت 3+ مرات ولم تُجب بعد!`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // اقتراح 2: المعرفة غير المستخدمة
+    // ═══════════════════════════════════════════════════════════════════════════════
+    const unusedKnowledge = knowledge.filter(k => k.usage_count === 0);
+    if (unusedKnowledge.length > 0) {
+      suggestions.push(`📊 ${unusedKnowledge.length} عناصر معرفة لم تُستخدم قط. فكر في حذفها.`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // اقتراح 3: المعرفة الأكثر استخداماً
+    // ═══════════════════════════════════════════════════════════════════════════════
+    const topUsed = knowledge.filter(k => k.usage_count > 10);
+    if (topUsed.length > 0) {
+      suggestions.push(`⭐ ${topUsed.length} عناصر تُستخدم بكثرة (${topUsed.map(k => k.key).join(', ').substring(0, 100)}...)`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // اقتراح 4: التحويلات
+    // ═══════════════════════════════════════════════════════════════════════════════
+    const convertedCount = visitors.filter(v => v.conversion_stage === 'converted').length;
+    const totalVisitors = visitors.length;
+    if (totalVisitors > 0) {
+      const rate = Math.round((convertedCount / totalVisitors) * 100);
+      if (rate < 10) {
+        suggestions.push(`📉 نسبة التحويل منخفضة (${rate}%). جرب تحسين ردود المستشار.`);
+      } else if (rate > 30) {
+        suggestions.push(`🎉 نسبة التحويل ممتازة (${rate}%)! استمر في نفس الاستراتيجية.`);
+      }
+    }
+
+    return suggestions.length > 0 ? suggestions : ['✨ جميع المؤشرات طبيعية. استمر في المراقبة!'];
+  };
+
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                              تقسيم المراحل حسب المزاج                       ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
+  const getMoodColor = (mood: string) => {
+    switch (mood) {
+      case 'happy': return 'text-green-400 bg-green-400/10';
+      case 'interested': return 'text-[#C5A059] bg-[#C5A059]/10';
+      case 'hesitant': return 'text-yellow-400 bg-yellow-400/10';
+      case 'frustrated': return 'text-red-400 bg-red-400/10';
+      default: return 'text-gray-400 bg-gray-400/10';
+    }
+  };
+
+  const getStageColor = (stage: string) => {
+    switch (stage) {
+      case 'converted': return 'text-green-400 border-green-400/30';
+      case 'qualified': return 'text-[#C5A059] border-[#C5A059]/30';
+      case 'interested': return 'text-blue-400 border-blue-400/30';
+      case 'lost': return 'text-red-400 border-red-400/30';
+      default: return 'text-gray-400 border-gray-400/30';
+    }
+  };
+
+  // ╔══════════════════════════════════════════════════════════════════════════════╗
+  // ║                              الواجهة الرئيسية                               ║
+  // ╚══════════════════════════════════════════════════════════════════════════════╝
   return (
-    <div className="h-screen flex">
-      {/* Main Chat Section (60%) */}
+    <div className="h-screen flex bg-[#0A0A0A]">
+      {/* ═══════════════════════════════════════════════════════════════════════════
+           القسم الرئيسي - المحادثة والتقارير (60%)
+          ═══════════════════════════════════════════════════════════════════════════ */}
       <div className="w-[60%] flex flex-col border-l border-white/10">
-        {/* Header */}
-        <div className="flex items-center gap-3 border-b border-white/10 px-6 py-4 bg-[#C5A059]/10">
-          <MessageCircle className="h-6 w-6 text-[#C5A059]" />
-          <div>
-            <h1 className="text-lg font-semibold text-white">مُستشار أزينث</h1>
-            <p className="text-xs text-white/60">وضع تعليم المدير</p>
-          </div>
-        </div>
-
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto bg-[#0A0A0A] p-6">
-          <div className="space-y-4">
-            {messages.map((msg, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex ${msg.role === "user" ? "justify-start" : "justify-end"}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    msg.role === "user"
-                      ? "bg-[#C5A059] text-white rounded-tl-sm"
-                      : "bg-zinc-800 text-gray-100 border border-white/10 rounded-tr-sm"
-                  }`}
-                >
-                  <p className="text-sm leading-relaxed">{msg.content}</p>
-                  <span className="text-xs opacity-50 mt-1 block">
-                    {new Date(msg.timestamp || Date.now()).toLocaleTimeString("ar-EG", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-
-            {isLoading && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-end">
-                <div className="bg-zinc-800 border border-white/10 rounded-2xl rounded-tr-sm px-4 py-3">
-                  <div className="flex gap-1">
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-[#C5A059] [animation-delay:-0.3s]"></span>
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-[#C5A059] [animation-delay:-0.15s]"></span>
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-[#C5A059]"></span>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
-
-        {/* Input Area */}
-        <form onSubmit={handleSubmit} className="border-t border-white/10 bg-zinc-900/50 p-4">
+        {/* ═══════════════════════════════════════════════════════════════════════════
+             Header مع علامات التبويب
+            ═══════════════════════════════════════════════════════════════════════════ */}
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4 bg-[#C5A059]/10">
           <div className="flex items-center gap-3">
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="اكتب توجيهك أو المعلومة الجديدة..."
-              className="flex-1 rounded-xl border border-white/10 bg-zinc-800 px-4 py-3 text-white placeholder-gray-500 focus:border-[#C5A059] focus:outline-none"
-              disabled={isLoading}
-            />
+            <MessageCircle className="h-6 w-6 text-[#C5A059]" />
+            <div>
+              <h1 className="text-lg font-semibold text-white">قائد المبيعات الاستراتيجي</h1>
+              <p className="text-xs text-white/60">الإصدار 2.0 - نظام المتدرب المطور</p>
+            </div>
+          </div>
+          <div className="flex gap-1 bg-zinc-800/50 rounded-lg p-1">
             <button
-              type="submit"
-              disabled={!inputMessage.trim() || isLoading}
-              className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#C5A059] text-white transition-colors hover:bg-[#d8b56d] disabled:opacity-50"
+              onClick={() => setActiveTab("chat")}
+              className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
+                activeTab === "chat" ? "bg-[#C5A059] text-white" : "text-white/60 hover:text-white"
+              }`}
             >
-              <Send className="h-5 w-5" />
+              المحادثة
+            </button>
+            <button
+              onClick={() => setActiveTab("reports")}
+              className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
+                activeTab === "reports" ? "bg-[#C5A059] text-white" : "text-white/60 hover:text-white"
+              }`}
+            >
+              التقارير
             </button>
           </div>
-          <p className="text-xs text-white/40 mt-2 text-center">
-            أي رسالة ترسلها هنا سيتم حفظها كتوجيه للمستشار
-          </p>
-        </form>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════════════════
+             المحتوى حسب التبويب النشط
+            ═══════════════════════════════════════════════════════════════════════════ */}
+        {activeTab === "chat" ? (
+          <>
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto bg-[#0A0A0A] p-6">
+              <div className="space-y-4">
+                {messages.map((msg, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex ${msg.role === "user" ? "justify-start" : "justify-end"}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                        msg.role === "user"
+                          ? "bg-[#C5A059] text-white rounded-tl-sm"
+                          : "bg-zinc-800 text-gray-100 border border-white/10 rounded-tr-sm"
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed whitespace-pre-line">{msg.content}</p>
+                      <span className="text-xs opacity-50 mt-1 block">
+                        {new Date(msg.timestamp || Date.now()).toLocaleTimeString("ar-EG", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+
+                {isLoading && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-end">
+                    <div className="bg-zinc-800 border border-white/10 rounded-2xl rounded-tr-sm px-4 py-3">
+                      <div className="flex gap-1">
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-[#C5A059] [animation-delay:-0.3s]"></span>
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-[#C5A059] [animation-delay:-0.15s]"></span>
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-[#C5A059]"></span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+
+            {/* Input Area */}
+            <form onSubmit={handleSubmit} className="border-t border-white/10 bg-zinc-900/50 p-4">
+              <div className="flex items-center gap-3">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder="اكتب معلومة جديدة بالصيغة: المفتاح | القيمة (مثال: سعر_الأريكة | تبدأ من 5000 جنيه)..."
+                  className="flex-1 rounded-xl border border-white/10 bg-zinc-800 px-4 py-3 text-white placeholder-gray-500 focus:border-[#C5A059] focus:outline-none"
+                  disabled={isLoading}
+                />
+                <button
+                  type="submit"
+                  disabled={!inputMessage.trim() || isLoading}
+                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#C5A059] text-white transition-colors hover:bg-[#d8b56d] disabled:opacity-50"
+                >
+                  <Send className="h-5 w-5" />
+                </button>
+              </div>
+              <p className="text-xs text-white/40 mt-2 text-center">
+                استخدم الصيغة: المفتاح | القيمة - أو اكتب أي توجيه وسأقترح تحسينات
+              </p>
+            </form>
+          </>
+        ) : (
+          /* ═══════════════════════════════════════════════════════════════════════════
+              تبويب التقارير
+             ═══════════════════════════════════════════════════════════════════════════ */
+          <div className="flex-1 overflow-y-auto bg-[#0A0A0A] p-6">
+            <div className="space-y-6">
+              {/* ═══════════════════════════════════════════════════════════════════════════
+                   ملخص سريع
+                  ═══════════════════════════════════════════════════════════════════════════ */}
+              <div className="grid grid-cols-4 gap-4">
+                <div className="bg-zinc-800/50 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="h-4 w-4 text-[#C5A059]" />
+                    <span className="text-xs text-white/60">الزوار</span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{visitors.length}</p>
+                </div>
+                <div className="bg-zinc-800/50 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BookOpen className="h-4 w-4 text-green-400" />
+                    <span className="text-xs text-white/60">المعرفة</span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{knowledge.length}</p>
+                </div>
+                <div className="bg-zinc-800/50 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <HelpCircle className="h-4 w-4 text-amber-500" />
+                    <span className="text-xs text-white/60">معلقة</span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{pendingQuestions.length}</p>
+                </div>
+                <div className="bg-zinc-800/50 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-blue-400" />
+                    <span className="text-xs text-white/60">التحويلات</span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">
+                    {visitors.filter(v => v.conversion_stage === 'converted').length}
+                  </p>
+                </div>
+              </div>
+
+              {/* ═══════════════════════════════════════════════════════════════════════════
+                   اقتراحات المتدرب
+                  ═══════════════════════════════════════════════════════════════════════════ */}
+              <div className="bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Lightbulb className="h-5 w-5 text-[#C5A059]" />
+                  <h3 className="font-semibold text-white">💡 اقتراحات المتدرب المطور</h3>
+                </div>
+                <div className="space-y-2">
+                  {generateSuggestions().map((suggestion, idx) => (
+                    <div key={idx} className="flex items-start gap-2 text-sm text-white/80">
+                      <span className="text-[#C5A059] mt-0.5">•</span>
+                      <span>{suggestion}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ═══════════════════════════════════════════════════════════════════════════
+                   آخر الزوار
+                  ═══════════════════════════════════════════════════════════════════════════ */}
+              <div className="bg-zinc-800/30 border border-white/10 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <BarChart3 className="h-5 w-5 text-[#C5A059]" />
+                  <h3 className="font-semibold text-white">👥 آخر الزوار والزائرات</h3>
+                </div>
+                {visitors.length === 0 ? (
+                  <p className="text-center text-white/40 text-sm py-4">لا يوجد زوار مسجلين بعد</p>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {visitors.slice(0, 10).map((visitor) => (
+                      <div key={visitor.id} className="flex items-center justify-between bg-zinc-800/50 rounded-lg p-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`px-2 py-0.5 rounded text-xs ${getStageColor(visitor.conversion_stage)}`}>
+                            {visitor.conversion_stage}
+                          </div>
+                          <span className="text-sm text-white">{visitor.name || 'زائر مجهول'}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${getMoodColor(visitor.mood)}`}>
+                            {visitor.mood}
+                          </span>
+                          <span className="text-xs text-white/40">{visitor.conversation_count} رسائل</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* ═══════════════════════════════════════════════════════════════════════════
+                   أكثر الأسئلة تكراراً (من التقرير الأسبوعي)
+                  ═══════════════════════════════════════════════════════════════════════════ */}
+              {weeklyReport && weeklyReport.topQuestions.length > 0 && (
+                <div className="bg-zinc-800/30 border border-white/10 rounded-xl p-4">
+                  <h3 className="font-semibold text-white mb-3">📊 أكثر الأسئلة تكراراً هذا الأسبوع</h3>
+                  <div className="space-y-2">
+                    {weeklyReport.topQuestions.map((q, idx) => (
+                      <div key={idx} className="flex items-center justify-between bg-zinc-800/50 rounded-lg p-3">
+                        <span className="text-sm text-white/80">{q.question}</span>
+                        <span className="px-2 py-1 rounded-full bg-[#C5A059]/20 text-[#C5A059] text-xs">
+                          {q.count} مرة
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Right Sidebar (40%) */}
+      {/* ═══════════════════════════════════════════════════════════════════════════
+           الشريط الجانبي الأيمن (40%)
+          ═══════════════════════════════════════════════════════════════════════════ */}
       <div className="w-[40%] flex flex-col">
-        {/* Active Learnings Section */}
+        {/* ═══════════════════════════════════════════════════════════════════════════
+             قسم قاعدة المعرفة (مع usage_count)
+            ═══════════════════════════════════════════════════════════════════════════ */}
         <div className="flex-1 border-b border-white/10 flex flex-col">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-zinc-900/30">
             <BookOpen className="h-5 w-5 text-[#C5A059]" />
-            <h2 className="font-semibold text-white">التوجيهات النشطة</h2>
+            <h2 className="font-semibold text-white">قاعدة المعرفة</h2>
             <span className="mr-auto text-xs bg-[#C5A059]/20 text-[#C5A059] px-2 py-1 rounded-full">
-              {learnings.length}
+              {knowledge.length}
             </span>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4">
-            {learnings.length === 0 ? (
+            {knowledge.length === 0 ? (
               <p className="text-center text-white/40 text-sm py-8">
-                لا توجد توجيهات محفوظة بعد. ابدأ بكتابة توجيه في المحادثة.
+                لا توجد معلومات في قاعدة المعرفة. ابدأ بإضافة معلومة جديدة.
               </p>
             ) : (
               <div className="space-y-3">
-                {learnings.map((learning) => (
+                {knowledge
+                  .sort((a, b) => b.usage_count - a.usage_count)
+                  .map((item) => (
                   <motion.div
-                    key={learning.id}
+                    key={item.id}
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-zinc-800/50 border border-white/5 rounded-xl p-3 group"
                   >
-                    <p className="text-sm text-white/90 leading-relaxed">{learning.instruction}</p>
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                      <span className="text-xs text-white/40">
-                        {new Date(learning.created_at).toLocaleDateString("ar-EG")}
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs px-2 py-0.5 rounded bg-zinc-700 text-zinc-300">
+                        {item.category}
                       </span>
-                      <button
-                        onClick={() => deleteLearning(learning.id)}
-                        className="text-red-400/60 hover:text-red-400 transition-colors"
-                        title="حذف التوجيه"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <span className="text-xs px-2 py-0.5 rounded bg-[#C5A059]/20 text-[#C5A059]">
+                        {item.usage_count} استخدام
+                      </span>
                     </div>
+                    
+                    {editingKnowledge === item.id ? (
+                      <div className="space-y-2 mt-2">
+                        <textarea
+                          value={knowledgeValue}
+                          onChange={(e) => setKnowledgeValue(e.target.value)}
+                          className="w-full rounded-lg border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white focus:border-[#C5A059] focus:outline-none resize-none"
+                          rows={2}
+                          autoFocus
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => saveKnowledgeUpdate(item.id)}
+                            className="flex-1 flex items-center justify-center gap-1 bg-green-600/80 text-white text-xs py-1.5 rounded-lg hover:bg-green-600"
+                          >
+                            <Check className="h-3 w-3" />
+                            حفظ
+                          </button>
+                          <button
+                            onClick={cancelEditingKnowledge}
+                            className="flex-1 flex items-center justify-center gap-1 bg-zinc-700 text-white text-xs py-1.5 rounded-lg hover:bg-zinc-600"
+                          >
+                            <X className="h-3 w-3" />
+                            إلغاء
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm font-medium text-white mb-1">{item.key}</p>
+                        <p className="text-xs text-white/70 leading-relaxed">{item.value.substring(0, 100)}...</p>
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+                          <span className="text-xs text-white/40">
+                            {new Date(item.created_at).toLocaleDateString("ar-EG")}
+                          </span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => startEditingKnowledge(item.id, item.value)}
+                              className="text-[#C5A059]/60 hover:text-[#C5A059] transition-colors"
+                              title="تعديل"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => deleteKnowledge(item.id)}
+                              className="text-red-400/60 hover:text-red-400 transition-colors"
+                              title="حذف"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </motion.div>
                 ))}
               </div>
