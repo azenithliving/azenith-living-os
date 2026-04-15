@@ -67,10 +67,11 @@ export async function middleware(request: NextRequest) {
   // Handle Supabase session for all other routes
   const { supabaseResponse, user } = await updateSession(request);
 
-  // Check if accessing admin-gate (except login page)
+  // Check if accessing admin routes (except login pages)
   if (
-    pathname.startsWith("/admin-gate") &&
+    (pathname.startsWith("/admin-gate") || pathname.startsWith("/admin")) &&
     !pathname.startsWith("/admin-gate/login") &&
+    !pathname.startsWith("/admin/verify-2fa") &&
     !user
   ) {
     // No user, redirect to login
@@ -83,7 +84,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/admin-gate/login") && user) {
     // Redirect to dashboard
     const url = request.nextUrl.clone();
-    url.pathname = "/admin-gate";
+    url.pathname = "/admin";
     return NextResponse.redirect(url);
   }
 
@@ -95,6 +96,7 @@ export const config = {
   matcher: [
     // Admin routes
     "/admin-gate/:path*",
+    "/admin/:path*",
     "/elite/:path*",
     // Protected API routes - rate limited
     "/api/pexels/:path*",

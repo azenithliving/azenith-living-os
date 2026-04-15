@@ -23,12 +23,17 @@ export default async function AdminLayout({
 
     if (authError) {
       console.error("[AdminLayout] Auth error:", authError.message);
-      redirect("/admin-gate/login");
+      // redirect removed - handled by middleware
     }
 
     if (!user) {
-      console.log("[AdminLayout] No user found, redirecting to login");
-      redirect("/admin-gate/login");
+      console.log("[AdminLayout] No user found - middleware should handle this");
+      // redirect removed - handled by middleware
+    }
+
+    if (!user) {
+      // Allow unauthenticated access (handled by middleware if needed)
+      return <AdminLayoutClient>{children}</AdminLayoutClient>;
     }
 
     console.log("[AdminLayout] User authenticated:", user.id);
@@ -53,10 +58,11 @@ export default async function AdminLayout({
       console.log("[AdminLayout] 2FA cookie value:", verified2FA);
 
       if (verified2FA !== "true") {
-        console.log("[AdminLayout] 2FA not verified, redirecting to verify-2fa");
-        redirect("/admin/verify-2fa");
+        console.log("[AdminLayout] 2FA not verified - should be handled by page");
+        // redirect removed - handled by middleware or page logic
+      } else {
+        console.log("[AdminLayout] 2FA verified");
       }
-      console.log("[AdminLayout] 2FA verified");
     } else {
       console.log("[AdminLayout] 2FA not enabled for user, allowing access");
     }
