@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 
 import { Providers } from "./providers";
 import VirtualDesignerWidget from "@/components/VirtualDesignerWidget";
+import ConsultantWidget from "@/components/ConsultantWidget";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -48,6 +49,7 @@ export default function RootLayout({
           }}
         />
         <VirtualDesignerWidget />
+        <ConsultantWidget />
       </body>
     </html>
   );
