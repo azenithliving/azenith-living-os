@@ -397,7 +397,7 @@ export async function sendWhatsAppMessage(
         const result = await waModule.sendMessage(to, message, template);
         return {
           success: result.success,
-          message: result.message,
+          message: result.messageId || "Message sent",
           service: "whatsapp",
         };
       }
@@ -496,10 +496,15 @@ export async function sendEmail(
     try {
       const emailModule = await import("@/lib/email-service");
       if (emailModule && typeof emailModule.sendEmail === 'function') {
-        const result = await emailModule.sendEmail(to, subject, body, html);
+        const result = await emailModule.sendEmail({
+          to,
+          subject,
+          text: body,
+          html: html ? body : undefined,
+        });
         return {
           success: result.success,
-          message: 'email' in result ? String(result.email) : 'Sent',
+          message: 'Sent',
           service: "email",
         };
       }
