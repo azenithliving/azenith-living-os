@@ -14,7 +14,7 @@
 
 import { createLLMClient } from "@/lib/ai-orchestrator";
 import { plannerAgent } from "@/lib/planner-agent";
-import { updateSiteSetting, createAutomationRule, getAnalyticsReport, getSystemHealth, analyzeSEO, checkContentHealth, analyzeRevenueOpportunities, createSection } from "@/lib/architect-tools";
+import { updateSiteSetting, createAutomationRule, getAnalyticsReport, getSystemHealth, analyzeSEO, checkContentHealth, analyzeRevenueOpportunities, createSection, addProduct, listProducts, createBackup, optimizeSpeed, setupAdSense, generateAffiliateLinks } from "@/lib/architect-tools";
 import type { StrategicPlan } from "@/lib/planner-agent";
 import { storeMemory, getUserPreference, storeUserPreference, getActiveGoals, createGoal, searchMemories } from "./memory-store";
 import { classifyRisk, validateAction, createApprovalRequest, getPendingApprovals, approveRequest, rejectRequest, logAuditEvent, AgentAction, getSecurityStats, checkDailyCriticalLimit } from "./security-manager";
