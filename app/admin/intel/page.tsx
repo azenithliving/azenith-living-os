@@ -497,16 +497,16 @@ function IntelligenceTab() {
       {
         id: "welcome",
         role: "architect",
-        content: `👋 **مرحباً بك في مركز الذكاء - المرحلة 2!**
+        content: `👋 **أهلاً بيك! أنا الوكيل الذكي الجديد (Ultimate Agent)**
 
-🧠 **المهندس المعماري الذكي** - الآن يمكنني تنفيذ أوامر حقيقية:
+🧠 **بفهم العامية المصرية ونفذ أوامر حقيقية:**
 
-• ⚙️ **إنشاء قواعد أتمتة** - "أنشئ قاعدة أتمتة..."
-• 🎨 **تغيير إعدادات الموقع** - "غيّر اللون إلى..."
-• 📊 **جلب تقارير التحليلات** - "كم عدد الزوار؟"
-• 🔍 **فحص صحة النظام** - "هل النظام يعمل بشكل جيد؟"
+• 🎨 **"غير لون الأزرار للذهبي"** → يتغير فوراً
+• 📊 **"كم زوار اليوم؟"** → بجيبك بالأرقام الحقيقية
+• ⚙️ **"أنشئ قاعدة أتمتة"** → بتتعمل تلقائياً
+• 🔍 **"فحص النظام"** → بجيك حالة الموقع
 
-جرب أحد الأمثلة أعلاه أو اكتب أمرك الخاص!`,
+جرب اكتب أي حاجة بالعامية!`,
         timestamp: new Date(),
       },
     ]);
@@ -532,34 +532,26 @@ function IntelligenceTab() {
     setExecutingTool(true);
 
     try {
-      // Use the new architect command API
-      const response = await fetch("/api/admin/architect/command", {
+      // Use UltimateAgent API (Phase 1: Natural Language)
+      const response = await fetch("/api/admin/agent/ultimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          command: input,
-          conversationId: conversationIdRef.current,
+          type: "process_message",
+          payload: {
+            message: input,
+          },
         }),
       });
 
       const data = await response.json();
 
-      // Track which tool was used
-      if (data.tool) {
-        setLastTool(data.tool);
-      }
-
       // Build response message
-      let responseContent = data.message || "تم تنفيذ طلبك.";
+      let responseContent = data.reply || data.message || "تم استلام رسالتك.";
       
-      // Add suggestions if available
-      if (data.suggestions && data.suggestions.length > 0) {
-        responseContent += "\n\n" + data.suggestions.join("\n");
-      }
-
-      // Add fallback hint if execution failed
-      if (!data.success && data.fallback) {
-        responseContent += `\n\n💡 ${data.fallback}`;
+      // Track if action was executed
+      if (data.success) {
+        setLastTool("ultimate_agent");
       }
 
       const architectMessage: ArchitectMessage = {
@@ -576,7 +568,7 @@ function IntelligenceTab() {
       const errorMessage: ArchitectMessage = {
         id: `msg_${Date.now()}_error`,
         role: "architect",
-        content: "❌ عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.\n\n💡 يمكنك استخدام التبويبات اليدوية في الأعلى كحل بديل.",
+        content: "❌ عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.",
         timestamp: new Date(),
       };
       
@@ -589,9 +581,9 @@ function IntelligenceTab() {
 
   // Quick action buttons for common commands
   const quickActions = [
-    { label: "📊 تقرير 30 يوم", command: "أعطني تقرير التحليلات لآخر 30 يوم" },
-    { label: "🔍 حالة النظام", command: "هل النظام يعمل بشكل جيد؟" },
-    { label: "⚙️ قاعدة جديدة", command: "أنشئ قاعدة أتمتة باسم تجربة" },
+    { label: "🎨 لون ذهبي", command: "غير لون الأزرار للذهبي" },
+    { label: "� زوار اليوم", command: "كم زوار اليوم؟" },
+    { label: "👋 مساء الخير", command: "مساء الخير" },
   ];
 
   return (
@@ -599,7 +591,7 @@ function IntelligenceTab() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">الذكاء والتطوير</h2>
-          <p className="text-sm text-[#C5A059]">المهندس المعماري الذكي - مع تنفيذ الأوامر (Phase 2)</p>
+          <p className="text-sm text-[#C5A059]">Ultimate Agent - يفهم العامية المصرية وينفذ الأوامر</p>
         </div>
         {lastTool && (
           <span className="px-3 py-1 rounded-full bg-[#C5A059]/20 text-[#C5A059] text-xs">

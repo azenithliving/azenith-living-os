@@ -25,6 +25,7 @@ import {
   getSecurityStats,
   getMemoryStats,
   executeAction,
+  UltimateAgent,
 } from "@/lib/ultimate-agent";
 import { createClient } from "@/utils/supabase/server";
 
@@ -222,6 +223,19 @@ export async function POST(request: NextRequest) {
         }
         const checkResult = await runProactiveCheck();
         return NextResponse.json(checkResult);
+        
+      case "process_message":
+        // UltimateAgent Phase 1: Natural language command processing
+        const { message } = payload || {};
+        if (!message) {
+          return NextResponse.json(
+            { success: false, error: "Message is required" },
+            { status: 400 }
+          );
+        }
+        const agent = new UltimateAgent();
+        const reply = await agent.processCommand(message, auth.user || "unknown");
+        return NextResponse.json({ success: true, reply });
         
       default:
         return NextResponse.json(

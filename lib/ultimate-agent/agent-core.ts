@@ -755,6 +755,213 @@ export async function exportAgentData(): Promise<{
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// UltimateAgent Class - Phase 1: Natural Language Understanding
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import { 
+  createAutomationRule, 
+  updateSiteSetting, 
+  getAnalyticsReport, 
+  getSystemHealth 
+} from "@/lib/architect-tools";
+
+export interface AgentResponse {
+  action: string;
+  params: Record<string, unknown>;
+  naturalResponse: string;
+}
+
+export class UltimateAgent {
+  private apiKey: string;
+  private model: string;
+
+  constructor() {
+    // Use OpenRouter with free models
+    this.apiKey = process.env.OPENROUTER_API_KEY || "";
+    this.model = "meta-llama/llama-3.1-8b-instruct"; // Free model on OpenRouter
+  }
+
+  async processCommand(userMessage: string, userId: string): Promise<string> {
+    try {
+      // 1. Use LLM to parse the command
+      const systemPrompt = `أنت مساعد ذكي لموقع "أزينث للتصميم الداخلي". المستخدم يتحدث بالعامية المصرية.
+
+مهمتك: حلل رسالة المستخدم وحدد الإجراء المطلوب من:
+1. updateSiteSetting - تغيير إعداد (الألوان، الخطوط، SEO)
+2. createAutomationRule - إنشاء قاعدة أتمتة
+3. getAnalytics - جلب تقرير تحليلات
+4. getSystemHealth - فحص صحة النظام
+5. generalChat - رد عام (تحية، سؤال، إلخ)
+
+أخرج JSON بالصيغة:
+{
+  "action": "updateSiteSetting|createAutomationRule|getAnalytics|getSystemHealth|generalChat",
+  "params": { ... },
+  "naturalResponse": "الرد بالعامية المصرية"
+}
+
+أمثلة:
+- "غير لون الأزرار للذهبي" → updateSiteSetting, {key:"theme", value:{primaryColor:"#C5A059"}}
+- "أنشئ قاعدة ترسل واتساب" → createAutomationRule, {name:"إشعار واتساب", trigger:"booking_status_changed", actions:[{type:"whatsapp"}]}
+- "كم زوار اليوم؟" → getAnalytics, {days:1}
+- "مساء الخير" → generalChat, {}
+
+رسالة المستخدم: "${userMessage}"`;
+
+      let parsed: AgentResponse;
+      
+      try {
+        // Try LLM parsing first
+        const response = await this.callLLM(systemPrompt);
+        parsed = JSON.parse(response);
+      } catch (llmError) {
+        // Fallback: keyword matching
+        parsed = this.fallbackParse(userMessage);
+      }
+
+      // 2. Execute the action
+      let result;
+      switch (parsed.action) {
+        case "updateSiteSetting":
+          result = await updateSiteSetting(parsed.params as any);
+          break;
+        case "createAutomationRule":
+          result = await createAutomationRule(parsed.params as any);
+          break;
+        case "getAnalytics":
+          result = await getAnalyticsReport(parsed.params as any);
+          break;
+        case "getSystemHealth":
+          result = await getSystemHealth();
+          break;
+        case "generalChat":
+          return parsed.naturalResponse || this.getFriendlyResponse(userMessage);
+        default:
+          return parsed.naturalResponse || "لم أفهم تماماً، ممكن توضح أكتر؟";
+      }
+
+      return result.success 
+        ? (parsed.naturalResponse || result.message)
+        : `❌ ${result.error || "فشل التنفيذ"}`;
+
+    } catch (error) {
+      console.error("[UltimateAgent] Error:", error);
+      return "عذراً، حصل مشكلة. جرب تاني بعد شوية.";
+    }
+  }
+
+  private async callLLM(prompt: string): Promise<string> {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${this.apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://azenith-living-os.vercel.app",
+        "X-Title": "Azenith Ultimate Agent"
+      },
+      body: JSON.stringify({
+        model: this.model,
+        messages: [
+          { role: "system", content: "أنت مساعد AI. أخرج JSON فقط بدون أي شرح." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 500
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`LLM API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "{}";
+  }
+
+  private fallbackParse(message: string): AgentResponse {
+    const lower = message.toLowerCase();
+    
+    // Greetings
+    if (/مساء|صباح|أهلا|مرحب|هاي|سلام/i.test(lower)) {
+      return {
+        action: "generalChat",
+        params: {},
+        naturalResponse: "أهلاً بيك! أنا هنا عشان أساعدك في إدارة الموقع. إيه اللي محتاجه؟"
+      };
+    }
+    
+    // Color change
+    if (/(غير|غيّر|عدل|تغيير).*(لون|ألوان|زر|أزرار)/i.test(lower)) {
+      let color = "#C5A059"; // Default gold
+      if (/(ذهب|ذهبي|أصفر)/i.test(lower)) color = "#C5A059";
+      else if (/(أحمر|red)/i.test(lower)) color = "#EF4444";
+      else if (/(أزرق|blue)/i.test(lower)) color = "#3B82F6";
+      else if (/(أخضر|green)/i.test(lower)) color = "#10B981";
+      
+      return {
+        action: "updateSiteSetting",
+        params: { key: "theme", value: { primaryColor: color } },
+        naturalResponse: `تمام! غيرت لون الأزرار للون ${color}.` 
+      };
+    }
+    
+    // Analytics
+    if (/(زوار|زيارات|visitors|إحصائ|مؤشر|metrics|analysis)/i.test(lower)) {
+      const days = /(يوم|today|النهار)/i.test(lower) ? 1 : 
+                   /(أسبوع|week)/i.test(lower) ? 7 : 30;
+      return {
+        action: "getAnalytics",
+        params: { days },
+        naturalResponse: "جاري جلب تقرير التحليلات..."
+      };
+    }
+    
+    // Automation rule
+    if (/(أتمتة|automation|قاعدة|rule)/i.test(lower)) {
+      return {
+        action: "createAutomationRule",
+        params: { 
+          name: "قاعدة جديدة", 
+          trigger: "page_visit",
+          actions: [{ type: "notification" }]
+        },
+        naturalResponse: "أنشأت قاعدة أتمتة جديدة. ممكن تعدل التفاصيل من لوحة التحكم."
+      };
+    }
+    
+    // System health
+    if (/(صحة|health|نظام|system|فحص|check)/i.test(lower)) {
+      return {
+        action: "getSystemHealth",
+        params: {},
+        naturalResponse: "جاري فحص حالة النظام..."
+      };
+    }
+    
+    return {
+      action: "generalChat",
+      params: {},
+      naturalResponse: "فهمتك، بس محتاج توضح أكتر عشان أساعدك صح."
+    };
+  }
+
+  private getFriendlyResponse(message: string): string {
+    const greetings = [
+      "أهلاً بيك! 🌟",
+      "مساء الفل! 🌙",
+      "هلا والله! 👋",
+      "أهلاً وسهلاً! 🏠"
+    ];
+    
+    if (/مساء/i.test(message)) return "مساء النور! ✨";
+    if (/صباح/i.test(message)) return "صباح الفل! ☀️";
+    if (/كيف|أخبار|حال|عامل/i.test(message)) return "تمام الحمد لله! إنت عامل إيه؟ 😊";
+    
+    return greetings[Math.floor(Math.random() * greetings.length)];
+  }
+}
+
 // Re-export sub-modules for convenience
 export { storeMemory, searchMemories, getUserPreference, storeUserPreference };
 export { classifyRisk, validateAction, getPendingApprovals, getSecurityStats };

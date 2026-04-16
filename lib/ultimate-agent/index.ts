@@ -30,6 +30,10 @@ export {
   handleApproval,
   exportAgentData,
   
+  // Ultimate Agent Class (Phase 1)
+  UltimateAgent,
+  type AgentResponse,
+  
   // Types
   type AgentConfig,
   type AgentStatus,
