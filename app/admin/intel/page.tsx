@@ -5,6 +5,7 @@ import { Brain, BarChart3, Target, Code, Globe, Palette, Zap, Shield, Server, Ac
 import Link from "next/link";
 import SmartSuggestions from "@/components/admin/SmartSuggestions";
 import { UltimateAgentChat } from "./components/UltimateAgentChat";
+import { ProactiveDashboard } from "./components/ProactiveDashboard";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // أنواع البيانات
@@ -1567,6 +1568,8 @@ const tabs = [
   { id: "development", label: "التطوير", icon: Code, component: DevelopmentTab },
   // وكيل شامل
   { id: "suggestions", label: "المقترحات الذكية", icon: Lightbulb, component: SmartSuggestionsTab },
+  // لوحة الاستباقية - Ultimate Agent Dashboard
+  { id: "proactive", label: "اللوحة الاستباقية", icon: Zap, component: ProactiveDashboard },
   // التبويبات المنقولة من /admin/ops (4)
   { id: "automation", label: "الأتمتة", icon: Zap, component: AutomationTab },
   { id: "content", label: "المحتوى", icon: FileText, component: ContentTab },

@@ -53,13 +53,16 @@ interface ApprovalRequest {
 }
 
 const QUICK_COMMANDS = [
-  { icon: TrendingUp, label: "المؤشرات", command: "أعرض المؤشرات" },
-  { icon: AlertTriangle, label: "الشذوذ", command: "اكتشف الشذوذ" },
-  { icon: Zap, label: "الفرص", command: "اعرض الفرص" },
-  { icon: Shield, label: "الموافقات", command: "اعرض الموافقات المعلقة" },
-  { icon: Command, label: "الحالة", command: "ما حالة الوكيل؟" },
-  { icon: Sparkles, label: "توصيات", command: "اعطني توصيات استراتيجية" },
+  { icon: TrendingUp, label: "المؤشرات", command: "المؤشرات" },
+  { icon: AlertTriangle, label: "الشذوذ", command: "الشذوذ" },
+  { icon: Zap, label: "الفرص", command: "الفرص" },
+  { icon: Shield, label: "الموافقات", command: "الموافقات" },
+  { icon: Command, label: "الحالة", command: "حالة الوكيل" },
+  { icon: Sparkles, label: "توصيات", command: "توصيات استراتيجية" },
+  { icon: MessageSquare, label: "الخطط", command: "خطط لإضافة قسم جديد" },
+  { icon: Clock, label: "النسخ الاحتياطية", command: "نسخ احتياطي" },
 ];
+
 
 export function UltimateAgentChat() {
   const [messages, setMessages] = useState<Message[]>([
@@ -146,7 +149,7 @@ export function UltimateAgentChat() {
       setMessages((prev) => [...prev, agentMessage]);
 
       // Refresh approvals if needed
-      if (data.actionTaken === "approval_review") {
+      if (data.requiresApproval || data.actionTaken === "approval_requested") {
         fetchPendingApprovals();
       }
     } catch (error) {

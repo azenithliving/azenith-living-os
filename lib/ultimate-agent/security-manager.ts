@@ -242,7 +242,7 @@ export async function createApprovalRequest(
         requested_at: new Date().toISOString(),
         expires_at: expiresAt.toISOString(),
         status: "pending",
-        metadata: metadata || {},
+        metadata: metadata || action.payload || {},
       })
       .select("*")
       .single();
@@ -330,15 +330,26 @@ export async function getPendingApprovals(): Promise<{
 }
 
 /**
- * Approve a request
+ * Approve a request AND execute the approved action
  */
 export async function approveRequest(
   requestId: string,
   approvedBy: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; executedAction?: { type: string; result: unknown } }> {
   const supabase = await createServerClient();
 
   try {
+    // First, get the request details to know what to execute
+    const { data: request, error: fetchError } = await supabase
+      .from("approval_requests")
+      .select("*")
+      .eq("id", requestId)
+      .single();
+
+    if (fetchError) throw fetchError;
+    if (!request) return { success: false, error: "Request not found" };
+
+    // Update status to approved
     const { error } = await supabase
       .from("approval_requests")
       .update({
@@ -350,16 +361,76 @@ export async function approveRequest(
 
     if (error) throw error;
 
+    // Now execute the approved action based on action_type
+    let executedAction: { type: string; result: unknown } | undefined;
+    
+    try {
+      if (request.action_type === "site_theme_change") {
+        // Execute theme change
+        const metadata = request.metadata as { key?: "theme" | "seo" | "general"; value?: Record<string, unknown> } || {};
+        const themeKey: "theme" | "seo" | "general" = metadata.key || "theme";
+        const themeValue: Record<string, unknown> = metadata.value || {};
+        
+        const result = await import("@/lib/architect-tools").then(m => 
+          m.updateSiteSetting({ key: themeKey, value: themeValue })
+        );
+        if (!result.success) {
+          return {
+            success: false,
+            error: result.message || "Failed to execute approved theme change",
+          };
+        }
+        executedAction = { type: "site_theme_change", result };
+      } 
+      else if (request.action_type === "create_automation_rule") {
+        // Execute automation rule creation
+        const metadata = request.metadata as {
+          name?: string;
+          trigger?: "page_visit" | "form_submit" | "booking_status_changed" | "lead_updated" | "time_delay" | "user_registered";
+          conditions?: Record<string, unknown>;
+          actions?: Array<{ type: string; message?: string; intent?: string }>;
+        } || {};
+        
+        const result = await import("@/lib/architect-tools").then(m =>
+          m.createAutomationRule({
+            name: metadata.name || "New automation rule",
+            trigger: metadata.trigger || "page_visit",
+            conditions: metadata.conditions || {},
+            actions: metadata.actions || [],
+            enabled: true,
+          })
+        );
+        if (!result.success) {
+          return {
+            success: false,
+            error: result.message || "Failed to execute approved automation rule",
+          };
+        }
+        executedAction = { type: "create_automation_rule", result };
+      } else {
+        return {
+          success: false,
+          error: `No executor registered for approved action "${request.action_type}"`,
+        };
+      }
+    } catch (execError) {
+      console.error("[SecurityManager] Action execution failed:", execError);
+      return {
+        success: false,
+        error: execError instanceof Error ? execError.message : "Unknown execution error",
+      };
+    }
+
     // Log the approval
     await storeMemory({
       type: "decision",
       category: "approval_granted",
-      content: `Request ${requestId} approved by ${approvedBy}`,
+      content: `Request ${requestId} approved by ${approvedBy} - action executed: ${executedAction?.type || 'none'}`,
       priority: "high",
-      context: { requestId, approvedBy },
+      context: { requestId, approvedBy, executedAction },
     });
 
-    return { success: true };
+    return { success: true, executedAction };
   } catch (error) {
     console.error("[SecurityManager] Failed to approve request:", error);
     return {

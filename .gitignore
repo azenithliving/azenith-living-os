@@ -51,3 +51,5 @@ next-env.d.ts
 # Large video files (must be compressed under 4.5MB for Vercel)
 /public/videos/*.backup
 *.mp4.backup
+
+.vercel
