@@ -6,6 +6,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import {
   initializeAgent,
   executeCommand,
@@ -27,7 +29,6 @@ import {
   executeAction,
   UltimateAgent,
 } from "@/lib/ultimate-agent";
-import { supabaseService } from "@/lib/supabase-service";
 
 // Initialize agent on first request
 let agentInitialized = false;
@@ -39,16 +40,40 @@ async function ensureInitialized() {
   }
 }
 
-// Authentication helper using supabaseService
-async function authenticate(request: NextRequest): Promise<{ authenticated: boolean; user?: string; role?: string }> {
-  const { data: { user } } = await supabaseService.auth.getUser();
+// Authentication helper using createServerClient
+async function authenticate(request: NextRequest): Promise<{ authenticated: boolean; user?: string; role?: string; userId?: string }> {
+  const cookieStore = await cookies();
   
-  if (!user) {
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // Ignore setAll errors in Server Components
+          }
+        },
+      },
+    }
+  );
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    console.error("[UltimateAgentAPI] Auth error:", userError);
     return { authenticated: false };
   }
   
   // Check if user is admin
-  const { data: profile } = await supabaseService
+  const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
@@ -60,6 +85,7 @@ async function authenticate(request: NextRequest): Promise<{ authenticated: bool
     authenticated: true,
     user: user.email || user.id,
     role: isAdmin ? "admin" : "user",
+    userId: user.id,
   };
 }
 
