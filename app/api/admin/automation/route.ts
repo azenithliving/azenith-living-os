@@ -53,8 +53,26 @@ export async function GET() {
  * Add new rule: { name, trigger, conditions, actions, enabled? }
  */
 export async function POST(request: NextRequest) {
+  console.log("[Automation API] ===== POST /api/admin/automation START =====");
+
   try {
-    const body = await request.json();
+    // Log raw request
+    const requestClone = request.clone();
+    const rawBody = await requestClone.text();
+    console.log("[Automation API] Raw request body:", rawBody);
+
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+      console.log("[Automation API] Parsed body:", JSON.stringify(body, null, 2));
+    } catch (parseError) {
+      console.error("[Automation API] Failed to parse JSON body:", parseError);
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON in request body" },
+        { status: 400 }
+      );
+    }
+
     const { name, trigger, conditions, actions, enabled = true, company_id } = body;
 
     // Validation
@@ -65,16 +83,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Log incoming request for debugging
-    console.log("[Automation API] Creating rule with data:", {
-      name,
-      trigger,
-      conditions,
-      actions,
-      enabled,
-      company_id,
-    });
 
     // Check if company_id is provided, if not use a default system company
     const insertData: Record<string, unknown> = {
@@ -88,40 +96,71 @@ export async function POST(request: NextRequest) {
     // If company_id provided, add it; otherwise fetch or use default
     if (company_id) {
       insertData.company_id = company_id;
+      console.log("[Automation API] Using provided company_id:", company_id);
     } else {
       // Try to fetch the first company from the database
       console.log("[Automation API] No company_id provided, fetching first company...");
-      const { data: firstCompany, error: companyError } = await supabaseService
-        .from("companies")
-        .select("id")
-        .limit(1)
-        .single();
+      try {
+        const { data: firstCompany, error: companyError } = await supabaseService
+          .from("companies")
+          .select("id")
+          .limit(1)
+          .single();
 
-      if (companyError || !firstCompany) {
-        // Use a default UUID if no companies exist (this will fail if company doesn't exist)
+        if (companyError) {
+          console.error("[Automation API] Error fetching company:", JSON.stringify(companyError, null, 2));
+        }
+
+        if (companyError || !firstCompany) {
+          // Use a default UUID if no companies exist (this will fail if company doesn't exist)
+          const defaultCompanyId = "00000000-0000-0000-0000-000000000001";
+          console.warn("[Automation API] No company found, using default:", defaultCompanyId);
+          insertData.company_id = defaultCompanyId;
+        } else {
+          console.log("[Automation API] Using company_id:", firstCompany.id);
+          insertData.company_id = firstCompany.id;
+        }
+      } catch (companyFetchError) {
+        console.error("[Automation API] Exception fetching company:", companyFetchError);
         const defaultCompanyId = "00000000-0000-0000-0000-000000000001";
-        console.warn("[Automation API] No company found, using default:", defaultCompanyId);
         insertData.company_id = defaultCompanyId;
-      } else {
-        console.log("[Automation API] Using company_id:", firstCompany.id);
-        insertData.company_id = firstCompany.id;
       }
     }
 
-    const { data, error } = await supabaseService
-      .from("automation_rules")
-      .insert(insertData)
-      .select()
-      .single();
+    console.log("[Automation API] Attempting insert with data:", JSON.stringify(insertData, null, 2));
+
+    let data, error;
+    try {
+      const result = await supabaseService
+        .from("automation_rules")
+        .insert(insertData)
+        .select()
+        .single();
+      data = result.data;
+      error = result.error;
+    } catch (supabaseError) {
+      console.error("[Automation API] EXCEPTION during Supabase insert:", supabaseError);
+      console.error("[Automation API] Exception stack:", (supabaseError as Error).stack);
+      return NextResponse.json(
+        { success: false, error: "Database exception", details: String(supabaseError) },
+        { status: 500 }
+      );
+    }
 
     if (error) {
-      console.error("[Automation API] Error creating rule - FULL ERROR:", JSON.stringify(error, null, 2));
-      console.error("[Automation API] Insert data attempted:", insertData);
+      console.error("[Automation API] Supabase ERROR object:", JSON.stringify(error, null, 2));
+      console.error("[Automation API] Error code:", (error as { code?: string }).code);
+      console.error("[Automation API] Error message:", (error as { message?: string }).message);
+      console.error("[Automation API] Error details:", (error as { details?: string }).details);
+      console.error("[Automation API] Insert data attempted:", JSON.stringify(insertData, null, 2));
       return NextResponse.json(
         { success: false, error: "Failed to create automation rule", details: error },
         { status: 500 }
       );
     }
+
+    console.log("[Automation API] SUCCESS: Rule created:", JSON.stringify(data, null, 2));
+    console.log("[Automation API] ===== POST /api/admin/automation END =====");
 
     return NextResponse.json({
       success: true,
@@ -129,9 +168,15 @@ export async function POST(request: NextRequest) {
       message: "Automation rule created successfully",
     });
   } catch (error) {
-    console.error("[Automation API] Error:", error);
+    console.error("[Automation API] UNEXPECTED ERROR:", error);
+    console.error("[Automation API] Error type:", typeof error);
+    console.error("[Automation API] Error string:", String(error));
+    if (error instanceof Error) {
+      console.error("[Automation API] Error stack:", error.stack);
+    }
+    console.error("[Automation API] ===== POST /api/admin/automation END WITH ERROR =====");
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "Internal server error", details: String(error) },
       { status: 500 }
     );
   }
