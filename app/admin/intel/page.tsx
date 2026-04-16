@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Brain, BarChart3, Target, Code, Globe, Palette, Zap, Shield, Server, Activity, TrendingUp, AlertTriangle, CheckCircle, Clock, Search, Sparkles, Send, X, Menu, ChevronRight, ChevronDown, Users, Loader2, MemoryStick, Cpu, Key, FileText, Calendar, CreditCard, Plus, Trash2, Edit2 } from "lucide-react";
+import { Brain, BarChart3, Target, Code, Globe, Palette, Zap, Shield, Server, Activity, TrendingUp, AlertTriangle, CheckCircle, Clock, Search, Sparkles, Send, X, Menu, ChevronRight, ChevronDown, Users, Loader2, MemoryStick, Cpu, Key, FileText, Calendar, CreditCard, Plus, Trash2, Edit2, Lightbulb } from "lucide-react";
 import Link from "next/link";
+import SmartSuggestions from "@/components/admin/SmartSuggestions";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // أنواع البيانات
@@ -1558,7 +1559,14 @@ function MetricCard({ icon: Icon, title, value, subtitle, color }: { icon: React
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// القائمة الرئيسية والتبويبات - 8 تبويبات (4 أصلية + 4 منقولة من /admin/ops)
+// تبويب المقترحات الذكية - Smart Suggestions (Omnipotent Agent)
+// ═══════════════════════════════════════════════════════════════════════════════
+function SmartSuggestionsTab() {
+  return <SmartSuggestions />;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// القائمة الرئيسية والتبويبات - 9 تبويبات
 // ═══════════════════════════════════════════════════════════════════════════════
 const tabs = [
   // التبويبات الأصلية (4)
@@ -1566,6 +1574,8 @@ const tabs = [
   { id: "warroom", label: "غرفة العمليات", icon: Target, component: WarRoomTab },
   { id: "analytics", label: "التحليلات", icon: BarChart3, component: AnalyticsTab },
   { id: "development", label: "التطوير", icon: Code, component: DevelopmentTab },
+  // وكيل شامل
+  { id: "suggestions", label: "المقترحات الذكية", icon: Lightbulb, component: SmartSuggestionsTab },
   // التبويبات المنقولة من /admin/ops (4)
   { id: "automation", label: "الأتمتة", icon: Zap, component: AutomationTab },
   { id: "content", label: "المحتوى", icon: FileText, component: ContentTab },
