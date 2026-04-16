@@ -497,16 +497,16 @@ function IntelligenceTab() {
       {
         id: "welcome",
         role: "architect",
-        content: `👋 **أهلاً بيك! أنا الوكيل الذكي الجديد (Ultimate Agent)**
+        content: `👋 **أهلاً بيك! أنا الوكيل الذكي (Smart Agent)**
 
 🧠 **بفهم العامية المصرية ونفذ أوامر حقيقية:**
 
 • 🎨 **"غير لون الأزرار للذهبي"** → يتغير فوراً
-• 📊 **"كم زوار اليوم؟"** → بجيبك بالأرقام الحقيقية
+• 📊 **"كم زوار اليوم؟"** → بجيبك بالأرقام
 • ⚙️ **"أنشئ قاعدة أتمتة"** → بتتعمل تلقائياً
 • 🔍 **"فحص النظام"** → بجيك حالة الموقع
 
-جرب اكتب أي حاجة بالعامية!`,
+جرب قول: "اهلاً"، "غير اللون"، أو "كم عدد الزوار"`,
         timestamp: new Date(),
       },
     ]);
@@ -532,26 +532,23 @@ function IntelligenceTab() {
     setExecutingTool(true);
 
     try {
-      // Use UltimateAgent API (Phase 1: Natural Language)
-      const response = await fetch("/api/admin/agent/ultimate", {
+      // Use Smart Agent API with DeepSeek
+      const response = await fetch("/api/admin/agent/smart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: "process_message",
-          payload: {
-            message: input,
-          },
+          message: input,
         }),
       });
 
       const data = await response.json();
 
       // Build response message
-      let responseContent = data.reply || data.message || "تم استلام رسالتك.";
+      let responseContent = data.reply || "تم استلام رسالتك.";
       
       // Track if action was executed
-      if (data.success) {
-        setLastTool("ultimate_agent");
+      if (data.executed) {
+        setLastTool(data.action || "smart_agent");
       }
 
       const architectMessage: ArchitectMessage = {
@@ -581,9 +578,10 @@ function IntelligenceTab() {
 
   // Quick action buttons for common commands
   const quickActions = [
+    { label: "👋 اهلاً", command: "اهلا" },
     { label: "🎨 لون ذهبي", command: "غير لون الأزرار للذهبي" },
-    { label: "� زوار اليوم", command: "كم زوار اليوم؟" },
-    { label: "👋 مساء الخير", command: "مساء الخير" },
+    { label: "📊 زوار اليوم", command: "كم عدد زوار اليوم" },
+    { label: "⚙️ قاعدة ترحيب", command: "أنشئ قاعدة ترحيب" },
   ];
 
   return (
@@ -591,7 +589,7 @@ function IntelligenceTab() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">الذكاء والتطوير</h2>
-          <p className="text-sm text-[#C5A059]">Ultimate Agent - يفهم العامية المصرية وينفذ الأوامر</p>
+          <p className="text-sm text-[#C5A059]">Smart Agent - يفهم العامية المصرية وينفذ الأوامر</p>
         </div>
         {lastTool && (
           <span className="px-3 py-1 rounded-full bg-[#C5A059]/20 text-[#C5A059] text-xs">
