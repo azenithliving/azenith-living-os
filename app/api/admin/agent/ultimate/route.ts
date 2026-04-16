@@ -1,22 +1,40 @@
+import { supabaseService } from "@/lib/supabase-service";
 import { UltimateAgent } from "@/lib/ultimate-agent/agent-core";
-
-// معرف مستخدم ثابت (مؤقت) - استخدم أي ID موجود في جدول users لديك
-// إذا لم يكن لديك أي مستخدم، سنستخدم هذا الـ ID كقيمة وهمية
-const TEMP_USER_ID = "00000000-0000-0000-0000-000000000001";
 
 export async function POST(req: Request) {
   try {
+    // الحصول على أول مستخدم من قاعدة البيانات (تجاوز المصادقة)
+    const { data: users, error } = await supabaseService
+      .from("users")
+      .select("id")
+      .limit(1);
+
+    if (error || !users || users.length === 0) {
+      console.error("No user found", error);
+      return new Response(JSON.stringify({ error: "No user available" }), { status: 500 });
+    }
+
+    const userId = users[0].id;
     const { message } = await req.json();
     const agent = new UltimateAgent();
-    // استخدام المعرف الثابت مؤقتاً
-    const reply = await agent.processCommand(message, TEMP_USER_ID);
+    const reply = await agent.processCommand(message, userId);
     return Response.json({ reply });
-  } catch (error: any) {
-    console.error("API error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Internal Server Error" }), { status: 500 });
+  } catch (err: any) {
+    console.error("API error:", err);
+    return new Response(JSON.stringify({ error: err.message, stack: err.stack }), { status: 500 });
   }
 }
 
+// GET endpoint (للمؤشرات)
 export async function GET(req: Request) {
-  return Response.json({ status: "ok" });
+  try {
+    const { data: users, error } = await supabaseService
+      .from("users")
+      .select("id")
+      .limit(1);
+    if (error || !users) return new Response("Unauthorized", { status: 401 });
+    return Response.json({ status: "ok" });
+  } catch (error) {
+    return new Response("Error", { status: 500 });
+  }
 }
