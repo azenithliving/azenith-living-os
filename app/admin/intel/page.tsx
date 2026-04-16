@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Brain, BarChart3, Target, Code, Globe, Palette, Zap, Shield, Server, Activity, TrendingUp, AlertTriangle, CheckCircle, Clock, Search, Sparkles, Send, X, Menu, ChevronRight, ChevronDown, Users, Loader2, MemoryStick, Cpu, Key, FileText, Calendar, CreditCard, Plus, Trash2, Edit2, Lightbulb } from "lucide-react";
 import Link from "next/link";
 import SmartSuggestions from "@/components/admin/SmartSuggestions";
+import { UltimateAgentChat } from "./components/UltimateAgentChat";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // أنواع البيانات
@@ -1570,7 +1571,7 @@ function SmartSuggestionsTab() {
 // ═══════════════════════════════════════════════════════════════════════════════
 const tabs = [
   // التبويبات الأصلية (4)
-  { id: "intelligence", label: "الذكاء", icon: Brain, component: IntelligenceTab },
+  { id: "intelligence", label: "الذكاء", icon: Brain, component: UltimateAgentChat },
   { id: "warroom", label: "غرفة العمليات", icon: Target, component: WarRoomTab },
   { id: "analytics", label: "التحليلات", icon: BarChart3, component: AnalyticsTab },
   { id: "development", label: "التطوير", icon: Code, component: DevelopmentTab },
