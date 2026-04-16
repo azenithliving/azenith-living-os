@@ -478,20 +478,33 @@ function AnalyticsTab() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// تبويب الذكاء - Intelligence & AI
+// تبويب الذكاء - Intelligence & AI (Phase 2: Tool Execution Enabled)
 // ═══════════════════════════════════════════════════════════════════════════════
 function IntelligenceTab() {
   const [messages, setMessages] = useState<ArchitectMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [executingTool, setExecutingTool] = useState(false);
+  const [lastTool, setLastTool] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const conversationIdRef = useRef(`conv_${Date.now()}`);
 
+  // Welcome message with Phase 2 capabilities
   useEffect(() => {
     setMessages([
       {
         id: "welcome",
         role: "architect",
-        content: "👋 أهلاً بك في مركز الذكاء والتطوير!\n\n🧠 أنا المهندس المعماري الذكي. يمكنني:\n• تحليل البيانات وتقديم توصيات\n• تطوير وتحسين الموقع\n• إنشاء تقارير ذكية\n• الإجابة على استفساراتك التقنية\n\nكيف يمكنني مساعدتك اليوم؟",
+        content: `👋 **مرحباً بك في مركز الذكاء - المرحلة 2!**
+
+🧠 **المهندس المعماري الذكي** - الآن يمكنني تنفيذ أوامر حقيقية:
+
+• ⚙️ **إنشاء قواعد أتمتة** - "أنشئ قاعدة أتمتة..."
+• 🎨 **تغيير إعدادات الموقع** - "غيّر اللون إلى..."
+• 📊 **جلب تقارير التحليلات** - "كم عدد الزوار؟"
+• 🔍 **فحص صحة النظام** - "هل النظام يعمل بشكل جيد؟"
+
+جرب أحد الأمثلة أعلاه أو اكتب أمرك الخاص!`,
         timestamp: new Date(),
       },
     ]);
@@ -514,45 +527,105 @@ function IntelligenceTab() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
+    setExecutingTool(true);
 
     try {
-      const response = await fetch("/api/admin/mastermind", {
+      // Use the new architect command API
+      const response = await fetch("/api/admin/architect/command", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "command",
-          payload: { command: input, sessionId: `intel_${Date.now()}`, context: "intelligence" },
+          command: input,
+          conversationId: conversationIdRef.current,
         }),
       });
 
       const data = await response.json();
+
+      // Track which tool was used
+      if (data.tool) {
+        setLastTool(data.tool);
+      }
+
+      // Build response message
+      let responseContent = data.message || "تم تنفيذ طلبك.";
+      
+      // Add suggestions if available
+      if (data.suggestions && data.suggestions.length > 0) {
+        responseContent += "\n\n" + data.suggestions.join("\n");
+      }
+
+      // Add fallback hint if execution failed
+      if (!data.success && data.fallback) {
+        responseContent += `\n\n💡 ${data.fallback}`;
+      }
+
       const architectMessage: ArchitectMessage = {
         id: `msg_${Date.now()}_resp`,
         role: "architect",
-        content: data.result?.response || "تم استلام طلبك وسأقوم بمعالجته.",
+        content: responseContent,
         timestamp: new Date(),
       };
+
       setMessages((prev) => [...prev, architectMessage]);
     } catch (error) {
       console.error("Chat error:", error);
+      
+      const errorMessage: ArchitectMessage = {
+        id: `msg_${Date.now()}_error`,
+        role: "architect",
+        content: "❌ عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.\n\n💡 يمكنك استخدام التبويبات اليدوية في الأعلى كحل بديل.",
+        timestamp: new Date(),
+      };
+      
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
+      setExecutingTool(false);
     }
   };
+
+  // Quick action buttons for common commands
+  const quickActions = [
+    { label: "📊 تقرير 30 يوم", command: "أعطني تقرير التحليلات لآخر 30 يوم" },
+    { label: "🔍 حالة النظام", command: "هل النظام يعمل بشكل جيد؟" },
+    { label: "⚙️ قاعدة جديدة", command: "أنشئ قاعدة أتمتة باسم تجربة" },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">الذكاء والتطوير</h2>
-          <p className="text-sm text-[#C5A059]">المهندس المعماري الذكي - AI Architect</p>
+          <p className="text-sm text-[#C5A059]">المهندس المعماري الذكي - مع تنفيذ الأوامر (Phase 2)</p>
         </div>
+        {lastTool && (
+          <span className="px-3 py-1 rounded-full bg-[#C5A059]/20 text-[#C5A059] text-xs">
+            آخر أداة: {lastTool}
+          </span>
+        )}
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 h-[450px] overflow-y-auto">
+      {/* Quick Actions */}
+      <div className="flex flex-wrap gap-2">
+        {quickActions.map((action) => (
+          <button
+            key={action.label}
+            onClick={() => {
+              setInput(action.command);
+            }}
+            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs transition-colors"
+          >
+            {action.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Chat Messages */}
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 h-[400px] overflow-y-auto">
         {messages.map((msg) => (
           <div key={msg.id} className={`mb-4 ${msg.role === "user" ? "text-left" : "text-right"}`}>
-            <div className={`inline-block max-w-[80%] rounded-xl p-3 ${
+            <div className={`inline-block max-w-[85%] rounded-xl p-3 ${
               msg.role === "user" ? "bg-[#C5A059]/20 text-white" : "bg-white/10 text-white"
             }`}>
               <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
@@ -562,25 +635,29 @@ function IntelligenceTab() {
             </div>
           </div>
         ))}
+        
+        {/* Loading States */}
         {loading && (
-          <div className="text-right">
+          <div className="text-right mb-4">
             <div className="inline-flex items-center gap-2 bg-white/10 text-white rounded-xl px-4 py-2">
               <div className="w-4 h-4 border-2 border-[#C5A059] border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm">جاري التفكير...</span>
+              <span className="text-sm">{executingTool ? "جاري التنفيذ..." : "جاري التفكير..."}</span>
             </div>
           </div>
         )}
+        
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input Area */}
       <div className="flex gap-2">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="اسأل المهندس المعماري..."
-          className="flex-1 rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3 text-white placeholder:text-white/40"
+          placeholder="اسأل المهندس المعماري أو اطلب تنفيذ أمر... (مثال: 'أنشئ قاعدة أتمتة')"
+          className="flex-1 rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3 text-white placeholder:text-white/40 text-sm"
         />
         <button
           onClick={sendMessage}
@@ -590,6 +667,11 @@ function IntelligenceTab() {
           <Send className="w-5 h-5" />
         </button>
       </div>
+
+      {/* Help Text */}
+      <p className="text-xs text-white/40 text-center">
+        يمكن للمهندس المعماري تنفيذ: قواعد الأتمتة، إعدادات الموقع، تقارير التحليلات، فحص النظام
+      </p>
     </div>
   );
 }
