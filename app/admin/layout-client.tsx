@@ -3,20 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Home, Shield, Brain, Bot, Menu, X } from "lucide-react";
+import { Home, Shield, Brain, Menu, X } from "lucide-react";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Home,
   Shield,
   Brain,
-  Bot,
+  // Bot removed - was used by /admin/ops which is now merged into /admin/intel
 };
 
 const navItems = [
   { href: "/admin", label: "الرئيسية", icon: "Home" },
   { href: "/admin/sales", label: "المبيعات والإدارة", icon: "Shield" },
   { href: "/admin/intel", label: "الاستخبارات والتطوير", icon: "Brain" },
-  { href: "/admin/ops", label: "العمليات والأتمتة", icon: "Bot" },
+  // تم دمج /admin/ops في /admin/intel - المرحلة 1 من خطة الدمج
 ];
 
 export default function AdminLayoutClient({
