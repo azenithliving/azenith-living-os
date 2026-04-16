@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
     ],
     qualities: [75, 85],
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;

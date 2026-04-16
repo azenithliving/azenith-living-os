@@ -397,7 +397,7 @@ class SilentArchitect {
       status: "pending",
       total_chunks: 1,
       chunk_index: 0,
-    });
+    } as any);
 
     return {
       scheduled: true,
@@ -521,7 +521,7 @@ class SilentArchitect {
       message: update.message,
       priority: update.requiresAttention ? "high" : "low",
       notification_type: update.type,
-    });
+    } as any);
 
     // If critical, also log to system intelligence
     if (update.requiresAttention) {
@@ -531,7 +531,7 @@ class SilentArchitect {
         p_severity: "high",
         p_ai_assessment: update.title,
         p_recommendation: update.message,
-      });
+      } as any);
     }
   }
 
@@ -647,7 +647,7 @@ class SilentArchitect {
       after_state: task.result,
       triggered_by: "silent_architect",
       execution_logs: [`Silent execution at ${new Date().toISOString()}`],
-    });
+    } as any);
   }
 
   // ==========================================

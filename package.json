@@ -27,6 +27,7 @@
     "@langchain/core": "^1.1.39",
     "@langchain/langgraph": "^1.2.8",
     "@prisma/client": "^6.7.0",
+    "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/ssr": "0.6.1",
     "@supabase/supabase-js": "^2.45.4",
     "@upstash/ratelimit": "^2.0.8",

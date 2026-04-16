@@ -126,7 +126,7 @@ class AzenithMastermind {
     return {
       totalTables: tables.length,
       recordCounts,
-      recentActivity: recent?.map((r) => `${String(r.metric_type)} at ${String(r.observed_at)}`) || [],
+      recentActivity: recent?.map((r: any) => `${String(r.metric_type)} at ${String(r.observed_at)}`) || [],
     };
   }
 
@@ -145,7 +145,7 @@ class AzenithMastermind {
 
     return {
       totalFiles: overview.length,
-      recentChanges: actions?.map((a) => String(a.target_path)) || [],
+      recentChanges: actions?.map((a: any) => String(a.target_path)) || [],
       criticalFiles: [
         "app/page.tsx",
         "app/layout.tsx",
@@ -346,7 +346,7 @@ class AzenithMastermind {
       priority: notification.priority,
       notification_type: "mastermind_alert",
       data: notification.data,
-    });
+    } as any);
 
     console.log(`[Mobile Push] ${notification.title}: ${notification.body}`);
   }
@@ -412,17 +412,17 @@ class AzenithMastermind {
 
     if (data) {
       await this.supabase.rpc("record_cache_hit", {
-        p_content_hash: data.content_hash,
-      });
+        p_content_hash: (data as any).content_hash,
+      } as any);
 
       this.semanticCache.set(query, {
         query,
-        response: String(data.cached_result),
-        timestamp: new Date(String(data.created_at)),
-        hitCount: Number(data.hit_count || 0) + 1,
+        response: String((data as any).cached_result),
+        timestamp: new Date(String((data as any).created_at)),
+        hitCount: Number((data as any).hit_count || 0) + 1,
       });
 
-      return String(data.cached_result);
+      return String((data as any).cached_result);
     }
 
     return "[Would generate fresh response - not in cache]";

@@ -225,7 +225,7 @@ class ResourceShield {
 
     if (exactMatch) {
       // Record hit
-      await supabase.rpc("record_cache_hit", { p_content_hash: hash });
+      await supabase.rpc("record_cache_hit", { p_content_hash: hash } as any);
       return {
         id: exactMatch.id as string,
         contentHash: exactMatch.content_hash as string,

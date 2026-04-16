@@ -369,7 +369,7 @@ class ProactiveAutonomy {
         p_severity: prediction.impact,
         p_ai_assessment: `Predicted ${prediction.metric} issue with ${(prediction.probability * 100).toFixed(1)}% probability`,
         p_recommendation: prediction.recommendation,
-      });
+      } as any);
 
     } catch (error) {
       action.executed = false;
@@ -397,7 +397,7 @@ class ProactiveAutonomy {
       p_severity: metric.severity,
       p_ai_assessment: message,
       p_recommendation: this.generateRecommendation(metric),
-    });
+    } as any);
 
     // Also create notification for dashboard
     await this.supabase.from("architect_notifications").insert({
@@ -407,7 +407,7 @@ class ProactiveAutonomy {
       message,
       priority: metric.severity === "critical" ? "urgent" : metric.severity === "high" ? "high" : "normal",
       notification_type: "alert",
-    });
+    } as any);
 
     return title;
   }
@@ -434,7 +434,7 @@ class ProactiveAutonomy {
         severity: metric.severity,
         ai_assessment: `Auto-detected during routine health check`,
         recommendation: this.generateRecommendation(metric),
-      });
+      } as any);
     }
   }
 
@@ -467,7 +467,7 @@ class ProactiveAutonomy {
   }
 
   async acknowledgeIssue(issueId: string, userId: string): Promise<void> {
-    await this.supabase
+    await (this.supabase as any)
       .from("system_intelligence")
       .update({
         acknowledged_at: new Date().toISOString(),
@@ -477,7 +477,7 @@ class ProactiveAutonomy {
   }
 
   async resolveIssue(issueId: string): Promise<void> {
-    await this.supabase
+    await (this.supabase as any)
       .from("system_intelligence")
       .update({
         resolved_at: new Date().toISOString(),

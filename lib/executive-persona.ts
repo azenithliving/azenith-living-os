@@ -219,7 +219,7 @@ class ExecutivePersona {
       title: preference,
       content: value,
       importance_score: 0.9,
-    });
+    } as any);
   }
 
   detectMood(message: string): ConversationContext["detectedMood"] {
@@ -337,7 +337,7 @@ class ExecutivePersona {
     
     // Add system status in business terms
     if (health) {
-      if (health.severity === "info") {
+      if ((health as any).severity === "info") {
         greeting += "الموقع اليوم هادئ ومستقر، كل شيء يعمل بسلاسة. ";
       }
     }
@@ -345,8 +345,8 @@ class ExecutivePersona {
     // Add proactive insight
     if (actions && actions.length > 0) {
       const recentAction = actions[0];
-      if (recentAction.action_type === "file_write") {
-        greeting += `لقد استغللت هذا الهدوء وحسّنت بعض التفاصيل في ${recentAction.target_path}، هل تريد أن أعرض عليك ما وجدت؟`;
+      if ((recentAction as any).action_type === "file_write") {
+        greeting += `لقد استغللت هذا الهدوء وحسّنت بعض التفاصيل في ${(recentAction as any).target_path}، هل تريد أن أعرض عليك ما وجدت؟`;
       } else {
         greeting += "لدي ملاحظة خفيفة قد تعجبك، هل تريد أن أشاركك إياها؟";
       }

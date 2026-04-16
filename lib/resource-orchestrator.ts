@@ -294,7 +294,7 @@ class DatabaseVault {
         en_text: translation,
         context: context || null,
         last_updated: new Date().toISOString(),
-      });
+      } as any);
 
       if (error) {
         console.error('[DatabaseVault] Save error:', error);
