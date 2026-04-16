@@ -66,28 +66,49 @@ async function fetchWithRetry<T>(
   fetchFn: (key: string) => Promise<Response>,
   parseFn: (data: any) => T
 ): Promise<{ success: true; data: T } | { success: false; error: string; status?: number }> {
+  const requestId = `retry_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const pool = KEY_POOLS[provider];
   const startIndex = keyIndices[provider];
+  
+  console.log(`[FetchWithRetry] [${requestId}] Provider: ${provider}, Pool size: ${pool.length}, Max retries: ${CONFIG.MAX_RETRIES}`);
 
   for (let attempt = 0; attempt < CONFIG.MAX_RETRIES; attempt++) {
     const key = getNextKey(provider);
+    const keyPrefix = key ? `${key.substring(0, 8)}...` : 'NO_KEY';
+    
+    console.log(`[FetchWithRetry] [${requestId}] Attempt ${attempt + 1}/${CONFIG.MAX_RETRIES}, Key: ${keyPrefix}`);
+    
     if (!key) {
+      console.error(`[FetchWithRetry] [${requestId}] No API keys available for ${provider}`);
       return { success: false, error: `No API keys available for ${provider}` };
     }
 
     try {
+      console.log(`[FetchWithRetry] [${requestId}] Making fetch call...`);
       const response = await fetchFn(key);
+      
+      console.log(`[FetchWithRetry] [${requestId}] Response status: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
         const status = response.status;
-        const errorData = await response.json().catch(() => ({}));
+        let errorData: any = {};
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          console.log(`[FetchWithRetry] [${requestId}] Could not parse error response as JSON`);
+        }
+        
         const errorMessage = errorData.error?.message || errorData.message || response.statusText;
+        const errorDetails = JSON.stringify(errorData).substring(0, 500);
 
-        console.error(`[${provider}] Key failed (attempt ${attempt + 1}/${CONFIG.MAX_RETRIES}): ${status} - ${errorMessage}`);
+        console.error(`[FetchWithRetry] [${requestId}] [${provider}] Key failed: ${status} - ${errorMessage}`);
+        console.error(`[FetchWithRetry] [${requestId}] Error details: ${errorDetails}`);
 
         if (isRetryableError(status)) {
           if (attempt < CONFIG.MAX_RETRIES - 1) {
-            await delay(CONFIG.RETRY_DELAY_MS * (attempt + 1));
+            const delayMs = CONFIG.RETRY_DELAY_MS * (attempt + 1);
+            console.log(`[FetchWithRetry] [${requestId}] Retryable error, waiting ${delayMs}ms before retry...`);
+            await delay(delayMs);
             continue;
           }
         }
@@ -96,19 +117,29 @@ async function fetchWithRetry<T>(
       }
 
       const data = await response.json();
+      console.log(`[FetchWithRetry] [${requestId}] Success! Parsed response.`);
       return { success: true, data: parseFn(data) };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Network error";
-      console.error(`[${provider}] Fetch error (attempt ${attempt + 1}/${CONFIG.MAX_RETRIES}): ${errorMessage}`);
+      const errorType = error?.constructor?.name || 'Unknown';
+      console.error(`[FetchWithRetry] [${requestId}] [${provider}] Fetch error (attempt ${attempt + 1}): [${errorType}] ${errorMessage}`);
+      
+      if (error instanceof Error && error.stack) {
+        console.error(`[FetchWithRetry] [${requestId}] Stack: ${error.stack.substring(0, 500)}`);
+      }
 
       if (attempt < CONFIG.MAX_RETRIES - 1) {
-        await delay(CONFIG.RETRY_DELAY_MS * (attempt + 1));
+        const delayMs = CONFIG.RETRY_DELAY_MS * (attempt + 1);
+        console.log(`[FetchWithRetry] [${requestId}] Retrying after ${delayMs}ms...`);
+        await delay(delayMs);
       } else {
+        console.error(`[FetchWithRetry] [${requestId}] All retries exhausted`);
         return { success: false, error: `${provider} fetch failed: ${errorMessage}` };
       }
     }
   }
 
+  console.error(`[FetchWithRetry] [${requestId}] Exhausted all retries for ${provider}`);
   return { success: false, error: `${provider} exhausted all retries` };
 }
 
@@ -277,6 +308,18 @@ export async function askDeepSeek(
   prompt: string,
   options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
 ): Promise<{ success: boolean; content: string; error?: string }> {
+  const requestId = `deepseek_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  console.log(`[AskDeepSeek] [${requestId}] ===== DEEPSEEK REQUEST =====`);
+  console.log(`[AskDeepSeek] [${requestId}] Prompt length: ${prompt.length} chars`);
+  console.log(`[AskDeepSeek] [${requestId}] Options:`, { model: options?.model || CONFIG.DEEPSEEK_MODEL, jsonMode: options?.jsonMode, temperature: options?.temperature ?? 0.7 });
+  console.log(`[AskDeepSeek] [${requestId}] Available keys: ${KEY_POOLS.deepseek.length}`);
+  
+  if (KEY_POOLS.deepseek.length === 0) {
+    console.error(`[AskDeepSeek] [${requestId}] NO API KEYS CONFIGURED!`);
+    return { success: false, content: "", error: "DeepSeek API keys not configured (DEEPSEEK_KEYS env var)" };
+  }
+
   const body: Record<string, unknown> = {
     model: options?.model || CONFIG.DEEPSEEK_MODEL,
     messages: [{ role: "user", content: prompt }],
@@ -287,7 +330,10 @@ export async function askDeepSeek(
   if (options?.jsonMode) {
     body.response_format = { type: "json_object" };
   }
+  
+  console.log(`[AskDeepSeek] [${requestId}] Request body:`, JSON.stringify({ ...body, messages: [{ role: "user", content: "[TRUNCATED]" }] }));
 
+  console.log(`[AskDeepSeek] [${requestId}] Calling fetchWithRetry...`);
   const result = await fetchWithRetry(
     "deepseek",
     (key) => fetch("https://api.deepseek.com/v1/chat/completions", {
@@ -301,9 +347,16 @@ export async function askDeepSeek(
     (data) => data.choices?.[0]?.message?.content || ""
   );
 
+  console.log(`[AskDeepSeek] [${requestId}] fetchWithRetry result:`, { success: result.success, hasData: result.success ? !!result.data : false, error: result.success ? null : result.error });
+  
   if (result.success) {
+    console.log(`[AskDeepSeek] [${requestId}] Raw content (first 200 chars): "${result.data?.substring(0, 200)}..."`);
+    console.log(`[AskDeepSeek] [${requestId}] ===== REQUEST COMPLETED =====`);
     return { success: true, content: result.data };
   }
+  
+  console.error(`[AskDeepSeek] [${requestId}] REQUEST FAILED: ${result.error}`);
+  console.error(`[AskDeepSeek] [${requestId}] ===== REQUEST FAILED =====`);
   return { success: false, content: "", error: result.error };
 }
 
@@ -577,3 +630,32 @@ export class AIOrchestrator {
 }
 
 export const aiOrchestrator = new AIOrchestrator();
+
+/**
+ * Create LLM client for a specific provider
+ * Simple interface for the UltimateAgent
+ */
+export function createLLMClient(provider: "deepseek" | "groq" | "mistral" | "openrouter") {
+  return {
+    async complete(prompt: string): Promise<string> {
+      let result;
+      switch (provider) {
+        case "deepseek":
+          result = await askDeepSeek(prompt, { temperature: 0.7, maxTokens: 1000 });
+          break;
+        case "groq":
+          result = await askGroq(prompt);
+          break;
+        case "mistral":
+          result = await askMistral(prompt);
+          break;
+        case "openrouter":
+          result = await askOpenRouter(prompt);
+          break;
+        default:
+          result = await askDeepSeek(prompt, { temperature: 0.7, maxTokens: 1000 });
+      }
+      return result.success ? result.content : "آسف، حصل مشكلة في الاتصال. جرب تاني بعد شوية. 😅";
+    },
+  };
+}

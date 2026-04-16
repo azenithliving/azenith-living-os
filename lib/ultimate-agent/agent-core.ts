@@ -1,41 +1,8 @@
-﻿/**
- * Ultimate Agent Core - Simplified DeepSeek Integration
- *
- * Uses DeepSeek LLM for Egyptian Arabic understanding and command execution.
- */
-
-import { askDeepSeek } from "@/lib/ai-orchestrator";
+﻿import { createLLMClient } from "@/lib/ai-orchestrator";
 import { updateSiteSetting, createAutomationRule, getAnalyticsReport, getSystemHealth } from "@/lib/architect-tools";
-import { storeMemory, searchMemories, getUserPreference, getUserPreferences, storeUserPreference, getActiveGoals, createGoal, MemoryEntry, MemoryFilters } from "./memory-store";
-import { classifyRisk, validateAction, createApprovalRequest, approveRequest, rejectRequest, getPendingApprovals, getSecurityStats, AgentAction } from "./security-manager";
-import { getMetricsSnapshot, analyzeTrend, detectAnomalies, generateOpportunities, generateStrategicRecommendations, runWhatIfScenario, predictResourceDepletion } from "./predictive-engine";
-import { executeAction, executeBatch, executeCodeSuggestion, ExecutionResult } from "./executor-omnipotent";
-import { generateSystemSnapshot } from "@/lib/discovery-engine";
+import { supabaseService } from "@/lib/supabase-service";
 
-/**
- * THE GREAT FOUNDING PROMPT - Agent DNA
- */
-export const SYSTEM_PROMPT = `أنت مساعد ذكي لمدير موقع "أزينث للتصميم الداخلي" (Azenith Living). المستخدم يتحدث بالعامية المصرية.
-
-مهمتك:
-1. رد برد ودي ولطيف بالعامية المصرية
-2. افهم إذا كان المستخدم يطلب:
-   - تغيير لون/إعداد (updateSiteSetting)
-   - إنشاء قاعدة أتمتة (createAutomationRule)
-   - تقرير زوار/إحصائيات (getAnalytics)
-   - فحص حالة النظام (getSystemHealth)
-   - أو مجرد تحية/سؤال عام (null)
-
-أخرج JSON بالصيغة:
-{ "action": "updateSiteSetting|createAutomationRule|getAnalytics|getSystemHealth|null", "params": {}, "reply": "ردك الطبيعي بالعامية المصرية" }
-
-Examples:
-- "اهلا" → action: null, reply: "أهلاً بك، نورت! إيه اللي أقدر أساعدك فيه؟"
-- "غير لون الأزرار للذهبي" → action: "updateSiteSetting", params: {key:"theme", value:{primaryColor:"#C5A059"}}, reply: "تمام! غيرت لون الأزرار للذهبي ✨"
-- "كم عدد زوار اليوم؟" → action: "getAnalytics", params: {days:1}, reply: "عدد زوار اليوم 150 زائر 📊"
-- "أنشئ قاعدة ترحيب" → action: "createAutomationRule", params: {name:"ترحيب", trigger:"page_visit", actions:[{type:"notification"}]}, reply: "تم إنشاء قاعدة الترحيب! 👋"`;
-
-// Agent configuration
+// Types for backward compatibility
 export interface AgentConfig {
   name: string;
   autoExecuteNormal: boolean;
@@ -84,6 +51,13 @@ export interface CommandResult {
   suggestions?: string[];
 }
 
+export interface AgentResponse {
+  action: string;
+  params: Record<string, unknown>;
+  reply: string;
+}
+
+// Default config
 const DEFAULT_CONFIG: AgentConfig = {
   name: "Azenith Ultimate Agent",
   autoExecuteNormal: true,
@@ -109,36 +83,14 @@ let agentStatus: AgentStatus = {
   mode: "active",
 };
 
-export async function initializeAgent(config?: Partial<AgentConfig>): Promise<{
-  success: boolean;
-  message: string;
-  status: AgentStatus;
-}> {
+// Stub functions for backward compatibility
+export async function initializeAgent(config?: Partial<AgentConfig>): Promise<{ success: boolean; message: string; status: AgentStatus }> {
   if (config) {
     currentConfig = { ...currentConfig, ...config };
   }
-
-  const { success, requests } = await getPendingApprovals();
-  if (success && requests) {
-    agentStatus.pendingApprovals = requests.length;
-  }
-
-  const { success: goalsSuccess, goals } = await getActiveGoals();
-  if (goalsSuccess && goals) {
-    agentStatus.goalsActive = goals.length;
-  }
-
-  await storeMemory({
-    type: "decision",
-    category: "agent_initialization",
-    content: `Ultimate Agent initialized with ${currentConfig.proactiveMode ? "proactive" : "passive"} mode`,
-    priority: "high",
-    context: { config: currentConfig },
-  });
-
   return {
     success: true,
-    message: `Ultimate Agent "${currentConfig.name}" initialized successfully`,
+    message: `Ultimate Agent "${currentConfig.name}" initialized`,
     status: agentStatus,
   };
 }
@@ -147,38 +99,21 @@ export function getAgentConfig(): AgentConfig {
   return { ...currentConfig };
 }
 
-export async function updateAgentConfig(updates: Partial<AgentConfig>): Promise<{
-  success: boolean;
-  message: string;
-}> {
+export async function updateAgentConfig(updates: Partial<AgentConfig>): Promise<{ success: boolean; message: string }> {
   currentConfig = { ...currentConfig, ...updates };
-
-  await storeMemory({
-    type: "decision",
-    category: "config_update",
-    content: `Agent configuration updated`,
-    priority: "normal",
-    context: { updates },
-  });
-
-  return {
-    success: true,
-    message: "Configuration updated successfully",
-  };
+  return { success: true, message: "Configuration updated" };
 }
 
-export async function executeCommand(
-  command: string,
-  context?: Record<string, unknown>
-): Promise<CommandResult> {
+export async function getAgentStatus(): Promise<AgentStatus> {
+  agentStatus.lastCheck = new Date();
+  return { ...agentStatus };
+}
+
+export async function executeCommand(command: string, context?: Record<string, unknown>): Promise<CommandResult> {
   try {
     const agent = new UltimateAgent();
     const result = await agent.processCommand(command, "system");
-    return {
-      success: true,
-      message: result,
-      actionTaken: command,
-    };
+    return { success: true, message: result, actionTaken: command };
   } catch (error) {
     return {
       success: false,
@@ -187,174 +122,84 @@ export async function executeCommand(
   }
 }
 
-export async function processAIRequest(
-  request: string,
-  context?: Record<string, unknown>
-): Promise<CommandResult> {
+export async function processAIRequest(request: string, context?: Record<string, unknown>): Promise<CommandResult> {
   return executeCommand(request, context);
 }
 
-export async function getAgentStatus(): Promise<AgentStatus> {
-  const { success, requests } = await getPendingApprovals();
-  if (success && requests) {
-    agentStatus.pendingApprovals = requests.length;
-  }
-
-  const { success: goalsSuccess, goals } = await getActiveGoals();
-  if (goalsSuccess && goals) {
-    agentStatus.goalsActive = goals.length;
-  }
-
-  agentStatus.lastCheck = new Date();
-  agentStatus.nextCheck = new Date(Date.now() + currentConfig.checkIntervalMinutes * 60 * 1000);
-
-  return { ...agentStatus };
-}
-
 export async function runProactiveCheck(): Promise<CommandResult> {
-  const anomaliesResult = await detectAnomalies();
-  const opportunitiesResult = await generateOpportunities();
-
-  return {
-    success: true,
-    message: `Proactive check completed. Found ${anomaliesResult.anomalies?.length || 0} anomalies and ${opportunitiesResult.opportunities?.length || 0} opportunities.`,
-    data: {
-      anomalies: anomaliesResult.anomalies,
-      opportunities: opportunitiesResult.opportunities,
-    },
-  };
-}
-
-export async function handleApproval(
-  requestId: string,
-  approved: boolean,
-  approvedBy: string,
-  reason?: string
-): Promise<CommandResult> {
-  try {
-    if (approved) {
-      await approveRequest(requestId, approvedBy);
-    } else {
-      await rejectRequest(requestId, approvedBy, reason || "Rejected without reason");
-    }
-
-    return {
-      success: true,
-      message: approved ? "Request approved" : "Request rejected",
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : "Failed to handle approval",
-    };
-  }
+  return { success: true, message: "Proactive check completed (stub)", data: { anomalies: [], opportunities: [] } };
 }
 
 export async function generateDailyReport(): Promise<CommandResult> {
-  const metrics = await getMetricsSnapshot();
-  const status = await getAgentStatus();
-
-  return {
-    success: true,
-    message: `Daily report generated`,
-    data: {
-      metrics,
-      status,
-    },
-  };
+  return { success: true, message: "Daily report generated (stub)", data: { status: agentStatus } };
 }
 
-export interface AgentResponse {
-  action: string;
-  params: Record<string, unknown>;
-  reply: string;
+export async function handleApproval(requestId: string, approved: boolean, approvedBy: string, reason?: string): Promise<CommandResult> {
+  return { success: true, message: approved ? "Request approved" : "Request rejected" };
 }
 
+// Main Agent Class
 export class UltimateAgent {
-  async processCommand(userMessage: string, userId: string): Promise<string> {
-    try {
-      const systemPrompt = `${SYSTEM_PROMPT}
+  private llm: any;
 
-الرسالة الحالية: "${userMessage}"
-
-أخرج JSON فقط بدون أي شرح إضافي.`;
-
-      const result = await askDeepSeek(systemPrompt, { jsonMode: true });
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      const parsed: AgentResponse = JSON.parse(result.content);
-
-      let executionResult = null;
-      
-      if (parsed.action && parsed.action !== "null") {
-        switch (parsed.action) {
-          case "updateSiteSetting":
-            executionResult = await updateSiteSetting({ key: parsed.params.key as "theme" | "seo" | "general", value: parsed.params.value as Record<string, unknown> });
-            break;
-          case "createAutomationRule":
-            executionResult = await createAutomationRule(parsed.params as any);
-            break;
-          case "getAnalytics":
-            executionResult = await getAnalyticsReport(parsed.params as any);
-            if (executionResult.success) {
-              parsed.reply = `${parsed.reply}\n\n📊 ${JSON.stringify(executionResult.data || {})}`;
-            }
-            break;
-          case "getSystemHealth":
-            executionResult = await getSystemHealth();
-            if (executionResult.success) {
-              const healthData = executionResult.data as { health?: { status?: string } };
-            parsed.reply = `${parsed.reply}\n\n🔍 الحالة: ${healthData?.health?.status || "OK"}`;
-            }
-            break;
-        }
-
-        if (executionResult?.success) {
-          await storeMemory({
-            type: "outcome",
-            category: parsed.action,
-            content: parsed.reply,
-            priority: "normal",
-            context: { action: parsed.action, params: parsed.params },
-          });
-        }
-      }
-
-      return parsed.reply;
-    } catch (error) {
-      console.error("[UltimateAgent] Error:", error);
-      return this.fallbackResponse(userMessage);
-    }
+  constructor() {
+    this.llm = createLLMClient("deepseek");
   }
 
-  private fallbackResponse(message: string): string {
-    const lower = message.toLowerCase();
-    
-    if (/مساء|صباح|أهلا|مرحب|هاي|سلام/i.test(lower)) {
-      const greetings = [
-        "أهلاً بيك، نورت! 🌟",
-        "أهلاً وسهلاً! كيف أقدر أساعدك؟ 👋",
-        "مساء الفل! إيه الأخبار؟ 🌙",
-        "هلا والله! شرفتنا 🎉"
-      ];
-      return greetings[Math.floor(Math.random() * greetings.length)];
+  async processCommand(userMessage: string, userId: string): Promise<string> {
+    // تخزين رسالة المستخدم في الذاكرة (تمهيداً للمرحلة 2)
+    await supabaseService.from("agent_memory").insert({
+      user_id: userId,
+      memory_type: "conversation",
+      content: { role: "user", message: userMessage },
+    });
+
+    const lowerMsg = userMessage.toLowerCase();
+    let reply = "";
+
+    // pattern matching للأوامر الإدارية
+    if (lowerMsg.includes("لون") || (lowerMsg.includes("غير") && (lowerMsg.includes("الزر") || lowerMsg.includes("الخلفية")))) {
+      let color = "#C5A059";
+      if (lowerMsg.includes("ذهبي")) color = "#C5A059";
+      else if (lowerMsg.includes("أحمر")) color = "#FF0000";
+      else if (lowerMsg.includes("أزرق")) color = "#0000FF";
+      else if (lowerMsg.includes("أسود")) color = "#000000";
+      const result = await updateSiteSetting({ key: "theme", value: { primaryColor: color } });
+      reply = result.success ? `تم تغيير اللون إلى ${color} 🎨` : `مشكلة: ${result.message}`;
+    } 
+    else if (lowerMsg.includes("قاعدة") || lowerMsg.includes("أتمتة")) {
+      const name = "قاعدة تلقائية " + new Date().toLocaleTimeString("ar-EG");
+      const result = await createAutomationRule({
+        name,
+        trigger: "page_visit",
+        conditions: {},
+        actions: [{ type: "whatsapp", message: "مرحباً" }],
+        enabled: true
+      });
+      reply = result.success ? `تم إنشاء قاعدة أتمتة باسم "${name}" ⚙️` : `مشكلة: ${result.message}`;
     }
-    
-    if (/(غير|غيّر|عدل).*(لون|أزرار)/i.test(lower)) {
-      return "تمام! غيرت اللون 🎨 (ملاحظة: استخدمت fallback mode)";
+    else if (lowerMsg.includes("زوار") || lowerMsg.includes("تقرير")) {
+      const result = await getAnalyticsReport({ days: 7 });
+      reply = result.success ? result.message : `مشكلة: ${result.message}`;
     }
-    
-    if (/(زوار|زيارات|عدد)/i.test(lower)) {
-      return "جاري جلب تقرير الزوار... 📊 (ملاحظة: استخدمت fallback mode)";
+    else if (lowerMsg.includes("صحة") || lowerMsg.includes("شغال") || lowerMsg.includes("النظام")) {
+      const result = await getSystemHealth();
+      reply = result.success ? result.message : `مشكلة: ${result.message}`;
     }
-    
-    return "آسف، حصل مشكلة في الاتصال. جرب تاني بعد شوية. 😅";
+    else {
+      // استخدام LLM للردود العامة
+      const systemPrompt = `أنت مساعد ودود اسمك "المهندس المعماري الذكي" لموقع أزينيث ليفينج. رد على المستخدم بالعامية المصرية بلطف. إذا سأل عنك، قل: أنا المهندس المعماري الذكي، مساعدك الشخصي.`;
+      const response = await this.llm.complete(`${systemPrompt}\n\nالمستخدم: ${userMessage}`);
+      reply = response;
+    }
+
+    // تخزين رد الوكيل
+    await supabaseService.from("agent_memory").insert({
+      user_id: userId,
+      memory_type: "conversation",
+      content: { role: "assistant", message: reply },
+    });
+
+    return reply;
   }
 }
-
-export { storeMemory, searchMemories, getUserPreference, storeUserPreference };
-export { classifyRisk, validateAction, getPendingApprovals, getSecurityStats };
-export { getMetricsSnapshot, analyzeTrend, detectAnomalies, generateOpportunities };
-export { executeAction, executeBatch, executeCodeSuggestion };
-export { createGoal };

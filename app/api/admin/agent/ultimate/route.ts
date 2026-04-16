@@ -27,7 +27,7 @@ import {
   executeAction,
   UltimateAgent,
 } from "@/lib/ultimate-agent";
-import { createClient } from "@/utils/supabase/server";
+import { supabaseService } from "@/lib/supabase-service";
 
 // Initialize agent on first request
 let agentInitialized = false;
@@ -39,17 +39,16 @@ async function ensureInitialized() {
   }
 }
 
-// Authentication helper
+// Authentication helper using supabaseService
 async function authenticate(request: NextRequest): Promise<{ authenticated: boolean; user?: string; role?: string }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabaseService.auth.getUser();
   
   if (!user) {
     return { authenticated: false };
   }
   
   // Check if user is admin
-  const { data: profile } = await supabase
+  const { data: profile } = await supabaseService
     .from("profiles")
     .select("role")
     .eq("id", user.id)
@@ -140,9 +139,18 @@ export async function GET(request: NextRequest) {
 
 // POST handler - Commands, Actions, Updates
 export async function POST(request: NextRequest) {
+  const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  console.log(`[UltimateAgentAPI] [${requestId}] ===== NEW REQUEST =====`);
+  console.log(`[UltimateAgentAPI] [${requestId}] URL: ${request.url}`);
+  console.log(`[UltimateAgentAPI] [${requestId}] Method: ${request.method}`);
+  
   const auth = await authenticate(request);
   
+  console.log(`[UltimateAgentAPI] [${requestId}] Auth result:`, { authenticated: auth.authenticated, user: auth.user, role: auth.role });
+  
   if (!auth.authenticated) {
+    console.error(`[UltimateAgentAPI] [${requestId}] AUTH FAILED - Unauthorized`);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   
@@ -151,6 +159,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { type, payload } = body;
+    
+    console.log(`[UltimateAgentAPI] [${requestId}] Request body:`, JSON.stringify(body, null, 2));
     
     switch (type) {
       case "command":
@@ -226,15 +236,21 @@ export async function POST(request: NextRequest) {
         
       case "process_message":
         // UltimateAgent Phase 1: Natural language command processing
+        console.log(`[UltimateAgentAPI] [${requestId}] Processing message: "${payload?.message}"`);
         const { message } = payload || {};
         if (!message) {
+          console.error(`[UltimateAgentAPI] [${requestId}] Missing message in payload`);
           return NextResponse.json(
             { success: false, error: "Message is required" },
             { status: 400 }
           );
         }
+        console.log(`[UltimateAgentAPI] [${requestId}] Creating UltimateAgent instance...`);
         const agent = new UltimateAgent();
+        console.log(`[UltimateAgentAPI] [${requestId}] Calling processCommand...`);
         const reply = await agent.processCommand(message, auth.user || "unknown");
+        console.log(`[UltimateAgentAPI] [${requestId}] processCommand returned: "${reply}"`);
+        console.log(`[UltimateAgentAPI] [${requestId}] ===== REQUEST COMPLETED =====`);
         return NextResponse.json({ success: true, reply });
         
       default:
@@ -244,9 +260,13 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error("[UltimateAgentAPI] POST error:", error);
+    console.error(`[UltimateAgentAPI] [${requestId}] ===== UNHANDLED ERROR =====`);
+    console.error(`[UltimateAgentAPI] [${requestId}] Error type:`, error?.constructor?.name);
+    console.error(`[UltimateAgentAPI] [${requestId}] Error message:`, error instanceof Error ? error.message : "Unknown error");
+    console.error(`[UltimateAgentAPI] [${requestId}] Error stack:`, error instanceof Error ? error.stack : "No stack");
+    console.error(`[UltimateAgentAPI] [${requestId}] ===== END ERROR =====`);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
+      { success: false, error: error instanceof Error ? error.message : "Unknown error", requestId },
       { status: 500 }
     );
   }
