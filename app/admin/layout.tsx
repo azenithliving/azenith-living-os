@@ -1,18 +1,18 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import AdminLayoutClient from "./layout-client";
+import { createClient } from "@/utils/supabase/server";
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Check for admin_auth cookie
-  const cookieStore = await cookies();
-  const adminAuth = cookieStore.get("admin_auth");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // If no cookie or not "true", redirect to gate login
-  if (!adminAuth || adminAuth.value !== "true") {
+  if (!user) {
     redirect("/gate/login");
   }
 

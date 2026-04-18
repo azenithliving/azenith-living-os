@@ -46,7 +46,7 @@ export default function Header() {
 
     if (newCount === 5) {
       sessionStorage.setItem(SOVEREIGN_ACCESS_KEY, "granted");
-      router.push("/admin-gate");
+      router.push("/gate/login");
       return;
     }
 

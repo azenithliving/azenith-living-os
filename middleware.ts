@@ -5,20 +5,26 @@ import {
   sensitiveRateLimiter,
   getClientIP,
   shouldRateLimit,
-  shouldSkipRateLimit,
   isRateLimitingEnabled,
 } from "@/lib/rate-limit";
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   let rateLimitHeaders: Record<string, string> | null = null;
+  const isAdminLoginApi = pathname === "/api/admin/verify-2fa";
 
-  // Skip rate limiting for static files and non-API routes early
-  if (shouldSkipRateLimit(pathname)) {
-    // Continue with session handling for non-rate-limited routes
-    const { supabaseResponse } = await updateSession(request);
-    return supabaseResponse;
+  // Skip entirely for static files to save execution time
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/public") ||
+    pathname.startsWith("/static") ||
+    pathname.match(/\.(jpeg|jpg|png|gif|svg|ico|css|js|woff|woff2)$/i)
+  ) {
+    return NextResponse.next();
   }
+
+  // Handle Supabase session for all routes first
+  const { supabaseResponse, user } = await updateSession(request);
 
   // Check if this path needs rate limiting
   const { shouldLimit, isSensitive } = shouldRateLimit(pathname);
@@ -64,9 +70,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Handle Supabase session for all other routes
-  const { supabaseResponse, user } = await updateSession(request);
-
   const applyResponseHeaders = (response: NextResponse) => {
     if (!rateLimitHeaders) {
       return response;
@@ -80,7 +83,7 @@ export async function middleware(request: NextRequest) {
   };
 
   // Protect admin API routes with the same admin session used by the dashboard.
-  if (pathname.startsWith("/api/admin") && !user) {
+  if (pathname.startsWith("/api/admin") && !isAdminLoginApi && !user) {
     return applyResponseHeaders(new NextResponse(
       JSON.stringify({
         success: false,
@@ -104,7 +107,7 @@ export async function middleware(request: NextRequest) {
   ) {
     // No user, redirect to login
     const url = request.nextUrl.clone();
-    url.pathname = "/admin-gate/login";
+    url.pathname = "/gate/login";
     return applyResponseHeaders(NextResponse.redirect(url));
   }
 
