@@ -13,10 +13,9 @@
  */
 
 import { createClient as createServerClient } from "@/utils/supabase/server";
-import { createClient as createBrowserClient } from "@/utils/supabase/client";
 import { generateSystemSnapshot } from "@/lib/discovery-engine";
 import { applySuggestion } from "@/lib/sandbox-executor";
-import { classifyRisk, validateAction, createApprovalRequest, logAuditEvent, AgentAction } from "./security-manager";
+import { classifyRisk, createApprovalRequest, logAuditEvent, AgentAction } from "./security-manager";
 import { storeMemory } from "./memory-store";
 import fs from "fs";
 import path from "path";

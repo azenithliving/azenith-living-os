@@ -1,111 +1,155 @@
 import { UltimateAgent } from "@/lib/ultimate-agent/agent-core";
-import { createClient } from "@/utils/supabase/server";
-import { getPendingApprovals, getSecurityStats } from "@/lib/ultimate-agent/security-manager";
+import { getPendingApprovals, getSecurityStats, logAuditEvent } from "@/lib/ultimate-agent/security-manager";
 import { getMetricsSnapshot, detectAnomalies, generateOpportunities } from "@/lib/ultimate-agent/predictive-engine";
 import { getActiveGoals } from "@/lib/ultimate-agent/memory-store";
-import { logAuditEvent } from "@/lib/ultimate-agent/security-manager";
+import { resolvePrimaryCompanyId } from "@/lib/company-resolver";
 
-/**
- * Get current user from session (proper auth)
- */
-async function getCurrentUserId(): Promise<string | null> {
-  try {
-    const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session?.user) {
-      return session.user.id;
-    }
-    
-    // Fallback: try to get from auth header or cookie
-    const authHeader = await Promise.resolve(null);
-    return null;
-  } catch (error) {
-    console.error("[UltimateAgent] Auth error:", error);
-    return null;
+export type ConversationMessage = { role: "user" | "assistant"; content: string };
+
+type CommandLogEntry = {
+  id: string;
+};
+
+function asUuidOrUndefined(value: string): string | undefined {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+    ? value
+    : undefined;
+}
+
+async function writeCommandLog(params: {
+  actorId: string;
+  command: string;
+  status: "pending" | "executed" | "failed";
+  resultSummary?: string;
+  payload?: Record<string, unknown>;
+}): Promise<CommandLogEntry | null> {
+  const { getSupabaseAdminClient } = await import("@/lib/supabase-admin");
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return null;
+
+  const basePayload = {
+    user_id: params.actorId,
+    command_text: params.command,
+    status: params.status,
+    result_summary: params.resultSummary || null,
+    parameters: params.payload || {},
+  };
+
+  // Schema version A (serial id + text user_id)
+  let insert = await supabase.from("immutable_command_log").insert(basePayload).select("id").single();
+  if (!insert.error && insert.data) {
+    return { id: String(insert.data.id) };
   }
+
+  // Schema version B (uuid user_id + execution_time_ms)
+  const uuidPayload = {
+    ...basePayload,
+    user_id: asUuidOrUndefined(params.actorId) || null,
+    execution_time_ms: 0,
+  };
+  insert = await supabase.from("immutable_command_log").insert(uuidPayload).select("id").single();
+  if (!insert.error && insert.data) {
+    return { id: String(insert.data.id) };
+  }
+
+  return null;
 }
 
 /**
  * POST handler - Main command processor
- * API Contract:
- * - type: "command" with payload.command
- * - type: "handle_approval" 
- * - type: "proactive_check"
  */
 export async function POST(req: Request) {
   const startTime = Date.now();
-  
+
   try {
-    // Get current user from session for audit logging
-    const userId = await getCurrentUserId();
-    
-    // Enforce real auth - reject unauthenticated requests
-    if (!userId) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Unauthorized - please login" }), 
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
-    }
-    
-    const actorId = userId;
-    
-    // Parse request body
+    const actorId = req.headers.get("x-admin-user-id") || "admin_dashboard";
+    const companyId = await resolvePrimaryCompanyId();
     const body = await req.json();
     const { type, payload } = body;
 
-    // Log the request
     await logAuditEvent(
       "agent_command",
       type,
       actorId,
-      { type, payload },
-      "success"
+      { type },
+      "success",
+      { companyId, actorUserId: asUuidOrUndefined(actorId) }
     );
 
-    // Route to appropriate handler
-    let result: { success: boolean; message: string; data?: unknown; actionTaken?: string; requiresApproval?: boolean; approvalRequestId?: string; suggestions?: string[] };
+    let result: {
+      success: boolean;
+      message: string;
+      data?: unknown;
+      actionTaken?: string;
+      requiresApproval?: boolean;
+      approvalRequestId?: string;
+      suggestions?: string[];
+    };
 
     switch (type) {
       case "command": {
-        const { command, context = {} } = payload;
-        
+        const { command, conversationHistory } = payload as {
+          command: string;
+          conversationHistory?: ConversationMessage[];
+        };
+
         if (!command) {
-          return new Response(
-            JSON.stringify({ success: false, error: "Missing command" }), 
-            { status: 400, headers: { "Content-Type": "application/json" } }
-          );
+          return new Response(JSON.stringify({ success: false, error: "Missing command" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
         }
 
+        const commandLog = await writeCommandLog({
+          actorId,
+          command,
+          status: "pending",
+          payload: { type, hasHistory: Array.isArray(conversationHistory) && conversationHistory.length > 0 },
+        });
+
         const agent = new UltimateAgent();
-        const cmdResult = await agent.processCommandWithResult(command, actorId);
-        
+        const cmdResult = await agent.processCommandWithResult(command, actorId, conversationHistory, {
+          companyId,
+          actorUserId: asUuidOrUndefined(actorId),
+          commandLogId: commandLog?.id,
+        });
+
         result = {
-          success: true,
+          success: !cmdResult.error,
           message: cmdResult.reply,
-          data: cmdResult,
+          data: cmdResult.data ?? cmdResult,
           actionTaken: cmdResult.actionTaken,
           requiresApproval: cmdResult.requiresApproval,
           approvalRequestId: cmdResult.approvalRequestId,
           suggestions: cmdResult.suggestions,
         };
+
+        if (commandLog?.id) {
+          await logAuditEvent(
+            "agent_command_result",
+            result.success ? "command_executed" : "command_failed",
+            actorId,
+            { type, commandLogId: commandLog.id, actionTaken: result.actionTaken },
+            result.success ? "success" : "failure",
+            { companyId, actorUserId: asUuidOrUndefined(actorId), commandLogId: commandLog.id }
+          );
+        }
         break;
       }
 
       case "handle_approval": {
         const { requestId, approved, reason } = payload;
-        
+
         if (!requestId) {
-          return new Response(
-            JSON.stringify({ success: false, error: "Missing requestId" }), 
-            { status: 400, headers: { "Content-Type": "application/json" } }
-          );
+          return new Response(JSON.stringify({ success: false, error: "Missing requestId" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
         }
 
         const agent = new UltimateAgent();
         const approvalResult = await agent.handleApproval(requestId, approved, actorId, reason);
-        
-        // Ensure action is executed after approval
+
         result = {
           success: approvalResult.success,
           message: approvalResult.message,
@@ -118,7 +162,7 @@ export async function POST(req: Request) {
       case "proactive_check": {
         const agent = new UltimateAgent();
         const checkResult = await agent.runProactiveCheck();
-        
+
         result = {
           success: checkResult.success,
           message: checkResult.message,
@@ -129,31 +173,32 @@ export async function POST(req: Request) {
 
       default:
         return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: `Unknown type: ${type}. Supported: command, handle_approval, proactive_check` 
-          }), 
+          JSON.stringify({
+            success: false,
+            error: `Unknown type: ${type}. Supported: command, handle_approval, proactive_check`,
+          }),
           { status: 400, headers: { "Content-Type": "application/json" } }
         );
     }
 
-    // Log execution time
     const executionTime = Date.now() - startTime;
     console.log(`[UltimateAgent] ${type} completed in ${executionTime}ms`);
 
     return Response.json({
       ...result,
-      executionTime
+      executionTime,
+      meta: { type, actorId, companyId },
     });
-
-  } catch (err: any) {
-    console.error("[UltimateAgent] API error:", err);
+  } catch (error) {
+    console.error("[UltimateAgent] API error:", error);
+    const err = error instanceof Error ? error : new Error("Unknown error");
     return new Response(
-      JSON.stringify({ 
-        success: false, 
+      JSON.stringify({
+        success: false,
         error: err.message,
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
-      }), 
+        stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+        meta: { route: "admin/agent/ultimate" },
+      }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
@@ -161,7 +206,6 @@ export async function POST(req: Request) {
 
 /**
  * GET handler - Query status, metrics, anomalies, opportunities, security, approvals
- * Query params: action=status|metrics|anomalies|opportunities|security|approvals
  */
 export async function GET(req: Request) {
   try {
@@ -174,9 +218,8 @@ export async function GET(req: Request) {
       case "status": {
         const agent = new UltimateAgent();
         const status = await agent.getAgentStatus();
-        
         const goals = await getActiveGoals("high");
-        
+
         result = {
           success: true,
           status: {
@@ -185,6 +228,9 @@ export async function GET(req: Request) {
             actionsToday: status.actionsToday,
             pendingApprovals: status.pendingApprovals,
             goalsActive: goals.goals?.length || 0,
+            anomaliesDetected: status.anomaliesDetected,
+            modelMesh: status.modelMesh || [],
+            capabilities: status.capabilities || [],
           },
         };
         break;
@@ -192,15 +238,12 @@ export async function GET(req: Request) {
 
       case "metrics": {
         const snapshot = await getMetricsSnapshot();
-        
+
         result = {
           success: true,
           snapshot: snapshot.snapshot
             ? {
-                visitors: {
-                  ...snapshot.snapshot.visitors,
-                  trend: "stable",
-                },
+                visitors: { ...snapshot.snapshot.visitors, trend: "stable" },
                 conversions: snapshot.snapshot.conversions,
                 inquiries: snapshot.snapshot.business.inquiries,
                 performance: snapshot.snapshot.performance,
@@ -217,27 +260,18 @@ export async function GET(req: Request) {
 
       case "anomalies": {
         const anomalyResult = await detectAnomalies();
-        
-        result = {
-          success: true,
-          anomalies: anomalyResult.anomalies || [],
-        };
+        result = { success: true, anomalies: anomalyResult.anomalies || [] };
         break;
       }
 
       case "opportunities": {
         const oppResult = await generateOpportunities();
-        
-        result = {
-          success: true,
-          opportunities: oppResult.opportunities || [],
-        };
+        result = { success: true, opportunities: oppResult.opportunities || [] };
         break;
       }
 
       case "security": {
         const securityStats = await getSecurityStats();
-        
         result = {
           success: true,
           stats: securityStats.stats || {
@@ -252,39 +286,41 @@ export async function GET(req: Request) {
 
       case "approvals": {
         const approvals = await getPendingApprovals();
-        
         result = {
           success: true,
-          requests: approvals.requests?.map(req => ({
-            id: req.id,
-            actionType: req.actionType,
-            description: req.description,
-            riskLevel: req.riskLevel,
-            requestedAt: req.requestedAt?.toISOString(),
-          })) || [],
+          requests:
+            approvals.requests?.map((req) => ({
+              id: req.id,
+              actionType: req.actionType,
+              description: req.description,
+              riskLevel: req.riskLevel,
+              requestedAt: req.requestedAt?.toISOString(),
+            })) || [],
         };
         break;
       }
 
       default:
         return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: `Unknown action: ${action}. Supported: status, metrics, anomalies, opportunities, security, approvals` 
-          }), 
+          JSON.stringify({
+            success: false,
+            error: `Unknown action: ${action}. Supported: status, metrics, anomalies, opportunities, security, approvals`,
+          }),
           { status: 400, headers: { "Content-Type": "application/json" } }
         );
     }
 
-    return Response.json(result);
-
+    return Response.json({
+      ...result,
+      meta: { action },
+    });
   } catch (error) {
     console.error("[UltimateAgent] GET error:", error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : "Unknown error" 
-      }), 
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }

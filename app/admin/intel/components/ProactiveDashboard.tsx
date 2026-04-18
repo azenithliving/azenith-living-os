@@ -29,7 +29,6 @@ import {
   RefreshCw,
   ChevronRight,
   Play,
-  Pause,
   Bell
 } from "lucide-react";
 

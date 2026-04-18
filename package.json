@@ -11,7 +11,7 @@
     "test-curation": "ts-node --transpile-only scripts/test-curation.ts",
     "prisma:generate": "prisma generate --schema=aaca/prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=aaca/prisma/schema.prisma",
-    "lint": "eslint . --max-warnings 0",
+    "lint": "eslint .",
     "lint:ci": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "typecheck:ci": "tsc --noEmit",

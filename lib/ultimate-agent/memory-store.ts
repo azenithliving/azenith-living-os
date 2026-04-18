@@ -38,6 +38,10 @@ export interface MemoryEntry {
   outcome?: "success" | "failure" | "pending" | "rejected";
   userFeedback?: "positive" | "negative" | "neutral";
   expiresAt?: Date;
+  companyId?: string;
+  actorUserId?: string;
+  sourceTable?: string;
+  sourceId?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -100,24 +104,46 @@ export async function storeMemory(
   const supabase = await createServerClient();
 
   try {
-    const { data, error } = await supabase
+    const insertPayload = {
+      type: entry.type,
+      category: entry.category,
+      content: entry.content,
+      context: entry.context || {},
+      priority: entry.priority,
+      outcome: entry.outcome || "pending",
+      user_feedback: entry.userFeedback || "neutral",
+      expires_at: entry.expiresAt?.toISOString(),
+      company_id: entry.companyId || null,
+      actor_user_id: entry.actorUserId || null,
+      source_table: entry.sourceTable || null,
+      source_id: entry.sourceId || null,
+    };
+
+    let { data, error } = await supabase
       .from("agent_memory")
-      .insert({
-        type: entry.type,
-        category: entry.category,
-        content: entry.content,
-        context: entry.context || {},
-        priority: entry.priority,
-        outcome: entry.outcome || "pending",
-        user_feedback: entry.userFeedback || "neutral",
-        expires_at: entry.expiresAt?.toISOString(),
-      })
+      .insert(insertPayload)
       .select("id")
       .single();
 
+    // Backward compatibility for older schemas without relation columns.
+    if (error && error.code === "42703") {
+      const legacyPayload = { ...insertPayload } as Record<string, unknown>;
+      delete legacyPayload.company_id;
+      delete legacyPayload.actor_user_id;
+      delete legacyPayload.source_table;
+      delete legacyPayload.source_id;
+      const legacyInsert = await supabase
+        .from("agent_memory")
+        .insert(legacyPayload)
+        .select("id")
+        .single();
+      data = legacyInsert.data;
+      error = legacyInsert.error;
+    }
+
     if (error) throw error;
 
-    return { success: true, id: data.id };
+    return { success: true, id: data?.id };
   } catch (error) {
     console.error("[MemoryStore] Failed to store memory:", error);
     return {
@@ -223,6 +249,10 @@ export async function searchMemories(
       outcome: row.outcome,
       userFeedback: row.user_feedback,
       expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
+      companyId: row.company_id || undefined,
+      actorUserId: row.actor_user_id || undefined,
+      sourceTable: row.source_table || undefined,
+      sourceId: row.source_id || undefined,
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
     }));

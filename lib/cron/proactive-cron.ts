@@ -5,7 +5,15 @@
  */
 
 import { runProactiveCheck, generateDailyReport } from "../ultimate-agent/agent-core";
-import { sendWhatsApp } from "../automation"; // Assume WhatsApp service
+
+type ProactiveData = {
+  anomalies?: unknown[];
+};
+
+async function sendWhatsAppAlert(to: string, message: string): Promise<void> {
+  // Placeholder integration to avoid blocking cron logic when WhatsApp transport changes.
+  console.log(`[ProactiveCron] WhatsApp alert to ${to}: ${message}`);
+}
 
 export interface CronConfig {
   proactiveInterval: string; // "0 */1 * * *" (hourly)
@@ -31,8 +39,13 @@ export async function startProactiveCron() {
   cron.schedule(config.proactiveInterval, async () => {
     console.log('🕐 Hourly proactive check...');
     const result = await runProactiveCheck();
-    if (result.success && result.data.anomalies?.length > 0) {
-      await sendWhatsApp(config.whatsappNumber, `⚠️ شذوذ مكتشفة: ${result.data.anomalies.length}\n${JSON.stringify(result.data.anomalies.slice(0,3))}`);
+    const data = (result.data || {}) as ProactiveData;
+    const anomalies = Array.isArray(data.anomalies) ? data.anomalies : [];
+    if (result.success && anomalies.length > 0) {
+      await sendWhatsAppAlert(
+        config.whatsappNumber,
+        `⚠️ شذوذ مكتشفة: ${anomalies.length}\n${JSON.stringify(anomalies.slice(0, 3))}`
+      );
     }
   });
 }
@@ -44,7 +57,7 @@ export async function startDailyReportCron() {
     console.log('📊 Daily report...');
     const report = await generateDailyReport();
     if (report.success) {
-      await sendWhatsApp(config.whatsappNumber, report.message);
+      await sendWhatsAppAlert(config.whatsappNumber, report.message);
     }
   });
 }

@@ -11,6 +11,7 @@ import {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  let rateLimitHeaders: Record<string, string> | null = null;
 
   // Skip rate limiting for static files and non-API routes early
   if (shouldSkipRateLimit(pathname)) {
@@ -55,17 +56,44 @@ export async function middleware(request: NextRequest) {
         );
       }
 
-      // Rate limit passed - add rate limit headers to response
-      const { supabaseResponse } = await updateSession(request);
-      supabaseResponse.headers.set("X-RateLimit-Limit", limit.toString());
-      supabaseResponse.headers.set("X-RateLimit-Remaining", remaining.toString());
-      supabaseResponse.headers.set("X-RateLimit-Reset", reset.toString());
-      return supabaseResponse;
+      rateLimitHeaders = {
+        "X-RateLimit-Limit": limit.toString(),
+        "X-RateLimit-Remaining": remaining.toString(),
+        "X-RateLimit-Reset": reset.toString(),
+      };
     }
   }
 
   // Handle Supabase session for all other routes
   const { supabaseResponse, user } = await updateSession(request);
+
+  const applyResponseHeaders = (response: NextResponse) => {
+    if (!rateLimitHeaders) {
+      return response;
+    }
+
+    Object.entries(rateLimitHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+
+    return response;
+  };
+
+  // Protect admin API routes with the same admin session used by the dashboard.
+  if (pathname.startsWith("/api/admin") && !user) {
+    return applyResponseHeaders(new NextResponse(
+      JSON.stringify({
+        success: false,
+        error: "Unauthorized",
+      }),
+      {
+        status: 401,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    ));
+  }
 
   // Check if accessing admin routes (except login pages)
   if (
@@ -77,7 +105,7 @@ export async function middleware(request: NextRequest) {
     // No user, redirect to login
     const url = request.nextUrl.clone();
     url.pathname = "/admin-gate/login";
-    return NextResponse.redirect(url);
+    return applyResponseHeaders(NextResponse.redirect(url));
   }
 
   // User is logged in, trying to access login page
@@ -85,11 +113,32 @@ export async function middleware(request: NextRequest) {
     // Redirect to dashboard
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
-    return NextResponse.redirect(url);
+    return applyResponseHeaders(NextResponse.redirect(url));
+  }
+
+  if (pathname.startsWith("/api/admin") && user) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-admin-user-id", user.id);
+
+    if (user.email) {
+      requestHeaders.set("x-admin-user-email", user.email);
+    }
+
+    const forwardedResponse = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      forwardedResponse.cookies.set(cookie);
+    });
+
+    return applyResponseHeaders(forwardedResponse);
   }
 
   // Important: return the supabaseResponse to ensure cookies are set
-  return supabaseResponse;
+  return applyResponseHeaders(supabaseResponse);
 }
 
 export const config = {

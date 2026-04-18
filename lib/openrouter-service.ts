@@ -81,12 +81,12 @@ const MODEL_PRIORITIES: Record<string, string> = {
   creative: "anthropic/claude-3.5-haiku",
   analysis: "openai/gpt-4o-mini",
   general: "meta-llama/llama-3.1-8b-instruct",
-  planning: "moonshotai/kimi-k2",
-  security: "anthropic/claude-3.5-haiku",
+  planning: "meta-llama/llama-3.3-70b-instruct:free",
+  security: "meta-llama/llama-3.3-70b-instruct:free",
 };
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1";
-const API_KEY = process.env.OPENROUTER_API_KEY || "";
+const API_KEY = process.env.OPENROUTER_API_KEY || (process.env.OPENROUTER_KEYS ? process.env.OPENROUTER_KEYS.split(',')[0] : "");
 
 /**
  * Get available free models from OpenRouter

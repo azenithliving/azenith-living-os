@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "app/api/admin/intel/relations/health/route.ts",
+    "app/api/admin/agent/ultimate/route.ts",
+    "app/api/admin/agent/smart/route.ts",
+    "app/api/admin/automation/route.ts",
+    "app/api/admin/mastermind/stats/route.ts",
+    "lib/architect-tools.ts",
+    "lib/discovery-engine.ts",
+    "lib/ultimate-agent/agent-core.ts",
+    "lib/ultimate-agent/memory-store.ts",
+    "lib/ultimate-agent/security-manager.ts",
+    "lib/company-resolver.ts",
+    "tests/intel-relations.test.ts",
+    "vitest.config.ts"
+  ]
+}

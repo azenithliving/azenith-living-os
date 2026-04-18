@@ -12,7 +12,7 @@
  */
 
 import { createClient as createServerClient } from "@/utils/supabase/server";
-import { storeMemory, createGoal, AgentGoal } from "./memory-store";
+import { storeMemory } from "./memory-store";
 
 // Analytics data point
 export interface DataPoint {
@@ -146,7 +146,6 @@ export async function getMetricsSnapshot(): Promise<{
     if (inquiryError) throw inquiryError;
 
     // Calculate unique visitors
-    const uniqueSessions = new Set(visitorStats?.map((v) => v.session_id));
     const uniqueVisitors = new Set(visitorStats?.map((v) => v.visitor_id));
 
     // Calculate conversion value
@@ -588,7 +587,7 @@ export async function generateStrategicRecommendations(): Promise<{
 
   try {
     // Get metrics and trends
-    const { snapshot } = await getMetricsSnapshot();
+    await getMetricsSnapshot();
     const { analysis: visitorTrend } = await analyzeTrend("visitors", 30);
     const { opportunities } = await generateOpportunities();
     const { anomalies } = await detectAnomalies();

@@ -14,6 +14,7 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from "fs";
 import { resolve, dirname, join, relative } from "path";
 import { getSystemStats } from "./sovereign-os";
@@ -72,7 +73,7 @@ interface SystemStatus {
 
 class SupremeArchitect {
   private static instance: SupremeArchitect;
-  private supabase: ReturnType<typeof createClient>;
+  private supabase: SupabaseClient<any>;
   private projectRoot: string;
   private conversationContext: Map<string, ArchitectMessage[]> = new Map();
 

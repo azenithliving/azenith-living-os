@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { resolvePrimaryCompanyId } from "@/lib/company-resolver";
+
+type AdminClient = NonNullable<ReturnType<typeof getSupabaseAdminClient>>;
+
+function apiSuccess(data: Record<string, unknown>) {
+  return NextResponse.json({
+    success: true,
+    ...data,
+  });
+}
+
+function apiError(error: string, status: number) {
+  return NextResponse.json({ success: false, error }, { status });
+}
 
 /**
  * GET /api/admin/mastermind/stats
@@ -7,64 +21,65 @@ import { createClient } from "@/utils/supabase/server";
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    
-    // Verify authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    const userId = request.headers.get("x-admin-user-id");
+    const companyId = await resolvePrimaryCompanyId();
+
+    if (!userId) {
+      return apiError("Unauthorized", 401);
+    }
+
+    const supabase = getSupabaseAdminClient();
+
+    if (!supabase) {
+      return apiError("Supabase admin client unavailable", 500);
     }
 
     // Check 2FA status
     const { data: user2FA } = await supabase
       .from("user_2fa")
       .select("is_enabled")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .single();
 
     if (!user2FA?.is_enabled) {
-      return NextResponse.json(
-        { error: "2FA required" },
-        { status: 403 }
-      );
+      return apiError("2FA required", 403);
     }
 
     // Fetch stats from multiple sources
-    const stats = await gatherMastermindStats(supabase, user.id);
+    const stats = await gatherMastermindStats(supabase, userId, companyId);
 
-    return NextResponse.json(stats);
+    return apiSuccess({
+      message: "Mastermind stats fetched",
+      data: stats,
+      meta: { actorId: userId, companyId },
+    });
 
   } catch (error) {
     console.error("Mastermind Stats Error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch stats" },
-      { status: 500 }
-    );
+    return apiError("Failed to fetch stats", 500);
   }
 }
 
-async function gatherMastermindStats(supabase: any, userId: string) {
+async function gatherMastermindStats(supabase: AdminClient, userId: string, companyId: string) {
   // 1. Command log stats
-  const { data: commandLogs, error: logError } = await supabase
+  const { data: commandLogs } = await supabase
     .from("immutable_command_log")
-    .select("status, executed_at, command_text")
+    .select("id, status, executed_at, command_text")
     .eq("user_id", userId)
     .order("executed_at", { ascending: false })
     .limit(100);
 
   // 2. API key health
-  const { data: apiKeys, error: keyError } = await supabase
+  const { data: apiKeys } = await supabase
     .from("api_keys")
     .select("provider, is_active, last_used_at")
     .eq("is_active", true);
 
   // 3. Failed login attempts (security metric)
-  const { data: failedAttempts, error: attemptError } = await supabase
+  const { data: failedAttempts } = await supabase
     .from("failed_login_attempts")
     .select("attempted_at")
+    .eq("company_id", companyId)
     .gte("attempted_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
   // Calculate metrics

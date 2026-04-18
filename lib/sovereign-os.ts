@@ -13,6 +13,7 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 
@@ -157,7 +158,7 @@ const SIMILARITY_THRESHOLD = 0.85; // For semantic cache
 
 class SovereignDatabase {
   private static instance: SovereignDatabase;
-  private supabase: ReturnType<typeof createClient> | null = null;
+  private supabase: SupabaseClient<any> | null = null;
 
   static getInstance(): SovereignDatabase {
     if (!SovereignDatabase.instance) {
@@ -166,7 +167,7 @@ class SovereignDatabase {
     return SovereignDatabase.instance;
   }
 
-  getClient(): ReturnType<typeof createClient> {
+  getClient(): SupabaseClient<any> {
     if (this.supabase) return this.supabase;
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -225,7 +226,7 @@ class ResourceShield {
 
     if (exactMatch) {
       // Record hit
-      await supabase.rpc("record_cache_hit", { p_content_hash: hash } as any);
+      await supabase.rpc("record_cache_hit", { p_content_hash: hash } as Record<string, unknown>);
       return {
         id: exactMatch.id as string,
         contentHash: exactMatch.content_hash as string,

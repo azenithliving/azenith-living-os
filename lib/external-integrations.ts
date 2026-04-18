@@ -4,7 +4,7 @@
  * Mobile command handling
  */
 
-import { processCommand } from "../ultimate-agent/agent-core";
+import { processCommand } from "./ultimate-agent/agent-core";
 
 export async function parseIncomingWhatsApp(message: string, from: string): Promise<string> {
   try {
@@ -26,7 +26,12 @@ export function setupIncomingHandlers() {
 }
 
 // Example webhook
-export async function whatsappWebhook(body: any): Promise<{ reply: string }> {
+export async function whatsappWebhook(body: {
+  message?: {
+    text?: string;
+    from?: string;
+  };
+}): Promise<{ reply: string }> {
   const message = body.message?.text || '';
   const from = body.message?.from || 'unknown';
   const reply = await parseIncomingWhatsApp(message, from);

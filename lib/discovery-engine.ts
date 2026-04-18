@@ -339,7 +339,7 @@ export async function discoverAutomationRules(): Promise<AutomationRule[]> {
     if (tableExists) {
       const { data, error } = await supabase
         .from("automation_rules")
-        .select("id, name, trigger, conditions, actions, last_executed, is_active");
+        .select("id, name, trigger, conditions, actions, last_executed, is_active, enabled");
 
       if (!error && data) {
         for (const row of data) {
@@ -350,7 +350,12 @@ export async function discoverAutomationRules(): Promise<AutomationRule[]> {
             conditions: row.conditions || {},
             actions: row.actions || {},
             lastExecuted: row.last_executed,
-            isActive: row.is_active || false,
+            isActive:
+              typeof row.is_active === "boolean"
+                ? row.is_active
+                : typeof row.enabled === "boolean"
+                ? row.enabled
+                : false,
           });
         }
       }

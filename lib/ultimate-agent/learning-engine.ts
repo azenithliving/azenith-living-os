@@ -17,7 +17,11 @@ export class LearningEngine {
   private rejectionThreshold = 2; // Avoid after 2 rejections
 
   // Analyze feedback and learn
-  async learnFromFeedback(memoryId: string, feedback: "positive" | "negative", reason: string): Promise<{ success: boolean; action: string }> {
+  async learnFromFeedback(
+    memoryId: string,
+    feedback: "positive" | "negative",
+    reason: string
+  ): Promise<{ success: boolean; action: string; rejectedType?: string }> {
     const result = await updateMemory(memoryId, { 
       userFeedback: feedback, 
       outcome: feedback === "positive" ? "success" : "failure" 
@@ -55,7 +59,8 @@ export class LearningEngine {
     });
 
     const typeCount = rejections.memories?.filter((m: MemoryEntry) => {
-      return (m.context as any)?.rejectedType === type;
+      const ctx = (m.context || {}) as { rejectedType?: string };
+      return ctx.rejectedType === type;
     }).length || 0;
 
     return typeCount >= this.rejectionThreshold;
@@ -77,11 +82,13 @@ export class LearningEngine {
     });
 
     const rejections = feedbackMemories.memories?.filter((m: MemoryEntry) => {
-      return (m.context as any)?.rejectedType;
+      const ctx = (m.context || {}) as { rejectedType?: string };
+      return Boolean(ctx.rejectedType);
     }) || [];
 
     const rejectionTypes = rejections.reduce((acc, m) => {
-      const type = (m.context as any)?.rejectedType || "unknown";
+      const ctx = (m.context || {}) as { rejectedType?: string };
+      const type = ctx.rejectedType || "unknown";
       acc[type] = (acc[type] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);

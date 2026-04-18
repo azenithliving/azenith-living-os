@@ -9,12 +9,50 @@ import { updateSiteSetting, createAutomationRule, getAnalyticsReport, getSystemH
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_KEYS?.split(",")[0]?.trim();
 const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 
+type SmartAction = "updateSiteSetting" | "createAutomationRule" | "getAnalytics" | "getSystemHealth" | "null" | null;
+
+interface SmartParseResult {
+  reply: string;
+  action: SmartAction;
+  params?: Record<string, unknown>;
+}
+
+function normalizeAction(action: unknown): SmartAction {
+  if (
+    action === "updateSiteSetting" ||
+    action === "createAutomationRule" ||
+    action === "getAnalytics" ||
+    action === "getSystemHealth" ||
+    action === "null" ||
+    action === null
+  ) {
+    return action;
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
   try {
+    const actorId = req.headers.get("x-admin-user-id");
+    if (!actorId) {
+      return Response.json(
+        { success: false, error: "Unauthorized", reply: "غير مصرح", meta: { route: "admin/agent/smart" } },
+        { status: 401 }
+      );
+    }
+
     const { message } = await req.json();
     
     if (!message || typeof message !== "string") {
-      return Response.json({ reply: "أهلاً بك! كيف أقدر أساعدك؟" }, { status: 400 });
+      return Response.json(
+        {
+          success: false,
+          error: "Invalid message",
+          reply: "أهلاً بك! كيف أقدر أساعدك؟",
+          meta: { route: "admin/agent/smart", actorId },
+        },
+        { status: 400 }
+      );
     }
 
     // System prompt for Egyptian dialect understanding
@@ -41,11 +79,7 @@ export async function POST(req: Request) {
 {"reply": "الرد بالعامية المصرية", "action": "updateSiteSetting|createAutomationRule|getAnalytics|getSystemHealth|null", "params": {}}`;
 
     // Call DeepSeek API
-    let parsedResponse: {
-      reply: string;
-      action: string | null;
-      params?: Record<string, unknown>;
-    };
+    let parsedResponse: SmartParseResult;
 
     try {
       const response = await fetch(DEEPSEEK_API_URL, {
@@ -72,7 +106,12 @@ export async function POST(req: Request) {
 
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content || "{}";
-      parsedResponse = JSON.parse(content);
+      const parsed = JSON.parse(content) as { reply?: string; action?: unknown; params?: Record<string, unknown> };
+      parsedResponse = {
+        reply: typeof parsed.reply === "string" ? parsed.reply : "تمت المعالجة.",
+        action: normalizeAction(parsed.action),
+        params: parsed.params || {},
+      };
     } catch (llmError) {
       // Fallback: keyword-based parsing
       console.error("LLM error, using fallback:", llmError);
@@ -85,13 +124,28 @@ export async function POST(req: Request) {
       try {
         switch (parsedResponse.action) {
           case "updateSiteSetting":
-            executionResult = await updateSiteSetting(parsedResponse.params as any);
+            executionResult = await updateSiteSetting((parsedResponse.params || {}) as {
+              key: "theme" | "seo" | "general";
+              value: Record<string, unknown>;
+            });
             break;
           case "createAutomationRule":
-            executionResult = await createAutomationRule(parsedResponse.params as any);
+            executionResult = await createAutomationRule((parsedResponse.params || {}) as {
+              name: string;
+              trigger:
+                | "page_visit"
+                | "form_submit"
+                | "booking_status_changed"
+                | "lead_updated"
+                | "time_delay"
+                | "user_registered";
+              conditions: Record<string, unknown>;
+              actions: Array<{ type: string; message?: string; intent?: string }>;
+              enabled?: boolean;
+            });
             break;
           case "getAnalytics":
-            executionResult = await getAnalyticsReport(parsedResponse.params as any);
+            executionResult = await getAnalyticsReport((parsedResponse.params || {}) as { days: 7 | 30 | 90 });
             break;
           case "getSystemHealth":
             executionResult = await getSystemHealth();
@@ -111,21 +165,27 @@ export async function POST(req: Request) {
     }
 
     return Response.json({ 
+      success: true,
       reply: parsedResponse.reply,
       action: parsedResponse.action,
-      executed: executionResult?.success || false
+      executed: executionResult?.success || false,
+      data: executionResult?.data || null,
+      meta: { route: "admin/agent/smart", actorId }
     });
 
   } catch (error) {
     console.error("[SmartAgent] Error:", error);
     return Response.json({ 
-      reply: "عذراً، حصل مشكلة في النظام. جرب تاني بعد شوية." 
+      success: false,
+      error: "Internal server error",
+      reply: "عذراً، حصل مشكلة في النظام. جرب تاني بعد شوية.",
+      meta: { route: "admin/agent/smart" },
     }, { status: 500 });
   }
 }
 
 // Fallback parsing when LLM is unavailable
-function fallbackParse(message: string): { reply: string; action: string | null; params?: Record<string, unknown> } {
+function fallbackParse(message: string): SmartParseResult {
   const lower = message.toLowerCase();
   
   // Greetings

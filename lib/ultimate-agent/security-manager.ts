@@ -68,6 +68,13 @@ export interface SecurityPolicy {
   notificationChannels: string[];
 }
 
+export interface RelationContext {
+  companyId?: string;
+  actorUserId?: string;
+  commandLogId?: string;
+  approvalRequestId?: string;
+}
+
 // Default security policy
 const DEFAULT_POLICY: SecurityPolicy = {
   autoApproveNormal: true,
@@ -171,7 +178,7 @@ export function classifyRisk(
   let riskLevel = rules.baseRisk;
 
   // Check for modifiers in payload
-  for (const [key, value] of Object.entries(action.payload)) {
+  for (const [key] of Object.entries(action.payload)) {
     if (rules.modifiers[key]) {
       riskLevel = rules.modifiers[key];
     }
@@ -224,7 +231,8 @@ export function validateAction(action: AgentAction): {
  */
 export async function createApprovalRequest(
   action: AgentAction,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  relationContext?: RelationContext
 ): Promise<{ success: boolean; request?: ApprovalRequest; error?: string }> {
   const supabase = await createServerClient();
 
@@ -232,20 +240,40 @@ export async function createApprovalRequest(
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour expiry
 
-    const { data, error } = await supabase
+    const approvalPayload = {
+      action_id: action.id || crypto.randomUUID(),
+      action_type: action.type,
+      description: action.description,
+      risk_level: action.riskLevel,
+      requested_at: new Date().toISOString(),
+      expires_at: expiresAt.toISOString(),
+      status: "pending",
+      metadata: metadata || action.payload || {},
+      company_id: relationContext?.companyId || null,
+      actor_user_id: relationContext?.actorUserId || null,
+      command_log_id: relationContext?.commandLogId || null,
+    };
+
+    let { data, error } = await supabase
       .from("approval_requests")
-      .insert({
-        action_id: action.id || crypto.randomUUID(),
-        action_type: action.type,
-        description: action.description,
-        risk_level: action.riskLevel,
-        requested_at: new Date().toISOString(),
-        expires_at: expiresAt.toISOString(),
-        status: "pending",
-        metadata: metadata || action.payload || {},
-      })
+      .insert(approvalPayload)
       .select("*")
       .single();
+
+    // Backward compatibility for older schemas without relation columns.
+    if (error && error.code === "42703") {
+      const legacyPayload = { ...approvalPayload } as Record<string, unknown>;
+      delete legacyPayload.company_id;
+      delete legacyPayload.actor_user_id;
+      delete legacyPayload.command_log_id;
+      const legacyInsert = await supabase
+        .from("approval_requests")
+        .insert(legacyPayload)
+        .select("*")
+        .single();
+      data = legacyInsert.data;
+      error = legacyInsert.error;
+    }
 
     if (error) throw error;
 
@@ -365,38 +393,67 @@ export async function approveRequest(
     let executedAction: { type: string; result: unknown } | undefined;
     
     try {
-      if (request.action_type === "site_theme_change") {
-        // Execute theme change
-        const metadata = request.metadata as { key?: "theme" | "seo" | "general"; value?: Record<string, unknown> } || {};
-        const themeKey: "theme" | "seo" | "general" = metadata.key || "theme";
-        const themeValue: Record<string, unknown> = metadata.value || {};
-        
-        const result = await import("@/lib/architect-tools").then(m => 
+      const metadata = (request.metadata as Record<string, unknown>) || {};
+
+      if (metadata.executor === "tool") {
+        const toolName = typeof metadata.toolName === "string" ? metadata.toolName : undefined;
+        const params =
+          metadata.params && typeof metadata.params === "object"
+            ? (metadata.params as Record<string, unknown>)
+            : {};
+
+        if (!toolName) {
+          return {
+            success: false,
+            error: "Approved request is missing toolName metadata",
+          };
+        }
+
+        const result = await import("@/lib/architect-tools").then((m) => m.executeTool(toolName, params));
+        if (!result.success) {
+          return {
+            success: false,
+            error: result.message || `Failed to execute approved tool "${toolName}"`,
+          };
+        }
+
+        executedAction = { type: toolName, result };
+      } else if (request.action_type === "site_theme_change" || request.action_type === "site_background_change") {
+        const themeKey = (metadata.key as "theme" | "seo" | "general") || "theme";
+        const themeValue =
+          metadata.value && typeof metadata.value === "object"
+            ? (metadata.value as Record<string, unknown>)
+            : {};
+
+        const result = await import("@/lib/architect-tools").then((m) =>
           m.updateSiteSetting({ key: themeKey, value: themeValue })
         );
         if (!result.success) {
           return {
             success: false,
-            error: result.message || "Failed to execute approved theme change",
+            error: result.message || "Failed to execute approved site setting change",
           };
         }
-        executedAction = { type: "site_theme_change", result };
-      } 
-      else if (request.action_type === "create_automation_rule") {
-        // Execute automation rule creation
-        const metadata = request.metadata as {
-          name?: string;
-          trigger?: "page_visit" | "form_submit" | "booking_status_changed" | "lead_updated" | "time_delay" | "user_registered";
-          conditions?: Record<string, unknown>;
-          actions?: Array<{ type: string; message?: string; intent?: string }>;
-        } || {};
-        
-        const result = await import("@/lib/architect-tools").then(m =>
+        executedAction = { type: request.action_type, result };
+      } else if (request.action_type === "create_automation_rule") {
+        const result = await import("@/lib/architect-tools").then((m) =>
           m.createAutomationRule({
-            name: metadata.name || "New automation rule",
-            trigger: metadata.trigger || "page_visit",
-            conditions: metadata.conditions || {},
-            actions: metadata.actions || [],
+            name: (metadata.name as string) || "New automation rule",
+            trigger:
+              (metadata.trigger as
+                | "page_visit"
+                | "form_submit"
+                | "booking_status_changed"
+                | "lead_updated"
+                | "time_delay"
+                | "user_registered") || "page_visit",
+            conditions:
+              metadata.conditions && typeof metadata.conditions === "object"
+                ? (metadata.conditions as Record<string, unknown>)
+                : {},
+            actions: Array.isArray(metadata.actions)
+              ? (metadata.actions as Array<{ type: string; message?: string; intent?: string }>)
+              : [],
             enabled: true,
           })
         );
@@ -531,19 +588,34 @@ export async function logAuditEvent(
   action: string,
   actor: string,
   details: Record<string, unknown>,
-  result: "success" | "failure" | "blocked"
+  result: "success" | "failure" | "blocked",
+  relationContext?: RelationContext
 ): Promise<void> {
   const supabase = await createServerClient();
 
   try {
-    await supabase.from("audit_log").insert({
+    const payload = {
       event_type: eventType,
       action,
       actor,
       details,
       result,
       timestamp: new Date().toISOString(),
-    });
+      company_id: relationContext?.companyId || null,
+      actor_user_id: relationContext?.actorUserId || null,
+      approval_request_id: relationContext?.approvalRequestId || null,
+      command_log_id: relationContext?.commandLogId || null,
+    };
+
+    const insertResult = await supabase.from("audit_log").insert(payload);
+    if (insertResult.error && insertResult.error.code === "42703") {
+      const legacyPayload = { ...payload } as Record<string, unknown>;
+      delete legacyPayload.company_id;
+      delete legacyPayload.actor_user_id;
+      delete legacyPayload.approval_request_id;
+      delete legacyPayload.command_log_id;
+      await supabase.from("audit_log").insert(legacyPayload);
+    }
   } catch (error) {
     console.error("[SecurityManager] Failed to log audit event:", error);
   }

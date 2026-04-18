@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Brain, BarChart3, Target, Code, Globe, Palette, Zap, Shield, Server, Activity, TrendingUp, AlertTriangle, CheckCircle, Clock, Search, Sparkles, Send, X, Menu, ChevronRight, ChevronDown, Users, Loader2, MemoryStick, Cpu, Key, FileText, Calendar, CreditCard, Plus, Trash2, Edit2, Lightbulb } from "lucide-react";
-import Link from "next/link";
+import { useState, useEffect, useCallback } from "react";
+import { Brain, BarChart3, Target, Code, Palette, Zap, Shield, Activity, TrendingUp, AlertTriangle, CheckCircle, Search, X, Users, Loader2, MemoryStick, Cpu, Key, FileText, Calendar, CreditCard, Plus, Trash2, Edit2, Lightbulb } from "lucide-react";
 import SmartSuggestions from "@/components/admin/SmartSuggestions";
 import { UltimateAgentChat } from "./components/UltimateAgentChat";
 import { ProactiveDashboard } from "./components/ProactiveDashboard";
@@ -65,14 +64,6 @@ interface AnalyticsMetrics {
   eventBreakdown: Record<string, number>;
 }
 
-interface ArchitectMessage {
-  id: string;
-  role: "user" | "architect";
-  content: string;
-  timestamp: Date;
-  codeBlocks?: Array<{ language: string; code: string; path?: string }>;
-}
-
 interface ThemeSettings {
   primaryColor: string;
   secondaryColor: string;
@@ -118,6 +109,13 @@ interface ContentContext {
 // ═══════════════════════════════════════════════════════════════════════════════
 // تبويب غرفة العمليات - War Room (REAL DATA)
 // ═══════════════════════════════════════════════════════════════════════════════
+function fetchAdmin(input: RequestInfo | URL, init?: RequestInit) {
+  return fetch(input, {
+    credentials: "include",
+    ...init,
+  });
+}
+
 function WarRoomTab() {
   const [health, setHealth] = useState<SystemHealthData | null>(null);
   const [arsenal, setArsenal] = useState<ArsenalData | null>(null);
@@ -132,8 +130,8 @@ function WarRoomTab() {
 
       const [healthRes, arsenalRes, mastermindRes] = await Promise.all([
         fetch("/api/system-health"),
-        fetch("/api/admin/arsenal"),
-        fetch("/api/admin/mastermind/stats"),
+        fetchAdmin("/api/admin/arsenal"),
+        fetchAdmin("/api/admin/mastermind/stats"),
       ]);
 
       const healthData = healthRes.ok ? await healthRes.json() : null;
@@ -379,11 +377,7 @@ function AnalyticsTab() {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<"7days" | "30days" | "90days">("30days");
 
-  useEffect(() => {
-    loadAnalytics();
-  }, [period]);
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/analytics?period=${period}`);
@@ -396,7 +390,11 @@ function AnalyticsTab() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [period]);
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [loadAnalytics]);
 
   const displayMetrics = metrics || {
     totalLeads: 0, uniqueVisitors: 0, totalRequests: 0, conversionRate: 0,
@@ -476,195 +474,6 @@ function AnalyticsTab() {
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// تبويب الذكاء - Intelligence & AI (Phase 2: Tool Execution Enabled)
-// ═══════════════════════════════════════════════════════════════════════════════
-function IntelligenceTab() {
-  const [messages, setMessages] = useState<ArchitectMessage[]>([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [executingTool, setExecutingTool] = useState(false);
-  const [lastTool, setLastTool] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const conversationIdRef = useRef(`conv_${Date.now()}`);
-
-  // Welcome message with Phase 2 capabilities
-  useEffect(() => {
-    setMessages([
-      {
-        id: "welcome",
-        role: "architect",
-        content: `👋 **أهلاً بيك! أنا الوكيل الذكي (Smart Agent)**
-
-🧠 **بفهم العامية المصرية ونفذ أوامر حقيقية:**
-
-• 🎨 **"غير لون الأزرار للذهبي"** → يتغير فوراً
-• 📊 **"كم زوار اليوم؟"** → بجيبك بالأرقام
-• ⚙️ **"أنشئ قاعدة أتمتة"** → بتتعمل تلقائياً
-• 🔍 **"فحص النظام"** → بجيك حالة الموقع
-
-جرب قول: "اهلاً"، "غير اللون"، أو "كم عدد الزوار"`,
-        timestamp: new Date(),
-      },
-    ]);
-  }, []);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
-
-    const userMessage: ArchitectMessage = {
-      id: `msg_${Date.now()}`,
-      role: "user",
-      content: input,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setLoading(true);
-    setExecutingTool(true);
-
-    try {
-      // Use Smart Agent API with DeepSeek
-      const response = await fetch("/api/admin/agent/smart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: input,
-        }),
-      });
-
-      const data = await response.json();
-
-      // Build response message
-      let responseContent = data.reply || "تم استلام رسالتك.";
-      
-      // Track if action was executed
-      if (data.executed) {
-        setLastTool(data.action || "smart_agent");
-      }
-
-      const architectMessage: ArchitectMessage = {
-        id: `msg_${Date.now()}_resp`,
-        role: "architect",
-        content: responseContent,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, architectMessage]);
-    } catch (error) {
-      console.error("Chat error:", error);
-      
-      const errorMessage: ArchitectMessage = {
-        id: `msg_${Date.now()}_error`,
-        role: "architect",
-        content: "❌ عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.",
-        timestamp: new Date(),
-      };
-      
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setLoading(false);
-      setExecutingTool(false);
-    }
-  };
-
-  // Quick action buttons for common commands
-  const quickActions = [
-    { label: "👋 اهلاً", command: "اهلا" },
-    { label: "🎨 لون ذهبي", command: "غير لون الأزرار للذهبي" },
-    { label: "📊 زوار اليوم", command: "كم عدد زوار اليوم" },
-    { label: "⚙️ قاعدة ترحيب", command: "أنشئ قاعدة ترحيب" },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-white">الذكاء والتطوير</h2>
-          <p className="text-sm text-[#C5A059]">Smart Agent - يفهم العامية المصرية وينفذ الأوامر</p>
-        </div>
-        {lastTool && (
-          <span className="px-3 py-1 rounded-full bg-[#C5A059]/20 text-[#C5A059] text-xs">
-            آخر أداة: {lastTool}
-          </span>
-        )}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-2">
-        {quickActions.map((action) => (
-          <button
-            key={action.label}
-            onClick={() => {
-              setInput(action.command);
-            }}
-            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs transition-colors"
-          >
-            {action.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Chat Messages */}
-      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 h-[400px] overflow-y-auto">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`mb-4 ${msg.role === "user" ? "text-left" : "text-right"}`}>
-            <div className={`inline-block max-w-[85%] rounded-xl p-3 ${
-              msg.role === "user" ? "bg-[#C5A059]/20 text-white" : "bg-white/10 text-white"
-            }`}>
-              <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
-              <p className="text-xs text-white/40 mt-1">
-                {msg.timestamp.toLocaleTimeString("ar-EG")}
-              </p>
-            </div>
-          </div>
-        ))}
-        
-        {/* Loading States */}
-        {loading && (
-          <div className="text-right mb-4">
-            <div className="inline-flex items-center gap-2 bg-white/10 text-white rounded-xl px-4 py-2">
-              <div className="w-4 h-4 border-2 border-[#C5A059] border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm">{executingTool ? "جاري التنفيذ..." : "جاري التفكير..."}</span>
-            </div>
-          </div>
-        )}
-        
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input Area */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="اسأل المهندس المعماري أو اطلب تنفيذ أمر... (مثال: 'أنشئ قاعدة أتمتة')"
-          className="flex-1 rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3 text-white placeholder:text-white/40 text-sm"
-        />
-        <button
-          onClick={sendMessage}
-          disabled={loading || !input.trim()}
-          className="rounded-xl bg-[#C5A059] px-4 py-3 text-[#1a1a1a] font-medium hover:bg-[#d8b56d] disabled:opacity-50"
-        >
-          <Send className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Help Text */}
-      <p className="text-xs text-white/40 text-center">
-        يمكن للمهندس المعماري تنفيذ: قواعد الأتمتة، إعدادات الموقع، تقارير التحليلات، فحص النظام
-      </p>
     </div>
   );
 }
@@ -848,7 +657,7 @@ function AutomationTab() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/automation");
+      const response = await fetchAdmin("/api/admin/automation");
       const data = await response.json();
       if (response.ok && data.success) {
         setRules(data.rules || []);
@@ -865,7 +674,7 @@ function AutomationTab() {
 
   const toggleRule = async (rule: AutomationRule) => {
     try {
-      const response = await fetch(`/api/admin/automation?id=${rule.id}`, {
+      const response = await fetchAdmin(`/api/admin/automation?id=${rule.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enabled: !rule.enabled }),
@@ -885,7 +694,7 @@ function AutomationTab() {
     if (!confirm("هل أنت متأكد من حذف هذه القاعدة؟")) return;
 
     try {
-      const response = await fetch(`/api/admin/automation?id=${ruleId}`, {
+      const response = await fetchAdmin(`/api/admin/automation?id=${ruleId}`, {
         method: "DELETE",
       });
 
@@ -935,7 +744,7 @@ function AutomationTab() {
       try {
         conditions = JSON.parse(formConditions || "{}");
         actions = JSON.parse(formActions || "{}");
-      } catch (jsonErr) {
+      } catch {
         alert("تنسيق JSON غير صالح في الشروط أو الإجراءات");
         setSubmitting(false);
         return;
@@ -951,7 +760,7 @@ function AutomationTab() {
 
       if (editingRule) {
         // Update existing rule
-        const response = await fetch(`/api/admin/automation?id=${editingRule.id}`, {
+        const response = await fetchAdmin(`/api/admin/automation?id=${editingRule.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
@@ -966,7 +775,7 @@ function AutomationTab() {
         }
       } else {
         // Create new rule
-        const response = await fetch("/api/admin/automation", {
+        const response = await fetchAdmin("/api/admin/automation", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
