@@ -3,6 +3,124 @@ import speakeasy from "speakeasy";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { sendSecurityAlert } from "@/lib/telegram-notify";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+
+const PRIMARY_ADMIN_EMAIL = (process.env.ADMIN_GATE_EMAIL || "azenithliving@gmail.com").trim().toLowerCase();
+const PRIMARY_ADMIN_PASSWORD = process.env.ADMIN_GATE_PASSWORD || "alaa92aziz";
+
+type User2FARecord = {
+  secret: string;
+  is_enabled: boolean;
+  backup_codes: string[];
+};
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+function isPrimaryAdminCredentials(email: string, password: string) {
+  return normalizeEmail(email) === PRIMARY_ADMIN_EMAIL && password === PRIMARY_ADMIN_PASSWORD;
+}
+
+async function ensurePrimaryAdminAuthUser(email: string, password: string) {
+  if (!isPrimaryAdminCredentials(email, password)) {
+    return { success: false as const, error: "unauthorized_credentials" };
+  }
+
+  const supabaseAdmin = getSupabaseAdminClient();
+  if (!supabaseAdmin) {
+    return { success: false as const, error: "missing_service_role" };
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+  const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+
+  if (listError) {
+    return { success: false as const, error: "list_users_failed" };
+  }
+
+  const existingUser = usersData.users.find((user) => normalizeEmail(user.email || "") === normalizedEmail);
+
+  if (!existingUser) {
+    const { data: createdUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email: normalizedEmail,
+      password,
+      email_confirm: true,
+      user_metadata: {
+        role: "master_admin",
+        is_primary_admin: true,
+      },
+    });
+
+    if (createError || !createdUser.user) {
+      return { success: false as const, error: "create_user_failed" };
+    }
+
+    return { success: true as const, userId: createdUser.user.id };
+  }
+
+  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+    password,
+    email_confirm: true,
+    user_metadata: {
+      ...(existingUser.user_metadata && typeof existingUser.user_metadata === "object" ? existingUser.user_metadata : {}),
+      role: "master_admin",
+      is_primary_admin: true,
+    },
+  });
+
+  if (updateError) {
+    return { success: false as const, error: "update_user_failed" };
+  }
+
+  return { success: true as const, userId: existingUser.id };
+}
+
+async function resolveUser2FARecord(userId: string, email: string): Promise<User2FARecord | null> {
+  const supabaseAdmin = getSupabaseAdminClient();
+
+  const readByUserId = async () => {
+    const client = supabaseAdmin ?? await createClient();
+    const { data } = await client
+      .from("user_2fa")
+      .select("secret, is_enabled, backup_codes")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    return data as User2FARecord | null;
+  };
+
+  const userScopedRecord = await readByUserId();
+  if (userScopedRecord) {
+    return userScopedRecord;
+  }
+
+  const client = supabaseAdmin ?? await createClient();
+  const normalizedEmail = normalizeEmail(email);
+  const { data: legacyRecord } = await client
+    .from("user_2fa")
+    .select("secret, is_enabled, backup_codes")
+    .eq("email", normalizedEmail)
+    .maybeSingle();
+
+  if (!legacyRecord) {
+    return null;
+  }
+
+  await client
+    .from("user_2fa")
+    .update({
+      user_id: userId,
+      email: normalizedEmail,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("email", normalizedEmail);
+
+  return legacyRecord as User2FARecord;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,30 +143,38 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
+    const normalizedEmail = normalizeEmail(email);
 
     // Step 1: Sign in with email and password
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
+    let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
       password,
     });
 
     if (authError || !authData.user) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 }
-      );
+      const provisionResult = await ensurePrimaryAdminAuthUser(normalizedEmail, password);
+      if (provisionResult.success) {
+        const retry = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password,
+        });
+        authData = retry.data;
+        authError = retry.error;
+      }
+
+      if (authError || !authData?.user) {
+        return NextResponse.json(
+          { error: "Invalid email or password" },
+          { status: 401 }
+        );
+      }
     }
 
     const user = authData.user;
 
     // Step 2: Fetch 2FA data for the user
-    const { data: user2FA, error: fetchError } = await supabase
-      .from("user_2fa")
-      .select("secret, is_enabled, backup_codes")
-      .eq("user_id", user.id)
-      .single();
-
-    if (fetchError || !user2FA) {
+    const user2FA = await resolveUser2FARecord(user.id, user.email || normalizedEmail);
+    if (!user2FA) {
       return NextResponse.json(
         { error: "2FA not setup for this user" },
         { status: 400 }
