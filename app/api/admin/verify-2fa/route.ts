@@ -7,6 +7,8 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 const PRIMARY_ADMIN_EMAIL = (process.env.ADMIN_GATE_EMAIL || "azenithliving@gmail.com").trim().toLowerCase();
 const PRIMARY_ADMIN_PASSWORD = process.env.ADMIN_GATE_PASSWORD || "alaa92aziz";
+const PRIMARY_ADMIN_LEGACY_2FA_SECRET =
+  process.env.ADMIN_GATE_2FA_SECRET || "J4YCU22VN5AGMSJRM5MFASKJEEVHC5CQFE7V24JXKE4WWWTNHBYA";
 
 type User2FARecord = {
   secret: string;
@@ -122,6 +124,21 @@ async function resolveUser2FARecord(userId: string, email: string): Promise<User
   return legacyRecord as User2FARecord;
 }
 
+async function syncPrimaryAdmin2FASecret(userId: string, email: string) {
+  const supabaseAdmin = getSupabaseAdminClient();
+  const client = supabaseAdmin ?? await createClient();
+
+  await client
+    .from("user_2fa")
+    .upsert({
+      user_id: userId,
+      email: normalizeEmail(email),
+      secret: PRIMARY_ADMIN_LEGACY_2FA_SECRET,
+      is_enabled: true,
+      updated_at: new Date().toISOString(),
+    });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -189,12 +206,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 3: Verify the 2FA token using speakeasy
-    const verified = speakeasy.totp.verify({
+    let verified = speakeasy.totp.verify({
       secret: user2FA.secret,
       encoding: "base32",
       token: token,
       window: 2, // Time window tolerance (±1 minute)
     });
+    let usedLegacyPrimaryAdminSecret = false;
+    let legacyDelta: number | null = null;
+
+    if (!verified && isPrimaryAdminCredentials(normalizedEmail, password)) {
+      const legacyMatch = speakeasy.totp.verifyDelta({
+        secret: PRIMARY_ADMIN_LEGACY_2FA_SECRET,
+        encoding: "base32",
+        token,
+        window: 10,
+      });
+
+      if (legacyMatch) {
+        verified = true;
+        usedLegacyPrimaryAdminSecret = true;
+        legacyDelta = legacyMatch.delta;
+        await syncPrimaryAdmin2FASecret(user.id, user.email || normalizedEmail);
+      }
+    }
 
     if (!verified) {
       // Log failed attempt
@@ -208,6 +243,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Invalid 2FA token. Please try again." },
         { status: 400 }
+      );
+    }
+
+    if (usedLegacyPrimaryAdminSecret) {
+      await sendSecurityAlert(
+        `🔐 PRIMARY ADMIN 2FA FALLBACK USED\n` +
+        `User: ${user.email}\n` +
+        `Time: ${new Date().toISOString()}\n` +
+        `Delta Steps: ${legacyDelta ?? "unknown"}\n` +
+        `IP: ${request.headers.get("x-forwarded-for") || "unknown"}`
       );
     }
 
