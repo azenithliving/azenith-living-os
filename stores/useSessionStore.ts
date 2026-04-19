@@ -143,7 +143,6 @@ const DEFAULT_LANGUAGE: Language = "ar"; // Default to Arabic for Egyptian marke
 const UPDATE_THROTTLE_MS = 500; // 500ms throttle for store updates
 
 // Throttle utility for store updates
-// Uses ReturnType<typeof setTimeout> for browser+Node.js compatibility
 let lastUpdateTime = 0;
 let pendingUpdate: (() => void) | null = null;
 let throttleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -153,17 +152,13 @@ function throttledSet(setFn: () => void) {
   const timeSinceLastUpdate = now - lastUpdateTime;
   
   if (timeSinceLastUpdate >= UPDATE_THROTTLE_MS) {
-    // Execute immediately if enough time has passed
     lastUpdateTime = now;
     setFn();
   } else {
-    // Queue for later execution
     pendingUpdate = setFn;
-    
     if (throttleTimer) {
       clearTimeout(throttleTimer);
     }
-    
     throttleTimer = setTimeout(() => {
       if (pendingUpdate) {
         lastUpdateTime = Date.now();
@@ -202,14 +197,14 @@ const useSessionStore = create<SessionState>()(
       // Multilingual Engine State
       language: DEFAULT_LANGUAGE,
 
-      // Behavioral Intelligence - starts with defaults
+      // Behavioral Intelligence
       userPersona: {
         certainty: "Low",
         interestLevel: "Low",
       },
       behavioralReport: null,
       
-      // Neural Analytics: Initialize psychological profile
+      // Neural Analytics
       psychologicalProfile: {
         preferredMaterials: [],
         lightingPreference: null,
@@ -235,16 +230,13 @@ const useSessionStore = create<SessionState>()(
         interactedImages: [],
       },
 
-      // Hydration guard - starts false, set to true after rehydration
       isHydrated: false,
 
       updateProfile: (updates) => throttledSet(() => set((state) => {
         const newState = { ...state, ...updates };
-        // Sync style to selectedStyle for consistency
         if (updates.style && updates.style !== state.style) {
           newState.selectedStyle = updates.style;
         }
-        // Update userProfile with any profile-related changes
         const profileUpdates: UserProfile = {};
         if (updates.roomType) profileUpdates.roomType = updates.roomType;
         if (updates.budget) profileUpdates.budget = updates.budget;
@@ -274,9 +266,6 @@ const useSessionStore = create<SessionState>()(
           intentProfile: profileUpdate,
           styleSwitches: switchesUpdate
         }));
-        if (process.env.NODE_ENV !== "production") {
-          console.log("Interaction:", type, { leadScore: newLeadScore, profile: profileUpdate });
-        }
       },
 
       trackEvent: (type, value) => {
@@ -284,13 +273,9 @@ const useSessionStore = create<SessionState>()(
         const newScore = state.score + getEventWeight(type);
         const intent = classifyIntent(newScore);
         set((state) => ({ ...state, score: newScore, intent }));
-        if (process.env.NODE_ENV !== "production") {
-          console.log("Event:", type, value, { score: newScore, intent });
-        }
       },
 
       setSelectedStyle: (style: string) => set((state) => {
-        // Track style switch if different from current
         if (state.selectedStyle !== style && state.selectedStyle !== "") {
           get().processInteraction("style_switch", 2);
         }
@@ -298,7 +283,7 @@ const useSessionStore = create<SessionState>()(
         return {
           ...state,
           selectedStyle: style,
-          style: style, // Sync with profile style
+          style: style,
           userProfile: { ...state.userProfile, style }
         };
       }),
@@ -315,38 +300,28 @@ const useSessionStore = create<SessionState>()(
       setHydrated: (value: boolean) => set((state) => ({ ...state, isHydrated: value })),
 
       setLanguage: (lang: Language) => set((state) => {
-        // Dispatch custom event for components that aren't using the store directly
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("languagechange", { detail: lang }));
         }
         return { ...state, language: lang };
       }),
 
-      // Neural Analytics: Track weighted interactions with psychological profiling
       trackNeuralInteraction: (imageId, interactionType, metadata) => set((state) => {
         const weights = { hover: 2, modal: 5, download: 10, reject: 1 };
         const weight = weights[interactionType];
         const now = Date.now();
         
-        // Update interaction scores
         const newInteractionScores = {
           ...state.psychologicalProfile.interactionScores,
           [`${interactionType}Score`]: state.psychologicalProfile.interactionScores[`${interactionType}Score`] + weight,
           total: state.psychologicalProfile.interactionScores.total + weight,
         };
         
-        // Add to interacted images history
         const newInteractedImages = [
           ...state.psychologicalProfile.interactedImages,
-          {
-            id: imageId,
-            timestamp: now,
-            interactionType,
-            metadata,
-          },
+          { id: imageId, timestamp: now, interactionType, metadata },
         ];
         
-        // Update color psychology if metadata has colors
         const newColorPsychology = { ...state.psychologicalProfile.colorPsychology };
         if (metadata?.colorPalette) {
           metadata.colorPalette.forEach((color) => {
@@ -356,7 +331,6 @@ const useSessionStore = create<SessionState>()(
           });
         }
         
-        // Update spatial focus if metadata has room type
         const newSpatialFocus = { ...state.psychologicalProfile.spatialFocus };
         if (metadata?.roomType) {
           const roomKey = metadata.roomType.toLowerCase().replace(/\s+/g, '') as keyof typeof newSpatialFocus;
@@ -365,7 +339,6 @@ const useSessionStore = create<SessionState>()(
           }
         }
         
-        // Update preferred materials
         const newPreferredMaterials = [...state.psychologicalProfile.preferredMaterials];
         if (metadata?.materials) {
           metadata.materials.forEach((material) => {
@@ -374,9 +347,6 @@ const useSessionStore = create<SessionState>()(
             }
           });
         }
-        
-        // Log for debugging
-        console.log(`[Neural Analytics] ${interactionType} on image ${imageId}: +${weight} points (Total: ${newInteractionScores.total})`);
         
         return {
           psychologicalProfile: {
@@ -387,7 +357,6 @@ const useSessionStore = create<SessionState>()(
             spatialFocus: newSpatialFocus,
             preferredMaterials: newPreferredMaterials,
           },
-          // Also update the main score for backward compatibility
           score: state.score + weight,
         };
       }),
@@ -442,7 +411,6 @@ const useSessionStore = create<SessionState>()(
     {
       name: "azenith-session",
       storage: createJSONStorage(() => localStorage),
-      // Persist ALL state including UI state and room intents
       partialize: (state) => ({
         sessionId: state.sessionId,
         score: state.score,
@@ -464,69 +432,38 @@ const useSessionStore = create<SessionState>()(
         userPersona: state.userPersona,
         behavioralReport: state.behavioralReport,
       }),
-      onRehydrateStorage: () => (state, error) => {
-        if (error) {
-          console.error("Session store rehydration error:", error);
-        }
-        // Set hydrated flag after rehydration completes
+      onRehydrateStorage: () => (state) => {
         if (state) {
           state.setHydrated(true);
-        }
-        if (process.env.NODE_ENV !== "production") {
-          console.log("Session store rehydrated:", state?.selectedStyle, state?.leadScore, state?.roomIntent);
         }
       },
     }
   )
 );
 
-// Hydration-aware hook helper for components
 export function useHydrationReady() {
   return useSessionStore((state) => state.isHydrated);
 }
 
-// Helper to get persisted style safely
 export function usePersistedStyle(defaultStyle = DEFAULT_STYLE) {
   const selectedStyle = useSessionStore((state) => state.selectedStyle);
   const isHydrated = useSessionStore((state) => state.isHydrated);
-  // Return default during SSR/hydration to prevent mismatch
   return isHydrated ? selectedStyle : defaultStyle;
 }
 
-/**
- * AI Summary Prep: Selector that formats leadScore and profile into LLM-ready prompt
- * Usage: const prompt = getAIPersonaPrompt(useSessionStore.getState());
- */
 export function getAIPersonaPrompt(state: SessionState): string {
-  const {
-    leadScore,
-    intent,
-    roomIntent,
-    styleSwitches,
-    userPersona,
-    behavioralReport,
-    userProfile,
-  } = state;
-
+  const { leadScore, intent, roomIntent, styleSwitches, userPersona, behavioralReport, userProfile } = state;
   const stylePrefs = userProfile.stylePreferences || {};
   const styleEntries = Object.entries(stylePrefs);
-
-  // Build focused rooms/furniture list
   const focusedRooms = roomIntent.slice(0, 5).join(", ") || "None tracked";
+  const styleAffinity = styleEntries.map(([style, data]) => `${style}(${data.roomCount} rooms)`).join(", ") || "No style preferences";
 
-  // Build style affinity string
-  const styleAffinity = styleEntries
-    .map(([style, data]) => `${style}(${data.roomCount} rooms)`)
-    .join(", ") || "No style preferences";
-
-  // Determine budget estimate based on lead score
   let budgetEstimate = "Unknown";
   if (leadScore > 70) budgetEstimate = "Premium/Luxury (High Intent)";
   else if (leadScore > 40) budgetEstimate = "Mid-to-High Range";
   else if (leadScore > 20) budgetEstimate = "Exploring Options";
   else budgetEstimate = "Early Research Phase";
 
-  // Format the prompt for LLM
   return `## Lead Analysis Request
 
 **Lead Score:** ${leadScore}/100
@@ -559,13 +496,9 @@ Analyze this luxury real estate visitor profile and provide:
 4. Sales approach recommendation in Arabic`;
 }
 
-}
-
 if (typeof window !== "undefined") {
   let syncTimeout: ReturnType<typeof setTimeout> | null = null;
-  
   useSessionStore.subscribe((state, prevState) => {
-    // Only sync if important fields changed
     if (
       state.leadScore !== prevState.leadScore ||
       state.intent !== prevState.intent ||
@@ -575,7 +508,6 @@ if (typeof window !== "undefined") {
       state.score !== prevState.score
     ) {
       if (syncTimeout) clearTimeout(syncTimeout);
-      
       syncTimeout = setTimeout(() => {
         const data = {
           sessionId: state.sessionId,
@@ -588,19 +520,13 @@ if (typeof window !== "undefined") {
           lastPage: window.location.pathname,
           language: state.language
         };
-        
-        try {
-          // Use fetch with keepalive as a fallback to beacon for larger payloads
-          fetch('/api/analytics/session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-            keepalive: true
-          }).catch(() => { /* silent fail for background sync */ });
-        } catch (e) {
-          // Ignore
-        }
-      }, 2000); // 2-second debounce
+        fetch('/api/analytics/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          keepalive: true
+        }).catch(() => {});
+      }, 2000);
     }
   });
 }
