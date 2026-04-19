@@ -157,56 +157,66 @@ export async function routeRequest(
     lastError = "No DeepSeek keys found in environment variables.";
   }
 
-  // Fallback to OpenRouter
-  try {
-    const model = request.modelPreference || getBestModelForTask(detectTaskType(request.prompt));
-    
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-      "X-Title": "Azenith Sovereign",
-    };
+  // Fallback to OpenRouter with Free Model Rotation
+  const STABLE_FREE_MODELS = [
+    "google/gemini-flash-1.5-8b:free",
+    "google/gemini-2.0-flash-exp:free",
+    "meta-llama/llama-3.1-8b-instruct:free",
+    "mistralai/mistral-7b-instruct:free",
+    "qwen/qwen-2-7b-instruct:free",
+    "microsoft/phi-3-mini-128k-instruct:free"
+  ];
 
-    if (API_KEY) {
-      headers["Authorization"] = `Bearer ${API_KEY}`;
-    }
-
-    const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        model,
-        messages: [
-          ...(request.systemPrompt ? [{ role: "system", content: request.systemPrompt }] : []),
-          { role: "user", content: request.prompt },
-        ],
-        temperature: request.temperature ?? 0.7,
-        max_tokens: request.maxTokens ?? 2048,
-      }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        success: true,
-        content: data.choices[0]?.message?.content || "",
-        model: data.model || model,
-        usage: data.usage,
+  for (const modelId of STABLE_FREE_MODELS) {
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        "X-Title": "Azenith Sovereign Free Mode",
       };
-    }
 
-    const errorData = await response.json().catch(() => ({}));
-    lastError += ` | OpenRouter Error (${response.status}): ${errorData.error?.message || "Rate limited"}`;
-  } catch (error) {
-    console.error("OpenRouter request failed:", error);
-    lastError += ` | OpenRouter Fetch Failed: ${error instanceof Error ? error.message : String(error)}`;
+      if (API_KEY) {
+        headers["Authorization"] = `Bearer ${API_KEY}`;
+      }
+
+      const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          model: modelId,
+          messages: [
+            ...(request.systemPrompt ? [{ role: "system", content: request.systemPrompt }] : []),
+            { role: "user", content: request.prompt },
+          ],
+          temperature: request.temperature ?? 0.7,
+          max_tokens: request.maxTokens ?? 1000,
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          success: true,
+          content: data.choices[0]?.message?.content || "",
+          model: modelId,
+          usage: data.usage,
+        };
+      }
+      
+      const errorData = await response.json().catch(() => ({}));
+      lastError += ` | ${modelId.split('/')[1]}: ${response.status} ${errorData.error?.message || "Busy"}`;
+      console.warn(`Model ${modelId} failed, trying next...`);
+    } catch (error) {
+      lastError += ` | ${modelId}: Fetch error`;
+    }
   }
 
   return {
     success: false,
     content: "",
     model: "none",
-    error: lastError || "All AI providers failed",
+    error: lastError || "All free models are currently overloaded. Please wait a few seconds.",
   };
 }
 
