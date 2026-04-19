@@ -177,24 +177,18 @@ async function notifyAdminUnknownQuestion(question: string, sessionId: string, u
     const adminPhone = process.env.ADMIN_WHATSAPP_PHONE || "01090819584";
     const displayName = userName || "زائر مجهول";
     
-    console.log(`[Consultant] Manual Review Needed: "${question}"`);
+    console.log(`[Consultant] Processing unknown question: "${question}" for session ${sessionId}`);
 
-    // 1. Log to Database FIRST (Most reliable for Dashboard)
+    // 1. Log to Database (for Admin Dashboard)
     const supabaseAdmin = getSupabaseAdminClient();
     if (supabaseAdmin) {
-      // Direct insertion into the dedicated table
       const { error: dbErr } = await supabaseAdmin.from("consultant_pending_questions").insert({
         session_id: sessionId,
         question: question,
         status: 'pending',
         created_at: new Date().toISOString()
       });
-      
-      if (dbErr) {
-        console.error("[Consultant] Database log failed:", dbErr);
-      } else {
-        console.log("[Consultant] Question logged to Dashboard successfully");
-      }
+      if (dbErr) console.error("[Consultant] DB Insert Error:", dbErr);
     }
 
     // 2. Prepare Notification Message
@@ -202,16 +196,16 @@ async function notifyAdminUnknownQuestion(question: string, sessionId: string, u
 -----------------------
 👤 العميل: ${displayName}
 ❓ السؤال: ${question}
+🆔 الجلسة: ${sessionId}
 -----------------------
 💡 يرجى الرد عبر لوحة التحكم لتدريب المستشار.`;
 
-    // 3. Try WhatsApp/Telegram via internal API (Secondary)
+    // 3. Trigger Communication Agent (WhatsApp/Telegram)
     const internalApiKey = process.env.INTERNAL_API_KEY;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
     try {
-      // We don't await this to avoid blocking the user response if WhatsApp is slow
-      fetch(`${siteUrl}/api/admin/agent/communication`, {
+      await fetch(`${siteUrl}/api/admin/agent/communication`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -222,12 +216,13 @@ async function notifyAdminUnknownQuestion(question: string, sessionId: string, u
           recipient: adminPhone,
           message
         })
-      }).catch(e => console.error("WhatsApp async error:", e));
+      });
+      console.log(`[Consultant] Notification signal sent to Communication Agent`);
     } catch (whErr) {
-      console.error("[Consultant] Communication trigger error:", whErr);
+      console.error("[Consultant] Communication Agent call failed:", whErr);
     }
   } catch (err) {
-    console.error("[Consultant] notifyAdminUnknownQuestion error:", err);
+    console.error("[Consultant] Global notify error:", err);
   }
 }
 
@@ -253,8 +248,7 @@ export async function POST(
     const sessionId = providedSessionId || generateSessionId();
 
     // Check if in Admin Learning Mode
-    // We trust the body.isAdmin ONLY if it's a trusted internal request or has valid session
-    const adminMode = body.isAdmin === true || isAdmin(sessionId, userEmail);
+    const adminMode = isAdmin(sessionId, userEmail);
 
     // ADMIN LEARNING MODE
     if (adminMode) {
@@ -303,7 +297,7 @@ export async function POST(
     if (!aiResult.success) {
       console.error("[Consultant] AI error:", aiResult.error);
       return NextResponse.json(
-        { error: "Failed to generate response", details: aiResult.error },
+        { error: "Failed to generate response" },
         { status: 500 }
       );
     }

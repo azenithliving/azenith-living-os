@@ -15,18 +15,15 @@ interface Message {
 
 interface KnowledgeItem {
   id: string;
-  key: string;
-  value: string;
-  category: string;
-  usage_count: number;
+  instruction: string;
   created_at: string;
 }
 
 interface PendingQuestion {
   id: string;
   question: string;
-  asked_count: number;
-  answered: boolean;
+  session_id: string;
+  status: string;
   created_at: string;
 }
 
@@ -70,13 +67,17 @@ function SalesManagerTab() {
   const [knowledge, setKnowledge] = useState<KnowledgeItem[]>([]);
   const [pendingQuestions, setPendingQuestions] = useState<PendingQuestion[]>([]);
   const [activeSubTab, setActiveSubTab] = useState<"chat" | "knowledge" | "questions">("chat");
+  const [newInstruction, setNewInstruction] = useState("");
+  const [savingInstruction, setSavingInstruction] = useState(false);
+  const [answeringId, setAnsweringId] = useState<string | null>(null);
+  const [answerText, setAnswerText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMessages([
       {
         role: "assistant",
-        content: "👋 أهلاً بك في لوحة قائد المبيعات!\n\n📚 أنا المتدرب المطور الذكي. أقترح عليك:\n• التوجيهات الأكثر استخداماً لتحسينها\n• الأسئلة المتكررة لإضافتها للمعرفة\n• تحليل أسبوعي للزوار والتحويلات\n\n✍️ اكتب أي معلومة جديدة وسأحفظها في قاعدة المعرفة.",
+        content: "👋 أهلاً في لوحة قائد المبيعات!\n\n📚 يمكنك:\n• إضافة معلومات حقيقية في تبويب 'المعرفة' ليستخدمها المستشار\n• الرد على الأسئلة المعلقة في تبويب 'الأسئلة'\n\n✍️ اكتب أي رسالة لتدريب المستشار.",
         timestamp: new Date().toISOString(),
       },
     ]);
@@ -90,10 +91,10 @@ function SalesManagerTab() {
 
   const loadKnowledge = async () => {
     try {
-      const response = await fetch("/api/sales-leader/knowledge");
+      const response = await fetch("/api/consultant/learnings");
       if (response.ok) {
         const data = await response.json();
-        setKnowledge(data.knowledge || []);
+        setKnowledge(data.learnings || []);
       }
     } catch (error) {
       console.error("[SalesLeader] Error loading knowledge:", error);
@@ -102,13 +103,59 @@ function SalesManagerTab() {
 
   const loadPendingQuestions = async () => {
     try {
-      const response = await fetch("/api/sales-leader/pending");
+      const response = await fetch("/api/consultant/pending-questions");
       if (response.ok) {
         const data = await response.json();
-        setPendingQuestions(data.pending || []);
+        setPendingQuestions(data.questions || []);
       }
     } catch (error) {
       console.error("[SalesLeader] Error loading pending:", error);
+    }
+  };
+
+  const saveInstruction = async () => {
+    if (!newInstruction.trim()) return;
+    setSavingInstruction(true);
+    try {
+      const res = await fetch("/api/consultant/learnings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instruction: newInstruction.trim() }),
+      });
+      if (res.ok) {
+        setNewInstruction("");
+        await loadKnowledge();
+        setMessages(prev => [...prev, {
+          role: "assistant",
+          content: "✅ تم حفظ المعلومة بنجاح في قاعدة المعرفة. سيستخدمها المستشار من الآن.",
+          timestamp: new Date().toISOString(),
+        }]);
+      }
+    } catch (err) {
+      console.error("Error saving:", err);
+    } finally {
+      setSavingInstruction(false);
+    }
+  };
+
+  const answerQuestion = async (q: PendingQuestion) => {
+    if (!answerText.trim()) return;
+    // Save the answer as a learning
+    const instruction = `سؤال: ${q.question}\nالإجابة: ${answerText.trim()}`;
+    try {
+      await fetch("/api/consultant/learnings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instruction }),
+      });
+      // Delete the pending question
+      await fetch(`/api/consultant/pending-questions?id=${q.id}`, { method: "DELETE" });
+      setAnsweringId(null);
+      setAnswerText("");
+      await loadKnowledge();
+      await loadPendingQuestions();
+    } catch (err) {
+      console.error("Error answering:", err);
     }
   };
 
@@ -137,23 +184,12 @@ function SalesManagerTab() {
       
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.reply || data.response || "تم استلام رسالتك ومعالجتها بنجاح.",
+        content: data.response || "تم استلام رسالتك وسأقوم بتحليلها.",
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
-
-      // If it was a learning interaction, refresh the lists
-      if (data.reply?.includes("حفظ")) {
-        loadKnowledge();
-        loadPendingQuestions();
-      }
     } catch (error) {
       console.error("Chat error:", error);
-      setMessages((prev) => [...prev, {
-        role: "assistant",
-        content: "❌ حدث خطأ في الاتصال. يرجى التأكد من اتصال الإنترنت.",
-        timestamp: new Date().toISOString()
-      }]);
     } finally {
       setIsLoading(false);
     }
@@ -229,18 +265,35 @@ function SalesManagerTab() {
 
       {activeSubTab === "knowledge" && (
         <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Add new instruction */}
+          <div className="rounded-xl border border-[#C5A059]/30 bg-[#C5A059]/5 p-4 space-y-3">
+            <p className="text-sm text-[#C5A059] font-medium">➕ أضف معلومة جديدة للمستشار</p>
+            <textarea
+              value={newInstruction}
+              onChange={(e) => setNewInstruction(e.target.value)}
+              rows={3}
+              placeholder="مثال: معرضنا يقع في التجمع الخامس، شارع التسعين. مواعيد العمل من 10 صباحاً حتى 10 مساءً."
+              className="w-full rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3 text-white placeholder:text-white/30 text-sm"
+            />
+            <button
+              onClick={saveInstruction}
+              disabled={savingInstruction || !newInstruction.trim()}
+              className="rounded-xl bg-[#C5A059] px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#d8b56d] disabled:opacity-50"
+            >
+              {savingInstruction ? "جاري الحفظ..." : "💾 حفظ في المعرفة"}
+            </button>
+          </div>
+          {/* Existing knowledge */}
+          <div className="grid gap-3 md:grid-cols-2">
             {knowledge.length === 0 ? (
               <div className="col-span-full rounded-xl border border-white/10 bg-white/[0.03] p-6 text-center text-white/60">
-                لا توجد عناصر معرفة بعد
+                لا توجد معلومات مسجلة بعد. أضف أول معلومة أعلاه!
               </div>
             ) : (
               knowledge.map((item) => (
                 <div key={item.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs text-[#C5A059] uppercase">{item.category}</p>
-                  <p className="font-medium text-white mt-1">{item.key}</p>
-                  <p className="text-sm text-white/60 mt-2 line-clamp-2">{item.value}</p>
-                  <p className="text-xs text-white/40 mt-2">الاستخدام: {item.usage_count}</p>
+                  <p className="text-sm text-white leading-relaxed">{item.instruction}</p>
+                  <p className="text-xs text-white/30 mt-2">{new Date(item.created_at).toLocaleDateString("ar-EG")}</p>
                 </div>
               ))
             )}
@@ -250,20 +303,53 @@ function SalesManagerTab() {
 
       {activeSubTab === "questions" && (
         <div className="space-y-4">
+          <button onClick={loadPendingQuestions} className="text-sm text-[#C5A059] hover:underline">🔄 تحديث</button>
           {pendingQuestions.length === 0 ? (
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 text-center text-white/60">
-              لا توجد أسئلة معلقة
+              ✅ لا توجد أسئلة معلقة. رائع!
             </div>
           ) : (
             pendingQuestions.map((q) => (
-              <div key={q.id} className="flex items-start justify-between rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                <div>
-                  <p className="text-white">{q.question}</p>
-                  <p className="text-sm text-white/50 mt-1">تم السؤال {q.asked_count} مرات</p>
+              <div key={q.id} className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-amber-300 text-sm font-medium">❓ سؤال من عميل:</p>
+                    <p className="text-white mt-1">{q.question}</p>
+                    <p className="text-xs text-white/40 mt-1">{new Date(q.created_at).toLocaleString("ar-EG")}</p>
+                  </div>
                 </div>
-                <span className={`px-2 py-1 rounded text-xs ${q.answered ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}`}>
-                  {q.answered ? "مجاب" : "معلق"}
-                </span>
+                {answeringId === q.id ? (
+                  <div className="space-y-2">
+                    <textarea
+                      value={answerText}
+                      onChange={(e) => setAnswerText(e.target.value)}
+                      rows={2}
+                      placeholder="اكتب الإجابة الصحيحة هنا..."
+                      className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-white text-sm placeholder:text-white/30"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => answerQuestion(q)}
+                        className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-500"
+                      >
+                        ✅ حفظ الإجابة وتدريب المستشار
+                      </button>
+                      <button
+                        onClick={() => { setAnsweringId(null); setAnswerText(""); }}
+                        className="rounded-lg bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20"
+                      >
+                        إلغاء
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setAnsweringId(q.id)}
+                    className="rounded-lg bg-[#C5A059]/20 border border-[#C5A059]/30 px-4 py-2 text-sm text-[#C5A059] hover:bg-[#C5A059]/30"
+                  >
+                    ✍️ أجب على هذا السؤال
+                  </button>
+                )}
               </div>
             ))
           )}
