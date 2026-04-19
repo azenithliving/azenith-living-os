@@ -83,6 +83,7 @@ const MODEL_PRIORITIES: Record<string, string> = {
   general: "meta-llama/llama-3.1-8b-instruct",
   planning: "meta-llama/llama-3.3-70b-instruct:free",
   security: "meta-llama/llama-3.3-70b-instruct:free",
+  reasoning: "meta-llama/llama-3.3-70b-instruct:free", // Upgrade from 8B to 70B for thinking
 };
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1";
