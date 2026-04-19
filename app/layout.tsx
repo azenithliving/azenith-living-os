@@ -105,6 +105,22 @@ export default async function RootLayout({
   const adsenseEnabled = seo.adsenseEnabled === true;
   const adsenseClient = typeof seo.adsenseClient === "string" ? seo.adsenseClient : "";
 
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "HomeAndConstructionBusiness",
+    "name": "أزينث ليفينج | Azenith Living",
+    "image": "https://azenith-living-os.vercel.app/favicon.png",
+    "description": "شركة رائدة في التصميم الداخلي والديكور الفاخر والتشطيبات في مصر.",
+    "url": "https://azenith-living-os.vercel.app",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "القاهرة",
+      "addressRegion": "القاهرة",
+      "addressCountry": "EG"
+    },
+    "priceRange": "$$$"
+  };
+
   return (
     <html
       lang="ar"
@@ -114,6 +130,12 @@ export default async function RootLayout({
       style={cssVars}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        />
+      </head>
       <body className="min-h-full bg-brand-secondary font-sans text-brand-accent" suppressHydrationWarning>
         {adsenseEnabled && adsenseClient ? (
           <Script
