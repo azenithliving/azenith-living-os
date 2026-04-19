@@ -157,59 +157,78 @@ export async function routeRequest(
     lastError = "No DeepSeek keys found in environment variables.";
   }
 
-  // Fallback to OpenRouter with Free Model Rotation
-  const STABLE_FREE_MODELS = [
-    "google/gemini-flash-1.5-8b:free",
-    "google/gemini-2.0-flash-exp:free",
-    "meta-llama/llama-3.1-8b-instruct:free",
-    "mistralai/mistral-7b-instruct:free",
-    "qwen/qwen-2-7b-instruct:free",
-    "microsoft/phi-3-mini-128k-instruct:free"
-  ];
+  // Fallback to OpenRouter with Dynamic Free Model Discovery
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      "X-Title": "Azenith Sovereign Smart Discovery",
+    };
 
-  for (const modelId of STABLE_FREE_MODELS) {
-    try {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        "X-Title": "Azenith Sovereign Free Mode",
-      };
-
-      if (API_KEY) {
-        headers["Authorization"] = `Bearer ${API_KEY}`;
-      }
-
-      const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          model: modelId,
-          messages: [
-            ...(request.systemPrompt ? [{ role: "system", content: request.systemPrompt }] : []),
-            { role: "user", content: request.prompt },
-          ],
-          temperature: request.temperature ?? 0.7,
-          max_tokens: request.maxTokens ?? 1000,
-        }),
-        signal: AbortSignal.timeout(10000),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          success: true,
-          content: data.choices[0]?.message?.content || "",
-          model: modelId,
-          usage: data.usage,
-        };
-      }
-      
-      const errorData = await response.json().catch(() => ({}));
-      lastError += ` | ${modelId.split('/')[1]}: ${response.status} ${errorData.error?.message || "Busy"}`;
-      console.warn(`Model ${modelId} failed, trying next...`);
-    } catch (error) {
-      lastError += ` | ${modelId}: Fetch error`;
+    if (API_KEY) {
+      headers["Authorization"] = `Bearer ${API_KEY}`;
     }
+
+    // 1. Fetch available free models dynamically to avoid 404
+    console.log("[OpenRouter] Discovering current free models...");
+    const modelsResponse = await fetch(`${OPENROUTER_API_URL}/models`, { headers });
+    let freeModels: string[] = [];
+    
+    if (modelsResponse.ok) {
+      const modelsData = await modelsResponse.json();
+      freeModels = modelsData.data
+        .filter((m: any) => m.pricing.prompt === "0" || m.pricing.prompt === 0)
+        .map((m: any) => m.id);
+    }
+
+    // 2. If discovery failed, use a very reliable hardcoded fallback list
+    if (freeModels.length === 0) {
+      freeModels = [
+        "google/gemini-flash-1.5-8b:free",
+        "google/gemini-2.0-flash-exp:free",
+        "meta-llama/llama-3.1-8b-instruct:free",
+        "mistralai/mistral-7b-instruct:free",
+        "openchat/openchat-7b:free"
+      ];
+    }
+
+    // 3. Try the models one by one
+    for (const modelId of freeModels.slice(0, 5)) { // Try top 5 free models
+      try {
+        console.log(`[OpenRouter] Trying model: ${modelId}`);
+        const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            model: modelId,
+            messages: [
+              ...(request.systemPrompt ? [{ role: "system", content: request.systemPrompt }] : []),
+              { role: "user", content: request.prompt },
+            ],
+            temperature: 0.7,
+            max_tokens: 1000,
+          }),
+          signal: AbortSignal.timeout(12000),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return {
+            success: true,
+            content: data.choices[0]?.message?.content || "",
+            model: modelId,
+            usage: data.usage,
+          };
+        }
+        
+        const errorData = await response.json().catch(() => ({}));
+        lastError += ` | ${modelId.split('/').pop()}: ${response.status} ${errorData.error?.message || "Busy"}`;
+      } catch (err) {
+        lastError += ` | ${modelId.split('/').pop()}: Timeout/Error`;
+      }
+    }
+  } catch (error) {
+    lastError += ` | OpenRouter Discovery Failed: ${error instanceof Error ? error.message : String(error)}`;
   }
 
   return {
