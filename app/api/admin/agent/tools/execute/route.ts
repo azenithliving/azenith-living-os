@@ -11,7 +11,7 @@
 import { NextResponse } from "next/server";
 import { executeTool, getTool, validateToolParams, TOOL_REGISTRY } from "@/lib/agent-tools/tool-registry";
 import { createExecutionRecord, updateExecutionRecord } from "@/lib/agent-tools/execution-tracker";
-import { executeWithApproval, requiresApproval } from "@/lib/agent-tools/approval-system";
+import { executeWithApproval } from "@/lib/agent-tools/approval-system";
 import { logAuditEvent } from "@/lib/ultimate-agent/security-manager";
 
 export async function POST(req: Request) {
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     const { 
       toolName, 
       params, 
-      requireApproval = false, 
+ 
       skipApproval = false,
       context = {}
     } = body;

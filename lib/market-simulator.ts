@@ -109,11 +109,16 @@ export class MarketSimulationEngine {
       .limit(10000);
 
     if (data) {
-      for (const scenario of data) {
+      const typedData = data as unknown as Array<{
+        id: string;
+        timestamp: string;
+        [key: string]: unknown;
+      }>;
+      for (const scenario of typedData) {
         this.scenarios.set(scenario.id, {
           ...scenario,
           timestamp: new Date(scenario.timestamp),
-        });
+        } as MarketScenario);
       }
     }
   }
@@ -489,7 +494,7 @@ Return as structured JSON with all fields.`,
       path,
       code,
       created_at: new Date().toISOString(),
-    });
+    } as never);
   }
 
   // ==========================================
@@ -513,7 +518,7 @@ Return as structured JSON with all fields.`,
       status: s.status,
     }));
 
-    await this.supabase.from("market_scenarios").upsert(dbRecords);
+    await this.supabase.from("market_scenarios").upsert(dbRecords as never);
   }
 
   private generateExecutiveSummary(
@@ -564,7 +569,7 @@ Top sectors: ${this.getTopSectors(opportunities)}. The swarm stands ready to exe
     scenario.status = "approved";
     await this.supabase
       .from("market_scenarios")
-      .update({ status: "approved" })
+      .update({ status: "approved" } as never)
       .eq("id", scenarioId);
 
     return true;
@@ -581,7 +586,7 @@ Top sectors: ${this.getTopSectors(opportunities)}. The swarm stands ready to exe
 
     await this.supabase
       .from("market_scenarios")
-      .update({ status: "deployed", deployed_url: deployedUrl })
+      .update({ status: "deployed", deployed_url: deployedUrl } as never)
       .eq("id", scenarioId);
 
     return true;

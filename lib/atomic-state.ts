@@ -147,15 +147,32 @@ export class AtomicStateManager {
       .limit(100);
 
     if (data) {
-      for (const snap of data) {
-        this.snapshots.set(snap.id, {
+      const typedData = data as unknown as Array<{
+        id: string;
+        timestamp: string;
+        file_state: unknown;
+        database_state: unknown;
+        runtime_state: unknown;
+        metadata: unknown;
+        type?: string;
+        label?: string;
+        description?: string;
+        rollback_available?: boolean;
+      }>;
+      for (const snap of typedData) {
+        const snapshot = {
           ...snap,
           timestamp: new Date(snap.timestamp),
           fileState: this.deserializeFileState(snap.file_state),
           databaseState: this.deserializeDatabaseState(snap.database_state),
-          runtimeState: snap.runtime_state,
-          metadata: snap.metadata,
-        });
+          runtimeState: snap.runtime_state as RuntimeState,
+          metadata: snap.metadata as SnapshotMetadata,
+        } as unknown as SystemSnapshot;
+        snapshot.type = (snap.type || "manual") as "manual" | "auto" | "pre_execution" | "pre_deployment" | "checkpoint";
+        snapshot.label = snap.label || "";
+        snapshot.description = snap.description || "";
+        snapshot.rollbackAvailable = snap.rollback_available || false;
+        this.snapshots.set(snap.id, snapshot);
       }
     }
   }
@@ -307,8 +324,9 @@ export class AtomicStateManager {
     const tableSnapshots = new Map<string, TableSnapshot>();
     const pendingMigrations: string[] = [];
 
-    if (tables) {
-      for (const tableName of tables) {
+    const typedTables = tables as unknown as string[];
+    if (typedTables) {
+      for (const tableName of typedTables) {
         // Get record count
         const { count } = await this.supabase
           .from(tableName)
@@ -344,7 +362,8 @@ export class AtomicStateManager {
         .from("schema_migrations")
         .select("filename");
       
-      const appliedSet = new Set(applied?.map(a => a.filename) || []);
+      const typedApplied = applied as unknown as Array<{ filename: string }>;
+      const appliedSet = new Set(typedApplied?.map(a => a.filename) || []);
       pendingMigrations.push(
         ...migrationFiles.filter(f => !appliedSet.has(f))
       );
@@ -474,8 +493,8 @@ export class AtomicStateManager {
 
     // Execute rollback
     let filesRestored = 0;
-    let databaseRestored = false;
-    let stateRestored = false;
+    const databaseRestored = false;
+    const stateRestored = false;
     const errors: string[] = [];
 
     // Restore file contents
@@ -568,11 +587,11 @@ export class AtomicStateManager {
       git_commit: snapshot.gitCommit,
       file_state: this.serializeFileState(snapshot.fileState),
       database_state: this.serializeDatabaseState(snapshot.databaseState),
-      runtime_state: snapshot.runtimeState,
-      metadata: snapshot.metadata,
+      runtime_state: snapshot.runtimeState as never,
+      metadata: snapshot.metadata as never,
       rollback_available: snapshot.rollbackAvailable,
       emotional_context: snapshot.emotionalContext,
-    });
+    } as never);
 
     // Store full snapshot to filesystem for large data
     const snapshotPath = resolve(process.cwd(), this.SNAPSHOT_DIR, `${snapshot.id}.json`);

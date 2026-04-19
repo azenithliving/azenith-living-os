@@ -277,7 +277,7 @@ class SupremeArchitect {
         exports: file.exports,
         complexity_score: file.complexity,
         last_analyzed_at: new Date().toISOString(),
-      }, { onConflict: "file_path" });
+      } as never, { onConflict: "file_path" });
     }
     
     return results;
@@ -298,7 +298,7 @@ class SupremeArchitect {
       const { data, error } = await this.supabase.rpc("execute_read_query", { 
         p_sql: sql,
         p_params: params || [],
-      });
+      } as never);
       
       if (error) throw error;
       
@@ -321,11 +321,13 @@ class SupremeArchitect {
         .order("created_at", { ascending: false })
         .limit(1);
       
+      const typedRecent = recent as unknown as Array<{ created_at: string }>;
+      
       return {
         success: true,
         stats: {
           totalRecords: count,
-          lastActivity: recent?.[0]?.created_at,
+          lastActivity: typedRecent?.[0]?.created_at,
         },
       };
     } catch (error) {
@@ -345,7 +347,7 @@ class SupremeArchitect {
       target_path: suggestedChange.table,
       after_state: sql,
       requires_approval: true,
-    });
+    } as never);
     
     return {
       success: true,
@@ -437,7 +439,7 @@ class SupremeArchitect {
     const { data, error } = await this.supabase.rpc("get_relevant_memory", {
       p_query: query,
       p_limit: 5,
-    });
+    } as never);
     
     if (error || !data) return [];
     
@@ -664,7 +666,7 @@ export function LuxuryCard({ children, className, glow = false }: LuxuryCardProp
       before_state: before,
       after_state: after,
       status: "completed",
-    });
+    } as never);
   }
 
   private async logConversation(
@@ -682,7 +684,7 @@ export function LuxuryCard({ children, className, glow = false }: LuxuryCardProp
       content: userMessage,
       intent,
       attachments: attachments || [],
-    });
+    } as never);
     
     await this.supabase.from("architect_conversations").insert({
       session_id: sessionId,
@@ -693,7 +695,7 @@ export function LuxuryCard({ children, className, glow = false }: LuxuryCardProp
       thinking_process: response.thinking,
       actions_triggered: response.actions.map(a => a.type),
       code_blocks: response.codePreview ? [response.codePreview] : [],
-    });
+    } as never);
   }
 
   // ==========================================
@@ -720,7 +722,7 @@ export function LuxuryCard({ children, className, glow = false }: LuxuryCardProp
       p_message: message,
       p_priority: priority,
       p_notification_type: "insight",
-    });
+    } as never);
   }
 }
 

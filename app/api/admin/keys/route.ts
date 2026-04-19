@@ -18,7 +18,7 @@ function maskKey(key: string): string {
 async function testKey(provider: string, key: string): Promise<{ valid: boolean; message: string }> {
   try {
     let testUrl: string;
-    let headers: Record<string, string> = { "Authorization": `Bearer ${key}` };
+    const headers: Record<string, string> = { "Authorization": `Bearer ${key}` };
 
     switch (provider) {
       case "groq":

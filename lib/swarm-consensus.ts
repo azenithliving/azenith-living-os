@@ -166,11 +166,16 @@ export class InfiniteSwarmEngine {
       .eq("status", "active");
 
     if (nodes) {
-      for (const node of nodes) {
+      const typedNodes = nodes as unknown as Array<{
+        id: string;
+        last_used: string;
+        [key: string]: unknown;
+      }>;
+      for (const node of typedNodes) {
         this.nodes.set(node.id, {
           ...node,
           lastUsed: new Date(node.last_used),
-        });
+        } as unknown as SwarmNode);
       }
     }
   }
@@ -767,7 +772,7 @@ export class InfiniteSwarmEngine {
       intelligence: node.intelligence,
       status: node.status,
       region: node.region,
-    });
+    } as never);
 
     return id;
   }

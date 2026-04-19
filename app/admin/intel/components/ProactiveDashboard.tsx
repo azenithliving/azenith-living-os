@@ -217,7 +217,8 @@ export function ProactiveDashboard() {
   };
 
   // Dismiss anomaly
-  const dismissAnomaly = async (anomalyIdx: number) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Parameter reserved for future use
+  const dismissAnomaly = async (_anomalyIdx: number) => {
     try {
       // In a real implementation, this would mark the anomaly as dismissed
       // For now, we'll just refresh the data

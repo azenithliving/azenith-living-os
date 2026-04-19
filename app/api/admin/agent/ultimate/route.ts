@@ -108,11 +108,7 @@ export async function POST(req: Request) {
         });
 
         const agent = new UltimateAgent();
-        const cmdResult = await agent.processCommandWithResult(command, actorId, conversationHistory, {
-          companyId,
-          actorUserId: asUuidOrUndefined(actorId),
-          commandLogId: commandLog?.id,
-        });
+        const cmdResult = await agent.processCommandWithResult(command, actorId, conversationHistory);
 
         result = {
           success: !cmdResult.error,
@@ -148,13 +144,12 @@ export async function POST(req: Request) {
         }
 
         const agent = new UltimateAgent();
-        const approvalResult = await agent.handleApproval(requestId, approved, actorId, reason);
+        const approvalResult = await agent.handleApproval(requestId, approved);
 
         result = {
           success: approvalResult.success,
           message: approvalResult.message,
           actionTaken: approvalResult.actionTaken,
-          data: approvalResult.data,
         };
         break;
       }

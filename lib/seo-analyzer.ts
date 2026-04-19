@@ -28,6 +28,7 @@ import type {
   ToolExecutionContext,
   ExecutionResult,
 } from "./agent-types";
+import type { Json } from "./supabase/database.types";
 
 // ============================================
 // Configuration
@@ -955,17 +956,17 @@ async function saveSEOAnalysisToDatabase(
     page_title: analysis.pageTitle || null,
     score: analysis.score,
     score_breakdown: analysis.scoreBreakdown,
-    meta_tags: analysis.metaTags,
-    meta_issues: analysis.issues.filter((i) => i.category === "meta"),
-    headings_structure: analysis.headings,
-    headings_issues: analysis.issues.filter((i) => i.category === "headings"),
-    images_analysis: analysis.images,
-    images_issues: analysis.issues.filter((i) => i.category === "images"),
-    links_analysis: analysis.links,
-    links_issues: analysis.issues.filter((i) => i.category === "links"),
-    performance_metrics: analysis.performance,
-    performance_issues: analysis.issues.filter((i) => i.category === "performance" || i.category === "mobile"),
-    recommendations: analysis.recommendations,
+    meta_tags: analysis.metaTags as unknown as Json,
+    meta_issues: analysis.issues.filter((i) => i.category === "meta") as unknown as Json[],
+    headings_structure: analysis.headings as unknown as Json,
+    headings_issues: analysis.issues.filter((i) => i.category === "headings") as unknown as Json[],
+    images_analysis: analysis.images as unknown as Json,
+    images_issues: analysis.issues.filter((i) => i.category === "images") as unknown as Json[],
+    links_analysis: analysis.links as unknown as Json,
+    links_issues: analysis.issues.filter((i) => i.category === "links") as unknown as Json[],
+    performance_metrics: analysis.performance as unknown as Json,
+    performance_issues: analysis.issues.filter((i) => i.category === "performance" || i.category === "mobile") as unknown as Json[],
+    recommendations: analysis.recommendations as unknown as Json[],
     analysis_status: "completed",
   };
 

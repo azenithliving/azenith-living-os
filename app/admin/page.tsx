@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
+import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image } from "lucide-react";
 import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-components";
+import { ImageHarvestDashboard } from "./intel/components/ImageHarvestDashboard";
 
 interface AnalyticsData {
   metrics: {
@@ -369,6 +370,20 @@ export default function AdminPage() {
               <p className="text-sm text-white/50 mt-2">الأتمتة، المحتوى، الحجوزات</p>
             </Link>
           </div>
+        </section>
+
+        {/* Image Harvest Dashboard */}
+        <section className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl">
+              <Image className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">نظام الصور الذكي</h2>
+              <p className="text-sm text-white/60">15,000 صورة ذكية | تجديد شهري تلقائي</p>
+            </div>
+          </div>
+          <ImageHarvestDashboard />
         </section>
 
         {/* Footer */}

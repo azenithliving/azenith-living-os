@@ -202,16 +202,16 @@ export async function createAutomationRule(input: AutomationRuleInput): Promise<
         enabled,
         is_active: enabled,
         ...(companyId ? { company_id: companyId } : {}),
-      })
+      } as never)
       .select()
       .single();
 
-    if (!primaryInsert.error && primaryInsert.data) {
-      const row = primaryInsert.data as { id?: string };
+    const primaryData = primaryInsert.data as unknown as { id?: string } | null;
+    if (!primaryInsert.error && primaryData) {
       return {
         success: true,
-        data: primaryInsert.data,
-        message: `✅ "${input.name}" جاهز (ID: ${(row.id || "").slice(0, 8)})`,
+        data: primaryData,
+        message: `✅ "${input.name}" جاهز (ID: ${(primaryData.id || "").slice(0, 8)})`,
       };
     }
 
@@ -224,16 +224,16 @@ export async function createAutomationRule(input: AutomationRuleInput): Promise<
         conditions: input.conditions || {},
         actions: input.actions || [],
         enabled,
-      })
+      } as never)
       .select()
       .single();
 
-    if (!legacyInsert.error && legacyInsert.data) {
-      const row = legacyInsert.data as { id?: string };
+    const legacyData = legacyInsert.data as unknown as { id?: string } | null;
+    if (!legacyInsert.error && legacyData) {
       return {
         success: true,
-        data: legacyInsert.data,
-        message: `✅ "${input.name}" جاهز (ID: ${(row.id || "").slice(0, 8)})`,
+        data: legacyData,
+        message: `✅ "${input.name}" جاهز (ID: ${(legacyData.id || "").slice(0, 8)})`,
       };
     }
 
@@ -317,7 +317,7 @@ export async function updateSiteSetting(input: SiteSettingInput): Promise<ToolRe
 
     let result = await supabaseService
       .from("site_settings")
-      .upsert(tenantPayload, { onConflict: primaryOnConflict })
+      .upsert(tenantPayload as never, { onConflict: primaryOnConflict })
       .select()
       .single();
 
@@ -331,7 +331,7 @@ export async function updateSiteSetting(input: SiteSettingInput): Promise<ToolRe
       if (fallbackAllowed) {
         result = await supabaseService
           .from("site_settings")
-          .upsert(basePayload, { onConflict: "key" })
+          .upsert(basePayload as never, { onConflict: "key" })
           .select()
           .single();
       }
@@ -656,14 +656,15 @@ export async function analyzeRevenueOpportunitiesWithInput(
     const q = supabaseService.from("conversions").select("value, created_at").gte("created_at", startDate);
     const { data, error } = companyId ? await q.eq("company_id", companyId) : await q;
     if (!error && Array.isArray(data)) {
-      conversionValue = data.reduce((sum, row) => sum + (typeof row.value === "number" ? row.value : 0), 0);
+      const typedData = data as unknown as Array<{ value?: number }>;
+      conversionValue = typedData.reduce((sum, row) => sum + (typeof row.value === "number" ? row.value : 0), 0);
     }
   }
 
-  const pageViews = viewsCount.success ? viewsCount.count : 0;
-  const inquiries = inquiriesCount.success ? inquiriesCount.count : 0;
-  const conversions = conversionsCount.success ? conversionsCount.count : 0;
-  const requests = requestsCount.success ? requestsCount.count : 0;
+  const pageViews = viewsCount.success ? (viewsCount.count ?? 0) : 0;
+  const inquiries = inquiriesCount.success ? (inquiriesCount.count ?? 0) : 0;
+  const conversions = conversionsCount.success ? (conversionsCount.count ?? 0) : 0;
+  const requests = requestsCount.success ? (requestsCount.count ?? 0) : 0;
 
   const inquiryRate = pageViews > 0 ? inquiries / pageViews : 0;
   const conversionRate = pageViews > 0 ? conversions / pageViews : 0;
@@ -740,13 +741,14 @@ export async function createSection(input: CreateSectionInput): Promise<ToolResu
     const { data: lastOrderRow } = await supabaseService
       .from("room_sections")
       .select("display_order")
-      .eq("company_id", companyId)
+      .eq("company_id", companyId as string)
       .order("display_order", { ascending: false })
       .limit(1)
       .maybeSingle();
 
+    const typedLastOrderRow = lastOrderRow as unknown as { display_order?: number } | null;
     const nextOrder =
-      typeof lastOrderRow?.display_order === "number" ? lastOrderRow.display_order + 1 : 1;
+      typeof typedLastOrderRow?.display_order === "number" ? typedLastOrderRow.display_order + 1 : 1;
 
     const insertPayload = {
       company_id: companyId,
@@ -761,7 +763,7 @@ export async function createSection(input: CreateSectionInput): Promise<ToolResu
 
     const { data, error } = await supabaseService
       .from("room_sections")
-      .insert(insertPayload)
+      .insert(insertPayload as never)
       .select("*")
       .single();
 
@@ -771,7 +773,7 @@ export async function createSection(input: CreateSectionInput): Promise<ToolResu
 
     return {
       success: true,
-      data,
+      data: data as unknown,
       message: `✅ تم إنشاء قسم "${input.name}" (slug: ${slug})`,
     };
   } catch (err) {
@@ -862,7 +864,7 @@ export async function createBackup(input?: { userId?: string; tables?: string[] 
       backup_type: "manual",
       tables_included: tablesRequested,
       error_message: errorMessage,
-    })
+    } as never)
     .select("id, status, created_at")
     .single();
 
@@ -870,18 +872,20 @@ export async function createBackup(input?: { userId?: string; tables?: string[] 
     return { success: false, message: `فشل حفظ النسخة الاحتياطية في قاعدة البيانات: ${error.message}` };
   }
 
+  const typedData = data as unknown as { id?: string; status?: string; created_at?: string } | null;
+
   if (errors.length) {
     return {
       success: false,
-      data: { backupId: data?.id, status: data?.status, createdAt: data?.created_at, errors },
-      message: `⚠️ تم إنشاء نسخة احتياطية رقم ${data?.id} لكن بها أخطاء.\n- ${errors.slice(0, 6).join("\n- ")}`,
+      data: { backupId: typedData?.id, status: typedData?.status, createdAt: typedData?.created_at, errors },
+      message: `⚠️ تم إنشاء نسخة احتياطية رقم ${typedData?.id} لكن بها أخطاء.\n- ${errors.slice(0, 6).join("\n- ")}`,
     };
   }
 
   return {
     success: true,
-    data: { backupId: data?.id, status: data?.status, createdAt: data?.created_at, sizeBytes, tables: tablesRequested },
-    message: `💾 تم إنشاء نسخة احتياطية رقم ${data?.id} (حجم: ${sizeBytes} بايت)`,
+    data: { backupId: typedData?.id, status: typedData?.status, createdAt: typedData?.created_at, sizeBytes, tables: tablesRequested },
+    message: `💾 تم إنشاء نسخة احتياطية رقم ${typedData?.id} (حجم: ${sizeBytes} بايت)`,
   };
 }
 

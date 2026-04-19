@@ -389,7 +389,7 @@ export class SovereignStatusGenerator {
       opportunities_count: report.opportunities.count,
       revenue_potential: report.opportunities.totalRevenuePotential,
       optimizations_count: report.optimizations.modulesOptimized,
-    });
+    } as never);
   }
 
   // ==========================================
@@ -436,7 +436,13 @@ export class SovereignStatusGenerator {
       .order("timestamp", { ascending: false })
       .limit(limit);
 
-    return (data || []).map(r => ({
+    const typedData = data as unknown as Array<{
+      timestamp: string;
+      session_id: string;
+      stability: number;
+      threat_level: number;
+    }>;
+    return (typedData || []).map(r => ({
       timestamp: new Date(r.timestamp),
       sessionId: r.session_id,
       empireStatus: {
@@ -446,7 +452,7 @@ export class SovereignStatusGenerator {
         message: "",
       },
       // ... other fields
-    } as SovereignStatusReport));
+    } as unknown as SovereignStatusReport));
   }
 }
 

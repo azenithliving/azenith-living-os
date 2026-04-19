@@ -245,7 +245,7 @@ export function generateBehaviorState(
   
   // Determine primary CTA based on state
   let primaryCTA: SmartCTA;
-  let secondaryCTAs: SmartCTA[] = [];
+  const secondaryCTAs: SmartCTA[] = [];
   let alertMessage: string | null = null;
   let encouragementMessage: string | null = null;
   let showUrgency = false;

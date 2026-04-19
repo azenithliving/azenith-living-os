@@ -103,11 +103,16 @@ export class PredictiveCodingEngine {
       .limit(100);
 
     if (patterns) {
-      for (const p of patterns) {
+      const typedPatterns = patterns as unknown as Array<{
+        id: string;
+        examples?: string[];
+        [key: string]: unknown;
+      }>;
+      for (const p of typedPatterns) {
         this.patterns.set(p.id, {
           ...p,
           examples: p.examples || [],
-        });
+        } as CodePattern);
       }
     }
 
@@ -118,12 +123,17 @@ export class PredictiveCodingEngine {
       .limit(50);
 
     if (modules) {
-      for (const m of modules) {
+      const typedModules = modules as unknown as Array<{
+        id: string;
+        timestamp: string;
+        [key: string]: unknown;
+      }>;
+      for (const m of typedModules) {
         this.predictedModules.set(m.id, {
           ...m,
           timestamp: new Date(m.timestamp),
-          triggeredBy: m.triggered_by || [],
-        });
+          triggeredBy: (m.triggered_by || []) as string[],
+        } as PredictedModule);
       }
     }
   }
@@ -422,7 +432,7 @@ export class PredictiveCodingEngine {
       analyzed_at: new Date().toISOString(),
     }));
 
-    await this.supabase.from("code_patterns").upsert(records);
+    await this.supabase.from("code_patterns").upsert(records as never);
   }
 
   // ==========================================
@@ -613,7 +623,7 @@ Provide:
       triggered_by: p.triggeredBy,
     }));
 
-    await this.supabase.from("predicted_modules").upsert(records);
+    await this.supabase.from("predicted_modules").upsert(records as never);
   }
 
   // ==========================================
@@ -680,7 +690,7 @@ Provide:
 
     await this.supabase
       .from("predicted_modules")
-      .update({ status: "approved" })
+      .update({ status: "approved" } as never)
       .eq("id", moduleId);
 
     return true;
@@ -694,7 +704,7 @@ Provide:
 
     await this.supabase
       .from("predicted_modules")
-      .update({ status: "implemented" })
+      .update({ status: "implemented" } as never)
       .eq("id", moduleId);
 
     return true;

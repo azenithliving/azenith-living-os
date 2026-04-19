@@ -26,8 +26,12 @@ function isAllowedDestination(partner: string, destinationUrl: string): boolean 
   }
 }
 
-export async function GET(request: NextRequest, context: { params: { partner: string } }) {
-  const partner = (context.params.partner || "").toLowerCase();
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ partner: string }> }
+): Promise<Response> {
+  const { partner: partnerParam } = await params;
+  const partner = (partnerParam || "").toLowerCase();
   const destination = request.nextUrl.searchParams.get("to") || "";
 
   if (!partner || !destination) {

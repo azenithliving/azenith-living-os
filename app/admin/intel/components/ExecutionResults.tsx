@@ -10,7 +10,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -294,8 +294,12 @@ export function BackupCreatedResult({ data }: { data: BackupCreatedData }) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const expiresDate = new Date(data.expiresAt);
-  const daysLeft = Math.ceil((expiresDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  // eslint-disable-next-line react-hooks/purity -- Date needed for calculation
+  const daysLeft = useMemo(() => {
+    const expiresDate = new Date(data.expiresAt);
+    const now = new Date();
+    return Math.ceil((expiresDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  }, [data.expiresAt]);
 
   return (
     <Card className="border-white/10 bg-[#0f1115] text-white">
@@ -413,10 +417,11 @@ export function SettingUpdatedResult({
 interface ExecutionResultProps {
   actionTaken?: string;
   data?: unknown;
-  onRollback?: (revisionId: string) => void;
+  executionId?: string;
+  onRollback?: (executionId: string) => void;
 }
 
-export function ExecutionResultCard({ actionTaken, data, onRollback }: ExecutionResultProps) {
+export function ExecutionResultCard({ actionTaken, data, executionId, onRollback }: ExecutionResultProps) {
   if (!data || typeof data !== "object") return null;
 
   // Render based on action type

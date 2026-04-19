@@ -538,7 +538,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
 
       try {
         // Step 1: Try to fetch CMS images from database first
-        let cmsImages: Record<string, string> = {};
+        const cmsImages: Record<string, string> = {};
         try {
           const cmsRes = await fetch('/api/room-sections', {
             signal: controller.signal,

@@ -245,10 +245,11 @@ export class SemanticCacheManager {
 
       if (data && data.length > 0) {
         // Find best match
-        let bestMatch = data[0];
+        const typedData = data as unknown as Array<{ exact_match: string; [key: string]: unknown }>;
+        let bestMatch = typedData[0];
         let bestSimilarity = this.calculateSimilarity(query.query, bestMatch.exact_match);
 
-        for (const entry of data) {
+        for (const entry of typedData) {
           const similarity = this.calculateSimilarity(query.query, entry.exact_match);
           if (similarity > bestSimilarity) {
             bestSimilarity = similarity;
@@ -260,19 +261,32 @@ export class SemanticCacheManager {
           this.stats.l3Hits++;
           this.stats.totalSavings += 0.01;
 
+          const typedBestMatch = bestMatch as unknown as {
+            semantic_hash: string;
+            exact_match: string;
+            near_matches?: string[];
+            response: string;
+            context: string;
+            created_at: string;
+            last_accessed: string;
+            access_count: number;
+            emotional_weight: number;
+            source?: string;
+            confidence?: number;
+          };
           const cacheEntry: CacheEntry = {
-            semanticHash: bestMatch.semantic_hash,
-            exactMatch: bestMatch.exact_match,
-            nearMatches: bestMatch.near_matches || [],
-            response: bestMatch.response,
-            context: bestMatch.context,
+            semanticHash: typedBestMatch.semantic_hash,
+            exactMatch: typedBestMatch.exact_match,
+            nearMatches: typedBestMatch.near_matches || [],
+            response: typedBestMatch.response,
+            context: typedBestMatch.context,
             metadata: {
-              createdAt: new Date(bestMatch.created_at),
-              lastAccessed: new Date(bestMatch.last_accessed),
-              accessCount: bestMatch.access_count,
-              emotionalWeight: bestMatch.emotional_weight,
-              source: bestMatch.source || "unknown",
-              confidence: bestMatch.confidence || 0.9,
+              createdAt: new Date(typedBestMatch.created_at),
+              lastAccessed: new Date(typedBestMatch.last_accessed),
+              accessCount: typedBestMatch.access_count,
+              emotionalWeight: typedBestMatch.emotional_weight,
+              source: typedBestMatch.source || "unknown",
+              confidence: typedBestMatch.confidence || 0.9,
             },
           };
 
@@ -387,7 +401,7 @@ export class SemanticCacheManager {
         emotional_weight: entry.metadata.emotionalWeight,
         source: entry.metadata.source,
         confidence: entry.metadata.confidence,
-      });
+      } as never);
     } catch (error) {
       console.error("[SemanticCache] L3 storage error:", error);
     }

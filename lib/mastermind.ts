@@ -583,7 +583,7 @@ ${conversationContext ? `=== سياق المحادثة السابق ===\n${conve
     this.conversationMemory.set(sessionId, history);
     
     // Call real AI with system prompt and conversation context
-    let response = await this.callAIWithContext(command, history);
+    const response = await this.callAIWithContext(command, history);
     
     // Store assistant response
     history.push({ role: "assistant", content: response, timestamp: new Date() });

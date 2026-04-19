@@ -133,13 +133,24 @@ export class SelfOptimizationEngine {
       .limit(100);
 
     if (bottlenecks) {
-      for (const b of bottlenecks) {
+      const typedBottlenecks = bottlenecks as unknown as Array<{
+        id: string;
+        timestamp: string;
+        location: string;
+        suggested_optimization: string;
+        [key: string]: unknown;
+      }>;
+      for (const b of typedBottlenecks) {
         this.bottlenecks.set(b.id, {
           ...b,
           timestamp: new Date(b.timestamp),
-          location: b.location,
-          suggestedOptimization: b.suggested_optimization,
-        });
+          location: b.location as unknown as { file: string; function: string; lineRange: [number, number] },
+          suggestedOptimization: b.suggested_optimization as unknown as OptimizationStrategy,
+          severity: (b.severity || "medium") as "critical" | "high" | "medium" | "low",
+          type: (b.type || "cpu") as "cpu" | "memory" | "io" | "algorithm" | "external_api",
+          metrics: (b.metrics || {}) as { currentTime: number; targetTime: number; improvementPotential: number },
+          autoRewritePending: (b.autoRewritePending || false) as boolean,
+        } as Bottleneck);
       }
     }
 
@@ -149,10 +160,14 @@ export class SelfOptimizationEngine {
       .limit(50);
 
     if (history) {
-      this.optimizationHistory = history.map(h => ({
+      const typedHistory = history as unknown as Array<{
+        time_saved_us: number;
+        [key: string]: unknown;
+      }>;
+      this.optimizationHistory = typedHistory.map(h => ({
         ...h,
         timeSavedMicroseconds: h.time_saved_us,
-      }));
+      })) as unknown as RewriteResult[];
     }
   }
 
@@ -447,7 +462,7 @@ export class SelfOptimizationEngine {
       time_saved_us: result.timeSavedMicroseconds,
       snapshot_id: snapshot.id,
       timestamp: new Date().toISOString(),
-    });
+    } as never);
 
     // Mark bottleneck as resolved
     bottleneck.autoRewritePending = false;

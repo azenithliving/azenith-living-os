@@ -125,7 +125,8 @@ export class PredatoryDefenseSystem {
       .eq("active", true);
 
     if (data) {
-      for (const record of data) {
+      const typedData = data as unknown as Array<{ ip: string }>;
+      for (const record of typedData) {
         this.blockedIPs.add(record.ip);
       }
     }
@@ -299,7 +300,7 @@ export class PredatoryDefenseSystem {
       source_ip: threat.source.ip,
       status: threat.status,
       auto_resolved: threat.autoResolved,
-    });
+    } as never);
   }
 
   private async applyCountermeasure(
@@ -323,7 +324,7 @@ export class PredatoryDefenseSystem {
             reason: threat.type,
             blocked_at: new Date().toISOString(),
             active: true,
-          });
+          } as never);
         }
         break;
         
@@ -384,7 +385,7 @@ Countermeasures: ${threat.countermeasures.length} deployed`;
       message,
       timestamp: new Date().toISOString(),
       priority: threat.severity,
-    });
+    } as never);
   }
 
   // ==========================================
@@ -533,7 +534,7 @@ Countermeasures: ${threat.countermeasures.length} deployed`;
     this.blockedIPs.delete(ip);
     await this.supabase
       .from("blocked_ips")
-      .update({ active: false, unblocked_at: new Date().toISOString() })
+      .update({ active: false, unblocked_at: new Date().toISOString() } as never)
       .eq("ip", ip);
     
     return true;

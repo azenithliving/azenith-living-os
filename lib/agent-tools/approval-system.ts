@@ -136,7 +136,7 @@ export async function getPendingApprovals(
 ): Promise<ApprovalRequest[]> {
   const supabase = await createClient();
 
-  let query = supabase
+  const query = supabase
     .from("approval_requests")
     .select("*")
     .eq("status", "pending")

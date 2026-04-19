@@ -34,7 +34,8 @@ export async function GET(request: Request) {
         success: true,
         count: translations?.length || 0,
         translations: (translations || []).reduce((acc, t) => {
-          acc[t.source_text] = t.en_text;
+          const typedT = t as unknown as { source_text: string; en_text: string };
+          acc[typedT.source_text] = typedT.en_text;
           return acc;
         }, {} as Record<string, string>),
       });
@@ -64,10 +65,11 @@ export async function GET(request: Request) {
       }
 
       if (cached) {
+        const typedCached = cached as unknown as { en_text: string };
         return NextResponse.json({
           success: true,
           cached: true,
-          translation: cached.en_text,
+          translation: typedCached.en_text,
         });
       }
 

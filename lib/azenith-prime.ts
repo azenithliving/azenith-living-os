@@ -171,15 +171,27 @@ export class AzenithPrime {
       .select("*");
 
     if (keys) {
-      for (const key of keys) {
+      const typedKeys = keys as unknown as Array<{
+        id: string;
+        provider: string;
+        key_value: string;
+        model: string;
+        specialty: string;
+        intelligence: number;
+        status: string;
+        last_used: string;
+        success_rate: number;
+        cost_per_request: number;
+      }>;
+      for (const key of typedKeys) {
         this.swarmKeys.set(key.id, {
           id: key.id,
           provider: key.provider,
           key: key.key_value,
           model: key.model,
-          specialty: key.specialty as TaskType,
+          specialty: key.specialty as unknown as TaskType,
           intelligence: key.intelligence,
-          status: key.status,
+          status: key.status as "active" | "cooldown" | "exhausted",
           lastUsed: new Date(key.last_used),
           successRate: key.success_rate,
           costPerRequest: key.cost_per_request,
@@ -246,7 +258,7 @@ export class AzenithPrime {
       last_used: newKey.lastUsed.toISOString(),
       success_rate: newKey.successRate,
       cost_per_request: newKey.costPerRequest,
-    });
+    } as never);
 
     this.swarmKeys.set(id, newKey);
     this.calculateCollectiveIntelligence();
@@ -536,7 +548,7 @@ export class AzenithPrime {
       description,
       emotional_context: emotionalContext,
       rollback_available: true,
-    });
+    } as never);
 
     const message = type === "pre_change"
       ? `🛡️ أنشأت كبسولة زمنية قبل التغيير. إذا لم يعجبك شيء، أقول "العودة" وأرجعك لحظة واحدة.`
@@ -607,7 +619,17 @@ export class AzenithPrime {
       .limit(10000);
 
     if (data) {
-      for (const entry of data) {
+      const typedData = data as unknown as Array<{
+        semantic_hash: string;
+        exact_match: string;
+        near_matches?: string[];
+        response: string;
+        context: string;
+        usage_count: number;
+        last_accessed: string;
+        emotional_weight: number;
+      }>;
+      for (const entry of typedData) {
         this.neuralCache.set(entry.semantic_hash, {
           semanticHash: entry.semantic_hash,
           exactMatch: entry.exact_match,
@@ -648,7 +670,7 @@ export class AzenithPrime {
       // Update in database
       await this.supabase.rpc("increment_neural_cache_usage", {
         p_semantic_hash: semanticHash,
-      });
+      } as never);
 
       this.calculateCacheStats();
 
@@ -742,7 +764,7 @@ export class AzenithPrime {
       usage_count: 1,
       last_accessed: new Date().toISOString(),
       emotional_weight: 0.5,
-    });
+    } as never);
   }
 
   private calculateCacheStats(): void {
@@ -836,7 +858,7 @@ export class AzenithPrime {
       action_url: notification.actionUrl,
       created_at: new Date().toISOString(),
       read: false,
-    });
+    } as never);
 
     // In production, would also send push notification via Firebase/APNs
     console.log(`[Azenith Prime] Imperial Notification: ${notification.title}`);

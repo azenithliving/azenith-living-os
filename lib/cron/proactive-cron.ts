@@ -56,8 +56,8 @@ export async function startDailyReportCron() {
   cron.schedule("0 21 * * *", async () => {
     console.log('📊 Daily report...');
     const report = await generateDailyReport();
-    if (report.success) {
-      await sendWhatsAppAlert(config.whatsappNumber, report.message);
+    if (report && typeof report === 'string') {
+      await sendWhatsAppAlert(config.whatsappNumber, report);
     }
   });
 }

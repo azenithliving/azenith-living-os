@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     const result = await supabaseService
       .from("automation_rules")
-      .insert(insertData)
+      .insert(insertData as never)
       .select()
       .single();
 
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       delete insertData.created_by;
       const legacyResult = await supabaseService
         .from("automation_rules")
-        .insert(insertData)
+        .insert(insertData as never)
         .select()
         .single();
       error = legacyResult.error;
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
       return apiError("Failed to create automation rule", 500, error);
     }
 
-    return apiSuccess({ rule: normalizeRule(data as Record<string, unknown>) }, "Automation rule created successfully");
+    return apiSuccess({ rule: normalizeRule(data as unknown as Record<string, unknown>) }, "Automation rule created successfully");
   } catch (error) {
     console.error("[Automation API] UNEXPECTED ERROR:", error);
     return apiError("Internal server error", 500, String(error));
@@ -179,7 +179,7 @@ export async function PUT(request: NextRequest) {
 
     let { data, error } = await supabaseService
       .from("automation_rules")
-      .update(updateData)
+      .update(updateData as never)
       .eq("id", id)
       .select()
       .single();
@@ -188,7 +188,7 @@ export async function PUT(request: NextRequest) {
       delete (updateData as Record<string, unknown>).updated_by;
       const legacyResult = await supabaseService
         .from("automation_rules")
-        .update(updateData)
+        .update(updateData as never)
         .eq("id", id)
         .select()
         .single();
@@ -201,7 +201,7 @@ export async function PUT(request: NextRequest) {
       return apiError("Failed to update automation rule", 500, error);
     }
 
-    return apiSuccess({ rule: normalizeRule(data as Record<string, unknown>) }, "Automation rule updated successfully");
+    return apiSuccess({ rule: normalizeRule(data as unknown as Record<string, unknown>) }, "Automation rule updated successfully");
   } catch (error) {
     console.error("[Automation API] Error:", error);
     return apiError("Internal server error", 500);
