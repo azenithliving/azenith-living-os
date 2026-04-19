@@ -239,13 +239,13 @@ ${TOOL_DEFINITIONS.map(t => `- ${t.name}: ${t.description}`).join("\n")}
     });
 
     if (!response.success || !response.content) {
-      return createFallbackReasoning(userMessage);
+      return createFallbackReasoning(userMessage, response.error);
     }
 
     return parseReasoningResponse(response.content);
   } catch (error) {
     console.error("Reasoning failed:", error);
-    return createFallbackReasoning(userMessage);
+    return createFallbackReasoning(userMessage, error instanceof Error ? error.message : String(error));
   }
 }
 
@@ -277,13 +277,13 @@ function parseReasoningResponse(content: string): ReasoningResult {
   }
 }
 
-function createFallbackReasoning(message: string): ReasoningResult {
+function createFallbackReasoning(message: string, error?: string): ReasoningResult {
   return {
-    understanding: "غير واضح",
-    intent: "unknown",
-    confidence: 0.3,
-    reasoning: "فشل في التحليل",
-    response: "ممكن توضح أكتر عايز تعمل إيه؟",
+    understanding: "فشل الاتصال بالذكاء الاصطناعي",
+    intent: "error_fallback",
+    confidence: 0,
+    reasoning: error || "لا توجد تفاصيل إضافية عن الخطأ",
+    response: "عذراً، أواجه مشكلة حالياً في الاتصال بمركز التفكير. يرجى التأكد من مفاتيح API في Vercel.",
     needsClarification: true,
     canExecute: false,
   };

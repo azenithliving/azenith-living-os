@@ -99,12 +99,10 @@ const getDeepSeekKey = () => {
 
 const DEEPSEEK_KEY = getDeepSeekKey();
 
-/**
- * Route request to appropriate model (DeepSeek priority)
- */
 export async function routeRequest(
   request: ModelRequest
 ): Promise<ModelResponse> {
+  let lastError = "";
   // Use DeepSeek directly if key is available
   if (DEEPSEEK_KEY) {
     try {
@@ -139,6 +137,7 @@ export async function routeRequest(
       // Fall through to OpenRouter with the error context if needed
     } catch (err) {
       console.error("DeepSeek Direct Error:", err);
+      lastError = `DeepSeek Error: ${err instanceof Error ? err.message : String(err)}`;
     }
   }
 
@@ -170,28 +169,29 @@ export async function routeRequest(
       }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API error: ${response.status}`);
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        success: true,
+        content: data.choices[0]?.message?.content || "",
+        model: data.model || model,
+        usage: data.usage,
+      };
     }
 
-    const data = await response.json();
-    
-    return {
-      success: true,
-      content: data.choices[0]?.message?.content || "",
-      model: data.model || model,
-      usage: data.usage,
-    };
+    const errorData = await response.json().catch(() => ({}));
+    lastError = `OpenRouter Error (${response.status}): ${errorData.error?.message || "Unknown error"}`;
   } catch (error) {
     console.error("OpenRouter request failed:", error);
-    return {
-      success: false,
-      content: "",
-      model: request.modelPreference || "unknown",
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    lastError = `OpenRouter Fetch Failed: ${error instanceof Error ? error.message : String(error)}`;
   }
+
+  return {
+    success: false,
+    content: "",
+    model: "none",
+    error: lastError || "All AI providers failed",
+  };
 }
 
 /**
