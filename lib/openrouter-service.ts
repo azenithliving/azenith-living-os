@@ -91,54 +91,63 @@ const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 
 const API_KEY = process.env.OPENROUTER_API_KEY || (process.env.OPENROUTER_KEYS ? process.env.OPENROUTER_KEYS.split(',')[0] : "");
 
-// Smart key resolver: always split and take first valid key to prevent "multiple keys" error
-const getDeepSeekKey = () => {
+// Smart key resolver: returns array of all available keys
+const getDeepSeekKeys = () => {
   const raw = process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_KEYS || "";
-  return raw.split(',')[0]?.trim();
+  return raw.split(',').map(k => k.trim()).filter(Boolean);
 };
 
-const DEEPSEEK_KEY = getDeepSeekKey();
+const DEEPSEEK_KEYS_LIST = getDeepSeekKeys();
 
+/**
+ * Route request to appropriate model (DeepSeek priority with Rotation)
+ */
 export async function routeRequest(
   request: ModelRequest
 ): Promise<ModelResponse> {
   let lastError = "";
-  // Use DeepSeek directly if key is available
-  if (DEEPSEEK_KEY) {
-    try {
-      const response = await fetch(DEEPSEEK_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${DEEPSEEK_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "deepseek-chat",
-          messages: [
-            ...(request.systemPrompt ? [{ role: "system", content: request.systemPrompt }] : []),
-            { role: "user", content: request.prompt },
-          ],
-          temperature: request.temperature ?? 0.7,
-          max_tokens: request.maxTokens ?? 2048,
-        }),
-      });
+  
+  // Try DeepSeek Keys one by one
+  if (DEEPSEEK_KEYS_LIST.length > 0) {
+    for (const key of DEEPSEEK_KEYS_LIST) {
+      try {
+        const response = await fetch(DEEPSEEK_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${key}`,
+          },
+          body: JSON.stringify({
+            model: "deepseek-chat",
+            messages: [
+              ...(request.systemPrompt ? [{ role: "system", content: request.systemPrompt }] : []),
+              { role: "user", content: request.prompt },
+            ],
+            temperature: request.temperature ?? 0.7,
+            max_tokens: request.maxTokens ?? 2048,
+          }),
+          signal: AbortSignal.timeout(15000), // 15s timeout
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          success: true,
-          content: data.choices[0]?.message?.content || "",
-          model: "deepseek-chat",
-          usage: data.usage,
-        };
+        if (response.ok) {
+          const data = await response.json();
+          return {
+            success: true,
+            content: data.choices[0]?.message?.content || "",
+            model: "deepseek-chat",
+            usage: data.usage,
+          };
+        }
+        
+        const errText = await response.text();
+        lastError = `DeepSeek (Key ${key.slice(0, 6)}...): ${response.status} ${errText.slice(0, 50)}`;
+        console.error("DeepSeek Key failed:", lastError);
+      } catch (err) {
+        lastError = `DeepSeek Fetch Error: ${err instanceof Error ? err.message : String(err)}`;
       }
-      const errText = await response.text();
-      console.error("DeepSeek Direct API failed:", response.status, errText);
-      // Fall through to OpenRouter with the error context if needed
-    } catch (err) {
-      console.error("DeepSeek Direct Error:", err);
-      lastError = `DeepSeek Error: ${err instanceof Error ? err.message : String(err)}`;
     }
+  } else {
+    lastError = "No DeepSeek keys found in environment variables.";
   }
 
   // Fallback to OpenRouter
