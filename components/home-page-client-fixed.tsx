@@ -399,6 +399,9 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { eyebrow: string; 
   },
 };
 
+// In-memory cache to prevent refetching images for the same style during a session
+const imageCache: Record<string, Record<string, string>> = {};
+
 export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }: HomePageClientProps) {
   console.log("[CLIENT] HomePageClient mounted, isHydrated:", useSessionStore.getState().isHydrated, "initialImages:", Object.keys(initialRoomImages).length);
   
@@ -436,20 +439,6 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
       setStyleSwitchCount(styleSwitches);
     }
   }, [isHydrated, styleSwitches]);
-
-  // HYDRATION FALLBACK: Force isHydrated to true after 3 seconds if stuck
-  useEffect(() => {
-    if (isHydrated) return;
-    
-    console.log("[HYDRATION] Waiting for store rehydration...");
-    const hydrationTimer = setTimeout(() => {
-      console.warn("[HYDRATION FALLBACK] Forcing isHydrated to true after timeout");
-      const setHydrated = useSessionStore.getState().setHydrated;
-      setHydrated(true);
-    }, 3000);
-    
-    return () => clearTimeout(hydrationTimer);
-  }, [isHydrated]);
 
   const handleStyleChange = (newStyle: string) => {
     if (selectedStyle !== newStyle) {
@@ -533,15 +522,14 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
     };
   }, []);
 
-  // BRUTE FORCE: Kill loading after 2 seconds
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // If we already have cached images for this style, use them instantly
+    if (imageCache[displayStyle] && Object.keys(imageCache[displayStyle]).length > 0) {
+      setRoomImages(imageCache[displayStyle]);
       setLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+      return;
+    }
 
-  useEffect(() => {
     const controller = new AbortController();
 
     const fetchRoomImages = async () => {
@@ -599,7 +587,9 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
 
         const images = await Promise.all(imagePromises);
         if (!controller.signal.aborted) {
-          setRoomImages(Object.assign({}, ...images));
+          const finalImages = Object.assign({}, ...images);
+          setRoomImages(finalImages);
+          imageCache[displayStyle] = finalImages; // Save to cache
         }
       } finally {
         // ALWAYS clear loading state, even if aborted

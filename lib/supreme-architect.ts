@@ -73,22 +73,25 @@ interface SystemStatus {
 
 class SupremeArchitect {
   private static instance: SupremeArchitect;
-  private supabase: SupabaseClient<any>;
   private projectRoot: string;
   private conversationContext: Map<string, ArchitectMessage[]> = new Map();
 
+  private _supabase: ReturnType<typeof createClient> | null = null;
+
+  private get supabase() {
+    if (!this._supabase) {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!url || !key) throw new Error("Missing Supabase credentials");
+      this._supabase = createClient(url, key, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+    }
+    return this._supabase;
+  }
+
   private constructor() {
     this.projectRoot = process.cwd();
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    if (!url || !key) {
-      throw new Error("Missing Supabase credentials for Architect");
-    }
-    
-    this.supabase = createClient(url, key, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
   }
 
   static getInstance(): SupremeArchitect {

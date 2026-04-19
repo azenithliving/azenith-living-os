@@ -9,16 +9,9 @@ import HomePageClient from "@/components/home-page-client-fixed";
 export default function Home() {
   const [mounted, setMounted] = useState(false);
 
-  // KILL SWITCH: Force mount after 1 second max
+  // Proper Hydration fix: set mounted to true after initial render
   useEffect(() => {
-    const timer = setTimeout(() => {
-      console.warn("[BYPASS] Forcing mount after 1s");
-      setMounted(true);
-    }, 1000);
-
-    setMounted(true); // Also set immediately
-
-    return () => clearTimeout(timer);
+    setMounted(true);
   }, []);
 
   // Static runtime config with Arabic text

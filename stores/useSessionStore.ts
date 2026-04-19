@@ -559,4 +559,50 @@ Analyze this luxury real estate visitor profile and provide:
 4. Sales approach recommendation in Arabic`;
 }
 
+}
+
+if (typeof window !== "undefined") {
+  let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+  
+  useSessionStore.subscribe((state, prevState) => {
+    // Only sync if important fields changed
+    if (
+      state.leadScore !== prevState.leadScore ||
+      state.intent !== prevState.intent ||
+      state.styleSwitches !== prevState.styleSwitches ||
+      state.selectedStyle !== prevState.selectedStyle ||
+      state.roomType !== prevState.roomType ||
+      state.score !== prevState.score
+    ) {
+      if (syncTimeout) clearTimeout(syncTimeout);
+      
+      syncTimeout = setTimeout(() => {
+        const data = {
+          sessionId: state.sessionId,
+          leadScore: state.leadScore,
+          intent: state.intent,
+          styleSwitches: state.styleSwitches,
+          userPersona: state.userPersona,
+          psychologicalProfile: state.psychologicalProfile,
+          behavioralReport: state.behavioralReport,
+          lastPage: window.location.pathname,
+          language: state.language
+        };
+        
+        try {
+          // Use fetch with keepalive as a fallback to beacon for larger payloads
+          fetch('/api/analytics/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            keepalive: true
+          }).catch(() => { /* silent fail for background sync */ });
+        } catch (e) {
+          // Ignore
+        }
+      }, 2000); // 2-second debounce
+    }
+  });
+}
+
 export default useSessionStore;

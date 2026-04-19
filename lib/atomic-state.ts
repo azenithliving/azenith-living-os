@@ -94,12 +94,20 @@ interface FileSystemDiff {
 // ==========================================
 
 export class AtomicStateManager {
-  private supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-  
+  private _supabase: ReturnType<typeof createClient> | null = null;
   private snapshots: Map<string, SystemSnapshot> = new Map();
+
+  private get supabase() {
+    if (!this._supabase) {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!url || !key) {
+        throw new Error("Missing Supabase environment variables. Required: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+      }
+      this._supabase = createClient(url, key);
+    }
+    return this._supabase;
+  }
   private currentSnapshotId: string | null = null;
   private snapshotInterval?: NodeJS.Timeout;
   private readonly SNAPSHOT_DIR = ".snapshots";
@@ -114,9 +122,14 @@ export class AtomicStateManager {
     "app/layout.tsx",
   ];
 
-  constructor() {
-    this.ensureSnapshotDirectory();
-    this.loadExistingSnapshots();
+  private initialized = false;
+  
+  private async ensureInitialized() {
+    if (!this.initialized) {
+      this.ensureSnapshotDirectory();
+      await this.loadExistingSnapshots();
+      this.initialized = true;
+    }
   }
 
   private ensureSnapshotDirectory() {

@@ -88,10 +88,19 @@ export interface SwarmHealth {
 export class InfiniteSwarmEngine {
   private nodes: Map<string, SwarmNode> = new Map();
   private consensusHistory: Array<{ timestamp: Date; confidence: number; taskType: TaskSpecialty }> = [];
-  private supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  private _supabase: ReturnType<typeof createClient> | null = null;
+
+  private get supabase() {
+    if (!this._supabase) {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!url || !key) {
+        throw new Error("Missing Supabase credentials");
+      }
+      this._supabase = createClient(url, key);
+    }
+    return this._supabase;
+  }
 
   constructor() {
     this.initializeSwarm();

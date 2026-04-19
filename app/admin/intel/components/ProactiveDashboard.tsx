@@ -147,6 +147,86 @@ export function ProactiveDashboard() {
     }
   };
 
+  // Execute opportunity action
+  const executeOpportunity = async (opportunityId: string) => {
+    try {
+      const response = await fetch("/api/admin/agent/tools/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toolName: "execute_opportunity",
+          params: { opportunityId },
+        }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        fetchDashboardData();
+      }
+    } catch (error) {
+      console.error("Failed to execute opportunity:", error);
+    }
+  };
+
+  // Schedule opportunity reminder
+  const scheduleOpportunity = async (opportunityId: string, type: string) => {
+    try {
+      const response = await fetch("/api/admin/agent/goals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `Review opportunity: ${opportunityId}`,
+          description: `Reminder to review opportunity ${opportunityId}`,
+          priority: "normal",
+          metadata: { opportunityId, type },
+        }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        alert("تم جدولة التذكير");
+      }
+    } catch (error) {
+      console.error("Failed to schedule opportunity:", error);
+    }
+  };
+
+  // Execute anomaly fix
+  const executeFix = async (anomalyIdx: number) => {
+    try {
+      const anomaly = data?.anomalies[anomalyIdx];
+      if (!anomaly) return;
+
+      const response = await fetch("/api/admin/agent/tools/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toolName: "system_health_check",
+          params: { 
+            deepCheck: true, 
+            includeRecommendations: true,
+            targetMetric: anomaly.metric,
+          },
+        }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        fetchDashboardData();
+      }
+    } catch (error) {
+      console.error("Failed to execute fix:", error);
+    }
+  };
+
+  // Dismiss anomaly
+  const dismissAnomaly = async (anomalyIdx: number) => {
+    try {
+      // In a real implementation, this would mark the anomaly as dismissed
+      // For now, we'll just refresh the data
+      fetchDashboardData();
+    } catch (error) {
+      console.error("Failed to dismiss anomaly:", error);
+    }
+  };
+
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "critical": return "bg-red-500";
@@ -429,13 +509,20 @@ export function ProactiveDashboard() {
                     <Badge variant="outline">{opp.category}</Badge>
                   </div>
                   <div className="mt-4 flex gap-2">
-                    <Button size="sm">
+                    <Button 
+                      size="sm"
+                      onClick={() => executeOpportunity(opp.id)}
+                    >
                       <Play className="h-4 w-4 mr-2" />
                       نفذ الآن
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => scheduleOpportunity(opp.id, 'reminder')}
+                    >
                       <Bell className="h-4 w-4 mr-2" />
-      ذكرني لاحقاً
+                      ذكرني لاحقاً
                     </Button>
                   </div>
                 </CardContent>
@@ -477,11 +564,18 @@ export function ProactiveDashboard() {
                     </div>
                   )}
                   <div className="mt-4 flex gap-2">
-                    <Button size="sm">
+                    <Button 
+                      size="sm"
+                      onClick={() => executeFix(idx)}
+                    >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       تنفيذ الإصلاح
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => dismissAnomaly(idx)}
+                    >
                       تجاهل
                     </Button>
                   </div>

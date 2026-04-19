@@ -101,6 +101,13 @@ export class QueueManager {
       removeOnFail: 100
     });
 
+    await this.createQueue('visitor-analytics', {
+      attempts: 5,
+      backoff: { type: 'exponential', delay: 2000 },
+      removeOnComplete: 1000,
+      removeOnFail: 500
+    });
+
     this.logger.info('All queues created successfully');
   }
 

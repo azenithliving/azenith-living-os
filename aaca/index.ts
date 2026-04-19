@@ -29,6 +29,7 @@ import { getEvolutionAgentService, EvolutionAgentService } from './agents/evolut
 // Support Systems
 import { getApprovalSystem, ApprovalSystem } from './approval/approval-system';
 import { getExecutionEngine, ExecutionEngine } from './execution/execution-engine';
+import { processVisitorAnalytics } from './workers/visitor-analytics-worker';
 
 // API
 import { createAPIRouter } from './api/routes';
@@ -243,6 +244,11 @@ class AACASystem {
       }
       throw new Error(`Action ${actionId} not found`);
     }, 2);
+
+    // Visitor Analytics Worker
+    await this.queueManager.addWorker('visitor-analytics', async (job) => {
+      return processVisitorAnalytics(job);
+    }, 5);
 
     logger.info('All workers configured');
 

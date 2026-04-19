@@ -25,6 +25,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
+import { ExecutionResultCard } from "./ExecutionResults";
 
 interface Message {
   id: string;
@@ -36,10 +37,8 @@ interface Message {
     actionTaken?: string;
     requiresApproval?: boolean;
     suggestions?: string[];
-    data?: {
-      intent?: string;
-      model?: string;
-    };
+    executionId?: string;
+    data?: Record<string, unknown>;
   };
 }
 
@@ -196,13 +195,9 @@ export function UltimateAgentChat() {
             actionTaken: data.actionTaken,
             requiresApproval: data.requiresApproval,
             suggestions: data.suggestions,
-            data:
-              data.data && typeof data.data === "object"
-                ? {
-                    intent: "intent" in data.data ? String(data.data.intent) : undefined,
-                    model: "model" in data.data ? String(data.data.model) : undefined,
-                  }
-                : undefined,
+            executionId: data.executionId,
+            // Pass full data object - NO FILTERING!
+            data: data.data,
           },
         });
 
@@ -461,6 +456,36 @@ export function UltimateAgentChat() {
                     <p className="whitespace-pre-wrap text-sm leading-6">{message.content}</p>
                   </div>
 
+                  {/* Render real execution results */}
+                  {message.metadata?.actionTaken && message.metadata?.data && message.role === "agent" && (
+                    <div className="mt-3">
+                      <ExecutionResultCard
+                        actionTaken={message.metadata.actionTaken}
+                        data={message.metadata.data}
+                        executionId={message.metadata.executionId}
+                        onRollback={async (executionId) => {
+                          try {
+                            const response = await fetch("/api/admin/agent/rollback", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ executionId }),
+                            });
+                            const result = await response.json();
+                            if (result.success) {
+                              alert("تم التراجع بنجاح");
+                              // Refresh the chat or update the message
+                            } else {
+                              alert("فشل التراجع: " + result.error);
+                            }
+                          } catch (error) {
+                            console.error("Rollback failed:", error);
+                            alert("فشل التراجع");
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/45">
                     <span>
                       <Clock className="mr-1 inline h-3 w-3" />
@@ -470,15 +495,15 @@ export function UltimateAgentChat() {
                       })}
                     </span>
 
-                    {message.metadata?.data?.intent ? (
+                    {message.metadata?.data && typeof message.metadata.data === 'object' && 'intent' in message.metadata.data ? (
                       <Badge variant="secondary" className="bg-white/5 text-white/65">
-                        {message.metadata.data.intent}
+                        {String(message.metadata.data.intent)}
                       </Badge>
                     ) : null}
 
-                    {message.metadata?.data?.model ? (
+                    {message.metadata?.data && typeof message.metadata.data === 'object' && 'model' in message.metadata.data ? (
                       <Badge variant="secondary" className="bg-white/5 text-white/65">
-                        {message.metadata.data.model}
+                        {String(message.metadata.data.model)}
                       </Badge>
                     ) : null}
                   </div>
