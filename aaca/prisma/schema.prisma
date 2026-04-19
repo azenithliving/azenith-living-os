@@ -611,6 +611,7 @@ model agent_goals {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id    String?   @db.Uuid
   goal       String
+  priority   String    @default("medium") @db.VarChar(20)
   status     String?   @default("active")
   created_at DateTime? @default(now()) @db.Timestamptz(6)
   users      User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -623,6 +624,7 @@ model agent_goals {
 model agent_memory {
   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id       String?   @db.Uuid
+  actor_user_id String?   @db.Uuid
   memory_type   String
   content       Json
   created_at    DateTime? @default(now()) @db.Timestamptz(6)

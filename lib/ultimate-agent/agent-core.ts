@@ -161,8 +161,13 @@ async function reason(
 ): Promise<ReasoningResult> {
   
   // Get memories for context
-  const memories = await getRecentMemories(5, ["interaction", "decision"]);
-  const memoryContext = memories.memories?.map(m => m.content).join("\n") || "";
+  let memoryContext = "";
+  try {
+    const memories = await getRecentMemories(5, ["interaction", "decision"]);
+    memoryContext = memories.memories?.map(m => m.content).join("\n") || "";
+  } catch (err) {
+    console.warn("[UltimateAgent] Memory retrieval failed, proceeding without context", err);
+  }
 
   const prompt = `
 أنت كيان ذكي حقيقي. حلل رسالة المستخدم بعمق واستنتج المقصود.
