@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate --schema=aaca/prisma/schema.prisma && next build",
+    "postinstall": "prisma generate --schema=aaca/prisma/schema.prisma",
     "start": "next start",
     "aaca:start": "ts-node --transpile-only aaca/main.ts",
     "aaca:dev": "ts-node --transpile-only --watch aaca/main.ts",
