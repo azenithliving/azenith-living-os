@@ -137,12 +137,23 @@ function SalesManagerTab() {
       
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.response || "تم استلام رسالتك وسأقوم بتحليلها.",
+        content: data.reply || data.response || "تم استلام رسالتك ومعالجتها بنجاح.",
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
+
+      // If it was a learning interaction, refresh the lists
+      if (data.reply?.includes("حفظ")) {
+        loadKnowledge();
+        loadPendingQuestions();
+      }
     } catch (error) {
       console.error("Chat error:", error);
+      setMessages((prev) => [...prev, {
+        role: "assistant",
+        content: "❌ حدث خطأ في الاتصال. يرجى التأكد من اتصال الإنترنت.",
+        timestamp: new Date().toISOString()
+      }]);
     } finally {
       setIsLoading(false);
     }
