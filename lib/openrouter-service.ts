@@ -90,7 +90,14 @@ const OPENROUTER_API_URL = "https://openrouter.ai/api/v1";
 const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 
 const API_KEY = process.env.OPENROUTER_API_KEY || (process.env.OPENROUTER_KEYS ? process.env.OPENROUTER_KEYS.split(',')[0] : "");
-const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY || (process.env.DEEPSEEK_KEYS ? process.env.DEEPSEEK_KEYS.split(',')[0] : "");
+
+// Smart key resolver: always split and take first valid key to prevent "multiple keys" error
+const getDeepSeekKey = () => {
+  const raw = process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_KEYS || "";
+  return raw.split(',')[0]?.trim();
+};
+
+const DEEPSEEK_KEY = getDeepSeekKey();
 
 /**
  * Route request to appropriate model (DeepSeek priority)
@@ -98,14 +105,14 @@ const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY || (process.env.DEEPSEEK_KEYS 
 export async function routeRequest(
   request: ModelRequest
 ): Promise<ModelResponse> {
-  // Use DeepSeek directly if key is available, it's more reliable for our needs
+  // Use DeepSeek directly if key is available
   if (DEEPSEEK_KEY) {
     try {
       const response = await fetch(DEEPSEEK_API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${DEEPSEEK_KEY.trim()}`,
+          "Authorization": `Bearer ${DEEPSEEK_KEY}`,
         },
         body: JSON.stringify({
           model: "deepseek-chat",
@@ -127,7 +134,9 @@ export async function routeRequest(
           usage: data.usage,
         };
       }
-      console.warn("DeepSeek Direct API failed, falling back to OpenRouter...");
+      const errText = await response.text();
+      console.error("DeepSeek Direct API failed:", response.status, errText);
+      // Fall through to OpenRouter with the error context if needed
     } catch (err) {
       console.error("DeepSeek Direct Error:", err);
     }
