@@ -87,51 +87,53 @@ const MODEL_PRIORITIES: Record<string, string> = {
 };
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1";
+const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
+
 const API_KEY = process.env.OPENROUTER_API_KEY || (process.env.OPENROUTER_KEYS ? process.env.OPENROUTER_KEYS.split(',')[0] : "");
+const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY || (process.env.DEEPSEEK_KEYS ? process.env.DEEPSEEK_KEYS.split(',')[0] : "");
 
 /**
- * Get available free models from OpenRouter
- */
-export async function getAvailableModels(): Promise<OpenRouterModel[]> {
-  try {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-      "X-Title": "Azenith Sovereign",
-    };
-
-    if (API_KEY) {
-      headers["Authorization"] = `Bearer ${API_KEY}`;
-    }
-
-    const response = await fetch(`${OPENROUTER_API_URL}/models`, {
-      method: "GET",
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenRouter API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    // فلترة النماذج المجانية (السعر = 0)
-    return data.data.filter((model: OpenRouterModel) => 
-      model.pricing.prompt === 0 && model.pricing.completion === 0
-    );
-  } catch (error) {
-    console.error("Failed to fetch models:", error);
-    // إرجاع قائمة النماذج المعروفة في حالة الفشل
-    return getFallbackModels();
-  }
-}
-
-/**
- * Route request to appropriate model
+ * Route request to appropriate model (DeepSeek priority)
  */
 export async function routeRequest(
   request: ModelRequest
 ): Promise<ModelResponse> {
+  // Use DeepSeek directly if key is available, it's more reliable for our needs
+  if (DEEPSEEK_KEY) {
+    try {
+      const response = await fetch(DEEPSEEK_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${DEEPSEEK_KEY.trim()}`,
+        },
+        body: JSON.stringify({
+          model: "deepseek-chat",
+          messages: [
+            ...(request.systemPrompt ? [{ role: "system", content: request.systemPrompt }] : []),
+            { role: "user", content: request.prompt },
+          ],
+          temperature: request.temperature ?? 0.7,
+          max_tokens: request.maxTokens ?? 2048,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          success: true,
+          content: data.choices[0]?.message?.content || "",
+          model: "deepseek-chat",
+          usage: data.usage,
+        };
+      }
+      console.warn("DeepSeek Direct API failed, falling back to OpenRouter...");
+    } catch (err) {
+      console.error("DeepSeek Direct Error:", err);
+    }
+  }
+
+  // Fallback to OpenRouter
   try {
     const model = request.modelPreference || getBestModelForTask(detectTaskType(request.prompt));
     
