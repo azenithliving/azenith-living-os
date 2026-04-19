@@ -421,7 +421,7 @@ interface ExecutionResultProps {
   onRollback?: (executionId: string) => void;
 }
 
-export function ExecutionResultCard({ actionTaken, data, executionId, onRollback }: ExecutionResultProps) {
+export function ExecutionResultCard({ actionTaken, data, onRollback }: ExecutionResultProps) {
   if (!data || typeof data !== "object") return null;
 
   // Render based on action type

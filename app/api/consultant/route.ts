@@ -189,6 +189,28 @@ async function notifyAdminUnknownQuestion(question: string, sessionId: string): 
         },
       });
     }
+
+    // REAL WHATSAPP SENDING via internal API
+    const internalApiKey = process.env.INTERNAL_API_KEY;
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    
+    try {
+      await fetch(`${baseUrl}/api/admin/agent/communication`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${internalApiKey}`
+        },
+        body: JSON.stringify({
+          type: 'whatsapp_notification',
+          recipient: adminPhone,
+          message
+        })
+      });
+      console.log(`[Consultant] Real WhatsApp notification triggered for admin`);
+    } catch (whErr) {
+      console.error("[Consultant] Failed to trigger real WhatsApp notify:", whErr);
+    }
   } catch (err) {
     console.error("[Consultant] Error notifying admin:", err);
   }

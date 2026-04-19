@@ -2,6 +2,7 @@ import { Job } from 'bullmq';
 import { EventBus } from '../events/event-bus';
 import { Logger } from '../utils/logger';
 import { prisma } from '../database/prisma-client';
+import { askGroq } from '../../lib/ai-orchestrator';
 import { 
   AITask, 
   TaskStatus, 
@@ -39,7 +40,7 @@ interface CapabilityDefinition {
 }
 
 const DEFAULT_CONFIG: EvolutionConfig = {
-  autoPropose: false,
+  autoPropose: true,
   simulationDepth: 3,
   requireApproval: true,
   maxProposalsPerDay: 5
@@ -442,8 +443,8 @@ export class EvolutionAgentService {
   }
 
   private async generateCapabilityDefinition(proposal: FeatureProposal): Promise<CapabilityDefinition> {
-    // Generate code based on proposal
-    const code = this.generateCapabilityCode(proposal);
+    // Generate code based on proposal using AI
+    const code = await this.generateCapabilityCodeAI(proposal);
 
     const manifest: CapabilityManifest = {
       entryPoint: `capabilities/${proposal.name.toLowerCase().replace(/\s+/g, '-')}.ts`,
@@ -465,6 +466,35 @@ export class EvolutionAgentService {
       manifest: manifest as CapabilityManifest,
       dependencies: []
     };
+  }
+
+  private async generateCapabilityCodeAI(proposal: FeatureProposal): Promise<string> {
+    this.logger.info('Generating capability code with AI', { name: proposal.name });
+    
+    const prompt = `أنت مهندس برمجيات محترف في نظام AACA. قم بكتابة كود TypeScript لـ "Capability" جديدة بناءً على الاقتراح التالي:
+    
+    الاسم: ${proposal.name}
+    الوصف: ${proposal.description}
+    الهدف: ${proposal.purpose}
+    المودول المستهدف: ${proposal.targetModule}
+    
+    يجب أن يتضمن الكود كلاس (Class) يحتوي على الميثودز التالية:
+    - initialize(): للتجهيز الأولي.
+    - execute(payload): لتنفيذ المهمة الأساسية.
+    - cleanup(): للتنظيف بعد الانتهاء.
+    
+    يجب أن يستخدم الكود EventBus لإرسال الأحداث.
+    أرجع الكود فقط بدون أي شرح أو علامات Markdown.`;
+
+    const result = await askGroq(prompt, { temperature: 0.2 });
+    
+    if (result.success) {
+      // Clean up markdown code blocks if any
+      return result.content.replace(/```typescript|```/g, '').trim();
+    }
+
+    this.logger.warn('AI code generation failed, falling back to template');
+    return this.generateCapabilityCode(proposal);
   }
 
   private generateCapabilityCode(proposal: FeatureProposal): string {

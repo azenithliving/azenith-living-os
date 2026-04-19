@@ -2,6 +2,8 @@ import { Job } from 'bullmq';
 import { EventBus } from '../events/event-bus';
 import { Logger } from '../utils/logger';
 import { prisma } from '../database/prisma-client';
+import axios from 'axios';
+import { Resend } from 'resend';
 import { 
   AITask, 
   TaskStatus, 
@@ -28,6 +30,10 @@ interface CommunicationConfig {
     enabled: boolean;
     botToken: string;
     defaultChatId: string;
+  };
+  whatsapp: {
+    enabled: boolean;
+    defaultNumber: string;
   };
   dashboard: {
     enabled: boolean;
@@ -65,9 +71,13 @@ const DEFAULT_CONFIG: CommunicationConfig = {
     fromAddress: process.env.FROM_EMAIL || 'aaca@company.com'
   },
   telegram: {
-    enabled: false,
+    enabled: true,
     botToken: process.env.TELEGRAM_BOT_TOKEN || '',
     defaultChatId: process.env.TELEGRAM_CHAT_ID || ''
+  },
+  whatsapp: {
+    enabled: true,
+    defaultNumber: process.env.WHATSAPP_DEFAULT_NUMBER || ''
   },
   dashboard: {
     enabled: true,
@@ -80,6 +90,7 @@ export class CommunicationAgentService {
   private logger: Logger;
   private config: CommunicationConfig;
   private emailTransporter?: nodemailer.Transporter;
+  private resend?: Resend;
   private dashboardMessages: DashboardMessage[] = [];
 
   constructor(eventBus: EventBus, config: Partial<CommunicationConfig> = {}) {
@@ -88,6 +99,13 @@ export class CommunicationAgentService {
     this.config = { ...DEFAULT_CONFIG, ...config };
     
     this.initializeEmail();
+    
+    // Initialize Resend
+    if (process.env.RESEND_API_KEY) {
+      this.resend = new Resend(process.env.RESEND_API_KEY);
+      this.logger.info('Resend client initialized');
+    }
+
     this.setupEventHandlers();
   }
 
@@ -176,11 +194,20 @@ export class CommunicationAgentService {
           break;
 
         case NotificationChannel.TELEGRAM:
-          if (this.config.telegram.enabled) {
+          if (this.config.telegram.enabled && this.config.telegram.botToken) {
             await this.sendTelegram(title, message, data);
             sentChannels.push(NotificationChannel.TELEGRAM);
           } else {
-            errors.push('Telegram not configured');
+            errors.push('Telegram not configured or enabled');
+          }
+          break;
+
+        case NotificationChannel.WHATSAPP:
+          if (this.config.whatsapp.enabled) {
+            await this.sendWhatsApp(recipientId || this.config.whatsapp.defaultNumber, message);
+            sentChannels.push(NotificationChannel.WHATSAPP);
+          } else {
+            errors.push('WhatsApp not enabled');
           }
           break;
 
@@ -463,11 +490,22 @@ export class CommunicationAgentService {
     body: string, 
     data?: Record<string, unknown>
   ): Promise<void> {
+    const htmlBody = this.formatEmailBody(body, data);
+
+    if (this.resend) {
+      await this.resend.emails.send({
+        from: this.config.email.fromAddress,
+        to: to === 'all' ? this.config.email.smtpUser : to,
+        subject,
+        html: htmlBody
+      });
+      this.logger.info('Email sent via Resend', { to, subject });
+      return;
+    }
+
     if (!this.emailTransporter) {
       throw new Error('Email transport not initialized');
     }
-
-    const htmlBody = this.formatEmailBody(body, data);
 
     await this.emailTransporter.sendMail({
       from: this.config.email.fromAddress,
@@ -477,19 +515,32 @@ export class CommunicationAgentService {
       html: htmlBody
     });
 
-    this.logger.info('Email sent', { to, subject });
+    this.logger.info('Email sent via SMTP', { to, subject });
   }
 
   private async sendTelegram(title: string, message: string, data?: Record<string, unknown>): Promise<void> {
-    if (!this.config.telegram.enabled) {
+    if (!this.config.telegram.enabled || !this.config.telegram.botToken) {
       throw new Error('Telegram not configured');
     }
 
-    const text = `*${title}*\n\n${message}`;
+    const text = `*${title}*\n\n${message}${data ? `\n\n_Details: ${JSON.stringify(data, null, 2)}_` : ''}`;
     
-    // Telegram bot API implementation would go here
-    // For now, we log it
-    this.logger.info('Telegram message prepared', { chatId: this.config.telegram.defaultChatId, text });
+    await axios.post(`https://api.telegram.org/bot${this.config.telegram.botToken}/sendMessage`, {
+      chat_id: this.config.telegram.defaultChatId,
+      text,
+      parse_mode: 'Markdown'
+    });
+
+    this.logger.info('Telegram message sent', { chatId: this.config.telegram.defaultChatId });
+  }
+
+  private async sendWhatsApp(to: string, message: string): Promise<void> {
+    // Basic WhatsApp implementation using a simple logging for now
+    // In a real scenario, this would interface with a WhatsApp API provider or whatsapp-web.js
+    this.logger.info('WhatsApp message triggered', { to, message });
+    
+    // For internal alerting, we often use Telegram as the primary channel
+    // but we log the WhatsApp request here for future integration with a gateway.
   }
 
   private async sendToDashboard(

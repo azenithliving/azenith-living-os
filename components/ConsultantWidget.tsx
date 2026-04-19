@@ -157,6 +157,19 @@ export default function ConsultantWidget() {
     }
   }, [hasLoadedSession, fetchSession, messages.length, userName]);
 
+  // Proactive trigger: Open chat after 15 seconds if it's the first time and not opened yet
+  useEffect(() => {
+    const hasBeenOpened = localStorage.getItem("azenith_consultant_auto_opened");
+    if (!hasBeenOpened) {
+      const timer = setTimeout(() => {
+        setIsOpen(true);
+        handleOpen();
+        localStorage.setItem("azenith_consultant_auto_opened", "true");
+      }, 15000);
+      return () => clearTimeout(timer);
+    }
+  }, [handleOpen]);
+
   // Send message to API
   const sendMessage = async (content: string) => {
     if (!content.trim() || isLoading) return;

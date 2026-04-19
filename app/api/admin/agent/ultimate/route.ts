@@ -134,7 +134,7 @@ export async function POST(req: Request) {
       }
 
       case "handle_approval": {
-        const { requestId, approved, reason } = payload;
+        const { requestId, approved } = payload;
 
         if (!requestId) {
           return new Response(JSON.stringify({ success: false, error: "Missing requestId" }), {

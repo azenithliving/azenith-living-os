@@ -1394,3 +1394,16 @@ model LeadConversion {
   @@map("lead_conversions")
   @@schema("public")
 }
+
+model ConsultantSession {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId  String   @unique @map("session_id")
+  messages   Json     @default("[]")
+  insights   Json?    @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("consultant_sessions")
+  @@schema("public")
+}
+
