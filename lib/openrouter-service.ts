@@ -93,8 +93,15 @@ const API_KEY = process.env.OPENROUTER_API_KEY || (process.env.OPENROUTER_KEYS ?
 
 // Smart key resolver: returns array of all available keys
 const getDeepSeekKeys = () => {
-  const raw = process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_KEYS || "";
-  return raw.split(',').map(k => k.trim()).filter(Boolean);
+  // Try all possible naming conventions
+  const raw = process.env.DEEPSEEK_API_KEY || 
+              process.env.DEEPSEEK_KEYS || 
+              process.env.NEXT_PUBLIC_DEEPSEEK_KEY || 
+              "";
+              
+  const keys = raw.split(',').map(k => k.trim()).filter(Boolean);
+  console.log(`[DeepSeek Router] Initialized with ${keys.length} keys from environment.`);
+  return keys;
 };
 
 const DEEPSEEK_KEYS_LIST = getDeepSeekKeys();
@@ -189,10 +196,10 @@ export async function routeRequest(
     }
 
     const errorData = await response.json().catch(() => ({}));
-    lastError = `OpenRouter Error (${response.status}): ${errorData.error?.message || "Unknown error"}`;
+    lastError += ` | OpenRouter Error (${response.status}): ${errorData.error?.message || "Rate limited"}`;
   } catch (error) {
     console.error("OpenRouter request failed:", error);
-    lastError = `OpenRouter Fetch Failed: ${error instanceof Error ? error.message : String(error)}`;
+    lastError += ` | OpenRouter Fetch Failed: ${error instanceof Error ? error.message : String(error)}`;
   }
 
   return {
