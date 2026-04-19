@@ -172,41 +172,40 @@ async function getLearnings(): Promise<string[]> {
 /**
  * Send WhatsApp notification to admin about unknown question
  */
-async function notifyAdminUnknownQuestion(question: string, sessionId: string): Promise<void> {
+async function notifyAdminUnknownQuestion(question: string, sessionId: string, userName?: string): Promise<void> {
   try {
     const adminPhone = process.env.ADMIN_WHATSAPP_PHONE || "01090819584";
+    const displayName = userName || "زائر مجهول";
     
-    const message = `🔔 *سؤال جديد للمستشار*
+    console.log(`[Consultant] Processing unknown question: "${question}" for session ${sessionId}`);
 
-السؤال: ${question}
-
-معرف الجلسة: ${sessionId}
-
-الرجاء الرد على هذا السؤال في وضع التعلم لتدريب المستشار.`;
-
-    console.log(`[Consultant] Would send WhatsApp to ${adminPhone}:`, message);
-    
-    // Log the notification
+    // 1. Log to Database (for Admin Dashboard)
     const supabaseAdmin = getSupabaseAdminClient();
     if (supabaseAdmin) {
-      await supabaseAdmin.from("events").insert({
-        id: crypto.randomUUID(),
-        type: "consultant_unknown_question",
-        value: question.substring(0, 100),
-        metadata: {
-          session_id: sessionId,
-          admin_phone: adminPhone,
-          notified_at: new Date().toISOString(),
-        },
+      const { error: dbErr } = await supabaseAdmin.from("consultant_pending_questions").insert({
+        session_id: sessionId,
+        question: question,
+        status: 'pending',
+        created_at: new Date().toISOString()
       });
+      if (dbErr) console.error("[Consultant] DB Insert Error:", dbErr);
     }
 
-    // REAL WHATSAPP SENDING via internal API
+    // 2. Prepare Notification Message
+    const message = `🔔 *استفسار جديد للمستشار*
+-----------------------
+👤 العميل: ${displayName}
+❓ السؤال: ${question}
+🆔 الجلسة: ${sessionId}
+-----------------------
+💡 يرجى الرد عبر لوحة التحكم لتدريب المستشار.`;
+
+    // 3. Trigger Communication Agent (WhatsApp/Telegram)
     const internalApiKey = process.env.INTERNAL_API_KEY;
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
     try {
-      await fetch(`${baseUrl}/api/admin/agent/communication`, {
+      await fetch(`${siteUrl}/api/admin/agent/communication`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,12 +217,12 @@ async function notifyAdminUnknownQuestion(question: string, sessionId: string): 
           message
         })
       });
-      console.log(`[Consultant] Real WhatsApp notification triggered for admin`);
+      console.log(`[Consultant] Notification signal sent to Communication Agent`);
     } catch (whErr) {
-      console.error("[Consultant] Failed to trigger real WhatsApp notify:", whErr);
+      console.error("[Consultant] Communication Agent call failed:", whErr);
     }
   } catch (err) {
-    console.error("[Consultant] Error notifying admin:", err);
+    console.error("[Consultant] Global notify error:", err);
   }
 }
 
@@ -305,30 +304,25 @@ export async function POST(
 
     let reply = aiResult.content.trim();
 
-    // Check if AI indicated it doesn't know the answer or is escalating
+    // Advanced detection: Check if the AI response indicates a lack of factual knowledge
+    const lowerReply = reply.toLowerCase();
     const unknownIndicators = [
-      "هذه المعلومة غير متاحة",
-      "لا أعرف",
-      "غير متأكد",
-      "لا أملك هذه المعلومة",
-      "غير موجودة في قاعدة البيانات",
+      "لا أستطيع أن أقدم لك هذه المعلومات مباشرة",
       "سأقوم بالتأكد من هذه المعلومة",
-      "سأقوم بنقله لمدير المبيعات",
-      "أريد أن أعطيك إجابة دقيقة",
-      "دعني أتأكد",
-      "يتواصل معك المسؤول"
+      "من الإدارة والرد عليك",
+      "ليتواصل معك المسؤول",
+      "غير متاحة حالياً",
+      "لا أملك إجابة دقيقة",
+      "تحويل استفسارك",
+      "سؤال ممتاز سأقوم بنقله"
     ];
     
-    const isUnknown = unknownIndicators.some(indicator => reply.includes(indicator));
+    const isUnknown = unknownIndicators.some(indicator => reply.includes(indicator)) || 
+                     (reply.length < 150 && reply.includes("الإدارة"));
     
     if (isUnknown) {
-      // Notify admin about the unknown question (WhatsApp + Dashboard)
-      await notifyAdminUnknownQuestion(message, sessionId);
-      
-      // Append message about admin notification if not already mentioned by AI
-      if (!reply.includes("قريباً") && !reply.includes("تواصل")) {
-        reply += "\n\n*ملاحظة: تم إرسال استفسارك لمدير المبيعات وسيتم الرد عليك في أقرب وقت.*";
-      }
+      console.log(`[Consultant] Unknown question detected. Notifying admin...`);
+      await notifyAdminUnknownQuestion(message, sessionId, userName);
     }
 
     // Add AI response to history
