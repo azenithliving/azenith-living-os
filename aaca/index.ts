@@ -48,8 +48,8 @@ interface AACAConfig {
 
 const DEFAULT_CONFIG: AACAConfig = {
   port: parseInt(process.env.AACA_PORT || '3001', 10),
-  redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://localhost:5432/aaca',
+  redisUrl: process.env.REDIS_URL || process.env.UPSTASH_REDIS_URL || '',
+  databaseUrl: process.env.DATABASE_URL || '',
   logLevel: process.env.LOG_LEVEL || 'info'
 };
 
