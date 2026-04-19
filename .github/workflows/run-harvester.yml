@@ -1,0 +1,42 @@
+name: Run Elite Harvester v3.0
+
+on:
+  workflow_dispatch: # Manual trigger only (runs for 2-4 hours)
+  # schedule:
+  #   - cron: '0 0 1 * *' # Uncomment for monthly auto-run
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360 # 6 hours max
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run Elite Harvester
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PEXELS_KEYS: ${{ secrets.PEXELS_KEYS }}
+          GOOGLE_AI_KEYS: ${{ secrets.GOOGLE_AI_KEYS }}
+          GROQ_KEYS: ${{ secrets.GROQ_KEYS }}
+          # Add any other env vars needed
+        run: npx tsx scripts/elite-harvester-v3.ts
+        
+      - name: Notify success
+        if: success()
+        run: echo "✅ Harvest completed successfully!"
+        
+      - name: Notify failure
+        if: failure()
+        run: echo "❌ Harvest failed!"
