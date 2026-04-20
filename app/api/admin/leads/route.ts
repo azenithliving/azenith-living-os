@@ -51,8 +51,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           }
         }
         
-        // If there's no phone, we might not consider it a full lead, but let's include all active sessions for now, or filter
-        if (!phone && !session.insights?.roomType) return null; // Skip empty sessions
+        // In Omniscience mode, we show EVERYONE. No filtering.
+        // if (!phone && !session.insights?.roomType) return null; 
 
         // Determine tier based on budget or engagement
         let tier = "bronze";
