@@ -193,6 +193,34 @@ export default function ConsultantWidget() {
     }
   }, [handleOpen]);
 
+  // استمع لحدث "fate:open_chat" الصادر من RealityUIProvider بعد انتهاء التجميد
+  useEffect(() => {
+    const handleFateOpenChat = (e: Event) => {
+      const customEvent = e as CustomEvent<{ message: string }>;
+      const specialMessage = customEvent.detail?.message;
+
+      // افتح الشات
+      setIsOpen(true);
+      setHasLoadedSession(true);
+
+      // أضف رسالة العرض الخاص فوراً
+      if (specialMessage) {
+        setMessages(prev => {
+          // تجنب التكرار
+          if (prev.some(m => m.content === specialMessage)) return prev;
+          return [...prev, {
+            role: "assistant",
+            content: specialMessage,
+            timestamp: new Date().toISOString(),
+          }];
+        });
+      }
+    };
+
+    window.addEventListener("fate:open_chat", handleFateOpenChat);
+    return () => window.removeEventListener("fate:open_chat", handleFateOpenChat);
+  }, []);
+
   // Poll for admin replies every 15 seconds when chat is open
   useEffect(() => {
     if (!isOpen || !sessionId) return;
