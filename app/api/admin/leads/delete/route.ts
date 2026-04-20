@@ -14,11 +14,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Database not initialized" }, { status: 500 });
     }
 
+    const idList = sessionIds.map(id => `"${id}"`).join(',');
+
     // 1. Delete telemetry data
     const { error: telError } = await supabase
       .from("visitor_telemetry")
       .delete()
-      .or(`session_id.in.(${sessionIds.join(',')}),id.in.(${sessionIds.join(',')})`);
+      .or(`session_id.in.(${idList}),id.in.(${idList})`);
 
     if (telError) {
       console.error("[Leads Delete] Telemetry error:", telError);
@@ -28,7 +30,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const { error: sessError } = await supabase
       .from("consultant_sessions")
       .delete()
-      .or(`session_id.in.(${sessionIds.join(',')}),id.in.(${sessionIds.join(',')})`);
+      .or(`session_id.in.(${idList}),id.in.(${idList})`);
 
     if (sessError) {
       console.error("[Leads Delete] Session error:", sessError);
