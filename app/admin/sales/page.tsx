@@ -5,6 +5,7 @@ import { Shield, Users, Building2, Settings, FileText, Crown, Send, MessageCircl
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import toast from "react-hot-toast";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // أنواع البيانات
@@ -451,24 +452,35 @@ function LeadsTab() {
     );
   };
 
-  const deleteLeads = async (ids: string[]) => {
-    if (ids.length === 0) return;
-    if (!confirm(`هل أنت متأكد من حذف ${ids.length} من العملاء نهائياً؟ لا يمكن التراجع!`)) return;
+  const deleteLeads = async (ids: (string | undefined)[]) => {
+    const validIds = ids.filter(Boolean) as string[];
+    if (validIds.length === 0) {
+      toast.error("لم يتم العثور على معرفات صالحة للحذف");
+      return;
+    }
+
+    if (!confirm(`هل أنت متأكد من حذف ${validIds.length} من العملاء نهائياً؟ لا يمكن التراجع!`)) return;
     
     setIsDeleting(true);
+    const toastId = toast.loading("جاري التطهير...");
+    
     try {
       const res = await fetch("/api/admin/leads/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionIds: ids })
+        body: JSON.stringify({ sessionIds: validIds })
       });
       
       if (res.ok) {
-        setLeads(prev => prev.filter(l => !l.session_id || !ids.includes(l.session_id)));
+        setLeads(prev => prev.filter(l => !validIds.includes(l.session_id || "") && !validIds.includes(l.id)));
         setSelectedLeads([]);
+        toast.success("تم تطهير البيانات بنجاح", { id: toastId });
+      } else {
+        toast.error("فشل في حذف بعض البيانات", { id: toastId });
       }
     } catch (err) {
       console.error("Delete failed:", err);
+      toast.error("حدث خطأ تقني أثناء الحذف", { id: toastId });
     } finally {
       setIsDeleting(false);
     }
