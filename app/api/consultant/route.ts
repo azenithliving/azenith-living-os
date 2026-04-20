@@ -291,12 +291,22 @@ export async function POST(
     // Fetch all learnings and build enhanced system prompt
     const learnings = await getLearnings();
     
+    // Fetch active reality mutations (Fate Actions) to sync AI with UI
+    const { data: mutations } = await supabase
+      .from("reality_mutations")
+      .select("*")
+      .eq("session_id", sessionId)
+      .eq("active", true)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
     // Build messages array for Groq with system prompt and conversation history
     const groqMessages = buildGroqMessages(
       conversationHistory, 
       userName || existingSession?.insights?.userName, 
       learnings, 
-      existingSession?.insights
+      existingSession?.insights,
+      mutations || []
     );
 
     // Get AI response using Groq with full conversation context
@@ -437,10 +447,23 @@ function buildGroqMessages(
   history: Message[],
   userName?: string,
   learnings: string[] = [],
-  insights?: Insights
+  insights?: Insights,
+  activeMutations: any[] = []
 ): GroqMessage[] {
   // Start with system message
   let systemContent = SYSTEM_PROMPT;
+  
+  // Add active reality mutations (Fate Actions) to context
+  if (activeMutations.length > 0) {
+    systemContent += `\n\n🚨 [تنبيه: تم تفعيل "أوامر قدر" بصرية على شاشة العميل الآن - تفاعل معها وكأنك أنت من فعلتها]:`;
+    activeMutations.forEach(m => {
+      if (m.action === 'THUNDER') systemContent += `\n- تم إطلاق صاعقة بصرية وخصم 15% فوري.`;
+      if (m.action === 'HALLUCINATION') systemContent += `\n- يتم إيهام العميل بوجود منافسين يشاهدون نفس التصميم.`;
+      if (m.action === 'FREEZE') systemContent += `\n- تم تجميد الشاشة لإجبار العميل على التركيز.`;
+      if (m.action === 'QUANTUM_OFFER') systemContent += `\n- ظهر عداد تنازلي لخصم "كمي" (Quantum Discount) كبير بنسبة 25%.`;
+    });
+    systemContent += `\n**ملاحظة:** إذا سأل العميل عن هذه التغييرات أو الخصومات، أكد عليها وحفزه لاستغلالها فوراً. لا تنكر وجودها!`;
+  }
   
   // Add context from insights to prevent repetitive questions
   if (insights) {
