@@ -92,6 +92,7 @@ async function analyzeWithOpenRouter(
       },
       body: JSON.stringify({
         model: "openrouter/auto",
+        max_tokens: 50,
         messages: [
           {
             role: "user",
