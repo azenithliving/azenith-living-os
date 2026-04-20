@@ -317,6 +317,14 @@ export async function POST(
     
     const isEscalation = escalationPhrases.some(p => reply.includes(p));
     
+    // Add AI response to history BEFORE checking booking so insights are accurate
+    const assistantMessage: Message = {
+      role: "assistant",
+      content: reply,
+      timestamp: new Date().toISOString(),
+    };
+    conversationHistory.push(assistantMessage);
+
     if (isEscalation) {
       console.log(`[Consultant] Escalation detected → notifying admin via Telegram + Dashboard`);
       await notifyAdminUnknownQuestion(message, sessionId, userName);
@@ -326,7 +334,12 @@ export async function POST(
     const bookingKeywords = ["تم تسجيل موعدك", "تم حجز موعد", "سيتواصل معك فريقنا", "تأكيد الموعد", "سنقوم بزيارة"];
     const isBookingConfirmed = bookingKeywords.some(k => reply.includes(k));
 
+    let insights: Insights | undefined = existingSession?.insights;
+
     if (isBookingConfirmed) {
+      // Force extract insights immediately for the booking alert
+      insights = await extractInsights(conversationHistory, userName);
+      
       // Extract phone from conversation history
       const allText = conversationHistory.map(m => m.content).join(" ");
       const phoneMatch = allText.match(/0[0-9]{10}/);
@@ -338,34 +351,27 @@ export async function POST(
         const bookingMsg = `📅 *حجز موعد جديد!*
 👤 العميل: ${userName || "غير محدد"}
 📞 الهاتف: ${phone}
+🏠 الطلب: ${insights?.roomType || "غير محدد"}
+💰 الميزانية: ${insights?.budget || "غير محدد"}
+🎨 الاستايل: ${insights?.style || "غير محدد"}
+📝 ملخص الاحتياجات: ${insights?.summary || "لا يوجد ملخص"}
 💬 آخر رسالة: ${message}
 🆔 الجلسة: ${sessionId}
 
-⚡ تواصل معه الآن لتأكيد الموعد!`;
+⚡ راجع الداشبورد لمزيد من التفاصيل!`;
         try {
           await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ chat_id: telegramChatId, text: bookingMsg, parse_mode: "Markdown" }),
           });
-          console.log("[Consultant] Booking alert sent to Telegram ✅");
+          console.log("[Consultant] Booking alert with full insights sent to Telegram ✅");
         } catch (e) {
           console.error("[Consultant] Booking Telegram failed:", e);
         }
       }
-    }
-
-    // Add AI response to history
-    const assistantMessage: Message = {
-      role: "assistant",
-      content: reply,
-      timestamp: new Date().toISOString(),
-    };
-    conversationHistory.push(assistantMessage);
-
-    // Extract insights after 3-5 exchanges
-    let insights: Insights | undefined = existingSession?.insights;
-    if (conversationHistory.length >= 6 && conversationHistory.length <= 10) {
+    } else if (conversationHistory.length >= 6 && conversationHistory.length <= 10) {
+      // Normal insight extraction
       insights = await extractInsights(conversationHistory, userName);
     }
 
@@ -373,6 +379,7 @@ export async function POST(
     await saveSession(sessionId, conversationHistory, insights);
 
     console.log(`[Consultant] Session ${sessionId}: ${conversationHistory.length} messages`);
+
 
     return NextResponse.json({
       reply,
