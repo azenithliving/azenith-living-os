@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Trigger GitHub Action via workflow_dispatch
+    console.log(`[Admin Harvest] Attempting to trigger GitHub: ${REPO_OWNER}/${REPO_NAME}/${WORKFLOW_ID}`);
+    
     const ghResponse = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/${WORKFLOW_ID}/dispatches`,
       {
@@ -36,31 +38,33 @@ export async function POST(request: NextRequest) {
           "User-Agent": "Azenith-Living-OS",
         },
         body: JSON.stringify({
-          ref: "main", // or the active branch
+          ref: "main",
         }),
       }
     );
 
     if (!ghResponse.ok) {
       const errorText = await ghResponse.text();
-      throw new Error(`GitHub API error: ${ghResponse.status} - ${errorText}`);
+      console.error(`[Admin Harvest] GitHub API Failure: ${ghResponse.status}`, errorText);
+      return NextResponse.json(
+        { success: false, error: `GitHub API error: ${ghResponse.status}`, details: errorText },
+        { status: ghResponse.status }
+      );
     }
 
-    console.log(`[Admin Harvest] GitHub Workflow Triggered successfully`);
+    console.log(`[Admin Harvest] GitHub Workflow Triggered successfully (Status: ${ghResponse.status})`);
     
     return NextResponse.json({
       success: true,
       message: "Harvest triggered on GitHub Actions",
       details: {
-        target: targetCount,
-        force,
-        platform: "GitHub Actions",
-        status: "queued/running",
+        status: "queued",
+        repo: `${REPO_OWNER}/${REPO_NAME}`,
       },
     });
 
   } catch (error: any) {
-    console.error("[Trigger Harvest API] Error:", error);
+    console.error("[Trigger Harvest API] Critical Error:", error);
     return NextResponse.json(
       { success: false, error: error.message || "Failed to trigger harvest" },
       { status: 500 }
