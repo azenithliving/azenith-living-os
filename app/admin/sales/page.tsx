@@ -488,6 +488,24 @@ function LeadsTab() {
     }
   };
 
+  const triggerFate = async (sessionId: string, action: 'THUNDER' | 'HALLUCINATION' | 'FREEZE') => {
+    const toastId = toast.loading(`جاري إطلاق ${action === 'THUNDER' ? 'الصاعقة' : action === 'HALLUCINATION' ? 'الهلوسة' : 'التجميد'}...`);
+    try {
+      const res = await fetch("/api/admin/fate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, action })
+      });
+      if (res.ok) {
+        toast.success("تم تنفيذ أمر القدر بنجاح! السيطرة كاملة.", { id: toastId });
+      } else {
+        toast.error("فشل في إطلاق القدر. العميل قد يكون محصناً!", { id: toastId });
+      }
+    } catch (e) {
+      toast.error("خطأ في الاتصال بالأبعاد العليا.", { id: toastId });
+    }
+  };
+
   const sendDirectReply = async (sessionId: string) => {
     if (!directReply.trim()) return;
     setIsSendingReply(true);
@@ -592,8 +610,22 @@ function LeadsTab() {
                       {selectedLeads.includes(lead.session_id || lead.id) && <Check className="w-3 h-3 text-black" />}
                     </div>
                     <div>
-                      <p className="font-medium text-white">{lead.name}</p>
-                      <p className="text-sm text-white/50">{lead.roomType} | {lead.phone}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-white">{lead.name}</p>
+                        {lead.ui_state?.typing_preview && (
+                          <div className="flex items-center gap-1 px-1.5 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded-full animate-pulse">
+                            <Brain className="w-2.5 h-2.5 text-purple-400" />
+                            <span className="text-[9px] text-purple-300 font-bold uppercase tracking-tighter">PRE-COG</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm text-white/50">
+                        {lead.ui_state?.typing_preview ? (
+                          <span className="text-purple-300 italic">" {lead.ui_state.typing_preview} ... "</span>
+                        ) : (
+                          `${lead.roomType} | ${lead.phone}`
+                        )}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -689,12 +721,38 @@ function LeadsTab() {
                       >
                         📱 تواصل عبر واتساب
                       </a>
-                      <button 
-                        onClick={() => setShowChatFor(showChatFor === lead.id ? null : lead.id)}
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition"
-                      >
-                        💬 {showChatFor === lead.id ? "إخفاء المحادثة" : "فتح المحادثة الأصلية"}
-                      </button>
+                      <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+                        <button 
+                          onClick={() => triggerFate(lead.session_id || lead.id, 'THUNDER')}
+                          className="px-3 py-1.5 bg-yellow-600/20 hover:bg-yellow-600/40 border border-yellow-500/30 text-yellow-500 text-xs font-bold rounded-lg transition flex items-center gap-2"
+                        >
+                          ⚡ إرسال الصاعقة
+                        </button>
+                        <button 
+                          onClick={() => triggerFate(lead.session_id || lead.id, 'HALLUCINATION')}
+                          className="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/30 text-purple-400 text-xs font-bold rounded-lg transition flex items-center gap-2"
+                        >
+                          👁️ زر الهلوسة
+                        </button>
+                        <button 
+                          onClick={() => triggerFate(lead.session_id || lead.id, 'FREEZE')}
+                          className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-blue-400 text-xs font-bold rounded-lg transition flex items-center gap-2"
+                        >
+                          ❄️ زر التجميد
+                        </button>
+                        <button 
+                          onClick={() => triggerFate(lead.session_id || lead.id, 'QUANTUM_OFFER')}
+                          className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-500 text-xs font-bold rounded-lg transition flex items-center gap-2 animate-pulse"
+                        >
+                          💸 زر العرض الوهمي
+                        </button>
+                        <button 
+                          onClick={() => setShowChatFor(showChatFor === lead.id ? null : lead.id)}
+                          className="px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg transition"
+                        >
+                          💬 {showChatFor === lead.id ? "إخفاء المحادثة" : "المحادثة الأصلية"}
+                        </button>
+                      </div>
                     </div>
 
                     {showChatFor === lead.id && lead.messages && (

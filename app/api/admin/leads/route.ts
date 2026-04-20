@@ -75,7 +75,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           status: phone ? "contacted" : "new",
           created_at: session.created_at,
           messages: session.messages || [],
-          telemetry: telemetryMap[session.session_id] || null
+          telemetry: telemetryMap[session.session_id] || null,
+          ui_state: session.ui_state || {}
         };
       })
       .filter(Boolean);

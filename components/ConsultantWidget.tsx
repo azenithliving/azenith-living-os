@@ -417,7 +417,18 @@ export default function ConsultantWidget() {
                 ref={inputRef}
                 type="text"
                 value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
+                onChange={(e) => {
+                    const val = e.target.value;
+                    setInputMessage(val);
+                    // Pre-Cog Typing Sensor
+                    if (sessionId) {
+                        fetch("/api/consultant/typing", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ sessionId, typingPreview: val })
+                        }).catch(() => {});
+                    }
+                }}
                 placeholder="اكتب رسالتك..."
                 className="flex-1 rounded-lg border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-gray-400 focus:border-amber-500 focus:outline-none"
                 disabled={isLoading}
