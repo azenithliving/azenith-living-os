@@ -85,60 +85,6 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
   return { score: 82 }; 
 }
 
-  // 3. PHASE 3: OPENROUTER AUTO (32 Keys)
-  // Uses openrouter/auto to pick the best available vision model
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const key = SHUFFLED_OR[orIdx++ % SHUFFLED_OR.length];
-      if (!key) break;
-
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${key}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://azenith-living-os.vercel.app",
-          "X-Title": "Azenith Living Harvester"
-        },
-        body: JSON.stringify({
-          model: "openrouter/auto",
-          max_tokens: 20,
-          messages: [
-            {
-              role: "user",
-              content: [
-                { type: "text", text: `Rate this ${category} in ${style} style (0-100 quality). Return ONLY the number.` },
-                { type: "image_url", image_url: { url: imageUrl } }
-              ]
-            }
-          ]
-        })
-      });
-
-      const data = await response.json();
-      if (data.error) {
-        console.log(`[OpenRouter] Key ${orIdx % SHUFFLED_OR.length} error: ${data.error.message}`);
-        continue;
-      }
-
-      const text = data.choices?.[0]?.message?.content || "0";
-      const score = parseInt(text.match(/\d+/)?.[0] || "0");
-
-      if (score > 0) {
-        console.log(`[OpenRouter-Shield] Key ${orIdx % SHUFFLED_OR.length} | Score: ${score}`);
-        return { score: Math.min(100, Math.max(0, score)) };
-      }
-    } catch (e) {
-      console.log(`[OpenRouter] Attempt ${attempt + 1} failed, rotating...`);
-    }
-  }
-
-  // EMERGENCY FALLBACK: If everything fails, return a safe mid-range score to keep moving
-  // This ensures the harvester NEVER stops as long as the internet is up
-  console.log(`⚠️ All providers exhausted for this image. Using safety pass-through.`);
-  return { score: 82 }; 
-}
-
 /**
  * Image to Base64 Helper
  */
