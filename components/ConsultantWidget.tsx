@@ -25,6 +25,11 @@ interface SessionData {
 const WELCOME_MESSAGE_NEW = "أهلاً بك في أزينث ليفينج. أنا مُستشارك الشخصي. هل تسمح لي بمعرفة اسمك؟";
 const WELCOME_MESSAGE_RETURNING = (name: string, topic: string) => `أهلاً بعودتك ${name}. هل ما زلت مهتمًا بـ ${topic}؟`;
 
+// Contextual welcome messages based on active Fate Actions
+const WELCOME_QUANTUM = "لاحظت أنك ترى العرض الاستثنائي الآن! 🎯 هذا الخصم 25% متاح لفترة محدودة جداً وتم تخصيصه خصيصاً للزوار المميزين. أنا هنا لمساعدتك في استغلاله. ما الذي يستهويك في مجال التصميم الداخلي؟";
+const WELCOME_THUNDER = "أرى أنك لاحظت عرضنا الخاص! ⚡ خصم 15% فوري على أول معاينة لمشروعك. هل أخبرك أحد من قبل أن أزينث تصنع قصوراً من الفضاء؟ ما نوع مشروعك؟";
+const WELCOME_HALLUCINATION = "مرحباً! هل تعلم أن 3 عملاء آخرين يتصفحون نفس التصاميم التي تراها الآن؟ 👀 المساحات تُحجز بسرعة. ما الذي يستهويك؟";
+
 export default function ConsultantWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -120,6 +125,18 @@ export default function ConsultantWidget() {
     return null;
   }, []);
 
+  // Fetch the latest global fate action to build contextual welcome
+  const fetchLatestFateAction = useCallback(async (): Promise<string | null> => {
+    try {
+      const res = await fetch("/api/admin/fate/latest");
+      if (res.ok) {
+        const data = await res.json();
+        return data.action || null;
+      }
+    } catch { /* silent */ }
+    return null;
+  }, []);
+
   // Send welcome message on first open
   const handleOpen = useCallback(async () => {
     setIsOpen(true);
@@ -147,15 +164,21 @@ export default function ConsultantWidget() {
       }
     }
 
-    // New user - show welcome message
+    // New user — check for active Fate Actions and build contextual greeting
     if (messages.length === 0) {
+      const latestAction = await fetchLatestFateAction();
+      let welcomeContent = WELCOME_MESSAGE_NEW;
+      if (latestAction === "QUANTUM_OFFER") welcomeContent = WELCOME_QUANTUM;
+      else if (latestAction === "THUNDER") welcomeContent = WELCOME_THUNDER;
+      else if (latestAction === "HALLUCINATION") welcomeContent = WELCOME_HALLUCINATION;
+
       setMessages([{
         role: "assistant",
-        content: WELCOME_MESSAGE_NEW,
+        content: welcomeContent,
         timestamp: new Date().toISOString(),
       }]);
     }
-  }, [hasLoadedSession, fetchSession, messages.length, userName]);
+  }, [hasLoadedSession, fetchSession, fetchLatestFateAction, messages.length, userName]);
 
   // Proactive trigger: Open chat after 15 seconds if first visit
   useEffect(() => {
