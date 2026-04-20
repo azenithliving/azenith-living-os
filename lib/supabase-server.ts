@@ -1,9 +1,12 @@
 import { createClient as supabaseCreateClient } from "@supabase/supabase-js";
 
-// Singleton instance for server-side services
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://placeholder-for-build.local";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key";
+
+// Singleton instance for server-side services with safety for build time
 export const supabaseServer = supabaseCreateClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  supabaseUrl,
+  supabaseKey,
   {
     auth: {
       persistSession: false,
@@ -16,5 +19,8 @@ export const supabaseServer = supabaseCreateClient(
  * that expect a createClient function.
  */
 export async function createClient() {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    console.warn("⚠️ Warning: Supabase URL is missing. This might be fine during build time.");
+  }
   return supabaseServer;
 }
