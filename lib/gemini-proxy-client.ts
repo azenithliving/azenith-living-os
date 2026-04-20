@@ -31,7 +31,6 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
     if (!key) break;
     
     try {
-      console.log(`[Trace] Trying Gemini via OpenRouter (Key ${orIdx % SHUFFLED_OR.length})...`);
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -56,21 +55,16 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
       });
 
       const data = await response.json();
-      if (data.error) {
-        console.log(`[OpenRouter-Gemini] Error: ${data.error.message}`);
-        continue;
-      }
+      if (data.error) continue;
       
       const text = data.choices?.[0]?.message?.content || "0";
       const score = parseInt(text.match(/\d+/)?.[0] || "0");
 
       if (score > 0) {
-        console.log(`[Gemini-Shield] Success! Score: ${score}`);
+        console.log(`[Gemini-Strike] Success! Score: ${score}`);
         return { score: Math.min(100, Math.max(0, score)) };
       }
-    } catch (e: any) {
-      console.log(`[Gemini-OR] Runtime Error: ${e.message}`);
-    }
+    } catch (e: any) {}
   }
 
   // 2. PHASE 2: LLAMA via OpenRouter (32+ Keys)
@@ -79,7 +73,6 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
     if (!key) break;
 
     try {
-      console.log(`[Trace] Trying Llama via OpenRouter (Key ${orIdx % SHUFFLED_OR.length})...`);
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -104,21 +97,16 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
       });
 
       const data = await response.json();
-      if (data.error) {
-        console.log(`[OpenRouter-Llama] Error: ${data.error.message}`);
-        continue;
-      }
+      if (data.error) continue;
       
       const text = data.choices?.[0]?.message?.content || "0";
       const score = parseInt(text.match(/\d+/)?.[0] || "0");
 
       if (score > 0) {
-        console.log(`[Llama-Shield] Success! Score: ${score}`);
+        console.log(`[Groq-Vanguard] Success! Score: ${score}`);
         return { score: Math.min(100, Math.max(0, score)) };
       }
-    } catch (e: any) {
-      console.log(`[Llama-OR] Runtime Error: ${e.message}`);
-    }
+    } catch (e: any) {}
   }
 
   // 3. PHASE 3: OPENROUTER AUTO (32 Keys)
