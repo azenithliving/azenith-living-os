@@ -422,7 +422,7 @@ export async function POST(
  * Generate unique session ID
  */
 function generateSessionId(): string {
-  return `cons_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+  return `zenith_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 }
 
 /**

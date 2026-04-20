@@ -9,10 +9,14 @@ export default function TelemetryTracker() {
 
   useEffect(() => {
     // We only track if there's a session ID established by the Consultant Widget
+    function generateSessionId(): string {
+      return `zenith_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    }
+
     const getSessionId = () => {
       let sid = localStorage.getItem("azenith_session_id");
       if (!sid) {
-        sid = `sid_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        sid = generateSessionId();
         localStorage.setItem("azenith_session_id", sid);
       }
       return sid;
