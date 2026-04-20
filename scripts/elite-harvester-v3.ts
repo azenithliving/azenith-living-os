@@ -341,11 +341,13 @@ async function filterWithGemini(photos: any[], category: string, style: string):
         const { score, error } = await analyzeImageWithProxy(
           prompt,
           photo.src?.large || photo.src?.original || photo.url,
-          geminiKeyIndex % CONFIG.GEMINI_KEYS.length
+          geminiKeyIndex % CONFIG.GEMINI_KEYS.length,
+          category,
+          style
         );
         
         if (error) {
-          console.warn(`[Gemini] Attempt ${attempts+1} failed: ${error.substring(0, 100)}`);
+          console.warn(`[Gemini] Attempt ${attempts+1} failed, rotating: ${error.substring(0, 50)}...`);
           geminiKeyIndex++; // Rotate key immediately on error
           attempts++;
           await sleep(500);

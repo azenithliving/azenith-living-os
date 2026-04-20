@@ -68,10 +68,67 @@ async function analyzeWithDirectAPI(
   }
 }
 
+// Groq Fallback for Image Analysis
+async function analyzeWithGroq(
+  imageUrl: string,
+  category: string,
+  style: string
+): Promise<{ score: number; error?: string }> {
+  try {
+    const GROQ_KEYS = (process.env.GROQ_KEYS || "").split(",").filter(Boolean);
+    const key = GROQ_KEYS[Math.floor(Math.random() * GROQ_KEYS.length)];
+    
+    if (!key) return { score: 0, error: "No Groq keys available" };
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.2-11b-vision-preview",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `Rate this ${category} in ${style} style (0-100 quality match). Return ONLY the number.`,
+              },
+              {
+                type: "image_url",
+                image_url: { url: imageUrl },
+              },
+            ],
+          },
+        ],
+        temperature: 0.1,
+        max_tokens: 10,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Groq API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const text = data.choices[0]?.message?.content || "0";
+    const score = parseInt(text.match(/\d+/)?.[0] || "0");
+
+    console.log(`[Groq] Fallback success! Score: ${score}`);
+    return { score: Math.min(100, Math.max(0, score)) };
+  } catch (error) {
+    return { score: 0, error: `Groq failed: ${(error as Error).message}` };
+  }
+}
+
 export async function analyzeImageWithProxy(
   prompt: string,
   imageUrl: string,
-  keyIndex: number = 0
+  keyIndex: number = 0,
+  category: string = "interior",
+  style: string = "luxury"
 ): Promise<{ score: number; error?: string }> {
   try {
     const response = await fetch(PROXY_URL, {
@@ -89,21 +146,18 @@ export async function analyzeImageWithProxy(
     const data: GeminiProxyResponse = await response.json();
 
     if (!response.ok || !data.success) {
-      // Fallback to direct API
-      console.log(`[Gemini] Proxy failed, falling back to direct API...`);
-      return analyzeWithDirectAPI(prompt, imageUrl);
+      console.log(`[Gemini] Proxy failed, falling back to Groq...`);
+      return analyzeWithGroq(imageUrl, category, style);
     }
 
-    // Extract score from response text (0-100)
     const text = data.text || "0";
     const score = parseInt(text.match(/\d+/)?.[0] || "0");
 
     return { score: Math.min(100, Math.max(0, score)) };
 
   } catch (error) {
-    // Proxy unavailable, use direct API
-    console.log(`[Gemini] Proxy unavailable (${(error as Error).message}), using direct API...`);
-    return analyzeWithDirectAPI(prompt, imageUrl);
+    console.log(`[Gemini] Proxy unavailable, falling back to Groq...`);
+    return analyzeWithGroq(imageUrl, category, style);
   }
 }
 
