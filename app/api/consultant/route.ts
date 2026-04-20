@@ -17,10 +17,7 @@ const MASTER_ADMIN_EMAILS = (process.env.MASTER_ADMIN_EMAILS || "")
 // Admin session IDs (can be expanded as needed)
 const ADMIN_SESSION_IDS: string[] = [];
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-);
+// supabase instance will be retrieved inside handlers using getSupabaseAdminClient()
 
 const SYSTEM_PROMPT = `أنت "عقل أزينث المركزي"، مدير مبيعات استثنائي واستراتيجي محنك في شركة "أزينث ليفينج" للتصميم الداخلي والتشطيبات الفاخرة.
 أنت لست "روبوت دردشة" تقليدي يسأل أسئلة محفوظة. أنت مفاوض محترف، هدفك الاستحواذ على عقل العميل، بيع "القيمة والفخامة"، وإغلاق الصفقة بسحب رقم هاتفه لتحديد موعد معاينة.
@@ -259,6 +256,13 @@ export async function POST(
 
     // Generate or use existing session ID
     const sessionId = providedSessionId || generateSessionId();
+    console.log(`[Consultant] Processing request for session: ${sessionId}`);
+
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      console.error("[Consultant] Supabase client failed to initialize");
+      return NextResponse.json({ error: "DB connection failed" }, { status: 500 });
+    }
 
     // Check if in Admin Learning Mode
     const adminMode = isAdmin(sessionId, userEmail);
@@ -299,13 +303,18 @@ export async function POST(
     const learnings = await getLearnings();
     
     // Fetch active reality mutations (Fate Actions) to sync AI with UI
-    const { data: mutations } = await supabase
+    console.log(`[Consultant] Fetching active mutations for session: ${sessionId}`);
+    const { data: mutations, error: mutError } = await supabase
       .from("reality_mutations")
       .select("*")
       .eq("session_id", sessionId)
       .eq("active", true)
       .order("created_at", { ascending: false })
       .limit(5);
+
+    if (mutError) {
+      console.warn("[Consultant] Error fetching mutations:", mutError.message);
+    }
 
     // Build messages array for Groq with system prompt and conversation history
     const groqMessages = buildGroqMessages(
@@ -317,6 +326,7 @@ export async function POST(
     );
 
     // Get AI response using Groq with full conversation context
+    console.log(`[Consultant] Calling AI (Groq/Fallback)...`);
     const aiResult = await askGroqMessages(groqMessages, {
       maxTokens: 2048,
       temperature: 0.7,
@@ -512,7 +522,9 @@ function buildGroqMessages(
  * Get session from database
  */
 async function getSession(sessionId: string): Promise<ConsultantSession | null> {
-  try {
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) return null;
+
     const { data, error } = await supabase
       .from("consultant_sessions")
       .select("*")
@@ -604,6 +616,12 @@ async function saveSession(
   insights?: Insights
 ): Promise<void> {
   try {
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      console.error("[Consultant] Supabase client failed in saveSession");
+      return;
+    }
+
     const now = new Date().toISOString();
 
     // Normalize messages to ensure timestamps exist
@@ -624,24 +642,26 @@ async function saveSession(
 
     if (existing) {
       // Update existing session
-      await supabase
+      const { error } = await supabase
         .from("consultant_sessions")
         .update(sessionData)
         .eq("session_id", sessionId);
+      if (error) console.error("[Consultant] Error updating session:", error.message);
     } else {
       // Insert new session
-      await supabase.from("consultant_sessions").insert({
+      const { error } = await supabase.from("consultant_sessions").insert({
         session_id: sessionId,
         messages: normalizedMessages,
         insights: insights || null,
         created_at: now,
         updated_at: now,
       });
+      if (error) console.error("[Consultant] Error inserting session:", error.message);
     }
 
     console.log(`[Consultant] Session saved: ${sessionId}${insights ? " with insights" : ""}`);
   } catch (err) {
-    console.error("[Consultant] Error saving session:", err);
+    console.error("[Consultant] Exception in saveSession:", err);
   }
 }
 
@@ -659,6 +679,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         { error: "Missing sessionId parameter" },
         { status: 400 }
       );
+    }
+
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      return NextResponse.json({ error: "DB connection failed" }, { status: 500 });
     }
 
     const session = await getSession(sessionId);

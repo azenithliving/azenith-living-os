@@ -26,18 +26,19 @@ export default function RealityUIProvider() {
           filter: `session_id=eq.${sessionId}`,
         },
         (payload) => {
-          const mutation = payload.new as { type: string; action: string };
+          const mutation = payload.new as any;
           console.log("[Reality Engine] Incoming Mutation:", mutation);
           if (mutation.type === "FATE_ACTION") {
-            handleFateAction(mutation.action);
+            handleFateAction(mutation);
           } else {
-            handleMutation(mutation.action);
+            handleMutation(mutation);
           }
         }
       )
       .subscribe();
 
-    const handleMutation = (action: string) => {
+    const handleMutation = (mutation: any) => {
+      const action = mutation.action;
       if (action === "theme_dark") {
         document.documentElement.style.setProperty("--zenith-black", "#050505");
         document.documentElement.style.setProperty("--brand-primary", "#C5A059");
@@ -49,7 +50,8 @@ export default function RealityUIProvider() {
       }
     };
 
-    const handleFateAction = (action: string) => {
+    const handleFateAction = (mutation: any) => {
+      const action = mutation.action;
       if (action === "THUNDER") {
         const flash = document.createElement("div");
         flash.className = "fixed inset-0 bg-white z-[9999] pointer-events-none transition-opacity duration-300";
@@ -70,7 +72,7 @@ export default function RealityUIProvider() {
         });
       } else if (action === "FREEZE") {
         // قرأ نص العرض من الـ payload وخزنه للاستخدام بعد العداد
-        const offerText = (mutation as any).payload?.offerText || 
+        const offerText = mutation.payload?.offerText || 
           "تم تحضير عرض استثنائي خاص بك من الإدارة العليا! اسألني الآن عن التفاصيل.";
         setFreezeOffer(offerText);
         setIsFrozen(true);
