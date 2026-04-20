@@ -554,7 +554,8 @@ function LeadsTab() {
           <button 
             onClick={() => deleteLeads(selectedLeads)}
             disabled={isDeleting}
-            className="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg transition disabled:opacity-50"
+            className="relative z-50 px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg transition disabled:opacity-50 cursor-pointer"
+            style={{ cursor: 'pointer' }}
           >
             {isDeleting ? "جاري الحذف..." : "حذف المحدد نهائياً"}
           </button>
@@ -599,7 +600,8 @@ function LeadsTab() {
                         e.stopPropagation();
                         deleteLeads([lead.session_id]);
                       }}
-                      className="p-2 text-white/20 hover:text-red-500 transition-colors"
+                      className="relative z-50 p-2 text-white/20 hover:text-red-500 transition-colors cursor-pointer"
+                      style={{ cursor: 'pointer' }}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
