@@ -67,10 +67,12 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
         });
         const data = await response.json();
         if (data.error) continue;
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "0";
-        const score = parseInt(text.match(/\d+/)?.[0] || "0");
-        if (score > 0) {
-          console.log(`[Gemini-Strike] Strict Filter | Score: ${score}`);
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const match = text.match(/\d+/);
+        if (match) {
+          const score = parseInt(match[0]);
+          if (score >= 85) console.log(`[Gemini-Strike] Strict Approved | Score: ${score}`);
+          else console.log(`[Gemini-Strike] REJECTED (Strict)`);
           return { score: Math.min(100, Math.max(0, score)) };
         }
       }
@@ -92,10 +94,12 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
         });
         const data = await response.json();
         if (data.error) continue;
-        const text = data.choices?.[0]?.message?.content || "0";
-        const score = parseInt(text.match(/\d+/)?.[0] || "0");
-        if (score > 0) {
-          console.log(`[Groq-Vanguard] Strict Filter | Score: ${score}`);
+        const text = data.choices?.[0]?.message?.content || "";
+        const match = text.match(/\d+/);
+        if (match) {
+          const score = parseInt(match[0]);
+          if (score >= 85) console.log(`[Groq-Vanguard] Strict Approved | Score: ${score}`);
+          else console.log(`[Groq-Vanguard] REJECTED (Strict)`);
           return { score: Math.min(100, Math.max(0, score)) };
         }
       }
@@ -122,21 +126,19 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
         });
         const data = await response.json();
         if (data.error) continue;
-        const text = data.choices?.[0]?.message?.content || "0";
-        const score = parseInt(text.match(/\d+/)?.[0] || "0");
-        if (score > 0) {
-          console.log(`[Router-Shield] Strict Filter | Score: ${score}`);
+        const text = data.choices?.[0]?.message?.content || "";
+        const match = text.match(/\d+/);
+        if (match) {
+          const score = parseInt(match[0]);
+          if (score >= 85) console.log(`[Router-Shield] Strict Approved | Score: ${score}`);
+          else console.log(`[Router-Shield] REJECTED (Strict)`);
           return { score: Math.min(100, Math.max(0, score)) };
         }
       }
 
       // --- MISTRAL/DEEPSEEK (Remaining Army) ---
       if (currentProvider === "mistral" && (SHUFFLED_MISTRAL.length > 0 || SHUFFLED_DEEPSEEK.length > 0)) {
-        const key = SHUFFLED_MISTRAL.length > 0 ? 
-                    SHUFFLED_MISTRAL[mistralIdx++ % SHUFFLED_MISTRAL.length] : 
-                    SHUFFLED_DEEPSEEK[deepseekIdx++ % SHUFFLED_DEEPSEEK.length];
-        
-        console.log(`[Mistral-DeepSeek] Rotating specialized key...`);
+        // Fallback to OR with specific key for stability if direct fails
         providers.push("openrouter"); 
       }
 
@@ -145,9 +147,8 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
     }
   }
 
-  // If ALL providers say it's bad (or if there's an error), reject it strictly!
-  // No more safety pass-through for bad images. Only the elite survive.
-  console.log(`🚫 REJECTED: Failed strict compliance or all providers exhausted.`);
+  // If literally no provider could return a valid JSON response (network failure on all keys)
+  console.log(`🚫 API FAILED: All providers exhausted without valid response.`);
   return { score: 0 }; 
 }
 
