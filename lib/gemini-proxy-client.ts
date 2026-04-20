@@ -30,6 +30,7 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
     "google/gemini-flash-1.5",
     "meta-llama/llama-3.2-11b-vision-instruct",
     "meta-llama/llama-3.2-90b-vision-instruct",
+    "mistralai/pixtral-12b",
     "google/gemini-pro-1.5",
     "openrouter/auto"
   ];
