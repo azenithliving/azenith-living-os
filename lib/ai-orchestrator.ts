@@ -250,7 +250,39 @@ export async function askGroqMessages(
   if (result.success) {
     return { success: true, content: result.data };
   }
-  return { success: false, content: "", error: result.error };
+  
+  // FALLBACK TO OPENROUTER FREE MODEL IF GROQ FAILS
+  console.log("[Orchestrator] Groq failed. Falling back to OpenRouter free models for stability.");
+  
+  const openRouterBody: Record<string, unknown> = {
+    model: "google/gemini-2.5-flash:free", // Use a highly capable free model
+    messages,
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (options?.jsonMode) {
+    openRouterBody.response_format = { type: "json_object" };
+  }
+
+  const fallbackResult = await fetchWithRetry(
+    "openrouter",
+    (key) => fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(openRouterBody),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  if (fallbackResult.success) {
+    return { success: true, content: fallbackResult.data };
+  }
+
+  return { success: false, content: "", error: `Groq error: ${result.error} | Fallback error: ${fallbackResult.error}` };
 }
 
 /**
