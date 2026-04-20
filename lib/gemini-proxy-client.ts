@@ -68,6 +68,51 @@ async function analyzeWithDirectAPI(
   }
 }
 
+// OpenRouter Fallback
+async function analyzeWithOpenRouter(
+  imageUrl: string,
+  category: string,
+  style: string
+): Promise<{ score: number; error?: string }> {
+  try {
+    const OPENROUTER_KEYS = (process.env.OPENROUTER_KEYS || "").split(",").filter(Boolean);
+    const key = OPENROUTER_KEYS[Math.floor(Math.random() * OPENROUTER_KEYS.length)];
+    
+    if (!key) return { score: 0, error: "No OpenRouter keys available" };
+
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://azenith-living-os.vercel.app",
+        "X-Title": "Azenith Living Harvester",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-flash-1.5",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: `Rate this ${category} in ${style} style (0-100 quality). Return ONLY the number.` },
+              { type: "image_url", image_url: { url: imageUrl } }
+            ]
+          }
+        ]
+      }),
+    });
+
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content || "0";
+    const score = parseInt(text.match(/\d+/)?.[0] || "0");
+    
+    console.log(`[OpenRouter] Success! Score: ${score}`);
+    return { score: Math.min(100, Math.max(0, score)) };
+  } catch (error) {
+    return { score: 0, error: `OpenRouter failed: ${(error as Error).message}` };
+  }
+}
+
 // Groq Fallback for Image Analysis
 async function analyzeWithGroq(
   imageUrl: string,
@@ -94,7 +139,7 @@ async function analyzeWithGroq(
             content: [
               {
                 type: "text",
-                text: `Rate this ${category} in ${style} style (0-100 quality match). Return ONLY the number.`,
+                text: `Analyze this interior design for a ${category} in ${style} style. Rate quality & match 0-100. Respond with ONLY the number.`,
               },
               {
                 type: "image_url",
@@ -104,12 +149,13 @@ async function analyzeWithGroq(
           },
         ],
         temperature: 0.1,
-        max_tokens: 10,
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Groq API error: ${response.status}`);
+      const errText = await response.text();
+      console.error(`[Groq] Error ${response.status}: ${errText}`);
+      throw new Error(`Groq status ${response.status}`);
     }
 
     const data = await response.json();
@@ -119,7 +165,8 @@ async function analyzeWithGroq(
     console.log(`[Groq] Fallback success! Score: ${score}`);
     return { score: Math.min(100, Math.max(0, score)) };
   } catch (error) {
-    return { score: 0, error: `Groq failed: ${(error as Error).message}` };
+    console.log(`[Groq] Failed, trying OpenRouter...`);
+    return analyzeWithOpenRouter(imageUrl, category, style);
   }
 }
 
