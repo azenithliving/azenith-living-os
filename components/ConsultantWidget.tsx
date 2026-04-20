@@ -203,17 +203,30 @@ export default function ConsultantWidget() {
       setIsOpen(true);
       setHasLoadedSession(true);
 
-      // أضف رسالة العرض الخاص فوراً
       if (specialMessage) {
+        // 1. أضف الرسالة للـ UI فوراً
         setMessages(prev => {
-          // تجنب التكرار
           if (prev.some(m => m.content === specialMessage)) return prev;
           return [...prev, {
-            role: "assistant",
+            role: "assistant" as const,
             content: specialMessage,
             timestamp: new Date().toISOString(),
           }];
         });
+
+        // 2. احفظها في Supabase لكي يعرف المستشار عنها عند الرد
+        const sid = localStorage.getItem("azenith_session_id");
+        if (sid) {
+          fetch("/api/consultant/inject", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sessionId: sid,
+              message: specialMessage,
+              source: "fate",
+            }),
+          }).catch(() => {/* silent */});
+        }
       }
     };
 
