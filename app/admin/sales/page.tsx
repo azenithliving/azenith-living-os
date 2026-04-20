@@ -45,6 +45,12 @@ interface Lead {
   status: string;
   created_at: string;
   messages?: Array<{ role: string; content: string; timestamp?: string }>;
+  telemetry?: {
+    current_path?: string;
+    attention_score?: number;
+    hovered_elements?: string[];
+    updated_at?: string;
+  };
 }
 
 interface TenantRecord {
@@ -535,6 +541,52 @@ function LeadsTab() {
                       <div className="p-3 bg-white/5 rounded-lg border border-white/10">
                         <p className="text-xs text-[#C5A059] mb-1">ملخص الذكاء الاصطناعي:</p>
                         <p className="text-sm text-white/80">{lead.summary}</p>
+                      </div>
+                    )}
+                    
+                    {/* Reality Engine Telemetry Radar */}
+                    {lead.telemetry && (
+                      <div className="p-3 bg-blue-900/10 rounded-lg border border-blue-500/20 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent animate-pulse" />
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                          </span>
+                          <p className="text-xs font-bold text-blue-400 tracking-wider">رادار الاستشعار الحي (Telemetry)</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm mt-3">
+                          <div>
+                            <p className="text-white/40 text-xs">معدل الانتباه (Attention)</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-blue-500 transition-all duration-500" 
+                                  style={{ width: \`\${Math.min(lead.telemetry.attention_score || 0, 100)}%\` }}
+                                />
+                              </div>
+                              <span className="text-blue-300 text-xs font-bold">{Math.round(lead.telemetry.attention_score || 0)}%</span>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-white/40 text-xs">الصفحة الحالية</p>
+                            <p className="text-white/90 text-xs truncate mt-1 bg-black/30 px-2 py-1 rounded border border-white/5" dir="ltr">
+                              {lead.telemetry.current_path || "/"}
+                            </p>
+                          </div>
+                        </div>
+                        {lead.telemetry.hovered_elements && lead.telemetry.hovered_elements.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-white/40 text-xs mb-1">العناصر التي أطال النظر إليها:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {lead.telemetry.hovered_elements.map((tag: string, idx: number) => (
+                                <span key={idx} className="px-2 py-0.5 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded text-[10px]">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                     <div className="flex gap-2">
