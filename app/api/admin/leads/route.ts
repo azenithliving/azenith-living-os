@@ -61,7 +61,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           summary: session.insights?.summary || "",
           tier: tier,
           status: phone ? "contacted" : "new",
-          created_at: session.created_at
+          created_at: session.created_at,
+          messages: session.messages || []
         };
       })
       .filter(Boolean);

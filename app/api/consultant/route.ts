@@ -349,7 +349,7 @@ export async function POST(
       const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
       const telegramChatId = process.env.TELEGRAM_CHAT_ID;
       if (telegramToken && telegramChatId) {
-        const dashboardUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living-os.vercel.app'}/admin/sales`;
+        const dashboardUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living-os.vercel.app'}/admin/sales?tab=leads&expand=${sessionId}`;
         const bookingMsg = `📅 *حجز موعد جديد متكامل!*
 👤 العميل: ${userName || insights?.summary?.split(" ")[0] || "غير محدد"}
 📞 الهاتف: ${phone}

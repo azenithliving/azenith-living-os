@@ -42,6 +42,7 @@ interface Lead {
   score?: number;
   status: string;
   created_at: string;
+  messages?: Array<{ role: string; content: string; timestamp?: string }>;
 }
 
 interface TenantRecord {
@@ -416,6 +417,15 @@ function LeadsTab() {
   };
 
   const [expandedLead, setExpandedLead] = useState<string | null>(null);
+  const [showChatFor, setShowChatFor] = useState<string | null>(null);
+
+  useEffect(() => {
+    const search = window.location.search;
+    const match = search.match(/expand=([^&]+)/);
+    if (match) {
+      setExpandedLead(match[1]);
+    }
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -461,7 +471,7 @@ function LeadsTab() {
               <div key={lead.id} className="flex flex-col">
                 <div 
                   className="flex items-center justify-between p-4 hover:bg-white/[0.02] cursor-pointer"
-                  onClick={() => setExpandedLead(expandedLead === lead.id ? null : lead.id)}
+                  onClick={() => setExpandedLead(expandedLead === lead.session_id ? null : (lead.session_id || lead.id))}
                 >
                   <div>
                     <p className="font-medium text-white">{lead.name}</p>
@@ -476,7 +486,7 @@ function LeadsTab() {
                 </div>
                 
                 {/* Expanded Details */}
-                {expandedLead === lead.id && (
+                {(expandedLead === lead.session_id || expandedLead === lead.id) && (
                   <div className="p-4 bg-black/40 border-t border-white/5 space-y-4">
                     <div className="grid md:grid-cols-2 gap-4 text-sm">
                       <div className="space-y-2">
@@ -496,17 +506,33 @@ function LeadsTab() {
                     )}
                     <div className="flex gap-2">
                       <a 
-                        href={`https://wa.me/2${lead.phone.startsWith('0') ? lead.phone.substring(1) : lead.phone}`} 
+                        href={`https://wa.me/20${lead.phone.startsWith('0') ? lead.phone.substring(1) : lead.phone}`} 
                         target="_blank" 
                         rel="noreferrer"
                         className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm rounded-lg flex items-center gap-2 transition"
                       >
                         📱 تواصل عبر واتساب
                       </a>
-                      <button className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition">
-                        💬 فتح المحادثة الأصلية (قريباً)
+                      <button 
+                        onClick={() => setShowChatFor(showChatFor === lead.id ? null : lead.id)}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition"
+                      >
+                        💬 {showChatFor === lead.id ? "إخفاء المحادثة" : "فتح المحادثة الأصلية"}
                       </button>
                     </div>
+
+                    {showChatFor === lead.id && lead.messages && (
+                      <div className="mt-4 p-4 rounded-xl border border-white/10 bg-black/50 max-h-[300px] overflow-y-auto space-y-3">
+                        {lead.messages.map((msg, idx) => (
+                          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.role === 'user' ? 'bg-[#C5A059]/20 text-white' : 'bg-white/10 text-white/90'}`}>
+                              <span className="block text-xs text-white/40 mb-1">{msg.role === 'user' ? lead.name : 'المستشار الذكي'}</span>
+                              {msg.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1162,6 +1188,12 @@ const tabs = [
 
 export default function SalesCenterPage() {
   const [activeTab, setActiveTab] = useState("sales");
+
+  useEffect(() => {
+    const search = window.location.search;
+    if (search.includes("tab=leads")) setActiveTab("leads");
+  }, []);
+
   const ActiveComponent = tabs.find((t) => t.id === activeTab)?.component || SalesManagerTab;
 
   return (
