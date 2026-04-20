@@ -78,8 +78,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           telemetry: telemetryMap[session.session_id] || null,
           ui_state: session.ui_state || {}
         };
-      })
-      .filter(Boolean);
+      });
 
     return NextResponse.json({ leads });
   } catch (error) {
