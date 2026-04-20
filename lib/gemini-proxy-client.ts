@@ -34,7 +34,7 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
       console.log(`[Trace] Trying Gemini with Key Index ${geminiIdx % SHUFFLED_GEMINI.length}...`);
       const base64 = await getBase64(imageUrl);
       
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -79,7 +79,7 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "llama-3.2-90b-vision-preview",
+          model: "llama-3.2-11b-vision-preview",
           messages: [
             {
               role: "user",
