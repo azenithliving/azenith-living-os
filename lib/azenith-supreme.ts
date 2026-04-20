@@ -15,7 +15,7 @@
  * - Sovereign Status (Proactive reports)
  */
 
-import { InfiniteSwarmEngine, infiniteSwarm, ConsensusRequest, ConsensusResult } from "./swarm-consensus";
+import { InfiniteSwarmEngine, infiniteSwarm, ConsensusRequest, ConsensusResult, SwarmHealth } from "./swarm-consensus";
 import { MarketSimulationEngine, marketSimulator, MarketScenario, SimulationResult } from "./market-simulator";
 import { AtomicStateManager, atomicState, SystemSnapshot, RollbackResult } from "./atomic-state";
 import { SelfOptimizationEngine, selfOptimization, OptimizationReport, Bottleneck, RewriteResult } from "./self-optimization";
@@ -45,6 +45,7 @@ export type {
   CodingProfile,
   CodePattern,
   SovereignStatusReport,
+  SwarmHealth,
 };
 
 // ==========================================
@@ -95,19 +96,19 @@ export class AzenithSupreme {
 
     try {
       // Start all engines
-      this.defense.startDefenseSystems();
+      await this.defense.startDefenseSystems();
       enginesOnline.push("Predatory Defense");
 
-      this.optimizer.startMonitoring();
+      await this.optimizer.startMonitoring();
       enginesOnline.push("Self-Optimization");
 
-      this.market.startContinuousSimulation();
+      await this.market.startContinuousSimulation();
       enginesOnline.push("Market Simulator");
 
-      this.atomic.startAutoSnapshots();
+      await this.atomic.startAutoSnapshots();
       enginesOnline.push("Atomic State");
 
-      this.predictor.startPredictiveMonitoring();
+      await this.predictor.startPredictiveMonitoring();
       enginesOnline.push("Predictive Coding");
 
       this.initialized = true;
@@ -194,18 +195,18 @@ export class AzenithSupreme {
    */
   async getEmpireSnapshot(): Promise<{
     timestamp: Date;
-    swarm: ReturnType<InfiniteSwarmEngine["getSwarmHealth"]>;
-    defense: ReturnType<PredatoryDefenseSystem["getDefenseMetrics"]>;
-    market: ReturnType<MarketSimulationEngine["getSimulationStats"]>;
-    optimization: ReturnType<SelfOptimizationEngine["getOptimizationReport"]>;
-    cache: ReturnType<SemanticCacheManager["getStats"]>;
+    swarm: SwarmHealth;
+    defense: DefenseMetrics;
+    market: { totalScenarios: number; highConfidenceCount: number; totalRevenuePotential: number; readyToDeployCount: number };
+    optimization: OptimizationReport;
+    cache: CacheStats;
   }> {
     return {
       timestamp: new Date(),
-      swarm: this.swarm.getSwarmHealth(),
-      defense: this.defense.getDefenseMetrics(),
-      market: this.market.getSimulationStats(),
-      optimization: this.optimizer.getOptimizationReport(),
+      swarm: await this.swarm.getSwarmHealth(),
+      defense: await this.defense.getDefenseMetrics(),
+      market: await this.market.getSimulationStats(),
+      optimization: await this.optimizer.getOptimizationReport(),
       cache: this.cache.getStats(),
     };
   }
@@ -248,7 +249,7 @@ export class AzenithSupreme {
 
     try {
       // Validate opportunity exists
-      const opportunities = this.market.getOpportunitiesByStatus("validated");
+      const opportunities = await this.market.getOpportunitiesByStatus("validated");
       const opportunity = opportunities.find(o => o.id === opportunityId);
 
       if (!opportunity) {
@@ -347,7 +348,7 @@ export class AzenithSupreme {
       defense: {
         systemHealth: defenseMetrics.systemHealth,
         activeThreats: defenseMetrics.activeThreats,
-        blockedIPs: this.defense.getBlockedIPCount(),
+        blockedIPs: await this.defense.getBlockedIPCount(),
         avgLatency: defenseMetrics.avgLatency,
       },
       market: {

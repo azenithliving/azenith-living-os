@@ -174,7 +174,12 @@ class SovereignDatabase {
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!url || !key) {
-      throw new Error("Missing Supabase credentials");
+      // Build-time resilience: return a placeholder client instead of crashing
+      return createClient(
+        url || "http://placeholder.local",
+        key || "placeholder-key",
+        { auth: { persistSession: false } }
+      );
     }
 
     this.supabase = createClient(url, key, {

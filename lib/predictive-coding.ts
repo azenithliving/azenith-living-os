@@ -92,49 +92,61 @@ export class PredictiveCodingEngine {
   ];
 
   constructor() {
-    this.loadHistoricalData();
+    // Lazy initialization
+  }
+
+  private _historicalDataLoaded = false;
+
+  private async ensureHistoricalDataLoaded() {
+    if (this._historicalDataLoaded) return;
+    this._historicalDataLoaded = true;
+    await this.loadHistoricalData();
   }
 
   private async loadHistoricalData() {
-    const { data: patterns } = await this.supabase
-      .from("code_patterns")
-      .select("*")
-      .order("frequency", { ascending: false })
-      .limit(100);
+    try {
+      const { data: patterns } = await this.supabase
+        .from("code_patterns")
+        .select("*")
+        .order("frequency", { ascending: false })
+        .limit(100);
 
-    if (patterns) {
-      const typedPatterns = patterns as unknown as Array<{
-        id: string;
-        examples?: string[];
-        [key: string]: unknown;
-      }>;
-      for (const p of typedPatterns) {
-        this.patterns.set(p.id, {
-          ...p,
-          examples: p.examples || [],
-        } as CodePattern);
+      if (patterns) {
+        const typedPatterns = patterns as unknown as Array<{
+          id: string;
+          examples?: string[];
+          [key: string]: unknown;
+        }>;
+        for (const p of typedPatterns) {
+          this.patterns.set(p.id, {
+            ...p,
+            examples: p.examples || [],
+          } as CodePattern);
+        }
       }
-    }
 
-    const { data: modules } = await this.supabase
-      .from("predicted_modules")
-      .select("*")
-      .order("timestamp", { ascending: false })
-      .limit(50);
+      const { data: modules } = await this.supabase
+        .from("predicted_modules")
+        .select("*")
+        .order("timestamp", { ascending: false })
+        .limit(50);
 
-    if (modules) {
-      const typedModules = modules as unknown as Array<{
-        id: string;
-        timestamp: string;
-        [key: string]: unknown;
-      }>;
-      for (const m of typedModules) {
-        this.predictedModules.set(m.id, {
-          ...m,
-          timestamp: new Date(m.timestamp),
-          triggeredBy: (m.triggered_by || []) as string[],
-        } as PredictedModule);
+      if (modules) {
+        const typedModules = modules as unknown as Array<{
+          id: string;
+          timestamp: string;
+          [key: string]: unknown;
+        }>;
+        for (const m of typedModules) {
+          this.predictedModules.set(m.id, {
+            ...m,
+            timestamp: new Date(m.timestamp),
+            triggeredBy: (m.triggered_by || []) as string[],
+          } as PredictedModule);
+        }
       }
+    } catch (e) {
+      console.warn("[PredictiveCoding] Could not load historical data:", e);
     }
   }
 
@@ -143,6 +155,7 @@ export class PredictiveCodingEngine {
   // ==========================================
 
   async analyzeCodebase(): Promise<CodingProfile> {
+    await this.ensureHistoricalDataLoaded();
     console.log("[PredictiveCoding] Analyzing codebase patterns...");
 
     const allFiles = this.getAllSourceFiles();
@@ -440,6 +453,7 @@ export class PredictiveCodingEngine {
   // ==========================================
 
   async predictNextModules(): Promise<PredictedModule[]> {
+    await this.ensureHistoricalDataLoaded();
     if (!this.codingProfile) {
       await this.analyzeCodebase();
     }
@@ -630,7 +644,8 @@ Provide:
   // CONTINUOUS MONITORING
   // ==========================================
 
-  startPredictiveMonitoring(): void {
+  async startPredictiveMonitoring(): Promise<void> {
+    await this.ensureHistoricalDataLoaded();
     if (this.isMonitoring) return;
     this.isMonitoring = true;
 
@@ -658,15 +673,17 @@ Provide:
   // PUBLIC API
   // ==========================================
 
-  getCodingProfile(): CodingProfile | null {
+  async getCodingProfile(): Promise<CodingProfile | null> {
+    await this.ensureHistoricalDataLoaded();
     return this.codingProfile;
   }
 
-  getPredictedModules(options?: {
+  async getPredictedModules(options?: {
     status?: PredictedModule["status"];
     minConfidence?: number;
     limit?: number;
-  }): PredictedModule[] {
+  }): Promise<PredictedModule[]> {
+    await this.ensureHistoricalDataLoaded();
     let modules = Array.from(this.predictedModules.values());
 
     if (options?.status) {
@@ -683,6 +700,7 @@ Provide:
   }
 
   async approveModule(moduleId: string): Promise<boolean> {
+    await this.ensureHistoricalDataLoaded();
     const module = this.predictedModules.get(moduleId);
     if (!module) return false;
 
@@ -697,6 +715,7 @@ Provide:
   }
 
   async markImplemented(moduleId: string): Promise<boolean> {
+    await this.ensureHistoricalDataLoaded();
     const module = this.predictedModules.get(moduleId);
     if (!module) return false;
 
@@ -710,7 +729,8 @@ Provide:
     return true;
   }
 
-  getTopPatterns(limit: number = 10): CodePattern[] {
+  async getTopPatterns(limit: number = 10): Promise<CodePattern[]> {
+    await this.ensureHistoricalDataLoaded();
     return Array.from(this.patterns.values())
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, limit);

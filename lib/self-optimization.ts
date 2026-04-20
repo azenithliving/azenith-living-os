@@ -122,52 +122,64 @@ export class SelfOptimizationEngine {
   ];
 
   constructor() {
-    this.loadHistoricalData();
+    // Lazy initialization
+  }
+
+  private _historicalDataLoaded = false;
+
+  private async ensureHistoricalDataLoaded() {
+    if (this._historicalDataLoaded) return;
+    this._historicalDataLoaded = true;
+    await this.loadHistoricalData();
   }
 
   private async loadHistoricalData() {
-    const { data: bottlenecks } = await this.supabase
-      .from("performance_bottlenecks")
-      .select("*")
-      .order("timestamp", { ascending: false })
-      .limit(100);
+    try {
+      const { data: bottlenecks } = await this.supabase
+        .from("performance_bottlenecks")
+        .select("*")
+        .order("timestamp", { ascending: false })
+        .limit(100);
 
-    if (bottlenecks) {
-      const typedBottlenecks = bottlenecks as unknown as Array<{
-        id: string;
-        timestamp: string;
-        location: string;
-        suggested_optimization: string;
-        [key: string]: unknown;
-      }>;
-      for (const b of typedBottlenecks) {
-        this.bottlenecks.set(b.id, {
-          ...b,
-          timestamp: new Date(b.timestamp),
-          location: b.location as unknown as { file: string; function: string; lineRange: [number, number] },
-          suggestedOptimization: b.suggested_optimization as unknown as OptimizationStrategy,
-          severity: (b.severity || "medium") as "critical" | "high" | "medium" | "low",
-          type: (b.type || "cpu") as "cpu" | "memory" | "io" | "algorithm" | "external_api",
-          metrics: (b.metrics || {}) as { currentTime: number; targetTime: number; improvementPotential: number },
-          autoRewritePending: (b.autoRewritePending || false) as boolean,
-        } as Bottleneck);
+      if (bottlenecks) {
+        const typedBottlenecks = bottlenecks as unknown as Array<{
+          id: string;
+          timestamp: string;
+          location: string;
+          suggested_optimization: string;
+          [key: string]: unknown;
+        }>;
+        for (const b of typedBottlenecks) {
+          this.bottlenecks.set(b.id, {
+            ...b,
+            timestamp: new Date(b.timestamp),
+            location: b.location as unknown as { file: string; function: string; lineRange: [number, number] },
+            suggestedOptimization: b.suggested_optimization as unknown as OptimizationStrategy,
+            severity: (b.severity || "medium") as "critical" | "high" | "medium" | "low",
+            type: (b.type || "cpu") as "cpu" | "memory" | "io" | "algorithm" | "external_api",
+            metrics: (b.metrics || {}) as { currentTime: number; targetTime: number; improvementPotential: number },
+            autoRewritePending: (b.autoRewritePending || false) as boolean,
+          } as Bottleneck);
+        }
       }
-    }
 
-    const { data: history } = await this.supabase
-      .from("optimization_history")
-      .select("*")
-      .limit(50);
+      const { data: history } = await this.supabase
+        .from("optimization_history")
+        .select("*")
+        .limit(50);
 
-    if (history) {
-      const typedHistory = history as unknown as Array<{
-        time_saved_us: number;
-        [key: string]: unknown;
-      }>;
-      this.optimizationHistory = typedHistory.map(h => ({
-        ...h,
-        timeSavedMicroseconds: h.time_saved_us,
-      })) as unknown as RewriteResult[];
+      if (history) {
+        const typedHistory = history as unknown as Array<{
+          time_saved_us: number;
+          [key: string]: unknown;
+        }>;
+        this.optimizationHistory = typedHistory.map(h => ({
+          ...h,
+          timeSavedMicroseconds: h.time_saved_us,
+        })) as unknown as RewriteResult[];
+      }
+    } catch (e) {
+      console.warn("[SelfOptimization] Could not load historical data:", e);
     }
   }
 
@@ -175,7 +187,8 @@ export class SelfOptimizationEngine {
   // PERFORMANCE MONITORING
   // ==========================================
 
-  startMonitoring(): void {
+  async startMonitoring(): Promise<void> {
+    await this.ensureHistoricalDataLoaded();
     if (this.isMonitoring) return;
     this.isMonitoring = true;
 
@@ -380,6 +393,7 @@ export class SelfOptimizationEngine {
   // ==========================================
 
   async optimizeBottleneck(bottleneckId: string): Promise<RewriteResult> {
+    await this.ensureHistoricalDataLoaded();
     const bottleneck = this.bottlenecks.get(bottleneckId);
     if (!bottleneck) {
       return {
@@ -551,7 +565,8 @@ export class SelfOptimizationEngine {
   // PUBLIC API
   // ==========================================
 
-  getOptimizationReport(): OptimizationReport {
+  async getOptimizationReport(): Promise<OptimizationReport> {
+    await this.ensureHistoricalDataLoaded();
     const recent = this.optimizationHistory.slice(-30);
     const totalTimeSaved = recent.reduce((sum, r) => sum + r.timeSavedMicroseconds, 0);
     const avgGain = recent.length > 0 
@@ -571,7 +586,8 @@ export class SelfOptimizationEngine {
     };
   }
 
-  getActiveBottlenecks(): Bottleneck[] {
+  async getActiveBottlenecks(): Promise<Bottleneck[]> {
+    await this.ensureHistoricalDataLoaded();
     return Array.from(this.bottlenecks.values())
       .filter(b => b.autoRewritePending)
       .sort((a, b) => {
@@ -580,7 +596,8 @@ export class SelfOptimizationEngine {
       });
   }
 
-  getOptimizationHistory(): RewriteResult[] {
+  async getOptimizationHistory(): Promise<RewriteResult[]> {
+    await this.ensureHistoricalDataLoaded();
     return this.optimizationHistory;
   }
 

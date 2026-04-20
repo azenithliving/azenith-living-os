@@ -62,7 +62,28 @@ type BrandSoulAlignment = "matte_black" | "subtle_gold_accents" | "natural_textu
 
 class AzenithMastermind {
   private static instance: AzenithMastermind;
-  private supabase: ReturnType<typeof createClient>;
+  private _supabase: ReturnType<typeof createClient> | null = null;
+
+  private get supabase() {
+    if (!this._supabase) {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+      if (!url || !key) {
+        // Return a proxy or placeholder during build to avoid crashes
+        return createClient(
+          url || "http://placeholder.local",
+          key || "placeholder-key",
+          { auth: { persistSession: false } }
+        );
+      }
+
+      this._supabase = createClient(url, key, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+    }
+    return this._supabase;
+  }
   private semanticCache: Map<string, SemanticCache> = new Map();
   private actionHistory: Map<string, TripleAAction> = new Map();
   private isMonitoring: boolean = false;
@@ -76,16 +97,7 @@ class AzenithMastermind {
   };
 
   private constructor() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!url || !key) {
-      throw new Error("Missing Supabase credentials for Mastermind");
-    }
-
-    this.supabase = createClient(url, key, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
+    // Lazy initialization
   }
 
   static getInstance(): AzenithMastermind {

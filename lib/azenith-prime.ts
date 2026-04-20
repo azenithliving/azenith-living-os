@@ -158,17 +158,26 @@ export class AzenithPrime {
   // ==========================================
 
   constructor() {
-    this.initializeSwarm();
+    // Lazy initialization
+  }
+
+  private _initialized = false;
+
+  private async ensureInitialized() {
+    if (this._initialized) return;
+    this._initialized = true;
+    
+    await this.initializeSwarm();
     this.initializeModelWatcher();
     this.initializeTimeCapsules();
-    this.initializeNeuralCache();
+    await this.initializeNeuralCache();
   }
 
   private async initializeSwarm() {
-    // Load all existing keys from database
-    const { data: keys } = await this.supabase
-      .from("swarm_keys")
-      .select("*");
+    try {
+      const { data: keys } = await this.supabase
+        .from("swarm_keys")
+        .select("*");
 
     if (keys) {
       const typedKeys = keys as unknown as Array<{
@@ -199,7 +208,10 @@ export class AzenithPrime {
       }
       this.calculateCollectiveIntelligence();
     }
+  } catch (e) {
+    console.warn("[AzenithPrime] Could not load swarm keys:", e);
   }
+}
 
   private initializeModelWatcher() {
     // Check for new AI models every 6 hours
@@ -215,9 +227,13 @@ export class AzenithPrime {
     }, 60 * 60 * 1000);
   }
 
-  private initializeNeuralCache() {
+  private async initializeNeuralCache() {
     // Load semantic cache from database
-    this.loadNeuralCache();
+    try {
+      await this.loadNeuralCache();
+    } catch (e) {
+      console.warn("[AzenithPrime] Could not load neural cache:", e);
+    }
   }
 
   // ==========================================
@@ -235,6 +251,7 @@ export class AzenithPrime {
     collectiveIntelligence: number;
     message: string;
   }> {
+    await this.ensureInitialized();
     const id = `swarm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     const newKey: SwarmKey = {
@@ -281,6 +298,7 @@ export class AzenithPrime {
     estimatedTime: string;
     philosophy: string;
   }> {
+    await this.ensureInitialized();
     const availableKeys = Array.from(this.swarmKeys.values())
       .filter(k => k.status === "active");
 
@@ -358,6 +376,7 @@ export class AzenithPrime {
     integrated: number;
     report: string;
   }> {
+    await this.ensureInitialized();
     // In production, this would query APIs from providers
     // For now, simulate new model discovery
     const mockNewModels: AIModel[] = [
@@ -443,6 +462,7 @@ export class AzenithPrime {
     summary: string;
     philosophy: string;
   }> {
+    await this.ensureInitialized();
     // In production, would analyze real market data
     const opportunities: MarketOpportunity[] = [
       {
@@ -517,6 +537,7 @@ export class AzenithPrime {
     timestamp: Date;
     message: string;
   }> {
+    await this.ensureInitialized();
     const id = `capsule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const timestamp = new Date();
 
@@ -566,6 +587,7 @@ export class AzenithPrime {
     message: string;
     emotionalMessage?: string;
   }> {
+    await this.ensureInitialized();
     const capsule = this.timeCapsules.get(capsuleId);
     
     if (!capsule || !capsule.rollbackAvailable) {
@@ -603,6 +625,7 @@ export class AzenithPrime {
    * Get available time capsules
    */
   async getTimeCapsules(): Promise<TimeCapsule[]> {
+    await this.ensureInitialized();
     return Array.from(this.timeCapsules.values())
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
@@ -659,6 +682,7 @@ export class AzenithPrime {
     savedCost: number;
     philosophy: string;
   }> {
+    await this.ensureInitialized();
     const semanticHash = await this.computeSemanticHash(query, context);
     
     // Check exact match

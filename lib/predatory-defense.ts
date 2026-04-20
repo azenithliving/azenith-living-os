@@ -100,7 +100,6 @@ export class PredatoryDefenseSystem {
 
   constructor() {
     this.initializeLoadBalancers();
-    this.loadBlockedIPs();
   }
 
   private initializeLoadBalancers() {
@@ -118,17 +117,25 @@ export class PredatoryDefenseSystem {
     }
   }
 
-  private async loadBlockedIPs() {
-    const { data } = await this.supabase
-      .from("blocked_ips")
-      .select("ip")
-      .eq("active", true);
+  private _blockedIpsLoaded = false;
 
-    if (data) {
-      const typedData = data as unknown as Array<{ ip: string }>;
-      for (const record of typedData) {
-        this.blockedIPs.add(record.ip);
+  private async loadBlockedIPs() {
+    if (this._blockedIpsLoaded) return;
+    this._blockedIpsLoaded = true;
+    try {
+      const { data } = await this.supabase
+        .from("blocked_ips")
+        .select("ip")
+        .eq("active", true);
+
+      if (data) {
+        const typedData = data as unknown as Array<{ ip: string }>;
+        for (const record of typedData) {
+          this.blockedIPs.add(record.ip);
+        }
       }
+    } catch (e) {
+      console.warn("[PredatoryDefense] Could not load blocked IPs:", e);
     }
   }
 
@@ -136,13 +143,14 @@ export class PredatoryDefenseSystem {
   // THREAT DETECTION
   // ==========================================
 
-  analyzeRequest(request: {
+  async analyzeRequest(request: {
     ip: string;
     userAgent: string;
     path: string;
     timestamp: number;
     latency: number;
-  }): SecurityThreat | null {
+  }): Promise<SecurityThreat | null> {
+    await this.loadBlockedIPs();
     // Check if IP is already blocked
     if (this.blockedIPs.has(request.ip)) {
       return this.createThreat("unauthorized_access", "critical", request);
@@ -471,7 +479,8 @@ Countermeasures: ${threat.countermeasures.length} deployed`;
   // PUBLIC API
   // ==========================================
 
-  getDefenseMetrics(): DefenseMetrics {
+  async getDefenseMetrics(): Promise<DefenseMetrics> {
+    await this.loadBlockedIPs();
     const threats = Array.from(this.threats.values());
     const recent = threats.filter(t => 
       Date.now() - t.timestamp.getTime() < 3600000 // Last hour
@@ -540,7 +549,8 @@ Countermeasures: ${threat.countermeasures.length} deployed`;
     return true;
   }
 
-  getBlockedIPCount(): number {
+  async getBlockedIPCount(): Promise<number> {
+    await this.loadBlockedIPs();
     return this.blockedIPs.size;
   }
 }

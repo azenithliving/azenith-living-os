@@ -89,6 +89,7 @@ export class InfiniteSwarmEngine {
   private nodes: Map<string, SwarmNode> = new Map();
   private consensusHistory: Array<{ timestamp: Date; confidence: number; taskType: TaskSpecialty }> = [];
   private _supabase: ReturnType<typeof createClient> | null = null;
+  private _initialized = false;
 
   private get supabase() {
     if (!this._supabase) {
@@ -103,13 +104,19 @@ export class InfiniteSwarmEngine {
   }
 
   constructor() {
-    this.initializeSwarm();
+    // Lazy initialization, no DB calls in constructor
   }
 
-  private async initializeSwarm() {
+  async initializeSwarm() {
+    if (this._initialized) return;
+    this._initialized = true;
     // Load all API keys from environment and database
     await this.loadNodesFromEnvironment();
-    await this.loadNodesFromDatabase();
+    try {
+      await this.loadNodesFromDatabase();
+    } catch (e) {
+      console.warn("[InfiniteSwarm] Could not load nodes from DB:", e);
+    }
     this.startHealthMonitoring();
   }
 
@@ -239,6 +246,7 @@ export class InfiniteSwarmEngine {
   // ==========================================
 
   async executeConsensus(request: ConsensusRequest): Promise<ConsensusResult> {
+    await this.initializeSwarm();
     const startTime = Date.now();
     
     // Select optimal nodes for this task
@@ -702,7 +710,8 @@ export class InfiniteSwarmEngine {
   // PUBLIC API
   // ==========================================
 
-  getSwarmHealth(): SwarmHealth {
+  async getSwarmHealth(): Promise<SwarmHealth> {
+    await this.initializeSwarm();
     const nodes = Array.from(this.nodes.values());
     const activeNodes = nodes.filter(n => n.status === "active");
     
@@ -726,11 +735,12 @@ export class InfiniteSwarmEngine {
     };
   }
 
-  getConsensusStats(): {
+  async getConsensusStats(): Promise<{
     totalExecutions: number;
     averageConfidence: number;
     consensusRate: number;
-  } {
+  }> {
+    await this.initializeSwarm();
     if (this.consensusHistory.length === 0) {
       return { totalExecutions: 0, averageConfidence: 0, consensusRate: 0 };
     }

@@ -98,28 +98,36 @@ export class MarketSimulationEngine {
   private isRunning = false;
 
   constructor() {
-    this.loadHistoricalScenarios();
+    // Lazy initialization
   }
 
-  private async loadHistoricalScenarios() {
-    const { data } = await this.supabase
-      .from("market_scenarios")
-      .select("*")
-      .order("timestamp", { ascending: false })
-      .limit(10000);
+  private _historicalScenariosLoaded = false;
 
-    if (data) {
-      const typedData = data as unknown as Array<{
-        id: string;
-        timestamp: string;
-        [key: string]: unknown;
-      }>;
-      for (const scenario of typedData) {
-        this.scenarios.set(scenario.id, {
-          ...scenario,
-          timestamp: new Date(scenario.timestamp),
-        } as MarketScenario);
+  private async loadHistoricalScenarios() {
+    if (this._historicalScenariosLoaded) return;
+    this._historicalScenariosLoaded = true;
+    try {
+      const { data } = await this.supabase
+        .from("market_scenarios")
+        .select("*")
+        .order("timestamp", { ascending: false })
+        .limit(10000);
+
+      if (data) {
+        const typedData = data as unknown as Array<{
+          id: string;
+          timestamp: string;
+          [key: string]: unknown;
+        }>;
+        for (const scenario of typedData) {
+          this.scenarios.set(scenario.id, {
+            ...scenario,
+            timestamp: new Date(scenario.timestamp),
+          } as MarketScenario);
+        }
       }
+    } catch (e) {
+      console.warn("[MarketSimulator] Could not load historical scenarios:", e);
     }
   }
 
@@ -128,6 +136,7 @@ export class MarketSimulationEngine {
   // ==========================================
 
   async runDailySimulation(): Promise<SimulationResult> {
+    await this.loadHistoricalScenarios();
     const startTime = Date.now();
     this.isRunning = true;
 
@@ -550,14 +559,16 @@ Top sectors: ${this.getTopSectors(opportunities)}. The swarm stands ready to exe
   // PUBLIC API
   // ==========================================
 
-  getTopOpportunities(limit: number = 10): MarketScenario[] {
+  async getTopOpportunities(limit: number = 10): Promise<MarketScenario[]> {
+    await this.loadHistoricalScenarios();
     return Array.from(this.scenarios.values())
       .filter(s => s.confidence > 80)
       .sort((a, b) => b.revenueProjection.yearly - a.revenueProjection.yearly)
       .slice(0, limit);
   }
 
-  getOpportunitiesByStatus(status: MarketScenario["status"]): MarketScenario[] {
+  async getOpportunitiesByStatus(status: MarketScenario["status"]): Promise<MarketScenario[]> {
+    await this.loadHistoricalScenarios();
     return Array.from(this.scenarios.values())
       .filter(s => s.status === status);
   }
@@ -592,12 +603,13 @@ Top sectors: ${this.getTopSectors(opportunities)}. The swarm stands ready to exe
     return true;
   }
 
-  getSimulationStats(): {
+  async getSimulationStats(): Promise<{
     totalScenarios: number;
     highConfidenceCount: number;
     totalRevenuePotential: number;
     readyToDeployCount: number;
-  } {
+  }> {
+    await this.loadHistoricalScenarios();
     const all = Array.from(this.scenarios.values());
     return {
       totalScenarios: all.length,

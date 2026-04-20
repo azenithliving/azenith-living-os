@@ -198,7 +198,7 @@ export class SovereignStatusGenerator {
       },
       predictive: {
         modulesGenerated: predictedModules.length,
-        patternsDetected: predictiveCoding.getTopPatterns(1).length,
+        patternsDetected: (await predictiveCoding.getTopPatterns(1)).length,
         suggestions: this.generateSuggestions(predictedModules, topOpportunities),
       },
       greeting: this.generateImperialGreeting(stability),
@@ -223,10 +223,10 @@ export class SovereignStatusGenerator {
   }
 
   private calculateStability(
-    swarmHealth: ReturnType<typeof infiniteSwarm.getSwarmHealth>,
-    defenseMetrics: ReturnType<typeof predatoryDefense.getDefenseMetrics>,
-    optimizationReport: ReturnType<typeof selfOptimization.getOptimizationReport>,
-    cacheStats: ReturnType<typeof semanticCache.getStats>
+    swarmHealth: Awaited<ReturnType<typeof infiniteSwarm.getSwarmHealth>>,
+    defenseMetrics: Awaited<ReturnType<typeof predatoryDefense.getDefenseMetrics>>,
+    optimizationReport: Awaited<ReturnType<typeof selfOptimization.getOptimizationReport>>,
+    cacheStats: Awaited<ReturnType<typeof semanticCache.getStats>>
   ): number {
     let score = 100;
 
@@ -250,7 +250,7 @@ export class SovereignStatusGenerator {
     return Math.min(100, Math.max(0, Math.round(score)));
   }
 
-  private determineThreatLevel(defense: ReturnType<typeof predatoryDefense.getDefenseMetrics>): SovereignStatusReport["empireStatus"]["threatLevel"] {
+  private determineThreatLevel(defense: Awaited<ReturnType<typeof predatoryDefense.getDefenseMetrics>>): SovereignStatusReport["empireStatus"]["threatLevel"] {
     if (defense.activeThreats > 10) return "critical";
     if (defense.activeThreats > 5) return "elevated";
     if (defense.activeThreats > 0) return "low";
@@ -282,8 +282,8 @@ export class SovereignStatusGenerator {
   }
 
   private generateSuggestions(
-    modules: ReturnType<typeof predictiveCoding.getPredictedModules>,
-    opportunities: ReturnType<typeof marketSimulator.getTopOpportunities>
+    modules: Awaited<ReturnType<typeof predictiveCoding.getPredictedModules>>,
+    opportunities: Awaited<ReturnType<typeof marketSimulator.getTopOpportunities>>
   ): string[] {
     const suggestions: string[] = [];
 
@@ -301,9 +301,9 @@ export class SovereignStatusGenerator {
   }
 
   private generateRecommendedActions(
-    opportunities: ReturnType<typeof marketSimulator.getTopOpportunities>,
-    predictedModules: ReturnType<typeof predictiveCoding.getPredictedModules>,
-    defense: ReturnType<typeof predatoryDefense.getDefenseMetrics>
+    opportunities: Awaited<ReturnType<typeof marketSimulator.getTopOpportunities>>,
+    predictedModules: Awaited<ReturnType<typeof predictiveCoding.getPredictedModules>>,
+    defense: Awaited<ReturnType<typeof predatoryDefense.getDefenseMetrics>>
   ): SovereignStatusReport["actions"] {
     const actions: SovereignStatusReport["actions"] = [];
 
@@ -401,8 +401,8 @@ export class SovereignStatusGenerator {
     message: string;
     urgentActions: number;
   }> {
-    const defense = predatoryDefense.getDefenseMetrics();
-    const swarm = infiniteSwarm.getSwarmHealth();
+    const defense = await predatoryDefense.getDefenseMetrics();
+    const swarm = await infiniteSwarm.getSwarmHealth();
     
     const stability = this.calculateQuickStability(swarm, defense);
     const urgentActions = defense.activeThreats > 0 ? 1 : 0;
@@ -415,8 +415,8 @@ export class SovereignStatusGenerator {
   }
 
   private calculateQuickStability(
-    swarm: ReturnType<typeof infiniteSwarm.getSwarmHealth>,
-    defense: ReturnType<typeof predatoryDefense.getDefenseMetrics>
+    swarm: Awaited<ReturnType<typeof infiniteSwarm.getSwarmHealth>>,
+    defense: Awaited<ReturnType<typeof predatoryDefense.getDefenseMetrics>>
   ): number {
     let score = 100;
     score -= (swarm.totalNodes - swarm.activeNodes) * 2;
