@@ -30,7 +30,9 @@ jobs:
           PEXELS_KEYS: ${{ secrets.PEXELS_KEYS }}
           GOOGLE_AI_KEYS: ${{ secrets.GOOGLE_AI_KEYS }}
           GROQ_KEYS: ${{ secrets.GROQ_KEYS }}
-          # Add any other env vars needed
+          OPENROUTER_KEYS: ${{ secrets.OPENROUTER_KEYS }}
+          DEEPSEEK_KEYS: ${{ secrets.DEEPSEEK_KEYS }}
+          MISTRAL_KEYS: ${{ secrets.MISTRAL_KEYS }}
         run: npx tsx scripts/elite-harvester-v3.ts
         
       - name: Notify success
