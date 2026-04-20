@@ -4,7 +4,7 @@
  * Usage tracked in logs/key-usage.json
  */
 
-import { createClient } from "@/utils/supabase/server";
+import { supabaseAdmin as supabase } from "@/lib/supabase-server";
 import { sendSecurityAlert } from "./telegram-notify";
 import fs from "fs";
 import path from "path";
@@ -139,7 +139,7 @@ export function resetDailyUsage(): void {
 export async function checkKeysUsage(): Promise<KeyCheckResult> {
   console.log("[KeyMonitor] Starting key usage check...");
 
-  const supabase = await createClient();
+  // const supabase = await createClient(); // Centralized singleton used
   const result: KeyCheckResult = {
     checked_at: new Date().toISOString(),
     total_keys: 0,
@@ -446,7 +446,7 @@ export async function addBackupKey(
   key: string
 ): Promise<{ success: boolean; message: string; keyId?: string }> {
   try {
-    const supabase = await createClient();
+    // Using centralized supabase singleton
 
     const { data, error } = await supabase
       .from("api_keys")

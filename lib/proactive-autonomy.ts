@@ -54,11 +54,11 @@ class ProactiveAutonomy {
   private checkInterval: number = 5 * 60 * 1000; // 5 minutes
 
   private constructor() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://placeholder-for-build.local";
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-key";
     
-    if (!url || !key) {
-      throw new Error("Missing Supabase credentials for Proactive Autonomy");
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.warn("⚠️ [ProactiveAutonomy] Initialization with placeholders (Build time resilience active)");
     }
     
     this.supabase = createClient(url, key, {
