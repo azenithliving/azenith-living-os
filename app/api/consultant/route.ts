@@ -522,6 +522,7 @@ function buildGroqMessages(
  * Get session from database
  */
 async function getSession(sessionId: string): Promise<ConsultantSession | null> {
+  try {
     const supabase = getSupabaseAdminClient();
     if (!supabase) return null;
 

@@ -53,6 +53,11 @@ interface Lead {
     hovered_elements?: string[];
     updated_at?: string;
   };
+  ui_state?: {
+    isFrozen?: boolean;
+    lastOffer?: string;
+    typing_preview?: string;
+  };
 }
 
 interface TenantRecord {
@@ -491,7 +496,7 @@ function LeadsTab() {
     }
   };
 
-  const triggerFate = async (sessionId: string, action: 'THUNDER' | 'HALLUCINATION' | 'FREEZE') => {
+  const triggerFate = async (sessionId: string, action: 'THUNDER' | 'HALLUCINATION' | 'FREEZE' | 'QUANTUM_OFFER') => {
     // زر التجميد يفتح Modal لكتابة العرض أولاً
     if (action === 'FREEZE') {
       setFreezeOfferText("");
