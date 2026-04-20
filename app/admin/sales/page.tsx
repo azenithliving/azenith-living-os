@@ -224,8 +224,8 @@ function SalesManagerTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">مدير المبيعات</h2>
-          <p className="text-sm text-[#C5A059]">مركز التحكم بالمبيعات والمحادثات</p>
+          <h2 className="text-xl font-bold text-white">مدير المبيعات (ADMIN CONTROL v2.0)</h2>
+          <p className="text-sm text-[#C5A059]">مركز التحكم بالمبيعات والمحادثات - تم تفعيل الحذف الفوري</p>
         </div>
         <div className="flex gap-2">
           {[
