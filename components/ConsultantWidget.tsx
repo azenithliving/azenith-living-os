@@ -239,10 +239,24 @@ export default function ConsultantWidget() {
         setSessionId(data.sessionId);
       }
 
+      // Parse and execute Reality UI mutations
+      let finalReply = data.reply;
+      const uiActionMatch = finalReply.match(/\[UI_ACTION:\s*([^\]]+)\]/);
+      if (uiActionMatch) {
+        const action = uiActionMatch[1].trim();
+        finalReply = finalReply.replace(/\[UI_ACTION:\s*[^\]]+\]/g, "").trim();
+        
+        // Dispatch global event for the Reality Distortion Engine to pick up
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("azenith_reality_mutation", { detail: { action } }));
+          console.log(`[Reality Engine] Executing UI Mutation: ${action}`);
+        }
+      }
+
       // Add assistant message
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.reply,
+        content: finalReply,
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, assistantMessage]);

@@ -7,6 +7,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 import { Providers } from "./providers";
 import ConsultantWidgetWrapper from "./ConsultantWidgetWrapper";
+import RealityUIProvider from "@/components/RealityUIProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -145,7 +146,7 @@ export default async function RootLayout({
             strategy="afterInteractive"
           />
         ) : null}
-        <Providers>{children}</Providers>
+        <Providers><RealityUIProvider />{children}</Providers>
         <Toaster
           position="bottom-center"
           toastOptions={{
