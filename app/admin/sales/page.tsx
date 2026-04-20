@@ -431,6 +431,8 @@ function LeadsTab() {
   const [showChatFor, setShowChatFor] = useState<string | null>(null);
   const [directReply, setDirectReply] = useState("");
   const [isSendingReply, setIsSendingReply] = useState(false);
+  const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -439,6 +441,38 @@ function LeadsTab() {
       setExpandedLead(expandParam);
     }
   }, [searchParams]);
+
+  const toggleSelectLead = (sessionId: string) => {
+    if (!sessionId) return;
+    setSelectedLeads(prev => 
+      prev.includes(sessionId) 
+        ? prev.filter(id => id !== sessionId) 
+        : [...prev, sessionId]
+    );
+  };
+
+  const deleteLeads = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    if (!confirm(`هل أنت متأكد من حذف ${ids.length} من العملاء نهائياً؟ لا يمكن التراجع!`)) return;
+    
+    setIsDeleting(true);
+    try {
+      const res = await fetch("/api/admin/leads/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionIds: ids })
+      });
+      
+      if (res.ok) {
+        setLeads(prev => prev.filter(l => !l.session_id || !ids.includes(l.session_id)));
+        setSelectedLeads([]);
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const sendDirectReply = async (sessionId: string) => {
     if (!directReply.trim()) return;
@@ -501,6 +535,20 @@ function LeadsTab() {
         ))}
       </div>
 
+      {/* Bulk Actions Bar */}
+      {selectedLeads.length > 0 && (
+        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between animate-in slide-in-from-top duration-300">
+          <p className="text-sm text-red-200">تم تحديد {selectedLeads.length} من العملاء</p>
+          <button 
+            onClick={() => deleteLeads(selectedLeads)}
+            disabled={isDeleting}
+            className="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg transition disabled:opacity-50"
+          >
+            {isDeleting ? "جاري الحذف..." : "حذف المحدد نهائياً"}
+          </button>
+        </div>
+      )}
+
       {/* Leads List */}
       <div className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden">
         {loading ? (
@@ -512,18 +560,37 @@ function LeadsTab() {
             {filteredLeads.map((lead) => (
               <div key={lead.id} className="flex flex-col">
                 <div 
-                  className="flex items-center justify-between p-4 hover:bg-white/[0.02] cursor-pointer"
-                  onClick={() => setExpandedLead(expandedLead === lead.session_id ? null : (lead.session_id || lead.id))}
+                  className={`flex items-center justify-between p-4 hover:bg-white/[0.02] cursor-pointer transition-colors ${selectedLeads.includes(lead.session_id) ? 'bg-white/[0.05]' : ''}`}
                 >
-                  <div>
-                    <p className="font-medium text-white">{lead.name}</p>
-                    <p className="text-sm text-white/50">{lead.roomType} | {lead.phone}</p>
+                  <div className="flex items-center gap-4 flex-1" onClick={() => setExpandedLead(expandedLead === lead.session_id ? null : (lead.session_id || lead.id))}>
+                    <div 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSelectLead(lead.session_id);
+                      }}
+                      className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${selectedLeads.includes(lead.session_id) ? 'bg-[#C5A059] border-[#C5A059]' : 'border-white/20 hover:border-[#C5A059]/50'}`}
+                    >
+                      {selectedLeads.includes(lead.session_id) && <Check className="w-3 h-3 text-black" />}
+                    </div>
+                    <div>
+                      <p className="font-medium text-white">{lead.name}</p>
+                      <p className="text-sm text-white/50">{lead.roomType} | {lead.phone}</p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`px-3 py-1 rounded-full text-xs border ${tierColors[lead.tier as keyof typeof tierColors] || tierColors.bronze}`}>
                       {lead.tier === "diamond" ? "ماسي" : lead.tier === "gold" ? "ذهبي" : lead.tier === "silver" ? "فضي" : "برونزي"}
                     </span>
                     <span className="text-sm text-white/60">{new Date(lead.created_at).toLocaleDateString("ar-EG")}</span>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteLeads([lead.session_id]);
+                      }}
+                      className="p-2 text-white/20 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
                 
