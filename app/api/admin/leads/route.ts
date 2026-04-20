@@ -20,6 +20,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Failed to fetch leads" }, { status: 500 });
     }
 
+    // Fetch telemetry data
+    const sessionIds = sessions.map(s => s.session_id);
+    const { data: telemetryData } = await supabase
+      .from("visitor_telemetry")
+      .select("*")
+      .in("session_id", sessionIds);
+
+    const telemetryMap = (telemetryData || []).reduce((acc: any, t: any) => {
+      acc[t.session_id] = t;
+      return acc;
+    }, {});
+
     const leads = sessions
       .map(session => {
         // Find phone number in messages
@@ -62,7 +74,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           tier: tier,
           status: phone ? "contacted" : "new",
           created_at: session.created_at,
-          messages: session.messages || []
+          messages: session.messages || [],
+          telemetry: telemetryMap[session.session_id] || null
         };
       })
       .filter(Boolean);
