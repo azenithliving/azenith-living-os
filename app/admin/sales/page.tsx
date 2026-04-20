@@ -1,4 +1,5 @@
 "use client";
+// Version: 2026-04-20_06:54_FORCE_FIX
 
 import { useState, useEffect, useRef } from "react";
 import { Shield, Users, Building2, Settings, FileText, Crown, Send, MessageCircle, TrendingUp, Edit2, Check, X, Trash2, AlertCircle } from "lucide-react";
