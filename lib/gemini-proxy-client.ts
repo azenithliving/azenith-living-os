@@ -25,62 +25,101 @@ let orIdx = 0;
  * Sequentially tries providers with smart key rotation
  */
 export async function analyzeImage(imageUrl: string, category: string, style: string) {
-  // 1. PHASE 1: GEMINI DIRECT (35 Keys)
+  // 1. PHASE 1: GEMINI via OpenRouter (32+ Keys)
   for (let attempt = 0; attempt < 2; attempt++) {
-    const key = SHUFFLED_GEMINI[geminiIdx++ % SHUFFLED_GEMINI.length];
+    const key = SHUFFLED_OR[orIdx++ % SHUFFLED_OR.length];
     if (!key) break;
     
     try {
-      console.log(`[Trace] Trying Gemini with Key Index ${geminiIdx % SHUFFLED_GEMINI.length}...`);
-      const base64 = await getBase64(imageUrl);
-      
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`, {
+      console.log(`[Trace] Trying Gemini via OpenRouter (Key ${orIdx % SHUFFLED_OR.length})...`);
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Authorization": `Bearer ${key}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://azenith-living-os.vercel.app",
+          "X-Title": "Azenith Living Harvester"
+        },
         body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: `Rate this ${category} in ${style} style (0-100 quality). Return ONLY the number.` },
-              { inline_data: { mime_type: "image/jpeg", data: base64 } }
-            ]
-          }]
+          model: "google/gemini-flash-1.5",
+          max_tokens: 20,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: `Rate this ${category} in ${style} style (0-100 quality). Return ONLY the number.` },
+                { type: "image_url", image_url: { url: imageUrl } }
+              ]
+            }
+          ]
         })
       });
 
       const data = await response.json();
       if (data.error) {
-        console.log(`[Gemini] API Error: ${data.error.message}`);
+        console.log(`[OpenRouter-Gemini] Error: ${data.error.message}`);
         continue;
       }
       
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "0";
+      const text = data.choices?.[0]?.message?.content || "0";
       const score = parseInt(text.match(/\d+/)?.[0] || "0");
 
       if (score > 0) {
-        console.log(`[Gemini-Strike] Success! Score: ${score}`);
+        console.log(`[Gemini-Shield] Success! Score: ${score}`);
         return { score: Math.min(100, Math.max(0, score)) };
       }
     } catch (e: any) {
-      console.log(`[Gemini] Runtime Error: ${e.message}`);
+      console.log(`[Gemini-OR] Runtime Error: ${e.message}`);
     }
   }
 
-  // 2. PHASE 2: GROQ ELITE (30 Keys)
+  // 2. PHASE 2: LLAMA via OpenRouter (32+ Keys)
   for (let attempt = 0; attempt < 2; attempt++) {
-    const key = SHUFFLED_GROQ[groqIdx++ % SHUFFLED_GROQ.length];
+    const key = SHUFFLED_OR[orIdx++ % SHUFFLED_OR.length];
     if (!key) break;
 
     try {
-      console.log(`[Trace] Trying Groq with Key Index ${groqIdx % SHUFFLED_GROQ.length}...`);
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      console.log(`[Trace] Trying Llama via OpenRouter (Key ${orIdx % SHUFFLED_OR.length})...`);
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${key}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://azenith-living-os.vercel.app",
+          "X-Title": "Azenith Living Harvester"
         },
         body: JSON.stringify({
-          model: "llama-3.2-11b-vision-preview",
+          model: "meta-llama/llama-3.2-11b-vision-instruct",
+          max_tokens: 20,
           messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: `Rate this ${category} in ${style} style (0-100 quality). Return ONLY the number.` },
+                { type: "image_url", image_url: { url: imageUrl } }
+              ]
+            }
+          ]
+        })
+      });
+
+      const data = await response.json();
+      if (data.error) {
+        console.log(`[OpenRouter-Llama] Error: ${data.error.message}`);
+        continue;
+      }
+      
+      const text = data.choices?.[0]?.message?.content || "0";
+      const score = parseInt(text.match(/\d+/)?.[0] || "0");
+
+      if (score > 0) {
+        console.log(`[Llama-Shield] Success! Score: ${score}`);
+        return { score: Math.min(100, Math.max(0, score)) };
+      }
+    } catch (e: any) {
+      console.log(`[Llama-OR] Runtime Error: ${e.message}`);
+    }
+  }
             {
               role: "user",
               content: [
