@@ -29,11 +29,17 @@ interface PendingQuestion {
 
 interface Lead {
   id: string;
+  session_id?: string;
   name: string;
-  email: string;
+  email?: string;
   phone: string;
+  roomType?: string;
+  budget?: string;
+  location?: string;
+  bestTime?: string;
+  summary?: string;
   tier: "diamond" | "gold" | "silver" | "bronze";
-  score: number;
+  score?: number;
   status: string;
   created_at: string;
 }
@@ -409,16 +415,15 @@ function LeadsTab() {
     bronze: leads.filter(l => l.tier === "bronze").length,
   };
 
+  const [expandedLead, setExpandedLead] = useState<string | null>(null);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">العملاء المحتملين</h2>
-          <p className="text-sm text-[#C5A059]">تصنيف الماسي | ذهبي | فضي | برونزي</p>
+          <p className="text-sm text-[#C5A059]">مركز التحكم الكامل بالعملاء</p>
         </div>
-        <Link href="/admin/leads" className="text-sm text-[#C5A059] hover:underline">
-          عرض الكل →
-        </Link>
       </div>
 
       {/* Stats */}
@@ -449,23 +454,61 @@ function LeadsTab() {
         {loading ? (
           <div className="p-8 text-center text-white/60">جاري التحميل...</div>
         ) : filteredLeads.length === 0 ? (
-          <div className="p-8 text-center text-white/60">
-            لا يوجد عملاء في هذا التصنيف
-          </div>
+          <div className="p-8 text-center text-white/60">لا يوجد عملاء في هذا التصنيف</div>
         ) : (
           <div className="divide-y divide-white/10">
-            {filteredLeads.slice(0, 10).map((lead) => (
-              <div key={lead.id} className="flex items-center justify-between p-4 hover:bg-white/[0.02]">
-                <div>
-                  <p className="font-medium text-white">{lead.name}</p>
-                  <p className="text-sm text-white/50">{lead.email} | {lead.phone}</p>
+            {filteredLeads.map((lead) => (
+              <div key={lead.id} className="flex flex-col">
+                <div 
+                  className="flex items-center justify-between p-4 hover:bg-white/[0.02] cursor-pointer"
+                  onClick={() => setExpandedLead(expandedLead === lead.id ? null : lead.id)}
+                >
+                  <div>
+                    <p className="font-medium text-white">{lead.name}</p>
+                    <p className="text-sm text-white/50">{lead.roomType} | {lead.phone}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1 rounded-full text-xs border ${tierColors[lead.tier as keyof typeof tierColors] || tierColors.bronze}`}>
+                      {lead.tier === "diamond" ? "ماسي" : lead.tier === "gold" ? "ذهبي" : lead.tier === "silver" ? "فضي" : "برونزي"}
+                    </span>
+                    <span className="text-sm text-white/60">{new Date(lead.created_at).toLocaleDateString("ar-EG")}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-xs border ${tierColors[lead.tier]}`}>
-                    {lead.tier === "diamond" ? "ماسي" : lead.tier === "gold" ? "ذهبي" : lead.tier === "silver" ? "فضي" : "برونزي"}
-                  </span>
-                  <span className="text-sm text-white/60">{lead.score} نقطة</span>
-                </div>
+                
+                {/* Expanded Details */}
+                {expandedLead === lead.id && (
+                  <div className="p-4 bg-black/40 border-t border-white/5 space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4 text-sm">
+                      <div className="space-y-2">
+                        <p className="text-white/40">الميزانية: <span className="text-white font-medium">{lead.budget || "غير محدد"}</span></p>
+                        <p className="text-white/40">الطلب: <span className="text-white font-medium">{lead.roomType || "غير محدد"}</span></p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-white/40">المكان: <span className="text-white font-medium">{lead.location || "غير محدد"}</span></p>
+                        <p className="text-white/40">وقت الاتصال: <span className="text-white font-medium">{lead.bestTime || "غير محدد"}</span></p>
+                      </div>
+                    </div>
+                    {lead.summary && (
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <p className="text-xs text-[#C5A059] mb-1">ملخص الذكاء الاصطناعي:</p>
+                        <p className="text-sm text-white/80">{lead.summary}</p>
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <a 
+                        href={`https://wa.me/2${lead.phone.startsWith('0') ? lead.phone.substring(1) : lead.phone}`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm rounded-lg flex items-center gap-2 transition"
+                      >
+                        📱 تواصل عبر واتساب
+                      </a>
+                      <button className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition">
+                        💬 فتح المحادثة الأصلية (قريباً)
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

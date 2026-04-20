@@ -51,10 +51,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
         return {
           id: session.id,
+          session_id: session.session_id,
           name: name,
           phone: phone || "غير متوفر",
           roomType: session.insights?.roomType || "غير محدد",
           budget: session.insights?.budget || "غير محدد",
+          location: session.insights?.location || "غير محدد",
+          bestTime: session.insights?.bestTime || "غير محدد",
+          summary: session.insights?.summary || "",
           tier: tier,
           status: phone ? "contacted" : "new",
           created_at: session.created_at
