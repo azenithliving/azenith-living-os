@@ -157,7 +157,7 @@ export default function ConsultantWidget() {
     }
   }, [hasLoadedSession, fetchSession, messages.length, userName]);
 
-  // Proactive trigger: Open chat after 15 seconds if it's the first time and not opened yet
+  // Proactive trigger: Open chat after 15 seconds if first visit
   useEffect(() => {
     const hasBeenOpened = localStorage.getItem("azenith_consultant_auto_opened");
     if (!hasBeenOpened) {
@@ -169,6 +169,29 @@ export default function ConsultantWidget() {
       return () => clearTimeout(timer);
     }
   }, [handleOpen]);
+
+  // Poll for admin replies every 15 seconds when chat is open
+  useEffect(() => {
+    if (!isOpen || !sessionId) return;
+    const pollReplies = async () => {
+      try {
+        const res = await fetch(`/api/consultant/check-reply?sessionId=${encodeURIComponent(sessionId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.reply) {
+            setMessages(prev => [...prev, {
+              role: "assistant",
+              content: data.reply,
+              timestamp: new Date().toISOString(),
+            }]);
+          }
+        }
+      } catch { /* silent */ }
+    };
+    const interval = setInterval(pollReplies, 15000);
+    return () => clearInterval(interval);
+  }, [isOpen, sessionId]);
+
 
   // Send message to API
   const sendMessage = async (content: string) => {
