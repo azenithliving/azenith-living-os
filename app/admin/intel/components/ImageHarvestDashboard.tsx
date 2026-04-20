@@ -155,6 +155,7 @@ export function ImageHarvestDashboard() {
           </Button>
           <Button
             size="sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
             onClick={triggerHarvest}
             disabled={triggering || data?.stats.percentage === 100}
           >
@@ -163,7 +164,7 @@ export function ImageHarvestDashboard() {
             ) : (
               <Play className="w-4 h-4 mr-2" />
             )}
-            {triggering ? "Running..." : "Run Harvest"}
+            {triggering ? "Triggering Engine..." : "Run Harvest (v4.0)"}
           </Button>
         </div>
       </div>
