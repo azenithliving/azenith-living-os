@@ -79,8 +79,7 @@ async function analyzeWithOpenRouter(
     const key = OPENROUTER_KEYS[Math.floor(Math.random() * OPENROUTER_KEYS.length)];
     
     if (!key) {
-      console.log(`[OpenRouter] No keys, using emergency pass-through...`);
-      return { score: 85 }; // Emergency Pass
+      return { score: 0, error: "No OpenRouter keys available" };
     }
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -112,8 +111,7 @@ async function analyzeWithOpenRouter(
     console.log(`[OpenRouter] Success! Score: ${score}`);
     return { score: Math.min(100, Math.max(0, score)) };
   } catch (error) {
-    console.log(`[OpenRouter] Failed, using emergency pass-through...`);
-    return { score: 85 }; // Emergency Pass (Assumes Pexels high-quality)
+    return { score: 0, error: `OpenRouter failed: ${(error as Error).message}` };
   }
 }
 
