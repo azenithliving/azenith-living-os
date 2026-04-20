@@ -120,35 +120,6 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
       console.log(`[Llama-OR] Runtime Error: ${e.message}`);
     }
   }
-            {
-              role: "user",
-              content: [
-                { type: "text", text: `Rate this ${category} in ${style} style (0-100 quality). Return ONLY the number.` },
-                { type: "image_url", image_url: { url: imageUrl } }
-              ]
-            }
-          ],
-          max_tokens: 20
-        })
-      });
-
-      const data = await response.json();
-      if (data.error) {
-        console.log(`[Groq] API Error: ${data.error.message}`);
-        continue;
-      }
-      
-      const text = data.choices?.[0]?.message?.content || "0";
-      const score = parseInt(text.match(/\d+/)?.[0] || "0");
-
-      if (score > 0) {
-        console.log(`[Groq-Vanguard] Success! Score: ${score}`);
-        return { score: Math.min(100, Math.max(0, score)) };
-      }
-    } catch (e: any) {
-      console.log(`[Groq] Runtime Error: ${e.message}`);
-    }
-  }
 
   // 3. PHASE 3: OPENROUTER AUTO (32 Keys)
   // Uses openrouter/auto to pick the best available vision model
