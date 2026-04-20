@@ -105,8 +105,17 @@ async function analyzeWithOpenRouter(
     });
 
     const data = await response.json();
+    if (data.error) {
+      console.log(`[OpenRouter] API Error: ${JSON.stringify(data.error)}`);
+      return { score: 0, error: data.error.message };
+    }
+    
     const text = data.choices?.[0]?.message?.content || "0";
     const score = parseInt(text.match(/\d+/)?.[0] || "0");
+    
+    if (score === 0) {
+      console.log(`[OpenRouter] Debug: Raw Response: ${text.substring(0, 100)}`);
+    }
     
     console.log(`[OpenRouter] Success! Score: ${score}`);
     return { score: Math.min(100, Math.max(0, score)) };
