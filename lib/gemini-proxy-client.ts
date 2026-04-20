@@ -6,9 +6,7 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const PROXY_URL = process.env.VERCEL_URL 
-  ? `https://${process.env.VERCEL_URL}/api/proxy/gemini`
-  : "http://localhost:3000/api/proxy/gemini";
+const PROXY_URL = "https://azenith-living-os.vercel.app/api/proxy/gemini";
 
 // Load Gemini keys for fallback
 const GEMINI_KEYS = (process.env.GOOGLE_AI_KEYS || "").split(",").filter(Boolean);

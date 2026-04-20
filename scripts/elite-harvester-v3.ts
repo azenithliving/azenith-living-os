@@ -316,71 +316,63 @@ async function filterWithGemini(photos: any[], category: string, style: string):
   if (photos.length === 0) return [];
   
   if (!usageTracker.checkGeminiLimit()) {
-    console.log(`[Gemini] Daily limit reached, using fallback scoring...`);
-    // Fallback: Use metadata-based scoring
-    return photos.slice(0, Math.ceil(photos.length * 0.3));
+    console.log(`[Gemini] Daily limit reached, using quality fallback...`);
+    return photos.slice(0, Math.ceil(photos.length * 0.2));
   }
   
-  // Check proxy health first
   const proxyHealth = await checkProxyHealth();
-  if (!proxyHealth.ok) {
-    console.error(`[Gemini] Proxy unavailable, using fallback...`);
-    return photos.slice(0, Math.ceil(photos.length * 0.3));
-  }
-  
-  console.log(`[Gemini] Using Vercel proxy with ${proxyHealth.availableKeys} keys`);
-  
   const elitePhotos: any[] = [];
-  let keyIndex = 0;
+  let geminiKeyIndex = Math.floor(Math.random() * CONFIG.GEMINI_KEYS.length);
   
+  console.log(`[Gemini] Processing ${photos.length} photos for ${category}/${style}...`);
+
   for (const photo of photos) {
-    try {
-      const prompt = `
-        Analyze this interior design image for a ${category} in ${style} style.
-        Rate how well it matches on a scale of 0-100.
+    let attempts = 0;
+    let success = false;
+
+    while (attempts < 2 && !success) {
+      try {
+        const prompt = `
+          Analyze this interior design for a ${category} in ${style} style.
+          Rate quality & match 0-100. Respond with ONLY the number.
+          URL: ${photo.src?.medium || photo.url}
+        `;
         
-        Criteria:
-        - Room type accuracy (is it clearly a ${category}?)
-        - Style match (does it embody ${style} design?)
-        - Luxury/premium quality (high-end materials, lighting, composition)
-        - Professional photography quality
+        const { score, error } = await analyzeImageWithProxy(
+          prompt,
+          photo.src?.large || photo.src?.original || photo.url,
+          geminiKeyIndex % CONFIG.GEMINI_KEYS.length
+        );
         
-        Respond with ONLY a number 0-100.
-        Image URL: ${photo.src?.medium || photo.url}
-      `;
-      
-      // Use proxy instead of direct API (bypasses Egypt IP restriction)
-      const { score, error } = await analyzeImageWithProxy(
-        prompt,
-        photo.src?.large || photo.src?.original || photo.url,
-        keyIndex
-      );
-      
-      if (error) {
-        console.error(`[Gemini] Proxy error for photo ${photo.id}:`, error);
-        keyIndex++; // Try next key
-        continue;
+        if (error) {
+          console.warn(`[Gemini] Attempt ${attempts+1} failed: ${error.substring(0, 100)}`);
+          geminiKeyIndex++; // Rotate key immediately on error
+          attempts++;
+          await sleep(500);
+          continue;
+        }
+        
+        photo.aiScore = score;
+        photo.aiReason = `Matched ${category}/${style}`;
+        
+        if (score >= CONFIG.THRESHOLDS.ELITE) {
+          elitePhotos.push(photo);
+        }
+        
+        success = true;
+        usageTracker.incrementGemini();
+        // Dynamic delay based on proxy health
+        await sleep(proxyHealth.ok ? 400 : 1000);
+        
+      } catch (error) {
+        geminiKeyIndex++;
+        attempts++;
+        await sleep(1000);
       }
-      
-      photo.aiScore = score;
-      photo.aiReason = `Matched ${category}/${style}`;
-      
-      // Tiered acceptance (aim for 30% total)
-      if (score >= CONFIG.THRESHOLDS.ULTRA_ELITE) {
-        elitePhotos.push(photo);
-      } else if (score >= CONFIG.THRESHOLDS.PREMIUM && elitePhotos.length < photos.length * 0.25) {
-        elitePhotos.push(photo);
-      } else if (score >= CONFIG.THRESHOLDS.ELITE && elitePhotos.length < photos.length * 0.30) {
-        elitePhotos.push(photo);
-      }
-      
-      usageTracker.incrementGemini();
-      await sleep(CONFIG.THROTTLING.GEMINI_DELAY);
-      
-    } catch (error) {
-      console.error(`[Gemini] Filter error:`, error);
-      keyIndex++; // Try next key
     }
+    
+    // Always rotate key slightly to balance load
+    if (Math.random() > 0.7) geminiKeyIndex++;
   }
   
   return elitePhotos;
@@ -519,21 +511,33 @@ async function harvestCategory(category: string, style: string): Promise<number>
   while (harvestedCount < needed && queryIndex < queries.length) {
     // Check API limits
     if (usageTracker.shouldCooldown()) {
-      console.log(`[Harvest] API usage high (${usageTracker.getStats().percentUsed.gemini}%), cooling for 1 hour...`);
-      await sleep(CONFIG.THROTTLING.COOLDOWN_DURATION);
+      console.log(`[Harvest] API usage high, cooling for 15 minutes...`);
+      await sleep(900000); // Reduce cooldown to 15m for faster progress
     }
     
     const query = queries[queryIndex++];
-    console.log(`  Query ${queryIndex}/${queries.length}: ${query.substring(0, 50)}...`);
+    console.log(`  Query ${queryIndex}/${queries.length}: ${query}`);
     
     // Fetch from Pexels
     const photos = await fetchFromPexels(query, CONFIG.PEXELS_BATCH_SIZE);
-    await sleep(CONFIG.THROTTLING.PEXELS_DELAY);
+    await sleep(200); // Faster Pexels fetching
     
-    if (photos.length === 0) continue;
+    if (photos.length === 0) {
+      // If we run out of images for a query, add more variations dynamically
+      if (queryIndex === queries.length && harvestedCount < needed) {
+        console.log(`  💡 Generating additional query variations...`);
+        queries.push(
+          `high-end ${style} ${category} inspiration`,
+          `exclusive ${category} ${style} furniture`,
+          `${style} ${category} architecture photography`
+        );
+      }
+      continue;
+    }
     
     // Filter duplicates
     const uniquePhotos = photos.filter(p => !isDuplicate(p));
+    if (uniquePhotos.length === 0) continue;
     
     // Filter with Gemini
     const elitePhotos = await filterWithGemini(uniquePhotos, category, style);
@@ -550,13 +554,7 @@ async function harvestCategory(category: string, style: string): Promise<number>
     const inserted = await insertEliteImages(toInsert, category, style);
     harvestedCount += inserted;
     
-    console.log(`  ✓ Inserted: ${inserted} | Total this combo: ${currentCount + harvestedCount}/${CONFIG.IMAGES_PER_COMBINATION}`);
-    
-    // Show API stats
-    const stats = usageTracker.getStats();
-    if (stats.percentUsed.gemini > 50) {
-      console.log(`  [API] Pexels: ${stats.percentUsed.pexels}% | Gemini: ${stats.percentUsed.gemini}%`);
-    }
+    console.log(`  ✓ Inserted: ${inserted} | Progress: ${currentCount + harvestedCount}/${CONFIG.IMAGES_PER_COMBINATION}`);
   }
   
   return harvestedCount;

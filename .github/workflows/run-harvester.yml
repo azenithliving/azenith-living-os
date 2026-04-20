@@ -1,14 +1,14 @@
 name: Run Elite Harvester v3.0
 
 on:
-  workflow_dispatch: # Manual trigger only (runs for 2-4 hours)
-  # schedule:
-  #   - cron: '0 0 1 * *' # Uncomment for monthly auto-run
+  workflow_dispatch: # Manual trigger
+  schedule:
+    - cron: '0 0 * * *' # Run daily at midnight to keep growing the library
 
 jobs:
   harvest:
     runs-on: ubuntu-latest
-    timeout-minutes: 360 # 6 hours max
+    timeout-minutes: 360 # Max allowed on GitHub free tier
     
     steps:
       - name: Checkout code
