@@ -455,14 +455,15 @@ function LeadsTab() {
   const deleteLeads = async (ids: (string | undefined)[]) => {
     const validIds = ids.filter(Boolean) as string[];
     if (validIds.length === 0) {
-      toast.error("لم يتم تحديد أي عملاء صالحين للحذف");
+      toast.error("⚠️ لم يتم تحديد أي معرفات صالحة");
       return;
     }
 
-    if (!confirm(`هل أنت متأكد من حذف ${validIds.length} من العملاء نهائياً؟`)) return;
+    // REMOVED confirm() to bypass potential browser blocks
+    toast.success(`جاري محاولة حذف ${validIds.length} سجل...`);
     
     setIsDeleting(true);
-    const toastId = toast.loading("جاري الحذف...");
+    const toastId = toast.loading("🚀 جاري التنفيذ الفوري...");
     
     try {
       const res = await fetch("/api/admin/leads/delete", {
@@ -552,12 +553,15 @@ function LeadsTab() {
         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between animate-in slide-in-from-top duration-300">
           <p className="text-sm text-red-200">تم تحديد {selectedLeads.length} من العملاء</p>
           <button 
-            onClick={() => deleteLeads(selectedLeads)}
+            onClick={() => {
+              toast.success("تم الضغط على حذف الكل");
+              deleteLeads(selectedLeads);
+            }}
             disabled={isDeleting}
-            className="relative z-50 px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg transition disabled:opacity-50 cursor-pointer"
-            style={{ cursor: 'pointer' }}
+            className="relative z-[9999] px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-bold rounded-xl transition shadow-lg shadow-red-600/40"
+            style={{ cursor: 'pointer !important', pointerEvents: 'auto' }}
           >
-            {isDeleting ? "جاري الحذف..." : "حذف المحدد نهائياً"}
+            {isDeleting ? "جاري الحذف..." : "🗑️ حذف المحدد نهائياً (فوري)"}
           </button>
         </div>
       )}
@@ -599,12 +603,13 @@ function LeadsTab() {
                      <button 
                       onClick={(e) => {
                         e.stopPropagation();
+                        toast.success("تم الضغط على سلة المهملات");
                         deleteLeads([lead.session_id || lead.id]);
                       }}
-                      className="relative z-50 p-2 text-white/20 hover:text-red-500 transition-colors cursor-pointer"
-                      style={{ cursor: 'pointer' }}
+                      className="relative z-[9999] p-3 text-red-500/40 hover:text-red-500 transition-colors"
+                      style={{ cursor: 'pointer !important', pointerEvents: 'auto' }}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
