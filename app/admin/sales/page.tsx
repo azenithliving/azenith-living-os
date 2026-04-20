@@ -88,6 +88,7 @@ function SalesManagerTab() {
   const [answerText, setAnswerText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+
   useEffect(() => {
     setMessages([
       {
@@ -389,12 +390,8 @@ function LeadsTab() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "diamond" | "gold" | "silver" | "bronze">("all");
 
-  useEffect(() => {
-    loadLeads();
-  }, []);
-
-  const loadLeads = async () => {
-    setLoading(true);
+  const loadLeads = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const response = await fetch("/api/admin/leads");
       if (response.ok) {
@@ -404,9 +401,15 @@ function LeadsTab() {
     } catch (error) {
       console.error("Failed to load leads:", error);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadLeads();
+    const interval = setInterval(() => loadLeads(true), 3000); // Live sync every 3s
+    return () => clearInterval(interval);
+  }, []);
 
   const filteredLeads = filter === "all" ? leads : leads.filter(l => l.tier === filter);
 

@@ -128,7 +128,7 @@ export default function ConsultantWidget() {
     setHasLoadedSession(true);
 
     // If we have a stored sessionId, try to fetch it
-    const storedSessionId = localStorage.getItem("azenith_consultant_session_id");
+    const storedSessionId = localStorage.getItem("azenith_session_id");
     const storedName = localStorage.getItem("azenith_consultant_name");
 
     if (storedSessionId) {

@@ -10,13 +10,10 @@ export default function TelemetryTracker() {
   useEffect(() => {
     // We only track if there's a session ID established by the Consultant Widget
     const getSessionId = () => {
-      // In a real app, this might be a cookie or a global state.
-      // For now, we fetch it from localStorage where ConsultantWidget might store it,
-      // or we just establish a tracking ID.
-      let sid = localStorage.getItem("azenith_visitor_id");
+      let sid = localStorage.getItem("azenith_session_id");
       if (!sid) {
-        sid = `vis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem("azenith_visitor_id", sid);
+        sid = `sid_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem("azenith_session_id", sid);
       }
       return sid;
     };

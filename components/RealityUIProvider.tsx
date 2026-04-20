@@ -11,21 +11,19 @@ export default function RealityUIProvider() {
       console.log("[Reality Engine] Received Action:", action);
 
       if (action === "theme_dark") {
-        document.body.style.setProperty("--zenith-black", "#050505");
-        document.body.style.setProperty("--brand-primary", "#C5A059");
-        toast("تم تفعيل وضع الفخامة 🌑", { icon: "🔮", style: { background: "#000", color: "#C5A059" } });
+        document.documentElement.style.setProperty("--zenith-black", "#050505");
+        document.documentElement.style.setProperty("--brand-primary", "#C5A059");
+        document.body.style.fontFamily = "'IBM Plex Sans Arabic', sans-serif";
+        console.log("Applied Dark Luxury Mutation");
       } else if (action === "theme_classic") {
-        document.body.style.setProperty("--zenith-black", "#2c1c11"); // Deep wood color
-        document.body.style.setProperty("--brand-primary", "#e2a964");
-        toast("تم تحويل التصميم إلى النمط الكلاسيكي 🏛️", { icon: "🔮", style: { background: "#2c1c11", color: "#e2a964" } });
+        document.documentElement.style.setProperty("--zenith-black", "#1a0f0a");
+        document.documentElement.style.setProperty("--brand-primary", "#d4af37");
+        document.body.style.fontFamily = "'Playfair Display', serif";
+        console.log("Applied Classic Royal Mutation");
       } else if (action === "trigger_scarcity") {
-        // Visual flash or inject a scarcity banner
-        document.body.style.transition = "filter 0.5s";
-        document.body.style.filter = "contrast(1.2)";
-        setTimeout(() => {
-            document.body.style.filter = "none";
-        }, 1000);
-        toast("عرض حصري متاح الآن لفترة محدودة! ⏳", { icon: "⚡", style: { background: "#C5A059", color: "#000" } });
+        document.body.style.transition = "filter 0.5s, transform 0.5s";
+        document.body.style.filter = "contrast(1.1) brightness(0.9)";
+        console.log("Applied Scarcity Filter");
       }
     };
 
