@@ -574,13 +574,15 @@ async function runEliteHarvesterV3() {
   console.log("╚════════════════════════════════════════════════════════╝\n");
   
   // Stats
-  console.log(`📊 Configuration:`);
-  console.log(`   Target Raw: ${CONFIG.TARGET_RAW_IMAGES.toLocaleString()}`);
-  console.log(`   Target Elite: ${CONFIG.TARGET_FILTERED_IMAGES.toLocaleString()}`);
-  console.log(`   Per Room: ${CONFIG.IMAGES_PER_COMBINATION} images`);
-  console.log(`   Rooms: ${CONFIG.TARGET_CATEGORIES.length}`);
-  console.log(`   Styles: ${CONFIG.STYLES.length}`);
-  console.log(`   API Keys: ${CONFIG.PEXELS_KEYS.length} Pexels, ${CONFIG.GEMINI_KEYS.length} Gemini\n`);
+  console.log(`📊 CONFIGURATION ARSENAL:`);
+  console.log(`   Target Elite: ${CONFIG.TARGET_FILTERED_IMAGES.toLocaleString()} images`);
+  console.log(`   Keys Loaded:`);
+  console.log(`   - Pexels:      ${CONFIG.PEXELS_KEYS.length}`);
+  console.log(`   - Gemini:      ${CONFIG.GEMINI_KEYS.length}`);
+  console.log(`   - Groq:        ${CONFIG.GROQ_KEYS.length}`);
+  console.log(`   - OpenRouter:  ${(process.env.OPENROUTER_KEYS || "").split(",").filter(Boolean).length}`);
+  console.log(`   - DeepSeek:    ${(process.env.DEEPSEEK_KEYS || "").split(",").filter(Boolean).length}`);
+  console.log(`   - Mistral:     ${(process.env.MISTRAL_KEYS || "").split(",").filter(Boolean).length}\n`);
   
   // Check current state
   const totalCount = await getCurrentImageCount();
