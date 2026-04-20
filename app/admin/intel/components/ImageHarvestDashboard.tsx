@@ -94,12 +94,13 @@ export function ImageHarvestDashboard() {
       const result = await response.json();
 
       if (result.success) {
-        setMessage("✅ Harvest triggered! Check back in 2-4 hours.");
+        setMessage(`✅ ${result.message} (Repo: ${result.details?.repo})`);
       } else {
-        setMessage("❌ Failed to trigger harvest: " + result.error);
+        const errorDetail = result.details ? ` - ${JSON.stringify(result.details)}` : "";
+        setMessage(`❌ Failed: ${result.error}${errorDetail}`);
       }
     } catch (error) {
-      setMessage("❌ Error: " + (error as Error).message);
+      setMessage("❌ Network Error: " + (error as Error).message);
     } finally {
       setTriggering(false);
     }
