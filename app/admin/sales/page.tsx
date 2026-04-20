@@ -443,26 +443,26 @@ function LeadsTab() {
     }
   }, [searchParams]);
 
-  const toggleSelectLead = (sessionId: string) => {
-    if (!sessionId) return;
+  const toggleSelectLead = (leadId: string) => {
+    if (!leadId) return;
     setSelectedLeads(prev => 
-      prev.includes(sessionId) 
-        ? prev.filter(id => id !== sessionId) 
-        : [...prev, sessionId]
+      prev.includes(leadId) 
+        ? prev.filter(id => id !== leadId) 
+        : [...prev, leadId]
     );
   };
 
   const deleteLeads = async (ids: (string | undefined)[]) => {
     const validIds = ids.filter(Boolean) as string[];
     if (validIds.length === 0) {
-      toast.error("لم يتم العثور على معرفات صالحة للحذف");
+      toast.error("لم يتم تحديد أي عملاء صالحين للحذف");
       return;
     }
 
-    if (!confirm(`هل أنت متأكد من حذف ${validIds.length} من العملاء نهائياً؟ لا يمكن التراجع!`)) return;
+    if (!confirm(`هل أنت متأكد من حذف ${validIds.length} من العملاء نهائياً؟`)) return;
     
     setIsDeleting(true);
-    const toastId = toast.loading("جاري التطهير...");
+    const toastId = toast.loading("جاري الحذف...");
     
     try {
       const res = await fetch("/api/admin/leads/delete", {
@@ -474,13 +474,13 @@ function LeadsTab() {
       if (res.ok) {
         setLeads(prev => prev.filter(l => !validIds.includes(l.session_id || "") && !validIds.includes(l.id)));
         setSelectedLeads([]);
-        toast.success("تم تطهير البيانات بنجاح", { id: toastId });
+        toast.success("تم الحذف بنجاح", { id: toastId });
       } else {
-        toast.error("فشل في حذف بعض البيانات", { id: toastId });
+        toast.error("فشل في إكمال عملية الحذف", { id: toastId });
       }
     } catch (err) {
       console.error("Delete failed:", err);
-      toast.error("حدث خطأ تقني أثناء الحذف", { id: toastId });
+      toast.error("خطأ في الاتصال بالخادم", { id: toastId });
     } finally {
       setIsDeleting(false);
     }
@@ -573,17 +573,18 @@ function LeadsTab() {
             {filteredLeads.map((lead) => (
               <div key={lead.id} className="flex flex-col">
                 <div 
-                  className={`flex items-center justify-between p-4 hover:bg-white/[0.02] cursor-pointer transition-colors ${selectedLeads.includes(lead.session_id) ? 'bg-white/[0.05]' : ''}`}
+                  className={`flex items-center justify-between p-4 hover:bg-white/[0.02] cursor-pointer transition-colors ${selectedLeads.includes(lead.session_id || lead.id) ? 'bg-white/[0.05]' : ''}`}
                 >
                   <div className="flex items-center gap-4 flex-1" onClick={() => setExpandedLead(expandedLead === lead.session_id ? null : (lead.session_id || lead.id))}>
                     <div 
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleSelectLead(lead.session_id);
+                        toggleSelectLead(lead.session_id || lead.id);
                       }}
-                      className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${selectedLeads.includes(lead.session_id) ? 'bg-[#C5A059] border-[#C5A059]' : 'border-white/20 hover:border-[#C5A059]/50'}`}
+                      className={`w-5 h-5 rounded border flex items-center justify-center transition-colors cursor-pointer ${selectedLeads.includes(lead.session_id || lead.id) ? 'bg-[#C5A059] border-[#C5A059]' : 'border-white/20 hover:border-[#C5A059]/50'}`}
+                      style={{ cursor: 'pointer' }}
                     >
-                      {selectedLeads.includes(lead.session_id) && <Check className="w-3 h-3 text-black" />}
+                      {selectedLeads.includes(lead.session_id || lead.id) && <Check className="w-3 h-3 text-black" />}
                     </div>
                     <div>
                       <p className="font-medium text-white">{lead.name}</p>
@@ -595,10 +596,10 @@ function LeadsTab() {
                       {lead.tier === "diamond" ? "ماسي" : lead.tier === "gold" ? "ذهبي" : lead.tier === "silver" ? "فضي" : "برونزي"}
                     </span>
                     <span className="text-sm text-white/60">{new Date(lead.created_at).toLocaleDateString("ar-EG")}</span>
-                    <button 
+                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        deleteLeads([lead.session_id]);
+                        deleteLeads([lead.session_id || lead.id]);
                       }}
                       className="relative z-50 p-2 text-white/20 hover:text-red-500 transition-colors cursor-pointer"
                       style={{ cursor: 'pointer' }}

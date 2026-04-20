@@ -18,7 +18,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const { error: telError } = await supabase
       .from("visitor_telemetry")
       .delete()
-      .in("session_id", sessionIds);
+      .or(`session_id.in.(${sessionIds.join(',')}),id.in.(${sessionIds.join(',')})`);
 
     if (telError) {
       console.error("[Leads Delete] Telemetry error:", telError);
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const { error: sessError } = await supabase
       .from("consultant_sessions")
       .delete()
-      .in("session_id", sessionIds);
+      .or(`session_id.in.(${sessionIds.join(',')}),id.in.(${sessionIds.join(',')})`);
 
     if (sessError) {
       console.error("[Leads Delete] Session error:", sessError);
