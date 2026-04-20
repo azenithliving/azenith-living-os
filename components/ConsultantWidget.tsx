@@ -38,7 +38,7 @@ export default function ConsultantWidget() {
 
   // Load session from localStorage on mount
   useEffect(() => {
-    const storedSessionId = localStorage.getItem("azenith_consultant_session_id");
+    const storedSessionId = localStorage.getItem("azenith_session_id");
     const storedMessages = localStorage.getItem("azenith_consultant_messages");
     const storedName = localStorage.getItem("azenith_consultant_name");
 
@@ -70,7 +70,7 @@ export default function ConsultantWidget() {
   // Save sessionId to localStorage
   useEffect(() => {
     if (sessionId) {
-      localStorage.setItem("azenith_consultant_session_id", sessionId);
+      localStorage.setItem("azenith_session_id", sessionId);
     }
   }, [sessionId]);
 
