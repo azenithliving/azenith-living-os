@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
           Authorization: `Bearer ${GITHUB_TOKEN}`,
           Accept: "application/vnd.github.v3+json",
           "Content-Type": "application/json",
+          "User-Agent": "Azenith-Living-OS",
         },
         body: JSON.stringify({
           ref: "main", // or the active branch
