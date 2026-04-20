@@ -355,9 +355,13 @@ async function filterWithGemini(photos: any[], category: string, style: string):
         }
         
         photo.aiScore = score;
-        photo.aiReason = `Matched ${category}/${style}`;
         
-        if (score >= CONFIG.THRESHOLDS.ELITE) {
+        if (score >= 85) {
+          photo.aiReason = `Matched ${category}/${style}`;
+          elitePhotos.push(photo);
+        } else if (score === 50) {
+          photo.aiReason = `Comprehensive Interior Design (Recycled)`;
+          photo.isComprehensive = true;
           elitePhotos.push(photo);
         }
         
@@ -542,21 +546,31 @@ async function harvestCategory(category: string, style: string): Promise<number>
     if (uniquePhotos.length === 0) continue;
     
     // Filter with Gemini
-    const elitePhotos = await filterWithGemini(uniquePhotos, category, style);
+    const evaluatedPhotos = await filterWithGemini(uniquePhotos, category, style);
     
-    if (elitePhotos.length === 0) continue;
+    if (evaluatedPhotos.length === 0) continue;
     
     // Mark as duplicates
-    elitePhotos.forEach(markAsDuplicate);
+    evaluatedPhotos.forEach(markAsDuplicate);
     
-    // Only take what we need
-    const toInsert = elitePhotos.slice(0, needed - harvestedCount);
+    // Separate elite (exact match) and comprehensive (recycled)
+    const exactMatches = evaluatedPhotos.filter(p => !p.isComprehensive);
+    const comprehensiveMatches = evaluatedPhotos.filter(p => p.isComprehensive);
     
-    // Insert to database
-    const inserted = await insertEliteImages(toInsert, category, style);
-    harvestedCount += inserted;
+    // Insert exact matches to their target category
+    if (exactMatches.length > 0) {
+      const toInsertExact = exactMatches.slice(0, needed - harvestedCount);
+      const insertedExact = await insertEliteImages(toInsertExact, category, style);
+      harvestedCount += insertedExact;
+      console.log(`  ✓ Inserted Exact: ${insertedExact} | Progress: ${currentCount + harvestedCount}/${CONFIG.IMAGES_PER_COMBINATION}`);
+    }
     
-    console.log(`  ✓ Inserted: ${inserted} | Progress: ${currentCount + harvestedCount}/${CONFIG.IMAGES_PER_COMBINATION}`);
+    // Insert comprehensive matches to the comprehensive category
+    if (comprehensiveMatches.length > 0) {
+      // Using 'comprehensive-interior' as the category for the general interior design card
+      const insertedComp = await insertEliteImages(comprehensiveMatches, "comprehensive-interior", style);
+      console.log(`  ♻️  Recycled: ${insertedComp} gorgeous images to Comprehensive Interior Design`);
+    }
   }
   
   return harvestedCount;

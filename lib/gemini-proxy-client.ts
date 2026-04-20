@@ -33,15 +33,16 @@ let deepseekIdx = 0;
  */
 export async function analyzeImage(imageUrl: string, category: string, style: string) {
   const cleanCategory = category.replace(/-/g, " ");
-  const strictPrompt = `You are an elite, unforgiving interior design inspector. 
-CRITICAL TASK: Evaluate this image for strict compliance.
-1. ROOM MATCH: Is this definitively and undeniably a ${cleanCategory}? If there is any doubt, or if it's a different room, return 0.
-2. STYLE MATCH: Is the aesthetic strictly, purely, and unmistakably ${style}? If it mixes styles or fails to represent ${style} perfectly, return 0.
-3. QUALITY: Is this a high-end, professional, luxury interior shot? No low-res, no weird angles, no messy rooms. If it looks cheap, return 0.
-If and ONLY if it perfectly matches a luxury ${style} ${cleanCategory}, rate its aesthetic quality from 85 to 100. 
+  const strictPrompt = `You are an elite interior design quality inspector. 
+CRITICAL TASK: Evaluate this image.
+1. Is it a high-end, professional, luxury interior design shot? (Must NOT contain people, text, messy rooms, bad lighting, or AI artifacts). If NO, return 0 immediately.
+2. If YES (it is a beautiful interior), does it perfectly match a luxury ${style} ${cleanCategory}?
+- If it PERFECTLY matches BOTH the room type (${cleanCategory}) and style (${style}), return a score between 85 and 100.
+- If it is a gorgeous luxury interior shot, but it DOES NOT match the specific room or style (e.g. it's a living room instead of a bedroom), return 50.
 Return ONLY the integer number. No words, no symbols, nothing else.`;
 
   // Randomly pick a starting provider for each request to balance load
+
   const providers = ["gemini", "groq", "openrouter", "mistral"];
   const starter = providers[Math.floor(Math.random() * providers.length)];
   
@@ -72,6 +73,7 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
         if (match) {
           const score = parseInt(match[0]);
           if (score >= 85) console.log(`[Gemini-Strike] Strict Approved | Score: ${score}`);
+          else if (score === 50) console.log(`[Gemini-Strike] Redirected to Comprehensive | Score: 50`);
           else console.log(`[Gemini-Strike] REJECTED (Strict)`);
           return { score: Math.min(100, Math.max(0, score)) };
         }
@@ -99,6 +101,7 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
         if (match) {
           const score = parseInt(match[0]);
           if (score >= 85) console.log(`[Groq-Vanguard] Strict Approved | Score: ${score}`);
+          else if (score === 50) console.log(`[Groq-Vanguard] Redirected to Comprehensive | Score: 50`);
           else console.log(`[Groq-Vanguard] REJECTED (Strict)`);
           return { score: Math.min(100, Math.max(0, score)) };
         }
@@ -131,6 +134,7 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
         if (match) {
           const score = parseInt(match[0]);
           if (score >= 85) console.log(`[Router-Shield] Strict Approved | Score: ${score}`);
+          else if (score === 50) console.log(`[Router-Shield] Redirected to Comprehensive | Score: 50`);
           else console.log(`[Router-Shield] REJECTED (Strict)`);
           return { score: Math.min(100, Math.max(0, score)) };
         }
