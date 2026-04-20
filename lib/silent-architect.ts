@@ -72,11 +72,13 @@ class SilentArchitect {
   private lastOptimization: Date = new Date();
 
   private constructor() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://placeholder-for-build.local";
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-key";
     
-    if (!url || !key) {
-      throw new Error("Missing credentials for Silent Architect");
+    // During build time on Vercel, env vars might be missing.
+    // We log a warning instead of crashing.
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.warn("⚠️ [SilentArchitect] Initialization with placeholders (Build time resilience active)");
     }
     
     this.supabase = createClient(url, key, {
@@ -113,6 +115,8 @@ class SilentArchitect {
     tasksExecuted: number;
     whispersSent: number;
   }> {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return { tasksCreated: 0, tasksExecuted: 0, whispersSent: 0 };
+    
     let tasksCreated = 0;
     let tasksExecuted = 0;
     let whispersSent = 0;
@@ -165,6 +169,7 @@ class SilentArchitect {
 
   private async detectImageOptimizationNeeds(): Promise<AutonomousTask[]> {
     const tasks: AutonomousTask[] = [];
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return tasks;
     
     // Check for unoptimized images in database
     const { data: images } = await this.supabase
@@ -191,6 +196,7 @@ class SilentArchitect {
 
   private async detectSEONeeds(): Promise<AutonomousTask[]> {
     const tasks: AutonomousTask[] = [];
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return tasks;
     
     // Check for rooms without SEO metadata
     const { data: rooms } = await this.supabase
@@ -217,6 +223,7 @@ class SilentArchitect {
 
   private async detectTranslationNeeds(): Promise<AutonomousTask[]> {
     const tasks: AutonomousTask[] = [];
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return tasks;
     
     // Check translation cache efficiency
     const stats = await getSystemStats();
@@ -282,6 +289,7 @@ class SilentArchitect {
   }
 
   private async warmTranslationCache(): Promise<void> {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
     // Run bulk translation in background
     const { bulkTranslateAndCache } = await import("./translation-vault");
     
@@ -412,6 +420,7 @@ class SilentArchitect {
 
   async predictNeeds(): Promise<PredictedNeed[]> {
     const predictions: PredictedNeed[] = [];
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return predictions;
     
     // 1. Predict content needs based on trends
     const { data: trends } = await this.supabase
@@ -507,6 +516,8 @@ class SilentArchitect {
   // ==========================================
 
   private async sendWhisperUpdate(update: Omit<WhisperUpdate, "id" | "createdAt">): Promise<void> {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
+    
     const fullUpdate: WhisperUpdate = {
       ...update,
       id: `whisper_${Date.now()}`,
@@ -536,6 +547,8 @@ class SilentArchitect {
   }
 
   async getWhispers(): Promise<WhisperUpdate[]> {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
+    
     const { data } = await this.supabase
       .from("architect_notifications")
       .select("*")
@@ -639,6 +652,8 @@ class SilentArchitect {
   // ==========================================
 
   private async logSilentAction(task: AutonomousTask): Promise<void> {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
+    
     await this.supabase.from("architect_actions").insert({
       action_type: task.type,
       status: "completed",
