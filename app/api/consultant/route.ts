@@ -292,7 +292,12 @@ export async function POST(
     const learnings = await getLearnings();
     
     // Build messages array for Groq with system prompt and conversation history
-    const groqMessages = buildGroqMessages(conversationHistory, userName, learnings);
+    const groqMessages = buildGroqMessages(
+      conversationHistory, 
+      userName || existingSession?.insights?.userName, 
+      learnings, 
+      existingSession?.insights
+    );
 
     // Get AI response using Groq with full conversation context
     const aiResult = await askGroqMessages(groqMessages, {
@@ -431,13 +436,21 @@ function generateSessionId(): string {
 function buildGroqMessages(
   history: Message[],
   userName?: string,
-  learnings: string[] = []
+  learnings: string[] = [],
+  insights?: Insights
 ): GroqMessage[] {
   // Start with system message
   let systemContent = SYSTEM_PROMPT;
   
-  // Add user name if provided
-  if (userName) {
+  // Add context from insights to prevent repetitive questions
+  if (insights) {
+    systemContent += `\n\n[سياق العميل الحالي - لا تسأل عن هذه المعلومات مجدداً]:`;
+    if (userName || insights.userName) systemContent += `\n- اسم العميل: ${userName || insights.userName}`;
+    if (insights.location) systemContent += `\n- الموقع: ${insights.location}`;
+    if (insights.roomType) systemContent += `\n- نوع الغرفة المطلوبة: ${insights.roomType}`;
+    if (insights.style) systemContent += `\n- الستايل المفضل: ${insights.style}`;
+    if (insights.budget) systemContent += `\n- الميزانية: ${insights.budget}`;
+  } else if (userName) {
     systemContent += `\n\nاسم الزائر: ${userName}`;
   }
   
