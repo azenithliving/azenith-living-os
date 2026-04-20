@@ -51,9 +51,16 @@ export function ImageHarvestDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Fetch stats on mount
+  // Fetch stats on mount and every 30 seconds
   useEffect(() => {
     fetchStats();
+    
+    // Auto-refresh interval (every 30 seconds)
+    const interval = setInterval(() => {
+      fetchStats();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   async function fetchStats() {

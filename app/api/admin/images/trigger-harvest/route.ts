@@ -11,35 +11,57 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { force = false, targetCount = 15000 } = body;
 
-    // Import the harvester
-    const { runEliteHarvesterV3, CONFIG } = await import("@/scripts/elite-harvester-v3");
-    
-    // Override target if specified
-    if (targetCount !== 15000) {
-      CONFIG.TARGET_FILTERED_IMAGES = targetCount;
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+    const REPO_OWNER = "azenithliving";
+    const REPO_NAME = "azenith-living-os";
+    const WORKFLOW_ID = "run-harvester.yml";
+
+    if (!GITHUB_TOKEN) {
+      console.error("[Trigger Harvest] GITHUB_TOKEN is missing in env vars");
+      return NextResponse.json(
+        { success: false, error: "GitHub configuration missing" },
+        { status: 500 }
+      );
     }
 
-    // Run harvester
-    console.log(`[Admin Harvest] Triggered with target: ${targetCount}`);
-    
-    // Note: In production, this would spawn a background job
-    // For now, we return immediately and the admin can check status
+    // Trigger GitHub Action via workflow_dispatch
+    const ghResponse = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/${WORKFLOW_ID}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ref: "main", // or the active branch
+        }),
+      }
+    );
+
+    if (!ghResponse.ok) {
+      const errorText = await ghResponse.text();
+      throw new Error(`GitHub API error: ${ghResponse.status} - ${errorText}`);
+    }
+
+    console.log(`[Admin Harvest] GitHub Workflow Triggered successfully`);
     
     return NextResponse.json({
       success: true,
-      message: "Harvest triggered",
+      message: "Harvest triggered on GitHub Actions",
       details: {
         target: targetCount,
         force,
-        estimatedDuration: "2-4 hours",
-        status: "running",
+        platform: "GitHub Actions",
+        status: "queued/running",
       },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("[Trigger Harvest API] Error:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to trigger harvest" },
+      { success: false, error: error.message || "Failed to trigger harvest" },
       { status: 500 }
     );
   }
