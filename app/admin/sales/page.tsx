@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Shield, Users, Building2, Settings, FileText, Crown, Send, MessageCircle, TrendingUp, Edit2, Check, X, Trash2, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // أنواع البيانات
@@ -418,14 +420,14 @@ function LeadsTab() {
 
   const [expandedLead, setExpandedLead] = useState<string | null>(null);
   const [showChatFor, setShowChatFor] = useState<string | null>(null);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const search = window.location.search;
-    const match = search.match(/expand=([^&]+)/);
-    if (match) {
-      setExpandedLead(match[1]);
+    const expandParam = searchParams.get("expand");
+    if (expandParam) {
+      setExpandedLead(expandParam);
     }
-  }, []);
+  }, [searchParams]);
 
   return (
     <div className="space-y-6">
@@ -1186,13 +1188,17 @@ const tabs = [
   { id: "cms", label: "CMS", icon: FileText, component: CMSTab },
 ];
 
-export default function SalesCenterPage() {
-  const [activeTab, setActiveTab] = useState("sales");
+function SalesCenterContent() {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "sales";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   useEffect(() => {
-    const search = window.location.search;
-    if (search.includes("tab=leads")) setActiveTab("leads");
-  }, []);
+    const tabParam = searchParams.get("tab");
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   const ActiveComponent = tabs.find((t) => t.id === activeTab)?.component || SalesManagerTab;
 
@@ -1240,5 +1246,13 @@ export default function SalesCenterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SalesCenterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0A0A0A] p-6 text-white text-center">جاري التحميل...</div>}>
+      <SalesCenterContent />
+    </Suspense>
   );
 }
