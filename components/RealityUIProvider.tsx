@@ -114,6 +114,65 @@ export default function RealityUIProvider() {
     };
   }, []);
 
+  // ═══════════════════════════════════════════════════════
+  // POLLING FALLBACK — يضمن وصول الأوامر حتى لو Realtime واقف
+  // يسأل الـ API كل 3 ثوانٍ عن أوامر جديدة لهذه الجلسة
+  // ═══════════════════════════════════════════════════════
+  useEffect(() => {
+    const sessionId = localStorage.getItem("azenith_session_id");
+    if (!sessionId) return;
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/reality/check?sessionId=${encodeURIComponent(sessionId)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.mutation) return;
+
+        const { type, action, payload } = data.mutation;
+        console.log("[Reality Polling] Received:", action, payload);
+
+        if (type === "FATE_ACTION") {
+          if (action === "THUNDER") {
+            const flash = document.createElement("div");
+            flash.className = "fixed inset-0 bg-white z-[9999] pointer-events-none transition-opacity duration-300";
+            document.body.appendChild(flash);
+            setTimeout(() => { flash.style.opacity = "0"; setTimeout(() => flash.remove(), 300); }, 50);
+            toast.success("⚡ صاعقة الحظ! حصلت على خصم 15% لمدة دقيقة واحدة فقط!", {
+              duration: 10000, icon: "💎",
+              style: { background: "#1a1a1a", color: "#C5A059", border: "1px solid #C5A059" },
+            });
+          } else if (action === "HALLUCINATION") {
+            toast("🔥 هناك 4 أشخاص آخرين يشاهدون هذا التصميم الآن!", {
+              icon: "👁️", style: { background: "#0A0A0A", color: "#fff", border: "1px solid #ffffff20" },
+            });
+          } else if (action === "FREEZE") {
+            const offerText = payload?.offerText ||
+              "تم تحضير عرض استثنائي خاص بك! اسألني الآن عن التفاصيل.";
+            setFreezeOffer(offerText);
+            setIsFrozen(true);
+          } else if (action === "QUANTUM_OFFER") {
+            // تشغيل عداد Quantum
+            const timerContainer = document.createElement("div");
+            timerContainer.className = "fixed top-6 left-1/2 -translate-x-1/2 z-[10000] bg-red-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex flex-col items-center animate-bounce";
+            timerContainer.innerHTML = `<div class="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">Quantum Discount Activated</div><div class="text-3xl font-black tabular-nums" id="q-clock2">03:00</div><div class="text-[11px] font-bold mt-1 text-center">خصم 25% خاص بك! اطلبه في الشات</div>`;
+            document.body.appendChild(timerContainer);
+            let secs = 180;
+            const iv = setInterval(() => {
+              secs--; if (secs <= 0) { clearInterval(iv); timerContainer.remove(); return; }
+              const c = document.getElementById("q-clock2");
+              if (c) c.innerText = `${String(Math.floor(secs/60)).padStart(2,"0")}:${String(secs%60).padStart(2,"0")}`;
+            }, 1000);
+            toast("⚠️ عرض سري استثنائي! اطلبه من المستشار الآن!", { duration: 10000, icon: "💸", style: { background: "#991b1b", color: "#fff" } });
+          }
+        }
+      } catch { /* silent */ }
+    };
+
+    const interval = setInterval(poll, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   // عداد تنازلي للتجميد — 10 ثوانٍ ثم فتح الشات بنص العرض المخصص
   useEffect(() => {
     if (!isFrozen) return;
