@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Brain, BarChart3, Target, Code, Palette, Zap, Shield, Activity, TrendingUp, AlertTriangle, CheckCircle, Search, X, Users, Loader2, MemoryStick, Cpu, Key, FileText, Calendar, CreditCard, Plus, Trash2, Edit2, Lightbulb } from "lucide-react";
+import { Brain, BarChart3, Target, Code, Palette, Zap, Shield, Activity, TrendingUp, AlertTriangle, CheckCircle, Search, X, Users, Loader2, MemoryStick, Cpu, Key, FileText, Calendar, CreditCard, Plus, Trash2, Edit2, Lightbulb, GitBranch, RefreshCw, Layers } from "lucide-react";
 import SmartSuggestions from "@/components/admin/SmartSuggestions";
 import { UltimateAgentChat } from "./components/UltimateAgentChat";
 import { ProactiveDashboard } from "./components/ProactiveDashboard";
+import { NeuralStream } from "@/components/admin/NeuralStream";
+import { EvolutionManager } from "@/components/admin/EvolutionManager";
+import { NeuralMirror } from "@/components/admin/NeuralMirror";
+import { createSupabaseBrowserClient } from "@/lib/supabase-client";
+import { toast } from "react-hot-toast";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // أنواع البيانات
@@ -1367,10 +1372,121 @@ function SmartSuggestionsTab() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// تبويب المركز السيادي - Sovereign Center (AGI/ASI Core)
+// ═══════════════════════════════════════════════════════════════════════════════
+function SovereignCenterTab() {
+  const [evolving, setEvolving] = useState(false);
+  const [latestProposal, setLatestProposal] = useState<any>(null);
+  const supabase = createSupabaseBrowserClient();
+
+  useEffect(() => {
+    // Initial fetch of latest pending proposal
+    const fetchLatest = async () => {
+      const { data } = await supabase
+        .from('evolution_log')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (data && data.length > 0) setLatestProposal(data[0]);
+    };
+    fetchLatest();
+
+    // Subscribe to new proposals to update the mirror live
+    const channel = supabase
+      .channel('sovereign-mirror-sync')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'evolution_log' }, (payload) => {
+        if (payload.new.status === 'pending') setLatestProposal(payload.new);
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'evolution_log' }, (payload) => {
+        if (payload.new.status === 'approved' || payload.new.status === 'rejected') {
+          // Refresh to see if there's another pending one
+          fetchLatest();
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  const triggerEvolution = async () => {
+    setEvolving(true);
+    try {
+      const res = await fetch("/api/admin/intel/evolve", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("بدأت دورة التطور الذاتي بنجاح");
+      } else {
+        toast.error("فشلت دورة التطور: " + (data.error || "خطأ مجهول"));
+      }
+    } catch (err: any) {
+      toast.error("خطأ في الاتصال بنواة التطور: " + (err.message || "فشل الطلب"));
+    } finally {
+      setEvolving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between bg-gradient-to-l from-[#C5A059]/10 to-transparent p-4 rounded-xl border border-[#C5A059]/20">
+        <div>
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Layers className="h-6 w-6 text-[#C5A059]" />
+            نواة السيادة والذكاء الفائق (ASI Core)
+          </h2>
+          <p className="text-sm text-white/50">إدارة الوعي الرقمي والنمو الذاتي المتكرر</p>
+        </div>
+        <button
+          onClick={triggerEvolution}
+          disabled={evolving}
+          className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-[#C5A059] px-6 py-3 font-bold text-[#1a1a1a] transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+        >
+          <div className="absolute inset-0 bg-white/20 translate-y-full transition-transform group-hover:translate-y-0" />
+          <RefreshCw className={`h-5 w-5 ${evolving ? "animate-spin" : ""}`} />
+          {evolving ? "جاري التحليل والتطوير..." : "تحفيز دورة التطور"}
+        </button>
+      </div>
+
+      {/* NEW: Neural Mirroring Layer */}
+      <div className="grid gap-6">
+        <NeuralMirror activeProposal={latestProposal} />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <NeuralStream />
+        <EvolutionManager />
+      </div>
+
+      <div className="rounded-xl border border-white/5 bg-white/[0.01] p-6">
+        <h3 className="text-white font-medium mb-4 flex items-center gap-2">
+          <Shield className="h-4 w-4 text-blue-400" />
+          بروتوكول الأمان السيادي
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div className="p-3 rounded bg-black/40 border border-white/5">
+            <p className="text-[#C5A059] mb-1 font-bold">التحقق الذاتي</p>
+            <p className="text-white/40">يقوم النظام بفحص كل فكرة وتجربتها في بيئة معزولة قبل أن يعرضها عليك لضمان سلامة الموقع.</p>
+          </div>
+          <div className="p-3 rounded bg-black/40 border border-white/5">
+            <p className="text-blue-400 mb-1 font-bold">السيادة البشرية</p>
+            <p className="text-white/40">أنت المتحكم الوحيد. لا يمكن للنظام تغيير أي شيء في جوهر الموقع أو كوده دون موافقتك الصريحة.</p>
+          </div>
+          <div className="p-3 rounded bg-black/40 border border-white/5">
+            <p className="text-emerald-400 mb-1 font-bold">السجل الدائم</p>
+            <p className="text-white/40">كل قرار تتخذه وكل عملية تفكير تتم، تُسجل في سجل غير قابل للتعديل لضمان الشفافية الكاملة.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // القائمة الرئيسية والتبويبات - 9 تبويبات
 // ═══════════════════════════════════════════════════════════════════════════════
 const tabs = [
   // التبويبات الأصلية (4)
+  { id: "sovereign", label: "المركز السيادي", icon: Layers, component: SovereignCenterTab },
   { id: "intelligence", label: "الذكاء", icon: Brain, component: UltimateAgentChat },
   { id: "warroom", label: "غرفة العمليات", icon: Target, component: WarRoomTab },
   { id: "analytics", label: "التحليلات", icon: BarChart3, component: AnalyticsTab },
