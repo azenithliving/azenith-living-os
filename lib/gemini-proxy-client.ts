@@ -26,12 +26,14 @@ let orIdx = 0;
  */
 export async function analyzeImage(imageUrl: string, category: string, style: string) {
   // 1. PHASE 1: GEMINI DIRECT (35 Keys)
-  // Direct calls from GitHub to Google AI are highly stable
   for (let attempt = 0; attempt < 2; attempt++) {
+    const key = SHUFFLED_GEMINI[geminiIdx++ % SHUFFLED_GEMINI.length];
+    if (!key) break;
+    
     try {
-      const key = SHUFFLED_GEMINI[geminiIdx++ % SHUFFLED_GEMINI.length];
-      if (!key) break;
-
+      console.log(`[Trace] Trying Gemini with Key Index ${geminiIdx % SHUFFLED_GEMINI.length}...`);
+      const base64 = await getBase64(imageUrl);
+      
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -39,31 +41,37 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
           contents: [{
             parts: [
               { text: `Rate this ${category} in ${style} style (0-100 quality). Return ONLY the number.` },
-              { inline_data: { mime_type: "image/jpeg", data: await getBase64(imageUrl) } }
+              { inline_data: { mime_type: "image/jpeg", data: base64 } }
             ]
           }]
         })
       });
 
       const data = await response.json();
+      if (data.error) {
+        console.log(`[Gemini] API Error: ${data.error.message}`);
+        continue;
+      }
+      
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "0";
       const score = parseInt(text.match(/\d+/)?.[0] || "0");
 
       if (score > 0) {
-        console.log(`[Gemini-Strike] Key ${geminiIdx % SHUFFLED_GEMINI.length} | Score: ${score}`);
+        console.log(`[Gemini-Strike] Success! Score: ${score}`);
         return { score: Math.min(100, Math.max(0, score)) };
       }
-    } catch (e) {
-      console.log(`[Gemini] Attempt ${attempt + 1} failed, rotating...`);
+    } catch (e: any) {
+      console.log(`[Gemini] Runtime Error: ${e.message}`);
     }
   }
 
   // 2. PHASE 2: GROQ ELITE (30 Keys)
   for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const key = SHUFFLED_GROQ[groqIdx++ % SHUFFLED_GROQ.length];
-      if (!key) break;
+    const key = SHUFFLED_GROQ[groqIdx++ % SHUFFLED_GROQ.length];
+    if (!key) break;
 
+    try {
+      console.log(`[Trace] Trying Groq with Key Index ${groqIdx % SHUFFLED_GROQ.length}...`);
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -86,15 +94,20 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
       });
 
       const data = await response.json();
+      if (data.error) {
+        console.log(`[Groq] API Error: ${data.error.message}`);
+        continue;
+      }
+      
       const text = data.choices?.[0]?.message?.content || "0";
       const score = parseInt(text.match(/\d+/)?.[0] || "0");
 
       if (score > 0) {
-        console.log(`[Groq-Vanguard] Key ${groqIdx % SHUFFLED_GROQ.length} | Score: ${score}`);
+        console.log(`[Groq-Vanguard] Success! Score: ${score}`);
         return { score: Math.min(100, Math.max(0, score)) };
       }
-    } catch (e) {
-      console.log(`[Groq] Attempt ${attempt + 1} failed, rotating...`);
+    } catch (e: any) {
+      console.log(`[Groq] Runtime Error: ${e.message}`);
     }
   }
 
