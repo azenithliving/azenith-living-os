@@ -91,7 +91,7 @@ async function analyzeWithOpenRouter(
         "X-Title": "Azenith Living Harvester",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-exp:free",
+        model: "openrouter/auto",
         messages: [
           {
             role: "user",
