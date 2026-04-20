@@ -562,7 +562,7 @@ function LeadsTab() {
                               <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
                                 <div 
                                   className="h-full bg-blue-500 transition-all duration-500" 
-                                  style={{ width: \`\${Math.min(lead.telemetry.attention_score || 0, 100)}%\` }}
+                                  style={{ width: `${Math.min(lead.telemetry.attention_score || 0, 100)}%` }}
                                 />
                               </div>
                               <span className="text-blue-300 text-xs font-bold">{Math.round(lead.telemetry.attention_score || 0)}%</span>
