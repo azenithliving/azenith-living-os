@@ -7,6 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 export default function RealityUIProvider() {
   const [isFrozen, setIsFrozen] = useState(false);
   const [freezeCountdown, setFreezeCountdown] = useState(10);
+  const [freezeOffer, setFreezeOffer] = useState("تم تحضير عرض استثنائي خاص بك! اسألني الآن عن التفاصيل.");
 
   useEffect(() => {
     const supabase = createClient();
@@ -68,7 +69,10 @@ export default function RealityUIProvider() {
           style: { background: "#0A0A0A", color: "#fff", border: "1px solid #ffffff20" },
         });
       } else if (action === "FREEZE") {
-        // التجميد: يعمل لمدة 10 ثوانٍ فقط ثم يفتح الشات تلقائياً
+        // قرأ نص العرض من الـ payload وخزنه للاستخدام بعد العداد
+        const offerText = (mutation as any).payload?.offerText || 
+          "تم تحضير عرض استثنائي خاص بك من الإدارة العليا! اسألني الآن عن التفاصيل.";
+        setFreezeOffer(offerText);
         setIsFrozen(true);
       } else if (action === "QUANTUM_OFFER") {
         showQuantumOffer();
@@ -110,7 +114,7 @@ export default function RealityUIProvider() {
     };
   }, []);
 
-  // عداد تنازلي للتجميد — 10 ثوانٍ ثم فتح الشات تلقائياً
+  // عداد تنازلي للتجميد — 10 ثوانٍ ثم فتح الشات بنص العرض المخصص
   useEffect(() => {
     if (!isFrozen) return;
     setFreezeCountdown(10);
@@ -121,18 +125,16 @@ export default function RealityUIProvider() {
       if (count <= 0) {
         clearInterval(interval);
         setIsFrozen(false);
-        // فتح الشات تلقائياً برسالة العرض الخاص
+        // فتح الشات برسالة العرض الذي كتبه الأدمن حرفياً
         window.dispatchEvent(
           new CustomEvent("fate:open_chat", {
-            detail: {
-              message: "تم تحضير عرضك الاستثنائي من الإدارة العليا! اسألني الآن عن التفاصيل قبل أن ينتهي الوقت.",
-            },
+            detail: { message: freezeOffer },
           })
         );
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [isFrozen]);
+  }, [isFrozen, freezeOffer]);
 
   if (isFrozen) {
     const progress = (freezeCountdown / 10) * 100;

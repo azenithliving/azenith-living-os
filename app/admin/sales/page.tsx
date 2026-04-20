@@ -436,6 +436,9 @@ function LeadsTab() {
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const searchParams = useSearchParams();
+  // Freeze Modal state
+  const [freezeModal, setFreezeModal] = useState<{ open: boolean; sessionId: string | null }>({ open: false, sessionId: null });
+  const [freezeOfferText, setFreezeOfferText] = useState("");
 
   useEffect(() => {
     const expandParam = searchParams.get("expand");
@@ -489,7 +492,13 @@ function LeadsTab() {
   };
 
   const triggerFate = async (sessionId: string, action: 'THUNDER' | 'HALLUCINATION' | 'FREEZE') => {
-    const toastId = toast.loading(`جاري إطلاق ${action === 'THUNDER' ? 'الصاعقة' : action === 'HALLUCINATION' ? 'الهلوسة' : 'التجميد'}...`);
+    // زر التجميد يفتح Modal لكتابة العرض أولاً
+    if (action === 'FREEZE') {
+      setFreezeOfferText("");
+      setFreezeModal({ open: true, sessionId });
+      return;
+    }
+    const toastId = toast.loading(`جاري إطلاق ${action === 'THUNDER' ? 'الصاعقة' : 'الهلوسة'}...`);
     try {
       const res = await fetch("/api/admin/fate", {
         method: "POST",
@@ -503,6 +512,33 @@ function LeadsTab() {
       }
     } catch (e) {
       toast.error("خطأ في الاتصال بالأبعاد العليا.", { id: toastId });
+    }
+  };
+
+  const executeFreezeWithOffer = async () => {
+    if (!freezeModal.sessionId || !freezeOfferText.trim()) {
+      toast.error("اكتب العرض أولاً قبل التنفيذ!");
+      return;
+    }
+    setFreezeModal({ open: false, sessionId: null });
+    const toastId = toast.loading("جاري تجميد شاشة العميل وتحضير العرض...");
+    try {
+      const res = await fetch("/api/admin/fate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: freezeModal.sessionId,
+          action: "FREEZE",
+          payload: { offerText: freezeOfferText.trim() }
+        })
+      });
+      if (res.ok) {
+        toast.success(`تم! الزائر مجمد والعرض محضر: "${freezeOfferText.trim().substring(0, 40)}..."`, { id: toastId, duration: 5000 });
+      } else {
+        toast.error("فشل تنفيذ التجميد.", { id: toastId });
+      }
+    } catch (e) {
+      toast.error("خطأ في الاتصال.", { id: toastId });
     }
   };
 
@@ -537,6 +573,49 @@ function LeadsTab() {
 
   return (
     <div className="space-y-6">
+      {/* FREEZE OFFER MODAL */}
+      {freezeModal.open && (
+        <div className="fixed inset-0 z-[99999] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
+          <div className="bg-[#111] border border-[#C5A059]/40 rounded-2xl p-8 w-full max-w-lg space-y-6 shadow-2xl shadow-[#C5A059]/10">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-[#C5A059]/20 border border-[#C5A059]/50 flex items-center justify-center text-xl">⏱️</div>
+              <div>
+                <h3 className="text-white font-black text-lg">بروتوكول التجميد</h3>
+                <p className="text-[#C5A059]/70 text-xs">اكتب العرض الذي سيراه الزائر في الشات بعد 10 ثوانٍ</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-white/70 text-sm font-medium">نص العرض الاستثنائي:</label>
+              <textarea
+                value={freezeOfferText}
+                onChange={e => setFreezeOfferText(e.target.value)}
+                placeholder="مثال: خصم 30% على تصميم الدريسنج مع تركيب مجاني خلال 48 ساعة..."
+                rows={4}
+                autoFocus
+                className="w-full bg-black/60 border border-[#C5A059]/30 rounded-xl p-4 text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C5A059] resize-none"
+              />
+              <p className="text-white/30 text-xs">💡 هذا النص سيُرسل للزائر حرفياً في الشات بعد انتهاء العداد.</p>
+            </div>
+            {freezeOfferText.trim() && (
+              <div className="bg-[#C5A059]/10 border border-[#C5A059]/20 rounded-xl p-4">
+                <p className="text-[#C5A059] text-xs font-bold mb-1">معاينة ما سيراه الزائر:</p>
+                <p className="text-white/80 text-sm">&ldquo;{freezeOfferText.trim()}&rdquo;</p>
+              </div>
+            )}
+            <div className="flex gap-3">
+              <button onClick={executeFreezeWithOffer} disabled={!freezeOfferText.trim()}
+                className="flex-1 bg-[#C5A059] hover:bg-[#D4B87A] disabled:opacity-30 disabled:cursor-not-allowed text-black font-black py-3 rounded-xl transition text-sm">
+                ⚡ تنفيذ التجميد والعرض
+              </button>
+              <button onClick={() => setFreezeModal({ open: false, sessionId: null })}
+                className="px-5 py-3 bg-white/5 hover:bg-white/10 text-white/60 rounded-xl transition text-sm">
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">العملاء المحتملين</h2>
