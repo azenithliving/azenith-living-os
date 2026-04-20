@@ -10,16 +10,11 @@
  * - Updates trending styles
  */
 
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin as supabase } from "../lib/supabase-server";
 import * as dotenv from "dotenv";
 import { runEliteHarvesterV3 } from "./elite-harvester-v3";
 
 dotenv.config({ path: ".env.local" });
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-);
 
 // ============================================
 // CONFIGURATION

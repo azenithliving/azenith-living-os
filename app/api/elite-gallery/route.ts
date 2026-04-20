@@ -9,31 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-// DEBUG: Log environment variables (mask sensitive parts)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-console.log("[Elite Gallery API] ENV CHECK:", {
-  hasUrl: !!supabaseUrl,
-  urlPreview: supabaseUrl ? supabaseUrl.substring(0, 20) + "..." : "MISSING",
-  hasKey: !!supabaseKey,
-  keyPreview: supabaseKey ? supabaseKey.substring(0, 10) + "..." : "MISSING"
-});
-
-// Only create client if env vars exist
-let supabase: ReturnType<typeof createClient> | null = null;
-if (supabaseUrl && supabaseKey) {
-  try {
-    supabase = createClient(supabaseUrl, supabaseKey);
-    console.log("[Elite Gallery API] Supabase client initialized");
-  } catch (err) {
-    console.error("[Elite Gallery API] Failed to create Supabase client:", err);
-  }
-} else {
-  console.error("[Elite Gallery API] Missing Supabase environment variables - will use fallback only");
-}
+import { supabaseAdmin as supabase } from "@/lib/supabase-server";
 
 // ============================================
 // FISHER-YATES SHUFFLE ALGORITHM

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin as supabase } from "@/lib/supabase-server";
 
 // Using Edge runtime for infinite scale and zero cold-start latency
 export const runtime = "edge";
@@ -12,10 +12,6 @@ export async function POST(req: NextRequest) {
     if (!sessionId) {
       return NextResponse.json({ error: "Missing sessionId" }, { status: 400 });
     }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Upsert telemetry data for this session
     // We try to update if it exists, otherwise insert

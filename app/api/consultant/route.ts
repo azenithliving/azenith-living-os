@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin as supabase } from "@/lib/supabase-server";
 import { askGroq, askGroqMessages } from "@/lib/ai-orchestrator";
-import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 interface GroqMessage {
   role: "system" | "user" | "assistant";
@@ -131,13 +130,13 @@ function isAdmin(sessionId?: string, userEmail?: string): boolean {
  */
 async function saveLearning(instruction: string): Promise<boolean> {
   try {
-    const supabaseAdmin = getSupabaseAdminClient();
-    if (!supabaseAdmin) {
+    // const supabaseAdmin = getSupabaseAdminClient();
+    if (!supabase) {
       console.error("[Consultant] Supabase admin client not available");
       return false;
     }
 
-    const { error } = await supabaseAdmin
+    const { error } = await supabase
       .from("consultant_learnings")
       .insert({
         instruction: instruction.trim(),
@@ -162,13 +161,12 @@ async function saveLearning(instruction: string): Promise<boolean> {
  */
 async function getLearnings(): Promise<string[]> {
   try {
-    const supabaseAdmin = getSupabaseAdminClient();
-    if (!supabaseAdmin) {
+    if (!supabase) {
       console.error("[Consultant] Supabase admin client not available");
       return [];
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from("consultant_learnings")
       .select("instruction")
       .order("created_at", { ascending: true });
@@ -194,9 +192,8 @@ async function notifyAdminUnknownQuestion(question: string, sessionId: string, u
 
   // 1. Save to Database (for Admin Dashboard)
   try {
-    const supabaseAdmin = getSupabaseAdminClient();
-    if (supabaseAdmin) {
-      const { error: dbErr } = await supabaseAdmin.from("consultant_pending_questions").insert({
+    if (supabase) {
+      const { error: dbErr } = await supabase.from("consultant_pending_questions").insert({
         session_id: sessionId,
         question: question,
         status: 'pending',
@@ -258,7 +255,6 @@ export async function POST(
     const sessionId = providedSessionId || generateSessionId();
     console.log(`[Consultant] Processing request for session: ${sessionId}`);
 
-    const supabase = getSupabaseAdminClient();
     if (!supabase) {
       console.error("[Consultant] Supabase client failed to initialize");
       return NextResponse.json({ error: "DB connection failed" }, { status: 500 });
