@@ -170,59 +170,53 @@ async function getLearnings(): Promise<string[]> {
 }
 
 /**
- * Send WhatsApp notification to admin about unknown question
+ * Send direct Telegram notification to admin about unknown question
  */
 async function notifyAdminUnknownQuestion(question: string, sessionId: string, userName?: string): Promise<void> {
-  try {
-    const adminPhone = process.env.ADMIN_WHATSAPP_PHONE || "01090819584";
-    const displayName = userName || "زائر مجهول";
-    
-    console.log(`[Consultant] Processing unknown question: "${question}" for session ${sessionId}`);
+  const displayName = userName || "زائر";
+  console.log(`[Consultant] Unknown question detected: "${question}"`);
 
-    // 1. Log to Database (for Admin Dashboard)
+  // 1. Save to Database (for Admin Dashboard)
+  try {
     const supabaseAdmin = getSupabaseAdminClient();
     if (supabaseAdmin) {
       const { error: dbErr } = await supabaseAdmin.from("consultant_pending_questions").insert({
         session_id: sessionId,
         question: question,
         status: 'pending',
-        created_at: new Date().toISOString()
       });
-      if (dbErr) console.error("[Consultant] DB Insert Error:", dbErr);
+      if (dbErr) console.error("[Consultant] DB Insert Error:", dbErr.message);
+      else console.log("[Consultant] Question saved to dashboard ✅");
     }
+  } catch (e) {
+    console.error("[Consultant] DB error:", e);
+  }
 
-    // 2. Prepare Notification Message
-    const message = `🔔 *استفسار جديد للمستشار*
------------------------
+  // 2. Send DIRECT Telegram notification (no middleman)
+  const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
+  const telegramChatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (telegramToken && telegramChatId) {
+    const msg = `🔔 *سؤال جديد من عميل*
 👤 العميل: ${displayName}
 ❓ السؤال: ${question}
 🆔 الجلسة: ${sessionId}
------------------------
-💡 يرجى الرد عبر لوحة التحكم لتدريب المستشار.`;
 
-    // 3. Trigger Communication Agent (WhatsApp/Telegram)
-    const internalApiKey = process.env.INTERNAL_API_KEY;
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-
+✍️ أجب عليه في لوحة التحكم → مدير المبيعات → الأسئلة`;
     try {
-      await fetch(`${siteUrl}/api/admin/agent/communication`, {
+      const tRes = await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${internalApiKey}`
-        },
-        body: JSON.stringify({
-          type: 'whatsapp_notification',
-          recipient: adminPhone,
-          message
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: telegramChatId, text: msg, parse_mode: 'Markdown' }),
       });
-      console.log(`[Consultant] Notification signal sent to Communication Agent`);
-    } catch (whErr) {
-      console.error("[Consultant] Communication Agent call failed:", whErr);
+      const tData = await tRes.json();
+      if (tData.ok) console.log("[Consultant] Telegram sent ✅");
+      else console.error("[Consultant] Telegram error:", tData.description);
+    } catch (e) {
+      console.error("[Consultant] Telegram fetch failed:", e);
     }
-  } catch (err) {
-    console.error("[Consultant] Global notify error:", err);
+  } else {
+    console.warn("[Consultant] Telegram not configured - missing token or chatId");
   }
 }
 
@@ -304,24 +298,29 @@ export async function POST(
 
     let reply = aiResult.content.trim();
 
-    // Advanced detection: Check if the AI response indicates a lack of factual knowledge
-    const lowerReply = reply.toLowerCase();
-    const unknownIndicators = [
-      "لا أستطيع أن أقدم لك هذه المعلومات مباشرة",
-      "سأقوم بالتأكد من هذه المعلومة",
-      "من الإدارة والرد عليك",
+    // Smart escalation detection - catches all patterns where AI admits it doesn't know
+    const escalationPhrases = [
+      "سأقوم بنقله لمدير",
+      "سأقوم بالتأكد",
+      "سأتأكد من",
+      "من الإدارة والرد",
       "ليتواصل معك المسؤول",
+      "هل تسمح لي برقم هاتفك",
+      "يتواصل معك المسؤول",
+      "سيتم التواصل معك",
+      "سيقوم بالرد عليك",
+      "لا أستطيع أن أقدم",
+      "لا أملك معلومة",
+      "لا أملك إجابة",
       "غير متاحة حالياً",
-      "لا أملك إجابة دقيقة",
-      "تحويل استفسارك",
-      "سؤال ممتاز سأقوم بنقله"
+      "سأقوم بنقل",
+      "هذا سؤال هام، سأقوم"
     ];
     
-    const isUnknown = unknownIndicators.some(indicator => reply.includes(indicator)) || 
-                     (reply.length < 150 && reply.includes("الإدارة"));
+    const isEscalation = escalationPhrases.some(p => reply.includes(p));
     
-    if (isUnknown) {
-      console.log(`[Consultant] Unknown question detected. Notifying admin...`);
+    if (isEscalation) {
+      console.log(`[Consultant] Escalation detected → notifying admin via Telegram + Dashboard`);
       await notifyAdminUnknownQuestion(message, sessionId, userName);
     }
 

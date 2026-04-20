@@ -93,6 +93,38 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 /**
+ * PATCH /api/consultant/pending-questions?id=xxx
+ * Mark a question as answered with the admin's reply (triggers auto-send to visitor)
+ */
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+    const { answered_reply } = await request.json();
+    if (!answered_reply) return NextResponse.json({ error: "Missing answered_reply" }, { status: 400 });
+
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) return NextResponse.json({ error: "DB not initialized" }, { status: 500 });
+
+    const { error } = await supabase
+      .from("consultant_pending_questions")
+      .update({ status: "answered", answered_reply })
+      .eq("id", id);
+
+    if (error) {
+      // If answered_reply column doesn't exist yet, just delete it
+      await supabase.from("consultant_pending_questions").delete().eq("id", id);
+      return NextResponse.json({ success: true, note: "deleted (column missing)" });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+/**
  * DELETE /api/consultant/pending-questions?id=xxx
  * Delete a pending question by ID
  */

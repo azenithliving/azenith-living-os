@@ -140,24 +140,31 @@ function SalesManagerTab() {
 
   const answerQuestion = async (q: PendingQuestion) => {
     if (!answerText.trim()) return;
-    // Save the answer as a learning
     const instruction = `سؤال: ${q.question}\nالإجابة: ${answerText.trim()}`;
     try {
+      // 1. Save as learning so consultant learns for future
       await fetch("/api/consultant/learnings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ instruction }),
       });
-      // Delete the pending question
-      await fetch(`/api/consultant/pending-questions?id=${q.id}`, { method: "DELETE" });
+      // 2. Mark the pending question as answered WITH the reply
+      //    so the visitor gets it automatically next time they open chat
+      await fetch(`/api/consultant/pending-questions?id=${q.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answered_reply: answerText.trim() }),
+      });
       setAnsweringId(null);
       setAnswerText("");
       await loadKnowledge();
       await loadPendingQuestions();
+      alert("✅ تم حفظ الإجابة وتدريب المستشار. سيصل الرد للزائر تلقائياً!");
     } catch (err) {
       console.error("Error answering:", err);
     }
   };
+
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
