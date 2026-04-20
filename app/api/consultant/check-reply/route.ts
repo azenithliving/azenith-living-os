@@ -37,8 +37,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       .update({ status: "delivered" })
       .eq("id", data.id);
 
+    const replyText = data.question === "DIRECT_MESSAGE" 
+        ? `👨‍💼 من الإدارة:\n${data.answered_reply}`
+        : `✅ رد الإدارة على سؤالك:\n${data.answered_reply}`;
+
     return NextResponse.json({
-      reply: `✅ رد الإدارة على سؤالك:\n${data.answered_reply}`,
+      reply: replyText,
       question: data.question,
     });
   } catch (error) {

@@ -420,6 +420,8 @@ function LeadsTab() {
 
   const [expandedLead, setExpandedLead] = useState<string | null>(null);
   const [showChatFor, setShowChatFor] = useState<string | null>(null);
+  const [directReply, setDirectReply] = useState("");
+  const [isSendingReply, setIsSendingReply] = useState(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -428,6 +430,35 @@ function LeadsTab() {
       setExpandedLead(expandParam);
     }
   }, [searchParams]);
+
+  const sendDirectReply = async (sessionId: string) => {
+    if (!directReply.trim()) return;
+    setIsSendingReply(true);
+    try {
+      const res = await fetch("/api/admin/leads/reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, message: directReply.trim() })
+      });
+      if (res.ok) {
+        // Optimistically update the UI
+        setLeads(leads.map(l => {
+          if ((l.session_id || l.id) === sessionId && l.messages) {
+            return {
+              ...l,
+              messages: [...l.messages, { role: "assistant", content: `👨‍💼 [تدخل الإدارة]: ${directReply.trim()}` }]
+            };
+          }
+          return l;
+        }));
+        setDirectReply("");
+      }
+    } catch (e) {
+      console.error("Failed to send reply:", e);
+    } finally {
+      setIsSendingReply(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -524,15 +555,42 @@ function LeadsTab() {
                     </div>
 
                     {showChatFor === lead.id && lead.messages && (
-                      <div className="mt-4 p-4 rounded-xl border border-white/10 bg-black/50 max-h-[300px] overflow-y-auto space-y-3">
-                        {lead.messages.map((msg, idx) => (
-                          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.role === 'user' ? 'bg-[#C5A059]/20 text-white' : 'bg-white/10 text-white/90'}`}>
-                              <span className="block text-xs text-white/40 mb-1">{msg.role === 'user' ? lead.name : 'المستشار الذكي'}</span>
-                              {msg.content}
+                      <div className="mt-4 p-4 rounded-xl border border-white/10 bg-black/50 space-y-4">
+                        <div className="max-h-[300px] overflow-y-auto space-y-3 p-2">
+                          {lead.messages.map((msg, idx) => (
+                            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.role === 'user' ? 'bg-[#C5A059]/20 text-white' : msg.content.includes('[تدخل الإدارة]') ? 'bg-red-500/20 text-red-100 border border-red-500/30' : 'bg-white/10 text-white/90'}`}>
+                                <span className="block text-xs text-white/40 mb-1">
+                                  {msg.role === 'user' ? lead.name : msg.content.includes('[تدخل الإدارة]') ? 'أنت (الإدارة)' : 'المستشار الذكي'}
+                                </span>
+                                {msg.content.replace('👨‍💼 [تدخل الإدارة]: ', '')}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+                        
+                        <div className="flex gap-2 border-t border-white/10 pt-4 mt-2">
+                          <input
+                            type="text"
+                            placeholder="اكتب رسالة للعميل مباشرة وسيراها فوراً..."
+                            value={directReply}
+                            onChange={(e) => setDirectReply(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && directReply.trim() && !isSendingReply) {
+                                sendDirectReply(lead.session_id || lead.id);
+                              }
+                            }}
+                            className="flex-1 rounded-lg border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-white focus:border-[#C5A059] focus:outline-none"
+                          />
+                          <button
+                            disabled={isSendingReply || !directReply.trim()}
+                            onClick={() => sendDirectReply(lead.session_id || lead.id)}
+                            className="px-4 py-2 bg-[#C5A059] text-[#1a1a1a] font-medium rounded-lg disabled:opacity-50 transition flex items-center gap-2"
+                          >
+                            <Send className="w-4 h-4" />
+                            {isSendingReply ? "جاري..." : "إرسال للعميل"}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

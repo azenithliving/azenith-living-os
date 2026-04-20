@@ -43,7 +43,11 @@ const SYSTEM_PROMPT = `أنت "مستشار أزينث الذكي"، مدير م
 قل: "التكلفة تختلف بدقة حسب المقاسات والخامات. هل يمكنني معرفة ميزانيتك التقريبية لنقدم لك أفضل الخيارات المتاحة؟"
 
 ✅ إذا سأل سؤالاً لا تعرفه:
-قل: "سأنقل استفسارك لمدير المبيعات للرد عليه. هل تسمح برقم هاتفك ليتواصل معك؟"`;
+قل: "سأنقل استفسارك لمدير المبيعات للرد عليه. هل تسمح برقم هاتفك ليتواصل معك؟"
+
+🚨 حالات التدخل البشري (Escalation):
+إذا كان العميل معادياً، أو يستخدم ألفاظاً غير لائقة، أو يصر على طلب خارج صلاحياتك (مثل التحدث مع صاحب الشركة أو الإدارة العليا):
+قل حصراً: "أعتذر منك، سأقوم بتحويل هذه المحادثة الآن إلى الإدارة العليا للتواصل معك مباشرة. برجاء ترك رقم هاتفك." وتوقف فوراً عن أي نقاش إضافي.`;
 
 
 // Types
@@ -297,7 +301,7 @@ export async function POST(
 
     let reply = aiResult.content.trim();
 
-    // Smart escalation detection - catches all patterns where AI admits it doesn't know
+    // Smart escalation detection - catches all patterns where AI admits it doesn't know or needs human intervention
     const escalationPhrases = [
       "سأقوم بنقله لمدير",
       "سأقوم بالتأكد",
@@ -313,7 +317,9 @@ export async function POST(
       "لا أملك إجابة",
       "غير متاحة حالياً",
       "سأقوم بنقل",
-      "هذا سؤال هام، سأقوم"
+      "هذا سؤال هام، سأقوم",
+      "تحويل هذه المحادثة",
+      "الإدارة العليا للتواصل"
     ];
     
     const isEscalation = escalationPhrases.some(p => reply.includes(p));
