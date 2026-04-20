@@ -32,6 +32,15 @@ let deepseekIdx = 0;
  * Distributes load across the ENTIRE 131-key army
  */
 export async function analyzeImage(imageUrl: string, category: string, style: string) {
+  const cleanCategory = category.replace(/-/g, " ");
+  const strictPrompt = `You are an elite, unforgiving interior design inspector. 
+CRITICAL TASK: Evaluate this image for strict compliance.
+1. ROOM MATCH: Is this definitively and undeniably a ${cleanCategory}? If there is any doubt, or if it's a different room, return 0.
+2. STYLE MATCH: Is the aesthetic strictly, purely, and unmistakably ${style}? If it mixes styles or fails to represent ${style} perfectly, return 0.
+3. QUALITY: Is this a high-end, professional, luxury interior shot? No low-res, no weird angles, no messy rooms. If it looks cheap, return 0.
+If and ONLY if it perfectly matches a luxury ${style} ${cleanCategory}, rate its aesthetic quality from 85 to 100. 
+Return ONLY the integer number. No words, no symbols, nothing else.`;
+
   // Randomly pick a starting provider for each request to balance load
   const providers = ["gemini", "groq", "openrouter", "mistral"];
   const starter = providers[Math.floor(Math.random() * providers.length)];
@@ -50,7 +59,7 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
           body: JSON.stringify({
             contents: [{
               parts: [
-                { text: `Rate this ${category} in ${style} style (0-100 quality). Return ONLY the number.` },
+                { text: strictPrompt },
                 { inline_data: { mime_type: "image/jpeg", data: await getBase64(imageUrl) } }
               ]
             }]
@@ -61,7 +70,7 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "0";
         const score = parseInt(text.match(/\d+/)?.[0] || "0");
         if (score > 0) {
-          console.log(`[Gemini-Strike] Key ${geminiIdx % SHUFFLED_GEMINI.length} | Score: ${score}`);
+          console.log(`[Gemini-Strike] Strict Filter | Score: ${score}`);
           return { score: Math.min(100, Math.max(0, score)) };
         }
       }
@@ -75,7 +84,7 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
           body: JSON.stringify({
             model: "llama-3.2-11b-vision-preview",
             messages: [{ role: "user", content: [
-              { type: "text", text: `Rate this ${category} in ${style} style (0-100 quality). Return ONLY the number.` },
+              { type: "text", text: strictPrompt },
               { type: "image_url", image_url: { url: imageUrl } }
             ]}],
             max_tokens: 20
@@ -86,7 +95,7 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
         const text = data.choices?.[0]?.message?.content || "0";
         const score = parseInt(text.match(/\d+/)?.[0] || "0");
         if (score > 0) {
-          console.log(`[Groq-Vanguard] Key ${groqIdx % SHUFFLED_GROQ.length} | Score: ${score}`);
+          console.log(`[Groq-Vanguard] Strict Filter | Score: ${score}`);
           return { score: Math.min(100, Math.max(0, score)) };
         }
       }
@@ -106,7 +115,7 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
             model: "openrouter/auto",
             max_tokens: 20,
             messages: [{ role: "user", content: [
-              { type: "text", text: `Rate this ${category} in ${style} style (0-100 quality). Return ONLY the number.` },
+              { type: "text", text: strictPrompt },
               { type: "image_url", image_url: { url: imageUrl } }
             ]}]
           })
@@ -116,7 +125,7 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
         const text = data.choices?.[0]?.message?.content || "0";
         const score = parseInt(text.match(/\d+/)?.[0] || "0");
         if (score > 0) {
-          console.log(`[Router-Shield] Key ${orIdx % SHUFFLED_OR.length} | Score: ${score}`);
+          console.log(`[Router-Shield] Strict Filter | Score: ${score}`);
           return { score: Math.min(100, Math.max(0, score)) };
         }
       }
@@ -127,10 +136,7 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
                     SHUFFLED_MISTRAL[mistralIdx++ % SHUFFLED_MISTRAL.length] : 
                     SHUFFLED_DEEPSEEK[deepseekIdx++ % SHUFFLED_DEEPSEEK.length];
         
-        // Since many Mistral/DeepSeek keys work via their own compatible APIs or OpenRouter fallback, 
-        // we'll use a high-stability call here
         console.log(`[Mistral-DeepSeek] Rotating specialized key...`);
-        // Fallback to OR with specific key for stability if direct fails
         providers.push("openrouter"); 
       }
 
@@ -139,7 +145,10 @@ export async function analyzeImage(imageUrl: string, category: string, style: st
     }
   }
 
-  return { score: 82 }; 
+  // If ALL providers say it's bad (or if there's an error), reject it strictly!
+  // No more safety pass-through for bad images. Only the elite survive.
+  console.log(`🚫 REJECTED: Failed strict compliance or all providers exhausted.`);
+  return { score: 0 }; 
 }
 
 /**
