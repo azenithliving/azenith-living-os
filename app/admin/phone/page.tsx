@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Smartphone, Wifi, Battery, Signal, Home, Grid, ChevronLeft, RefreshCw, Link, ShieldCheck, Power, Info } from "lucide-react";
+import { Smartphone, Wifi, Battery, Signal, Home, Grid, ChevronLeft, RefreshCw, Link, ShieldCheck, ExternalLink, Info } from "lucide-react";
 
 export default function PhonePage() {
   const [mounted, setMounted] = useState(false);
@@ -12,14 +12,10 @@ export default function PhonePage() {
 
   useEffect(() => {
     setMounted(true);
-    // استرجاع الرابط المحفوظ بشرط ميكونش localhost القديم
     const savedUrl = localStorage.getItem("sovereign_mobile_url");
     if (savedUrl && !savedUrl.includes("localhost")) {
       setCloudUrl(savedUrl);
       setIsConnected(true);
-    } else {
-      // تنظيف أي رابط قديم معطل
-      localStorage.removeItem("sovereign_mobile_url");
     }
 
     const updateTime = () => {
@@ -36,8 +32,10 @@ export default function PhonePage() {
       localStorage.setItem("sovereign_mobile_url", tempUrl);
       setCloudUrl(tempUrl);
       setIsConnected(true);
+      // فتح الرابط في نافذة جديدة للتفعيل
+      window.open(tempUrl, "_blank");
     } else {
-      alert("Please enter the FULL Cloud Shell Preview URL (starts with https://6080-cs-...)");
+      alert("Please enter a valid Cloud Shell Preview URL (Port 6080)");
     }
   };
 
@@ -73,30 +71,26 @@ export default function PhonePage() {
                 <Link className="w-10 h-10 text-blue-500" />
               </div>
               
-              <h2 className="text-2xl font-black text-white mb-3 tracking-tight">Sovereign Cloud Link</h2>
+              <h2 className="text-2xl font-black text-white mb-3 tracking-tight">Cloud Bridge OS</h2>
               <p className="text-[13px] text-white/40 mb-10 max-w-[280px] leading-relaxed">
-                Open port <span className="text-blue-400 font-bold">6080</span> in Cloud Shell, copy the new tab's URL, and paste it below.
+                Connect your sovereign android instance by pasting the preview URL below.
               </p>
               
               <div className="w-full max-w-sm space-y-4">
                 <input 
                   type="text" 
-                  placeholder="Paste https://6080-cs-... here" 
+                  placeholder="https://6080-cs-..." 
                   value={tempUrl}
                   onChange={(e) => setTempUrl(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.07] transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all"
                 />
                 <button 
                   onClick={handleConnect}
-                  className="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl hover:bg-blue-500 active:scale-95 transition-all shadow-xl shadow-blue-900/20"
+                  className="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl hover:bg-blue-500 active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
-                  Establish Connection
+                  <ExternalLink size={18} />
+                  Authorize & Connect
                 </button>
-              </div>
-
-              <div className="mt-12 flex items-center gap-2 text-white/20">
-                <Info size={14} />
-                <span className="text-[10px] font-medium uppercase tracking-widest">Sovereign Mobile v2.0</span>
               </div>
             </div>
           ) : (
@@ -110,11 +104,14 @@ export default function PhonePage() {
               <div className="absolute top-6 left-6 flex gap-3">
                 <button 
                   onClick={handleReset}
-                  className="p-3 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full text-white/40 hover:text-red-400 hover:border-red-500/30 transition-all shadow-2xl"
-                  title="Reset Connection"
+                  className="p-3 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full text-white/40 hover:text-red-400 transition-all shadow-2xl"
                 >
                   <RefreshCw size={16} />
                 </button>
+                <div className="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full flex items-center gap-2 backdrop-blur-md">
+                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                   <span className="text-[10px] font-bold text-green-400 uppercase tracking-widest">Linked</span>
+                </div>
               </div>
             </>
           )}
