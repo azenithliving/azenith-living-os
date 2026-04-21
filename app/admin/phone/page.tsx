@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Smartphone, Wifi, Battery, Signal, Home, Grid, ChevronLeft, RefreshCw, Link, ShieldCheck } from "lucide-react";
+import { Smartphone, Wifi, Battery, Signal, Home, Grid, ChevronLeft, RefreshCw, Link, ShieldCheck, Power, Info } from "lucide-react";
 
 export default function PhonePage() {
   const [mounted, setMounted] = useState(false);
@@ -12,11 +12,14 @@ export default function PhonePage() {
 
   useEffect(() => {
     setMounted(true);
-    // استرجاع الرابط المحفوظ
+    // استرجاع الرابط المحفوظ بشرط ميكونش localhost القديم
     const savedUrl = localStorage.getItem("sovereign_mobile_url");
-    if (savedUrl) {
+    if (savedUrl && !savedUrl.includes("localhost")) {
       setCloudUrl(savedUrl);
       setIsConnected(true);
+    } else {
+      // تنظيف أي رابط قديم معطل
+      localStorage.removeItem("sovereign_mobile_url");
     }
 
     const updateTime = () => {
@@ -29,19 +32,20 @@ export default function PhonePage() {
   }, []);
 
   const handleConnect = () => {
-    if (tempUrl.includes("cloudshell.dev") || tempUrl.includes("localhost")) {
+    if (tempUrl.includes("cloudshell.dev")) {
       localStorage.setItem("sovereign_mobile_url", tempUrl);
       setCloudUrl(tempUrl);
       setIsConnected(true);
     } else {
-      alert("Please enter a valid Cloud Shell Preview URL");
+      alert("Please enter the FULL Cloud Shell Preview URL (starts with https://6080-cs-...)");
     }
   };
 
-  const handleDisconnect = () => {
+  const handleReset = () => {
     localStorage.removeItem("sovereign_mobile_url");
     setCloudUrl("");
     setIsConnected(false);
+    setTempUrl("");
   };
 
   if (!mounted) return null;
@@ -49,7 +53,6 @@ export default function PhonePage() {
   return (
     <div className="fixed inset-0 bg-[#050505] flex items-center justify-center overflow-hidden font-sans">
       
-      {/* Sovereign Mobile OS - Cloud Bridge Edition */}
       <div className="relative w-full h-full bg-black flex flex-col overflow-hidden">
         
         {/* Status Bar */}
@@ -65,29 +68,35 @@ export default function PhonePage() {
         {/* Content Area */}
         <div className="flex-1 relative bg-[#0a0a0a]">
           {!isConnected ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-[#111] to-black">
-              <div className="w-20 h-20 bg-blue-500/20 rounded-3xl flex items-center justify-center border border-blue-500/30 mb-6 animate-pulse">
-                <Link className="w-10 h-10 text-blue-400" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-[#0f0f0f] to-black">
+              <div className="w-20 h-20 bg-blue-600/10 rounded-[2.5rem] flex items-center justify-center border border-blue-500/20 mb-8 shadow-[0_0_50px_rgba(59,130,246,0.1)]">
+                <Link className="w-10 h-10 text-blue-500" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Cloud Bridge Required</h2>
-              <p className="text-sm text-white/40 mb-8 max-w-xs leading-relaxed">
-                Paste the Cloud Shell Preview URL (Port 6080) to establish a sovereign connection.
+              
+              <h2 className="text-2xl font-black text-white mb-3 tracking-tight">Sovereign Cloud Link</h2>
+              <p className="text-[13px] text-white/40 mb-10 max-w-[280px] leading-relaxed">
+                Open port <span className="text-blue-400 font-bold">6080</span> in Cloud Shell, copy the new tab's URL, and paste it below.
               </p>
               
-              <div className="w-full max-w-sm flex flex-col gap-3">
+              <div className="w-full max-w-sm space-y-4">
                 <input 
                   type="text" 
-                  placeholder="https://6080-cs-..." 
+                  placeholder="Paste https://6080-cs-... here" 
                   value={tempUrl}
                   onChange={(e) => setTempUrl(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.07] transition-all"
                 />
                 <button 
                   onClick={handleConnect}
-                  className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-white/90 active:scale-95 transition-all"
+                  className="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl hover:bg-blue-500 active:scale-95 transition-all shadow-xl shadow-blue-900/20"
                 >
-                  Connect Sovereign Droid
+                  Establish Connection
                 </button>
+              </div>
+
+              <div className="mt-12 flex items-center gap-2 text-white/20">
+                <Info size={14} />
+                <span className="text-[10px] font-medium uppercase tracking-widest">Sovereign Mobile v2.0</span>
               </div>
             </div>
           ) : (
@@ -98,13 +107,15 @@ export default function PhonePage() {
                 allow="autoplay; fullscreen; clipboard-read; clipboard-write"
                 title="Sovereign Android System"
               />
-              <button 
-                onClick={handleDisconnect}
-                className="absolute top-4 left-4 p-3 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-white/40 hover:text-red-400 transition-all"
-                title="Disconnect"
-              >
-                <Power size={16} />
-              </button>
+              <div className="absolute top-6 left-6 flex gap-3">
+                <button 
+                  onClick={handleReset}
+                  className="p-3 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full text-white/40 hover:text-red-400 hover:border-red-500/30 transition-all shadow-2xl"
+                  title="Reset Connection"
+                >
+                  <RefreshCw size={16} />
+                </button>
+              </div>
             </>
           )}
         </div>
@@ -112,10 +123,8 @@ export default function PhonePage() {
         {/* Navigation Dock */}
         <div className="h-24 bg-black flex items-center justify-around px-12 pb-6">
           <ChevronLeft className="w-7 h-7 text-white/20" />
-          <div className="w-16 h-16 bg-white/10 rounded-full border border-white/20 flex items-center justify-center">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-2xl">
-               <Home className="w-5 h-5 text-black" />
-            </div>
+          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.2)] active:scale-90 transition-all cursor-pointer">
+             <Home className="w-6 h-6 text-black" />
           </div>
           <Grid className="w-7 h-7 text-white/20" />
         </div>
@@ -125,5 +134,3 @@ export default function PhonePage() {
     </div>
   );
 }
-
-import { Power } from "lucide-react";
