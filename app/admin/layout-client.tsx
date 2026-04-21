@@ -10,6 +10,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Shield,
   Brain,
   Monitor,
+  Smartphone,
   // Bot removed - was used by /admin/ops which is now merged into /admin/intel
 };
 
@@ -18,6 +19,7 @@ const navItems = [
   { href: "/admin/sales", label: "المبيعات والإدارة", icon: "Shield" },
   { href: "/admin/intel", label: "الاستخبارات والتطوير", icon: "Brain" },
   { href: "/admin/computer", label: "My Computer", icon: "Monitor" },
+  { href: "/admin/phone", label: "My Phone", icon: "Smartphone" },
   // تم دمج /admin/ops في /admin/intel - المرحلة 1 من خطة الدمج
 ];
 
