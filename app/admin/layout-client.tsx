@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Home, Shield, Brain, Menu, X, Monitor } from "lucide-react";
+import { Home, Shield, Brain, Menu, X, Monitor, Smartphone } from "lucide-react";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Home,
