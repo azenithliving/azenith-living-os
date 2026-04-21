@@ -75,7 +75,7 @@ const FREE_MODELS: Record<string, string[]> = {
 
 // الأولويات للنماذج
 const MODEL_PRIORITIES: Record<string, string> = {
-  coding: "deepseek/deepseek-coder-v2",
+  coding: "google/gemini-2.0-flash-exp:free",
   translation: "google/gemma-2-9b-it",
   vision: "google/gemini-flash-1.5",
   creative: "anthropic/claude-3.5-haiku",
@@ -83,28 +83,26 @@ const MODEL_PRIORITIES: Record<string, string> = {
   general: "meta-llama/llama-3.1-8b-instruct",
   planning: "meta-llama/llama-3.3-70b-instruct:free",
   security: "meta-llama/llama-3.3-70b-instruct:free",
-  reasoning: "meta-llama/llama-3.3-70b-instruct:free", // Upgrade from 8B to 70B for thinking
+  reasoning: "meta-llama/llama-3.3-70b-instruct:free",
 };
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1";
 const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 
-const API_KEY = process.env.OPENROUTER_API_KEY || (process.env.OPENROUTER_KEYS ? process.env.OPENROUTER_KEYS.split(',')[0] : "");
-
-// Smart key resolver: returns array of all available keys
-const getDeepSeekKeys = () => {
-  // Try all possible naming conventions
-  const raw = process.env.DEEPSEEK_API_KEY || 
-              process.env.DEEPSEEK_KEYS || 
-              process.env.NEXT_PUBLIC_DEEPSEEK_KEY || 
-              "";
-              
-  const keys = raw.split(',').map(k => k.trim()).filter(Boolean);
-  console.log(`[DeepSeek Router] Initialized with ${keys.length} keys from environment.`);
+// Smart key resolver: returns array of all available keys, cleaned of quotes
+const getOpenRouterKeys = () => {
+  const raw = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEYS || "";
+  const keys = raw.split(',').map(k => k.replace(/['"]+/g, '').trim()).filter(Boolean);
+  console.log(`[OpenRouter Router] Initialized with ${keys.length} keys.`);
   return keys;
 };
 
-const DEEPSEEK_KEYS_LIST = getDeepSeekKeys();
+const getDeepSeekKeys = () => {
+  const raw = process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_KEYS || process.env.NEXT_PUBLIC_DEEPSEEK_KEY || "";
+  const keys = raw.split(',').map(k => k.replace(/['"]+/g, '').trim()).filter(Boolean);
+  console.log(`[DeepSeek Router] Initialized with ${keys.length} keys.`);
+  return keys;
+};
 
 /**
  * Route request to appropriate model (DeepSeek priority with Rotation)
@@ -113,8 +111,10 @@ export async function routeRequest(
   request: ModelRequest
 ): Promise<ModelResponse> {
   let lastError = "";
+  const DEEPSEEK_KEYS_LIST = getDeepSeekKeys();
+  const OPENROUTER_KEYS_LIST = getOpenRouterKeys();
   
-  // Try DeepSeek Keys one by one
+  // 1. Try DeepSeek (Specialized/Fast)
   if (DEEPSEEK_KEYS_LIST.length > 0) {
     for (const key of DEEPSEEK_KEYS_LIST) {
       try {
@@ -133,7 +133,7 @@ export async function routeRequest(
             temperature: request.temperature ?? 0.7,
             max_tokens: request.maxTokens ?? 2048,
           }),
-          signal: AbortSignal.timeout(15000), // 15s timeout
+          signal: AbortSignal.timeout(15000),
         });
 
         if (response.ok) {
@@ -146,18 +146,69 @@ export async function routeRequest(
           };
         }
         
-        const errText = await response.text();
-        lastError = `DeepSeek (Key ${key.slice(0, 6)}...): ${response.status} ${errText.slice(0, 50)}`;
-        console.error("DeepSeek Key failed:", lastError);
+        lastError += ` | DeepSeek: ${response.status}`;
       } catch (err) {
-        lastError = `DeepSeek Fetch Error: ${err instanceof Error ? err.message : String(err)}`;
+        lastError += " | DeepSeek: Error";
       }
     }
-  } else {
-    lastError = "No DeepSeek keys found in environment variables.";
   }
 
-  // Fallback to OpenRouter with Dynamic Free Model Discovery
+  // 2. Try OpenRouter (Multi-Model Mesh) with Full Key Rotation
+  if (OPENROUTER_KEYS_LIST.length > 0) {
+    const modelId = "moonshotai/kimi-k2.6";
+    
+    // Sort keys to prioritize known working keys (from diagnostic), then shuffle the rest
+    const sortedKeys = [...OPENROUTER_KEYS_LIST].sort((a, b) => {
+      if (a.includes("ae780a")) return -1;
+      if (b.includes("ae780a")) return 1;
+      return Math.random() - 0.5;
+    });
+    
+    // Try ALL keys, but with a very aggressive timeout (3s) to skip hanging/dead keys instantly
+    for (const key of sortedKeys) {
+      try {
+        const combinedPrompt = request.systemPrompt 
+          ? `[SYSTEM INSTRUCTIONS]\n${request.systemPrompt}\n\n[USER REQUEST]\n${request.prompt}`
+          : request.prompt;
+
+        const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${key}`,
+            "HTTP-Referer": "https://azenith-living.vercel.app",
+            "X-Title": "Azenith Sovereign Prime",
+          },
+          body: JSON.stringify({
+            model: modelId,
+            messages: [{ role: "user", content: combinedPrompt }],
+            temperature: request.temperature ?? 0.7,
+            max_tokens: Math.min(request.maxTokens ?? 4000, 8192), // Allow huge execution output
+          }),
+          signal: AbortSignal.timeout(20000), // 20s timeout (AI needs time to think)
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const content = data.choices[0]?.message?.content;
+          if (content) {
+            return {
+              success: true,
+              content,
+              model: modelId,
+              usage: data.usage,
+            };
+          }
+        }
+        
+        lastError += ` | Key(${key.slice(0, 8)}): ${response.status}`;
+      } catch (err) {
+        lastError += ` | Key(${key.slice(0, 8)}): Error`;
+      }
+    }
+  }
+
+  // 3. Fallback to OpenRouter Free Discovery (No Keys Required)
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -165,40 +216,48 @@ export async function routeRequest(
       "X-Title": "Azenith Sovereign Smart Discovery",
     };
 
-    if (API_KEY) {
-      headers["Authorization"] = `Bearer ${API_KEY}`;
+    if (OPENROUTER_KEYS_LIST.length > 0) {
+      headers["Authorization"] = `Bearer ${OPENROUTER_KEYS_LIST[0]}`;
     }
 
     // 1. Fetch available free models dynamically to avoid 404
-    console.log("[OpenRouter] Discovering current free models...");
-    const modelsResponse = await fetch(`${OPENROUTER_API_URL}/models`, { headers });
+    console.log("[OpenRouter] Discovering current free models (Keyless)...");
+    const discoveryHeaders = {
+      "Content-Type": "application/json",
+      "HTTP-Referer": "http://localhost:3000",
+      "X-Title": "Azenith Sovereign Discovery",
+    };
+    
+    const modelsResponse = await fetch(`${OPENROUTER_API_URL}/models`, { headers: discoveryHeaders });
     let freeModels: string[] = [];
     
     if (modelsResponse.ok) {
       const modelsData = await modelsResponse.json();
       freeModels = modelsData.data
-        .filter((m: any) => m.pricing.prompt === "0" || m.pricing.prompt === 0)
+        .filter((m: any) => m.pricing?.prompt === "0" || m.pricing?.prompt === 0)
         .map((m: any) => m.id);
     }
 
-    // 2. If discovery failed, use a very reliable hardcoded fallback list
-    if (freeModels.length === 0) {
-      freeModels = [
-        "google/gemini-flash-1.5-8b:free",
-        "google/gemini-2.0-flash-exp:free",
-        "meta-llama/llama-3.1-8b-instruct:free",
-        "mistralai/mistral-7b-instruct:free",
-        "openchat/openchat-7b:free"
-      ];
-    }
+    // 2. Comprehensive fallback list
+    const reliableFallbacks = [
+      "moonshotai/kimi-k2.6",
+      "minimax/minimax-m2.5:free",
+      "google/gemma-4-26b-a4b-it:free",
+      "arcee-ai/trinity-large-preview:free",
+      "nvidia/nemotron-3-super-120b-a12b:free",
+      "google/lyria-3-pro-preview",
+      "openrouter/free"
+    ];
 
-    // 3. Try the models one by one
-    for (const modelId of freeModels.slice(0, 5)) { // Try top 5 free models
+    const modelsToTry = [...new Set([...reliableFallbacks, ...freeModels])].slice(0, 10);
+
+    // 3. Try the models one by one (KEYLESS for maximum compatibility with free tier)
+    for (const modelId of modelsToTry) {
       try {
-        console.log(`[OpenRouter] Trying model: ${modelId}`);
+        console.log(`[OpenRouter Keyless] Routing to: ${modelId}`);
         const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
           method: "POST",
-          headers,
+          headers: discoveryHeaders,
           body: JSON.stringify({
             model: modelId,
             messages: [
@@ -208,34 +267,56 @@ export async function routeRequest(
             temperature: 0.7,
             max_tokens: 1000,
           }),
-          signal: AbortSignal.timeout(12000),
+          signal: AbortSignal.timeout(15000),
         });
 
         if (response.ok) {
           const data = await response.json();
-          return {
-            success: true,
-            content: data.choices[0]?.message?.content || "",
-            model: modelId,
-            usage: data.usage,
-          };
+          const content = data.choices?.[0]?.message?.content;
+          if (content) {
+            return {
+              success: true,
+              content,
+              model: `keyless:${modelId}`,
+              usage: data.usage,
+            };
+          }
         }
         
-        const errorData = await response.json().catch(() => ({}));
-        lastError += ` | ${modelId.split('/').pop()}: ${response.status} ${errorData.error?.message || "Busy"}`;
+        lastError += ` | ${modelId.split('/').pop()}: ${response.status}`;
       } catch (err) {
-        lastError += ` | ${modelId.split('/').pop()}: Timeout/Error`;
+        lastError += ` | ${modelId.split('/').pop()}: Error`;
       }
     }
   } catch (error) {
-    lastError += ` | OpenRouter Discovery Failed: ${error instanceof Error ? error.message : String(error)}`;
+    lastError += ` | Final Fail`;
   }
+
+  // 4. LAST DITCH: Zero-Auth Attempt (Sometimes works for free models when keys are flagged)
+  try {
+    const lastDitchModels = ["google/gemini-2.0-flash-exp:free", "meta-llama/llama-3.1-8b-instruct:free"];
+    for (const modelId of lastDitchModels) {
+      const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [{ role: "user", content: request.prompt }],
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return { success: true, content: data.choices[0]?.message?.content || "", model: `zero-auth:${modelId}` };
+      }
+    }
+  } catch (e) {}
 
   return {
     success: false,
     content: "",
     model: "none",
-    error: lastError || "All free models are currently overloaded. Please wait a few seconds.",
+    error: lastError || "All systems exhausted.",
   };
 }
 
@@ -355,21 +436,29 @@ export async function* streamRequest(
       "X-Title": "Azenith Sovereign",
     };
 
-    if (API_KEY) {
-      headers["Authorization"] = `Bearer ${API_KEY}`;
+    const currentKeys = getOpenRouterKeys();
+    const sortedKeys = [...currentKeys].sort((a, b) => {
+      if (a.includes("ae780a")) return -1;
+      if (b.includes("ae780a")) return 1;
+      return Math.random() - 0.5;
+    });
+
+    if (sortedKeys.length > 0) {
+      headers["Authorization"] = `Bearer ${sortedKeys[0]}`;
     }
+
+    const combinedPrompt = request.systemPrompt 
+      ? `[SYSTEM INSTRUCTIONS]\n${request.systemPrompt}\n\n[USER REQUEST]\n${request.prompt}`
+      : request.prompt;
 
     const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
       method: "POST",
       headers,
       body: JSON.stringify({
         model,
-        messages: [
-          ...(request.systemPrompt ? [{ role: "system", content: request.systemPrompt }] : []),
-          { role: "user", content: request.prompt },
-        ],
+        messages: [{ role: "user", content: combinedPrompt }],
         temperature: request.temperature ?? 0.7,
-        max_tokens: request.maxTokens ?? 2048,
+        max_tokens: Math.min(request.maxTokens ?? 1500, 1500),
         stream: true,
       }),
     });

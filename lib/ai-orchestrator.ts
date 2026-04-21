@@ -387,9 +387,9 @@ export async function askDeepSeek(
     return { success: true, content: result.data };
   }
   
-  console.error(`[AskDeepSeek] [${requestId}] REQUEST FAILED: ${result.error}`);
-  console.error(`[AskDeepSeek] [${requestId}] ===== REQUEST FAILED =====`);
-  return { success: false, content: "", error: result.error };
+  // FALLBACK TO OPENROUTER IF DEEPSEEK FAILS (e.g. 402 Insufficient Balance)
+  console.error(`[AskDeepSeek] [${requestId}] REQUEST FAILED: ${result.error}. Falling back to OpenRouter...`);
+  return askOpenRouter(prompt, undefined, { model: "google/gemini-2.0-pro-exp-02-05:free" });
 }
 
 /**

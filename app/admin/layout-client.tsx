@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Home, Shield, Brain, Menu, X } from "lucide-react";
+import { Home, Shield, Brain, Menu, X, Monitor } from "lucide-react";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Home,
   Shield,
   Brain,
+  Monitor,
   // Bot removed - was used by /admin/ops which is now merged into /admin/intel
 };
 
@@ -16,6 +17,7 @@ const navItems = [
   { href: "/admin", label: "الرئيسية", icon: "Home" },
   { href: "/admin/sales", label: "المبيعات والإدارة", icon: "Shield" },
   { href: "/admin/intel", label: "الاستخبارات والتطوير", icon: "Brain" },
+  { href: "/admin/computer", label: "My Computer", icon: "Monitor" },
   // تم دمج /admin/ops في /admin/intel - المرحلة 1 من خطة الدمج
 ];
 
@@ -42,46 +44,44 @@ export default function AdminLayoutClient({
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex">
-      {/* زر الهمبرغر - يظهر فقط على الشاشات الصغيرة */}
+    <div className="min-h-screen bg-[#0A0A0A] flex overflow-hidden">
+      {/* زر القائمة - يظهر دائماً */}
       <button
         onClick={() => setIsMobileMenuOpen(true)}
-        className="lg:hidden fixed top-4 right-4 z-50 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#C5A059] text-[#1a1a1a] shadow-lg shadow-[#C5A059]/30 transition-all active:scale-95"
+        className="fixed top-4 right-4 z-50 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#C5A059] text-[#1a1a1a] shadow-lg shadow-[#C5A059]/30 transition-all active:scale-95 hover:bg-[#D4B16A]"
         aria-label="فتح القائمة"
       >
         <Menu className="h-6 w-6" />
       </button>
 
-      {/* Overlay للخلفية - يظهر عند فتح القائمة على الموبايل */}
+      {/* Overlay للخلفية - يظهر عند فتح القائمة */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 transition-opacity"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      {/* Sidebar - Desktop: ظاهرة دائماً, Mobile: Drawer من اليمين */}
+      {/* Sidebar - Drawer دائماً لجميع الشاشات */}
       <aside
         className={`
-          fixed lg:static inset-y-0 right-0 z-50
-          w-[280px] lg:w-64
+          fixed inset-y-0 right-0 z-50
+          w-[280px]
           border-l border-white/10 bg-[#0A0A0A]
-          flex-col
+          flex flex-col
           transform transition-transform duration-300 ease-in-out
-          lg:transform-none lg:flex
-          ${isMobileMenuOpen ? "flex translate-x-0" : "hidden translate-x-full lg:translate-x-0"}
+          ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
-        {/* Header مع زر الإغلاق للموبايل */}
+        {/* Header مع زر الإغلاق */}
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold text-[#C5A059]">AZENITH</h1>
             <p className="text-xs text-white/50 mt-1">لوحة التحكم</p>
           </div>
-          {/* زر إغلاق للموبايل */}
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-colors"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-colors"
             aria-label="إغلاق القائمة"
           >
             <X className="h-5 w-5" />
@@ -91,7 +91,7 @@ export default function AdminLayoutClient({
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
             const IconComponent = iconMap[item.icon];
 
             return (
@@ -122,8 +122,8 @@ export default function AdminLayoutClient({
         </div>
       </aside>
 
-      {/* Main Content - مع padding علوي للموبايل بسبب زر الهمبرغر */}
-      <main className="flex-1 overflow-auto lg:pt-0 pt-16">
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto h-screen">
         {children}
       </main>
     </div>

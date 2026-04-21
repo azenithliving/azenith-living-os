@@ -5,9 +5,9 @@ import ConsultantWidget from "@/components/ConsultantWidget";
 
 export default function ConsultantWidgetWrapper() {
   const pathname = usePathname();
-  const isAdminPage = pathname?.startsWith("/admin");
+  const isHiddenPage = pathname?.startsWith("/admin");
 
-  if (isAdminPage) return null;
+  if (isHiddenPage) return null;
 
   return <ConsultantWidget />;
 }

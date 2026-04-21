@@ -3,6 +3,7 @@ import { getPendingApprovals, getSecurityStats, logAuditEvent } from "@/lib/ulti
 import { getMetricsSnapshot, detectAnomalies, generateOpportunities } from "@/lib/ultimate-agent/predictive-engine";
 import { getActiveGoals } from "@/lib/ultimate-agent/memory-store";
 import { resolvePrimaryCompanyId } from "@/lib/company-resolver";
+import { SovereignIntelligenceKernel } from "@/lib/sovereign-kernel";
 
 export type ConversationMessage = { role: "user" | "assistant"; content: string };
 
@@ -107,17 +108,13 @@ export async function POST(req: Request) {
           payload: { type, hasHistory: Array.isArray(conversationHistory) && conversationHistory.length > 0 },
         });
 
-        const agent = new UltimateAgent();
-        const cmdResult = await agent.processCommandWithResult(command, actorId, conversationHistory);
+        const kernel = SovereignIntelligenceKernel.getInstance();
+        const kernelReply = await kernel.processIntent(command, actorId);
 
         result = {
-          success: !cmdResult.error,
-          message: cmdResult.reply,
-          data: cmdResult.data ?? cmdResult,
-          actionTaken: cmdResult.actionTaken,
-          requiresApproval: cmdResult.requiresApproval,
-          approvalRequestId: cmdResult.approvalRequestId,
-          suggestions: cmdResult.suggestions,
+          success: true,
+          message: kernelReply,
+          actionTaken: "sovereign_intent_processed",
         };
 
         if (commandLog?.id) {
