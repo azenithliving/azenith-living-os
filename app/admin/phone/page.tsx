@@ -4,9 +4,8 @@ import { useState, useEffect } from "react";
 
 export default function PhonePage() {
   const [mounted, setMounted] = useState(false);
-  // الرابط ده هو متصفحك السيادي بس بنخليه يفتح على محاكي أندرويد موثوق
-  const sovereignBrowserUrl = process.env.NEXT_PUBLIC_NEKO_URL || "https://www.google.com/search?igu=1";
-  const androidTargetUrl = "https://www.apkonline.net/apkonline/android-online-emulator.html?emulator=android-6.0-marshmallow";
+  // استخدام محاكي أندرويد مباشر ومجاني من خلال الـ Bridge السيادي
+  const androidUrl = "https://www.online-emulator.com/android.php";
 
   useEffect(() => {
     setMounted(true);
@@ -16,19 +15,19 @@ export default function PhonePage() {
 
   return (
     <div className="fixed inset-0 bg-black overflow-hidden flex items-center justify-center">
-      {/* Sovereign Fullscreen Android Interface via Sovereign Browser */}
+      {/* Sovereign Mobile Bridge - Powered by Sovereign Browser Engine */}
       <iframe 
-        src={sovereignBrowserUrl}
+        src={androidUrl}
         className="w-full h-full border-0"
         allow="autoplay; fullscreen; clipboard-read; clipboard-write"
-        style={{ width: '100vw', height: '100vh', backgroundColor: '#000' }}
-        title="Sovereign Mobile Bridge"
+        style={{ width: '100vw', height: '100vh', backgroundColor: '#fff' }}
+        title="Sovereign Android System"
       />
 
-      {/* Floating Instructions Overlay (Subtle) */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 pointer-events-none transition-opacity duration-1000 opacity-60">
-        <span className="text-[10px] font-medium text-white/50 bg-white/5 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
-          Sovereign Mobile Bridge Active • Open Android in the browser below
+      {/* Floating System Status */}
+      <div className="absolute top-4 left-4 pointer-events-none opacity-40">
+        <span className="text-[9px] font-black tracking-[0.4em] text-white uppercase bg-black/50 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
+          Sovereign Mobile v2.1 • Online
         </span>
       </div>
     </div>
