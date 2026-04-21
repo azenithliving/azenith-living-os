@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 
 export default function PhonePage() {
   const [mounted, setMounted] = useState(false);
-  // استخدام الرابط الرسمي التجريبي (Demo) لضمان التشغيل للأبد
-  const androidUrl = "https://appetize.io/embed/demo?device=nexus5&osVersion=8.1&scale=75&autoplay=true&orientation=portrait";
+  // استخدام محاكي أندرويد مفتوح المصدر (JS-Based) يعمل داخل المتصفح مباشرة ولا يحتاج لسيرفرات معقدة
+  const androidUrl = "https://www.online-emulator.com/android.php";
 
   useEffect(() => {
     setMounted(true);
@@ -20,14 +20,14 @@ export default function PhonePage() {
         src={androidUrl}
         className="w-full h-full border-0"
         allow="autoplay; fullscreen; clipboard-read; clipboard-write"
-        style={{ width: '100vw', height: '100vh', backgroundColor: '#000' }}
-        title="Sovereign Android Demo"
+        style={{ width: '100vw', height: '100vh', backgroundColor: '#fff' }}
+        title="Sovereign Android Online"
       />
 
       {/* Floating Mode Indicator */}
       <div className="absolute top-4 left-4 pointer-events-none opacity-40">
         <span className="text-[9px] font-black tracking-[0.4em] text-white uppercase bg-black/50 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
-          Sovereign Mobile Node (Demo Mode)
+          Sovereign Mobile Node (Web-Stream)
         </span>
       </div>
     </div>
