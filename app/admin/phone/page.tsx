@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Smartphone, Wifi, Battery, Signal, Home, Grid, ChevronLeft, RefreshCw, Link, ShieldCheck, ExternalLink, Info } from "lucide-react";
+import { Smartphone, Wifi, Battery, Signal, Home, Grid, ChevronLeft, RefreshCw, Link, ShieldCheck, ExternalLink, Info, Power } from "lucide-react";
 
 export default function PhonePage() {
   const [mounted, setMounted] = useState(false);
@@ -13,7 +13,7 @@ export default function PhonePage() {
   useEffect(() => {
     setMounted(true);
     const savedUrl = localStorage.getItem("sovereign_mobile_url");
-    if (savedUrl && !savedUrl.includes("localhost")) {
+    if (savedUrl && savedUrl.startsWith("https://")) {
       setCloudUrl(savedUrl);
       setIsConnected(true);
     }
@@ -28,14 +28,16 @@ export default function PhonePage() {
   }, []);
 
   const handleConnect = () => {
-    if (tempUrl.includes("cloudshell.dev")) {
-      localStorage.setItem("sovereign_mobile_url", tempUrl);
-      setCloudUrl(tempUrl);
+    // تنظيف الرابط من المسافات والحروف الزائدة
+    const cleanUrl = tempUrl.trim().replace(/['"`]/g, "");
+    
+    if (cleanUrl.includes("cloudshell.dev") && cleanUrl.startsWith("https://")) {
+      localStorage.setItem("sovereign_mobile_url", cleanUrl);
+      setCloudUrl(cleanUrl);
       setIsConnected(true);
-      // فتح الرابط في نافذة جديدة للتفعيل
-      window.open(tempUrl, "_blank");
+      window.open(cleanUrl, "_blank");
     } else {
-      alert("Please enter a valid Cloud Shell Preview URL (Port 6080)");
+      alert("Invalid URL. Please copy the URL from the Web Preview tab address bar.");
     }
   };
 
