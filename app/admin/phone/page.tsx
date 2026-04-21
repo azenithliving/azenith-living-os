@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Smartphone, Wifi, Battery, Signal, Home, Search, Layers, ChevronLeft } from "lucide-react";
+import { Smartphone, Wifi, Battery, Signal, Home, Globe, MessageSquare, Camera, Play, Grid } from "lucide-react";
 
 export default function PhonePage() {
   const [mounted, setMounted] = useState(false);
-  const [url, setUrl] = useState("https://www.google.com/search?q=android+apps+online&igu=1");
   const [time, setTime] = useState("");
+  // نستخدم محاكي أندرويد ويب سريع ومستقر جداً
+  const androidUrl = "https://www.apkonline.net/apkonline/android-online-emulator.html?emulator=android-6.0-marshmallow";
 
   useEffect(() => {
     setMounted(true);
@@ -22,65 +23,76 @@ export default function PhonePage() {
   if (!mounted) return null;
 
   return (
-    <div className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center overflow-hidden">
-      {/* Sovereign Mobile OS - Edge to Edge Experience */}
-      <div className="relative w-full h-full bg-black flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-[#050505] flex items-center justify-center overflow-hidden font-sans">
+      
+      {/* Premium Smartphone Chassis Simulation */}
+      <div className="relative w-full h-full max-w-none bg-black flex flex-col shadow-2xl overflow-hidden border-x border-white/5">
         
-        {/* iOS-Style Status Bar */}
-        <div className="h-10 bg-black/80 backdrop-blur-md flex items-center justify-between px-6 z-[100] border-b border-white/5">
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-bold text-white tracking-tight">{time}</span>
-          </div>
+        {/* Dynamic Island / Notch Area */}
+        <div className="absolute top-0 left-0 right-0 h-8 bg-black z-[200] flex items-center justify-between px-8">
+          <div className="text-[14px] font-bold text-white tracking-tight">{time}</div>
           
-          <div className="absolute left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-b-2xl border-x border-b border-white/10" />
+          {/* The "Island" */}
+          <div className="w-32 h-6 bg-black rounded-full border border-white/10 flex items-center justify-center gap-2">
+            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+            <span className="text-[9px] font-bold text-blue-400 uppercase tracking-widest">Sovereign OS</span>
+          </div>
 
-          <div className="flex items-center gap-2 opacity-90">
-            <Signal className="w-4 h-4 text-white" />
-            <Wifi className="w-4 h-4 text-white" />
-            <div className="flex items-center gap-1">
-              <span className="text-[11px] font-bold text-white">85%</span>
-              <Battery className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-2.5">
+            <Signal className="w-4 h-4 text-white/90" />
+            <Wifi className="w-4 h-4 text-white/90" />
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-3 border border-white/30 rounded-[3px] relative flex items-center px-0.5">
+                <div className="bg-white w-3/4 h-1.5 rounded-[1px]" />
+                <div className="absolute -right-1 w-0.5 h-1 bg-white/30 rounded-r-full" />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* The Core Mobile Interface (Sovereign Web Node) */}
-        <div className="flex-1 relative bg-[#1a1a1a]">
+        {/* Main Display Area (Android Core) */}
+        <div className="flex-1 mt-8 relative bg-[#0a0a0a]">
           <iframe 
-            src={url}
+            src={androidUrl}
             className="w-full h-full border-0"
             allow="autoplay; fullscreen; clipboard-read; clipboard-write"
-            title="Sovereign Mobile Node"
+            title="Sovereign Mobile Engine"
           />
+          
+          {/* Subtle Screen Glare Effect */}
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/5 via-transparent to-transparent opacity-30" />
         </div>
 
-        {/* iOS-Style Bottom Navigation Bar */}
-        <div className="h-20 bg-black/90 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-4 pb-4">
-          <button onClick={() => window.history.back()} className="p-3 hover:bg-white/10 rounded-full transition-colors">
-            <ChevronLeft className="w-6 h-6 text-white/50" />
-          </button>
-          <button onClick={() => setUrl("https://www.google.com/search?q=android+apps+online&igu=1")} className="p-4 bg-white/10 rounded-2xl border border-white/10 shadow-lg active:scale-95 transition-all">
-            <Home className="w-6 h-6 text-white" />
-          </button>
-          <button className="p-3 hover:bg-white/10 rounded-full transition-colors">
-            <Search className="w-6 h-6 text-white/50" />
-          </button>
-          <button className="p-3 hover:bg-white/10 rounded-full transition-colors">
-            <Layers className="w-6 h-6 text-white/50" />
-          </button>
+        {/* Floating App Dock (Bottom Navigation) */}
+        <div className="h-24 bg-black/80 backdrop-blur-3xl border-t border-white/5 flex items-center justify-center px-8 relative">
+          <div className="flex items-center justify-between w-full max-w-md bg-white/5 p-4 rounded-[2rem] border border-white/10 shadow-2xl">
+            <div className="p-3 bg-green-500/20 rounded-2xl border border-green-500/30 text-green-400 cursor-pointer hover:scale-110 transition-transform">
+              <Globe className="w-6 h-6" />
+            </div>
+            <div className="p-3 bg-blue-500/20 rounded-2xl border border-blue-500/30 text-blue-400 cursor-pointer hover:scale-110 transition-transform">
+              <MessageSquare className="w-6 h-6" />
+            </div>
+            {/* Main Home Button */}
+            <div className="p-4 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] cursor-pointer active:scale-90 transition-all">
+              <Grid className="w-7 h-7 text-black" />
+            </div>
+            <div className="p-3 bg-purple-500/20 rounded-2xl border border-purple-500/30 text-purple-400 cursor-pointer hover:scale-110 transition-transform">
+              <Camera className="w-6 h-6" />
+            </div>
+            <div className="p-3 bg-red-500/20 rounded-2xl border border-red-500/30 text-red-400 cursor-pointer hover:scale-110 transition-transform">
+              <Play className="w-6 h-6" />
+            </div>
+          </div>
+          
+          {/* Home Indicator Bar */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-white/20 rounded-full" />
         </div>
 
-        {/* Home Indicator */}
-        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full z-[101]" />
       </div>
 
-      {/* Floating System Overlay */}
-      <div className="absolute top-14 left-4 pointer-events-none">
-        <div className="bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full flex items-center gap-2">
-          <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-[9px] font-black tracking-widest text-white/60 uppercase">Node Active</span>
-        </div>
-      </div>
+      {/* Background Ambient Glow */}
+      <div className="fixed -bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="fixed -top-1/4 -left-1/4 w-[600px] h-[600px] bg-purple-600/10 blur-[120px] rounded-full pointer-events-none" />
     </div>
   );
 }
