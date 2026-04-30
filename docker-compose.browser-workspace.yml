@@ -1,0 +1,67 @@
+services:
+  browser-workspace:
+    image: lscr.io/linuxserver/chromium:latest
+    container_name: azenith-browser-workspace
+    environment:
+      PUID: ${BROWSER_WORKSPACE_PUID:-1000}
+      PGID: ${BROWSER_WORKSPACE_PGID:-1000}
+      TZ: ${BROWSER_WORKSPACE_TZ:-Africa/Cairo}
+      CUSTOM_USER: ${BROWSER_WORKSPACE_CUSTOM_USER:-admin}
+      PASSWORD: ${BROWSER_WORKSPACE_PASSWORD:-change-me-now}
+      CHROME_CLI: ${BROWSER_WORKSPACE_CHROME_CLI:-}
+      TITLE: ${BROWSER_WORKSPACE_TITLE:-Azenith Browser Workspace}
+      LC_ALL: ${BROWSER_WORKSPACE_LOCALE:-ar_EG.UTF-8}
+    volumes:
+      - ./data/browser-workspace/config:/config
+    ports:
+      - "${BROWSER_WORKSPACE_HTTP_PORT:-3004}:3000"
+      - "${BROWSER_WORKSPACE_HTTPS_PORT:-3001}:3001"
+    shm_size: "1gb"
+    restart: unless-stopped
+
+  # Agent Nodes - NEW
+  powerhouse-alpha:
+    build: ./docker/agent-nodes/headless-node
+    container_name: powerhouse-alpha
+    environment:
+      NODE_ENV: production
+      AGENT_NODE_ID: powerhouse-alpha
+      SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      PORT: 3002
+    volumes:
+      - agent_alpha_data:/app/data
+    ports:
+      - "3002:3002"
+    networks:
+      - agent-network
+    restart: unless-stopped
+    depends_on:
+      - browser-workspace
+
+  powerhouse-beta:
+    build: ./docker/agent-nodes/headless-node
+    container_name: powerhouse-beta
+    environment:
+      NODE_ENV: production
+      AGENT_NODE_ID: powerhouse-beta
+      SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      PORT: 3003
+    volumes:
+      - agent_beta_data:/app/data
+    ports:
+      - "3003:3003"
+    networks:
+      - agent-network
+    restart: unless-stopped
+    depends_on:
+      - browser-workspace
+
+volumes:
+  agent_alpha_data:
+  agent_beta_data:
+
+networks:
+  agent-network:
+    driver: bridge

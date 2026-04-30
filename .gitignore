@@ -1,0 +1,57 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Documentation with secrets
+NEURAL_BLUEPRINT.md
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+.env.browser-workspace
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+.vercel
+
+# Local Netlify folder
+.netlify
+
+# Large video files (must be compressed under 4.5MB for Vercel)
+/public/videos/*.backup
+*.mp4.backup
+/data/browser-workspace/
+
+.vercel

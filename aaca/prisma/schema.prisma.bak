@@ -1,0 +1,463 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas   = ["public", "auth"]
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String?   @unique
+  name          String?
+  role          UserRole  @default(USER)
+  permissions   String[]  @default([])
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  lastLoginAt   DateTime?
+  
+  tasks         AITask[]
+  actions       AIAction[]
+  approvalsGiven Approval[] @relation("ApprovalGiver")
+  notifications Notification[]
+  visitorSessions VisitorSession[]
+  
+  @@map("users")
+  @@schema("public")
+}
+
+model AITask {
+  id            String        @id @default(uuid())
+  title         String
+  description   String?
+  type          TaskType
+  status        TaskStatus    @default(PENDING)
+  priority      TaskPriority  @default(MEDIUM)
+  payload       Json?
+  result        Json?
+  error         String?
+  
+  createdById   String
+  createdBy     User          @relation(fields: [createdById], references: [id])
+  
+  assignedTo    String?
+  parentTaskId  String?
+  parentTask    AITask?       @relation("TaskChildren", fields: [parentTaskId], references: [id])
+  subTasks      AITask[]      @relation("TaskChildren")
+  
+  workflowId    String?
+  workflow      Workflow?     @relation(fields: [workflowId], references: [id])
+  
+  actions       AIAction[]
+  events        Event[]
+  
+  startedAt     DateTime?
+  completedAt   DateTime?
+  failedAt      DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now()) @updatedAt
+  
+  retries       Int           @default(0)
+  maxRetries    Int           @default(3)
+  
+  @@index([status])
+  @@index([type])
+  @@index([createdById])
+  @@index([workflowId])
+  @@map("ai_tasks")
+  @@schema("public")
+}
+
+model AIAction {
+  id            String        @id @default(uuid())
+  type          ActionType
+  status        ActionStatus  @default(PENDING)
+  
+  taskId        String
+  task          AITask        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  payload       Json
+  result        Json?
+  error         String?
+  
+  riskScore     Int?
+  requiresApproval Boolean   @default(false)
+  
+  approval      Approval?
+  
+  executedById  String?
+  executedBy    User?         @relation(fields: [executedById], references: [id])
+  
+  rollbackData  Json?
+  canRollback   Boolean       @default(false)
+  
+  executionLogs ExecutionLog[]
+  
+  createdAt     DateTime      @default(now())
+  executedAt    DateTime?
+  completedAt   DateTime?
+  
+  @@index([status])
+  @@index([taskId])
+  @@index([type])
+  @@map("ai_actions")
+  @@schema("public")
+}
+
+model Approval {
+  id            String          @id @default(uuid())
+  actionId      String          @unique
+  action        AIAction        @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  
+  status        ApprovalStatus  @default(PENDING)
+  requestedBy   String
+  requestedAt   DateTime        @default(now())
+  
+  approvedById  String?
+  approvedBy    User?           @relation("ApprovalGiver", fields: [approvedById], references: [id])
+  approvedAt    DateTime?
+  
+  rejectedById  String?
+  rejectedAt    DateTime?
+  rejectionReason String?
+  
+  expiresAt     DateTime
+  
+  @@index([status])
+  @@index([actionId])
+  @@map("approvals")
+  @@schema("public")
+}
+
+model ExecutionLog {
+  id            String    @id @default(uuid())
+  actionId      String
+  action        AIAction  @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  
+  step          String
+  status        String
+  details       Json?
+  timestamp     DateTime  @default(now())
+  
+  @@index([actionId])
+  @@map("execution_logs")
+  @@schema("public")
+}
+
+model Event {
+  id            String    @id @default(uuid())
+  type          String
+  source        String    @default("system")
+  payload       Json?
+  
+  taskId        String?
+  task          AITask?   @relation(fields: [taskId], references: [id])
+  
+  processed     Boolean   @default(false)
+  processedAt   DateTime?
+  error         String?
+  
+  createdAt     DateTime  @default(now())
+  
+  @@index([type])
+  @@index([processed])
+  @@index([createdAt])
+  @@map("events")
+  @@schema("public")
+}
+
+model Notification {
+  id            String            @id @default(uuid())
+  type          NotificationType
+  channel       NotificationChannel
+  status        NotificationStatus @default(PENDING)
+  
+  recipientId   String
+  recipient     User              @relation(fields: [recipientId], references: [id])
+  
+  title         String
+  message       String
+  data          Json?
+  
+  sentAt        DateTime?
+  error         String?
+  
+  createdAt     DateTime          @default(now())
+  
+  @@index([recipientId])
+  @@index([status])
+  @@map("notifications")
+  @@schema("public")
+}
+
+model Workflow {
+  id            String          @id @default(uuid())
+  name          String
+  description   String?
+  definition    Json            // Workflow DAG definition
+  status        WorkflowStatus  @default(DRAFT)
+  version       Int             @default(1)
+  
+  tasks         AITask[]
+  
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  
+  @@map("workflows")
+  @@schema("public")
+}
+
+model SystemLog {
+  id            String    @id @default(uuid())
+  level         LogLevel
+  service       String
+  message       String
+  metadata      Json?
+  traceId       String?
+  
+  createdAt     DateTime  @default(now())
+  
+  @@index([level])
+  @@index([service])
+  @@index([createdAt])
+  @@map("system_logs")
+  @@schema("public")
+}
+
+model Capability {
+  id            String            @id @default(uuid())
+  name          String            @unique
+  description   String
+  version       String
+  status        CapabilityStatus  @default(DRAFT)
+  
+  // Self-extension system
+  proposedBy    String            // Agent that proposed
+  proposedAt    DateTime          @default(now())
+  
+  simulationResult  Json?
+  securityReview    Json?
+  
+  approvedById  String?
+  approvedAt    DateTime?
+  
+  activatedAt   DateTime?
+  deactivatedAt DateTime?
+  
+  code          String?           // Generated code for the capability
+  manifest      Json              // Capability manifest
+  
+  dependencies  String[]          @default([])
+  
+  @@map("capabilities")
+  @@schema("public")
+}
+
+model JobQueue {
+  id            String    @id @default(uuid())
+  name          String    @unique
+  queueType     String
+  config        Json?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+
+  @@map("job_queues")
+  @@schema("public")
+}
+
+model Company {
+  id            String    @id @default(uuid())
+  name          String
+  domain        String?
+  primaryColor  String?
+  whatsapp      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+
+  roomSections  RoomSection[]
+
+  @@map("companies")
+  @@schema("public")
+}
+
+model RoomSection {
+  id            String    @id @default(uuid())
+  companyId     String    @map("company_id")
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  slug          String
+  name          String
+  nameAr        String?   @map("name_ar")
+  description   String?
+  displayOrder  Int       @default(0) @map("display_order")
+  isActive      Boolean   @default(true) @map("is_active")
+  icon          String?
+  metadata      Json?     @default("{}")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([companyId, slug])
+  @@map("room_sections")
+  @@schema("public")
+}
+
+model VisitorSession {
+  id                   String    @id @default(uuid())
+  sessionId            String    @unique @map("session_id")
+  leadScore            Int       @default(0) @map("lead_score")
+  intent               String    @default("browsing")
+  styleSwitches        Int       @default(0) @map("style_switches")
+  
+  userPersona          Json?     @map("user_persona")
+  psychologicalProfile Json?     @map("psychological_profile")
+  behavioralReport     Json?     @map("behavioral_report")
+  
+  lastPage             String?   @map("last_page")
+  language             String    @default("ar")
+  
+  userId               String?   @map("user_id")
+  user                 User?     @relation(fields: [userId], references: [id])
+  
+  leadConversion       LeadConversion?
+  
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  @@index([sessionId])
+  @@index([intent])
+  @@index([leadScore])
+  @@map("visitor_sessions")
+  @@schema("public")
+}
+
+model LeadConversion {
+  id               String          @id @default(uuid())
+  sessionId        String          @unique @map("session_id")
+  session          VisitorSession  @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  
+  contactMethod    String          // e.g., "whatsapp", "form"
+  contactValue     String?         // phone or email
+  status           String          @default("NEW") // NEW, CONTACTED, QUALIFIED, CLOSED
+  
+  conversionValue  Float?          @map("conversion_value")
+  notes            String?
+  
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("lead_conversions")
+  @@schema("public")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  AGENT
+  @@schema("public")
+}
+
+enum TaskType {
+  RESEARCH
+  ANALYSIS
+  GENERATION
+  EXECUTION
+  SYSTEM
+  @@schema("public")
+}
+
+enum TaskStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  @@schema("public")
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+  @@schema("public")
+}
+
+enum ActionType {
+  CREATE_FILE
+  UPDATE_FILE
+  DELETE_FILE
+  RUN_COMMAND
+  API_CALL
+  DATABASE_QUERY
+  MANUAL
+  @@schema("public")
+}
+
+enum ActionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  @@schema("public")
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  @@schema("public")
+}
+
+enum NotificationType {
+  SYSTEM
+  TASK_UPDATE
+  APPROVAL_REQUIRED
+  ALERT
+  @@schema("public")
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  @@schema("public")
+}
+
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+  @@schema("public")
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
+  @@schema("public")
+}
+
+enum CapabilityStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  DEPRECATED
+  @@schema("public")
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+  @@schema("public")
+}

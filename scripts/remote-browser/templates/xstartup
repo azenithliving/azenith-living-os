@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+xset -dpms
+xset s off
+xset s noblank
+dbus-launch --exit-with-session startxfce4

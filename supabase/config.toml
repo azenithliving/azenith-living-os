@@ -1,0 +1,12 @@
+# Supabase Configuration
+project_id = "azenith-living-os"
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+port = 54323

@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+@keyframes spin360 {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+.hover\:spin360:hover {
+  animation: spin360 10s linear infinite;
+}
+
+:root {
+  --brand-primary: #C5A059;
+  --brand-primary-fg: #F5F1E9;
+  --brand-secondary: #F5F1E9;
+  --brand-accent: #1A1A1B;
+  --brand-accent-fg: #ffffff;
+  --brand-primary-glow: rgba(197, 160, 89, 0.18);
+  --bg-start: #161617;
+  --bg-end: #1A1A1B;
+  --zenith-gold: #D4AF37;
+  --zenith-black: #050505;
+  --font-sans: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, var(--brand-primary-glow, rgba(197, 160, 89, 0.18)), transparent 32%),
+    linear-gradient(180deg, var(--bg-start, #161617) 0%, var(--bg-end, #1A1A1B) 100%);
+  color: var(--color-brand-primary-foreground);
+  font-feature-settings: "ss01" 1;
+  direction: rtl;
+  font-family: var(--font-sans);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.glass-section {
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.glass-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}

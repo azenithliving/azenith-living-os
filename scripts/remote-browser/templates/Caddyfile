@@ -1,0 +1,10 @@
+__REMOTE_BROWSER_HOSTNAME__ {
+  reverse_proxy 127.0.0.1:6080
+
+  header {
+    -X-Frame-Options
+    Content-Security-Policy "frame-ancestors __APP_PROD_ORIGIN__ http://localhost:3000"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    X-Content-Type-Options "nosniff"
+  }
+}

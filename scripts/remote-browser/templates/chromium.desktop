@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Chromium
+Exec=/snap/bin/chromium --no-first-run --no-default-browser-check --password-store=basic --start-maximized __CHROMIUM_START_URL__
+X-GNOME-Autostart-enabled=true

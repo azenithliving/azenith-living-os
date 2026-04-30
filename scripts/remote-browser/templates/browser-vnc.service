@@ -1,0 +1,18 @@
+[Unit]
+Description=Remote Browser TigerVNC Server
+After=network.target
+
+[Service]
+Type=forking
+User=__REMOTE_BROWSER_USER__
+Group=__REMOTE_BROWSER_USER__
+WorkingDirectory=/home/__REMOTE_BROWSER_USER__
+Environment=HOME=/home/__REMOTE_BROWSER_USER__
+PIDFile=/home/__REMOTE_BROWSER_USER__/.vnc/%H:1.pid
+ExecStart=/usr/bin/vncserver :1 -geometry __REMOTE_BROWSER_RESOLUTION__ -depth __REMOTE_BROWSER_DEPTH__ -localhost yes
+ExecStop=/usr/bin/vncserver -kill :1
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

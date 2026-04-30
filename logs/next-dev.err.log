@@ -1,0 +1,37 @@
+⚠ Slow filesystem detected. The benchmark took 310ms. If E:\my-app\.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
+[browser] [CMS] Failed to fetch CMS images, falling back to Pexels: AbortError: signal is aborted without reason
+    at HomePageClient.useEffect (components/home-page-client-fixed.tsx:230:29)
+  228 |
+  229 |     void fetchRoomImages();
+> 230 |     return () => controller.abort();
+      |                             ^
+  231 |   }, [roomList, displayStyle]);
+  232 |
+  233 |   useEffect(() => { (components/home-page-client-fixed.tsx:186:19)
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (app/providers.tsx:24:15)
+(node:5480) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[browser] [CMS] Failed to fetch CMS images, falling back to Pexels: AbortError: signal is aborted without reason
+    at HomePageClient.useEffect (components/home-page-client-fixed.tsx:230:29)
+  228 |
+  229 |     void fetchRoomImages();
+> 230 |     return () => controller.abort();
+      |                             ^
+  231 |   }, [roomList, displayStyle]);
+  232 |
+  233 |   useEffect(() => { (components/home-page-client-fixed.tsx:186:19)
+[browser] @supabase/gotrue-js: Lock "lock:sb-dmavypdmtbxzwrexqesu-auth-token" was not released within 5000ms. This may indicate an orphaned lock from a component unmount (e.g., React Strict Mode). Forcefully acquiring the lock to recover.
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (app/providers.tsx:24:15)
+[browser] [AzenithLegacy] Video failed to load for slide 1, using fallback image (components/AzenithLegacy.tsx:131:13)
+[browser] @supabase/gotrue-js: Lock "lock:sb-dmavypdmtbxzwrexqesu-auth-token" was not released within 5000ms. This may indicate an orphaned lock from a component unmount (e.g., React Strict Mode). Forcefully acquiring the lock to recover. (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87271)
+[browser] [AzenithLegacy] Video failed to load for slide 3, using fallback image (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87271)
+[browser] @supabase/gotrue-js: Lock "lock:sb-dmavypdmtbxzwrexqesu-auth-token" was not released within 5000ms. This may indicate an orphaned lock from a component unmount (e.g., React Strict Mode). Forcefully acquiring the lock to recover. (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87271)
+[browser] @supabase/gotrue-js: Lock "lock:sb-dmavypdmtbxzwrexqesu-auth-token" was not released within 5000ms. This may indicate an orphaned lock from a component unmount (e.g., React Strict Mode). Forcefully acquiring the lock to recover. (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87271)
+[browser] @supabase/gotrue-js: Lock "lock:sb-dmavypdmtbxzwrexqesu-auth-token" was not released within 5000ms. This may indicate an orphaned lock from a component unmount (e.g., React Strict Mode). Forcefully acquiring the lock to recover. (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87271)
+[browser] @supabase/gotrue-js: Lock "lock:sb-dmavypdmtbxzwrexqesu-auth-token" was not released within 5000ms. This may indicate an orphaned lock from a component unmount (e.g., React Strict Mode). Forcefully acquiring the lock to recover. (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87271)
+[browser] [AzenithLegacy] Video failed to load for slide 5, using fallback image (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87271)
+[browser] [AzenithLegacy] Video failed to load for slide 6, using fallback image (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87271)
+⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+⚠ Slow filesystem detected. The benchmark took 1334ms. If E:\my-app\.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development

@@ -1,0 +1,349 @@
+
+> azenith-living-os@1.0.0 dev
+> next dev
+
+▲ Next.js 16.2.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.6:3000
+- Environments: .env.local, .env
+✓ Ready in 5.2s
+○ Compiling proxy ...
+
+○ Compiling /robots.txt ...
+ GET /robots.txt 200 in 4.9s (next.js: 4.7s, proxy.ts: 18ms, application-code: 107ms)
+○ Compiling / ...
+[ENV DEBUG] Supabase URL: https://dmavypdmtbxzwrexqesu.supabase.co
+[ENV DEBUG] PostHog Key exists: true
+ GET / 200 in 33.1s (next.js: 30.2s, proxy.ts: 16ms, application-code: 2.9s)
+ GET / 200 in 2.1s (next.js: 67ms, proxy.ts: 21ms, application-code: 1962ms)
+○ Compiling /[...path] ...
+ GET /api/consultant?sessionId=zenith_1777561652602_5p9ey1vek 404 in 46s (next.js: 45s, proxy.ts: 15ms, application-code: 1040ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 48s (next.js: 48s, proxy.ts: 18ms, application-code: 610ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 25.5s (next.js: 25.1s, proxy.ts: 39ms, application-code: 334ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 407ms (next.js: 156ms, proxy.ts: 35ms, application-code: 216ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 474ms (next.js: 170ms, proxy.ts: 34ms, application-code: 269ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 567ms (next.js: 179ms, proxy.ts: 39ms, application-code: 348ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 163ms (next.js: 24ms, proxy.ts: 27ms, application-code: 112ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 215ms (next.js: 37ms, proxy.ts: 29ms, application-code: 149ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 221ms (next.js: 54ms, proxy.ts: 33ms, application-code: 134ms)
+ GET /api/room-sections 200 in 50s (next.js: 49s, proxy.ts: 258ms, application-code: 697ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 425ms (next.js: 71ms, proxy.ts: 59ms, application-code: 295ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 403ms (next.js: 37ms, proxy.ts: 50ms, application-code: 316ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 438ms (next.js: 47ms, proxy.ts: 52ms, application-code: 338ms)
+ GET /videos/hero-1.mp4 404 in 54s (next.js: 54s, proxy.ts: 18ms, application-code: 20ms)
+ GET /videos/hero-2.mp4 404 in 655ms (next.js: 593ms, proxy.ts: 50ms, application-code: 11ms)
+ GET /videos/hero-3.mp4 404 in 675ms (next.js: 615ms, proxy.ts: 49ms, application-code: 11ms)
+ GET /videos/hero-4.mp4 404 in 512ms (next.js: 479ms, proxy.ts: 23ms, application-code: 10ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 715ms (next.js: 145ms, proxy.ts: 34ms, application-code: 537ms)
+[Pexels API] Smart Rotation: Loaded 5 keys
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 2/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 3/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 4/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 5/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 1/5 (attempt 1)
+[Pexels API] Key 2 succeeded!
+[Pexels API] Key 5 succeeded!
+[Pexels API] Key 4 succeeded!
+[Pexels API] Key 3 succeeded!
+[Pexels API] Key 1 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20modern%20living%20room%20high-end%20interior%20design%20architectural%20digest%20lounge&per_page=1&page=6 200 in 9.3s (next.js: 7.4s, proxy.ts: 529ms, application-code: 1415ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20master%20bedroom%20suite%20hotel%20interior%20design&per_page=1&page=6 200 in 9.1s (next.js: 7.4s, proxy.ts: 617ms, application-code: 1165ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20high-end%20kitchen%20marble%20bespoke%20interior%20design&per_page=1&page=8 200 in 9.2s (next.js: 7.4s, proxy.ts: 558ms, application-code: 1217ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20bespoke%20dining%20area%20luxury%20interior%20dining%20modern%20chandelier%20dining%20room&per_page=1&page=3 200 in 9.4s (next.js: 7.4s, proxy.ts: 534ms, application-code: 1439ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%BA%D8%B1%D9%81%D8%A9%20%D9%86%D9%88%D9%85%20%D8%A7%D9%84%D8%B6%D9%8A%D9%88%D9%81&per_page=1&page=10 200 in 9.2s (next.js: 7.4s, proxy.ts: 588ms, application-code: 1174ms)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 2/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 3/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 4/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 5/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 1/5 (attempt 1)
+[Pexels API] Key 2 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%BA%D8%B1%D9%81%D8%A9%20%D8%A7%D9%84%D8%A3%D8%B7%D9%81%D8%A7%D9%84&per_page=1&page=8 200 in 1092ms (next.js: 78ms, proxy.ts: 498ms, application-code: 516ms)
+[Pexels API] Key 1 succeeded!
+[Pexels API] Key 5 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%BA%D8%B1%D9%81%D8%A9%20%D8%A7%D9%84%D8%AF%D8%B1%D8%A7%D8%B3%D8%A9&per_page=1&page=12 200 in 968ms (next.js: 260ms, proxy.ts: 364ms, application-code: 343ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20modern%20teenager%20bedroom%20study%20area%20contemporary%20design&per_page=1&page=12 200 in 1420ms (next.js: 274ms, proxy.ts: 620ms, application-code: 525ms)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 2/5 (attempt 1)
+[Pexels API] Key 3 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20bespoke%20walk-in%20closet%20luxury%20dressing%20room%20interior&per_page=1&page=12 200 in 1522ms (next.js: 171ms, proxy.ts: 591ms, application-code: 760ms)
+[Pexels API] Key 4 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20home%20office%20study%20room%20executive%20interior&per_page=1&page=11 200 in 1565ms (next.js: 234ms, proxy.ts: 567ms, application-code: 764ms)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 3/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 4/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 5/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 1/5 (attempt 1)
+[Pexels API] Key 4 succeeded!
+[Pexels API] Key 2 succeeded!
+[Pexels API] Key 5 succeeded!
+[Pexels API] Key 3 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%A7%D9%84%D9%85%D8%AF%D8%AE%D9%84&per_page=1&page=14 200 in 753ms (next.js: 43ms, proxy.ts: 300ms, application-code: 410ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%A7%D9%84%D8%AD%D9%85%D8%A7%D9%85&per_page=1&page=15 200 in 1133ms (next.js: 22ms, proxy.ts: 361ms, application-code: 750ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20corner%20sofa%20sectional%20living%20room%20high-end%20furniture&per_page=1&page=17 200 in 626ms (next.js: 10ms, proxy.ts: 235ms, application-code: 381ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%AD%D9%85%D8%A7%D9%85%20%D8%A7%D9%84%D8%B6%D9%8A%D9%88%D9%81&per_page=1&page=14 200 in 828ms (next.js: 24ms, proxy.ts: 295ms, application-code: 509ms)
+[Pexels API] Key 1 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20lounge%20seating%20area%20interior%20design%20modern%20elegant&per_page=1&page=20 200 in 873ms (next.js: 6ms, proxy.ts: 230ms, application-code: 637ms)
+ GET /videos/hero-5.mp4 404 in 114ms (next.js: 53ms, proxy.ts: 51ms, application-code: 10ms)
+ GET /videos/hero-6.mp4 404 in 89ms (next.js: 20ms, proxy.ts: 12ms, application-code: 57ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 704ms (next.js: 169ms, proxy.ts: 62ms, application-code: 473ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 705ms (next.js: 190ms, proxy.ts: 68ms, application-code: 447ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 714ms (next.js: 182ms, proxy.ts: 67ms, application-code: 466ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 356ms (next.js: 9ms, proxy.ts: 12ms, application-code: 335ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 132ms (next.js: 11ms, proxy.ts: 15ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 147ms (next.js: 30ms, proxy.ts: 13ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 3.5s (next.js: 20ms, proxy.ts: 10ms, application-code: 3.5s)
+ POST /api/analytics/session 200 in 68s (next.js: 64s, proxy.ts: 78ms, application-code: 4.4s)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 2.8s (next.js: 2.6s, proxy.ts: 14ms, application-code: 108ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 126ms (next.js: 7ms, proxy.ts: 19ms, application-code: 100ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 254ms (next.js: 6ms, proxy.ts: 11ms, application-code: 238ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 129ms (next.js: 12ms, proxy.ts: 20ms, application-code: 97ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 131ms (next.js: 12ms, proxy.ts: 13ms, application-code: 106ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 126ms (next.js: 7ms, proxy.ts: 12ms, application-code: 107ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 18.9s (next.js: 9.3s, proxy.ts: 319ms, application-code: 9.3s)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 1640ms (next.js: 7ms, proxy.ts: 15ms, application-code: 1618ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 503ms (next.js: 9ms, proxy.ts: 379ms, application-code: 116ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 116ms (next.js: 6ms, proxy.ts: 10ms, application-code: 99ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 710ms (next.js: 375ms, proxy.ts: 221ms, application-code: 115ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 119ms (next.js: 6ms, proxy.ts: 11ms, application-code: 101ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 716ms (next.js: 6ms, proxy.ts: 13ms, application-code: 697ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 124ms (next.js: 7ms, proxy.ts: 10ms, application-code: 107ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 124ms (next.js: 6ms, proxy.ts: 10ms, application-code: 108ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 116ms (next.js: 6ms, proxy.ts: 11ms, application-code: 100ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 138ms (next.js: 10ms, proxy.ts: 12ms, application-code: 116ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 126ms (next.js: 6ms, proxy.ts: 10ms, application-code: 109ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 253ms (next.js: 12ms, proxy.ts: 10ms, application-code: 231ms)
+✓ Finished writing to filesystem cache in 44s
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 476ms (next.js: 6ms, proxy.ts: 10ms, application-code: 459ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 127ms (next.js: 8ms, proxy.ts: 11ms, application-code: 108ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 116ms (next.js: 6ms, proxy.ts: 10ms, application-code: 100ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 126ms (next.js: 8ms, proxy.ts: 12ms, application-code: 106ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 114ms (next.js: 6ms, proxy.ts: 10ms, application-code: 98ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 218ms (next.js: 99ms, proxy.ts: 11ms, application-code: 108ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 120ms (next.js: 5ms, proxy.ts: 10ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 126ms (next.js: 8ms, proxy.ts: 11ms, application-code: 107ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 296ms (next.js: 6ms, proxy.ts: 10ms, application-code: 280ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 139ms (next.js: 6ms, proxy.ts: 13ms, application-code: 121ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 124ms (next.js: 5ms, proxy.ts: 10ms, application-code: 109ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 452ms (next.js: 6ms, proxy.ts: 13ms, application-code: 433ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 120ms (next.js: 8ms, proxy.ts: 12ms, application-code: 100ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 124ms (next.js: 8ms, proxy.ts: 11ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 849ms (next.js: 7ms, proxy.ts: 12ms, application-code: 831ms)
+ GET / 200 in 21.6s (next.js: 4.5s, proxy.ts: 13ms, application-code: 17.0s)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 616ms (next.js: 6ms, proxy.ts: 12ms, application-code: 598ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 561ms (next.js: 15ms, proxy.ts: 13ms, application-code: 533ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 394ms (next.js: 187ms, proxy.ts: 11ms, application-code: 197ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 121ms (next.js: 7ms, proxy.ts: 10ms, application-code: 104ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 120ms (next.js: 7ms, proxy.ts: 10ms, application-code: 104ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 120ms (next.js: 5ms, proxy.ts: 10ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 140ms (next.js: 8ms, proxy.ts: 12ms, application-code: 120ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 124ms (next.js: 6ms, proxy.ts: 11ms, application-code: 107ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 151ms (next.js: 5ms, proxy.ts: 11ms, application-code: 135ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 161ms (next.js: 6ms, proxy.ts: 12ms, application-code: 143ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 147ms (next.js: 7ms, proxy.ts: 12ms, application-code: 128ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 214ms (next.js: 6ms, proxy.ts: 79ms, application-code: 129ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 120ms (next.js: 6ms, proxy.ts: 10ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 129ms (next.js: 9ms, proxy.ts: 12ms, application-code: 108ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 122ms (next.js: 6ms, proxy.ts: 11ms, application-code: 106ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 121ms (next.js: 5ms, proxy.ts: 10ms, application-code: 106ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 130ms (next.js: 8ms, proxy.ts: 14ms, application-code: 107ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 133ms (next.js: 7ms, proxy.ts: 12ms, application-code: 114ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 121ms (next.js: 6ms, proxy.ts: 11ms, application-code: 104ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 126ms (next.js: 9ms, proxy.ts: 11ms, application-code: 106ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 2.7s (next.js: 2.4s, proxy.ts: 10ms, application-code: 290ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 1531ms (next.js: 1402ms, proxy.ts: 10ms, application-code: 118ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 1048ms (next.js: 935ms, proxy.ts: 10ms, application-code: 103ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 217ms (next.js: 100ms, proxy.ts: 10ms, application-code: 108ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 966ms (next.js: 853ms, proxy.ts: 10ms, application-code: 102ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 161ms (next.js: 7ms, proxy.ts: 10ms, application-code: 143ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 130ms (next.js: 7ms, proxy.ts: 14ms, application-code: 108ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 123ms (next.js: 7ms, proxy.ts: 11ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 222ms (next.js: 5ms, proxy.ts: 12ms, application-code: 205ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 117ms (next.js: 9ms, proxy.ts: 11ms, application-code: 97ms)
+ GET /videos/hero-1.mp4 404 in 868ms (next.js: 620ms, proxy.ts: 10ms, application-code: 238ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 115ms (next.js: 5ms, proxy.ts: 10ms, application-code: 99ms)
+ GET /api/room-sections 200 in 1877ms (next.js: 20ms, proxy.ts: 1512ms, application-code: 346ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 116ms (next.js: 6ms, proxy.ts: 11ms, application-code: 99ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 139ms (next.js: 12ms, proxy.ts: 14ms, application-code: 113ms)
+ GET /api/room-sections 200 in 443ms (next.js: 10ms, proxy.ts: 239ms, application-code: 195ms)
+ GET /api/consultant?sessionId=zenith_1777561998062_bqg4tgwoa 404 in 8.7s (next.js: 8.4s, proxy.ts: 19ms, application-code: 333ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 9.5s (next.js: 9.3s, proxy.ts: 13ms, application-code: 154ms)
+ POST /api/analytics/session 200 in 5.9s (next.js: 3.7s, proxy.ts: 164ms, application-code: 1985ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 6.2s (next.js: 4.9s, proxy.ts: 28ms, application-code: 1236ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 3.4s (next.js: 2.0s, proxy.ts: 78ms, application-code: 1284ms)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 2/5 (attempt 1)
+[Pexels API] Key 2 succeeded!
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 3/5 (attempt 1)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20modern%20living%20room%20high-end%20interior%20design%20architectural%20digest%20lounge&per_page=1&page=6 200 in 3.4s (next.js: 889ms, proxy.ts: 1464ms, application-code: 999ms)
+[Pexels API] Key 3 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20high-end%20kitchen%20marble%20bespoke%20interior%20design&per_page=1&page=5 200 in 3.6s (next.js: 1029ms, proxy.ts: 1569ms, application-code: 994ms)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 4/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 5/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 1/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 2/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 3/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 4/5 (attempt 1)
+[Pexels API] Key 4 succeeded!
+[Pexels API] Key 5 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20master%20bedroom%20suite%20hotel%20interior%20design&per_page=1&page=8 200 in 6.1s (next.js: 2.9s, proxy.ts: 1648ms, application-code: 1514ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20bespoke%20dining%20area%20luxury%20interior%20dining%20modern%20chandelier%20dining%20room&per_page=1&page=3 200 in 6.2s (next.js: 3.2s, proxy.ts: 1686ms, application-code: 1249ms)
+[Pexels API] Key 4 succeeded!
+[Pexels API] Key 2 succeeded!
+[Pexels API] Key 3 succeeded!
+[Pexels API] Key 1 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20bespoke%20walk-in%20closet%20luxury%20dressing%20room%20interior&per_page=1&page=10 200 in 3.1s (next.js: 1583ms, proxy.ts: 439ms, application-code: 1104ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%BA%D8%B1%D9%81%D8%A9%20%D9%86%D9%88%D9%85%20%D8%A7%D9%84%D8%B6%D9%8A%D9%88%D9%81&per_page=1&page=10 200 in 5.9s (next.js: 3.2s, proxy.ts: 904ms, application-code: 1832ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20modern%20teenager%20bedroom%20study%20area%20contemporary%20design&per_page=1&page=9 200 in 3.8s (next.js: 1764ms, proxy.ts: 430ms, application-code: 1632ms)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 5/5 (attempt 1)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%BA%D8%B1%D9%81%D8%A9%20%D8%A7%D9%84%D8%A3%D8%B7%D9%81%D8%A7%D9%84&per_page=1&page=11 200 in 6.3s (next.js: 3.1s, proxy.ts: 931ms, application-code: 2.2s)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 1/5 (attempt 1)
+[Pexels API] Key 1 succeeded!
+[Pexels API] Key 5 succeeded!
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 2/5 (attempt 1)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%BA%D8%B1%D9%81%D8%A9%20%D8%A7%D9%84%D8%AF%D8%B1%D8%A7%D8%B3%D8%A9&per_page=1&page=12 200 in 1373ms (next.js: 213ms, proxy.ts: 705ms, application-code: 455ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20home%20office%20study%20room%20executive%20interior&per_page=1&page=14 200 in 2.2s (next.js: 436ms, proxy.ts: 588ms, application-code: 1128ms)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 3/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 4/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 5/5 (attempt 1)
+[Pexels API] Stats: 5 total, 5 available, 0 blacklisted
+[Pexels API] Round-Robin: Using key 1/5 (attempt 1)
+[Pexels API] Key 2 succeeded!
+[Pexels API] Key 3 succeeded!
+[Pexels API] Key 4 succeeded!
+[Pexels API] Key 1 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%A7%D9%84%D8%AD%D9%85%D8%A7%D9%85&per_page=1&page=12 200 in 4.2s (next.js: 126ms, proxy.ts: 907ms, application-code: 3.1s)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%AD%D9%85%D8%A7%D9%85%20%D8%A7%D9%84%D8%B6%D9%8A%D9%88%D9%81&per_page=1&page=15 200 in 3.9s (next.js: 218ms, proxy.ts: 1070ms, application-code: 2.6s)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20corner%20sofa%20sectional%20living%20room%20high-end%20furniture&per_page=1&page=18 200 in 3.9s (next.js: 302ms, proxy.ts: 963ms, application-code: 2.7s)
+[Pexels API] Key 5 succeeded!
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20luxury%20lounge%20seating%20area%20interior%20design%20modern%20elegant&per_page=1&page=17 200 in 3.8s (next.js: 1097ms, proxy.ts: 786ms, application-code: 1907ms)
+ GET /api/pexels?query=modern%20minimal%20luxury%20luxury%20interior%20design%20%D8%A7%D9%84%D9%85%D8%AF%D8%AE%D9%84&per_page=1&page=14 200 in 4.5s (next.js: 1282ms, proxy.ts: 1115ms, application-code: 2.2s)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 4.8s (next.js: 1783ms, proxy.ts: 273ms, application-code: 2.7s)
+ GET /videos/hero-3.mp4 404 in 762ms (next.js: 689ms, proxy.ts: 65ms, application-code: 8ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 536ms (next.js: 138ms, proxy.ts: 47ms, application-code: 351ms)
+ GET / 200 in 4.3s (next.js: 670ms, proxy.ts: 321ms, application-code: 3.3s)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 3.8s (next.js: 3.0s, proxy.ts: 47ms, application-code: 804ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 965ms (next.js: 514ms, proxy.ts: 31ms, application-code: 419ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 351ms (next.js: 17ms, proxy.ts: 25ms, application-code: 308ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 154ms (next.js: 5ms, proxy.ts: 32ms, application-code: 117ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 278ms (next.js: 10ms, proxy.ts: 25ms, application-code: 243ms)
+ GET /videos/hero-4.mp4 404 in 346ms (next.js: 242ms, proxy.ts: 84ms, application-code: 20ms)
+ GET /videos/hero-5.mp4 404 in 352ms (next.js: 228ms, proxy.ts: 76ms, application-code: 47ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 555ms (next.js: 137ms, proxy.ts: 87ms, application-code: 331ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 1127ms (next.js: 772ms, proxy.ts: 63ms, application-code: 292ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 611ms (next.js: 23ms, proxy.ts: 88ms, application-code: 500ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 313ms (next.js: 119ms, proxy.ts: 64ms, application-code: 130ms)
+ GET /videos/hero-6.mp4 404 in 33ms (next.js: 15ms, proxy.ts: 10ms, application-code: 8ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 213ms (next.js: 16ms, proxy.ts: 35ms, application-code: 162ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 994ms (next.js: 355ms, proxy.ts: 251ms, application-code: 389ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 235ms (next.js: 31ms, proxy.ts: 60ms, application-code: 144ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 249ms (next.js: 58ms, proxy.ts: 40ms, application-code: 151ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 775ms (next.js: 6ms, proxy.ts: 12ms, application-code: 757ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 1271ms (next.js: 15ms, proxy.ts: 344ms, application-code: 913ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 460ms (next.js: 7ms, proxy.ts: 21ms, application-code: 432ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 916ms (next.js: 349ms, proxy.ts: 48ms, application-code: 518ms)
+○ Compiling /api/telemetry ...
+ GET /videos/hero-2.mp4 404 in 5.6s (next.js: 5.6s, proxy.ts: 51ms, application-code: 13ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 4.8s (next.js: 3.9s, proxy.ts: 33ms, application-code: 853ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 268ms (next.js: 143ms, proxy.ts: 28ms, application-code: 96ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 819ms (next.js: 709ms, proxy.ts: 10ms, application-code: 99ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 440ms (next.js: 335ms, proxy.ts: 10ms, application-code: 96ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 403ms (next.js: 288ms, proxy.ts: 10ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 1502ms (next.js: 1395ms, proxy.ts: 10ms, application-code: 96ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 7.2s (next.js: 7.0s, proxy.ts: 9ms, application-code: 242ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 1500ms (next.js: 1387ms, proxy.ts: 10ms, application-code: 103ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 205ms (next.js: 88ms, proxy.ts: 10ms, application-code: 107ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 752ms (next.js: 637ms, proxy.ts: 10ms, application-code: 104ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 152ms (next.js: 32ms, proxy.ts: 10ms, application-code: 110ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 736ms (next.js: 390ms, proxy.ts: 10ms, application-code: 336ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 141ms (next.js: 6ms, proxy.ts: 10ms, application-code: 126ms)
+✓ Finished filesystem cache database compaction in 5.9min
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 1823ms (next.js: 1410ms, proxy.ts: 10ms, application-code: 403ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 1248ms (next.js: 1138ms, proxy.ts: 9ms, application-code: 101ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 118ms (next.js: 6ms, proxy.ts: 9ms, application-code: 103ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 118ms (next.js: 6ms, proxy.ts: 10ms, application-code: 102ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 257ms (next.js: 6ms, proxy.ts: 20ms, application-code: 232ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 120ms (next.js: 5ms, proxy.ts: 9ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 114ms (next.js: 5ms, proxy.ts: 10ms, application-code: 98ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 182ms (next.js: 68ms, proxy.ts: 10ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 122ms (next.js: 13ms, proxy.ts: 9ms, application-code: 99ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 156ms (next.js: 44ms, proxy.ts: 9ms, application-code: 102ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 401ms (next.js: 13ms, proxy.ts: 9ms, application-code: 378ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 486ms (next.js: 12ms, proxy.ts: 10ms, application-code: 463ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 283ms (next.js: 27ms, proxy.ts: 10ms, application-code: 246ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 219ms (next.js: 106ms, proxy.ts: 10ms, application-code: 103ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 208ms (next.js: 47ms, proxy.ts: 11ms, application-code: 151ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 130ms (next.js: 15ms, proxy.ts: 11ms, application-code: 104ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 254ms (next.js: 148ms, proxy.ts: 9ms, application-code: 97ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 119ms (next.js: 7ms, proxy.ts: 10ms, application-code: 102ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 148ms (next.js: 38ms, proxy.ts: 11ms, application-code: 99ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 123ms (next.js: 9ms, proxy.ts: 12ms, application-code: 102ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 169ms (next.js: 20ms, proxy.ts: 41ms, application-code: 107ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 123ms (next.js: 9ms, proxy.ts: 12ms, application-code: 101ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 151ms (next.js: 39ms, proxy.ts: 11ms, application-code: 101ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 149ms (next.js: 31ms, proxy.ts: 14ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 126ms (next.js: 17ms, proxy.ts: 11ms, application-code: 98ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 751ms (next.js: 635ms, proxy.ts: 11ms, application-code: 104ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 180ms (next.js: 70ms, proxy.ts: 11ms, application-code: 100ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 121ms (next.js: 5ms, proxy.ts: 13ms, application-code: 104ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 1630ms (next.js: 66ms, proxy.ts: 12ms, application-code: 1552ms)
+ POST /api/telemetry 200 in 2.7min (proxy.ts: 18ms)
+ POST /api/telemetry 200 in 2.8min (proxy.ts: 53ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 1464ms (next.js: 1302ms, proxy.ts: 57ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 553ms (next.js: 421ms, proxy.ts: 11ms, application-code: 121ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 119ms (next.js: 6ms, proxy.ts: 10ms, application-code: 102ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 118ms (next.js: 6ms, proxy.ts: 10ms, application-code: 102ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 122ms (next.js: 6ms, proxy.ts: 14ms, application-code: 102ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 129ms (next.js: 7ms, proxy.ts: 10ms, application-code: 112ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 118ms (next.js: 6ms, proxy.ts: 10ms, application-code: 101ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 465ms (next.js: 6ms, proxy.ts: 10ms, application-code: 449ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 123ms (next.js: 12ms, proxy.ts: 12ms, application-code: 99ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 120ms (next.js: 5ms, proxy.ts: 9ms, application-code: 106ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 123ms (next.js: 9ms, proxy.ts: 14ms, application-code: 101ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 126ms (next.js: 7ms, proxy.ts: 10ms, application-code: 108ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 119ms (next.js: 7ms, proxy.ts: 10ms, application-code: 102ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 132ms (next.js: 7ms, proxy.ts: 12ms, application-code: 113ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 382ms (next.js: 7ms, proxy.ts: 10ms, application-code: 365ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 126ms (next.js: 10ms, proxy.ts: 12ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 124ms (next.js: 7ms, proxy.ts: 16ms, application-code: 100ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 154ms (next.js: 15ms, proxy.ts: 13ms, application-code: 126ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 150ms (next.js: 5ms, proxy.ts: 10ms, application-code: 135ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 122ms (next.js: 6ms, proxy.ts: 14ms, application-code: 102ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 113ms (next.js: 5ms, proxy.ts: 10ms, application-code: 98ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 122ms (next.js: 6ms, proxy.ts: 12ms, application-code: 105ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 420ms (next.js: 165ms, proxy.ts: 147ms, application-code: 109ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 123ms (next.js: 6ms, proxy.ts: 12ms, application-code: 104ms)
+ GET /api/reality/check?sessionId=zenith_1777561652602_5p9ey1vek 200 in 134ms (next.js: 8ms, proxy.ts: 13ms, application-code: 114ms)
+ GET /api/reality/check?sessionId=zenith_1777561998062_bqg4tgwoa 200 in 573ms (next.js: 9ms, proxy.ts: 13ms, application-code: 552ms)
+▲ Next.js 16.2.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.6:3000
+- Environments: .env.local, .env
+✓ Ready in 19.5s
+○ Compiling proxy ...
+

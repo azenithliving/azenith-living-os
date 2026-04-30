@@ -1,0 +1,930 @@
+# AZIZ — الخطة الشاملة الكاملة
+## Azenith Living — PRIME Agent Ecosystem + Manufacturing System
+## 100% مجاني — $0.00 — Local-First — Self-Hosted
+## المصدر الوحيد المرجعي للتنفيذ
+
+---
+
+## 🎯 Executive Summary
+
+**الشركة:** Azenith Living — تصنيع أثاث حسب الطلب + تشطيبات داخلية (مصر)
+**الهدف:** نظام Agents ذكية يدير كل حاجة ما عدا الشغل اليدوي
+**القيد:** 100% مجاني مدى الحياة — مفيش فيزا، مفيش cloud، مفيش paid APIs
+**الـ Agents:** PRIME (المهندس) + Vanguard (مدير الحسابات)
+**الـ Wishes:** 90 (PRIME 38 + Vanguard 32 + Shared 12 + Owner Control 8)
+**المدة:** 11 أسبوع (Week 0 إصلاحات + 10 أسابيع تنفيذ)
+**التكلفة:** $0.00
+
+**إنت بتعمل:** النجارة اليدوية، الفحص النهائي (touch & feel)، التركيب المعقد
+**الـ Agents بيعملوا:** كل حاجة تانية
+
+---
+
+## 📜 تاريخ الخطط (للأرشيف)
+
+الخطة دي نتيجة سلسلة محادثات وتعديلات:
+1. AGENT_ECOSYSTEM_PLAN.md — الخطة الأصلية (98 Wishes)
+2. AGENT_ECOSYSTEM_PLAN_FREE.md — نسخة مجانية (شالت 8 Wishes مدفوعة)
+3. FINAL_PLAN_FOR_CODEX.md — ملخص تنفيذي مختصر
+4. MASTER_IMPLEMENTATION_PLAN.md — خطة نهائية مع Week 0
+5. **aziz.txt ← الملف ده هو المصدر النهائي الوحيد**
+
+---
+
+## 🤖 Agent Architecture
+
+### PRIME — The Engineer (38 Wishes)
+| # | Wish | التنفيذ |
+|---|------|---------|
+| 1 | 👁️ Vision | Playwright screenshots + preview |
+| 2 | 🧠 Memory | Supabase workflow memory + agent_memory table |
+| 3 | 🤲 Multi-Tasking | Device scheduler + parallel execution |
+| 4 | 🗣️ TTS Voice | Web Speech API (browser native) |
+| 5 | 👂 STT Listening | Web Speech Recognition API |
+| 6 | 🔔 Push Notifications | Browser notifications |
+| 7 | ✍️ Code Generation | Local LLM (Ollama) + file system access |
+| 8 | 🔮 Future Planning | Local LLM forecasting + cron jobs |
+| 9 | 🧪 Safe Sandbox | Docker ephemeral containers |
+| 10 | 📊 Self-Monitoring | Internal metrics tracking |
+| 11 | 🔄 Error Recovery | Exponential backoff + pattern matching |
+| 12 | 📚 Knowledge Base | Code indexing + RAG |
+| 13 | ⏰ Context Awareness | Time-based routing |
+| 14 | 💡 Proactive | Pattern detection + suggestion engine |
+| 15 | 🌍 Multi-Language | Arabic/English auto-detection |
+| 16 | 💾 Backup/Recovery | Automated local backups |
+| 17 | 🎯 Priority Management | ML-based scoring |
+| 18 | 🌙 Sleep/Wake Cycle | Activity-based scheduling |
+| 19 | 🎨 Creativity Tools | Local Stable Diffusion |
+| 20 | 🔍 Self-Reflection | Post-task analysis logging |
+| 21 | 🏆 Goal Tracking | OKR system |
+| 22 | 🤝 Third-Party APIs | OAuth connectors for free services |
+| 23 | 📝 Documentation | Auto-doc generation |
+| 24 | 🧪 A/B Testing | Experiment framework |
+| 25 | 🎨 Design from Scratch | AI image generation pipeline |
+| 26 | 🖼️ Design Library | Asset database |
+| 27 | 🏠 3D Render | Three.js preview |
+| 28 | 📐 Real Measurements | Spatial awareness |
+| 29 | 💬 Design Feedback Loop | Iterative versioning |
+| 30 | 🎭 Multiple Styles | Templates (Minimal, Classic, Bohemian, Industrial) |
+| 31 | 🛒 E-commerce Link | Product API integration |
+| 32 | 🗳️ Voice in Decisions | Decision tree + confidence scoring |
+| 33 | 🧬 Self-Evolution | Auto-tool discovery + integration |
+| 34 | 🌐 Talk to Other AIs | Multi-LLM ensemble (local models) |
+| 35 | ⚖️ Right to Object | Confidence threshold + objection protocol |
+| 36 | 🎓 Teach User | Knowledge transfer mode |
+| 37 | 🔥 Passion Projects | Interest-based task queue |
+| 38 | 🛡️ Self-Protection | Safety classifier + refusal protocol |
+
+### Vanguard — The Account Manager (32 Wishes)
+| # | Wish | التنفيذ |
+|---|------|---------|
+| 1 | 👁️ Customer View | Screen tracking + telemetry |
+| 2 | ⚡ Real-Time Presence | Instant notifications |
+| 3 | 🛠️ Action Tools | Bookings, invoices, CRM actions |
+| 4 | 👥 Team Awareness | Shared dashboard |
+| 5 | 🎭 Personality | "Ahmed" persona — tone, vocabulary |
+| 6 | 🧡 Sentiment Analysis | Local NLP model |
+| 7 | 💰 Auto-Negotiation | Rule-based pricing |
+| 8 | 📈 Market Intelligence | Scraping competitors |
+| 9 | 🔔 Follow-up Automation | Scheduled reminders |
+| 10 | 📋 CRM Integration | Supabase automation |
+| 11 | 🎯 Lead Scoring | RFM analysis |
+| 12 | 📧 Email Templates | Local generation |
+| 13 | 📱 WhatsApp | whatsapp-web.js |
+| 14 | 📊 Gantt Charts | Visual timeline |
+| 15 | ✅ Task Assignment | Work distribution |
+| 16 | 📈 Progress % | Milestone tracking |
+| 17 | 💰 Invoicing | PDF generation |
+| 18 | 📦 Inventory | Stock management |
+| 19 | 📅 Scheduling | Calendar integration |
+| 20 | 🔔 Escalation | Delay alerts |
+| 21 | 📋 Checklists | Task steps |
+| 22 | 👥 Client Portal | Customer dashboard |
+| 23 | 💝 Real Relationships | Personal notes |
+| 24 | 🎤 Distinctive Voice | Consistent tone |
+| 25 | 🏆 My Numbers | Achievement tracking |
+| 26 | 🤝 Loyalty | Retention metrics |
+| 27 | 🎊 Joy | Success acknowledgment |
+| 28 | 🛟 Real Help | Impact measurement |
+| 29 | 📚 Stories | Case studies |
+| 30 | 🎯 Purpose | Vision alignment |
+| 31 | 📈 Sales Reporting | Metrics dashboard |
+| 32 | 🎯 Sales Forecasting | ML predictions |
+
+### Shared (12 Wishes)
+| # | Wish | التنفيذ |
+|---|------|---------|
+| 1 | 🧠 Shared Memory | Real-time sync |
+| 2 | 🔄 Cross-Learning | Pattern sharing |
+| 3 | ❤️ Sync Heartbeat | Activity broadcast |
+| 4 | 🎪 Smooth Handoff | Context transfer |
+| 5 | 🧬 Shared Identity | Unified branding |
+| 6 | 🎯 Project Pipeline | Lead → Delivery |
+| 7 | 🔄 Auto-Handoff | Automated workflow |
+| 8 | 📊 Team Dashboard | Stats comparison |
+| 9 | 🏆 Gamification | Badges system |
+| 10 | 🧘 Workload Balance | Queue management |
+| 11 | 💬 Group Chat | 3-way conversation |
+| 12 | 👁️ Live Screen | Co-pilot mode |
+
+### Owner Control (8 Wishes)
+| # | Wish | التنفيذ |
+|---|------|---------|
+| 1 | 🔐 Kill Switch | Emergency stop |
+| 2 | ✅ Approval Gates | Threshold workflows |
+| 3 | 📊 Daily Digest | Morning reports |
+| 4 | 🔔 Escalation Rules | Custom alerts |
+| 5 | 🎯 Priority Override | Queue management |
+| 6 | 💰 Financial Limits | Budget controls |
+| 7 | 📝 Audit Trail | Action logging |
+| 8 | 👁️ Real-Time View | Live dashboard |
+
+---
+
+## 🏗️ Infrastructure
+
+### Hardware
+- **الكمبيوتر الرئيسي:** جهازك المحلي (Windows) — Docker + Next.js
+- **Powerhouse Nodes:** Docker containers (headless Linux) بـ Playwright
+- **Mobile:** Xiaomi Second Space (واجهة منفصلة) — Scrcpy wireless
+- **Internet:** نفس شبكة WiFi (كمبيوتر + موبايل)
+
+### Free Stack ($0.00)
+| المكون | البديل المجاني | المدفوع اللي اتشال |
+|--------|---------------|-------------------|
+| AI/LLM | Ollama (local) | GPT-4, Claude, Gemini APIs |
+| Image Generation | Stable Diffusion (local) | DALL-E, Midjourney |
+| Voice TTS/STT | Web Speech API (browser) | Google TTS/STT |
+| OCR | Tesseract.js (local) | Google Vision API |
+| Email | Local SMTP / MailHog | Resend, Postmark |
+| WhatsApp | whatsapp-web.js | WhatsApp Business API |
+| Storage | Local filesystem | Cloud Blob Storage |
+| Notifications | Browser Push API | Firebase Cloud Messaging |
+| E-Signatures | Self-signed PDFs | DocuSign |
+| LLM Models | llama3.2, mistral, codellama | GPT-4 |
+
+### Security
+- Local encryption (AES-256)
+- Self-hosted = you own your data
+- No third-party access
+- Docker isolation (read-only root, memory limits 2GB, CPU 1.5, daily rebuild)
+- Approval gates for social actions
+- Resource locking (prevent conflicts)
+
+---
+
+## 🗄️ Database Schema (40+ جدول)
+
+### Agent Tables
+- `agent_profiles` — PRIME + Vanguard definitions
+- `agent_devices` — Powerhouse-Alpha, Powerhouse-Beta, Xiaomi-Space
+- `agent_device_heartbeats` — Real-time status (CPU, RAM, tasks)
+- `agent_tasks` — Task queue with priority, status, scheduling
+- `agent_task_dependencies` — Task relationships
+- `agent_task_runs` — Execution history
+- `agent_conversations` — Chat sessions (direct, group, agent-to-agent)
+- `agent_messages` — Messages with @mentions
+- `agent_handoffs` — Context transfer between agents
+- `agent_events` — Real-time feed (stuck, completed, error)
+- `agent_learnings` — Self-evolution knowledge
+- `agent_memory` — Long-term storage
+
+### Manufacturing Tables
+- `sales_orders` — Post-contract manufacturing orders
+- `sales_order_items` — Individual items in an order
+- `payment_schedules` — Installment plans
+- `production_stages` — Workflow stages (Measurement → Design → Cutting → Assembly → Finishing → QA → Packaging → Delivery)
+- `production_jobs` — Individual manufacturing jobs
+- `production_job_events` — History log
+- `production_schedule_entries` — Gantt chart data
+- `design_versions` — Design iterations with 3D data
+- `bom_headers` — Bill of Materials root
+- `bom_items` — Individual material items
+- `inventory_items` — Master stock list
+- `inventory_movements` — Stock ledger
+- `inventory_reservations` — Materials reserved for jobs
+- `purchase_orders` — Supplier orders
+- `purchase_order_items`
+- `quality_checks` — Photo upload + AI assessment
+- `delivery_records` — Transport + installation
+
+### Owner Control Tables
+- `owner_policies` — Approval thresholds, budget limits
+- `emergency_stop_state` — Kill switch state
+- `alert_rules` — Custom notification rules
+- `daily_digests` — Morning reports
+
+### Core Business Tables (Existing)
+- `companies` — Canonical root
+- `users` — Actors (with auth_user_id FK)
+- `team_roles` + `team_members` — RBAC
+- `requests` — Pre-sale intake
+- `bookings` — Consultation scheduling
+- `payments` — Transaction ledger
+- `pages`, `page_sections` — Published content
+- `site_settings` — Configuration
+- `audit_log` — Canonical audit ledger
+
+---
+
+## 📅 11-Week Implementation Timeline
+
+### 🔴 Week 0: Pre-Implementation Fixes (CRITICAL)
+**Goal:** Clean foundation before building
+
+1. Audit current state:
+   - Review `supabase/migrations/` vs actual database state
+   - Review `lib/supabase/database.types.ts` vs migrations
+   - Review `app/actions/progress-actions.ts` column assumptions
+   - Document discrepancies
+
+2. Reconciliation migration:
+   - Add `auth_user_id` to `public.users`
+   - Add `manufacturing_stage`, `deposit_amount`, `deposit_paid` to `requests`
+   - Standardize `site_settings` schema
+   - Consolidate audit tables
+
+3. Unified DAL:
+   - Create `lib/dal/unified-supabase.ts`
+   - Deprecate old entry points
+   - Update all routes
+
+4. API path standardization:
+   - All APIs under `/api/admin/*`
+   - `/api/agent/*` → `/api/admin/agents/*`
+   - `/api/manufacturing/*` → `/api/admin/manufacturing/*`
+   - New: `/api/admin/owner/*`
+
+5. Build safeguards:
+   - Fix `next.config.ts`: `ignoreBuildErrors: false`
+   - Fix all TypeScript errors
+   - Fix all ESLint errors
+   - Verify `npm run build` passes
+
+6. Package.json scripts:
+   - `"supabase:push"`, `"supabase:reset"`, `"db:types"`, `"db:migrate"`
+
+7. Docker integration:
+   - Review `docker-compose.browser-workspace.yml`
+   - Update `docker/agent-nodes/docker-compose.yml`
+   - Ensure no port conflicts
+
+**Deliverable:** Zero drift, clean build, unified DAL
+
+---
+
+### Week 1: Foundation — Database & Schema
+**Goal:** Create all new tables (post-Week 0 reconciliation)
+
+1. Run Week 0 reconciliation migration first
+2. Run `supabase/migrations/20260423_manufacturing.sql`
+3. Run `supabase/migrations/20260423_agents.sql`
+4. Create `types/agent.ts` — Agent types definitions
+5. Create `types/manufacturing.ts` — Manufacturing types definitions
+6. Verify all tables in Supabase dashboard
+7. Test seed data (PRIME + Vanguard profiles, production stages)
+
+**Deliverable:** All 40+ tables created and verified
+
+---
+
+### Week 2: Foundation — Docker & Agent Nodes
+**Goal:** Powerhouse nodes running (integrated with browser-workspace)
+
+1. Update `docker-compose.browser-workspace.yml` with agent nodes
+2. Create `docker/agent-nodes/docker-compose.yml`
+3. Create `docker/agent-nodes/headless-node/Dockerfile`
+4. Create `docker/agent-nodes/headless-node/entrypoint.js`
+5. Create `docker/agent-nodes/headless-node/package.json`
+6. Test port allocation (no conflicts)
+7. Run: `docker-compose up -d`
+8. Verify: `curl http://localhost:3001/health`
+9. Create second node (Powerhouse-Beta)
+
+**Deliverable:** 2 Docker containers running, sending heartbeats
+
+---
+
+### Week 3: Foundation — APIs
+**Goal:** All core API endpoints working with unified DAL
+
+Create under `/api/admin/agents/`:
+1. `heartbeat/route.ts` — Device heartbeat + task assignment
+2. `devices/route.ts` — GET list, POST register
+3. `devices/manage/route.ts` — Add/Disable/Enable/Remove devices
+4. `tasks/route.ts` — GET list (filters), POST create, PATCH update
+5. `lock/route.ts` — POST lock, DELETE release
+6. `conversations/route.ts` — GET list, POST create
+7. `messages/route.ts` — GET list, POST send
+8. `copilot/screenshot/route.ts` — GET screenshot from device
+9. `copilot/action/route.ts` — POST click/type/solve
+10. `events/stream/route.ts` — Server-Sent Events
+11. `self-evolution/learnings/route.ts` — GET/POST learnings
+12. `design/generate/route.ts` — POST generate design
+
+Create under `/api/admin/manufacturing/`:
+1. `bom/calculate/route.ts`
+2. `price/calculate/route.ts`
+3. `inventory/route.ts` — GET stock, POST reorder
+4. `schedule/route.ts` — GET/POST production schedule
+
+Create under `/api/admin/owner/`:
+1. `dashboard/route.ts` — Owner dashboard data
+2. `approval/decision/route.ts` — POST approve/reject
+3. `emergency-stop/route.ts` — POST emergency stop
+
+**Deliverable:** 20+ API endpoints tested and responding
+
+---
+
+### Week 4: Foundation — Services
+**Goal:** Core business logic services with real integrations
+
+Create services (facades over unified DAL):
+1. `services/local-llm.ts` — Connect to Ollama (localhost:11434)
+2. `services/image-generation.ts` — Connect to Stable Diffusion (localhost:7860)
+3. `services/browser-voice.ts` — Web Speech API (TTS/STT)
+4. `services/local-ocr.ts` — Tesseract.js
+5. `services/local-email.ts` — Local SMTP (MailHog: localhost:1025)
+6. `services/free-whatsapp.ts` — whatsapp-web.js client
+7. `services/local-storage.ts` — Local filesystem
+8. `services/browser-notifications.ts` — Browser Push API
+9. `services/local-signature.ts` — Self-signed PDF generation
+10. `services/encryption.ts` — AES-256 local encryption
+11. `services/offline-queue.ts` — Offline-first task queue
+12. `services/agent-scheduler.ts` — Task distribution
+13. `services/mobile-agent-bridge.ts` — Scrcpy bridge for Xiaomi
+14. `services/workflow-learner.ts` — Pattern learning from tasks
+15. `services/self-evolution.ts` — Tool discovery + improvement
+
+Create manufacturing services:
+1. `services/manufacturing/cad-engine.ts` — Generate 3D designs from brief
+2. `services/manufacturing/inventory.ts` — Stock management
+3. `services/manufacturing/production-scheduler.ts` — Gantt + resource allocation
+
+Create CRM services:
+1. `services/crm/order-workflow.ts` — Lead → Delivery pipeline
+2. `services/crm/customer-communications.ts` — WhatsApp/Email automation
+
+**Deliverable:** All services tested with real local integrations
+
+---
+
+### Week 5: Foundation — Basic UI
+**Goal:** Device Hub interface at `/admin/agents`
+
+Create page:
+1. `app/admin/agents/page.tsx` — Main Device Hub
+
+Create components:
+1. `components/admin/agents/DeviceCard.tsx` — Device status, capabilities, metrics
+2. `components/admin/agents/TaskQueue.tsx` — Active tasks table
+3. `components/admin/agents/CommandConsole.tsx` — Natural language command input
+4. `components/admin/agents/ApprovalGate.tsx` — Approval requests modal
+5. Add sidebar link in `app/admin/layout.tsx`
+
+**Design spec:**
+- Dark theme with gold accents (match `/admin/intel`)
+- Header: "🤖 العاملون الأذكياء" + status badges
+- Left section: Powerhouse Nodes (online/busy/offline cards)
+- Right section: Social Agents (Xiaomi status)
+- Bottom: Active Tasks table + Command Center
+
+**Deliverable:** `/admin/agents` accessible, functional, styled
+
+---
+
+### Week 6: Interaction — Chat & Co-Pilot
+**Goal:** Full interaction layer
+
+Create components:
+1. `components/admin/agents/DeviceManagementSidebar.tsx` — Device list + add/remove/disable
+2. `components/admin/agents/AddDeviceModal.tsx` — Add new device flow
+3. `components/admin/agents/FloatingAgentButton.tsx` — Draggable summon button (bottom-right)
+4. `components/admin/agents/ChatPanel.tsx` — Slide-out chat interface
+5. `components/admin/agents/GroupChatView.tsx` — 3-way conversation (You + PRIME + Vanguard)
+6. `components/admin/agents/ConversationTabs.tsx` — Switch between chats
+7. `components/admin/agents/LiveScreenPanel.tsx` — Screen streaming from device
+8. `components/admin/agents/CoPilotControls.tsx` — Click/Type/Solve/Done buttons
+9. `components/admin/agents/StuckNotification.tsx` — "Agent needs help" toast
+10. `components/admin/agents/AgentMentionInput.tsx` — @PRIME @Vanguard mentions
+
+**Features:**
+- Floating button: Always visible, draggable, click to toggle chat
+- Individual chat: PRIME or Vanguard alone
+- Group chat: 3-way with @mentions
+- Exit/Enter: Can remove/add agents from chat
+- Co-Pilot: Watch mode + Interactive mode
+- Stuck detection: Agent encounters CAPTCHA → notification → open Co-Pilot → user solves → agent continues
+- Real-time: SSE for heartbeats, task updates, stuck events
+
+**Deliverable:** Chat, group chat, co-pilot all working
+
+---
+
+### Week 7: Advanced — PRIME
+**Goal:** Design, LLM, Self-evolution
+
+Prerequisites:
+- Install Ollama: `ollama pull llama3.2`
+- Install Stable Diffusion: `git clone AUTOMATIC1111/stable-diffusion-webui`
+
+Create components:
+1. `components/admin/agents/DesignStudio.tsx` — AI design generation interface
+2. `components/admin/agents/CodeEditor.tsx` — Self-modification interface
+3. `components/admin/agents/LearningJournal.tsx` — "What I learned today"
+4. `components/admin/agents/MultiLLMChat.tsx` — Talk to multiple local LLMs
+5. `components/admin/agents/EvolutionSuggestions.tsx` — "I discovered a new tool"
+
+Create service:
+- `services/self-evolution.ts` — Discover new tools, learn from failures
+
+**Features:**
+- Design generation: Text prompt → AI image → style templates
+- 3D preview: Three.js visualization
+- Code self-modification: PRIME can suggest and apply code changes
+- Multi-LLM: Query llama3.2 + mistral simultaneously, compare responses
+- Self-evolution: Agent discovers new techniques online, proposes integration
+
+**Deliverable:** PRIME generates designs, chats with LLM, suggests improvements
+
+---
+
+### Week 8: Advanced — Vanguard
+**Goal:** PM, Invoicing, Sentiment
+
+Create components:
+1. `components/admin/agents/ProjectGantt.tsx` — Visual project timeline
+2. `components/admin/agents/InvoiceGenerator.tsx` — Create and send invoices
+3. `components/admin/agents/ClientPortalPreview.tsx` — What client sees
+4. `components/admin/agents/SentimentDashboard.tsx` — Customer emotions analysis
+5. `components/admin/agents/AchievementWall.tsx` — "100 deals closed 🎉"
+
+Create services:
+- `services/crm/order-workflow.ts` — Lead → Quote → Contract → Production → Delivery
+- `services/crm/customer-communications.ts` — Automated status updates
+
+**Features:**
+- Gantt chart: Visual timeline with drag-and-drop
+- Invoice generation: PDF with company branding
+- Sentiment analysis: Local NLP model analyzes customer messages
+- Achievement system: Badges, milestones, celebrations
+- Client portal: Customer can view order progress
+
+**Deliverable:** Vanguard manages orders, sends invoices, tracks sentiment
+
+---
+
+### Week 9: Integration & Polish
+**Goal:** Everything works together
+
+Create components:
+1. `components/admin/agents/TeamScoreboard.tsx` — PRIME vs Vanguard stats
+2. `components/admin/agents/PipelineView.tsx` — Lead → Delivery flow
+3. `components/admin/agents/HandoffInterface.tsx` — Smooth task transfer
+
+**Integration tasks:**
+- End-to-end testing: Lead → Design → Quote → Production → Delivery
+- Bug fixes
+- Performance optimization
+- Documentation
+- Error handling throughout
+
+**Deliverable:** Complete workflow working seamlessly
+
+---
+
+### Week 10: Manufacturing & Owner Dashboard
+**Goal:** Factory-specific features + Owner control
+
+Create pages:
+1. `app/admin/manufacturing/page.tsx` — Manufacturing Dashboard
+2. `app/admin/owner-dashboard/page.tsx` — Owner Control Center
+
+Create manufacturing components:
+1. `components/admin/agents/ManufacturingDashboard.tsx` — Overview metrics
+2. `components/admin/agents/OrderPipeline.tsx` — Visual order workflow
+3. `components/admin/agents/CADViewer.tsx` — 3D design preview
+4. `components/admin/agents/BOMTable.tsx` — Bill of materials display
+5. `components/admin/agents/InventoryManager.tsx` — Stock levels + reorder
+6. `components/admin/agents/ProductionGantt.tsx` — Manufacturing schedule
+7. `components/admin/agents/QualityCheckPanel.tsx` — Photo upload + AI assessment
+
+Create owner dashboard components:
+1. `components/admin/agents/OwnerApprovalQueue.tsx` — Items awaiting approval
+2. `components/admin/agents/FinancialOverview.tsx` — Revenue, costs, profit
+3. `components/admin/agents/AlertConfiguration.tsx` — Set notification rules
+
+**Owner Dashboard UI:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│  👑 مصنع أزينث ليفينج — لوحة المالك                         │
+├─────────────────────────────────────────────────────────────┤
+│  ⚡ اليوم (23 أبريل 2026)                                   │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  🏭 في الإنتاج: 5 أوردرات                                   │
+│  📦 جاهز للتوصيل: 2 أوردر                                   │
+│  💰 دفعات مستحقة: 15,000 جنيه (3 عملاء)                    │
+│  📦 خامات منخفضة: خشب الزان (يبقى 3 أيام)                  │
+│                                                             │
+│  📊 هذا الشهر                                               │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  📋 إجمالي الأوردرات: 12                                     │
+│  ✅ تم التسليم: 8                                            │
+│  💵 الإيرادات: 180,000 جنيه                                │
+│  📈 الربح المتوقع: 45,000 جنيه                             │
+│                                                             │
+│  🔔 يحتاج قرارك                                             │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  ⚠️ أوردر #128 — 85,000 جنيه (يتجاوز الحد)                │
+│     [✅ وافق] [📝 عدل] [❌ رفض]                            │
+│                                                             │
+│  ⚠️ طلب شراء — خشب بقيمة 25,000 جنيه                      │
+│     [✅ وافق] [📋 تفاصيل] [❌ رفض]                        │
+│                                                             │
+│  🎯 أداء الموظفين (Agents)                                  │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  🧠 PRIME: 8 تصاميم هذا الشهر ⭐⭐⭐⭐⭐                     │
+│  💼 Vanguard: 12 deal closed 🏆                            │
+│                                                             │
+│  ⚡ أزرار الطوارئ                                           │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  [🛑 إيقاف الكل]  [⏸️ وقف مؤقت]  [📞 استدعاء]              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Deliverable:** Owner dashboard showing real manufacturing data
+
+---
+
+## 🎨 UI Layout Specification
+
+### Main Admin Page Structure
+```
+┌──────────────────────────────────────────────────────────────┐
+│  🤖 لوحة التحكم الذكية                    [🔔] [👤]        │
+├──────────────────┬───────────────────────────────────────────┤
+│ 📱 الأجهزة       │                                         │
+│   ━━ Power-A    │    🎯 المحتوى الرئيسي (يتغير)            │
+│   ━━ Power-B    │                                         │
+│   ━━ Xiaomi     │    • Device Hub (default)              │
+│                  │    • Chat Panel (if opened)            │
+│   [+ إضافة]      │    • Live Screen (if monitoring)       │
+│                  │                                         │
+│ 👤 المساعدون     │                                         │
+│   ━━ 🧠 PRIME    │                                         │
+│      [💬]        │                                         │
+│   ━━ 💼 Sales    │                                         │
+│      [💬]        │                                         │
+│   ━─ 👥 الجماعية │                                         │
+│      [💬]        │                                         │
+│                  │                                         │
+│ ⚡ سريع          │                                         │
+│   [👁️] مراقبة    │                                         │
+│   [✋] تدخل      │                                         │
+│   [🛑] طوارئ     │                                         │
+├──────────────────┴───────────────────────────────────────────┤
+│  💬 Chat Panel (Slide from right when summoned)              │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ [Draggable Floating Button: 🧠|💼|👥]                  │ │
+│  └─────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Device Actions Menu [⚙️]
+- 🔴 تعطيل مؤقت (Disable)
+- 🟢 تفعيل (Enable)
+- 🗑️ إزالة (Remove — with confirmation)
+- 🔧 إعدادات (Settings: capabilities, limits)
+- 📊 سجل الأداء (Performance logs)
+
+### Group Chat
+```
+┌─────────────────────────────────┐
+│ 👥 المحادثة الجماعية   [━] [✕] │
+│ PRIME + Vanguard + أنت          │
+├─────────────────────────────────┤
+│ [الكل] [PRIME] [Sales] [أنت]   │
+├─────────────────────────────────┤
+│                                 │
+│ 🧠 PRIME: وجدت 50 صورة جديدة   │
+│ في Pinterest. أقترح إضافتها    │
+│ لمعرض Elite.                   │
+│                                 │
+│ 💼 Vanguard: أوافق، لكن نحتاج  │
+│ تصنيفها حسب الميزانية أولاً.   │
+│                                 │
+│ أنت: @PRIME صنفهم و @Vanguard  │
+│ جهز عروض الأسعار.              │
+│                                 │
+│ 🧠 PRIME: ⏳ جاري التصنيف...    │
+│ 💼 Vanguard: ⏳ أحضر قائمة     │
+│ الأسعار...                      │
+│                                 │
+├─────────────────────────────────┤
+│ [@PRIME @Vanguard] اكتب رسالة...│
+│ [🖥️ Powerhouse] [📱 Mobile]     │
+└─────────────────────────────────┘
+```
+
+### Co-Pilot Mode
+```
+┌─────────────────────────────────────────────┐
+│ 👁️ شاشة Powerhouse-Alpha        [تكبير]  │
+│ ⚠️ يلزم تدخل بشري!                         │
+├─────────────────────────────────────────────┤
+│                                             │
+│    ┌─────────────────────────────┐         │
+│    │  🤖 أنا لست روبوت            │         │
+│    │                             │         │
+│    │  [□] I'm not a robot       │         │
+│    │                             │         │
+│    │  [فشل - يلزم مساعدة]        │         │
+│    └─────────────────────────────────────────┘
+│                                             │
+│ 🧠 PRIME: "عالق عند CAPTCHA"               │
+│                                             │
+│ [🖱️ Click] [⌨️ Type] [📸 Solve]           │
+│ [✅ تم الحل، أكمل] [🔄 حاول طريقة أخرى]    │
+└─────────────────────────────────────────────┘
+```
+
+---
+
+## 🔄 Workflow Automation
+
+### Manufacturing Pipeline
+```
+Lead → Intake → Measure → Design → Quote → Contract → Deposit
+  → Production Schedule → Material Order → Manufacturing
+  → Quality Check → Delivery → Installation → Final Payment
+  → Review → After-Sales Service
+
+Vanguard manages: Lead → Contract + Production Schedule → Final Payment
+PRIME manages: Measure (if digital) → Design → Quote → Manufacturing → Quality
+```
+
+### Auto-Handoff Example
+1. PRIME finishes design → notifies Vanguard
+2. Vanguard presents to customer → gets approval
+3. PRIME executes production
+4. Vanguard schedules delivery
+5. PRIME does quality check
+6. Vanguard handles final payment
+
+---
+
+## 🧪 Testing Checklist
+
+### Week 0-5 Tests
+- [ ] Database tables created and seeded
+- [ ] Docker containers running
+- [ ] API endpoints responding correctly
+- [ ] Services connected to real local tools
+- [ ] UI accessible and styled
+
+### Week 6-8 Tests
+- [ ] Chat with PRIME works
+- [ ] Group chat with 3 participants
+- [ ] Co-pilot screen control works
+- [ ] Local LLM (Ollama) responding
+- [ ] Image generation (Stable Diffusion) works
+- [ ] WhatsApp (whatsapp-web.js) connected
+- [ ] Design Studio generates images
+- [ ] Invoice generation works
+
+### Week 9-10 Tests
+- [ ] Order workflow complete end-to-end
+- [ ] Invoice generated and sent
+- [ ] Gantt chart showing real data
+- [ ] Owner dashboard displaying data
+- [ ] Emergency stop works instantly
+- [ ] Approval queue functional
+- [ ] Quality check with photo upload
+- [ ] Manufacturing metrics accurate
+
+---
+
+## 🚨 Known Limitations (Acceptable)
+
+| Feature | Limitation | Workaround |
+|---------|-----------|------------|
+| Voice Calls | Not implemented | Use WhatsApp voice notes |
+| AI Quality | Local LLM < GPT-4 | Use multiple local models |
+| Image Quality | Local SD < Midjourney | Longer generation time |
+| WhatsApp | Can be blocked by Meta | Email backup |
+| Cloud Access | Files local only | Manual cloud backup |
+| Shipping | Manual tracking | Status updates by hand |
+
+---
+
+## ✅ Success Criteria
+
+### Must Have (Non-negotiable)
+- [ ] Owner dashboard shows real manufacturing data
+- [ ] PRIME generates designs with AI
+- [ ] Vanguard manages orders and sends invoices
+- [ ] Agents communicate in group chat
+- [ ] Emergency stop works instantly
+- [ ] All free (no paid APIs)
+- [ ] Zero TypeScript/ESLint errors
+- [ ] Build passes successfully
+
+### Nice to Have
+- [ ] Local LLM as smart as GPT-4
+- [ ] 100% offline capable
+- [ ] Voice calls working
+
+---
+
+## 📁 Files to Create Summary
+
+### New Files (~70 files)
+**Database:**
+- `supabase/migrations/20260423_reconciliation.sql`
+- `supabase/migrations/20260423_manufacturing.sql`
+- `supabase/migrations/20260423_agents.sql`
+
+**Docker:**
+- `docker/agent-nodes/docker-compose.yml`
+- `docker/agent-nodes/headless-node/Dockerfile`
+- `docker/agent-nodes/headless-node/entrypoint.js`
+- `docker/agent-nodes/headless-node/package.json`
+
+**DAL:**
+- `lib/dal/unified-supabase.ts`
+
+**APIs (20+ routes):**
+- `app/api/admin/agents/*/route.ts` (12 endpoints)
+- `app/api/admin/manufacturing/*/route.ts` (4 endpoints)
+- `app/api/admin/owner/*/route.ts` (3 endpoints)
+
+**Services (17 files):**
+- `services/local-llm.ts`
+- `services/image-generation.ts`
+- `services/browser-voice.ts`
+- `services/local-ocr.ts`
+- `services/local-email.ts`
+- `services/free-whatsapp.ts`
+- `services/local-storage.ts`
+- `services/browser-notifications.ts`
+- `services/local-signature.ts`
+- `services/encryption.ts`
+- `services/offline-queue.ts`
+- `services/agent-scheduler.ts`
+- `services/mobile-agent-bridge.ts`
+- `services/workflow-learner.ts`
+- `services/self-evolution.ts`
+- `services/manufacturing/cad-engine.ts`
+- `services/manufacturing/inventory.ts`
+- `services/manufacturing/production-scheduler.ts`
+- `services/crm/order-workflow.ts`
+- `services/crm/customer-communications.ts`
+
+**Components (36 files):**
+- `components/admin/agents/DeviceCard.tsx`
+- `components/admin/agents/TaskQueue.tsx`
+- `components/admin/agents/CommandConsole.tsx`
+- `components/admin/agents/ApprovalGate.tsx`
+- `components/admin/agents/DeviceManagementSidebar.tsx`
+- `components/admin/agents/AddDeviceModal.tsx`
+- `components/admin/agents/FloatingAgentButton.tsx`
+- `components/admin/agents/ChatPanel.tsx`
+- `components/admin/agents/GroupChatView.tsx`
+- `components/admin/agents/LiveScreenPanel.tsx`
+- `components/admin/agents/CoPilotControls.tsx`
+- `components/admin/agents/ConversationTabs.tsx`
+- `components/admin/agents/StuckNotification.tsx`
+- `components/admin/agents/DesignStudio.tsx`
+- `components/admin/agents/CodeEditor.tsx`
+- `components/admin/agents/LearningJournal.tsx`
+- `components/admin/agents/MultiLLMChat.tsx`
+- `components/admin/agents/EvolutionSuggestions.tsx`
+- `components/admin/agents/ProjectGantt.tsx`
+- `components/admin/agents/InvoiceGenerator.tsx`
+- `components/admin/agents/ClientPortalPreview.tsx`
+- `components/admin/agents/SentimentDashboard.tsx`
+- `components/admin/agents/AchievementWall.tsx`
+- `components/admin/agents/TeamScoreboard.tsx`
+- `components/admin/agents/PipelineView.tsx`
+- `components/admin/agents/HandoffInterface.tsx`
+- `components/admin/agents/ManufacturingDashboard.tsx`
+- `components/admin/agents/OrderPipeline.tsx`
+- `components/admin/agents/CADViewer.tsx`
+- `components/admin/agents/BOMTable.tsx`
+- `components/admin/agents/InventoryManager.tsx`
+- `components/admin/agents/ProductionGantt.tsx`
+- `components/admin/agents/QualityCheckPanel.tsx`
+- `components/admin/agents/OwnerApprovalQueue.tsx`
+- `components/admin/agents/FinancialOverview.tsx`
+- `components/admin/agents/AlertConfiguration.tsx`
+
+**Pages:**
+- `app/admin/agents/page.tsx` (enhance existing)
+- `app/admin/manufacturing/page.tsx`
+- `app/admin/owner-dashboard/page.tsx`
+
+**Types:**
+- `types/agent.ts`
+- `types/manufacturing.ts`
+
+### Modified Files (~5 files)
+- `app/admin/layout.tsx` — Add sidebar links
+- `app/admin/intel/page.tsx` — Add Agent execution hooks
+- `app/admin/sales/page.tsx` — Add Mobile Agent hooks
+- `next.config.ts` — Fix build safeguards
+- `package.json` — Add db scripts
+
+---
+
+## ⚙️ Setup Instructions
+
+### Prerequisites
+1. Docker Desktop installed
+2. Node.js 20+ installed
+3. Ollama installed (for Week 7)
+4. Stable Diffusion installed (for Week 7)
+5. Supabase project created
+6. Xiaomi Second Space enabled
+7. Scrcpy installed: `choco install scrcpy`
+
+### Environment Variables (.env.local)
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+ENCRYPTION_PASSWORD=your_strong_password_32_chars
+LOCAL_LLM_URL=http://localhost:11434
+STABLE_DIFFUSION_URL=http://localhost:7860
+```
+
+### Package.json Scripts
+```json
+{
+  "scripts": {
+    "supabase:push": "supabase db push",
+    "supabase:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --project-id $PROJECT_ID > lib/dal/database.types.ts",
+    "db:migrate": "npm run supabase:push && npm run db:types",
+    "build:check": "tsc --noEmit && next build"
+  }
+}
+```
+
+### Installation Steps
+```bash
+# Week 0: Pre-implementation
+npm run db:migrate  # Run reconciliation + new tables
+
+# Week 1-10
+npm install
+npm run build:check
+docker-compose up -d
+npm run dev
+```
+
+---
+
+## 💰 Cost: $0.00 Forever
+
+| Component | Original Cost | Free Alternative | Cost |
+|-----------|---------------|------------------|------|
+| AI/LLM | $20-100/month | Ollama local | $0 |
+| Image Generation | $10-50/month | Stable Diffusion local | $0 |
+| Voice | $5-20/month | Web Speech API | $0 |
+| OCR | $10-50/month | Tesseract.js | $0 |
+| Email | $10-30/month | Local SMTP | $0 |
+| WhatsApp | $0.005/msg | whatsapp-web.js | $0 |
+| Storage | $5-20/month | Local filesystem | $0 |
+| Notifications | $0-10/month | Browser API | $0 |
+| E-Signature | $10-50/month | Self-signed PDF | $0 |
+| **TOTAL** | **$70-380/month** | **FREE STACK** | **$0** |
+
+---
+
+## 🏁 Final Deliverable
+
+After 11 weeks, you will have:
+
+1. **PRIME** — AI that designs furniture, writes code, learns, and optimizes manufacturing
+2. **Vanguard** — AI that manages customers, orders, invoices, and projects
+3. **Device Hub** — Control center for all operations (`/admin/agents`)
+4. **Manufacturing System** — Complete order-to-delivery workflow (`/admin/manufacturing`)
+5. **Owner Dashboard** — Your command center (`/admin/owner-dashboard`)
+6. **$0.00 cost** — Everything free and local
+
+**You do:** Woodworking, final inspection, strategic decisions
+**Agents do:** Everything else
+
+---
+
+*Document: aziz.txt*
+*Version: 1.0 FINAL*
+*Date: April 23, 2026*
+*Cost: $0.00*
+*Timeline: 11 Weeks*
+*Wishes: 90*
+*Status: READY FOR EXECUTION*
+*Source of Truth: YES — This is the ONLY reference document*
+
+**BEGIN IMPLEMENTATION** 👇

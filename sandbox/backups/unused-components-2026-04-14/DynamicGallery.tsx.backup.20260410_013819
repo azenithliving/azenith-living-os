@@ -1,0 +1,200 @@
+"use client";
+
+import { useEffect, useState, useRef, useCallback } from "react";
+import Image from "next/image";
+import SmartImageGrid from "./SmartImageGrid";
+import GoldPulseLoader from "./GoldPulseLoader";
+
+const INITIAL_LOAD_COUNT = 15;
+const LOAD_MORE_COUNT = 15;
+const SCROLL_THRESHOLD = 200;
+
+interface Photo {
+  id: number;
+  src: { large2x?: string; large?: string; medium?: string };
+  alt?: string;
+}
+
+interface DynamicGalleryProps {
+  roomId: string;
+  roomTitle: string;
+  roomQuery: string;
+  initialPhotos: Photo[];
+  currentStyle: string;
+  intent: string;
+  budget: string;
+  onImageClick: (index: number) => void;
+  trackNeuralInteraction?: (imageId: number, interactionType: "hover" | "modal" | "download" | "reject", metadata?: Record<string, unknown>) => void;
+}
+
+const STYLE_QUERY_HINTS: Record<string, string> = {
+  modern: "modern minimal luxury",
+  classic: "classic elegant luxury",
+  industrial: "industrial loft luxury",
+  scandinavian: "scandinavian cozy luxury",
+};
+
+export default function DynamicGallery({
+  roomId,
+  roomTitle,
+  roomQuery,
+  initialPhotos,
+  currentStyle,
+  intent,
+  budget,
+  onImageClick,
+  trackNeuralInteraction,
+}: DynamicGalleryProps) {
+  // Local state - bypass store completely for initial render
+  const [photos, setPhotos] = useState<Photo[]>(initialPhotos.slice(0, INITIAL_LOAD_COUNT));
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [mounted, setMounted] = useState(false);
+
+  // Refs for scroll and debounce
+  const galleryEndRef = useRef<HTMLDivElement>(null);
+  const isFetchingRef = useRef(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Mount logic: only set mounted after client-side hydration
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Load more images - only runs after mount
+  const loadMoreImages = useCallback(async () => {
+    if (!mounted || isFetchingRef.current || !hasMore || isLoadingMore) return;
+
+    isFetchingRef.current = true;
+    setIsLoadingMore(true);
+
+    try {
+      const nextPage = currentPage + 1;
+
+      // Fetch from Pexels
+      const styleHint = STYLE_QUERY_HINTS[currentStyle] || currentStyle;
+      const query = `${styleHint} luxury interior design ${roomQuery}`;
+      const pexelsResponse = await fetch(
+        `/api/pexels?query=${encodeURIComponent(query)}&per_page=${LOAD_MORE_COUNT}&page=${nextPage}`
+      );
+
+      if (!pexelsResponse.ok) {
+        if (pexelsResponse.status === 429) {
+          console.log("[Gallery] Rate limited, will retry on next scroll");
+        }
+        setHasMore(false);
+        return;
+      }
+
+      const pexelsData = await pexelsResponse.json();
+      if (!Array.isArray(pexelsData?.photos) || pexelsData.photos.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      // AI Curation
+      const curatedResponse = await fetch("/api/curated-pages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId,
+          style: currentStyle,
+          page: nextPage,
+          photos: pexelsData.photos,
+        }),
+      });
+
+      if (!curatedResponse.ok) {
+        setHasMore(false);
+        return;
+      }
+
+      const curatedData = await curatedResponse.json();
+      const approvedPhotos = curatedData.photos || [];
+
+      if (approvedPhotos.length > 0) {
+        setPhotos((prev) => [...prev, ...approvedPhotos]);
+        setCurrentPage(nextPage);
+        console.log(`[Gallery] Loaded ${approvedPhotos.length} images`);
+      } else {
+        setCurrentPage(nextPage);
+      }
+    } catch (error) {
+      console.error("[Gallery] Failed to load more:", error);
+    } finally {
+      setIsLoadingMore(false);
+      isFetchingRef.current = false;
+    }
+  }, [mounted, currentPage, currentStyle, hasMore, isLoadingMore, roomId, roomQuery]);
+
+  // Infinite scroll with 500ms debounce
+  useEffect(() => {
+    if (!mounted) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isFetchingRef.current) {
+          // 500ms debounce
+          if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+          }
+          debounceTimerRef.current = setTimeout(() => {
+            if (!isFetchingRef.current && !isLoadingMore) {
+              loadMoreImages();
+            }
+          }, 500);
+        }
+      },
+      { rootMargin: `${SCROLL_THRESHOLD}px` }
+    );
+
+    const currentGalleryEnd = galleryEndRef.current;
+    if (currentGalleryEnd) {
+      observer.observe(currentGalleryEnd);
+    }
+
+    return () => {
+      observer.disconnect();
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [mounted, hasMore, isLoadingMore, loadMoreImages]);
+
+  const gallery = photos.slice(1);
+
+  return (
+    <>
+      {/* Gallery Grid */}
+      {gallery.length > 0 && (
+        <SmartImageGrid
+          roomType={roomId}
+          style={currentStyle}
+          intent={intent || "exploring"}
+          budget={budget || "flexible"}
+          initialImages={gallery}
+          onImageClick={onImageClick}
+          onReject={(imageId, reason) => {
+            console.log(`[AI Curation] User rejected image ${imageId}: ${reason}`);
+            trackNeuralInteraction?.(imageId, "reject", {
+              roomType: roomId,
+              style: currentStyle,
+              reason,
+            });
+          }}
+        />
+      )}
+
+      {/* Loading State */}
+      {isLoadingMore && hasMore && (
+        <div className="py-4">
+          <GoldPulseLoader text="Curating more luxury for you..." size="md" />
+        </div>
+      )}
+
+      {/* Infinite Scroll Sentinel */}
+      <div ref={galleryEndRef} className="h-4" />
+    </>
+  );
+}
