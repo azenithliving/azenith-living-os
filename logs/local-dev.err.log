@@ -1,0 +1,4394 @@
+⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (usually cookies on the server) and may not be authentic. Use supabase.auth.getUser() instead which authenticates the data by contacting the Supabase Auth server.
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (usually cookies on the server) and may not be authentic. Use supabase.auth.getUser() instead which authenticates the data by contacting the Supabase Auth server.
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (usually cookies on the server) and may not be authentic. Use supabase.auth.getUser() instead which authenticates the data by contacting the Supabase Auth server.
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (usually cookies on the server) and may not be authentic. Use supabase.auth.getUser() instead which authenticates the data by contacting the Supabase Auth server.
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+OpenRouter request failed: Error: No cookie auth credentials found
+    at routeRequest (lib\openrouter-service.ts:163:13)
+    at async detectIntentWithModel (lib\ultimate-agent\agent-core.ts:670:20)
+    at async UltimateAgent.processCommandInternal (lib\ultimate-agent\agent-core.ts:1030:50)
+    at async UltimateAgent.processCommandWithResult (lib\ultimate-agent\agent-core.ts:981:20)
+    at async POST (app\api\admin\agent\ultimate\route.ts:79:27)
+  161 |     if (!response.ok) {
+  162 |       const errorData = await response.json().catch(() => ({}));
+> 163 |       throw new Error(errorData.error?.message || `API error: ${response.status}`);
+      |             ^
+  164 |     }
+  165 |
+  166 |     const data = await response.json();
+OpenRouter request failed: Error: No cookie auth credentials found
+    at routeRequest (lib\openrouter-service.ts:163:13)
+    at async UltimateAgent.respondConversationally (lib\ultimate-agent\agent-core.ts:1585:20)
+    at async UltimateAgent.processCommandInternal (lib\ultimate-agent\agent-core.ts:1032:20)
+    at async UltimateAgent.processCommandWithResult (lib\ultimate-agent\agent-core.ts:981:20)
+    at async POST (app\api\admin\agent\ultimate\route.ts:79:27)
+  161 |     if (!response.ok) {
+  162 |       const errorData = await response.json().catch(() => ({}));
+> 163 |       throw new Error(errorData.error?.message || `API error: ${response.status}`);
+      |             ^
+  164 |     }
+  165 |
+  166 |     const data = await response.json();
+[FetchWithRetry] [retry_1776517677353_wunlvqjwh] [deepseek] Key failed: 401 - Authentication Fails, Your api key: ****-key is invalid
+[FetchWithRetry] [retry_1776517677353_wunlvqjwh] Error details: {"error":{"message":"Authentication Fails, Your api key: ****-key is invalid","type":"authentication_error","param":null,"code":"invalid_request_error"}}
+[AskDeepSeek] [deepseek_1776517677350_8dyc12fjq] REQUEST FAILED: deepseek API error: 401 - Authentication Fails, Your api key: ****-key is invalid
+[AskDeepSeek] [deepseek_1776517677350_8dyc12fjq] ===== REQUEST FAILED =====
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (usually cookies on the server) and may not be authentic. Use supabase.auth.getUser() instead which authenticates the data by contacting the Supabase Auth server.
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+OpenRouter request failed: Error: No cookie auth credentials found
+    at routeRequest (lib\openrouter-service.ts:163:13)
+    at async detectIntentWithModel (lib\ultimate-agent\agent-core.ts:670:20)
+    at async UltimateAgent.processCommandInternal (lib\ultimate-agent\agent-core.ts:1030:50)
+    at async UltimateAgent.processCommandWithResult (lib\ultimate-agent\agent-core.ts:981:20)
+    at async POST (app\api\admin\agent\ultimate\route.ts:79:27)
+  161 |     if (!response.ok) {
+  162 |       const errorData = await response.json().catch(() => ({}));
+> 163 |       throw new Error(errorData.error?.message || `API error: ${response.status}`);
+      |             ^
+  164 |     }
+  165 |
+  166 |     const data = await response.json();
+OpenRouter request failed: Error: No cookie auth credentials found
+    at routeRequest (lib\openrouter-service.ts:163:13)
+    at async UltimateAgent.respondConversationally (lib\ultimate-agent\agent-core.ts:1585:20)
+    at async UltimateAgent.processCommandInternal (lib\ultimate-agent\agent-core.ts:1032:20)
+    at async UltimateAgent.processCommandWithResult (lib\ultimate-agent\agent-core.ts:981:20)
+    at async POST (app\api\admin\agent\ultimate\route.ts:79:27)
+  161 |     if (!response.ok) {
+  162 |       const errorData = await response.json().catch(() => ({}));
+> 163 |       throw new Error(errorData.error?.message || `API error: ${response.status}`);
+      |             ^
+  164 |     }
+  165 |
+  166 |     const data = await response.json();
+[FetchWithRetry] [retry_1776517708065_fen37y50t] [deepseek] Key failed: 401 - Authentication Fails, Your api key: ****-key is invalid
+[FetchWithRetry] [retry_1776517708065_fen37y50t] Error details: {"error":{"message":"Authentication Fails, Your api key: ****-key is invalid","type":"authentication_error","param":null,"code":"invalid_request_error"}}
+[AskDeepSeek] [deepseek_1776517708064_pcgcscvhg] REQUEST FAILED: deepseek API error: 401 - Authentication Fails, Your api key: ****-key is invalid
+[AskDeepSeek] [deepseek_1776517708064_pcgcscvhg] ===== REQUEST FAILED =====
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (usually cookies on the server) and may not be authentic. Use supabase.auth.getUser() instead which authenticates the data by contacting the Supabase Auth server.
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+OpenRouter request failed: Error: No cookie auth credentials found
+    at routeRequest (lib\openrouter-service.ts:163:13)
+    at async UltimateAgent.processCommandInternal (lib\ultimate-agent\agent-core.ts:1081:24)
+    at async UltimateAgent.processCommandWithResult (lib\ultimate-agent\agent-core.ts:1014:20)
+    at async POST (app\api\admin\agent\ultimate\route.ts:48:27)
+  161 |     if (!response.ok) {
+  162 |       const errorData = await response.json().catch(() => ({}));
+> 163 |       throw new Error(errorData.error?.message || `API error: ${response.status}`);
+      |             ^
+  164 |     }
+  165 |
+  166 |     const data = await response.json();
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+OpenRouter request failed: Error: No cookie auth credentials found
+    at routeRequest (lib\openrouter-service.ts:163:13)
+    at async PlannerAgent.createPlan (lib\planner-agent.ts:56:24)
+    at async UltimateAgent.executeIntent (lib\ultimate-agent\agent-core.ts:1391:28)
+    at async UltimateAgent.processCommandInternal (lib\ultimate-agent\agent-core.ts:1047:22)
+    at async UltimateAgent.processCommandWithResult (lib\ultimate-agent\agent-core.ts:1014:20)
+    at async POST (app\api\admin\agent\ultimate\route.ts:48:27)
+  161 |     if (!response.ok) {
+  162 |       const errorData = await response.json().catch(() => ({}));
+> 163 |       throw new Error(errorData.error?.message || `API error: ${response.status}`);
+      |             ^
+  164 |     }
+  165 |
+  166 |     const data = await response.json();
+OpenRouter request failed: Error: No cookie auth credentials found
+    at routeRequest (lib\openrouter-service.ts:163:13)
+    at async PlannerAgent.createPlan (lib\planner-agent.ts:73:34)
+    at async UltimateAgent.executeIntent (lib\ultimate-agent\agent-core.ts:1391:28)
+    at async UltimateAgent.processCommandInternal (lib\ultimate-agent\agent-core.ts:1047:22)
+    at async UltimateAgent.processCommandWithResult (lib\ultimate-agent\agent-core.ts:1014:20)
+    at async POST (app\api\admin\agent\ultimate\route.ts:48:27)
+  161 |     if (!response.ok) {
+  162 |       const errorData = await response.json().catch(() => ({}));
+> 163 |       throw new Error(errorData.error?.message || `API error: ${response.status}`);
+      |             ^
+  164 |     }
+  165 |
+  166 |     const data = await response.json();
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[PredictiveEngine] Failed to get metrics: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.page_sections'",
+  message: "Could not find the table 'public.page_views' in the schema cache"
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+OpenRouter request failed: Error: No cookie auth credentials found
+    at routeRequest (lib\openrouter-service.ts:163:13)
+    at async UltimateAgent.processCommandInternal (lib\ultimate-agent\agent-core.ts:1081:24)
+    at async UltimateAgent.processCommandWithResult (lib\ultimate-agent\agent-core.ts:1014:20)
+    at async POST (app\api\admin\agent\ultimate\route.ts:48:27)
+  161 |     if (!response.ok) {
+  162 |       const errorData = await response.json().catch(() => ({}));
+> 163 |       throw new Error(errorData.error?.message || `API error: ${response.status}`);
+      |             ^
+  164 |     }
+  165 |
+  166 |     const data = await response.json();
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[PredictiveEngine] Failed to get metrics: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.page_sections'",
+  message: "Could not find the table 'public.page_views' in the schema cache"
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[Arsenal] Failed to load keys: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.api_keys'",
+  message: "Could not find the table 'public.api_keys_arsenal' in the schema cache"
+}
+[Arsenal] Failed to load keys: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.api_keys'",
+  message: "Could not find the table 'public.api_keys_arsenal' in the schema cache"
+}
+[Arsenal] Failed to load keys: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.api_keys'",
+  message: "Could not find the table 'public.api_keys_arsenal' in the schema cache"
+}
+[Arsenal] Failed to load keys: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.api_keys'",
+  message: "Could not find the table 'public.api_keys_arsenal' in the schema cache"
+}
+[Arsenal] Failed to load keys: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.api_keys'",
+  message: "Could not find the table 'public.api_keys_arsenal' in the schema cache"
+}
+[Arsenal] Failed to load keys: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.api_keys'",
+  message: "Could not find the table 'public.api_keys_arsenal' in the schema cache"
+}
+[Arsenal] Failed to load keys: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.api_keys'",
+  message: "Could not find the table 'public.api_keys_arsenal' in the schema cache"
+}
+[Arsenal] Failed to load keys: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.api_keys'",
+  message: "Could not find the table 'public.api_keys_arsenal' in the schema cache"
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[browser] [KILL SWITCH] Forcing loading end after 3s timeout (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get preference: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column user_preferences.value does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to store memory: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "agent_memory"'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+⨯ ./app/api/admin/agent/ultimate/route.ts:31:5
+Expected ',', got 'const'
+  [90m29 |[0m       { [36mtype[0m, payload },
+  [90m30 |[0m       [32m"success"[0m
+[31m[1m>[0m [90m31 |[0m     [36mconst[0m { [36mtype[0m, payload } = body;
+  [90m   |[0m     [31m[1m^^^^^[0m
+  [90m32 |[0m
+  [90m33 |[0m     [90m// Log the request[0m
+  [90m34 |[0m     [36mawait[0m logAuditEvent(
+
+Parsing ecmascript source code failed
+
+
+⨯ ./app/api/admin/agent/ultimate/route.ts:31:5
+Expected ',', got 'const'
+  [90m29 |[0m       { [36mtype[0m, payload },
+  [90m30 |[0m       [32m"success"[0m
+[31m[1m>[0m [90m31 |[0m     [36mconst[0m { [36mtype[0m, payload } = body;
+  [90m   |[0m     [31m[1m^^^^^[0m
+  [90m32 |[0m
+  [90m33 |[0m     [90m// Log the request[0m
+  [90m34 |[0m     [36mawait[0m logAuditEvent(
+
+Parsing ecmascript source code failed
+
+
+[browser] ./app/api/admin/agent/ultimate/route.ts:31:5
+Expected ',', got 'const'
+  29 |       { type, payload },
+  30 |       "success"
+> 31 |     const { type, payload } = body;
+     |     ^^^^^
+  32 |
+  33 |     // Log the request
+  34 |     await logAuditEvent(
+
+Parsing ecmascript source code failed 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.364.7:1:86622)
+    at handleErrors (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13828:21)
+    at processMessage (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13891:21)
+    at WebSocket.handleMessage (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13335:52) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.364.7:1:86622)
+[browser] Failed to fetch approvals: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.364.7:1:86622)
+[browser] Failed to fetch agent status: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.364.7:1:86622)
+[browser] ./app/api/admin/agent/ultimate/route.ts:31:5
+Expected ',', got 'const'
+  29 |       { type, payload },
+  30 |       "success"
+> 31 |     const { type, payload } = body;
+     |     ^^^^^
+  32 |
+  33 |     // Log the request
+  34 |     await logAuditEvent(
+
+Parsing ecmascript source code failed 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.364.7:1:86622)
+    at handleErrors (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13828:21)
+    at processMessage (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13891:21)
+    at WebSocket.handleMessage (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13335:52) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.364.7:1:86622)
+[browser] ./app/api/admin/agent/ultimate/route.ts:31:5
+Expected ',', got 'const'
+  29 |       { type, payload },
+  30 |       "success"
+> 31 |     const { type, payload } = body;
+     |     ^^^^^
+  32 |
+  33 |     // Log the request
+  34 |     await logAuditEvent(
+
+Parsing ecmascript source code failed 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.364.7:1:86622)
+    at handleErrors (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13828:21)
+    at processMessage (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13891:21)
+    at WebSocket.handleMessage (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13335:52) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.364.7:1:86622)
+[browser] ./app/api/admin/agent/ultimate/route.ts:31:5
+Expected ',', got 'const'
+  29 |       { type, payload },
+  30 |       "success"
+> 31 |     const { type, payload } = body;
+     |     ^^^^^
+  32 |
+  33 |     // Log the request
+  34 |     await logAuditEvent(
+
+Parsing ecmascript source code failed 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.364.7:1:86622)
+    at handleErrors (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13828:21)
+    at processMessage (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13891:21)
+    at WebSocket.handleMessage (file://D:/Program Files/azenith living/my-app/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13335:52) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.364.7:1:86622)
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+[MemoryStore] Failed to get goals: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_goals.priority does not exist'
+}
+
+thread '<unnamed>' (12504) panicked at crates\next-code-frame\src\highlight.rs:1011:45:
+end byte index 91 is not a char boundary; it is inside 'ا' (bytes 90..92) of `1. لا تستخدم أي أداة إلا إذا كنت متأكداً أنك تحتاجها لتلبية طلب المستخدم الحالي. إذا كان ...`
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
