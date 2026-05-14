@@ -3,7 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Home, Shield, Brain, Globe, Menu, X, Bot, Factory, Crown } from "lucide-react";
+import { 
+  Home, 
+  Shield, 
+  Brain, 
+  Globe, 
+  Menu, 
+  X, 
+  Bot, 
+  Factory, 
+  Crown, 
+  Phone, 
+  Monitor, 
+  Code, 
+  MessageSquare, 
+  TrendingUp,
+  Settings,
+  Database,
+  Search,
+  Sparkles,
+  Cpu,
+  Activity
+} from "lucide-react";
 import { FloatingAgentButton } from "@/components/admin/agents/FloatingAgentButton";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -14,16 +35,58 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Bot,
   Factory,
   Crown,
+  Phone,
+  Monitor,
+  Code,
+  MessageSquare,
+  TrendingUp,
+  Settings,
+  Database,
+  Sparkles,
+  Cpu,
+  Activity
 };
 
-const navItems = [
-  { href: "/admin", label: "الرئيسية", icon: "Home" },
-  { href: "/admin/agents", label: "الـ Agents", icon: "Bot" },
-  { href: "/admin/manufacturing", label: "التصنيع", icon: "Factory" },
-  { href: "/admin/owner-dashboard", label: "لوحة المالك", icon: "Crown" },
-  { href: "/admin/sales", label: "المبيعات", icon: "Shield" },
-  { href: "/admin/intel", label: "الاستخبارات", icon: "Brain" },
-  { href: "/admin/browser", label: "Browser", icon: "Globe" },
+const navCategories = [
+  {
+    title: "الرئيسية",
+    items: [
+      { href: "/admin", label: "نظرة عامة", icon: "Home" },
+      { href: "/admin/owner-dashboard", label: "لوحة المالك", icon: "Crown" },
+    ]
+  },
+  {
+    title: "الذكاء الاصطناعي والقدر",
+    items: [
+      { href: "/admin/agents", label: "نظام الوكلاء الذكي", icon: "Bot" },
+      { href: "/admin/fate", label: "التحكم في القدر", icon: "Sparkles" },
+      { href: "/admin/intel", label: "مركز الاستخبارات", icon: "Brain" },
+      { href: "/admin/browser", label: "تصفح الأتمتة", icon: "Globe" },
+      { href: "/admin/computer", label: "تحكم الكمبيوتر", icon: "Monitor" },
+      { href: "/admin/sandbox", label: "بيئة الاختبار", icon: "Code" },
+    ]
+  },
+  {
+    title: "العمليات والمبيعات",
+    items: [
+      { href: "/admin/sales", label: "إدارة المبيعات", icon: "TrendingUp" },
+      { href: "/admin/manufacturing", label: "خطوط الإنتاج", icon: "Factory" },
+    ]
+  },
+  {
+    title: "الاتصالات",
+    items: [
+      { href: "/admin/whatsapp", label: "واتساب", icon: "MessageSquare" },
+      { href: "/admin/phone", label: "الهاتف", icon: "Phone" },
+    ]
+  },
+  {
+    title: "النظام",
+    items: [
+      { href: "/admin/settings", label: "الإعدادات", icon: "Settings" },
+      { href: "/admin/database", label: "قاعدة البيانات", icon: "Database" },
+    ]
+  }
 ];
 
 export default function AdminLayoutClient({
@@ -32,120 +95,146 @@ export default function AdminLayoutClient({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [mobileMenuState, setMobileMenuState] = useState({
-    isOpen: false,
-    pathname: "",
-  });
-  const isMobileMenuOpen =
-    mobileMenuState.isOpen && mobileMenuState.pathname === (pathname || "");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const openMobileMenu = () => {
-    setMobileMenuState({
-      isOpen: true,
-      pathname: pathname || "",
-    });
-  };
+  const filteredNav = navCategories.map(cat => ({
+    ...cat,
+    items: cat.items.filter(item => 
+      item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cat.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  })).filter(cat => cat.items.length > 0);
 
-  const closeMobileMenu = () => {
-    setMobileMenuState((current) =>
-      current.isOpen ? { ...current, isOpen: false } : current
-    );
-  };
-
-  // إغلاق القائمة عند الضغط على Escape
+  // Close sidebar on path change (mobile)
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeMobileMenu();
-    };
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
+    setIsSidebarOpen(false);
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex overflow-hidden">
-      {/* زر القائمة - يظهر دائماً */}
+    <div className="min-h-screen bg-[#0A0A0A] flex overflow-hidden font-outfit">
+      {/* Mobile Menu Toggle */}
       <button
-        onClick={openMobileMenu}
-        className="fixed top-4 right-4 z-50 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#C5A059] text-[#1a1a1a] shadow-lg shadow-[#C5A059]/30 transition-all active:scale-95 hover:bg-[#D4B16A]"
-        aria-label="فتح القائمة"
+        onClick={() => setIsSidebarOpen(true)}
+        className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-xl bg-[#C5A059] text-[#1a1a1a] shadow-lg active:scale-95 transition-all"
       >
         <Menu className="h-6 w-6" />
       </button>
 
-      {/* Overlay للخلفية - يظهر عند فتح القائمة */}
-      {isMobileMenuOpen && (
+      {/* Sidebar Overlay */}
+      {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 transition-opacity"
-          onClick={closeMobileMenu}
+          className="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]"
+          onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar - Drawer دائماً لجميع الشاشات */}
+      {/* Sidebar Container */}
       <aside
         className={`
-          fixed inset-y-0 right-0 z-50
-          w-[280px]
-          border-l border-white/10 bg-[#0A0A0A]
+          fixed lg:static inset-y-0 right-0 z-[70]
+          w-[300px] flex-shrink-0
+          border-l border-white/10 bg-[#0C0C0C]
           flex flex-col
           transform transition-transform duration-300 ease-in-out
-          ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}
+          ${isSidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
         `}
       >
-        {/* Header مع زر الإغلاق */}
-        <div className="p-6 border-b border-white/10 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold text-[#C5A059]">AZENITH</h1>
-            <p className="text-xs text-white/50 mt-1">لوحة التحكم</p>
+        {/* Sidebar Header */}
+        <div className="p-6 border-b border-white/5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-[#C5A059] to-[#8B7355] rounded-lg">
+                <Crown className="w-5 h-5 text-[#1a1a1a]" />
+              </div>
+              <span className="text-xl font-bold tracking-tighter text-white">AZENITH <span className="text-[#C5A059] text-xs">OS</span></span>
+            </div>
+            <button 
+              className="lg:hidden p-2 text-white/40 hover:text-white"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={closeMobileMenu}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-colors"
-            aria-label="إغلاق القائمة"
-          >
-            <X className="h-5 w-5" />
-          </button>
+
+          {/* Search Bar */}
+          <div className="relative group">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-[#C5A059] transition-colors" />
+            <input 
+              type="text"
+              placeholder="بحث في الوظائف..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white/[0.03] border border-white/5 rounded-xl py-2 pr-10 pl-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#C5A059]/50 focus:bg-white/[0.05] transition-all"
+            />
+          </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
-            const IconComponent = iconMap[item.icon];
+        {/* Navigation Content */}
+        <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-8 custom-scrollbar scrollbar-hide">
+          {filteredNav.map((category) => (
+            <div key={category.title} className="space-y-3">
+              <h3 className="px-4 text-[10px] font-bold text-[#C5A059]/40 uppercase tracking-[0.25em]">
+                {category.title}
+              </h3>
+              <div className="space-y-1">
+                {category.items.map((item) => {
+                  const isActive = pathname === item.href || (item.href !== "/admin" && pathname?.startsWith(item.href + "/"));
+                  const Icon = iconMap[item.icon] || Code;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={closeMobileMenu}
-                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-xl transition-colors min-h-[48px]
-                  ${isActive
-                    ? "bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30"
-                    : "text-white/70 hover:bg-white/5 hover:text-white"
-                  }
-                `}
-              >
-                {IconComponent && <IconComponent className="h-5 w-5 flex-shrink-0" />}
-                <span className="font-medium text-sm">{item.label}</span>
-              </Link>
-            );
-          })}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`
+                        group flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-300
+                        ${isActive 
+                          ? "bg-[#C5A059]/10 text-[#C5A059] border-r-2 border-[#C5A059] shadow-lg shadow-[#C5A059]/5" 
+                          : "text-white/40 hover:bg-white/[0.03] hover:text-white/80"
+                        }
+                      `}
+                    >
+                      <Icon className={`w-4.5 h-4.5 transition-transform group-hover:scale-110 ${isActive ? "text-[#C5A059]" : "text-white/20 group-hover:text-white/60"}`} />
+                      <span className="text-sm font-medium">{item.label}</span>
+                      {isActive && (
+                        <div className="mr-auto w-1.5 h-1.5 rounded-full bg-[#C5A059] animate-pulse" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-white/10">
-          <p className="text-xs text-white/40 text-center">
-            أزينث ليفينج © 2025
+        {/* Sidebar Footer with System Stats */}
+        <div className="p-4 border-t border-white/5 space-y-4">
+          <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-3.5 h-3.5 text-[#C5A059]" />
+                <span className="text-[10px] text-white/60">نظام الأوركيسترا</span>
+              </div>
+              <span className="text-[10px] text-emerald-400">نشط</span>
+            </div>
+            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full bg-[#C5A059] w-[85%] rounded-full animate-pulse" />
+            </div>
+          </div>
+          <p className="text-[10px] text-white/20 text-center uppercase tracking-widest font-bold">
+            Sovereign OS v2.1
           </p>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto h-screen">
-        {children}
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
+        <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar p-0">
+          {children}
+        </div>
       </main>
 
-      {/* Floating Agent Button - Always visible */}
+      {/* Floating Action Button */}
       <FloatingAgentButton />
     </div>
   );

@@ -20,57 +20,30 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
+    const companyId = searchParams.get('company_id') || '00000000-0000-0000-0000-000000000000';
     
-    // TODO: Connect to Supabase when migrations are fixed
-    // For now, return mock devices (Docker containers)
-    const mockDevices = [
-      {
-        id: '1',
-        device_key: 'powerhouse-alpha',
-        device_type: 'docker_container',
-        hostname: 'powerhouse-alpha',
-        status: 'online',
-        capabilities: ['browser', 'scrape', 'screenshot', 'research'],
-        last_seen_at: new Date().toISOString(),
-        current_task_count: 0,
-        max_concurrent_tasks: 3,
-        agent_device_heartbeats: [{
-          status: 'online',
-          recorded_at: new Date().toISOString(),
-          cpu_percent: 15,
-          memory_percent: 45,
-          active_tasks: 0
-        }]
-      },
-      {
-        id: '2',
-        device_key: 'powerhouse-beta',
-        device_type: 'docker_container',
-        hostname: 'powerhouse-beta',
-        status: 'online',
-        capabilities: ['browser', 'scrape', 'screenshot', 'research'],
-        last_seen_at: new Date().toISOString(),
-        current_task_count: 1,
-        max_concurrent_tasks: 3,
-        agent_device_heartbeats: [{
-          status: 'online',
-          recorded_at: new Date().toISOString(),
-          cpu_percent: 12,
-          memory_percent: 38,
-          active_tasks: 1
-        }]
-      }
-    ].filter(d => !status || d.status === status);
+    let query = supabaseServer
+      .from('agent_devices')
+      .select('*, agent_device_heartbeats(*)')
+      .eq('company_id', companyId);
+      
+    if (status) {
+      query = query.eq('status', status);
+    }
+    
+    const { data, error } = await query.order('last_seen_at', { ascending: false });
+    
+    if (error) throw error;
     
     return NextResponse.json({ 
       success: true, 
-      data: mockDevices 
+      data: data 
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Get devices error:', error);
     return NextResponse.json(
-      { success: false, error: 'خطأ في السيرفر' },
+      { success: false, error: error.message || 'خطأ في السيرفر' },
       { status: 500 }
     );
   }

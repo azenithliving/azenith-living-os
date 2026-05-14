@@ -19,6 +19,14 @@ export async function proxy(request: NextRequest) {
   let rateLimitHeaders: Record<string, string> | null = null;
   const isAdminLoginApi = pathname === "/api/admin/verify-2fa";
 
+  const applyResponseHeaders = (response: NextResponse) => {
+    if (!rateLimitHeaders) return response;
+    Object.entries(rateLimitHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    return response;
+  };
+
   // 1. GATEKEEPER LEAK DETECTION (Sovereign Mesh)
   // Catch requests escaping from proxied dimensions (Referer: Mirror API)
   if (referer && referer.includes('/api/omnipotent/mirror') && 
@@ -68,8 +76,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 3. SESSION & SECURITY
-  const { supabaseResponse, user } = await updateSession(request);
+  // 3. RATE LIMITING
   const { shouldLimit, isSensitive } = shouldRateLimit(pathname);
 
   // Apply rate limiting if enabled
@@ -107,19 +114,27 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  const applyResponseHeaders = (response: NextResponse) => {
-    if (!rateLimitHeaders) return response;
-    Object.entries(rateLimitHeaders).forEach(([key, value]) => {
-      response.headers.set(key, value);
-    });
-    return response;
-  };
+  const needsSession =
+    pathname.startsWith("/api/admin") ||
+    pathname.startsWith("/admin-gate") ||
+    pathname.startsWith("/admin");
+
+  if (!needsSession) {
+    return applyResponseHeaders(NextResponse.next());
+  }
+
+  // 4. SESSION & SECURITY
+  // Keep Supabase session checks scoped to protected routes. Proxy runs before
+  // every matched request, so doing network-backed auth for public assets/pages
+  // can make local development appear to hang.
+  const { supabaseResponse, user } = await updateSession(request);
 
   // Admin API Protection
   const isGenesisApi = pathname === "/api/admin/eternal/genesis";
+  const isWhatsAppApi = pathname.startsWith("/api/admin/whatsapp");
   const isLocalhost = request.headers.get("host")?.includes("localhost");
 
-  if (pathname.startsWith("/api/admin") && !isAdminLoginApi && !user && !(isGenesisApi && isLocalhost)) {
+  if (pathname.startsWith("/api/admin") && !isAdminLoginApi && !user && !((isGenesisApi || isWhatsAppApi) && isLocalhost)) {
     return applyResponseHeaders(new NextResponse(
       JSON.stringify({ success: false, error: "Unauthorized" }),
       { status: 401, headers: { "Content-Type": "application/json" } }

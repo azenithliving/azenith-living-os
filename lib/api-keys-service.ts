@@ -21,6 +21,8 @@ const ENV_KEY_POOLS = {
   mistral: parseKeyPool(process.env.MISTRAL_KEYS),
   pexels: parseKeyPool(process.env.PEXELS_KEYS),
   deepseek: parseKeyPool(process.env.DEEPSEEK_KEYS),
+  openai: parseKeyPool(process.env.OPENAI_KEYS),
+  google: parseKeyPool(process.env.GOOGLE_AI_KEYS || process.env.GEMINI_API_KEY),
 };
 
 // In-memory key state
@@ -37,6 +39,8 @@ const keyStates: Record<string, KeyState[]> = {
   mistral: [],
   pexels: [],
   deepseek: [],
+  openai: [],
+  google: [],
 };
 
 let keysLoaded = false;
@@ -60,10 +64,7 @@ export async function loadKeysFromDB(): Promise<void> {
     }
 
     // Reset states
-    keyStates.groq = [];
-    keyStates.openrouter = [];
-    keyStates.mistral = [];
-    keyStates.pexels = [];
+    Object.keys(keyStates).forEach(k => { keyStates[k] = []; });
 
     // Add DB keys
     for (const row of data || []) {
@@ -78,7 +79,8 @@ export async function loadKeysFromDB(): Promise<void> {
     }
 
     // Merge with env keys (avoid duplicates)
-    for (const provider of ["groq", "openrouter", "mistral", "pexels", "deepseek"] as const) {
+    const providers = ["groq", "openrouter", "mistral", "pexels", "deepseek", "openai", "google"] as const;
+    for (const provider of providers) {
       const existingKeys = new Set(keyStates[provider].map((k) => k.key));
       for (const envKey of ENV_KEY_POOLS[provider]) {
         if (!existingKeys.has(envKey)) {
@@ -93,12 +95,9 @@ export async function loadKeysFromDB(): Promise<void> {
     }
 
     keysLoaded = true;
-    console.log("[API Keys Service] Keys loaded:", {
-      groq: keyStates.groq.length,
-      openrouter: keyStates.openrouter.length,
-      mistral: keyStates.mistral.length,
-      pexels: keyStates.pexels.length,
-    });
+    console.log("[API Keys Service] Keys loaded:", Object.fromEntries(
+      Object.entries(keyStates).map(([k, v]) => [k, v.length])
+    ));
   } catch (err) {
     console.error("[API Keys Service] Error loading keys:", err);
     fallbackToEnvKeys();
@@ -109,7 +108,8 @@ export async function loadKeysFromDB(): Promise<void> {
  * Fallback to environment keys only
  */
 function fallbackToEnvKeys(): void {
-  for (const provider of ["groq", "openrouter", "mistral", "pexels", "deepseek"] as const) {
+  const providers = ["groq", "openrouter", "mistral", "pexels", "deepseek", "openai", "google"] as const;
+  for (const provider of providers) {
     keyStates[provider] = ENV_KEY_POOLS[provider].map((k) => ({
       key: k,
       cooldownUntil: null,
@@ -124,7 +124,7 @@ function fallbackToEnvKeys(): void {
  * Get a single key from database (preferred) or environment
  */
 export async function getKeyFromDB(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek"
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google"
 ): Promise<string | null> {
   try {
     const supabase = await createClient();
@@ -161,20 +161,22 @@ const keyIndices: Record<string, number> = {
   mistral: 0,
   pexels: 0,
   deepseek: 0,
+  openai: 0,
+  google: 0,
 };
 
 /**
  * Get next available key using round-robin with cooldown support
  */
 export async function getNextAvailableKey(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek"
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google"
 ): Promise<{ key: string; index: number } | null> {
   if (!keysLoaded) {
     await loadKeysFromDB();
   }
 
   const pool = keyStates[provider];
-  if (pool.length === 0) return null;
+  if (!pool || pool.length === 0) return null;
 
   const now = new Date();
   const startIndex = keyIndices[provider];
@@ -209,7 +211,7 @@ export async function getNextAvailableKey(
  * Set cooldown for a specific key
  */
 export async function setKeyCooldown(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek",
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google",
   key: string,
   durationMs: number
 ): Promise<void> {
@@ -217,6 +219,7 @@ export async function setKeyCooldown(
 
   // Update in-memory
   const pool = keyStates[provider];
+  if (!pool) return;
   const keyEntry = pool.find((k) => k.key === key);
   if (keyEntry) {
     keyEntry.cooldownUntil = cooldownUntil;
@@ -242,11 +245,12 @@ export async function setKeyCooldown(
  * Increment request count for a key
  */
 export async function incrementKeyUsage(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek",
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google",
   key: string
 ): Promise<void> {
   // Update in-memory
   const pool = keyStates[provider];
+  if (!pool) return;
   const keyEntry = pool.find((k) => k.key === key);
   if (keyEntry) {
     keyEntry.totalRequests++;
@@ -272,7 +276,7 @@ export async function incrementKeyUsage(
 /**
  * Get all key stats for a provider
  */
-export async function getKeyStats(provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek"): Promise<{
+export async function getKeyStats(provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google"): Promise<{
   total: number;
   active: number;
   inCooldown: number;
@@ -282,7 +286,7 @@ export async function getKeyStats(provider: "groq" | "openrouter" | "mistral" | 
     await loadKeysFromDB();
   }
 
-  const pool = keyStates[provider];
+  const pool = keyStates[provider] || [];
   const now = new Date();
 
   return {

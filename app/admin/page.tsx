@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image } from "lucide-react";
+import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image, MessageSquare, Activity, Factory } from "lucide-react";
 import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-components";
 import { ImageHarvestDashboard } from "./intel/components/ImageHarvestDashboard";
 
@@ -82,6 +82,10 @@ export default function AdminPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [systemStatus, setSystemStatus] = useState({
+    whatsapp: "loading",
+    aaca: "loading"
+  });
 
   // Fetch real data from APIs
   useEffect(() => {
@@ -140,20 +144,20 @@ export default function AdminPage() {
             href: "/admin/intel",
           },
           {
-            title: "طلبات الحجز",
+            title: "نظام الوكلاء",
             value: analytics.metrics?.totalRequests || 0,
             subtitle: analytics.metrics?.totalBookings ? `${analytics.metrics.totalBookings} حجز مؤكد` : "قيد الانتظار",
             icon: <Bot className="h-6 w-6" />,
             color: "blue" as const,
-            href: "/admin/ops",
+            href: "/admin/agents",
           },
           {
-            title: "الزوار الفريدين",
+            title: "نشاط المنصة",
             value: analytics.metrics?.uniqueVisitors || 0,
             subtitle: analytics.metrics?.whatsappClicks ? `${analytics.metrics.whatsappClicks} نقر واتساب` : "هذا الشهر",
             icon: <Clock className="h-6 w-6" />,
             color: "gold" as const,
-            href: "/admin/ops",
+            href: "/admin",
           },
         ];
 
@@ -199,13 +203,13 @@ export default function AdminPage() {
 
         // Default alert if none exist
         if (realAlerts.length === 0) {
-          realAlerts.push({
-            icon: CheckCircle,
-            color: "emerald" as const,
-            text: "النظام يعمل بكفاءة",
-            subtext: "لا توجد مشاكل أو تنبيهات حالية",
-            link: "/admin/ops",
-          });
+            realAlerts.push({
+              icon: CheckCircle,
+              color: "emerald" as const,
+              text: "النظام يعمل بكفاءة",
+              subtext: "لا توجد مشاكل أو تنبيهات حالية",
+              link: "/admin",
+            });
         }
 
         setAlerts(realAlerts);
@@ -218,6 +222,23 @@ export default function AdminPage() {
     };
 
     fetchDashboardData();
+
+    // Fetch system health (WhatsApp & AACA)
+    const checkSystems = async () => {
+      try {
+        const waRes = await fetch("/api/admin/whatsapp/status");
+        const waData = await waRes.json();
+        const aacaRes = await fetch("http://localhost:3001/api/health").catch(() => ({ ok: false }));
+        
+        setSystemStatus({
+          whatsapp: waData.status || "DISCONNECTED",
+          aaca: aacaRes.ok ? "READY" : "OFFLINE"
+        });
+      } catch (e) {
+        setSystemStatus({ whatsapp: "ERROR", aaca: "ERROR" });
+      }
+    };
+    checkSystems();
   }, []);
 
   const colorClasses: Record<string, string> = {
@@ -225,6 +246,18 @@ export default function AdminPage() {
     amber: "border-amber-500/30 bg-amber-500/10",
     emerald: "border-emerald-500/30 bg-emerald-500/10",
   };
+
+  const [aiHealth, setAiHealth] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchAIHealth = async () => {
+      try {
+        const res = await fetch("/api/admin/ai/health");
+        if (res.ok) setAiHealth(await res.json());
+      } catch (e) { console.error(e); }
+    };
+    fetchAIHealth();
+  }, []);
 
   const iconColors: Record<string, string> = {
     rose: "text-rose-400",
@@ -254,6 +287,74 @@ export default function AdminPage() {
             <span className="text-sm text-emerald-400">النظام يعمل بكفاءة</span>
           </div>
         </div>
+
+        {/* System Health Overview */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-2xl ${systemStatus.whatsapp === 'READY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                <MessageSquare className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-sm">خدمة الواتساب</h3>
+                <p className="text-[10px] text-white/40">الحالة الحالية لمحرك التواصل</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`h-2 w-2 rounded-full animate-pulse ${systemStatus.whatsapp === 'READY' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+              <span className={`text-xs font-bold ${systemStatus.whatsapp === 'READY' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {systemStatus.whatsapp === 'READY' ? 'متصل' : 'غير متصل'}
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-2xl ${systemStatus.aaca === 'READY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                <Activity className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-sm">نظام الوكلاء (AACA)</h3>
+                <p className="text-[10px] text-white/40">حالة العقل المدبر للعمليات</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`h-2 w-2 rounded-full animate-pulse ${systemStatus.aaca === 'READY' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+              <span className={`text-xs font-bold ${systemStatus.aaca === 'READY' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {systemStatus.aaca === 'READY' ? 'نشط' : 'متوقف'}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* AI Key Pools Health */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <Brain className="w-5 h-5 text-purple-400" />
+              مراقبة أحواض الذكاء الاصطناعي
+            </h2>
+            <span className="text-[10px] text-white/30 uppercase tracking-widest">تحديث مباشر</span>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {aiHealth && aiHealth.pools && Object.entries(aiHealth.pools).map(([name, pool]: [string, any]) => (
+              <div key={name} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 transition-all hover:bg-white/[0.04]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{name}</span>
+                  <div className={`h-1.5 w-1.5 rounded-full ${pool.healthy ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}`} />
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xl font-bold text-white">{pool.keys}</span>
+                  <span className="text-[10px] text-white/30">مفتاح</span>
+                </div>
+                <div className="mt-2 h-1 bg-white/5 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${pool.healthy ? 'bg-emerald-500/50' : 'bg-rose-500/50'}`} style={{ width: pool.keys > 0 ? '100%' : '0%' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* 6 Metric Cards */}
         <section>
@@ -348,26 +449,26 @@ export default function AdminPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <Link href="/admin/sales" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
               <div className="rounded-xl bg-[#C5A059]/20 p-3 w-fit mb-4">
-                <Shield className="w-6 h-6 text-[#C5A059]" />
+                <TrendingUp className="w-6 h-6 text-[#C5A059]" />
               </div>
               <h3 className="text-lg font-bold text-white group-hover:text-[#C5A059] transition-colors">المبيعات</h3>
               <p className="text-sm text-white/50 mt-2">العملاء، المستأجرين، الإدارة</p>
             </Link>
 
-            <Link href="/admin/intel" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-purple-500/30 hover:bg-white/[0.05]">
+            <Link href="/admin/agents" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-purple-500/30 hover:bg-white/[0.05]">
               <div className="rounded-xl bg-purple-500/20 p-3 w-fit mb-4">
-                <Brain className="w-6 h-6 text-purple-400" />
+                <Bot className="w-6 h-6 text-purple-400" />
               </div>
-              <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">الاستخبارات</h3>
+              <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">الوكلاء</h3>
               <p className="text-sm text-white/50 mt-2">التحليلات، الذكاء، التطوير</p>
             </Link>
 
-            <Link href="/admin/ops" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-cyan-500/30 hover:bg-white/[0.05]">
+            <Link href="/admin/manufacturing" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-cyan-500/30 hover:bg-white/[0.05]">
               <div className="rounded-xl bg-cyan-500/20 p-3 w-fit mb-4">
-                <Bot className="w-6 h-6 text-cyan-400" />
+                <Factory className="w-6 h-6 text-cyan-400" />
               </div>
-              <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">العمليات</h3>
-              <p className="text-sm text-white/50 mt-2">الأتمتة، المحتوى، الحجوزات</p>
+              <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">التصنيع</h3>
+              <p className="text-sm text-white/50 mt-2">الأتمتة، الإنتاج، التوريد</p>
             </Link>
           </div>
         </section>

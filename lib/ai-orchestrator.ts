@@ -21,6 +21,8 @@ const KEY_POOLS = {
   openrouter: parseKeyPool(process.env.OPENROUTER_KEYS),
   mistral: parseKeyPool(process.env.MISTRAL_KEYS),
   deepseek: parseKeyPool(process.env.DEEPSEEK_KEYS),
+  openai: parseKeyPool(process.env.OPENAI_KEYS),
+  google: parseKeyPool(process.env.GOOGLE_AI_KEYS || process.env.GEMINI_API_KEY),
 };
 
 // Model Configuration
@@ -30,6 +32,8 @@ const CONFIG = {
   MISTRAL_CODE_MODEL: "codestral-latest",
   MISTRAL_GENERAL_MODEL: "mistral-large-latest",
   DEEPSEEK_MODEL: "deepseek-chat",
+  OPENAI_MODEL: "gpt-4o",
+  GOOGLE_MODEL: "gemini-2.0-flash",
   MAX_RETRIES: 3,
   RETRY_DELAY_MS: 500,
 };
@@ -40,10 +44,12 @@ const keyIndices: Record<string, number> = {
   openrouter: 0,
   mistral: 0,
   deepseek: 0,
+  openai: 0,
+  google: 0,
 };
 
 // Get next key using round-robin
-const getNextKey = (provider: "groq" | "openrouter" | "mistral" | "deepseek"): string | null => {
+const getNextKey = (provider: "groq" | "openrouter" | "mistral" | "deepseek" | "openai" | "google"): string | null => {
   const pool = KEY_POOLS[provider];
   if (pool.length === 0) return null;
 
@@ -62,13 +68,12 @@ const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(r
 
 // Provider-specific fetch with retry logic
 async function fetchWithRetry<T>(
-  provider: "groq" | "openrouter" | "mistral" | "deepseek",
+  provider: "groq" | "openrouter" | "mistral" | "deepseek" | "openai" | "google",
   fetchFn: (key: string) => Promise<Response>,
   parseFn: (data: any) => T
 ): Promise<{ success: true; data: T } | { success: false; error: string; status?: number }> {
   const requestId = `retry_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const pool = KEY_POOLS[provider];
-  const startIndex = keyIndices[provider];
   
   console.log(`[FetchWithRetry] [${requestId}] Provider: ${provider}, Pool size: ${pool.length}, Max retries: ${CONFIG.MAX_RETRIES}`);
 
@@ -180,15 +185,15 @@ interface GroqMessage {
 }
 
 /**
- * Ask Groq - Primary for Semantic Data, Intent Scoring, and Rapid APIs
+ * Ask Groq with full message history (Chat API)
  */
-export async function askGroq(
-  prompt: string,
+export async function askGroqMessages(
+  messages: Array<{ role: string; content: string }>,
   options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
 ): Promise<{ success: boolean; content: string; error?: string }> {
   const body: Record<string, unknown> = {
     model: options?.model || CONFIG.GROQ_MODEL,
-    messages: [{ role: "user", content: prompt }],
+    messages: messages,
     temperature: options?.temperature ?? 0.7,
     max_tokens: options?.maxTokens ?? 2048,
   };
@@ -200,6 +205,52 @@ export async function askGroq(
   const result = await fetchWithRetry(
     "groq",
     (key) => fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  if (result.success) {
+    return { success: true, content: result.data };
+  }
+
+  // CROSS-PROVIDER FALLBACK: If Groq fails completely, escalate to OpenAI or Google
+  console.error(`[Orchestrator] Groq exhausted. Falling back to OpenAI/Google for stability.`);
+  
+  // Try OpenAI as first fallback
+  const openaiResult = await askOpenAIMessages(messages, options);
+  if (openaiResult.success) return openaiResult;
+
+  // Final fallback to Google
+  return askGoogle(messages[messages.length - 1].content, options);
+}
+
+/**
+ * Ask OpenAI with full message history
+ */
+export async function askOpenAIMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const body: Record<string, unknown> = {
+    model: options?.model || CONFIG.OPENAI_MODEL,
+    messages: messages,
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (options?.jsonMode) {
+    body.response_format = { type: "json_object" };
+  }
+
+  const result = await fetchWithRetry(
+    "openai",
+    (key) => fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${key}`,
@@ -217,72 +268,13 @@ export async function askGroq(
 }
 
 /**
- * Ask Groq with Messages Array - For Conversational Context
+ * Ask Groq - Primary for Semantic Data, Intent Scoring, and Rapid APIs
  */
-export async function askGroqMessages(
-  messages: GroqMessage[],
+export async function askGroq(
+  prompt: string,
   options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
 ): Promise<{ success: boolean; content: string; error?: string }> {
-  const body: Record<string, unknown> = {
-    model: options?.model || CONFIG.GROQ_MODEL,
-    messages,
-    temperature: options?.temperature ?? 0.7,
-    max_tokens: options?.maxTokens ?? 2048,
-  };
-
-  if (options?.jsonMode) {
-    body.response_format = { type: "json_object" };
-  }
-
-  const result = await fetchWithRetry(
-    "groq",
-    (key) => fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    }),
-    (data) => data.choices?.[0]?.message?.content || ""
-  );
-
-  if (result.success) {
-    return { success: true, content: result.data };
-  }
-  
-  // FALLBACK TO OPENROUTER FREE MODEL IF GROQ FAILS
-  console.log("[Orchestrator] Groq failed. Falling back to OpenRouter free models for stability.");
-  
-  const openRouterBody: Record<string, unknown> = {
-    model: "google/gemini-2.5-flash:free", // Use a highly capable free model
-    messages,
-    temperature: options?.temperature ?? 0.7,
-    max_tokens: options?.maxTokens ?? 2048,
-  };
-
-  if (options?.jsonMode) {
-    openRouterBody.response_format = { type: "json_object" };
-  }
-
-  const fallbackResult = await fetchWithRetry(
-    "openrouter",
-    (key) => fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(openRouterBody),
-    }),
-    (data) => data.choices?.[0]?.message?.content || ""
-  );
-
-  if (fallbackResult.success) {
-    return { success: true, content: fallbackResult.data };
-  }
-
-  return { success: false, content: "", error: `Groq error: ${result.error} | Fallback error: ${fallbackResult.error}` };
+  return askGroqMessages([{ role: "user", content: prompt }], options);
 }
 
 /**
@@ -314,7 +306,7 @@ export async function askOpenRouter(
       headers: {
         "Authorization": `Bearer ${key}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": process.env.PRIMARY_DOMAIN || "https://azenithliving.vercel.app",
+        "HTTP-Referer": process.env.PRIMARY_DOMAIN || "https://azenith-living-os.vercel.app",
         "X-Title": "Azenith Living",
       },
       body: JSON.stringify({
@@ -343,13 +335,10 @@ export async function askDeepSeek(
   const requestId = `deepseek_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
   console.log(`[AskDeepSeek] [${requestId}] ===== DEEPSEEK REQUEST =====`);
-  console.log(`[AskDeepSeek] [${requestId}] Prompt length: ${prompt.length} chars`);
-  console.log(`[AskDeepSeek] [${requestId}] Options:`, { model: options?.model || CONFIG.DEEPSEEK_MODEL, jsonMode: options?.jsonMode, temperature: options?.temperature ?? 0.7 });
-  console.log(`[AskDeepSeek] [${requestId}] Available keys: ${KEY_POOLS.deepseek.length}`);
   
   if (KEY_POOLS.deepseek.length === 0) {
-    console.error(`[AskDeepSeek] [${requestId}] NO API KEYS CONFIGURED!`);
-    return { success: false, content: "", error: "DeepSeek API keys not configured (DEEPSEEK_KEYS env var)" };
+    console.warn(`[AskDeepSeek] [${requestId}] No DeepSeek keys, falling back to OpenRouter...`);
+    return askOpenRouter(prompt, undefined, { model: "google/gemini-2.0-flash:free" });
   }
 
   const body: Record<string, unknown> = {
@@ -362,10 +351,7 @@ export async function askDeepSeek(
   if (options?.jsonMode) {
     body.response_format = { type: "json_object" };
   }
-  
-  console.log(`[AskDeepSeek] [${requestId}] Request body:`, JSON.stringify({ ...body, messages: [{ role: "user", content: "[TRUNCATED]" }] }));
 
-  console.log(`[AskDeepSeek] [${requestId}] Calling fetchWithRetry...`);
   const result = await fetchWithRetry(
     "deepseek",
     (key) => fetch("https://api.deepseek.com/v1/chat/completions", {
@@ -379,17 +365,83 @@ export async function askDeepSeek(
     (data) => data.choices?.[0]?.message?.content || ""
   );
 
-  console.log(`[AskDeepSeek] [${requestId}] fetchWithRetry result:`, { success: result.success, hasData: result.success ? !!result.data : false, error: result.success ? null : result.error });
-  
   if (result.success) {
-    console.log(`[AskDeepSeek] [${requestId}] Raw content (first 200 chars): "${result.data?.substring(0, 200)}..."`);
-    console.log(`[AskDeepSeek] [${requestId}] ===== REQUEST COMPLETED =====`);
     return { success: true, content: result.data };
   }
   
-  // FALLBACK TO OPENROUTER IF DEEPSEEK FAILS (e.g. 402 Insufficient Balance)
+  // FALLBACK TO OPENROUTER IF DEEPSEEK FAILS
   console.error(`[AskDeepSeek] [${requestId}] REQUEST FAILED: ${result.error}. Falling back to OpenRouter...`);
   return askOpenRouter(prompt, undefined, { model: "google/gemini-2.0-pro-exp-02-05:free" });
+}
+
+/**
+ * Ask OpenAI - Direct access to GPT-4o pool
+ */
+export async function askOpenAI(
+  prompt: string,
+  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const body: Record<string, unknown> = {
+    model: options?.model || CONFIG.OPENAI_MODEL,
+    messages: [{ role: "user", content: prompt }],
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (options?.jsonMode) {
+    body.response_format = { type: "json_object" };
+  }
+
+  const result = await fetchWithRetry(
+    "openai",
+    (key) => fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  if (result.success) {
+    return { success: true, content: result.data };
+  }
+  return { success: false, content: "", error: result.error };
+}
+
+/**
+ * Ask Google - Direct access to Gemini 2.0 pool
+ */
+export async function askGoogle(
+  prompt: string,
+  options?: { model?: string; temperature?: number; maxTokens?: number }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const model = options?.model || CONFIG.GOOGLE_MODEL;
+  
+  const result = await fetchWithRetry(
+    "google",
+    (key) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: options?.temperature ?? 0.7,
+          maxOutputTokens: options?.maxTokens ?? 2048,
+        },
+      }),
+    }),
+    (data) => data.candidates?.[0]?.content?.parts?.[0]?.text || ""
+  );
+
+  if (result.success) {
+    return { success: true, content: result.data };
+  }
+  return { success: false, content: "", error: result.error };
 }
 
 /**
@@ -423,7 +475,6 @@ async function fetchHuggingFace(
     return { success: false, error: "HUGGINGFACE_KEYS not configured" };
   }
 
-  const startIndex = huggingFaceKeyIndex;
   const maxRetries = Math.min(HUGGINGFACE_KEY_POOL.length * 2, 8); // Try each key twice max
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -449,12 +500,9 @@ async function fetchHuggingFace(
         const status = response.status;
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.error || errorData.message || response.statusText;
-        console.error(`[HuggingFace ${model}] Key failed (attempt ${attempt + 1}/${maxRetries}): ${status} - ${errorMessage}`);
 
-        // Retry on 429 (rate limit) or 503 (model loading)
         if (isHuggingFaceRetryable(status)) {
           if (attempt < maxRetries - 1) {
-            // Wait longer for model loading (503)
             const waitMs = status === 503 ? 3000 : 1000;
             await delay(waitMs * (attempt + 1));
             continue;
@@ -465,13 +513,10 @@ async function fetchHuggingFace(
       }
 
       const data = await response.json();
-      // Hugging Face returns an array of generated texts
       const generatedText = Array.isArray(data) ? data[0]?.generated_text : data.generated_text;
       return { success: true, data: generatedText || "" };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Network error";
-      console.error(`[HuggingFace ${model}] Fetch error (attempt ${attempt + 1}/${maxRetries}): ${errorMessage}`);
-
       if (attempt < maxRetries - 1) {
         await delay(1000 * (attempt + 1));
       } else {
@@ -485,7 +530,6 @@ async function fetchHuggingFace(
 
 /**
  * Ask Hugging Face - Generic interface with key rotation
- * Model: Any Hugging Face Inference API model
  */
 export async function askHuggingFace(
   model: string,
@@ -510,16 +554,12 @@ export async function askHuggingFace(
 
 /**
  * Ask Nile Chat - Egyptian Arabic/Arabizi Chat Model
- * Model: MBZUAI-Paris/Nile-Chat-12B
- * Best for: Casual conversation in Egyptian dialect and Arabizi
  */
 export async function askNileChat(
   prompt: string,
   options?: { maxTokens?: number; temperature?: number }
 ): Promise<{ success: boolean; content: string; error?: string }> {
   const MODEL = "MBZUAI-Paris/Nile-Chat-12B";
-
-  // Format prompt for chat model (Nile Chat uses Llama-2 chat format)
   const formattedPrompt = `[INST] ${prompt} [/INST]`;
 
   const result = await fetchHuggingFace(
@@ -541,16 +581,12 @@ export async function askNileChat(
 
 /**
  * Ask ALLaM - Gulf Arabic Premium Content Model
- * Model: SDAIA/ALLaM-7B-Instruct
- * Best for: High-quality Gulf Arabic content, formal writing, premium copy
  */
 export async function askAllam(
   prompt: string,
   options?: { maxTokens?: number; temperature?: number }
 ): Promise<{ success: boolean; content: string; error?: string }> {
   const MODEL = "SDAIA/ALLaM-7B-Instruct";
-
-  // Format as instruction for instruct model (ALLaM uses Alpaca format)
   const formattedPrompt = `### Instruction:
 ${prompt}
 
@@ -583,18 +619,21 @@ export function getOrchestratorHealth(): {
   openrouter: { keys: number; healthy: boolean };
   mistral: { keys: number; healthy: boolean };
   deepseek: { keys: number; healthy: boolean };
+  openai: { keys: number; healthy: boolean };
+  google: { keys: number; healthy: boolean };
 } {
   return {
     groq: { keys: KEY_POOLS.groq.length, healthy: KEY_POOLS.groq.length > 0 },
     openrouter: { keys: KEY_POOLS.openrouter.length, healthy: KEY_POOLS.openrouter.length > 0 },
     mistral: { keys: KEY_POOLS.mistral.length, healthy: KEY_POOLS.mistral.length > 0 },
     deepseek: { keys: KEY_POOLS.deepseek.length, healthy: KEY_POOLS.deepseek.length > 0 },
+    openai: { keys: KEY_POOLS.openai.length, healthy: KEY_POOLS.openai.length > 0 },
+    google: { keys: KEY_POOLS.google.length, healthy: KEY_POOLS.google.length > 0 },
   };
 }
 
 /**
  * Legacy singleton instance (for backward compatibility)
- * @deprecated Use askMistral, askGroq, askOpenRouter directly
  */
 export class AIOrchestrator {
   async fastText(prompt: string): Promise<{ success: boolean; content: string; error?: string }> {
@@ -614,25 +653,18 @@ export class AIOrchestrator {
     return askDeepSeek(prompt, options);
   }
 
-  getKeyStatus(): {
-    groqConfigured: boolean;
-    openRouterConfigured: boolean;
-    mistralConfigured: boolean;
-    deepseekConfigured: boolean;
-  } {
+  getKeyStatus() {
     const health = getOrchestratorHealth();
     return {
       groqConfigured: health.groq.healthy,
       openRouterConfigured: health.openrouter.healthy,
       mistralConfigured: health.mistral.healthy,
       deepseekConfigured: health.deepseek.healthy,
+      openaiConfigured: health.openai.healthy,
+      googleConfigured: health.google.healthy,
     };
   }
 
-  /**
-   * Process a command using the Mastermind Graph workflow
-   * Phase 2: Unlimited Intelligence
-   */
   async processWithMastermind(
     command: string,
     userId: string,
@@ -640,7 +672,6 @@ export class AIOrchestrator {
   ): Promise<{ success: boolean; result?: unknown; error?: string }> {
     try {
       const state = await runMastermind(command, userId, context);
-      
       return {
         success: state.errors.length === 0,
         result: {
@@ -665,13 +696,18 @@ export const aiOrchestrator = new AIOrchestrator();
 
 /**
  * Create LLM client for a specific provider
- * Simple interface for the UltimateAgent
  */
-export function createLLMClient(provider: "deepseek" | "groq" | "mistral" | "openrouter") {
+export function createLLMClient(provider: "deepseek" | "groq" | "mistral" | "openrouter" | "openai" | "google") {
   return {
     async complete(prompt: string): Promise<string> {
       let result;
       switch (provider) {
+        case "openai":
+          result = await askOpenAI(prompt);
+          break;
+        case "google":
+          result = await askGoogle(prompt);
+          break;
         case "deepseek":
           result = await askDeepSeek(prompt, { temperature: 0.7, maxTokens: 1000 });
           break;

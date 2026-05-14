@@ -186,7 +186,7 @@ export async function askOpenRouterServer(
       headers: {
         "Authorization": `Bearer ${key}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": process.env.PRIMARY_DOMAIN || "https://azenithliving.vercel.app",
+        "HTTP-Referer": process.env.PRIMARY_DOMAIN || "https://azenith-living-os.vercel.app",
         "X-Title": "Azenith Living",
       },
       body: JSON.stringify({

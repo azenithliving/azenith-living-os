@@ -397,7 +397,7 @@ BEGIN
                        'bom_headers', 'inventory_items', 'purchase_orders',
                        'quality_checks', 'delivery_records')
   LOOP
-    EXECUTE format('CREATE TRIGGER IF NOT EXISTS update_%s_updated_at 
+    EXECUTE format('CREATE TRIGGER update_%s_updated_at 
       BEFORE UPDATE ON %I 
       FOR EACH ROW 
       EXECUTE FUNCTION update_updated_at_column()', t, t);

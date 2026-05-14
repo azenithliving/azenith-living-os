@@ -28,6 +28,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+dev-*.log
 
 # Documentation with secrets
 NEURAL_BLUEPRINT.md
@@ -55,3 +56,10 @@ next-env.d.ts
 /data/browser-workspace/
 
 .vercel
+
+# WhatsApp Web JS
+.wwebjs_auth/
+.wwebjs_cache/
+wwebjs-auth/
+whatsapp-service.js
+debug-auth/

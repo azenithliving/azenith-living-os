@@ -1,18 +1,28 @@
-// API Route: approval-queue - طلبات الـ Agents اللي محتاجة موافقة
 import { NextRequest, NextResponse } from 'next/server';
+import { supabaseServer } from '@/lib/dal/unified-supabase';
 
 // GET: جلب كل الطلبات المعلقة
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // TODO: Connect to Supabase when migrations are fixed
-    // For now, return empty array
+    const { searchParams } = new URL(request.url);
+    const companyId = searchParams.get('company_id') || '00000000-0000-0000-0000-000000000000';
+
+    const { data, error } = await supabaseServer
+      .from('approval_requests')
+      .select('*')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
     return NextResponse.json({
-      approvals: []
+      success: true,
+      approvals: data || []
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching approvals:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch approvals' },
+      { success: false, error: error.message || 'Failed to fetch approvals' },
       { status: 500 }
     );
   }
@@ -23,17 +33,29 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    // TODO: Connect to Supabase when migrations are fixed
-    // For now, return success
+    const { data, error } = await supabaseServer
+      .from('approval_requests')
+      .insert({
+        action_id: body.action_id,
+        action_type: body.action_type,
+        description: body.description,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
     return NextResponse.json({
       success: true,
-      id: crypto.randomUUID(),
+      id: data.id,
       message: 'Approval request created'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating approval:', error);
     return NextResponse.json(
-      { error: 'Failed to create approval' },
+      { success: false, error: error.message || 'Failed to create approval' },
       { status: 500 }
     );
   }

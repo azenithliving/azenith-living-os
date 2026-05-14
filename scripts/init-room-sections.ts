@@ -179,7 +179,7 @@ async function initRoomSections() {
         .from('companies')
         .insert({
           name: 'Azenith Living',
-          domain: 'azenithliving.vercel.app',
+          domain: 'azenith-living-os.vercel.app',
           primary_color: '#C5A059',
           whatsapp: '201090819584'
         })

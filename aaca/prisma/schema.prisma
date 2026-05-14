@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -8,102 +7,6 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
   schemas   = ["auth", "public"]
-}
-
-model User {
-  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email            String?
-  company_id       String            @db.Uuid
-  session_id       String
-  score            Int               @default(0)
-  intent           String            @default("browsing")
-  last_page        String?
-  room_type        String?
-  budget           String?
-  style            String?
-  service_type     String?
-  created_at       DateTime          @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at       DateTime          @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  agent_goals      agent_goals[]
-  agent_memory     agent_memory[]
-  approval_logs    approval_logs[]
-  bookings         bookings[]
-  events           Event[]
-  payments         payments[]
-  requests         requests[]
-  site_settings    site_settings[]
-  user_preferences user_preferences?
-  visitor_sessions VisitorSession[]
-  companies        Company           @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([company_id], map: "idx_users_company_id")
-  @@index([company_id, intent, score], map: "idx_users_company_intent_score")
-  @@map("users")
-  @@schema("public")
-}
-
-model Event {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id String   @db.Uuid
-  user_id    String?  @db.Uuid
-  type       String
-  value      String?
-  metadata   Json     @default("{}")
-  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies  Company  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users      User?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
-
-  @@index([company_id, created_at], map: "idx_events_company_created_at")
-  @@index([company_id, type, created_at], map: "idx_events_company_type_created_at")
-  @@map("events")
-  @@schema("public")
-}
-
-model Company {
-  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String
-  domain           String             @unique
-  logo             String?
-  primary_color    String?
-  whatsapp         String?
-  created_at       DateTime           @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at       DateTime           @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  audit_logs       audit_logs[]
-  automation_rules automation_rules[]
-  bookings         bookings[]
-  content          content[]
-  events           Event[]
-  experiments      experiments[]
-  images           images[]
-  media_assets     media_assets[]
-  page_sections    page_sections[]
-  pages            pages[]
-  payments         payments[]
-  requests         requests[]
-  site_config      site_config[]
-  users            User[]
-
-  @@index([domain], map: "idx_companies_domain")
-  @@map("companies")
-  @@schema("public")
-}
-
-model RoomSection {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String
-  slug         String    @unique
-  description  String?
-  image_url    String?   @default("https://images.unsplash.com/photo-1618221195710-dd6b41faeaa6?auto=format&fit=crop&q=80&w=800")
-  isActive     Boolean?  @default(true) @map("is_active")
-  companyId    String?   @map("company_id") @db.Uuid
-  displayOrder Int       @default(autoincrement()) @map("display_order")
-  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  nameAr       String?   @map("name_ar")
-  icon         String?
-  metadata     Json?
-
-  @@map("room_sections")
-  @@schema("public")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -185,15 +88,15 @@ model flow_state {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model identities {
   provider_id     String
-  user_id         String    @db.Uuid
+  user_id         String     @db.Uuid
   identity_data   Json
   provider        String
-  last_sign_in_at DateTime? @db.Timestamptz(6)
-  created_at      DateTime? @db.Timestamptz(6)
-  updated_at      DateTime? @db.Timestamptz(6)
-  email           String?   @default(dbgenerated("lower((identity_data ->> 'email'::text))"))
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  last_sign_in_at DateTime?  @db.Timestamptz(6)
+  created_at      DateTime?  @db.Timestamptz(6)
+  updated_at      DateTime?  @db.Timestamptz(6)
+  email           String?    @default(dbgenerated("lower((identity_data ->> 'email'::text))"))
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  users           auth_users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([provider_id, provider], map: "identities_provider_id_provider_unique")
   @@index([email])
@@ -260,7 +163,7 @@ model mfa_factors {
   web_authn_aaguid             String?          @db.Uuid
   last_webauthn_challenge_data Json?
   mfa_challenges               mfa_challenges[]
-  users                        users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                        auth_users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([user_id, phone], map: "unique_phone_factor_per_user")
   @@index([user_id, created_at], map: "factor_id_created_at_idx")
@@ -288,7 +191,7 @@ model oauth_authorizations {
   approved_at           DateTime?                  @db.Timestamptz(6)
   nonce                 String?
   oauth_clients         oauth_clients              @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users                 users?                     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                 auth_users?                @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("auth")
 }
@@ -336,7 +239,7 @@ model oauth_consents {
   granted_at    DateTime      @default(now()) @db.Timestamptz(6)
   revoked_at    DateTime?     @db.Timestamptz(6)
   oauth_clients oauth_clients @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users         users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users         auth_users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([user_id, client_id], map: "oauth_consents_user_client_unique")
   @@index([user_id, granted_at(sort: Desc)], map: "oauth_consents_user_order_idx")
@@ -353,7 +256,7 @@ model one_time_tokens {
   relates_to String
   created_at DateTime            @default(now()) @db.Timestamp(6)
   updated_at DateTime            @default(now()) @db.Timestamp(6)
-  users      users               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users      auth_users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([user_id, token_type])
   @@index([relates_to], map: "one_time_tokens_relates_to_hash_idx", type: Hash)
@@ -453,7 +356,7 @@ model sessions {
   mfa_amr_claims         mfa_amr_claims[]
   refresh_tokens         refresh_tokens[]
   oauth_clients          oauth_clients?   @relation(fields: [oauth_client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users                  users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                  auth_users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([not_after(sort: Desc)])
   @@index([oauth_client_id])
@@ -500,7 +403,7 @@ model sso_providers {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
-model users {
+model auth_users {
   instance_id                 String?                 @db.Uuid
   id                          String                  @id @db.Uuid
   aud                         String?                 @db.VarChar(255)
@@ -553,18 +456,19 @@ model users {
 
   @@index([instance_id])
   @@index([is_anonymous])
+  @@map("users")
   @@schema("auth")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model webauthn_challenges {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id        String?  @db.Uuid
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String?     @db.Uuid
   challenge_type String
   session_data   Json
-  created_at     DateTime @default(now()) @db.Timestamptz(6)
-  expires_at     DateTime @db.Timestamptz(6)
-  users          users?   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  created_at     DateTime    @default(now()) @db.Timestamptz(6)
+  expires_at     DateTime    @db.Timestamptz(6)
+  users          auth_users? @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([expires_at])
   @@index([user_id])
@@ -572,24 +476,35 @@ model webauthn_challenges {
 }
 
 model webauthn_credentials {
-  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id          String    @db.Uuid
-  credential_id    Bytes     @unique
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String     @db.Uuid
+  credential_id    Bytes      @unique
   public_key       Bytes
-  attestation_type String    @default("")
-  aaguid           String?   @db.Uuid
-  sign_count       BigInt    @default(0)
-  transports       Json      @default("[]")
-  backup_eligible  Boolean   @default(false)
-  backed_up        Boolean   @default(false)
-  friendly_name    String    @default("")
-  created_at       DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime  @default(now()) @db.Timestamptz(6)
-  last_used_at     DateTime? @db.Timestamptz(6)
-  users            users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  attestation_type String     @default("")
+  aaguid           String?    @db.Uuid
+  sign_count       BigInt     @default(0)
+  transports       Json       @default("[]")
+  backup_eligible  Boolean    @default(false)
+  backed_up        Boolean    @default(false)
+  friendly_name    String     @default("")
+  created_at       DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime   @default(now()) @db.Timestamptz(6)
+  last_used_at     DateTime?  @db.Timestamptz(6)
+  users            auth_users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id])
   @@schema("auth")
+}
+
+model agent_cognitive_weights {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  parameter_key   String    @unique @db.VarChar(255)
+  parameter_value Decimal   @db.Decimal(10, 5)
+  learning_rate   Decimal?  @default(0.01) @db.Decimal(5, 4)
+  last_updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  update_reason   String?
+
+  @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -606,15 +521,93 @@ model agent_configuration {
   @@schema("public")
 }
 
+model agent_consciousness_stream {
+  id                      String                    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  session_id              String?                   @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  thought_vector          Unsupported("vector")?
+  thought_summary         String
+  internal_monologue      String?
+  active_goals            Json?                     @default("[]")
+  working_memory          Json?                     @default("{}")
+  emotional_state         Json?                     @default("{\"focus\": 1.0, \"stability\": 1.0}")
+  created_at              DateTime?                 @default(now()) @db.Timestamptz(6)
+  expires_at              DateTime?                 @db.Timestamptz(6)
+  sovereign_event_horizon sovereign_event_horizon[]
+
+  @@index([thought_vector], map: "idx_consciousness_thought_vector")
+  @@schema("public")
+}
+
+model agent_conversations {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id        String           @db.Uuid
+  title             String?          @db.VarChar(255)
+  conversation_type String           @db.VarChar(50)
+  is_active         Boolean?         @default(true)
+  created_at        DateTime?        @default(now()) @db.Timestamptz(6)
+  agent_messages    agent_messages[]
+
+  @@schema("public")
+}
+
+model agent_device_heartbeats {
+  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  device_id          String        @db.Uuid
+  status             String        @db.VarChar(50)
+  cpu_percent        Decimal?      @db.Decimal(5, 2)
+  memory_percent     Decimal?      @db.Decimal(5, 2)
+  disk_percent       Decimal?      @db.Decimal(5, 2)
+  active_tasks       Int?          @default(0)
+  queue_depth        Int?          @default(0)
+  network_latency_ms Int?
+  metadata           Json?
+  recorded_at        DateTime?     @default(now()) @db.Timestamptz(6)
+  agent_devices      agent_devices @relation(fields: [device_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model agent_devices {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id              String                    @db.Uuid
+  device_key              String                    @unique @db.VarChar(255)
+  device_type             String                    @db.VarChar(50)
+  status                  String?                   @default("offline") @db.VarChar(50)
+  is_active               Boolean?                  @default(true)
+  created_at              DateTime?                 @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime?                 @default(now()) @db.Timestamptz(6)
+  agent_device_heartbeats agent_device_heartbeats[]
+  agent_events            agent_events[]
+  agent_tasks             agent_tasks[]
+
+  @@schema("public")
+}
+
+model agent_events {
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id       String          @db.Uuid
+  agent_profile_id String?         @db.Uuid
+  device_id        String?         @db.Uuid
+  event_type       String          @db.VarChar(100)
+  event_data       Json?
+  task_id          String?         @db.Uuid
+  created_at       DateTime?       @default(now()) @db.Timestamptz(6)
+  agent_profiles   agent_profiles? @relation(fields: [agent_profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent_devices    agent_devices?  @relation(fields: [device_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent_tasks      agent_tasks?    @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model agent_goals {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id    String?   @db.Uuid
+  id         String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?       @db.Uuid
   goal       String
-  priority   String    @default("medium") @db.VarChar(20)
-  status     String?   @default("active")
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  users      User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status     String?       @default("active")
+  created_at DateTime?     @default(now()) @db.Timestamptz(6)
+  priority   String        @default("normal") @db.VarChar(20)
+  users      public_users? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -622,44 +615,160 @@ model agent_goals {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model agent_memory {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id       String?   @db.Uuid
-  actor_user_id String?   @db.Uuid
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String?       @db.Uuid
   memory_type   String
   content       Json
-  created_at    DateTime? @default(now()) @db.Timestamptz(6)
-  type          String    @default("interaction") @db.VarChar(50)
-  category      String    @default("general") @db.VarChar(100)
-  context       Json?     @default("{}")
-  priority      String    @default("normal") @db.VarChar(20)
-  outcome       String?   @db.VarChar(20)
-  user_feedback String?   @db.VarChar(20)
-  expires_at    DateTime? @db.Timestamptz(6)
-  updated_at    DateTime? @default(now()) @db.Timestamptz(6)
-  users         User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  created_at    DateTime?     @default(now()) @db.Timestamptz(6)
+  type          String        @default("interaction") @db.VarChar(50)
+  category      String        @default("general") @db.VarChar(100)
+  context       Json?         @default("{}")
+  priority      String        @default("normal") @db.VarChar(20)
+  outcome       String?       @db.VarChar(20)
+  user_feedback String?       @db.VarChar(20)
+  expires_at    DateTime?     @db.Timestamptz(6)
+  updated_at    DateTime?     @default(now()) @db.Timestamptz(6)
+  users         public_users? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([category], map: "idx_agent_memory_category")
   @@index([created_at(sort: Desc)], map: "idx_agent_memory_created_at")
   @@index([outcome], map: "idx_agent_memory_outcome")
   @@index([priority], map: "idx_agent_memory_priority")
   @@index([type], map: "idx_agent_memory_type")
+  @@index([memory_type], map: "idx_memory_type")
+  @@schema("public")
+}
+
+model agent_messages {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversation_id     String              @db.Uuid
+  sender_type         String              @db.VarChar(50)
+  sender_id           String?             @db.Uuid
+  content             String
+  created_at          DateTime?           @default(now()) @db.Timestamptz(6)
+  agent_conversations agent_conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model agent_profiles {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id   String         @db.Uuid
+  agent_key    String         @unique @db.VarChar(50)
+  name         String         @db.VarChar(255)
+  description  String?
+  avatar_url   String?
+  capabilities Json?          @default("[]")
+  config       Json?          @default("{}")
+  is_active    Boolean?       @default(true)
+  created_at   DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime?      @default(now()) @db.Timestamptz(6)
+  agent_events agent_events[]
+  agent_tasks  agent_tasks[]
+
+  @@schema("public")
+}
+
+model agent_tasks {
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id       String          @db.Uuid
+  agent_profile_id String?         @db.Uuid
+  device_id        String?         @db.Uuid
+  task_type        String          @db.VarChar(100)
+  title            String          @db.VarChar(255)
+  description      String?
+  status           String?         @default("pending") @db.VarChar(50)
+  progress_percent Int?            @default(0)
+  priority         Int?            @default(0)
+  context          Json?           @default("{}")
+  input_data       Json?
+  output_data      Json?
+  error_message    String?
+  created_at       DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?       @default(now()) @db.Timestamptz(6)
+  agent_events     agent_events[]
+  agent_profiles   agent_profiles? @relation(fields: [agent_profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent_devices    agent_devices?  @relation(fields: [device_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model ai_actions {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type             ActionType
+  status           ActionStatus     @default(PENDING)
+  taskId           String           @db.Uuid
+  payload          Json
+  result           Json?
+  error            String?
+  riskScore        Int?
+  requiresApproval Boolean          @default(false)
+  executedById     String?          @db.Uuid
+  rollbackData     Json?
+  canRollback      Boolean          @default(false)
+  createdAt        DateTime         @default(now()) @db.Timestamptz(6)
+  executedAt       DateTime?        @db.Timestamptz(6)
+  completedAt      DateTime?        @db.Timestamptz(6)
+  users            public_users?    @relation(fields: [executedById], references: [id])
+  ai_tasks         ai_tasks         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  approvals        approvals?
+  execution_logs   execution_logs[]
+
+  @@index([status])
+  @@index([taskId])
+  @@index([type])
+  @@schema("public")
+}
+
+model ai_tasks {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title          String
+  description    String?
+  type           TaskType
+  status         TaskStatus   @default(PENDING)
+  priority       TaskPriority @default(MEDIUM)
+  payload        Json?
+  result         Json?
+  error          String?
+  createdById    String       @db.Uuid
+  assignedTo     String?      @db.Uuid
+  parentTaskId   String?      @db.Uuid
+  workflowId     String?      @db.Uuid
+  startedAt      DateTime?    @db.Timestamptz(6)
+  completedAt    DateTime?    @db.Timestamptz(6)
+  failedAt       DateTime?    @db.Timestamptz(6)
+  createdAt      DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime     @default(now()) @db.Timestamptz(6)
+  retries        Int          @default(0)
+  maxRetries     Int          @default(3)
+  ai_actions     ai_actions[]
+  users          public_users @relation(fields: [createdById], references: [id])
+  ai_tasks       ai_tasks?    @relation("ai_tasksToai_tasks", fields: [parentTaskId], references: [id])
+  other_ai_tasks ai_tasks[]   @relation("ai_tasksToai_tasks")
+  workflows      workflows?   @relation(fields: [workflowId], references: [id])
+  events         events[]
+
+  @@index([createdById])
+  @@index([status])
+  @@index([type])
+  @@index([workflowId])
   @@schema("public")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model api_keys {
-  id             Int       @id @default(autoincrement())
+  id             Int         @id @default(autoincrement())
   provider       String
   key            String
-  is_active      Boolean?  @default(true)
-  cooldown_until DateTime? @db.Timestamp(6)
-  total_requests Int?      @default(0)
-  last_used_at   DateTime? @db.Timestamp(6)
-  created_at     DateTime? @default(now()) @db.Timestamp(6)
-  user_id        String?   @db.Uuid
-  is_backup      Boolean?  @default(false)
-  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
-  users          users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  is_active      Boolean?    @default(true)
+  cooldown_until DateTime?   @db.Timestamp(6)
+  total_requests Int?        @default(0)
+  last_used_at   DateTime?   @db.Timestamp(6)
+  created_at     DateTime?   @default(now()) @db.Timestamp(6)
+  user_id        String?     @db.Uuid
+  is_backup      Boolean?    @default(false)
+  updated_at     DateTime?   @default(now()) @db.Timestamptz(6)
+  users          auth_users? @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([provider, key])
   @@index([provider, is_active], map: "idx_api_keys_provider_active")
@@ -667,13 +776,26 @@ model api_keys {
   @@schema("public")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model api_usage_log {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider      String
+  key_hash      String
+  request_count Int?     @default(0)
+  date          DateTime @default(dbgenerated("CURRENT_DATE")) @db.Date
+  created_at    DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+
+  @@unique([provider, key_hash, date])
+  @@schema("public")
+}
+
 model approval_logs {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   action      String
   approved    Boolean?
-  approved_by String?   @db.Uuid
-  created_at  DateTime? @default(now()) @db.Timestamptz(6)
-  users       User?     @relation(fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approved_by String?       @db.Uuid
+  created_at  DateTime?     @default(now()) @db.Timestamptz(6)
+  users       public_users? @relation(fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -699,6 +821,26 @@ model approval_requests {
   @@schema("public")
 }
 
+model approvals {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actionId        String         @unique @db.Uuid
+  status          ApprovalStatus @default(PENDING)
+  requestedBy     String         @db.Uuid
+  requestedAt     DateTime       @default(now()) @db.Timestamptz(6)
+  approvedById    String?        @db.Uuid
+  approvedAt      DateTime?      @db.Timestamptz(6)
+  rejectedById    String?        @db.Uuid
+  rejectedAt      DateTime?      @db.Timestamptz(6)
+  rejectionReason String?
+  expiresAt       DateTime       @db.Timestamptz(6)
+  ai_actions      ai_actions     @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  users           public_users?  @relation(fields: [approvedById], references: [id])
+
+  @@index([actionId])
+  @@index([status])
+  @@schema("public")
+}
+
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model audit_log {
@@ -717,31 +859,31 @@ model audit_log {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model audit_logs {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id  String   @db.Uuid
-  actor_id    String?  @db.Uuid
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id  String    @db.Uuid
+  actor_id    String?   @db.Uuid
   action      String
   entity_type String
-  entity_id   String?  @db.Uuid
-  payload     Json     @default("{}")
-  created_at  DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies   Company  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  entity_id   String?   @db.Uuid
+  payload     Json      @default("{}")
+  created_at  DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  companies   companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model automation_rules {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id String?  @db.Uuid
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id String?    @db.Uuid
   name       String
   trigger    String
-  conditions Json     @default("{}")
-  actions    Json     @default("[]")
-  enabled    Boolean  @default(true)
-  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies  Company? @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  conditions Json       @default("{}")
+  actions    Json       @default("[]")
+  enabled    Boolean    @default(true)
+  created_at DateTime   @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at DateTime   @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  companies  companies? @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -750,16 +892,16 @@ model automation_rules {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model backups {
-  id              Int      @id @default(autoincrement())
-  user_id         String?  @db.Uuid
-  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  id              Int         @id @default(autoincrement())
+  user_id         String?     @db.Uuid
+  created_at      DateTime    @default(now()) @db.Timestamptz(6)
   backup_data     Json
   size_bytes      Int?
-  status          String   @default("pending")
-  backup_type     String?  @default("manual")
+  status          String      @default("pending")
+  backup_type     String?     @default("manual")
   tables_included String[]
   error_message   String?
-  users           users?   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  users           auth_users? @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@index([created_at(sort: Desc)], map: "idx_backups_created_at")
   @@index([user_id], map: "idx_backups_user_id")
@@ -768,33 +910,54 @@ model backups {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model bookings {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id String    @db.Uuid
-  user_id    String?   @db.Uuid
-  request_id String?   @db.Uuid
-  slot_start DateTime  @db.Timestamptz(6)
-  slot_end   DateTime  @db.Timestamptz(6)
-  status     String    @default("pending")
-  created_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies  Company   @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  requests   requests? @relation(fields: [request_id], references: [id], onUpdate: NoAction)
-  users      User?     @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  id         String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id String        @db.Uuid
+  user_id    String?       @db.Uuid
+  request_id String?       @db.Uuid
+  slot_start DateTime      @db.Timestamptz(6)
+  slot_end   DateTime      @db.Timestamptz(6)
+  status     String        @default("pending")
+  created_at DateTime      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at DateTime      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  companies  companies     @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  requests   requests?     @relation(fields: [request_id], references: [id], onUpdate: NoAction)
+  users      public_users? @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@index([company_id, slot_start], map: "idx_bookings_company_slot_start")
+  @@schema("public")
+}
+
+model capabilities {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String           @unique
+  description      String
+  version          String
+  status           CapabilityStatus @default(DRAFT)
+  proposedBy       String
+  proposedAt       DateTime         @default(now()) @db.Timestamptz(6)
+  simulationResult Json?
+  securityReview   Json?
+  approvedById     String?          @db.Uuid
+  approvedAt       DateTime?        @db.Timestamptz(6)
+  activatedAt      DateTime?        @db.Timestamptz(6)
+  deactivatedAt    DateTime?        @db.Timestamptz(6)
+  code             String?
+  manifest         Json
+  dependencies     String[]         @default([])
+
   @@schema("public")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model chat_history {
-  id         Int       @id @default(autoincrement())
-  user_id    String?   @db.Uuid
+  id         Int         @id @default(autoincrement())
+  user_id    String?     @db.Uuid
   role       String
   content    String
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  metadata   Json?     @default("{}")
-  users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  created_at DateTime?   @default(now()) @db.Timestamptz(6)
+  metadata   Json?       @default("{}")
+  users      auth_users? @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([created_at(sort: Desc)], map: "idx_chat_history_created_at")
   @@index([user_id], map: "idx_chat_history_user_id")
@@ -825,20 +988,82 @@ model client_access {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model companies {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  domain           String             @unique
+  logo             String?
+  primary_color    String?
+  whatsapp         String?
+  created_at       DateTime           @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at       DateTime           @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  audit_logs       audit_logs[]
+  automation_rules automation_rules[]
+  bookings         bookings[]
+  content          content[]
+  events           events[]
+  experiments      experiments[]
+  images           images[]
+  media_assets     media_assets[]
+  page_sections    page_sections[]
+  pages            pages[]
+  payments         payments[]
+  requests         requests[]
+  site_config      site_config[]
+  users            public_users[]
+
+  @@index([domain], map: "idx_companies_domain")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model consultant_learnings {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instruction String
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model consultant_pending_questions {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id     String?
+  question       String
+  status         String?   @default("pending")
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  answered_reply String?
+
+  @@schema("public")
+}
+
+model consultant_sessions {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id String    @unique
+  messages   Json?     @default("[]")
+  insights   Json?     @default("{}")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  ui_state   Json?     @default("{}")
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model content {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id        String   @db.Uuid
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id        String    @db.Uuid
   type              String
   slug              String
   title             String
   body              String
-  performance_score Decimal? @db.Decimal(10, 2)
-  ctr               Decimal? @db.Decimal(10, 2)
-  conversions       Int      @default(0)
-  status            String   @default("draft")
-  created_at        DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at        DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies         Company  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  performance_score Decimal?  @db.Decimal(10, 2)
+  ctr               Decimal?  @db.Decimal(10, 2)
+  conversions       Int       @default(0)
+  status            String    @default("draft")
+  created_at        DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at        DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  companies         companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([company_id, slug], map: "idx_content_company_slug")
   @@schema("public")
@@ -847,16 +1072,62 @@ model content {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model curated_images {
-  id         BigInt    @id
-  room_type  String?
-  style      String?
-  url        String?   @unique(map: "idx_curated_images_url")
-  metadata   Json?     @default("{}")
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  is_active  Boolean?  @default(true)
+  id            BigInt    @id
+  room_type     String?
+  style         String?
+  url           String?   @unique(map: "idx_curated_images_url")
+  metadata      Json?     @default("{}")
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  is_active     Boolean?  @default(true)
+  display_order Int?      @default(0)
+  source        String?   @default("pexels")
+  quality_score Decimal?  @default(0) @db.Decimal(5, 2)
+  original_url  String?
+  thumbnail_url String?
 
   @@index([is_active, room_type, style], map: "idx_curated_images_active")
+  @@index([display_order], map: "idx_curated_images_display_order")
   @@index([metadata], map: "idx_curated_images_metadata_gin", type: Gin)
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dimensional_anchors {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                    String
+  base_url                String
+  dimension_id            String?                   @db.Uuid
+  is_active               Boolean?                  @default(true)
+  reliability_score       Float?                    @default(1.0)
+  parser_config           Json?                     @default("{}")
+  created_at              DateTime?                 @default(now()) @db.Timestamptz(6)
+  omnipotent_dimensions   omnipotent_dimensions?    @relation(fields: [dimension_id], references: [id], onUpdate: NoAction)
+  prime_substrate_results prime_substrate_results[]
+
+  @@index([dimension_id], map: "idx_anchors_dimension")
+  @@schema("public")
+}
+
+model dimensional_routes {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  target_domain    String    @unique
+  best_identity_id String?   @db.Uuid
+  best_node_id     String?   @db.Uuid
+  success_rate     Float?    @default(1.0)
+  last_accessed    DateTime? @default(now()) @db.Timestamptz(6)
+  metadata         Json?     @default("{}")
+
+  @@schema("public")
+}
+
+model dynamic_assets_cms {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  asset_url             String
+  asset_type            String?
+  tags                  String[]
+  psychological_trigger String?
+  created_at            DateTime? @default(now()) @db.Timestamptz(6)
+
   @@schema("public")
 }
 
@@ -893,34 +1164,132 @@ model elite_sessions {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model events {
+  id         String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id String        @db.Uuid
+  user_id    String?       @db.Uuid
+  type       String
+  value      String?
+  metadata   Json          @default("{}")
+  created_at DateTime      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  task_id    String?       @db.Uuid
+  companies  companies     @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  ai_tasks   ai_tasks?     @relation(fields: [task_id], references: [id])
+  users      public_users? @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@index([company_id, created_at], map: "idx_events_company_created_at")
+  @@index([company_id, type, created_at], map: "idx_events_company_type_created_at")
+  @@schema("public")
+}
+
+model evolution_log {
+  id                         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  version                    String?   @db.VarChar(50)
+  change_type                String?   @db.VarChar(50)
+  description                String
+  proposed_patch             String?
+  status                     String?   @default("pending") @db.VarChar(20)
+  performance_gain_predicted Decimal?  @db.Decimal(5, 2)
+  actual_gain                Decimal?  @db.Decimal(5, 2)
+  approved_at                DateTime? @db.Timestamptz(6)
+  created_at                 DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model evolutionary_sandbox {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mutation_id   String    @db.Uuid
+  target_file   String?
+  proposed_code String?
+  test_results  Json?
+  risk_level    Decimal?  @db.Decimal(3, 2)
+  status        String?   @default("pending") @db.VarChar(20)
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+model execution_logs {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actionId   String     @db.Uuid
+  step       String
+  status     String
+  details    Json?
+  timestamp  DateTime   @default(now()) @db.Timestamptz(6)
+  ai_actions ai_actions @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@index([actionId])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model experiments {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id String   @db.Uuid
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id String    @db.Uuid
   key        String
-  status     String   @default("draft")
-  variants   Json     @default("{}")
+  status     String    @default("draft")
+  variants   Json      @default("{}")
   winner     String?
-  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies  Company  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  created_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  companies  companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([company_id, key], map: "idx_experiments_company_key")
   @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model genesis_manifests {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  manifest_name String    @unique @db.VarChar(255)
+  manifest_type String    @db.VarChar(50)
+  definition    Json
+  status        String?   @default("active") @db.VarChar(20)
+  version       Int?      @default(1)
+  is_autonomous Boolean?  @default(false)
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+model identity_matrices {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_agent        String
+  screen_resolution String?   @default("1920x1080")
+  platform          String?   @default("Win32")
+  behavior_profile  Json?     @default("{}")
+  is_active         Boolean?  @default(true)
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  fingerprint_hash  String?
+  canvas_noise      String?
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model image_backups {
+  id          String   @id
+  image_count Int
+  created_at  DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model images {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id  String   @db.Uuid
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id  String    @db.Uuid
   url         String
-  tags        String[] @default([])
+  tags        String[]  @default([])
   source      String
   license     String?
-  ctr         Decimal? @db.Decimal(10, 2)
-  conversions Int      @default(0)
-  created_at  DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at  DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies   Company  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  ctr         Decimal?  @db.Decimal(10, 2)
+  conversions Int       @default(0)
+  created_at  DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at  DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  companies   companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -929,23 +1298,39 @@ model images {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model immutable_command_log {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id           String?  @db.Uuid
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id           String?     @db.Uuid
   command_text      String
-  command_hash      String?  @default(dbgenerated("encode(sha256((command_text)::bytea), 'hex'::text)"))
+  command_hash      String?     @default(dbgenerated("encode(sha256((command_text)::bytea), 'hex'::text)"))
   signature         String?
   executor_ip       String?
-  executed_at       DateTime @default(now()) @db.Timestamptz(6)
-  status            String   @default("pending")
+  executed_at       DateTime    @default(now()) @db.Timestamptz(6)
+  status            String      @default("pending")
   result_summary    String?
   parameters        Json?
   execution_time_ms Int?
-  users             users?   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  users             auth_users? @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@index([executed_at(sort: Desc)], map: "idx_command_log_executed_at")
   @@index([status], map: "idx_command_log_status")
   @@index([user_id], map: "idx_command_log_user_id")
   @@index([executed_at(sort: Desc)], map: "idx_immutable_command_log_executed_at")
+  @@schema("public")
+}
+
+model lead_conversions {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id       String           @unique
+  contactMethod    String
+  contactValue     String?
+  status           String           @default("NEW")
+  conversion_value Float?
+  notes            String?
+  created_at       DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime         @default(now()) @db.Timestamptz(6)
+  visitor_sessions visitor_sessions @relation(fields: [session_id], references: [session_id], onDelete: Cascade)
+
+  @@index([status])
   @@schema("public")
 }
 
@@ -967,19 +1352,79 @@ model login_tokens {
   @@schema("public")
 }
 
+model loyalty_protocols {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  protocol_key        String    @unique @db.VarChar(100)
+  protocol_definition String
+  is_active           Boolean?  @default(true)
+  enforcement_level   String?   @default("hard") @db.VarChar(20)
+  created_at          DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model loyalty_seal {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  protocol_name String    @unique @db.VarChar(100)
+  rules         Json
+  is_immutable  Boolean?  @default(true)
+  last_verified DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model media_assets {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id String   @db.Uuid
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id String    @db.Uuid
   url        String
   source     String
   license    String?
   alt_text   String?
   width      Int?
   height     Int?
-  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies  Company  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  created_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  companies  companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model neural_knowledge {
+  id         String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  content    String
+  embedding  Unsupported("vector")?
+  metadata   Json?                  @default("{}")
+  category   String?                @db.VarChar(100)
+  tags       String[]
+  created_at DateTime?              @default(now()) @db.Timestamptz(6)
+
+  @@index([embedding], map: "idx_neural_knowledge_embedding")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model neural_queries {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  intent                  String
+  assigned_node_id        String?                   @db.Uuid
+  execution_time_ms       Int?
+  status                  String?                   @default("pending")
+  created_at              DateTime?                 @default(now()) @db.Timestamptz(6)
+  sovereign_nodes         sovereign_nodes?          @relation(fields: [assigned_node_id], references: [id], onUpdate: NoAction)
+  prime_substrate_results prime_substrate_results[]
+
+  @@schema("public")
+}
+
+model neural_stream {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  agent_name      String?   @db.VarChar(100)
+  thought_process String
+  context         Json?     @default("{}")
+  intensity       Decimal?  @db.Decimal(3, 2)
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
 
   @@schema("public")
 }
@@ -999,19 +1444,50 @@ model newsletter_subscribers {
   @@schema("public")
 }
 
+model notifications {
+  id          String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type        NotificationType
+  channel     NotificationChannel
+  status      NotificationStatus  @default(PENDING)
+  recipientId String              @db.Uuid
+  title       String
+  message     String
+  data        Json?
+  sentAt      DateTime?           @db.Timestamptz(6)
+  error       String?
+  createdAt   DateTime            @default(now()) @db.Timestamptz(6)
+  users       public_users        @relation(fields: [recipientId], references: [id])
+
+  @@index([recipientId])
+  @@index([status])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model omnipotent_dimensions {
+  id                  String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String                @unique
+  risk_level          Int?                  @default(1)
+  description         String?
+  created_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  dimensional_anchors dimensional_anchors[]
+
+  @@schema("public")
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model page_sections {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id String   @db.Uuid
-  page_id    String   @db.Uuid
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id String    @db.Uuid
+  page_id    String    @db.Uuid
   type       String
   position   Int
-  config     Json     @default("{}")
-  status     String   @default("draft")
-  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies  Company  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  pages      pages    @relation(fields: [page_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  config     Json      @default("{}")
+  status     String    @default("draft")
+  created_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  companies  companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  pages      pages     @relation(fields: [page_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([company_id, page_id, position], map: "idx_page_sections_company_page_position")
   @@schema("public")
@@ -1030,7 +1506,7 @@ model pages {
   created_at      DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   updated_at      DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   page_sections   page_sections[]
-  companies       Company         @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  companies       companies       @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([company_id, slug], map: "idx_pages_company_slug")
   @@schema("public")
@@ -1038,31 +1514,78 @@ model pages {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model payments {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id String    @db.Uuid
-  user_id    String?   @db.Uuid
-  request_id String?   @db.Uuid
-  amount     Decimal   @db.Decimal(12, 2)
-  status     String    @default("pending")
-  created_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies  Company   @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  requests   requests? @relation(fields: [request_id], references: [id], onUpdate: NoAction)
-  users      User?     @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  id         String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id String        @db.Uuid
+  user_id    String?       @db.Uuid
+  request_id String?       @db.Uuid
+  amount     Decimal       @db.Decimal(12, 2)
+  status     String        @default("pending")
+  created_at DateTime      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  companies  companies     @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  requests   requests?     @relation(fields: [request_id], references: [id], onUpdate: NoAction)
+  users      public_users? @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@index([company_id, created_at], map: "idx_payments_company_created_at")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model prime_substrate_results {
+  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  query_id            String?              @db.Uuid
+  anchor_id           String?              @db.Uuid
+  url                 String
+  title               String
+  snippet             String?
+  relevance_score     Float?               @default(0.0)
+  ai_summary          String?
+  fetched_at          DateTime?            @default(now()) @db.Timestamptz(6)
+  dimensional_anchors dimensional_anchors? @relation(fields: [anchor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  neural_queries      neural_queries?      @relation(fields: [query_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([query_id], map: "idx_results_query")
+  @@index([url], map: "idx_results_url")
   @@schema("public")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model rate_limits {
-  id             Int       @id @default(autoincrement())
-  endpoint       String    @unique
-  limit_per_hour Int       @default(1000)
-  rate_window    String?   @default("1h")
-  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by     String?   @db.Uuid
-  users          users?    @relation(fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id             Int         @id @default(autoincrement())
+  endpoint       String      @unique
+  limit_per_hour Int         @default(1000)
+  rate_window    String?     @default("1h")
+  updated_at     DateTime?   @default(now()) @db.Timestamptz(6)
+  updated_by     String?     @db.Uuid
+  users          auth_users? @relation(fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model reality_mutations {
+  id         BigInt    @id @default(autoincrement())
+  session_id String
+  type       String
+  action     String
+  payload    Json?     @default("{}")
+  active     Boolean?  @default(true)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model refresh_logs {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status           String
+  duration_minutes Decimal? @db.Decimal(10, 2)
+  images_before    Int?     @default(0)
+  images_after     Int?     @default(0)
+  deleted_count    Int?     @default(0)
+  added_count      Int?     @default(0)
+  report           Json?    @default("{}")
+  created_at       DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
 
   @@schema("public")
 }
@@ -1085,24 +1608,57 @@ model requests {
   bookings       bookings[]
   client_access  client_access[]
   payments       payments[]
-  companies      Company         @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users          User?           @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  companies      companies       @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users          public_users?   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@index([company_id, status, created_at], map: "idx_requests_company_status_created_at")
   @@schema("public")
 }
 
+model room_sections {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  slug          String    @unique
+  description   String?
+  image_url     String?   @default("https://images.unsplash.com/photo-1618221195710-dd6b41faeaa6?auto=format&fit=crop&q=80&w=800")
+  is_active     Boolean?  @default(true)
+  company_id    String?   @db.Uuid
+  display_order Int       @default(autoincrement())
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  name_ar       String?
+  icon          String?
+  metadata      Json?
+
+  @@schema("public")
+}
+
+model sales_order_items {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sales_order_id String? @db.Uuid
+  description    String?
+
+  @@schema("public")
+}
+
+model sales_orders {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id String? @db.Uuid
+  status     String?
+
+  @@schema("public")
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model site_config {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id  String?  @db.Uuid
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id  String?    @db.Uuid
   section    String
   key        String
-  value      Json     @default("{}")
-  is_active  Boolean  @default(true)
-  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  companies  Company? @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  value      Json       @default("{}")
+  is_active  Boolean    @default(true)
+  created_at DateTime   @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at DateTime   @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  companies  companies? @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([tenant_id, section, key], map: "idx_site_config_tenant_section_key")
   @@schema("public")
@@ -1110,11 +1666,92 @@ model site_config {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model site_settings {
-  key        String    @id
+  key        String        @id
   value      Json
-  updated_at DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by String?   @db.Uuid
-  users      User?     @relation(fields: [updated_by], references: [id], onUpdate: NoAction)
+  updated_at DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_by String?       @db.Uuid
+  users      public_users? @relation(fields: [updated_by], references: [id], onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model sovereign_event_horizon {
+  id                         String                      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  entity_type                String                      @db.VarChar(50)
+  entity_id                  String?                     @db.VarChar(255)
+  event_category             String                      @db.VarChar(100)
+  event_name                 String                      @db.VarChar(100)
+  description                String?
+  payload                    Json?                       @default("{}")
+  impact_score               Decimal?                    @default(0.0) @db.Decimal(3, 2)
+  criticality                String?                     @default("normal") @db.VarChar(20)
+  consciousness_id           String?                     @db.Uuid
+  created_at                 DateTime?                   @default(now()) @db.Timestamptz(6)
+  agent_consciousness_stream agent_consciousness_stream? @relation(fields: [consciousness_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([event_category], map: "idx_event_horizon_category")
+  @@index([created_at(sort: Desc)], map: "idx_event_horizon_created_at")
+  @@schema("public")
+}
+
+model sovereign_nodes {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  node_url           String
+  node_location      String?
+  node_status        String?          @default("active")
+  latency_score      Float?           @default(1.0)
+  created_at         DateTime?        @default(now()) @db.Timestamptz(6)
+  protocol           String?          @default("https")
+  endpoint_ip        String?
+  auth_keys          Json?            @default("{}")
+  allowed_dimensions String[]         @default([]) @db.Uuid
+  neural_queries     neural_queries[]
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model sovereign_prime_substrate {
+  id                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entity_type       String                 @db.VarChar(100)
+  category          String                 @db.VarChar(100)
+  content           String
+  vector_embedding  Unsupported("vector")?
+  metadata          Json?                  @default("{}")
+  criticality_score Decimal?               @default(0.5) @db.Decimal(3, 2)
+  loyalty_signature String?                @db.Uuid
+  created_at        DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?              @default(now()) @db.Timestamptz(6)
+
+  @@index([category], map: "idx_prime_substrate_category")
+  @@index([entity_type], map: "idx_prime_substrate_type")
+  @@schema("public")
+}
+
+model system_telemetry {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  component  String
+  status     String
+  latency_ms Int?
+  metadata   Json?     @default("{}")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+model team_members {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id String? @db.Uuid
+  role_id    String? @db.Uuid
+  email      String?
+  name       String?
+
+  @@schema("public")
+}
+
+model team_roles {
+  id   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String?
 
   @@schema("public")
 }
@@ -1135,144 +1772,110 @@ model translations_cache {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model user_2fa {
-  id           Int       @id @default(autoincrement())
-  user_id      String?   @unique @db.Uuid
+  id           Int         @id @default(autoincrement())
+  user_id      String?     @unique @db.Uuid
   secret       String
-  is_enabled   Boolean?  @default(false)
+  is_enabled   Boolean?    @default(false)
   backup_codes String[]
-  created_at   DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
-  users        users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  created_at   DateTime?   @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime?   @default(now()) @db.Timestamptz(6)
+  users        auth_users? @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model user_preferences {
-  user_id     String    @id @db.Uuid
-  preferences Json      @default("{}")
-  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
-  users       User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_id     String       @id @db.Uuid
+  preferences Json         @default("{}")
+  updated_at  DateTime?    @default(now()) @db.Timestamptz(6)
+  users       public_users @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("public")
 }
 
-enum UserRole {
-  USER
-  ADMIN
-  AGENT
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model public_users {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email            String?
+  company_id       String             @db.Uuid
+  session_id       String
+  score            Int                @default(0)
+  intent           String             @default("browsing")
+  last_page        String?
+  room_type        String?
+  budget           String?
+  style            String?
+  service_type     String?
+  created_at       DateTime           @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at       DateTime           @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  agent_goals      agent_goals[]
+  agent_memory     agent_memory[]
+  ai_actions       ai_actions[]
+  ai_tasks         ai_tasks[]
+  approval_logs    approval_logs[]
+  approvals        approvals[]
+  bookings         bookings[]
+  events           events[]
+  notifications    notifications[]
+  payments         payments[]
+  requests         requests[]
+  site_settings    site_settings[]
+  user_preferences user_preferences?
+  companies        companies          @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  visitor_sessions visitor_sessions[]
+
+  @@index([company_id], map: "idx_users_company_id")
+  @@index([company_id, intent, score], map: "idx_users_company_intent_score")
+  @@map("users")
+  @@schema("public")
+}
+
+model visitor_sessions {
+  id                    String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id            String            @unique
+  lead_score            Int               @default(0)
+  intent                String            @default("browsing")
+  style_switches        Int               @default(0)
+  user_persona          Json?
+  psychological_profile Json?
+  behavioral_report     Json?
+  last_page             String?
+  language              String            @default("ar")
+  user_id               String?           @db.Uuid
+  created_at            DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime          @default(now()) @db.Timestamptz(6)
+  lead_conversions      lead_conversions?
+  users                 public_users?     @relation(fields: [user_id], references: [id])
+
+  @@index([intent])
+  @@index([lead_score])
+  @@index([session_id])
+  @@schema("public")
+}
+
+model visitor_telemetry {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id       String
+  current_path     String?
+  hovered_elements Json?     @default("[]")
+  attention_score  Float?    @default(0)
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
 
   @@schema("public")
 }
 
-enum TaskType {
-  RESEARCH
-  ANALYSIS
-  GENERATION
-  EXECUTION
-  SYSTEM
-
-  @@schema("public")
-}
-
-enum TaskStatus {
-  PENDING
-  RUNNING
-  COMPLETED
-  FAILED
-
-  @@schema("public")
-}
-
-enum TaskPriority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-
-  @@schema("public")
-}
-
-enum ActionType {
-  CREATE_FILE
-  UPDATE_FILE
-  DELETE_FILE
-  RUN_COMMAND
-  API_CALL
-  DATABASE_QUERY
-  MANUAL
-
-  @@schema("public")
-}
-
-enum ActionStatus {
-  PENDING
-  RUNNING
-  COMPLETED
-  FAILED
-
-  @@schema("public")
-}
-
-enum ApprovalStatus {
-  PENDING
-  APPROVED
-  REJECTED
-
-  @@schema("public")
-}
-
-enum NotificationType {
-  SYSTEM
-  TASK_UPDATE
-  APPROVAL_REQUIRED
-  ALERT
-
-  @@schema("public")
-}
-
-enum NotificationChannel {
-  IN_APP
-  EMAIL
-  SMS
-
-  @@schema("public")
-}
-
-enum WorkflowStatus {
-  DRAFT
-  ACTIVE
-  PAUSED
-  COMPLETED
-  ARCHIVED
-
-  @@schema("public")
-}
-
-enum LogLevel {
-  DEBUG
-  INFO
-  WARN
-  ERROR
-  FATAL
-
-  @@schema("public")
-}
-
-enum CapabilityStatus {
-  DRAFT
-  ACTIVE
-  INACTIVE
-  DEPRECATED
-
-  @@schema("public")
-}
-
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
+model workflows {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String?
+  definition  Json
+  status      WorkflowStatus @default(DRAFT)
+  version     Int            @default(1)
+  createdAt   DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime       @default(now()) @db.Timestamptz(6)
+  ai_tasks    ai_tasks[]
 
   @@schema("public")
 }
@@ -1346,64 +1949,123 @@ enum one_time_token_type {
 
   @@schema("auth")
 }
-model VisitorSession {
-  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sessionId            String    @unique @map("session_id")
-  leadScore            Int       @default(0) @map("lead_score")
-  intent               String    @default("browsing")
-  styleSwitches        Int       @default(0) @map("style_switches")
-  
-  userPersona          Json?     @map("user_persona")
-  psychologicalProfile Json?     @map("psychological_profile")
-  behavioralReport     Json?     @map("behavioral_report")
-  
-  lastPage             String?   @map("last_page")
-  language             String    @default("ar")
-  
-  userId               String?   @map("user_id") @db.Uuid
-  user                 User?     @relation(fields: [userId], references: [id])
-  
-  leadConversion       LeadConversion?
-  
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  @@index([sessionId])
-  @@index([intent])
-  @@index([leadScore])
-  @@map("visitor_sessions")
+enum ActionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+
   @@schema("public")
 }
 
-model LeadConversion {
-  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sessionId        String          @unique @map("session_id")
-  session          VisitorSession  @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
-  
-  contactMethod    String          // e.g., "whatsapp", "form"
-  contactValue     String?         // phone or email
-  status           String          @default("NEW") // NEW, CONTACTED, QUALIFIED, CLOSED
-  
-  conversionValue  Float?          @map("conversion_value")
-  notes            String?
-  
-  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+enum ActionType {
+  CREATE_FILE
+  UPDATE_FILE
+  DELETE_FILE
+  RUN_COMMAND
+  API_CALL
+  DATABASE_QUERY
+  MANUAL
 
-  @@index([status])
-  @@map("lead_conversions")
   @@schema("public")
 }
 
-model ConsultantSession {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sessionId  String   @unique @map("session_id")
-  messages   Json     @default("[]")
-  insights   Json?    @default("{}")
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 
-  @@map("consultant_sessions")
   @@schema("public")
 }
 
+enum CapabilityStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  DEPRECATED
+
+  @@schema("public")
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
+
+  @@schema("public")
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+
+  @@schema("public")
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+
+  @@schema("public")
+}
+
+enum NotificationType {
+  SYSTEM
+  TASK_UPDATE
+  APPROVAL_REQUIRED
+  ALERT
+
+  @@schema("public")
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+
+  @@schema("public")
+}
+
+enum TaskStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+
+  @@schema("public")
+}
+
+enum TaskType {
+  RESEARCH
+  ANALYSIS
+  GENERATION
+  EXECUTION
+  SYSTEM
+
+  @@schema("public")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  AGENT
+
+  @@schema("public")
+}
+
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+
+  @@schema("public")
+}

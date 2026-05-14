@@ -535,12 +535,16 @@ export class CommunicationAgentService {
   }
 
   private async sendWhatsApp(to: string, message: string): Promise<void> {
-    // Basic WhatsApp implementation using a simple logging for now
-    // In a real scenario, this would interface with a WhatsApp API provider or whatsapp-web.js
-    this.logger.info('WhatsApp message triggered', { to, message });
+    const { sendMessage } = await import('@/lib/whatsapp-service');
     
-    // For internal alerting, we often use Telegram as the primary channel
-    // but we log the WhatsApp request here for future integration with a gateway.
+    this.logger.info('Sending real WhatsApp message', { to, message: message.substring(0, 50) + '...' });
+    
+    const result = await sendMessage(to, message);
+    
+    if (!result.success) {
+      this.logger.error('Failed to send real WhatsApp message', { error: result.error });
+      throw new Error(`WhatsApp delivery failed: ${result.error}`);
+    }
   }
 
   private async sendToDashboard(

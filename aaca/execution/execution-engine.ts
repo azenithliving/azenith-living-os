@@ -557,7 +557,7 @@ export class ExecutionEngine {
   ): Promise<{ rolledBack: boolean }> {
     const { targetActionId } = payload;
 
-    const action = await prisma.aIAction.findUnique({
+    const action = await prisma.ai_actions.findUnique({
       where: { id: targetActionId }
     });
 
@@ -587,7 +587,7 @@ export class ExecutionEngine {
       });
     }
 
-    await prisma.aIAction.update({
+    await prisma.ai_actions.update({
       where: { id: targetActionId },
       data: { status: ActionStatus.ROLLED_BACK }
     });
@@ -617,7 +617,7 @@ export class ExecutionEngine {
     result?: unknown,
     error?: string
   ): Promise<void> {
-    await prisma.aIAction.update({
+    await prisma.ai_actions.update({
       where: { id: actionId },
       data: {
         status,
@@ -637,7 +637,7 @@ export class ExecutionEngine {
     status: string,
     details?: Record<string, unknown>
   ): Promise<void> {
-    await prisma.executionLog.create({
+    await prisma.execution_logs.create({
       data: {
         actionId,
         step,
@@ -648,7 +648,7 @@ export class ExecutionEngine {
   }
 
   private async storeRollbackData(actionId: string, result: PatchResult): Promise<void> {
-    await prisma.aIAction.update({
+    await prisma.ai_actions.update({
       where: { id: actionId },
       data: {
         rollbackData: result as Record<string, unknown>,
@@ -658,7 +658,7 @@ export class ExecutionEngine {
   }
 
   async getExecutionLogs(actionId: string): Promise<ExecutionLogEntry[]> {
-    const logs = await prisma.executionLog.findMany({
+    const logs = await prisma.execution_logs.findMany({
       where: { actionId },
       orderBy: { timestamp: 'asc' }
     });

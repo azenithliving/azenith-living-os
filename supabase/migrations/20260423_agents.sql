@@ -539,7 +539,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER IF NOT EXISTS trigger_update_conversation_last_message
+CREATE TRIGGER trigger_update_conversation_last_message
 AFTER INSERT ON agent_messages
 FOR EACH ROW
 EXECUTE FUNCTION update_conversation_last_message();

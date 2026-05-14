@@ -23,40 +23,33 @@ const taskSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
+    const status = searchParams.get('status') || 'pending';
+    const companyId = searchParams.get('company_id') || '00000000-0000-0000-0000-000000000000';
     
-    // TODO: Connect to Supabase when migrations are fixed
-    // For now, return mock tasks
-    const mockTasks = [
-      {
-        id: '1',
-        title: 'مهمة تجريبية لـ PRIME',
-        status: 'pending',
-        priority: 5,
-        agent_key: 'prime',
-        created_at: new Date().toISOString(),
-        progress_percent: 0
-      },
-      {
-        id: '2', 
-        title: 'مهمة تجريبية لـ Vanguard',
-        status: 'running',
-        priority: 3,
-        agent_key: 'vanguard',
-        created_at: new Date().toISOString(),
-        progress_percent: 50
-      }
-    ].filter(t => !status || t.status === status);
+    let result;
+    if (status === 'pending') {
+      result = await agentTasksDAL.getPending(companyId);
+    } else {
+      // جلب المهام بناءً على الحالة
+      result = await supabaseServer
+        .from('agent_tasks')
+        .select('*, agent_profiles(agent_key)')
+        .eq('company_id', companyId)
+        .eq('status', status)
+        .order('created_at', { ascending: false });
+    }
+    
+    if (result.error) throw result.error;
     
     return NextResponse.json({ 
       success: true, 
-      data: mockTasks 
+      data: result.data 
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Get tasks error:', error);
     return NextResponse.json(
-      { success: false, error: 'خطأ في السيرفر' },
+      { success: false, error: error.message || 'خطأ في السيرفر' },
       { status: 500 }
     );
   }

@@ -1,7 +1,7 @@
 "use server";
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-import { askOpenRouter } from "@/lib/ai-orchestrator";
+import { askOpenRouter, askGoogle } from "@/lib/ai-orchestrator";
 
 /**
  * Sentinel: Self-Healing Architecture & System Health Monitor
@@ -48,7 +48,7 @@ const MAX_ALERTS = 100;
 /**
  * Monitor API key failures and auto-rotate if needed
  */
-export async function monitorAPIHealth(provider: "groq" | "openrouter" | "mistral", errorCount: number): Promise<void> {
+export async function monitorAPIHealth(provider: "groq" | "openrouter" | "mistral" | "openai" | "google", errorCount: number): Promise<void> {
   if (errorCount >= 3) {
     const alert: SystemAlert = {
       id: crypto.randomUUID(),
@@ -347,8 +347,8 @@ Context: ${context}
 
 Provide a concise root cause analysis in 1-2 sentences. Focus on actionable insights.`;
 
-  const result = await askOpenRouter(prompt, undefined, {
-    model: "anthropic/claude-3.5-sonnet",
+  const result = await askGoogle(prompt, {
+    model: "gemini-2.0-flash",
     temperature: 0.2,
     maxTokens: 200,
   });

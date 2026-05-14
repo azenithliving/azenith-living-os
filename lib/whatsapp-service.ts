@@ -1,8 +1,4 @@
-/**
- * WhatsApp Service
- * 
- * Handles WhatsApp message sending functionality
- */
+import { whatsAppManager } from './whatsapp-proxy';
 
 export interface WhatsAppMessageResult {
   success: boolean;
@@ -17,10 +13,7 @@ export interface WhatsAppTemplate {
 }
 
 /**
- * Send a WhatsApp message
- * 
- * Note: This is a stub implementation. In production, this would
- * integrate with WhatsApp Business API or a WhatsApp gateway.
+ * Send a WhatsApp message (Real Implementation)
  */
 export async function sendMessage(
   to: string,
@@ -28,29 +21,28 @@ export async function sendMessage(
   template?: WhatsAppTemplate | string
 ): Promise<WhatsAppMessageResult> {
   try {
-    // Check if WhatsApp Web JS is available
+    // We only send from server-side
     if (typeof window !== 'undefined') {
-      // Client-side: would use WhatsApp Web JS if initialized
-      console.log(`[WhatsApp] Would send to ${to}: ${message}`);
-      return {
-        success: true,
-        messageId: `msg_${Date.now()}`,
-      };
+      // In client-side, we should call an API route
+      const response = await fetch('/api/admin/whatsapp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, message })
+      });
+      return await response.json();
     }
 
-    // Server-side: would integrate with WhatsApp Business API
-    console.log(`[WhatsApp Service] Message to ${to}: ${message.substring(0, 50)}...`);
+    const result = await whatsAppManager.sendMessage(to, message);
     
-    // Return success for now (stub implementation)
     return {
       success: true,
-      messageId: `server_msg_${Date.now()}`,
+      messageId: result.id.id,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("[WhatsApp Service] Error sending message:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error.message || "Unknown error",
     };
   }
 }
@@ -59,13 +51,17 @@ export async function sendMessage(
  * Check if WhatsApp service is ready/initialized
  */
 export function isReady(): boolean {
-  return true; // Stub: always returns ready
+  if (typeof window !== 'undefined') return false;
+  return whatsAppManager.getStatus() === 'READY';
 }
 
 /**
  * Initialize WhatsApp service
  */
 export async function initialize(): Promise<boolean> {
-  console.log("[WhatsApp Service] Initialized (stub)");
+  if (typeof window !== 'undefined') return false;
+  
+  console.log("[WhatsApp Service] Initializing real client...");
+  await whatsAppManager.initialize();
   return true;
 }
