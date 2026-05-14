@@ -265,8 +265,43 @@ export async function askGoogle(prompt: string, options?: any) {
 }
 
 /**
- * Get health status of all key pools
+ * Ask Hugging Face - Generic interface
  */
+export async function askHuggingFace(
+  model: string,
+  prompt: string,
+  options?: { maxTokens?: number; temperature?: number; returnFullText?: boolean }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const keys = (process.env.HUGGINGFACE_KEYS || "").split(",").map(k => k.trim()).filter(k => k);
+  if (keys.length === 0) return { success: false, content: "", error: "HUGGINGFACE_KEYS not configured" };
+  const key = keys[Math.floor(Math.random() * keys.length)];
+  try {
+    const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        inputs: prompt,
+        parameters: {
+          max_new_tokens: options?.maxTokens ?? 512,
+          temperature: options?.temperature ?? 0.7,
+          return_full_text: options?.returnFullText ?? false,
+        },
+      }),
+    });
+    if (!response.ok) return { success: false, content: "", error: `HF Error: ${response.status}` };
+    const data = await response.json();
+    const generatedText = Array.isArray(data) ? data[0]?.generated_text : data.generated_text;
+    return { success: true, content: generatedText || "" };
+  } catch (e: any) { return { success: false, content: "", error: e.message }; }
+}
+
+export async function askNileChat(prompt: string, options?: any) {
+  return askHuggingFace("MBZUAI-Paris/Nile-Chat-12B", `[INST] ${prompt} [/INST]`, options);
+}
+
+export async function askAllam(prompt: string, options?: any) {
+  return askHuggingFace("SDAIA/ALLaM-7B-Instruct", `### Instruction:\n${prompt}\n\n### Response:\n`, options);
+}
 export async function getOrchestratorHealth() {
   const providers = ["groq", "openrouter", "mistral", "deepseek", "openai", "google"] as const;
   const health: any = {};
