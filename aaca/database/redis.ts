@@ -35,7 +35,11 @@ class RedisConnection {
     };
 
     if (url) {
-      this.client = new IORedis(url, this.config);
+      const isTls = url.startsWith('rediss:');
+      this.client = new IORedis(url, { ...this.config, tls: isTls ? { rejectUnauthorized: false } : undefined, family: 0 });
+    } else if (process.env.REDIS_URL) {
+      const isTls = process.env.REDIS_URL.startsWith('rediss:');
+      this.client = new IORedis(process.env.REDIS_URL, { ...this.config, tls: isTls ? { rejectUnauthorized: false } : undefined, family: 0 });
     } else {
       this.client = new IORedis({
         host: process.env.REDIS_HOST ?? 'localhost',

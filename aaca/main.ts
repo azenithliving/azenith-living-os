@@ -9,6 +9,8 @@
  * - Phase 4: Execution Engine, Approval System & API
  */
 
+import { config } from 'dotenv';
+config({ path: '.env.local' });
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';

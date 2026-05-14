@@ -319,9 +319,13 @@ class Brains {
     }
 
     const { queueManager } = this.nervousSystem.getServices();
+    
+    if (!this.orchestrator) {
+      throw new Error('Orchestrator not initialized');
+    }
 
     return {
-      orchestrator: this.orchestrator.getSystemStats(),
+      orchestrator: await this.orchestrator.getSystemStats(),
       queues: queueManager.getQueueNames(),
       health: await this.nervousSystem.getHealth()
     };

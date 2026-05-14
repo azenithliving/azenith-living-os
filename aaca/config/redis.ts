@@ -32,12 +32,7 @@ export function createBullMQConnection(config: Partial<RedisConfig> = {}): IORed
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
   
   const connection = new IORedis(finalConfig.url, {
-    host: finalConfig.host,
-    port: finalConfig.port,
-    password: finalConfig.password,
-    db: finalConfig.db,
     maxRetriesPerRequest: finalConfig.maxRetriesPerRequest,
-    enableReadyCheck: finalConfig.enableReadyCheck,
     retryStrategy: (times: number) => {
       const delay = Math.min(times * 50, 2000);
       logger.warn(`Redis retry attempt ${times}, delaying ${delay}ms`);
