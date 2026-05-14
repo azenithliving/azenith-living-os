@@ -8,26 +8,22 @@ async function test() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { data, error } = await supabase
-    .from("agent_memory")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(10);
+  console.log("--- Probing Schema for 'orders' ---");
+  const { data, error } = await supabase.from("orders").select("id").limit(1);
+  if (error) console.log("Orders probe error:", error.message);
+  else console.log("Orders probe success!");
 
-  if (error) {
-    console.error(error);
-    return;
+  // Try to find schema via Postgres internal tables
+  const { data: schemaData, error: schemaErr } = await supabase
+    .from("pg_tables") // This might fail via REST, but worth a try
+    .select("schemaname, tablename")
+    .eq("tablename", "orders");
+  
+  if (schemaErr) {
+    console.log("pg_tables access failed (expected via REST).");
+  } else {
+    console.log("Schema match:", schemaData);
   }
-
-  const formattedMemories = data
-    .reverse()
-    .map((memory) => {
-      const role = memory.context?.role === "user" ? "User" : "Agent";
-      return `${role}: ${memory.content}`;
-    });
-
-  console.log("Memory Dump:");
-  console.log(formattedMemories.join("\n"));
 }
 
 test();

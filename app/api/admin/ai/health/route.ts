@@ -15,7 +15,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const pools = getOrchestratorHealth();
+    const pools = await getOrchestratorHealth();
 
     return NextResponse.json({
       ok: true,
