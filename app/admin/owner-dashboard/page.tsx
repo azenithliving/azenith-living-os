@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Crown, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
+import { Crown, AlertTriangle, Loader2, RefreshCw, TrendingUp } from 'lucide-react';
 
 interface DashboardData {
   orders_summary: {

@@ -17,7 +17,8 @@ const prisma = globalForPrisma.prisma ?? new PrismaClient({
 });
 
 // Attach event listeners
-prisma.$on('query', (e) => {
+// @ts-ignore
+prisma.$on('query', (e: any) => {
   logger.debug('Query executed', {
     query: e.query,
     params: e.params,
@@ -25,19 +26,22 @@ prisma.$on('query', (e) => {
   });
 });
 
-prisma.$on('error', (e) => {
+// @ts-ignore
+prisma.$on('error', (e: any) => {
   logger.error('Database error', {
     message: e.message
   });
 });
 
-prisma.$on('info', (e) => {
+// @ts-ignore
+prisma.$on('info', (e: any) => {
   logger.info('Database info', {
     message: e.message
   });
 });
 
-prisma.$on('warn', (e) => {
+// @ts-ignore
+prisma.$on('warn', (e: any) => {
   logger.warn('Database warning', {
     message: e.message
   });

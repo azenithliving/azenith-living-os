@@ -1,4 +1,4 @@
-import { prisma } from '../aaca/database/prisma-client.ts';
+import { prisma } from '../aaca/database/prisma-client';
 
 async function main() {
   console.log('Testing database connection via shared Prisma client...');
