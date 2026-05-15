@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { askOpenRouter } from "@/lib/ai-orchestrator";
 
 /**
  * Aesthetic Advisor Component
@@ -155,11 +154,25 @@ Tone: Advisory, inspiring, sophisticated. Lead naturally toward professional con
 
 Return ONLY valid JSON, no markdown.`;
 
-      const result = await askOpenRouter(prompt, base64Images[0], {
-        model: "anthropic/claude-3.5-sonnet",
-        temperature: 0.4,
-        maxTokens: 1024,
+      const response = await fetch("/api/ai/analyze-vision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt,
+          imageUrl: base64Images[0],
+          options: {
+            model: "anthropic/claude-3.5-sonnet",
+            temperature: 0.4,
+            maxTokens: 1024,
+          }
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error("Analysis request failed");
+      }
+
+      const result = await response.json();
 
       if (!result.success) {
         throw new Error(result.error || "Analysis failed");
