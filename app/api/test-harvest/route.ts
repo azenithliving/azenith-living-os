@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Check API key status
-    const keyStatus = aiOrchestrator.getKeyStatus();
+    const keyStatus = await aiOrchestrator.getKeyStatus();
 
     // Test Groq API with a simple prompt
     const testPrompt = "Say 'Azenith Living AI is active' and list 3 luxury interior design keywords.";
