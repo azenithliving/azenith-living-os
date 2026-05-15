@@ -301,6 +301,11 @@ export async function POST(
     
     // Fetch active reality mutations (Fate Actions) to sync AI with UI
     console.log(`[Consultant] Fetching active mutations for session: ${sessionId}`);
+    const { data: learningData, error: learningError } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'asi_logic')
+      .single();
     const { data: mutations, error: mutError } = await supabase
       .from("reality_mutations")
       .select("*")
@@ -313,11 +318,17 @@ export async function POST(
       console.warn("[Consultant] Error fetching mutations:", mutError.message);
     }
 
+    // Merge global ASI logic with granular learnings
+    const allLearnings = [...learnings];
+    if (learningData?.value) {
+      allLearnings.push(typeof learningData.value === 'string' ? learningData.value : JSON.stringify(learningData.value));
+    }
+
     // Build messages array for Groq with system prompt and conversation history
     const groqMessages = buildGroqMessages(
       conversationHistory, 
       userName || existingSession?.insights?.userName, 
-      learnings, 
+      allLearnings, 
       existingSession?.insights,
       mutations || []
     );

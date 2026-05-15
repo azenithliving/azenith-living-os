@@ -3,6 +3,7 @@ import "server-only";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { analyzeStyleDNAFast, LeadDossier, StyleDNA } from "@/lib/pdf-generator";
 import { fireAndForget } from "@/lib/background-processor";
+import { whatsAppManager } from "./whatsapp-proxy";
 
 /**
  * WhatsApp Lead Dossier System
@@ -116,19 +117,14 @@ export async function buildLeadDossier(leadId: string, tenantId: string): Promis
     priority = "medium";
   }
 
-  // Analyze Style DNA with 2s timeout - non-blocking
-  // Returns default immediately if AI takes too long, processes in background
+  // Analyze Style DNA
   let styleDNA: StyleDNA;
   if (viewedImages.length > 0) {
-    const { styleDNA: fastResult, status } = await analyzeStyleDNAFast(viewedImages, {
+    const { styleDNA: fastResult } = await analyzeStyleDNAFast(viewedImages, {
       userId: leadId,
       tenantId: tenantId,
     });
     styleDNA = fastResult;
-
-    if (status === "processing") {
-      console.log(`[WhatsAppDossier] StyleDNA analysis processing in background for lead ${leadId}`);
-    }
   } else {
     styleDNA = {
       dominantStyles: user.style ? [user.style] : ["modern-luxury"],
@@ -182,12 +178,10 @@ export function formatWhatsAppDossier(dossier: WhatsAppDossier): string {
     `*Client:* ${dossier.fullName}`,
     `*Phone:* ${dossier.phone}`,
     dossier.email ? `*Email:* ${dossier.email}` : "",
-    dossier.language ? `*Language:* ${dossier.language.toUpperCase()}` : "",
     "",
     `*Project Scope:* ${dossier.scope}`,
     `*Investment:* ${dossier.budget}`,
     `*Timeline:* ${dossier.timeline}`,
-    `*Blueprint:* ${dossier.blueprintAvailable ? "✅ Available" : "❌ Needed"}`,
     "",
     `*Priority:* ${priorityEmoji} ${dossier.qualification.priority.toUpperCase()}`,
     `*Score:* ${dossier.qualification.score}/100`,
@@ -195,59 +189,9 @@ export function formatWhatsAppDossier(dossier: WhatsAppDossier): string {
     "*Style DNA Analysis:*",
     `• Styles: ${dossier.styleDNA.dominantStyles.join(", ")}`,
     `• Colors: ${dossier.styleDNA.colorPalette.join(", ")}`,
-    `• Materials: ${dossier.styleDNA.materials.join(", ")}`,
-    `• Mood: ${dossier.styleDNA.moodKeywords.join(", ")}`,
-    `• Complexity: ${dossier.styleDNA.complexity}`,
-    "",
-  ];
-
-  // Investment Tier Selection
-  if (dossier.investmentSelection) {
-    lines.push(
-      `*Investment Tier Selected:* ${dossier.investmentSelection.tier}`,
-      `• Range: ${dossier.investmentSelection.rangeEGP}`,
-      `• ${dossier.investmentSelection.description}`,
-      ""
-    );
-  }
-
-  if (dossier.viewedImages.length > 0) {
-    lines.push(`*Viewed ${dossier.viewedImages.length} inspiration images*`, "");
-  }
-
-  if (dossier.uploadedSpaceImages && dossier.uploadedSpaceImages.length > 0) {
-    lines.push(`*Uploaded ${dossier.uploadedSpaceImages.length} space photos for analysis*`, "");
-  }
-
-  // Aesthetic Advisor Results
-  if (dossier.aestheticAdvice) {
-    lines.push(
-      "*Aesthetic Advisor Analysis:*",
-      `• Visual Harmony: ${dossier.aestheticAdvice.visualHarmony.substring(0, 80)}...`,
-      `• Space Optimization: ${dossier.aestheticAdvice.spaceOptimization.substring(0, 80)}...`,
-      ""
-    );
-  }
-
-  if (dossier.specialRequests) {
-    lines.push("*Special Requests:*", dossier.specialRequests, "");
-  }
-
-  // Admin Translation (if client wrote in English, show Arabic summary)
-  if (dossier.adminTranslation && dossier.language === "en") {
-    lines.push(
-      "*Arabic Summary for Admin:*",
-      dossier.adminTranslation.summary,
-      ""
-    );
-  }
-
-  lines.push(
-    "─────────────────",
-    `Submitted: ${new Date(dossier.createdAt).toLocaleString("en-GB", { timeZone: "Africa/Cairo" })}`,
     "",
     "Reply READY to claim this lead"
-  );
+  ];
 
   return lines.filter(Boolean).join("\n");
 }
@@ -260,53 +204,37 @@ export async function sendWhatsAppDossier(
   adminPhone: string,
   tenantId: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  console.log(`[WhatsAppDossier] DEBUG: Starting sendWhatsAppDossier for lead ${dossier.leadId}`);
-  console.log(`[WhatsAppDossier] DEBUG: Tier=${dossier.qualification.tier}, Phone=${adminPhone}`);
-  
   const supabase = getSupabaseAdminClient();
   if (!supabase) throw new Error('Supabase not initialized');
 
   try {
     const message = formatWhatsAppDossier(dossier);
-    console.log(`[WhatsAppDossier] DEBUG: Formatted message length=${message.length}`);
+    
+    // Call the actual WhatsApp proxy
+    try {
+      await whatsAppManager.sendMessage(adminPhone, message);
+    } catch (sendErr: any) {
+      console.error(`[WhatsAppDossier] Proxy Send Failed:`, sendErr.message);
+    }
 
-    // Log the WhatsApp send attempt
+    // Log event
     await supabase.from("events").insert({
-      id: crypto.randomUUID(),
       company_id: tenantId,
       user_id: dossier.leadId,
       type: "whatsapp_dossier_sent",
       value: dossier.qualification.tier,
-      metadata: {
-        to: adminPhone,
-        tier: dossier.qualification.tier,
-        score: dossier.qualification.score,
-        priority: dossier.qualification.priority,
-        messageLength: message.length,
-      },
+      metadata: { to: adminPhone, tier: dossier.qualification.tier },
     });
 
-    // Note: In production, integrate with WhatsApp Business API here
-    // For now, we log and return success for the automation system
-    console.log(`[WhatsAppDossier] Would send to ${adminPhone}:`, message.substring(0, 200) + "...");
-
-    return {
-      success: true,
-      messageId: crypto.randomUUID(),
-    };
-
-  } catch (error) {
+    return { success: true, messageId: crypto.randomUUID() };
+  } catch (error: any) {
     console.error("[WhatsAppDossier] Failed to send:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to send WhatsApp dossier",
-    };
+    return { success: false, error: error.message };
   }
 }
 
 /**
  * Auto-trigger WhatsApp for Diamond leads
- * SYNCHRONOUS VERSION - Blocks until complete
  */
 export async function notifyDiamondLead(
   leadId: string,
@@ -314,37 +242,20 @@ export async function notifyDiamondLead(
   adminPhone: string
 ): Promise<{ success: boolean; error?: string }> {
   const dossier = await buildLeadDossier(leadId, tenantId);
-
-  if (!dossier) {
-    return { success: false, error: "Failed to build lead dossier" };
-  }
-
-  if (dossier.qualification.tier !== "Diamond") {
-    return { success: true, error: "Not a Diamond lead - skipping WhatsApp" };
-  }
-
+  if (!dossier) return { success: false, error: "Failed to build lead dossier" };
+  if (dossier.qualification.tier !== "Diamond") return { success: true };
   return sendWhatsAppDossier(dossier, adminPhone, tenantId);
 }
 
 /**
  * Auto-trigger WhatsApp for Diamond leads - ASYNC VERSION
- * Non-blocking: Creates background task and returns immediately
- * Perfect for API endpoints that need <500ms response times
  */
 export function notifyDiamondLeadAsync(
   leadId: string,
   tenantId: string,
   adminPhone: string
 ): void {
-  // Fire-and-forget pattern - don't await, don't block
   fireAndForget(async () => {
-    const result = await notifyDiamondLead(leadId, tenantId, adminPhone);
-    if (result.success) {
-      console.log(`[notifyDiamondLeadAsync] ✅ Diamond lead notification sent for ${leadId}`);
-    } else {
-      console.error(`[notifyDiamondLeadAsync] ❌ Failed for ${leadId}:`, result.error);
-    }
-  }, (error) => {
-    console.error(`[notifyDiamondLeadAsync] Critical error for ${leadId}:`, error);
-  });
+    await notifyDiamondLead(leadId, tenantId, adminPhone);
+  }, (error) => console.error(`[notifyDiamondLeadAsync] Error:`, error));
 }

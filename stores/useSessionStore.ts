@@ -232,7 +232,7 @@ const useSessionStore = create<SessionState>()(
 
       isHydrated: false,
 
-      updateProfile: (updates) => throttledSet(() => set((state) => {
+      updateProfile: (updates) => set((state) => {
         const newState = { ...state, ...updates };
         if (updates.style && updates.style !== state.style) {
           newState.selectedStyle = updates.style;
@@ -246,7 +246,7 @@ const useSessionStore = create<SessionState>()(
           newState.userProfile = { ...state.userProfile, ...profileUpdates };
         }
         return newState;
-      })),
+      }),
 
       toggleWishlist: (slug: string) => set((state) => {
         const newWishlist = state.wishlist.includes(slug)

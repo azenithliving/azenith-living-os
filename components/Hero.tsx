@@ -140,6 +140,7 @@ export default function Hero() {
       aria-labelledby="hero-title"
       className="relative flex h-screen items-center justify-center overflow-hidden font-['GE_SS_Two','Cairo','sans-serif']"
     >
+      <div className="absolute inset-0 z-10 bg-black/40" />
       <AnimatePresence mode="wait">
         {isVideoReady && !isExiting && manifestoState ? (
           <motion.div

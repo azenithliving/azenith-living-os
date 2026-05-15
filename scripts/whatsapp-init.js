@@ -14,22 +14,29 @@ console.log('║   → Link a Device → Scan the QR code below                 
 console.log('╚════════════════════════════════════════════════════════════╝');
 console.log('');
 
-// Chrome installed on D: drive
-const chromePath = 'D:\\puppeteer\\chrome\\win64-147.0.7727.50\\chrome-win64\\chrome.exe';
+// Standard Chrome path on Windows
+const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const alternativePath = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe';
 
-if (!fs.existsSync(chromePath)) {
-  console.error('❌ Chrome not found at:', chromePath);
-  console.log('   Please install Chrome first');
-  process.exit(1);
+let finalChromePath = chromePath;
+
+if (!fs.existsSync(finalChromePath)) {
+  if (fs.existsSync(alternativePath)) {
+    finalChromePath = alternativePath;
+  } else {
+    console.error('❌ Chrome not found in standard locations.');
+    console.log('   Please install Chrome or update the path in this script.');
+    process.exit(1);
+  }
 }
 
-console.log('✓ Chrome found at:', chromePath);
+console.log('✓ Chrome found at:', finalChromePath);
 console.log('');
 
 // Create WhatsApp client
 const client = new Client({
   puppeteer: {
-    executablePath: chromePath,
+    executablePath: finalChromePath,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: true
   },
@@ -119,7 +126,7 @@ app.listen(API_PORT, () => {
 
 client.on('qr', (qr) => {
   console.log('\n📱 QR CODE GENERATED - SCAN NOW:\n');
-  qrcode.generate(qr, { small: false });
+  qrcode.generate(qr, { small: true });
   console.log('\n⏳ Waiting for authentication...');
 });
 

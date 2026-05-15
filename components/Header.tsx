@@ -112,7 +112,7 @@ export default function Header() {
           <button
             type="button"
             onClick={handleLogoClick}
-            className="relative h-20 w-48 cursor-pointer select-none transition-transform duration-500 hover:scale-105 md:h-32 md:w-64"
+            className="relative h-16 w-32 cursor-pointer select-none transition-transform duration-500 hover:scale-105 md:h-32 md:w-64"
           >
             <Image
               src="/logo.png"

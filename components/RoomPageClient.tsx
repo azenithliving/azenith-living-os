@@ -208,6 +208,8 @@ export default function RoomPageClient({
       if (pendingUpdateRef.current) {
         updateProfile({
           lastPage: `/rooms/${room.id}`,
+          roomType: room.title,
+          style: currentStyle,
           userProfile: {
             ...userProfile,
             stylePreferences: pendingUpdateRef.current.stylePrefs,

@@ -31,7 +31,10 @@ export class WhatsAppManager extends EventEmitter {
   private async pollStatus() {
     setInterval(async () => {
       try {
-        const response = await axios.get(`${this.serviceUrl}/health`);
+        const apiKey = process.env.INTERNAL_API_KEY || '8f3d6c1b-a2e5-4d7c-9b8a-1c5e4d2b3a9f';
+        const response = await axios.get(`${this.serviceUrl}/health`, {
+          headers: { 'x-api-key': apiKey }
+        });
         // The script returns { status, connected, timestamp }
         const { status, connected } = response.data;
         
@@ -67,7 +70,11 @@ export class WhatsAppManager extends EventEmitter {
 
   public async sendMessage(to: string, message: string) {
     try {
-      const response = await axios.post(`${this.serviceUrl}/send-message`, { phone: to, message });
+      const apiKey = process.env.INTERNAL_API_KEY || '8f3d6c1b-a2e5-4d7c-9b8a-1c5e4d2b3a9f';
+      const response = await axios.post(`${this.serviceUrl}/send-message`, 
+        { phone: to, message },
+        { headers: { 'x-api-key': apiKey } }
+      );
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || error.message);
