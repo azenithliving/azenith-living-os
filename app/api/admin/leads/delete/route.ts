@@ -14,26 +14,32 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Database not initialized" }, { status: 500 });
     }
 
-    // 1. Delete telemetry data by session_id
+    // 1. Delete telemetry data
     await supabase.from("visitor_telemetry").delete().in("session_id", sessionIds);
-    // 2. Delete telemetry data by id (in case it was passed as id)
-    await supabase.from("visitor_telemetry").delete().in("id", sessionIds);
 
-    // 3. Delete consultant sessions by session_id
-    const { error: sessError1 } = await supabase
-      .from("consultant_sessions")
-      .delete()
+    // 2. Delete requests (which might have foreign keys to users)
+    // First by request ID
+    await supabase.from("requests").delete().in("id", sessionIds);
+    
+    // Then get user IDs associated with these sessions to delete their requests
+    const { data: usersToCleanup } = await supabase
+      .from("users")
+      .select("id")
       .in("session_id", sessionIds);
+    
+    const userIds = (usersToCleanup || []).map(u => u.id);
+    if (userIds.length > 0) {
+      await supabase.from("requests").delete().in("user_id", userIds);
+    }
 
-    // 4. Delete consultant sessions by id
-    const { error: sessError2 } = await supabase
-      .from("consultant_sessions")
-      .delete()
-      .in("id", sessionIds);
+    // 3. Delete consultant sessions
+    await supabase.from("consultant_sessions").delete().in("session_id", sessionIds);
+    await supabase.from("consultant_sessions").delete().in("id", sessionIds);
 
-    if (sessError1 && sessError2) {
-      console.error("[Leads Delete] Session errors:", sessError1, sessError2);
-      return NextResponse.json({ error: "Failed to delete sessions from all identifiers" }, { status: 500 });
+    // 4. Finally, delete users
+    await supabase.from("users").delete().in("session_id", sessionIds);
+    if (userIds.length > 0) {
+      await supabase.from("users").delete().in("id", userIds);
     }
 
     return NextResponse.json({ success: true, deletedCount: sessionIds.length });

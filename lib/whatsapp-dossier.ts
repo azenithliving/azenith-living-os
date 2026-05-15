@@ -139,14 +139,14 @@ export async function buildLeadDossier(leadId: string, tenantId: string): Promis
     };
   }
 
-  const quoteSnapshot = request?.quote_snapshot as Record<string, { fullName?: string; phone?: string; email?: string }> | null;
+  const quoteSnapshot = request?.quote_snapshot as Record<string, any> | null;
   const contact = quoteSnapshot?.contact;
 
   return {
     leadId,
-    fullName: contact?.fullName || user.session_id || "Unknown",
-    phone: contact?.phone || "N/A",
-    email: contact?.email,
+    fullName: user.full_name || contact?.fullName || user.session_id || "Unknown",
+    phone: user.phone || contact?.phone || "N/A",
+    email: user.email || contact?.email,
     scope: user.room_type || request?.room_type || "Not specified",
     budget: user.budget || request?.budget || "Not specified",
     timeline: user.service_type || "Not specified",

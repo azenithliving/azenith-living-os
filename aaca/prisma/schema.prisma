@@ -1866,11 +1866,14 @@ model user_preferences {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model public_users {
   id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  full_name        String?
+  phone            String?
   email            String?
   company_id       String             @db.Uuid
   session_id       String
   score            Int                @default(0)
   intent           String             @default("browsing")
+  tier             String?
   last_page        String?
   room_type        String?
   budget           String?

@@ -4,9 +4,7 @@
  * SERVER ONLY - Do not import in client components
  */
 
-"use server";
-
-import { createClient } from "@/utils/supabase/server";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 // Parse key pools from environment
 const parseKeyPool = (envValue: string | undefined): string[] => {
@@ -50,7 +48,13 @@ let keysLoaded = false;
  */
 export async function loadKeysFromDB(): Promise<void> {
   try {
-    const supabase = await createClient();
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      console.warn("[API Keys Service] Admin client not available, using env keys only.");
+      fallbackToEnvKeys();
+      return;
+    }
+
     const { data, error } = await supabase
       .from("api_keys")
       .select("provider, key, cooldown_until, total_requests, last_used_at")
@@ -68,8 +72,9 @@ export async function loadKeysFromDB(): Promise<void> {
 
     // Add DB keys
     for (const row of data || []) {
-      if (keyStates[row.provider]) {
-        keyStates[row.provider].push({
+      const provider = row.provider?.toLowerCase();
+      if (keyStates[provider]) {
+        keyStates[provider].push({
           key: row.key,
           cooldownUntil: row.cooldown_until ? new Date(row.cooldown_until) : null,
           totalRequests: row.total_requests || 0,
@@ -127,10 +132,12 @@ export async function getKeyFromDB(
   provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google"
 ): Promise<string | null> {
   try {
-    const supabase = await createClient();
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) return ENV_KEY_POOLS[provider][0] || null;
+
     const now = new Date().toISOString();
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("api_keys")
       .select("key")
       .eq("provider", provider)
@@ -138,7 +145,7 @@ export async function getKeyFromDB(
       .or(`cooldown_until.is.null,cooldown_until.lt.${now}`)
       .order("last_used_at", { ascending: true, nullsFirst: true })
       .limit(1)
-      .single();
+      .maybeSingle<{ key: string }>();
 
     if (data?.key) {
       return data.key;
@@ -227,15 +234,17 @@ export async function setKeyCooldown(
 
   // Update in database
   try {
-    const supabase = await createClient();
-    await supabase
-      .from("api_keys")
-      .update({
-        cooldown_until: cooldownUntil.toISOString(),
-        last_used_at: new Date().toISOString(),
-      })
-      .eq("provider", provider)
-      .eq("key", key);
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      await supabase
+        .from("api_keys")
+        .update({
+          cooldown_until: cooldownUntil.toISOString(),
+          last_used_at: new Date().toISOString(),
+        })
+        .eq("provider", provider)
+        .eq("key", key);
+    }
   } catch (err) {
     // Silent fail - cooldown tracked in-memory
   }
@@ -259,15 +268,17 @@ export async function incrementKeyUsage(
 
   // Update in database (async, don't wait)
   try {
-    const supabase = await createClient();
-    await supabase
-      .from("api_keys")
-      .update({
-        total_requests: keyEntry?.totalRequests || 1,
-        last_used_at: new Date().toISOString(),
-      })
-      .eq("provider", provider)
-      .eq("key", key);
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      await supabase
+        .from("api_keys")
+        .update({
+          total_requests: keyEntry?.totalRequests || 1,
+          last_used_at: new Date().toISOString(),
+        })
+        .eq("provider", provider)
+        .eq("key", key);
+    }
   } catch (err) {
     // Silent fail
   }

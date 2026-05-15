@@ -1,4 +1,4 @@
-﻿import "server-only";
+import "server-only";
 
 import { z } from "zod";
 
@@ -62,8 +62,12 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
       id: userId,
       company_id: tenant.id,
       session_id: payload.sessionId,
+      full_name: payload.fullName,
+      phone: payload.phone,
+      email: payload.email,
       score: payload.score,
       intent,
+      tier: intent,
       last_page: payload.lastPage,
       room_type: payload.roomType,
       budget: payload.budget,
@@ -97,8 +101,12 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
     const { error: updateUserError } = await supabase
       .from("users")
       .update({
+        full_name: payload.fullName,
+        phone: payload.phone,
+        email: payload.email,
         score: payload.score,
         intent,
+        tier: intent,
         last_page: payload.lastPage,
         room_type: payload.roomType,
         budget: payload.budget,
