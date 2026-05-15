@@ -30,7 +30,7 @@ export function ApprovalGate() {
       const res = await fetch('/api/admin/agents/approval-queue');
       const data = await res.json();
       if (data.success) {
-        setApprovals(data.data);
+        setApprovals(Array.isArray(data.data) ? data.data : []);
       }
     } catch (err) {
       console.error('Error fetching approvals:', err);

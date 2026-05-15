@@ -24,8 +24,9 @@ export default function AgentsPage() {
       try {
         const res = await fetch('/api/admin/agents/devices');
         const data = await res.json();
-        setDevices(data.data || []);
+        setDevices(Array.isArray(data.data) ? data.data : []);
       } catch (error) {
+        console.error("Failed to fetch devices:", error);
         setDevices([]);
       } finally {
         setLoading(false);

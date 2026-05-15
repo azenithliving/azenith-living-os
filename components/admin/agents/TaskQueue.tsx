@@ -34,7 +34,7 @@ export function TaskQueue() {
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
-        setTasks(data.data);
+        setTasks(Array.isArray(data.data) ? data.data : []);
         setLoading(false);
       }
     } catch (err) {
