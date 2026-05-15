@@ -787,7 +787,7 @@ async function executeSettingUpdate(
   const { data: existingSetting, error: fetchError } = await supabase
     .from("site_settings")
     .select("*")
-    .eq("setting_key", settingKey)
+    .eq("key", settingKey)
     .single();
 
   if (fetchError && fetchError.code !== "PGRST116") {

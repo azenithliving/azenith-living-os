@@ -555,10 +555,10 @@ export async function executeSettingUpdate(
     const { data: existingSetting, error: fetchError } = await supabase
       .from("site_settings")
       .select("*")
-      .eq("setting_key", key)
+      .eq("key", key)
       .maybeSingle();
 
-    const oldValue = existingSetting?.setting_value || null;
+    const oldValue = existingSetting?.value || null;
 
     // Create revision
     const { data: revision, error: revisionError } = await supabase
@@ -607,8 +607,7 @@ export async function executeSettingUpdate(
       result = await supabase
         .from("site_settings")
         .update({
-          setting_value: value as Json,
-          setting_category: category,
+          value: value as Json,
           current_revision_id: revision.id,
           updated_at: new Date().toISOString(),
         })
@@ -620,9 +619,8 @@ export async function executeSettingUpdate(
       result = await supabase
         .from("site_settings")
         .insert({
-          setting_key: key,
-          setting_value: value as Json,
-          setting_category: category,
+          key: key,
+          value: value as Json,
           current_revision_id: revision.id,
         })
         .select()

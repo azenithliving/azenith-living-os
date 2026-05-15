@@ -510,39 +510,24 @@ export interface Database {
       site_settings: {
         Row: {
           id: string;
-          setting_key: string;
-          setting_value: Json;
-          setting_category: string | null;
-          setting_schema: Json | null;
-          current_revision_id: string | null;
-          validated_at: string | null;
-          validation_errors: Json | null;
-          created_at: string;
+          key: string;
+          value: Json;
           updated_at: string;
+          updated_by: string | null;
         };
         Insert: {
           id?: string;
-          setting_key: string;
-          setting_value: Json;
-          setting_category?: string | null;
-          setting_schema?: Json | null;
-          current_revision_id?: string | null;
-          validated_at?: string | null;
-          validation_errors?: Json | null;
-          created_at?: string;
+          key: string;
+          value: Json;
           updated_at?: string;
+          updated_by?: string | null;
         };
         Update: {
           id?: string;
-          setting_key?: string;
-          setting_value?: Json;
-          setting_category?: string | null;
-          setting_schema?: Json | null;
-          current_revision_id?: string | null;
-          validated_at?: string | null;
-          validation_errors?: Json | null;
-          created_at?: string;
+          key?: string;
+          value?: Json;
           updated_at?: string;
+          updated_by?: string | null;
         };
       };
 

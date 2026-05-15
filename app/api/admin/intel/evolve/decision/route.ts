@@ -42,11 +42,10 @@ export async function POST(req: Request) {
       const { error: upsertError } = await supabaseServer
         .from('site_settings')
         .upsert({
-          setting_key: `asi_patch_${id.substring(0,8)}`,
-          setting_category: 'asi_logic',
-          setting_value: parsedPatch,
+          key: `asi_patch_${id.substring(0,8)}`,
+          value: parsedPatch,
           updated_at: new Date().toISOString()
-        }, { onConflict: 'setting_key' });
+        }, { onConflict: 'key' });
 
       if (upsertError) {
         console.error("❌ Patch Execution Error:", upsertError);

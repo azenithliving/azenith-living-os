@@ -14,14 +14,13 @@ export function useAsiLogic() {
         const { data, error } = await supabase
           .from('site_settings')
           .select('*')
-          .eq('setting_category', 'asi_logic')
-          .order('updated_at', { ascending: false });
+          .eq('key', 'asi_logic');
 
         if (!error && data) {
           setPatches(data.map(d => ({
-            id: d.id,
-            key: d.setting_key,
-            value: typeof d.setting_value === 'string' ? JSON.parse(d.setting_value) : d.setting_value
+            id: d.key, // Using key as ID if needed
+            key: d.key,
+            value: typeof d.value === 'string' ? JSON.parse(d.value) : d.value
           })));
         }
       } catch (err) {
@@ -40,7 +39,7 @@ export function useAsiLogic() {
         event: '*', 
         schema: 'public', 
         table: 'site_settings',
-        filter: 'setting_category=eq.asi_logic'
+        filter: 'key=eq.asi_logic'
       }, () => {
         console.log("🔄 ASI Patch Update Detected!");
         fetchPatches();
