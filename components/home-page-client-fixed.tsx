@@ -117,12 +117,17 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
       if (styleDesc) {
         return {
           ...room,
-          eyebrow: styleDesc.eyebrow,
-          title: styleDesc.title,
-          summary: styleDesc.summary,
+          eyebrow: isRTL ? styleDesc.eyebrow : (styleDesc.eyebrowEn || room.eyebrowEn || styleDesc.eyebrow),
+          title: isRTL ? styleDesc.title : (styleDesc.titleEn || room.titleEn || styleDesc.title),
+          summary: isRTL ? styleDesc.summary : (styleDesc.summaryEn || room.summaryEn || styleDesc.summary),
         };
       }
-      return { ...room };
+      return { 
+        ...room,
+        eyebrow: isRTL ? room.eyebrow : (room.eyebrowEn || room.eyebrow),
+        title: isRTL ? room.title : (room.titleEn || room.title),
+        summary: isRTL ? room.summary : (room.summaryEn || room.summary),
+      };
     });
 
     if (displayStyle === "modern") {

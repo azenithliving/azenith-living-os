@@ -76,6 +76,7 @@ interface ConsultantRequest {
   history?: Message[];
   userName?: string;
   userEmail?: string;
+  language?: string;
 }
 
 interface ConsultantLearning {
@@ -243,7 +244,7 @@ export async function POST(
 ): Promise<NextResponse<ConsultantResponse | { error: string }>> {
   try {
     const body: ConsultantRequest = await request.json();
-    const { message, sessionId: providedSessionId, history = [], userName, userEmail } = body;
+    const { message, sessionId: providedSessionId, history = [], userName, userEmail, language } = body;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -342,7 +343,9 @@ export async function POST(
 
     if (!aiResult.success) {
       console.error("[Consultant] AI error:", aiResult.error);
-      const fallbackReply = "أعتذر منك بشدة، أواجه ضغطاً كبيراً في الطلبات حالياً ولا يمكنني إكمال المحادثة بنفس الكفاءة. هل يمكنك ترك رقم هاتفك هنا ليتصل بك كبير المهندسين في أسرع وقت لتلبية طلبك؟";
+      const fallbackReply = language === "en" 
+    ? "I sincerely apologize, I am currently facing a high volume of requests and cannot continue the conversation efficiently. Could you please leave your phone number here so our senior engineer can contact you as soon as possible to fulfill your request?"
+    : "أعتذر منك بشدة، أواجه ضغطاً كبيراً في الطلبات حالياً ولا يمكنني إكمال المحادثة بنفس الكفاءة. هل يمكنك ترك رقم هاتفك هنا ليتصل بك كبير المهندسين في أسرع وقت لتلبية طلبك؟";
       const assistantMessage: Message = { role: "assistant", content: fallbackReply, timestamp: new Date().toISOString() };
       conversationHistory.push(assistantMessage);
       await saveSession(sessionId, conversationHistory, existingSession?.insights);
