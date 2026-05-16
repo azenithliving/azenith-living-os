@@ -184,10 +184,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(getStaticLuxuryFallback());
     
   } catch (error) {
-    console.error("❌ Sovereign Engine Crash:", error);
-    return NextResponse.json(
-      { ok: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("❌ Pexels API error, returning static fallback:", error);
+    return NextResponse.json(getStaticLuxuryFallback());
   }
 }

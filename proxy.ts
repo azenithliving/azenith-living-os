@@ -5,7 +5,7 @@ import {
   sensitiveRateLimiter,
   getClientIP,
   shouldRateLimit,
-  isRateLimitingEnabled,
+  checkRateLimit,
 } from "@/lib/rate-limit";
 
 /**
@@ -79,33 +79,32 @@ export async function proxy(request: NextRequest) {
   // 3. RATE LIMITING
   const { shouldLimit, isSensitive } = shouldRateLimit(pathname);
 
-  // Apply rate limiting if enabled
-  if (shouldLimit && isRateLimitingEnabled()) {
+  if (shouldLimit) {
     const clientIP = getClientIP(request);
     const limiter = isSensitive ? sensitiveRateLimiter : generalRateLimiter;
-    if (limiter) {
-      const { success, limit, remaining, reset } = await limiter.limit(clientIP);
-      if (!success) {
-        return new NextResponse(
-          JSON.stringify({
-            error: "Too Many Requests",
-            message: isSensitive ? "Sensitive API rate limit exceeded." : "API rate limit exceeded.",
-            limit,
-            remaining: 0,
-            resetAt: new Date(reset).toISOString(),
-          }),
-          {
-            status: 429,
-            headers: {
-              "Content-Type": "application/json",
-              "X-RateLimit-Limit": limit.toString(),
-              "X-RateLimit-Remaining": remaining.toString(),
-              "X-RateLimit-Reset": reset.toString(),
-              "Retry-After": Math.ceil((reset - Date.now()) / 1000).toString(),
-            },
-          }
-        );
-      }
+    const { success, limit, remaining, reset } = await checkRateLimit(limiter, clientIP);
+    if (!success && limit !== undefined && reset !== undefined) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "Too Many Requests",
+          message: isSensitive ? "Sensitive API rate limit exceeded." : "API rate limit exceeded.",
+          limit,
+          remaining: 0,
+          resetAt: new Date(reset).toISOString(),
+        }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": reset.toString(),
+            "Retry-After": Math.ceil((reset - Date.now()) / 1000).toString(),
+          },
+        }
+      );
+    }
+    if (limit !== undefined && remaining !== undefined && reset !== undefined) {
       rateLimitHeaders = {
         "X-RateLimit-Limit": limit.toString(),
         "X-RateLimit-Remaining": remaining.toString(),

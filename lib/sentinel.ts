@@ -33,7 +33,7 @@ export interface HealthSnapshot {
   metrics: {
     apiSuccessRate: number;
     dbConnectionHealth: boolean;
-    cacheHitRate: number;
+    cacheHitRate: number | null;
     memoryUsagePercent: number;
     activeAlerts: number;
     criticalAlerts: number;
@@ -245,17 +245,27 @@ export async function getSystemHealth(): Promise<HealthSnapshot> {
   if (!dbHealth) recommendations.push("Database connection unstable - verify Supabase status");
   if (criticalAlerts > 0) recommendations.push("Critical alerts require immediate attention");
   if (warningAlerts > 5) recommendations.push("High warning rate suggests systemic issue");
-  
+
+  const pendingCount = alerts.filter((a) => a.status === "pending").length;
+  const apiAlerts = alerts.filter((a) => a.category === "api").length;
+  const totalTracked = Math.max(alerts.length, 1);
+  const apiSuccessRate = Math.max(0, Math.min(100, 100 - (apiAlerts / totalTracked) * 100));
+
+  const mem = process.memoryUsage();
+  const heapUsedMB = mem.heapUsed / (1024 * 1024);
+  const heapTotalMB = Math.max(mem.heapTotal / (1024 * 1024), 1);
+  const memoryUsagePercent = Math.round((heapUsedMB / heapTotalMB) * 1000) / 10;
+
   return {
     status,
     lastCheck: new Date().toISOString(),
     alerts,
     metrics: {
-      apiSuccessRate: 98.5, // Placeholder - would calculate from real metrics
+      apiSuccessRate: Math.round(apiSuccessRate * 10) / 10,
       dbConnectionHealth: dbHealth,
-      cacheHitRate: 87.3, // Placeholder
-      memoryUsagePercent: 45.2, // Placeholder
-      activeAlerts: alerts.filter(a => a.status === "pending").length,
+      cacheHitRate: null,
+      memoryUsagePercent,
+      activeAlerts: pendingCount,
       criticalAlerts,
     },
     recommendations,

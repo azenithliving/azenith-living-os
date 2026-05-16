@@ -145,18 +145,19 @@ export async function POST(request: NextRequest) {
       });
     } catch (deviceError) {
       console.error('Device action error:', deviceError);
-
-      // For development, return success mock
-      return NextResponse.json({
-        success: true,
-        data: {
-          device_id: device.id,
-          action: action.type,
-          result: { success: true, mock: true },
-          timestamp: new Date().toISOString(),
-          mock: true
-        }
-      });
+      const message = deviceError instanceof Error ? deviceError.message : 'Device action failed';
+      return NextResponse.json(
+        {
+          success: false,
+          error: message,
+          data: {
+            device_id: device.id,
+            action: action.type,
+            timestamp: new Date().toISOString(),
+          },
+        },
+        { status: 502 }
+      );
     }
   } catch (error) {
     console.error('Co-Pilot action error:', error);

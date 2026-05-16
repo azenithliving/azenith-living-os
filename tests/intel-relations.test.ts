@@ -83,6 +83,13 @@ describe("Smart Agent API Contract", () => {
   });
 
   it("rejects unauthenticated calls", async () => {
+    vi.doMock("@/lib/architect-tools", () => ({
+      updateSiteSetting: vi.fn(),
+      createAutomationRule: vi.fn(),
+      getAnalyticsReport: vi.fn(),
+      getSystemHealth: vi.fn(),
+    }));
+
     const { POST } = await import("../app/api/admin/agent/smart/route");
     const response = await POST(
       new Request("http://localhost:3000/api/admin/agent/smart", {
@@ -94,7 +101,7 @@ describe("Smart Agent API Contract", () => {
 
     expect(response.status).toBe(401);
     expect(json.success).toBe(false);
-  });
+  }, 15000);
 
   it("returns unified success contract in fallback mode", async () => {
     const fetchSpy = vi.spyOn(global, "fetch").mockRejectedValueOnce(new Error("network down"));

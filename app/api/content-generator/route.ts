@@ -1,50 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
-import { rateLimiter, getClientIP } from "@/lib/rate-limit";
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { checkRateLimit, rateLimiter, getClientIP } from "@/lib/rate-limit";
 import { generateAIContent, improveContent } from "@/lib/ai-content";
 
 export async function POST(request: NextRequest) {
   try {
-    // Check rate limit
-    if (!rateLimiter) {
-      // Skip rate limiting if Redis is not configured
-      return NextResponse.json(
-        { ok: false, message: "Rate limiting not available" },
-        { status: 503 }
-      );
-    }
-    const ip = getClientIP(request);
-    const { success, limit, remaining, reset } = await rateLimiter.limit(ip);
-
-    if (!success) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "Rate limit exceeded",
-          limit,
-          remaining,
-          reset,
-        },
-        { status: 429 }
-      );
+    if (rateLimiter) {
+      const ip = getClientIP(request);
+      const rate = await checkRateLimit(rateLimiter, ip);
+      if (!rate.success && rate.limit !== undefined && rate.reset !== undefined) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "Rate limit exceeded",
+            limit: rate.limit,
+            remaining: 0,
+            reset: rate.reset,
+          },
+          { status: 429 }
+        );
+      }
     }
 
     const body = await request.json();
-    const { type, context, tone = "luxury", language = "ar" } = body;
+    const { type, context, tone = "luxury", language = "ar", improve } = body;
+
+    if (improve && body.content) {
+      const result = await improveContent(body.content, improve, language);
+      return NextResponse.json({
+        ok: true,
+        content: result.content,
+        tokensUsed: result.tokensUsed,
+        source: result.source,
+      });
+    }
 
     const result = await generateAIContent({
       type,
       context,
       tone,
-      language
+      language,
     });
 
     return NextResponse.json({
       ok: true,
       content: result.content,
       alternatives: result.alternatives,
-      tokensUsed: result.tokensUsed
+      tokensUsed: result.tokensUsed,
+      source: result.source,
     });
   } catch (error) {
     console.error("Content generation error:", error);

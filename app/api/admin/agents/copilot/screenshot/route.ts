@@ -82,19 +82,20 @@ export async function GET(request: NextRequest) {
       });
     } catch (deviceError) {
       console.error('Device screenshot error:', deviceError);
-      
-      // Return mock screenshot for development
-      return NextResponse.json({
-        success: true,
-        data: {
-          device_id: device.id,
-          device_key: device.device_key,
-          screenshot_url: '/mock/screenshot.png',
-          timestamp: new Date().toISOString(),
-          full_page: fullPage,
-          mock: true
-        }
-      });
+      const message = deviceError instanceof Error ? deviceError.message : 'Screenshot capture failed';
+      return NextResponse.json(
+        {
+          success: false,
+          error: message,
+          data: {
+            device_id: device.id,
+            device_key: device.device_key,
+            timestamp: new Date().toISOString(),
+            full_page: fullPage,
+          },
+        },
+        { status: 502 }
+      );
     }
   } catch (error) {
     console.error('Screenshot API error:', error);

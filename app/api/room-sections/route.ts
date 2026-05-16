@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { DEFAULT_COMPANY_ID } from "@/lib/company-resolver";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 // Public API to fetch room sections with CMS images
@@ -7,22 +8,20 @@ export async function GET() {
     const supabase = getSupabaseAdminClient();
     if (!supabase) throw new Error('Supabase not initialized');
     
-    // Get the first company (master tenant)
+    const masterCompanyId = process.env.MASTER_COMPANY_ID || DEFAULT_COMPANY_ID;
+
     const { data: company } = await supabase
       .from("companies")
       .select("id")
-      .limit(1)
-      .single();
+      .eq("id", masterCompanyId)
+      .maybeSingle();
 
-    if (!company) {
-      return NextResponse.json({ sections: [] });
-    }
+    const companyId = company?.id ?? masterCompanyId;
 
-    // Fetch all active room sections with their images
     const { data: sections, error } = await supabase
       .from("room_sections")
-      .select("id, company_id, slug, name, name_ar, description, icon, display_order, is_active")
-      .eq("company_id", company.id)
+      .select("id, company_id, slug, name, name_ar, description, icon, display_order, is_active, image_url, metadata")
+      .eq("company_id", companyId)
       .eq("is_active", true)
       .order("display_order", { ascending: true });
 
@@ -43,9 +42,10 @@ export async function GET() {
         description: section.description,
         icon: section.icon,
         displayOrder: section.display_order,
-        // Placeholder for CMS images - metadata field removed
-        cmsImageUrl: null,
-        galleryImages: [],
+        cmsImageUrl: section.image_url ?? null,
+        galleryImages: Array.isArray(section.metadata?.gallery)
+          ? section.metadata.gallery
+          : [],
       };
     }) || [];
 

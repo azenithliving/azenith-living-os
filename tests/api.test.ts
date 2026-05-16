@@ -85,23 +85,21 @@ describe('API Endpoints', () => {
     });
 
     it('should return fallback photos when all keys exhausted', async () => {
-      (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error('All API keys exhausted')
-      );
+      vi.doMock('@/lib/api-keys-service', () => ({
+        getNextAvailableKey: vi.fn(async () => null),
+        setKeyCooldown: vi.fn(async () => {}),
+        getKeyStats: vi.fn(async () => ({ total: 0, active: 0, inCooldown: 0 })),
+      }));
 
       const { GET } = await import('../app/api/pexels/route');
-      
-      // Create a mock request
       const request = new Request('http://localhost:3000/api/pexels?query=test');
-      const response = await GET(request as any);
-      
-      expect(response).toBeDefined();
+      const response = await GET(request as unknown as import('next/server').NextRequest);
       const data = await response.json();
-      
-      // Should return fallback with ok: true
+
       expect(data.ok).toBe(true);
-      expect(data.photos).toBeDefined();
       expect(Array.isArray(data.photos)).toBe(true);
+      expect(data.photos.length).toBeGreaterThan(0);
+      vi.resetModules();
     });
 
     it('should handle missing query parameter', async () => {

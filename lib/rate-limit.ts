@@ -67,11 +67,74 @@ export function getClientIP(request: NextRequest): string {
   return "unknown";
 }
 
+/** Circuit breaker: disable Redis rate limiting after quota/connection failures */
+let redisCircuitOpenUntil = 0;
+const CIRCUIT_COOLDOWN_MS = 5 * 60 * 1000;
+
+function isRedisCircuitOpen(): boolean {
+  return Date.now() < redisCircuitOpenUntil;
+}
+
+function openRedisCircuit(reason: string): void {
+  redisCircuitOpenUntil = Date.now() + CIRCUIT_COOLDOWN_MS;
+  console.warn(`[RateLimit] Redis circuit open for ${CIRCUIT_COOLDOWN_MS / 1000}s: ${reason}`);
+}
+
+function isRedisQuotaError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes("max requests limit exceeded") ||
+    message.includes("ERR max requests") ||
+    message.includes("UpstashError")
+  );
+}
+
+export type RateLimitResult = {
+  success: boolean;
+  limit?: number;
+  remaining?: number;
+  reset?: number;
+  degraded?: boolean;
+};
+
 /**
- * Check if rate limiting is configured
+ * Apply rate limit safely — fail open when Redis is down or over quota.
+ */
+export async function checkRateLimit(
+  limiter: Ratelimit | null,
+  identifier: string
+): Promise<RateLimitResult> {
+  if (!limiter || !isRedisConfigured || isRedisCircuitOpen()) {
+    return { success: true, degraded: true };
+  }
+
+  if (process.env.RATE_LIMIT_DISABLED === "true") {
+    return { success: true, degraded: true };
+  }
+
+  try {
+    const result = await limiter.limit(identifier);
+    return {
+      success: result.success,
+      limit: result.limit,
+      remaining: result.remaining,
+      reset: result.reset,
+    };
+  } catch (error) {
+    if (isRedisQuotaError(error)) {
+      openRedisCircuit("quota exceeded");
+    } else {
+      console.error("[RateLimit] Redis error, allowing request:", error);
+    }
+    return { success: true, degraded: true };
+  }
+}
+
+/**
+ * Check if rate limiting is configured and active
  */
 export function isRateLimitingEnabled(): boolean {
-  return isRedisConfigured;
+  return isRedisConfigured && !isRedisCircuitOpen() && process.env.RATE_LIMIT_DISABLED !== "true";
 }
 
 /**
