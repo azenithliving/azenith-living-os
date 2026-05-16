@@ -524,7 +524,7 @@ export default function RoomPageClient({
                             }`}
                           >
                             <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-current" : ""}`} />
-                            <span>{isLiked ? "أعجبني" : "أعجبني"}</span>
+                            <span>{isLiked ? (isRTL ? "أعجبني" : "Liked") : (isRTL ? "أعجبني" : "Like")}</span>
                           </motion.button>
                           
                           <motion.button
@@ -541,7 +541,7 @@ export default function RoomPageClient({
                             }`}
                           >
                             <Bookmark className={`h-3.5 w-3.5 ${isFavorited ? "fill-current" : ""}`} />
-                            <span>{isFavorited ? "محفوظ" : "حفظ"}</span>
+                            <span>{isFavorited ? (isRTL ? "محفوظ" : "Saved") : (isRTL ? "حفظ" : "Save")}</span>
                           </motion.button>
                         </div>
                       </div>
@@ -567,20 +567,20 @@ export default function RoomPageClient({
                     </div>
                     <div className="flex-1">
                       <span className="text-xs font-medium uppercase tracking-wider text-amber-400">
-                        معلومة تصميمية - الدفعة {batchIndex + 1}
+                        {isRTL ? \`معلومة تصميمية - الدفعة \${batchIndex + 1}\` : \`Design Tip - Batch \${batchIndex + 1}\`}
                       </span>
                       <h3 className="mt-1 text-xl font-bold text-white">
-                        {tip.title}
+                        {isRTL ? tip.title : ((tip as any).titleEn || tip.title)}
                       </h3>
                       <p className="mt-2 text-base leading-relaxed text-gray-300">
-                        {tip.content}
+                        {isRTL ? tip.content : ((tip as any).contentEn || tip.content)}
                       </p>
                       <span className="mt-3 inline-block rounded-full bg-amber-500/10 px-3 py-1 text-xs text-amber-400">
-                        {tip.category === "furniture" && "أثاث"}
-                        {tip.category === "lighting" && "إضاءة"}
-                        {tip.category === "colors" && "ألوان"}
-                        {tip.category === "layout" && "تخطيط"}
-                        {tip.category === "materials" && "خامات"}
+                        {tip.category === "furniture" && (isRTL ? "أثاث" : "Furniture")}
+                        {tip.category === "lighting" && (isRTL ? "إضاءة" : "Lighting")}
+                        {tip.category === "colors" && (isRTL ? "ألوان" : "Colors")}
+                        {tip.category === "layout" && (isRTL ? "تخطيط" : "Layout")}
+                        {tip.category === "materials" && (isRTL ? "خامات" : "Materials")}
                       </span>
                     </div>
                   </div>
@@ -606,7 +606,7 @@ export default function RoomPageClient({
               whileTap={{ scale: 0.98 }}
               className="group flex items-center gap-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-8 py-4 text-base font-medium text-amber-400 transition-all hover:bg-amber-500/20"
             >
-              <span>مشاهدة المزيد</span>
+              <span>{isRTL ? "مشاهدة المزيد" : "View More"}</span>
               <span className="text-sm text-amber-500/60">
                 ({batchPage} من {MAX_BATCHES})
               </span>
@@ -614,7 +614,7 @@ export default function RoomPageClient({
             </motion.button>
           )}
           <p className="text-sm text-gray-500">
-            يمكنك تحميل {MAX_BATCHES - batchPage} دفعات إضافية (30 صورة لكل دفعة)
+            {isRTL ? "يمكنك تحميل" : "You can load"} {MAX_BATCHES - batchPage} {isRTL ? "دفعات إضافية" : "more batches"} (30 {isRTL ? "صورة لكل دفعة" : "images per batch"})
           </p>
         </div>
       )}

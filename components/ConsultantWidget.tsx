@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import useSessionStore from "@/stores/useSessionStore";
 import { MessageCircle, X, Send, User, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -22,15 +23,17 @@ interface SessionData {
   updatedAt: string;
 }
 
-const WELCOME_MESSAGE_NEW = "أهلاً بك في أزينث ليفينج. أنا مُستشارك الشخصي. هل تسمح لي بمعرفة اسمك؟";
-const WELCOME_MESSAGE_RETURNING = (name: string, topic: string) => `أهلاً بعودتك ${name}. هل ما زلت مهتمًا بـ ${topic}؟`;
+const WELCOME_MESSAGE_NEW = (isRTL: boolean) => isRTL ? "أهلاً بك في أزينث ليفينج. أنا مُستشارك الشخصي. هل تسمح لي بمعرفة اسمك؟" : "Welcome to Azenith Living. I am your personal consultant. May I know your name?";
+const WELCOME_MESSAGE_RETURNING = (name: string, topic: string, isRTL: boolean) => isRTL ? `أهلاً بعودتك ${name}. هل ما زلت مهتمًا بـ ${topic}؟` : `Welcome back ${name}. Are you still interested in ${topic}?`;
 
 // Contextual welcome messages based on active Fate Actions
-const WELCOME_QUANTUM = "لاحظت أنك ترى العرض الاستثنائي الآن! 🎯 هذا الخصم 25% متاح لفترة محدودة جداً وتم تخصيصه خصيصاً للزوار المميزين. أنا هنا لمساعدتك في استغلاله. ما الذي يستهويك في مجال التصميم الداخلي؟";
-const WELCOME_THUNDER = "أرى أنك لاحظت عرضنا الخاص! ⚡ خصم 15% فوري على أول معاينة لمشروعك. هل أخبرك أحد من قبل أن أزينث تصنع قصوراً من الفضاء؟ ما نوع مشروعك؟";
-const WELCOME_HALLUCINATION = "مرحباً! هل تعلم أن 3 عملاء آخرين يتصفحون نفس التصاميم التي تراها الآن؟ 👀 المساحات تُحجز بسرعة. ما الذي يستهويك؟";
+const WELCOME_QUANTUM = (isRTL: boolean) => isRTL ? "لاحظت أنك ترى العرض الاستثنائي الآن! 🎯 هذا الخصم 25% متاح لفترة محدودة جداً وتم تخصيصه خصيصاً للزوار المميزين. أنا هنا لمساعدتك في استغلاله. ما الذي يستهويك في مجال التصميم الداخلي؟" : "I see you're looking at the exceptional offer! 🎯 This 25% discount is available for a very limited time. I am here to help you utilize it. What interests you in interior design?";
+const WELCOME_THUNDER = (isRTL: boolean) => isRTL ? "أرى أنك لاحظت عرضنا الخاص! ⚡ خصم 15% فوري على أول معاينة لمشروعك. هل أخبرك أحد من قبل أن أزينث تصنع قصوراً من الفضاء؟ ما نوع مشروعك؟" : "I see you noticed our special offer! ⚡ 15% instant discount on your first project consultation. Has anyone told you Azenith builds palaces from space? What's your project type?";
+const WELCOME_HALLUCINATION = (isRTL: boolean) => isRTL ? "مرحباً! هل تعلم أن 3 عملاء آخرين يتصفحون نفس التصاميم التي تراها الآن؟ 👀 المساحات تُحجز بسرعة. ما الذي يستهويك؟" : "Hello! Did you know 3 other clients are browsing the same designs? 👀 Spaces get booked fast. What catches your eye?";
 
 export default function ConsultantWidget() {
+  const currentLang = useSessionStore((state) => state.language);
+  const isRTL = currentLang === "ar";
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -167,7 +170,7 @@ export default function ConsultantWidget() {
         const lastTopic = extractLastTopic(sessionMessages);
         const welcomeBackMsg: Message = {
           role: "assistant",
-          content: WELCOME_MESSAGE_RETURNING(name, lastTopic),
+          content: WELCOME_MESSAGE_RETURNING(name, lastTopic, isRTL),
           timestamp: new Date().toISOString(),
         };
         setMessages(prev => [...prev, welcomeBackMsg]);
@@ -178,10 +181,10 @@ export default function ConsultantWidget() {
     // New user — check for active Fate Actions and build contextual greeting
     if (messages.length === 0) {
       const latestAction = await fetchLatestFateAction();
-      let welcomeContent = WELCOME_MESSAGE_NEW;
-      if (latestAction === "QUANTUM_OFFER") welcomeContent = WELCOME_QUANTUM;
-      else if (latestAction === "THUNDER") welcomeContent = WELCOME_THUNDER;
-      else if (latestAction === "HALLUCINATION") welcomeContent = WELCOME_HALLUCINATION;
+      let welcomeContent = WELCOME_MESSAGE_NEW(isRTL);
+      if (latestAction === "QUANTUM_OFFER") welcomeContent = WELCOME_QUANTUM(isRTL);
+      else if (latestAction === "THUNDER") welcomeContent = WELCOME_THUNDER(isRTL);
+      else if (latestAction === "HALLUCINATION") welcomeContent = WELCOME_HALLUCINATION(isRTL);
 
       setMessages([{
         role: "assistant",
@@ -300,6 +303,7 @@ export default function ConsultantWidget() {
           sessionId,
           userName: userName || undefined,
           history: messages,
+          language: currentLang,
         }),
       });
 
@@ -341,7 +345,7 @@ export default function ConsultantWidget() {
       // Add error message
       const errorMessage: Message = {
         role: "assistant",
-        content: "عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.",
+        content: isRTL ? "عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى." : "Sorry, a connection error occurred. Please try again.",
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -424,8 +428,8 @@ export default function ConsultantWidget() {
                 <User className="h-4 w-4 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-white">مُستشار أزينث</h3>
-                <span className="text-xs text-white/80">متصل الآن</span>
+                <h3 className="font-semibold text-white">{isRTL ? "مُستشار أزينث" : "Azenith Consultant"}</h3>
+                <span className="text-xs text-white/80">{isRTL ? "متصل الآن" : "Online now"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -436,12 +440,12 @@ export default function ConsultantWidget() {
                     setSessionId(null);
                     setMessages([{
                       role: "assistant",
-                      content: WELCOME_MESSAGE_NEW,
+                      content: WELCOME_MESSAGE_NEW(isRTL),
                       timestamp: new Date().toISOString(),
                     }]);
                     setUserName(null);
                   }}
-                  title="محادثة جديدة"
+                  title={isRTL ? "محادثة جديدة" : "New Chat"}
                   className="rounded-full p-1 text-white/80 transition-colors hover:bg-white/20"
                 >
                   <RefreshCw className="h-4 w-4" />
@@ -459,7 +463,7 @@ export default function ConsultantWidget() {
             <div className="flex h-[380px] flex-col gap-3 overflow-y-auto bg-zinc-900 p-4">
               {messages.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-center text-gray-500">
-                  <p>اضغط للبدء</p>
+                  <p>{isRTL ? "اضغط للبدء" : "Tap to start"}</p>
                 </div>
               ) : (
                 messages.map((msg, index) => (
@@ -524,7 +528,7 @@ export default function ConsultantWidget() {
                         }).catch(() => {});
                     }
                 }}
-                placeholder="اكتب رسالتك..."
+                placeholder={isRTL ? "اكتب رسالتك..." : "Type your message..."}
                 className="flex-1 rounded-lg border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-gray-400 focus:border-amber-500 focus:outline-none"
                 disabled={isLoading}
               />
