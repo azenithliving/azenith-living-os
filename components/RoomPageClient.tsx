@@ -567,7 +567,7 @@ export default function RoomPageClient({
                     </div>
                     <div className="flex-1">
                       <span className="text-xs font-medium uppercase tracking-wider text-amber-400">
-                        {isRTL ? \`معلومة تصميمية - الدفعة \${batchIndex + 1}\` : \`Design Tip - Batch \${batchIndex + 1}\`}
+                        {isRTL ? `معلومة تصميمية - الدفعة ${batchIndex + 1}` : `Design Tip - Batch ${batchIndex + 1}`}
                       </span>
                       <h3 className="mt-1 text-xl font-bold text-white">
                         {isRTL ? tip.title : ((tip as any).titleEn || tip.title)}
