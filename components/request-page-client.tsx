@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 
@@ -26,7 +26,8 @@ export default function RequestPageClient({ runtimeConfig }: RequestPageClientPr
   const serviceType = useSessionStore((state) => state.serviceType);
   const updateProfile = useSessionStore((state) => state.updateProfile);
   const trackEvent = useSessionStore((state) => state.trackEvent);
-  const isRTL = true;
+  const currentLang = useSessionStore((state) => state.language);
+  const isRTL = currentLang === "ar";
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -51,10 +52,16 @@ export default function RequestPageClient({ runtimeConfig }: RequestPageClientPr
   async function submitLead() {
     setErrorMessage("");
     setStatusMessage("");
+    
+    const finalRoomType = roomType || "غير محدد";
+    const finalBudget = budget || "غير محدد";
+    const finalStyle = style || "غير محدد";
+    const finalServiceType = serviceType || "غير محدد";
+
     const response = await fetch("/api/leads", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId, fullName, phone, email, notes, roomType, budget, style, serviceType, score, intent, lastPage: "/request" }),
+      body: JSON.stringify({ sessionId, fullName, phone, email, notes, roomType: finalRoomType, budget: finalBudget, style: finalStyle, serviceType: finalServiceType, score, intent, lastPage: "/request" }),
     });
     const payload = (await response.json()) as LeadApiResponse;
     if (!response.ok || !payload.ok) {
@@ -68,10 +75,6 @@ export default function RequestPageClient({ runtimeConfig }: RequestPageClientPr
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!hasEnoughProfileData) {
-      setErrorMessage(isRTL ? "أكمل خطوة التقييم السريع أولًا حتى نبني التقدير الصحيح." : "Complete the quick assessment step first to build the correct estimate.");
-      return;
-    }
     startTransition(() => { void submitLead(); });
   };
 

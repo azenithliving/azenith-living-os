@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { aboutData } from "@/lib/site-content";
+import useSessionStore from "@/stores/useSessionStore";
 
 interface RuntimeConfig {
   whatsappNumber?: string;
 }
 
 export default function AboutPage() {
-  const isRTL = true;
+  const currentLang = useSessionStore((state) => state.language);
+  const isRTL = currentLang === "ar";
   const [runtimeConfig, setRuntimeConfig] = useState<RuntimeConfig>({});
 
   useEffect(() => {

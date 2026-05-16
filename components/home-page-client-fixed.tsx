@@ -47,6 +47,8 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
   const setSelectedStyle = useSessionStore((state) => state.setSelectedStyle);
   const styleSwitches = useSessionStore((state) => state.styleSwitches);
   const isHydrated = useSessionStore((state) => state.isHydrated);
+  const currentLang = useSessionStore((state) => state.language);
+  const isRTL = currentLang === "ar";
 
   // Use server-fetched images as initial state to eliminate loading flash
   const [roomImages, setRoomImages] = useState<Record<string, string>>(initialRoomImages);
@@ -237,10 +239,10 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
 
   const primaryCtaText =
     styleSwitchCount > 3
-      ? "حائر بين الستايلات؟ اطلب استشارة دمج مجانية"
+      ? (isRTL ? "حائر بين الستايلات؟ اطلب استشارة دمج مجانية" : "Confused? Request free mix consultation")
       : intent === "buyer" && runtimeConfig.whatsappNumber
-        ? "تحدث مع مهندس التصميم الآن"
-        : "ابدأ رحلة التصميم";
+        ? (isRTL ? "تحدث مع مهندس التصميم الآن" : "Chat with designer now")
+        : (isRTL ? "ابدأ رحلة التصميم" : "Start Design Journey");
   const profile = { roomType, budget, style: displayStyle, serviceType, intent };
   const whatsappUrl = runtimeConfig.whatsappNumber
     ? buildWhatsAppUrl(runtimeConfig.whatsappNumber, profile, runtimeConfig.brandNameAr)
@@ -309,9 +311,9 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
                   />
                   <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 z-20 p-8 text-right">
-                    <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-brand-primary">تصميم شامل</span>
-                    <h3 className="mb-2 text-2xl font-serif font-bold text-white">تصميم داخلي شامل</h3>
-                    <p className="line-clamp-2 text-sm leading-relaxed text-white/70">حلول متكاملة لتصميم مساحتك بالكامل.</p>
+                    <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-brand-primary">{isRTL ? "تصميم شامل" : "Comprehensive"}</span>
+                    <h3 className="mb-2 text-2xl font-serif font-bold text-white">{isRTL ? "تصميم داخلي شامل" : "Comprehensive Interior Design"}</h3>
+                    <p className="line-clamp-2 text-sm leading-relaxed text-white/70">{isRTL ? "حلول متكاملة لتصميم مساحتك بالكامل." : "Integrated solutions to design your entire space."}</p>
                   </div>
                 </Link>
               </div>
@@ -321,22 +323,22 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                     <div className="mb-4 flex items-center gap-2">
                       <Sparkles className="h-3 w-3 animate-pulse text-[#C5A059]" />
-                      <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-[#C5A059] animate-pulse">الخطوة الحصرية</span>
+                      <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-[#C5A059] animate-pulse">{isRTL ? "الخطوة الحصرية" : "EXCLUSIVE STEP"}</span>
                     </div>
                     <h2 className="mb-4 text-xl font-black leading-tight text-white md:text-2xl">
-                      استكشف <span className="bg-gradient-to-r from-[#C5A059] to-[#E5C170] bg-clip-text text-transparent">المساحات</span>
+                      {isRTL ? "استكشف " : "Explore "} <span className="bg-gradient-to-r from-[#C5A059] to-[#E5C170] bg-clip-text text-transparent">{isRTL ? "المساحات" : "Spaces"}</span>
                     </h2>
                     <p className="mb-6 max-w-[200px] text-xs leading-relaxed text-white/50 md:text-sm">
-                      {styleSwitchCount > 2 ? "وجدنا الستايل المناسب لك.. لنبدأ التنفيذ" : "اكتشف إبداعاتنا في التصميم الداخلي المبتكر."}
+                      {styleSwitchCount > 2 ? (isRTL ? "وجدنا الستايل المناسب لك.. لنبدأ التنفيذ" : "Found the right style.. Let's start execution") : (isRTL ? "اكتشف إبداعاتنا في التصميم الداخلي المبتكر." : "Discover our innovative interior design creations.")}
                     </p>
                     <Link
                       href={styleSwitchCount > 2 ? primaryHref : "/rooms"}
                       onClick={styleSwitchCount > 2 ? handlePrimaryClick : undefined}
                       className="w-full rounded-xl bg-gradient-to-r from-[#C5A059] to-[#E5C170] px-4 py-3 text-center text-sm font-black text-black shadow-[0_15px_30px_-10px_rgba(197,160,89,0.6)] transition-all hover:shadow-[0_0_20px_rgba(197,160,89,0.5)] active:scale-95"
                     >
-                      {styleSwitchCount > 2 ? "اطلب استشارة دمج مجانية" : "استكشف المساحات"}
+                      {styleSwitchCount > 2 ? (isRTL ? "اطلب استشارة دمج مجانية" : "Request Free Mix Consultation") : (isRTL ? "استكشف المساحات" : "Explore Spaces")}
                     </Link>
-                    <span className="mt-4 text-[8px] font-medium text-white/40">تصاميم فريدة • جودة استثنائية</span>
+                    <span className="mt-4 text-[8px] font-medium text-white/40">{isRTL ? "تصاميم فريدة • جودة استثنائية" : "Unique Designs • Exceptional Quality"}</span>
                   </div>
                 </div>
               </div>
@@ -344,17 +346,17 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
               <div className="relative z-50 flex aspect-[16/10] transform flex-col items-center justify-center overflow-hidden rounded-[2.5rem] border-2 border-[#C5A059] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1A1A1B] via-[#0D0D0E] to-black p-8 text-center shadow-[0_0_50px_rgba(197,160,89,0.3)] transition-all duration-500 hover:scale-105 md:col-span-2 lg:col-span-1">
                 <div className="mb-6 flex items-center gap-2">
                   <Sparkles className="h-4 w-4 animate-pulse text-[#C5A059]" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C5A059] animate-pulse">الخطوة الحصرية</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C5A059] animate-pulse">{isRTL ? "الخطوة الحصرية" : "EXCLUSIVE STEP"}</span>
                 </div>
-                <h4 className="mb-4 text-xl font-bold text-white">جاهز لتصميم مساحتك؟</h4>
-                <p className="mb-6 text-sm leading-tight text-white/80">ابدأ الآن مسار تصميم مخصص يناسب ذوقك واحتياجك الحقيقي.</p>
+                <h4 className="mb-4 text-xl font-bold text-white">{isRTL ? "جاهز لتصميم مساحتك؟" : "Ready to design your space?"}</h4>
+                <p className="mb-6 text-sm leading-tight text-white/80">{isRTL ? "ابدأ الآن مسار تصميم مخصص يناسب ذوقك واحتياجك الحقيقي." : "Start a custom design path tailored to your taste and real needs."}</p>
                 <Link
                   href="/start"
                   className="w-full rounded-xl bg-gradient-to-r from-[#C5A059] to-[#E5C170] py-4 text-center text-lg font-black text-black shadow-[0_15px_30px_-10px_rgba(197,160,89,0.6)] transition-all hover:shadow-[0_0_20px_rgba(197,160,89,0.5)] active:scale-95"
                 >
-                  ابدأ رحلة التصميم
+                  {isRTL ? "ابدأ رحلة التصميم" : "Start Design Journey"}
                 </Link>
-                <span className="mt-6 text-[10px] font-medium text-white/40">عقد تنفيذ مضمون</span>
+                <span className="mt-6 text-[10px] font-medium text-white/40">{isRTL ? "عقد تنفيذ مضمون" : "Guaranteed Execution Contract"}</span>
               </div>
             </div>
 

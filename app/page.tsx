@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "@/components/Header";
 import AzenithLegacy from "@/components/AzenithLegacy";
 import Hero from "@/components/Hero";
 import HomePageClient from "@/components/home-page-client-fixed";
@@ -49,8 +48,6 @@ export default function Home() {
       >
         تجاوز إلى المحتوى
       </a>
-
-      <Header />
 
       <div className="fixed inset-0 w-full h-full -z-10">
         <AzenithLegacy />

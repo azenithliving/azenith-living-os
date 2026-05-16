@@ -71,13 +71,13 @@ export default function Header() {
       >
         <nav dir="rtl" className="hidden items-center gap-8 text-sm font-medium text-white md:flex">
           <Link href="/about" className="transition-colors hover:text-[#C5A059]">
-            من نحن
+            {currentLang === 'ar' ? 'من نحن' : 'About Us'}
           </Link>
           <Link href="/rooms" className="transition-colors hover:text-[#C5A059]">
-            المساحات
+            {currentLang === 'ar' ? 'المساحات' : 'Spaces'}
           </Link>
           <Link href="/request" className="transition-colors hover:text-[#C5A059]">
-            تواصل معنا
+            {currentLang === 'ar' ? 'تواصل معنا' : 'Contact Us'}
           </Link>
           <div className="flex items-center gap-2 border border-[#C5A059]/30 rounded-lg px-3 py-1">
             <button
@@ -137,13 +137,13 @@ export default function Header() {
           >
             <div className="flex flex-col items-end space-y-6 px-6 py-8" dir="rtl">
               <Link href="/about" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                من نحن
+                {currentLang === 'ar' ? 'من نحن' : 'About Us'}
               </Link>
               <Link href="/rooms" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                المساحات
+                {currentLang === 'ar' ? 'المساحات' : 'Spaces'}
               </Link>
               <Link href="/request" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                تواصل معنا
+                {currentLang === 'ar' ? 'تواصل معنا' : 'Contact Us'}
               </Link>
               <div className="pt-4 border-t border-white/10 w-full flex justify-end">
                 <div className="flex items-center gap-2 border border-[#C5A059]/30 rounded-lg px-3 py-1">

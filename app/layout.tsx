@@ -9,6 +9,7 @@ import { Providers } from "./providers";
 import ConsultantWidgetWrapper from "./ConsultantWidgetWrapper";
 import RealityUIProvider from "@/components/RealityUIProvider";
 import TelemetryTracker from "@/components/TelemetryTracker";
+import MainLayout from "@/components/MainLayout";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -147,7 +148,7 @@ export default async function RootLayout({
             strategy="afterInteractive"
           />
         ) : null}
-        <Providers><TelemetryTracker /><RealityUIProvider />{children}</Providers>
+        <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainLayout></Providers>
         <Toaster
           position="bottom-center"
           toastOptions={{

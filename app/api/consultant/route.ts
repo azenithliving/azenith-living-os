@@ -342,10 +342,12 @@ export async function POST(
 
     if (!aiResult.success) {
       console.error("[Consultant] AI error:", aiResult.error);
-      return NextResponse.json(
-        { error: "Failed to generate response" },
-        { status: 500 }
-      );
+      const fallbackReply = "أعتذر منك بشدة، أواجه ضغطاً كبيراً في الطلبات حالياً ولا يمكنني إكمال المحادثة بنفس الكفاءة. هل يمكنك ترك رقم هاتفك هنا ليتصل بك كبير المهندسين في أسرع وقت لتلبية طلبك؟";
+      const assistantMessage: Message = { role: "assistant", content: fallbackReply, timestamp: new Date().toISOString() };
+      conversationHistory.push(assistantMessage);
+      await saveSession(sessionId, conversationHistory, existingSession?.insights);
+      return NextResponse.json({ reply: fallbackReply, sessionId });
+    // ;
     }
 
     let reply = aiResult.content.trim();

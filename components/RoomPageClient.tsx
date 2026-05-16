@@ -53,13 +53,14 @@ export default function RoomPageClient({
   const intent = useSessionStore((state) => state.intent);
   const budget = useSessionStore((state) => state.budget);
 
-  // Use Arabic by default
-  const isRTL = true;
+  // Get language from store
+  const currentLang = useSessionStore((state) => state.language);
+  const isRTL = currentLang === "ar";
 
-  // Get room data (Arabic only)
-  const roomTitle = room.title;
-  const roomCategory = room.category;
-  const roomDescription = room.description;
+  // Get room data (localized)
+  const roomTitle = isRTL ? room.title : room.titleEn;
+  const roomCategory = isRTL ? room.category : room.categoryEn;
+  const roomDescription = isRTL ? room.description : room.descriptionEn;
 
   // Simplified local state
   const [photos, setPhotos] = useState(initialPhotos);
@@ -166,14 +167,18 @@ export default function RoomPageClient({
     }
   }, [room.id]);
 
-  // Initialize tips when room/style changes
+  // Initialize tips when room changes
   useEffect(() => {
     const tips = getRoomTips(room.id, currentStyle, MAX_BATCHES);
     setBatchTips(tips);
-    setBatchPage(1);
+  }, [room.id, currentStyle]);
+
+  // Update batch photos when initialPhotos changes (e.g. from server navigation)
+  useEffect(() => {
     setAllBatchPhotos(initialPhotos);
+    setBatchPage(1);
     setHasMoreBatches(initialPhotos.length >= PHOTOS_PER_BATCH && 1 < MAX_BATCHES);
-  }, [room.id, currentStyle, initialPhotos]);
+  }, [initialPhotos, room.id]);
 
   // Ref-Gate for profile updates
   const hasRoomViewDispatchedRef = useRef<boolean>(false);
@@ -189,8 +194,10 @@ export default function RoomPageClient({
     if (!isHydrated || hasRoomViewDispatchedRef.current) return;
     
     hasRoomViewDispatchedRef.current = true;
-    const stylePrefs = userProfile?.stylePreferences as Record<string, StylePreference> | undefined;
-    const currentPref = stylePrefs?.[currentStyle] || { roomCount: 0, totalTimeSpent: 0, lastViewedAt: 0 };
+    
+    const currentUserProfile = useSessionStore.getState().userProfile;
+    const stylePrefs = (currentUserProfile?.stylePreferences as Record<string, StylePreference>) || {};
+    const currentPref = stylePrefs[currentStyle] || { roomCount: 0, totalTimeSpent: 0, lastViewedAt: 0 };
     
     pendingUpdateRef.current = {
       stylePrefs: {
@@ -206,12 +213,13 @@ export default function RoomPageClient({
     
     aggregationTimerRef.current = setTimeout(() => {
       if (pendingUpdateRef.current) {
-        updateProfile({
+        const latestProfile = useSessionStore.getState().userProfile;
+        useSessionStore.getState().updateProfile({
           lastPage: `/rooms/${room.id}`,
           roomType: room.title,
           style: currentStyle,
           userProfile: {
-            ...userProfile,
+            ...latestProfile,
             stylePreferences: pendingUpdateRef.current.stylePrefs,
           },
         });
@@ -224,7 +232,7 @@ export default function RoomPageClient({
         clearTimeout(aggregationTimerRef.current);
       }
     };
-  }, [isHydrated, currentStyle, room.id, userProfile, updateProfile]);
+  }, [isHydrated, currentStyle, room.id]);
 
   // Shuffle handler
   const handleShuffle = useCallback(async () => {
@@ -248,6 +256,9 @@ export default function RoomPageClient({
         const data = await response.json();
         if (data.photos?.length > 0) {
           setPhotos(data.photos);
+          setAllBatchPhotos(data.photos);
+          setBatchPage(1);
+          setHasMoreBatches(data.photos.length >= PHOTOS_PER_BATCH && 1 < MAX_BATCHES);
           setPoolSize(data.poolSize || 0);
           reservoirRef.current = { poolSize: data.poolSize, lastSeed: newSeed };
         }
@@ -289,6 +300,9 @@ export default function RoomPageClient({
         const data = await response.json();
         if (data.photos?.length > 0) {
           setPhotos(data.photos);
+          setAllBatchPhotos(data.photos);
+          setBatchPage(1);
+          setHasMoreBatches(data.photos.length >= PHOTOS_PER_BATCH && 1 < MAX_BATCHES);
           setPoolSize(data.poolSize || 0);
           reservoirRef.current = { poolSize: data.poolSize, lastSeed: newSeed };
         }
@@ -359,16 +373,17 @@ export default function RoomPageClient({
         clearTimeout(aggregationTimerRef.current);
       }
       if (pendingUpdateRef.current) {
-        updateProfile({
+        const latestProfile = useSessionStore.getState().userProfile;
+        useSessionStore.getState().updateProfile({
           lastPage: `/rooms/${room.id}`,
           userProfile: {
-            ...userProfile,
+            ...latestProfile,
             stylePreferences: pendingUpdateRef.current.stylePrefs,
           },
         });
       }
     };
-  }, [room.id, updateProfile, userProfile]);
+  }, [room.id]);
 
   const heroImage = photos[0];
 

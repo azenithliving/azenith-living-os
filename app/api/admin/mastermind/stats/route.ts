@@ -34,9 +34,6 @@ export async function GET(request: NextRequest) {
       return apiError("Supabase admin client unavailable", 500);
     }
 
-    // Check 2FA status (Sovereign Admin bypass)
-    const sovereignAdmin = process.env.SOVEREIGN_ADMIN_EMAIL || "azenithliving@gmail.com";
-    
     // We get the user's email from the auth system if possible, 
     // but here we just check if 2FA is enabled or if it's a known admin.
     const { data: user2FA } = await supabase

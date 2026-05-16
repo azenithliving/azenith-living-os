@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, X, Send, User } from "lucide-react";
+import { MessageCircle, X, Send, User, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Message {
@@ -46,6 +46,16 @@ export default function ConsultantWidget() {
     const storedSessionId = localStorage.getItem("azenith_session_id");
     const storedMessages = localStorage.getItem("azenith_consultant_messages");
     const storedName = localStorage.getItem("azenith_consultant_name");
+    const lastUpdate = localStorage.getItem("azenith_consultant_last_update");
+
+    // Auto-expire session after 24 hours of inactivity
+    if (lastUpdate && Date.now() - parseInt(lastUpdate, 10) > 86400000) {
+      localStorage.removeItem("azenith_session_id");
+      localStorage.removeItem("azenith_consultant_messages");
+      localStorage.removeItem("azenith_consultant_name");
+      localStorage.removeItem("azenith_consultant_last_update");
+      return;
+    }
 
     if (storedSessionId) {
       setSessionId(storedSessionId);
@@ -69,6 +79,7 @@ export default function ConsultantWidget() {
   useEffect(() => {
     if (messages.length > 0) {
       localStorage.setItem("azenith_consultant_messages", JSON.stringify(messages));
+      localStorage.setItem("azenith_consultant_last_update", Date.now().toString());
     }
   }, [messages]);
 
@@ -416,12 +427,32 @@ export default function ConsultantWidget() {
                 <h3 className="font-semibold text-white">مُستشار أزينث</h3>
                 <span className="text-xs text-white/80">متصل الآن</span>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="rounded-full p-1 text-white/80 transition-colors hover:bg-white/20"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("azenith_session_id");
+                    localStorage.removeItem("azenith_consultant_messages");
+                    localStorage.removeItem("azenith_consultant_name");
+                    setSessionId(null);
+                    setMessages([{
+                      role: "assistant",
+                      content: WELCOME_MESSAGE_NEW,
+                      timestamp: new Date().toISOString(),
+                    }]);
+                    setUserName(null);
+                  }}
+                  title="محادثة جديدة"
+                  className="rounded-full p-1 text-white/80 transition-colors hover:bg-white/20"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-full p-1 text-white/80 transition-colors hover:bg-white/20"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             {/* Messages Area */}
