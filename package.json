@@ -69,6 +69,7 @@
     "react-markdown": "^10.1.0",
     "redis": "^5.12.1",
     "resend": "^6.10.0",
+    "server-only": "^0.0.1",
     "sharp": "^0.33.5",
     "socket.io": "^4.8.3",
     "socks-proxy-agent": "^10.0.0",
