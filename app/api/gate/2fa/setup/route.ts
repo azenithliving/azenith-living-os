@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import speakeasy from "speakeasy";
 import QRCode from "qrcode";
 import { createClient } from "@/utils/supabase/server";
-
-const ADMIN_EMAIL = "azenithliving@gmail.com";
-const ADMIN_PASSWORD = "alaa92aziz";
+import { validateAdminGateCredentials } from "@/lib/admin-gate";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +10,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = body;
 
     // Verify credentials
-    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    if (!validateAdminGateCredentials(email, password)) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }

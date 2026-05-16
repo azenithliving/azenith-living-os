@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
     const shuffled = shuffleArray(images, seed);
     
     // Transform to Photo format
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const photos = shuffled.slice(0, limit).map((image: any) => ({
       id: image.id,
       src: {

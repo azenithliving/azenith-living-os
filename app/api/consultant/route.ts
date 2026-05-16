@@ -354,7 +354,7 @@ export async function POST(
     // ;
     }
 
-    let reply = aiResult.content.trim();
+    const reply = aiResult.content.trim();
 
     // Smart escalation detection - catches all patterns where AI admits it doesn't know or needs human intervention
     const escalationPhrases = [

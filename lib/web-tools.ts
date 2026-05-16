@@ -15,33 +15,64 @@ const APIFY_TOKEN = process.env.APIFY_API_TOKEN;
  * Search the web using DuckDuckGo Lite
  * Returns top 5 results with title and link
  */
-export async function searchWeb(query: string): Promise<string[]> {
-  try {
-    const url = `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(query)}`;
-    const response = await axios.get(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      },
-      timeout: 15000,
-    });
-    const $ = cheerio.load(response.data);
-    const results: string[] = [];
-    $('.result-link').each((i, el) => {
+function parseDuckDuckGoHtml(html: string): string[] {
+  const $ = cheerio.load(html);
+  const results: string[] = [];
+  const selectors = [
+    ".result-link",
+    "a.result__a",
+    "a.result__url",
+    "td a[href^='http']",
+    "a[href*='uddg=']",
+    "a[href^='//duckduckgo.com/l/?']",
+  ];
+
+  for (const selector of selectors) {
+    $(selector).each((_i, el) => {
       const title = $(el).text().trim();
-      const link = $(el).attr('href');
-      if (title && link && !link.includes('//duckduckgo.com')) {
+      let link = $(el).attr("href") || "";
+      if (link.startsWith("//")) link = `https:${link}`;
+      if (link.includes("uddg=")) {
+        try {
+          const parsed = new URL(link, "https://duckduckgo.com");
+          link = decodeURIComponent(parsed.searchParams.get("uddg") || link);
+        } catch {
+          /* keep raw link */
+        }
+      }
+      if (title && link.startsWith("http") && !link.includes("duckduckgo.com")) {
         results.push(`${title}: ${link}`);
       }
       if (results.length >= 5) return false;
     });
-    if (results.length === 0) {
-      return [`لا توجد نتائج لـ "${query}"`];
-    }
-    return results;
-  } catch (error: any) {
-    console.error('[Search] DuckDuckGo error:', error.message);
-    return [`❌ فشل البحث: ${error.message}`];
+    if (results.length >= 5) break;
   }
+  return results;
+}
+
+export async function searchWeb(query: string): Promise<string[]> {
+  const headers = {
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  };
+
+  const endpoints = [
+    `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(query)}`,
+    `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`,
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const response = await axios.get(url, { headers, timeout: 15000 });
+      const results = parseDuckDuckGoHtml(response.data);
+      if (results.length > 0) return results;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[Search] DuckDuckGo error (${url}):`, message);
+    }
+  }
+
+  return [`لا توجد نتائج لـ "${query}"`];
 }
 
 /**

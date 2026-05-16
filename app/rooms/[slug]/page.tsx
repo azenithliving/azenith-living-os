@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import RoomPageClient from "@/components/RoomPageClient";
+import { resolveRoomSlug } from "@/lib/rooms-catalog";
 
 type RoomMeta = {
   id: string;
@@ -177,11 +178,6 @@ const ROOMS: RoomMeta[] = [
   },
 ];
 
-const ROOM_ALIASES: Record<string, string> = {
-  office: "home-office",
-  "kids-room": "youth-room",
-};
-
 interface PageProps {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -296,7 +292,7 @@ async function fetchRoomPhotos(query: string, style: string, roomId: string) {
 
 export default async function Page({ params, searchParams }: PageProps) {
   const { slug: rawSlug } = await params;
-  const slug = ROOM_ALIASES[rawSlug] ?? rawSlug;
+  const slug = resolveRoomSlug(rawSlug);
   const room = ROOMS.find((item) => item.id === slug);
 
   if (!room) {

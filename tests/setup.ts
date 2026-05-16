@@ -1,5 +1,10 @@
 // Test setup file
-import { vi } from 'vitest';
+import { config } from "dotenv";
+import { vi } from "vitest";
+
+config({ path: ".env.local" });
+
+vi.mock("server-only", () => ({}));
 
 // Mock Next.js modules
 vi.mock('next/server', () => ({

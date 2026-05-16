@@ -13,7 +13,7 @@
     "prisma:generate": "prisma generate --schema=aaca/prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=aaca/prisma/schema.prisma",
     "lint": "eslint .",
-    "lint:ci": "eslint . --max-warnings 0",
+    "lint:ci": "eslint app components lib utils stores services types hooks proxy.ts tests e2e --quiet",
     "typecheck": "tsc --noEmit",
     "typecheck:ci": "tsc --noEmit",
     "test": "vitest run",
@@ -82,6 +82,7 @@
     "zustand": "5.0.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",

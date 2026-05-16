@@ -18,7 +18,8 @@ export async function GET(req: NextRequest) {
         success: false,
         error: firstResult,
         query,
-      }, { status: 500 });
+        diagnostic: true,
+      }, { status: 200 });
     }
 
     return NextResponse.json({

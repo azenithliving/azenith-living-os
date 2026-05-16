@@ -7,6 +7,7 @@ import {
   shouldRateLimit,
   checkRateLimit,
 } from "@/lib/rate-limit";
+import { isValidRoomSlug } from "@/lib/rooms-catalog";
 
 /**
  * SOVEREIGN PROXY ENGINE v1.0
@@ -17,7 +18,8 @@ export async function proxy(request: NextRequest) {
   const { pathname, search, origin } = request.nextUrl;
   const referer = request.headers.get('referer');
   let rateLimitHeaders: Record<string, string> | null = null;
-  const isAdminLoginApi = pathname === "/api/admin/verify-2fa";
+  const isAdminLoginApi =
+    pathname === "/api/admin/verify-2fa" || pathname === "/api/admin/gate/validate";
 
   const applyResponseHeaders = (response: NextResponse) => {
     if (!rateLimitHeaders) return response;
@@ -33,7 +35,7 @@ export async function proxy(request: NextRequest) {
       !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
     
     const refererUrl = new URL(referer);
-    let targetUrlParam = refererUrl.searchParams.get('url');
+    const targetUrlParam = refererUrl.searchParams.get('url');
     
     // RECOVERY: If direct URL param is missing from referer, it's a deep leak
     // Extract origin from refererUrl.searchParams.get('url') or guess from history
@@ -74,6 +76,15 @@ export async function proxy(request: NextRequest) {
     pathname.match(/\.(jpeg|jpg|png|gif|svg|ico|css|js|woff|woff2)$/i)
   ) {
     return NextResponse.next();
+  }
+
+  // 2b. Unknown room slugs → real HTTP 404 (SEO + monitoring)
+  const roomSlugMatch = pathname.match(/^\/rooms\/([^/]+)\/?$/);
+  if (roomSlugMatch?.[1] && !isValidRoomSlug(decodeURIComponent(roomSlugMatch[1]))) {
+    return new NextResponse("الصفحة غير موجودة", {
+      status: 404,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   }
 
   // 3. RATE LIMITING

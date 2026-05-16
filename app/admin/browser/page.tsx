@@ -198,7 +198,7 @@ export default function BrowserWorkspacePage() {
       const normalized = normalizeViewerUrl(savedCustomViewerUrl);
       if (normalized.ok) {
         // Sync persisted browser settings after mount to avoid SSR/localStorage coupling.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setCustomViewerUrl(normalized.url);
         setCustomViewerDraft(normalized.url);
       } else {

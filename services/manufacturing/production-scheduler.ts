@@ -136,7 +136,7 @@ export class ProductionSchedulerService {
     companyId: string
   ): Promise<Date> {
     // ابدأ من بكرة
-    let candidate = new Date();
+    const candidate = new Date();
     candidate.setDate(candidate.getDate() + 1);
     candidate.setHours(8, 0, 0, 0);  // 8 AM
     

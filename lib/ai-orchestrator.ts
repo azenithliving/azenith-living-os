@@ -149,7 +149,20 @@ export async function askGroqMessages(
 
   if (result.success) return { success: true, content: result.data };
 
-  // Fallbacks
+  // Fallbacks (avoid Google first — quota-sensitive)
+  const openRouterResult = await askOpenRouter(
+    messages[messages.length - 1]?.content || "",
+    undefined,
+    options
+  );
+  if (openRouterResult.success) return openRouterResult;
+
+  const mistralResult = await askMistral(messages[messages.length - 1]?.content || "", options);
+  if (mistralResult.success) return mistralResult;
+
+  const deepseekResult = await askDeepSeek(messages[messages.length - 1]?.content || "", options);
+  if (deepseekResult.success) return deepseekResult;
+
   const openaiResult = await askOpenAIMessages(messages, options);
   if (openaiResult.success) return openaiResult;
 
@@ -486,7 +499,14 @@ export async function getOrchestratorHealth() {
 }
 
 export class AIOrchestrator {
-  async fastText(prompt: string) { return askGroq(prompt); }
+  async fastText(prompt: string) {
+    const chain = [askGroq, askMistral, askOpenRouter, askDeepSeek] as const;
+    for (const provider of chain) {
+      const result = await provider(prompt);
+      if (result.success && result.content?.trim()) return result;
+    }
+    return askGroq(prompt);
+  }
   async analyzeVision(imageUrl: string, prompt: string) {
     const res = await askOpenRouter(prompt, imageUrl);
     return { success: res.success, analysis: res.content, error: res.error };

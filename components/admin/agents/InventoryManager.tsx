@@ -32,13 +32,7 @@ export function InventoryManager() {
         }
       } catch (error) {
         console.error('Failed to load inventory:', error);
-        // Use mock data for development
-        setItems([
-          { id: '1', sku: 'WD-001', name: 'خشب زان', item_type: 'raw_material', current_quantity: 50, min_stock_level: 30, unit_of_measure: 'board_feet', unit_cost: 35, stock_status: 'ok', reorder_needed: false },
-          { id: '2', sku: 'WD-002', name: 'خشب سنديان', item_type: 'raw_material', current_quantity: 20, min_stock_level: 25, unit_of_measure: 'board_feet', unit_cost: 50, stock_status: 'low', reorder_needed: true },
-          { id: '3', sku: 'SC-001', name: 'مسامير خشب', item_type: 'supply', current_quantity: 500, min_stock_level: 200, unit_of_measure: 'pieces', unit_cost: 0.5, stock_status: 'ok', reorder_needed: false },
-          { id: '4', sku: 'GL-001', name: 'ورنيش', item_type: 'supply', current_quantity: 5, min_stock_level: 10, unit_of_measure: 'liters', unit_cost: 120, stock_status: 'low', reorder_needed: true }
-        ]);
+        setItems([]);
       } finally {
         setLoading(false);
       }

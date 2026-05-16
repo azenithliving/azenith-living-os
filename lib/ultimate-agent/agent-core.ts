@@ -384,7 +384,7 @@ export function getAgentConfig(): AgentConfig {
   return {};
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export function updateAgentConfig(_: Partial<AgentConfig>): void {
   console.log("[Agent] Config updated");
 }
@@ -401,12 +401,12 @@ export function getAgentStatus(): AgentStatus {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export async function executeCommand(_: string): Promise<CommandResult> {
   return { success: true, message: "Command executed" };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export async function processAIRequest(_: string): Promise<AgentResponse> {
   return {
     understanding: "",
@@ -423,7 +423,7 @@ export async function generateDailyReport(): Promise<string> {
   return "Daily report placeholder";
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export async function handleApproval(_: string, __: boolean): Promise<CommandResult> {
   return { success: true, message: "Approval handled" };
 }

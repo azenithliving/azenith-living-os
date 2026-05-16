@@ -1,22 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 
+const DEFAULT_NAVIGATION = {
+  items: [
+    { id: '1', label: 'الرئيسية', href: '/', enabled: true },
+    { id: '2', label: 'الغرف', href: '/rooms', enabled: true },
+    { id: '3', label: 'الحجوزات', href: '/bookings', enabled: true },
+    { id: '4', label: 'اتصل بنا', href: '/contact', enabled: true },
+  ],
+};
+
+async function resolveTenantId(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient>>,
+  tenantId: string | null
+): Promise<string | null> {
+  if (tenantId) return tenantId;
+  const { data: company } = await supabase
+    .from('companies')
+    .select('id')
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  return company?.id ?? null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabaseAdminClient();
     if (!supabase) throw new Error('Supabase not initialized');
     const { searchParams } = new URL(request.url);
-    const tenantId = searchParams.get('tenantId');
+    const resolvedTenantId = await resolveTenantId(supabase, searchParams.get('tenantId'));
 
-    if (!tenantId) {
-      return NextResponse.json({ error: 'Tenant ID is required' }, { status: 400 });
+    if (!resolvedTenantId) {
+      return NextResponse.json(DEFAULT_NAVIGATION);
     }
 
     // Get navigation content from the content table
     const { data: navigationData, error } = await supabase
       .from('content')
       .select('body')
-      .eq('company_id', tenantId)
+      .eq('company_id', resolvedTenantId)
       .eq('type', 'navigation')
       .eq('slug', 'main-navigation')
       .single();
@@ -27,14 +50,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Return default navigation if none exists
-    const navigation = navigationData?.body ? JSON.parse(navigationData.body) : {
-      items: [
-        { id: '1', label: 'الرئيسية', href: '/', enabled: true },
-        { id: '2', label: 'الغرف', href: '/rooms', enabled: true },
-        { id: '3', label: 'الحجوزات', href: '/bookings', enabled: true },
-        { id: '4', label: 'اتصل بنا', href: '/contact', enabled: true }
-      ]
-    };
+    const navigation = navigationData?.body
+      ? JSON.parse(navigationData.body as string)
+      : DEFAULT_NAVIGATION;
 
     return NextResponse.json(navigation);
   } catch (error) {

@@ -4,13 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, AlertCircle, Shield, KeyRound } from "lucide-react";
 
-const ADMIN_EMAIL = "azenithliving@gmail.com";
-const ADMIN_PASSWORD = "alaa92aziz";
-
-function normalizeEmail(email: string) {
-  return email.trim().toLowerCase();
-}
-
 export default function GateLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -24,18 +17,27 @@ export default function GateLoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const normalizedEmail = normalizeEmail(email);
 
-    // Check credentials
-    if (normalizedEmail !== normalizeEmail(ADMIN_EMAIL) || password !== ADMIN_PASSWORD) {
-      setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+    try {
+      const response = await fetch("/api/admin/gate/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setError(data.error || "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+        setLoading(false);
+        return;
+      }
+
+      setStep("2fa");
+    } catch {
+      setError("تعذر الاتصال بالخادم. حاول مرة أخرى.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Go to 2FA step
-    setStep("2fa");
-    setLoading(false);
   };
 
   const handleVerify2FA = async (e: React.FormEvent) => {

@@ -4,11 +4,11 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { sendSecurityAlert } from "@/lib/telegram-notify";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-
-const PRIMARY_ADMIN_EMAIL = (process.env.ADMIN_GATE_EMAIL || "azenithliving@gmail.com").trim().toLowerCase();
-const PRIMARY_ADMIN_PASSWORD = process.env.ADMIN_GATE_PASSWORD || "alaa92aziz";
-const PRIMARY_ADMIN_LEGACY_2FA_SECRET =
-  process.env.ADMIN_GATE_2FA_SECRET || "J4YCU22VN5AGMSJRM5MFASKJEEVHC5CQFE7V24JXKE4WWWTNHBYA";
+import {
+  getPrimaryAdminLegacy2FASecret,
+  normalizeAdminEmail,
+  validateAdminGateCredentials,
+} from "@/lib/admin-gate";
 
 type User2FARecord = {
   secret: string;
@@ -16,12 +16,8 @@ type User2FARecord = {
   backup_codes: string[];
 };
 
-function normalizeEmail(email: string) {
-  return email.trim().toLowerCase();
-}
-
 function isPrimaryAdminCredentials(email: string, password: string) {
-  return normalizeEmail(email) === PRIMARY_ADMIN_EMAIL && password === PRIMARY_ADMIN_PASSWORD;
+  return validateAdminGateCredentials(email, password);
 }
 
 async function ensurePrimaryAdminAuthUser(email: string, password: string) {
@@ -34,7 +30,7 @@ async function ensurePrimaryAdminAuthUser(email: string, password: string) {
     return { success: false as const, error: "missing_service_role" };
   }
 
-  const normalizedEmail = normalizeEmail(email);
+  const normalizedEmail = normalizeAdminEmail(email);
   const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers({
     page: 1,
     perPage: 1000,
@@ -44,7 +40,7 @@ async function ensurePrimaryAdminAuthUser(email: string, password: string) {
     return { success: false as const, error: "list_users_failed" };
   }
 
-  const existingUser = usersData.users.find((user) => normalizeEmail(user.email || "") === normalizedEmail);
+  const existingUser = usersData.users.find((user) => normalizeAdminEmail(user.email || "") === normalizedEmail);
 
   if (!existingUser) {
     const { data: createdUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
@@ -101,7 +97,7 @@ async function resolveUser2FARecord(userId: string, email: string): Promise<User
   }
 
   const client = supabaseAdmin ?? await createClient();
-  const normalizedEmail = normalizeEmail(email);
+  const normalizedEmail = normalizeAdminEmail(email);
   const { data: legacyRecord } = await client
     .from("user_2fa")
     .select("secret, is_enabled, backup_codes")
@@ -132,8 +128,8 @@ async function syncPrimaryAdmin2FASecret(userId: string, email: string) {
     .from("user_2fa")
     .upsert({
       user_id: userId,
-      email: normalizeEmail(email),
-      secret: PRIMARY_ADMIN_LEGACY_2FA_SECRET,
+      email: normalizeAdminEmail(email),
+      secret: getPrimaryAdminLegacy2FASecret() || "",
       is_enabled: true,
       updated_at: new Date().toISOString(),
     });
@@ -160,7 +156,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const normalizedEmail = normalizeEmail(email);
+    const normalizedEmail = normalizeAdminEmail(email);
 
     // Step 1: Sign in with email and password
     let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -216,12 +212,15 @@ export async function POST(request: NextRequest) {
     let legacyDelta: number | null = null;
 
     if (!verified && isPrimaryAdminCredentials(normalizedEmail, password)) {
-      const legacyMatch = speakeasy.totp.verifyDelta({
-        secret: PRIMARY_ADMIN_LEGACY_2FA_SECRET,
-        encoding: "base32",
-        token,
-        window: 10,
-      });
+      const legacySecret = getPrimaryAdminLegacy2FASecret();
+      const legacyMatch = legacySecret
+        ? speakeasy.totp.verifyDelta({
+            secret: legacySecret,
+            encoding: "base32",
+            token,
+            window: 10,
+          })
+        : null;
 
       if (legacyMatch) {
         verified = true;

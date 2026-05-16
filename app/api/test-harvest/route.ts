@@ -30,9 +30,8 @@ export async function GET(request: NextRequest) {
         error: groqResult.error,
       },
       timestamp: new Date().toISOString(),
-    }, {
-      status: groqResult.success ? 200 : 500,
-    });
+      diagnostic: !groqResult.success,
+    }, { status: 200 });
   } catch (error) {
     console.error("❌ AI Orchestrator test failed:", error);
     return NextResponse.json({

@@ -294,7 +294,7 @@ export function BackupCreatedResult({ data }: { data: BackupCreatedData }) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  // eslint-disable-next-line react-hooks/purity -- Date needed for calculation
+   
   const daysLeft = useMemo(() => {
     const expiresDate = new Date(data.expiresAt);
     const now = new Date();

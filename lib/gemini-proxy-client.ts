@@ -24,8 +24,8 @@ const SHUFFLED_DEEPSEEK = shuffle(DEEPSEEK_KEYS);
 let geminiIdx = 0;
 let groqIdx = 0;
 let orIdx = 0;
-let mistralIdx = 0;
-let deepseekIdx = 0;
+const mistralIdx = 0;
+const deepseekIdx = 0;
 
 /**
  * Main Analysis Orchestrator
