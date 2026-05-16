@@ -623,7 +623,9 @@ export default function RoomPageClient({
       {!hasMoreBatches && batchPage >= MAX_BATCHES && (
         <div className="mt-10 text-center">
           <p className="text-gray-500">
-            لقد شاهدت جميع الدفعات المتاحة ({MAX_BATCHES} × {PHOTOS_PER_BATCH} صورة)
+            {isRTL 
+              ? `لقد شاهدت جميع الدفعات المتاحة (${MAX_BATCHES} × ${PHOTOS_PER_BATCH} صورة)`
+              : `You have viewed all available batches (${MAX_BATCHES} × ${PHOTOS_PER_BATCH} images)`}
           </p>
         </div>
       )}
@@ -646,7 +648,7 @@ export default function RoomPageClient({
             <div className="flex items-center justify-between border-b border-white/10 p-4">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-amber-400" />
-                <span className="font-bold text-white">مساعد التصميم الذكي</span>
+                <span className="font-bold text-white">{isRTL ? "مساعد التصميم الذكي" : "Smart Design Assistant"}</span>
               </div>
               <button
                 onClick={() => setAnalysisModalOpen(false)}
@@ -660,9 +662,11 @@ export default function RoomPageClient({
             <div className="max-h-[70vh] overflow-y-auto p-6">
               {isAnalyzing ? (
                 <div className="flex flex-col items-center justify-center py-12">
-                  <GoldPulseLoader text="جاري تحليل الصورة..." size="md" />
+                  <GoldPulseLoader text={isRTL ? "جاري تحليل الصورة..." : "Analyzing image..."} size="md" />
                   <p className="mt-4 text-sm text-gray-400">
-                    الذكاء الاصطناعي يحلل استايل التصميم ويقترح لك غرف مشابهة
+                    {isRTL 
+                      ? "الذكاء الاصطناعي يحلل استايل التصميم ويقترح لك غرف مشابهة"
+                      : "AI is analyzing the design style and suggesting similar rooms"}
                   </p>
                 </div>
               ) : currentAnalysis ? (
@@ -691,7 +695,9 @@ export default function RoomPageClient({
                   <div>
                     <h4 className="mb-3 flex items-center gap-2 font-bold text-white">
                       <Star className="h-4 w-4 text-amber-400" />
-                      تحب تشوف صور أكتر من استايل {currentAnalysis.styleAr}؟
+                      {isRTL 
+                        ? `تحب تشوف صور أكتر من استايل ${currentAnalysis.styleAr}؟`
+                        : `Want to see more images in ${currentAnalysis.detectedStyle} style?`}
                     </h4>
                     <button
                       onClick={() => {
@@ -700,7 +706,7 @@ export default function RoomPageClient({
                       }}
                       className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 py-3 text-amber-400 transition-all hover:bg-amber-500/20"
                     >
-                      <span>استكشف استايل {currentAnalysis.styleAr}</span>
+                      <span>{isRTL ? `استكشف استايل ${currentAnalysis.styleAr}` : `Explore ${currentAnalysis.detectedStyle} Style`}</span>
                       <ExternalLink className="h-4 w-4" />
                     </button>
                   </div>
@@ -710,7 +716,7 @@ export default function RoomPageClient({
                     <div>
                       <h4 className="mb-3 flex items-center gap-2 font-bold text-white">
                         <MessageCircle className="h-4 w-4 text-amber-400" />
-                        بناءً على ذوقك، ممكن تعجبك:
+                        {isRTL ? "بناءً على ذوقك، ممكن تعجبك:" : "Based on your taste, you might like:"}
                       </h4>
                       <div className="grid gap-3">
                         {currentAnalysis.suggestions.map((suggestion) => (
@@ -745,21 +751,21 @@ export default function RoomPageClient({
                       }`}
                     >
                       {favorites.includes(currentAnalysis.photoId) 
-                        ? "✓ تم الحفظ في المفضلة" 
-                        : "حفظ في المفضلة"}
+                        ? (isRTL ? "✓ تم الحفظ في المفضلة" : "✓ Saved to Favorites")
+                        : (isRTL ? "حفظ في المفضلة" : "Save to Favorites")}
                     </button>
                     
                     <button
                       onClick={() => setShowPriceMessage(true)}
                       className="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 font-medium text-white transition-all hover:bg-white/10"
                     >
-                      معرفة السعر
+                      {isRTL ? "معرفة السعر" : "Get Price"}
                     </button>
                   </div>
                 </div>
               ) : (
                 <div className="py-8 text-center text-gray-400">
-                  حدث خطأ في التحليل. يرجى المحاولة مرة أخرى.
+                  {isRTL ? "حدث خطأ في التحليل. يرجى المحاولة مرة أخرى." : "An error occurred during analysis. Please try again."}
                 </div>
               )}
             </div>
@@ -792,9 +798,11 @@ export default function RoomPageClient({
               <MessageCircle className="h-8 w-8 text-green-400" />
             </div>
             
-            <h3 className="mb-3 text-xl font-bold text-white">لمعرفة الأسعار</h3>
+            <h3 className="mb-3 text-xl font-bold text-white">{isRTL ? "لمعرفة الأسعار" : "Get Pricing"}</h3>
             <p className="mb-6 text-gray-300">
-              تواصل معنا مباشرة عبر واتساب للحصول على تفاصيل الأسعار وعرض خاص مناسب لميزانيتك.
+              {isRTL 
+                ? "تواصل معنا مباشرة عبر واتساب للحصول على تفاصيل الأسعار وعرض خاص مناسب لميزانيتك."
+                : "Contact us directly via WhatsApp to get pricing details and a special offer tailored to your budget."}
             </p>
             
             <a

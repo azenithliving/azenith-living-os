@@ -282,7 +282,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
                     <Image
                       key={`${displayStyle}-${room.slug}-${roomImages[room.slug] || "placeholder"}`}
                       src={roomImages[room.slug] || "/placeholder-room.jpg"}
-                      alt={`${room.title} بتصميم ${styleAltLabel}`}
+                      alt={isRTL ? `${room.title} بتصميم ${styleAltLabel}` : `${room.titleEn || room.title} in ${styleAltLabel} style`}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="absolute inset-0 object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -291,9 +291,9 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
                     />
                     <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 z-20 p-8 text-right">
-                      <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-brand-primary">{room.eyebrow}</span>
-                      <h3 className="mb-2 text-2xl font-serif font-bold text-white">{room.title}</h3>
-                      <p className="line-clamp-2 text-sm leading-relaxed text-white/70">{room.summary}</p>
+                      <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-brand-primary">{isRTL ? room.eyebrow : (room.eyebrowEn || room.eyebrow)}</span>
+                      <h3 className="mb-2 text-2xl font-serif font-bold text-white">{isRTL ? room.title : (room.titleEn || room.title)}</h3>
+                      <p className="line-clamp-2 text-sm leading-relaxed text-white/70">{isRTL ? room.summary : (room.summaryEn || room.summary)}</p>
                     </div>
                   </Link>
                 </div>

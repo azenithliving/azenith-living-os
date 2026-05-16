@@ -13,13 +13,13 @@ function RoomCard({ room, isRTL }: { room: any, isRTL: boolean }) {
       roomSlug={room.slug}
       className="group block rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 transition-all hover:border-brand-primary hover:bg-brand-primary/[0.05] hover:-translate-y-2 relative"
     >
-      <p className="text-sm text-brand-primary group-hover:text-brand-primary/80">{room.eyebrow}</p>
-      <h2 className="mt-3 text-2xl font-semibold text-white">{room.title}</h2>
-      <p className="mt-3 text-sm leading-7 text-white/60">{room.summary}</p>
+      <p className="text-sm text-brand-primary group-hover:text-brand-primary/80">{isRTL ? room.eyebrow : (room.eyebrowEn || room.eyebrow)}</p>
+      <h2 className="mt-3 text-2xl font-semibold text-white">{isRTL ? room.title : (room.titleEn || room.title)}</h2>
+      <p className="mt-3 text-sm leading-7 text-white/60">{isRTL ? room.summary : (room.summaryEn || room.summary)}</p>
       
       <div className="mt-5 space-y-2 text-sm text-white/72 min-h-[100px]">
-        {tab === "spaces" && room.bullets.slice(0, 3).map((bullet: string) => (
-          <div key={bullet} className="flex items-center gap-3 animate-fadeInUp">
+        {tab === "spaces" && (isRTL ? room.bullets : (room.bulletsEn || room.bullets)).slice(0, 3).map((bullet: string, i: number) => (
+          <div key={i} className="flex items-center gap-3 animate-fadeInUp">
             <span className="h-1.5 w-1.5 rounded-full bg-brand-primary" />
             <span>{bullet}</span>
           </div>
@@ -27,7 +27,7 @@ function RoomCard({ room, isRTL }: { room: any, isRTL: boolean }) {
         {tab === "furniture" && (room.furniture || []).slice(0, 3).map((furn: any) => (
           <div key={furn.slug} className="flex items-center gap-3 animate-fadeInUp">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            <span>{furn.title}</span>
+            <span>{isRTL ? furn.title : (furn.titleEn || furn.title)}</span>
           </div>
         ))}
       </div>

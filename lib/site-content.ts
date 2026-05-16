@@ -1,12 +1,16 @@
 export type FurnitureDefinition = {
   slug: string;
   title: string;
+  titleEn?: string;
   images: string[];
   video?: string;
   description: string;
+  descriptionEn?: string;
   priceRange: string;
   features: string[];
+  featuresEn?: string[];
   variations: string[];
+  variationsEn?: string[];
 };
 
 export type RoomDefinition = {
@@ -14,17 +18,25 @@ export type RoomDefinition = {
   title: string;
   titleEn?: string;
   eyebrow: string;
+  eyebrowEn?: string;
   summary: string;
+  summaryEn?: string;
   outcome: string;
+  outcomeEn?: string;
   bullets: string[];
+  bulletsEn?: string[];
   furniture: FurnitureDefinition[];
 };
 
 export type AboutData = {
   title: string;
+  titleEn: string;
   story: string;
+  storyEn: string;
   values: string[];
+  valuesEn: string[];
   team: string;
+  teamEn: string;
 };
 
 export type SeoPageDefinition = {
@@ -40,6 +52,10 @@ export const roomDefinitions: RoomDefinition[] = [
     title: "غرف النوم الرئيسية",
     titleEn: "Master Bedrooms",
     eyebrow: "خصوصية محسوبة",
+    eyebrowEn: "Calculated Privacy",
+    summaryEn: "A calm space with hotel details, layered lighting, and long-lasting materials.",
+    outcomeEn: "A design that transforms the room from mere furnishing to a comfortable and cohesive daily experience.",
+    bulletsEn: ["Clear movement distribution","Hidden storage solutions","Warm materials palette","Harmony between bed and dressing"],
     summary: "مساحة هادئة بتفاصيل فندقية وإضاءة طبقية وخامات تعيش سنوات طويلة.",
     outcome: "تصميم ينقل الغرفة من مجرد فرش إلى تجربة يومية مريحة ومتماسكة.",
     bullets: ["توزيع حركة واضح", "حلول تخزين مخفية", "لوحة خامات دافئة", "تناغم بين السرير والدريسينج"],
@@ -47,6 +63,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "master-bed",
         title: "سرير رئيسي فاخر",
+        titleEn: "Luxury Master Bed",
         images: ["/images/master-bed-1.jpg", "/images/master-bed-2.jpg", "/images/master-bed-3.jpg"],
         video: "/videos/master-bed-tour.mp4",
         description: "سرير بتصميم مترف يجمع بين الراحة والأناقة مع خامات فندقية عالية الجودة.",
@@ -57,6 +74,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "nightstands",
         title: "كومودات السرير",
+        titleEn: "Nightstands",
         images: ["/images/nightstands-1.jpg", "/images/nightstands-2.jpg"],
         description: "كومودات أنيقة مع تخزين ذكي وإضاءة ليلية لتجربة نوم مثالية.",
         priceRange: "8,000 - 15,000 EGP",
@@ -66,6 +84,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "sofa-master",
         title: "كنبة غرفة نوم رئيسية",
+        titleEn: "Master Bedroom Sofa",
         images: ["/images/sofa-master-1.jpg", "/images/sofa-master-2.jpg"],
         description: "كنبة أنيقة لجلسات القراءة في الغرفة الرئيسية، خامات فندقية فاخرة.",
         priceRange: "18,000 - 30,000 EGP",
@@ -79,6 +98,10 @@ export const roomDefinitions: RoomDefinition[] = [
     title: "غرف المعيشة",
     titleEn: "Living Rooms",
     eyebrow: "استقبال بثقة",
+    eyebrowEn: "Confident Reception",
+    summaryEn: "A hall that carries the social character of the home with a balance between comfort and the overall scene.",
+    outcomeEn: "Visually and practically studied seating with a strong visual center and comfortable movement paths.",
+    bulletsEn: ["TV and main wall treatment","Flexible seating distribution","Hospitality lighting solutions","Choosing fabrics suitable for daily use"],
     summary: "صالة تحمل الطابع الاجتماعي للمنزل مع توازن بين الراحة والمشهد العام.",
     outcome: "جلسات مدروسة بصريًا وعمليًا مع مركز بصري قوي ومسارات حركة مريحة.",
     bullets: ["معالجة التلفزيون والجدار الرئيسي", "توزيع جلسات مرن", "حلول إضاءة للضيافة", "اختيار أقمشة مناسبة للاستخدام اليومي"],
@@ -86,6 +109,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "living-sofa",
         title: "كنبة غرفة معيشة كلاسيك",
+        titleEn: "Classic Living Sofa",
         images: ["/images/living-sofa-1.jpg", "/images/living-sofa-2.jpg"],
         video: "/videos/living-sofa.mp4",
         description: "كنبة مريحة للجلسات العائلية، أقمشة مقاومة وتصميم عصري.",
@@ -96,6 +120,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "corner-sofa-living",
         title: "كنبة زاوية للصالة",
+        titleEn: "Living Room Corner Sofa",
         images: ["/images/corner-sofa-living-1.jpg"],
         description: "كنبة زاوية توفر مساحة ومرونة للصالات الكبيرة والصغيرة.",
         priceRange: "35,000 - 55,000 EGP",
@@ -109,6 +134,10 @@ export const roomDefinitions: RoomDefinition[] = [
     title: "المطابخ",
     titleEn: "Kitchens",
     eyebrow: "أداء يومي أنظف",
+    eyebrowEn: "Cleaner Daily Performance",
+    summaryEn: "Modern kitchens balancing function and form with care for storage and ease of use.",
+    outcomeEn: "A practical kitchen with meticulous facades, shortened usage paths, and a finish that looks more expensive than its cost.",
+    bulletsEn: ["Smart movement triangle","Vertical exploitation of storage","Resistant and easy to clean materials","Lighting solutions above workspaces"],
     summary: "مطابخ حديثة بتوازن بين الوظيفة والشكل مع عناية بالتخزين وسهولة الاستخدام.",
     outcome: "مطبخ عملي بواجهات متقنة ومسارات استخدام مختصرة وتشطيب يبدو أغلى من تكلفته.",
     bullets: ["مثلث حركة ذكي", "استغلال رأسي للتخزين", "خامات مقاومة وسهلة التنظيف", "حلول إضاءة فوق أسطح العمل"],
@@ -116,6 +145,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "kitchen-sofa",
         title: "كنبة مطبخ صغيرة",
+        titleEn: "Small Kitchen Sofa",
         images: ["/images/kitchen-sofa-1.jpg"],
         description: "كنبة بجانب البار للجلسات السريعة في المطبخ الحديث.",
         priceRange: "10,000 - 18,000 EGP",
@@ -129,6 +159,10 @@ export const roomDefinitions: RoomDefinition[] = [
     title: "غرف الملابس",
     titleEn: "Dressing Rooms",
     eyebrow: "تنظيم فاخر",
+    eyebrowEn: "Luxurious Organization",
+    summaryEn: "A clearly divided dressing room that elevates the daily experience and reduces clutter.",
+    outcomeEn: "Calculated storage units, mirrors, and lighting that make the space practical and luxurious at the same time.",
+    bulletsEn: ["Effective internal divisions","Cosmetic mirrors and lighting","Maximum use of space","Materials consistent with the main room"],
     summary: "دريسينج واضح التقسيم يرفع قيمة التجربة اليومية ويقلل الفوضى.",
     outcome: "وحدات تخزين محسوبة، مرايا، وإضاءة تجعل المساحة عملية ومترفة في الوقت نفسه.",
     bullets: ["تقسيمات داخلية فعالة", "مرايا وإضاءة تجميلية", "استفادة قصوى من المساحة", "خامات متناسقة مع الغرفة الرئيسية"],
@@ -136,6 +170,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "dressing-sofa",
         title: "كنبة صغيرة للدريسينج",
+        titleEn: "Small Dressing Sofa",
         images: ["/images/dressing-sofa-1.jpg"],
         description: "كنبة أنيقة للجلوس أثناء التجربة في غرفة الملابس.",
         priceRange: "9,000 - 15,000 EGP",
@@ -149,6 +184,10 @@ export const roomDefinitions: RoomDefinition[] = [
     title: "المكاتب المنزلية",
     titleEn: "Home Offices",
     eyebrow: "تركيز بدون تشويش",
+    eyebrowEn: "Focus Without Distraction",
+    summaryEn: "A home office that maintains the home's identity with real readiness for long work.",
+    outcomeEn: "A comfortable workspace, clean visual background, and storage that makes the space productive and not temporary.",
+    bulletsEn: ["Practical task lighting","Meeting background treatment","Files and accessories storage","Visual comfort for long sessions"],
     summary: "مكتب منزلي يحافظ على هوية المنزل مع جاهزية حقيقية للعمل الطويل.",
     outcome: "سطح عمل مريح، خلفية بصرية نظيفة، وتخزين يجعل المساحة منتجة وليست مؤقتة.",
     bullets: ["إضاءة عملية للمهام", "معالجة خلفية الاجتماعات", "تخزين ملفات وإكسسوارات", "راحة بصرية للجلسات الطويلة"],
@@ -156,6 +195,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "office-sofa",
         title: "كنبة مكتب منزلي",
+        titleEn: "Home Office Sofa",
         images: ["/images/office-sofa-1.jpg"],
         description: "كنبة مريحة للزوار أو استراحة العمل في المكتب المنزلي.",
         priceRange: "14,000 - 24,000 EGP",
@@ -169,6 +209,10 @@ export const roomDefinitions: RoomDefinition[] = [
     title: "غرف الشباب والأطفال",
     titleEn: "Kids & Teen Rooms",
     eyebrow: "مرونة تنمو مع الوقت",
+    eyebrowEn: "Flexibility That Grows Over Time",
+    summaryEn: "Rooms that combine personality and practicality with scalable solutions instead of rapid change.",
+    outcomeEn: "A flexible space for sleeping, studying, and storage, with an identity that suits age and use.",
+    bulletsEn: ["Clear study corners","Storage that reduces clutter","Calculated colors","Furniture that can be developed later"],
     summary: "غرف تجمع بين الشخصية والعملية مع حلول قابلة للتطوير بدل التغيير السريع.",
     outcome: "مساحة مرنة للنوم والدراسة والتخزين، مع هوية تناسب العمر والاستخدام.",
     bullets: ["زوايا دراسة واضحة", "تخزين يخفف الفوضى", "ألوان محسوبة", "أثاث يقبل التطوير لاحقًا"],
@@ -176,6 +220,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "youth-sofa",
         title: "كنب شبابي متعدد الاستخدامات",
+        titleEn: "Versatile Youth Sofa",
         images: ["/images/youth-sofa-1.jpg"],
         description: "كنب مريح يتحول إلى سرير مع تخزين مدمج للغرف الصغيرة.",
         priceRange: "12,000 - 20,000 EGP",
@@ -185,6 +230,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "corner-sofa-youth",
         title: "كنبة زاوية للغرف الشبابية",
+        titleEn: "Youth Room Corner Sofa",
         images: ["/images/corner-sofa-youth-1.jpg"],
         description: "كنبة زاوية صغيرة متعددة الوظائف للغرف المحدودة المساحة.",
         priceRange: "15,000 - 25,000 EGP",
@@ -198,6 +244,10 @@ export const roomDefinitions: RoomDefinition[] = [
     title: "غرف الطعام",
     titleEn: "Dining Rooms",
     eyebrow: "جلسات عائلية راقية",
+    eyebrowEn: "Elegant Family Gatherings",
+    summaryEn: "A design that combines elegance and practicality for exceptional dining experiences.",
+    outcomeEn: "An interconnected dining space with warm lighting and comfortable distribution.",
+    bulletsEn: ["Expandable tables","Comfortable chairs","Display cabinets"],
     summary: "تصميم يجمع بين الأناقة والعملية لتجارب الطعام المميزة.",
     outcome: "مساحة طعام مترابطة مع إضاءة دافئة وتوزيع مريح.",
     bullets: ["طاولات قابلة للتوسعة", "كراسي مريحة", "خزائن عرض"],
@@ -205,6 +255,7 @@ export const roomDefinitions: RoomDefinition[] = [
       {
         slug: "dining-table",
         title: "طاولة طعام فاخرة",
+        titleEn: "Luxury Dining Table",
         images: ["/images/dining-table-1.jpg"],
         description: "طاولة طعام من خشب طبيعي تدوم لأجيال.",
         priceRange: "30,000 - 50,000 EGP",
@@ -218,6 +269,10 @@ export const roomDefinitions: RoomDefinition[] = [
     title: "تصميم داخلي شامل",
     titleEn: "Full Interior Design",
     eyebrow: "رؤية متكاملة",
+    eyebrowEn: "Integrated Vision",
+    summaryEn: "Comprehensive design for the entire home with harmony between all spaces.",
+    outcomeEn: "A harmonious home that reflects your personality.",
+    bulletsEn: ["Comprehensive design","Material selection","Execution supervision"],
     summary: "تصميم شامل للمنزل بأكمله مع تناغم بين جميع المساحات.",
     outcome: "منزل متناسق يعكس شخصيتكم.",
     bullets: ["تصميم شامل", "اختيار خامات", "إشراف تنفيذ"],
@@ -349,9 +404,13 @@ export const executionTimeline = [
 
 export const aboutData: AboutData = {
   title: "نبذة عنا",
+  titleEn: "About Us",
   story: "نحن متخصصون في تصميم داخلي فاخر يركز على المساحات السكنية. خبرتنا تمتد لسنوات في خلق بيئات تعيش مع العائلة وتنمو مع احتياجاتها. نؤمن بأن التصميم ليس مجرد شكل، بل وظيفة تجعل الحياة أفضل.",
+  storyEn: "We specialize in luxury interior design focusing on residential spaces. Our experience spans years of creating environments that live with the family and grow with their needs. We believe design is not just form, but function that makes life better.",
   values: ["جودة تدوم", "تخصيص كامل", "تنفيذ مضمون"],
-  team: "فريق من المهندسين والمصممين ذوي الخبرة العالية."
+  valuesEn: ["Lasting Quality", "Full Customization", "Guaranteed Execution"],
+  team: "فريق من المهندسين والمصممين ذوي الخبرة العالية.",
+  teamEn: "A team of highly experienced engineers and designers."
 };
 
 export function getRoomDefinition(slug: string) {

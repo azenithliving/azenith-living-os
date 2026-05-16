@@ -4,6 +4,7 @@ import { useEffect, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import Image from "next/image";
+import useSessionStore from "@/stores/useSessionStore";
 
 interface ImageLightboxProps {
   isOpen: boolean;
@@ -28,6 +29,8 @@ export default function ImageLightbox({
   onScroll,
   onDownload,
 }: ImageLightboxProps) {
+  const currentLang = useSessionStore((state) => state.language);
+  const isRTL = currentLang === "ar";
   const [isDownloading, setIsDownloading] = useState(false);
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -131,7 +134,7 @@ export default function ImageLightbox({
           <button
             onClick={onClose}
             className="absolute right-4 top-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white transition-all hover:bg-white/20 hover:scale-110"
-            aria-label="إغلاق"
+            aria-label={isRTL ? "إغلاق" : "Close"}
           >
             <X className="h-6 w-6" />
           </button>
@@ -143,8 +146,8 @@ export default function ImageLightbox({
               disabled={isDownloading}
               className="absolute left-4 top-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-[#d4af37] transition-all hover:bg-white/20 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ color: '#d4af37' }}
-              aria-label="تحميل"
-              title="تحميل"
+              aria-label={isRTL ? "تحميل" : "Download"}
+              title={isRTL ? "تحميل" : "Download"}
             >
               <Download className={`h-6 w-6 ${isDownloading ? 'animate-pulse' : ''}`} />
             </button>
@@ -159,7 +162,7 @@ export default function ImageLightbox({
                   onPrev();
                 }}
                 className="absolute left-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-all hover:bg-white/20 hover:scale-110"
-                aria-label="الصورة السابقة"
+                aria-label={isRTL ? "الصورة السابقة" : "Previous Image"}
               >
                 <ChevronRight className="h-6 w-6" />
               </button>
@@ -169,7 +172,7 @@ export default function ImageLightbox({
                   onNext();
                 }}
                 className="absolute right-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-all hover:bg-white/20 hover:scale-110"
-                aria-label="الصورة التالية"
+                aria-label={isRTL ? "الصورة التالية" : "Next Image"}
               >
                 <ChevronLeft className="h-6 w-6" />
               </button>
@@ -188,7 +191,7 @@ export default function ImageLightbox({
           >
             <Image
               src={imageUrl}
-              alt={currentImage.alt || `صورة ${currentIndex + 1}`}
+              alt={currentImage.alt || (isRTL ? `صورة ${currentIndex + 1}` : `Image ${currentIndex + 1}`)}
               fill
               className="object-contain"
               sizes="90vw"
