@@ -12,6 +12,7 @@ export type FurnitureDefinition = {
 export type RoomDefinition = {
   slug: string;
   title: string;
+  titleEn?: string;
   eyebrow: string;
   summary: string;
   outcome: string;
@@ -37,6 +38,7 @@ export const roomDefinitions: RoomDefinition[] = [
   {
     slug: "master-bedroom",
     title: "غرف النوم الرئيسية",
+    titleEn: "Master Bedrooms",
     eyebrow: "خصوصية محسوبة",
     summary: "مساحة هادئة بتفاصيل فندقية وإضاءة طبقية وخامات تعيش سنوات طويلة.",
     outcome: "تصميم ينقل الغرفة من مجرد فرش إلى تجربة يومية مريحة ومتماسكة.",
@@ -75,6 +77,7 @@ export const roomDefinitions: RoomDefinition[] = [
   {
     slug: "living-room",
     title: "غرف المعيشة",
+    titleEn: "Living Rooms",
     eyebrow: "استقبال بثقة",
     summary: "صالة تحمل الطابع الاجتماعي للمنزل مع توازن بين الراحة والمشهد العام.",
     outcome: "جلسات مدروسة بصريًا وعمليًا مع مركز بصري قوي ومسارات حركة مريحة.",
@@ -104,6 +107,7 @@ export const roomDefinitions: RoomDefinition[] = [
   {
     slug: "kitchen",
     title: "المطابخ",
+    titleEn: "Kitchens",
     eyebrow: "أداء يومي أنظف",
     summary: "مطابخ حديثة بتوازن بين الوظيفة والشكل مع عناية بالتخزين وسهولة الاستخدام.",
     outcome: "مطبخ عملي بواجهات متقنة ومسارات استخدام مختصرة وتشطيب يبدو أغلى من تكلفته.",
@@ -123,6 +127,7 @@ export const roomDefinitions: RoomDefinition[] = [
   {
     slug: "dressing-room",
     title: "غرف الملابس",
+    titleEn: "Dressing Rooms",
     eyebrow: "تنظيم فاخر",
     summary: "دريسينج واضح التقسيم يرفع قيمة التجربة اليومية ويقلل الفوضى.",
     outcome: "وحدات تخزين محسوبة، مرايا، وإضاءة تجعل المساحة عملية ومترفة في الوقت نفسه.",
@@ -142,6 +147,7 @@ export const roomDefinitions: RoomDefinition[] = [
   {
     slug: "home-office",
     title: "المكاتب المنزلية",
+    titleEn: "Home Offices",
     eyebrow: "تركيز بدون تشويش",
     summary: "مكتب منزلي يحافظ على هوية المنزل مع جاهزية حقيقية للعمل الطويل.",
     outcome: "سطح عمل مريح، خلفية بصرية نظيفة، وتخزين يجعل المساحة منتجة وليست مؤقتة.",
@@ -161,6 +167,7 @@ export const roomDefinitions: RoomDefinition[] = [
   {
     slug: "youth-room",
     title: "غرف الشباب والأطفال",
+    titleEn: "Kids & Teen Rooms",
     eyebrow: "مرونة تنمو مع الوقت",
     summary: "غرف تجمع بين الشخصية والعملية مع حلول قابلة للتطوير بدل التغيير السريع.",
     outcome: "مساحة مرنة للنوم والدراسة والتخزين، مع هوية تناسب العمر والاستخدام.",
@@ -189,6 +196,7 @@ export const roomDefinitions: RoomDefinition[] = [
   {
     slug: "dining-room",
     title: "غرف الطعام",
+    titleEn: "Dining Rooms",
     eyebrow: "جلسات عائلية راقية",
     summary: "تصميم يجمع بين الأناقة والعملية لتجارب الطعام المميزة.",
     outcome: "مساحة طعام مترابطة مع إضاءة دافئة وتوزيع مريح.",
@@ -208,6 +216,7 @@ export const roomDefinitions: RoomDefinition[] = [
   {
     slug: "interior-design",
     title: "تصميم داخلي شامل",
+    titleEn: "Full Interior Design",
     eyebrow: "رؤية متكاملة",
     summary: "تصميم شامل للمنزل بأكمله مع تناغم بين جميع المساحات.",
     outcome: "منزل متناسق يعكس شخصيتكم.",

@@ -4,9 +4,12 @@ import { useEffect, useState } from "react";
 import AzenithLegacy from "@/components/AzenithLegacy";
 import Hero from "@/components/Hero";
 import HomePageClient from "@/components/home-page-client-fixed";
+import useSessionStore from "@/stores/useSessionStore";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const currentLang = useSessionStore((state) => state.language);
+  const isRTL = currentLang === "ar";
 
   // Proper Hydration fix: set mounted to true after initial render
   useEffect(() => {
@@ -18,7 +21,7 @@ export default function Home() {
     brandName: "أزينث ليفينج",
     brandNameAr: "أزينث",
     brandNameEn: "Azenith Living",
-    freeHookOffer: "تصميم مبدئي خلال 24 ساعة",
+    freeHookOffer: isRTL ? "تصميم مبدئي خلال 24 ساعة" : "Initial Design in 24 Hours",
     whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201090819584",
     primaryDomain: null,
     contactEmail: "azenithliving@gmail.com",
@@ -27,7 +30,7 @@ export default function Home() {
     logoPath: "/logo.png",
     faviconPath: "/favicon.png",
     primaryColor: "#C5A059",
-    language: "ar",
+    language: currentLang,
   };
 
   // Empty initial images (client will fetch)
@@ -46,7 +49,7 @@ export default function Home() {
         href="#inventory-section"
         className="sr-only absolute right-4 top-4 z-[120] rounded-full bg-white px-4 py-2 text-sm font-medium text-black focus:not-sr-only"
       >
-        تجاوز إلى المحتوى
+        {isRTL ? "تجاوز إلى المحتوى" : "Skip to content"}
       </a>
 
       <div className="fixed inset-0 w-full h-full -z-10">
