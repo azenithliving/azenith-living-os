@@ -1,40 +1,13 @@
-"use client";
-import React, { useEffect, useState, useCallback } from "react";
-import useSessionStore from "@/stores/useSessionStore";
-import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
+const fs = require('fs');
 
-type SlideStat = {
-  label: string;
-  value: string;
-};
+const path = 'components/AzenithLegacy.tsx';
+let code = fs.readFileSync(path, 'utf8');
 
-export type VideoStateChangeDetail = {
-  currentIndex: number;
-  videoReady: boolean;
-  isExiting: boolean;
-  pillar: string;
-  poeticTitle: string;
-  subtitle: string;
-  stats: ReadonlyArray<SlideStat>;
-  cta: string;
-  ariaLabel: string;
-};
-
-declare global {
-  interface WindowEventMap {
-    videoStateChange: CustomEvent<VideoStateChangeDetail>;
-  }
-}
-
-// Vercel Blob URLs for production, local paths for development
-const isDev = process.env.NODE_ENV === 'development';
-const BLOB_BASE = "https://ovnuuxdhjjkfsk6k.public.blob.vercel-storage.com/videos";
-
-export const slides = [
+// Replace the slides array definition
+const newSlides = `export const slides = [
   {
     id: 1,
-    video: `${BLOB_BASE}/hero-1.mp4`,
+    video: \`\${BLOB_BASE}/hero-1.mp4\`,
     pillar: "HERITAGE",
     title: "إرث الخبرة في كل قطعة",
     poeticTitle: "إرث الخبرة في كل قطعة",
@@ -53,7 +26,7 @@ export const slides = [
   },
   {
     id: 2,
-    video: `${BLOB_BASE}/hero-2.mp4`,
+    video: \`\${BLOB_BASE}/hero-2.mp4\`,
     pillar: "COMMITMENT",
     title: "صلابة الخشب الطبيعي",
     poeticTitle: "صلابة الخشب الطبيعي",
@@ -72,7 +45,7 @@ export const slides = [
   },
   {
     id: 3,
-    video: `${BLOB_BASE}/hero-3.mp4`,
+    video: \`\${BLOB_BASE}/hero-3.mp4\`,
     pillar: "INNOVATION",
     title: "تصميم عصري مبتكر",
     poeticTitle: "تصميم عصري مبتكر",
@@ -91,7 +64,7 @@ export const slides = [
   },
   {
     id: 4,
-    video: `${BLOB_BASE}/hero-4.mp4`,
+    video: \`\${BLOB_BASE}/hero-4.mp4\`,
     pillar: "SYNERGY",
     title: "تحالف اليد والآلة",
     poeticTitle: "تحالف اليد والآلة",
@@ -110,7 +83,7 @@ export const slides = [
   },
   {
     id: 5,
-    video: `${BLOB_BASE}/hero-5.mp4`,
+    video: \`\${BLOB_BASE}/hero-5.mp4\`,
     pillar: "TRUST",
     title: "ثقة في أرقى الوحدات",
     poeticTitle: "ثقة في أرقى الوحدات",
@@ -129,7 +102,7 @@ export const slides = [
   },
   {
     id: 6,
-    video: `${BLOB_BASE}/hero-6.mp4`,
+    video: \`\${BLOB_BASE}/hero-6.mp4\`,
     pillar: "QUALITY",
     title: "رفاهية مطلقة",
     poeticTitle: "رفاهية مطلقة",
@@ -147,87 +120,8 @@ export const slides = [
     ],
   },
 ] as any; // Using any to bypass strict type checking temporarily if SlideStat doesn't have En fields
+`;
 
+code = code.replace(/export const slides = \[\s*\{[\s\S]*?\] as const;/g, newSlides);
 
-export default function AzenithLegacy() {
-  const currentLang = useSessionStore((state) => state.language);
-  const isRTL = currentLang === "ar";
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [videoError, setVideoError] = useState<Record<number, boolean>>({});
-
-  const handleVideoError = useCallback((slideId: number) => {
-    console.warn(`[AzenithLegacy] Video failed to load for slide ${slideId}, using fallback image`);
-    setVideoError(prev => ({ ...prev, [slideId]: true }));
-  }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 9000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const slide = slides[currentIndex];
-    const event = new CustomEvent<VideoStateChangeDetail>("videoStateChange", {
-      detail: {
-        currentIndex,
-        videoReady: true,
-        isExiting: false,
-        pillar: slide.pillar,
-        poeticTitle: isRTL ? slide.poeticTitle : slide.poeticTitleEn,
-        subtitle: isRTL ? slide.description : slide.descriptionEn,
-        stats: slide.stats.map((s: any) => ({
-          label: isRTL ? s.label : s.labelEn,
-          value: isRTL ? s.value : s.valueEn
-        })),
-        cta: isRTL ? slide.cta : slide.ctaEn,
-        ariaLabel: isRTL ? slide.ariaLabel : slide.ariaLabelEn,
-      },
-    });
-
-    window.dispatchEvent(event);
-  }, [currentIndex, isRTL]);
-
-  return (
-    <div className="absolute inset-0">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1 }}
-          className="absolute inset-0 h-full w-full"
-          style={{
-            background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)",
-          }}
-        >
-          {videoError[slides[currentIndex].id] ? (
-            <Image
-              src="/images/room-placeholder.jpg"
-              alt={slides[currentIndex].ariaLabel}
-              fill
-              className="absolute inset-0 z-0 object-cover"
-              priority
-            />
-          ) : (
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="absolute inset-0 z-0 h-full w-full object-cover"
-              src={slides[currentIndex].video}
-              onError={() => handleVideoError(slides[currentIndex].id)}
-            />
-          )}
-
-          <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/50 via-transparent to-black/70" />
-          <div className="absolute inset-0 z-10 bg-black/20 backdrop-blur-[1px]" />
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
-}
+fs.writeFileSync(path, code);

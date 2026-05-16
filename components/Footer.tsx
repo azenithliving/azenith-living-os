@@ -8,6 +8,7 @@ import { ChevronLeft } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { subscribeToNewsletter } from "@/app/actions/subscribeAction";
 import type { RuntimeConfig } from "@/lib/runtime-config";
+import useSessionStore from "@/stores/useSessionStore";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -39,6 +40,8 @@ type FooterProps = {
 };
 
 export default function Footer({ contactEmail, contactPhone, businessAddress }: FooterProps) {
+  const currentLang = useSessionStore((state) => state.language);
+  const isRTL = currentLang === "ar";
   const [eliteEmail, setEliteEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const email = contactEmail ?? "azenithliving@gmail.com";
@@ -49,7 +52,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
     e.preventDefault();
 
     if (!eliteEmail.trim()) {
-      toast.error("أدخل بريدك الإلكتروني أولًا.");
+      toast.error(isRTL ? "أدخل بريدك الإلكتروني أولًا." : "Please enter your email first.");
       return;
     }
 
@@ -69,7 +72,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("حدث خطأ غير متوقع. حاول مرة أخرى.");
+      toast.error(isRTL ? "حدث خطأ غير متوقع. حاول مرة أخرى." : "An unexpected error occurred. Please try again.");
       console.error("Newsletter subscription error:", error);
     } finally {
       setIsLoading(false);
@@ -96,9 +99,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
                 className="h-auto w-24 object-contain"
                 style={{ height: 'auto' }}
               />
-              <p className="mt-6 text-sm font-light italic leading-relaxed text-gray-400">
-                راحة وفخامة تدوم إلى الأبد
-              </p>
+              <p className="mt-6 text-sm font-light italic leading-relaxed text-gray-400">{isRTL ? "راحة وفخامة تدوم إلى الأبد" : "Comfort and luxury that lasts forever"}</p>
               <p className="mt-3 text-[10px] font-mono uppercase tracking-wider text-gray-600">
                 Azenith OS: Autonomous Manufacturing System
               </p>
@@ -106,13 +107,13 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
           </motion.div>
 
           <motion.div variants={columnVariants} className="space-y-8">
-            <h4 className="text-xs font-light uppercase tracking-widest text-gray-500">الملاحة الذكية</h4>
+            <h4 className="text-xs font-light uppercase tracking-widest text-gray-500">{isRTL ? "الملاحة الذكية" : "Smart Navigation"}</h4>
             <ul className="space-y-4">
               {[
-                { label: "قصة الإرث", href: "/about" },
-                { label: "استكشف الوحدات", href: "/rooms" },
-                { label: "معرض الأثاث", href: "/furniture" },
-                { label: "ابدأ رحلتك", href: "/start" },
+                { label: isRTL ? "قصة الإرث" : "Legacy Story", href: "/about" },
+                { label: isRTL ? "استكشف الوحدات" : "Explore Units", href: "/rooms" },
+                { label: isRTL ? "معرض الأثاث" : "Furniture Gallery", href: "/furniture" },
+                { label: isRTL ? "ابدأ رحلتك" : "Start Journey", href: "/start" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -127,33 +128,31 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
           </motion.div>
 
           <motion.div variants={columnVariants} className="space-y-8">
-            <h4 className="text-xs font-light uppercase tracking-widest text-gray-500">تواصل مباشر</h4>
+            <h4 className="text-xs font-light uppercase tracking-widest text-gray-500">{isRTL ? "تواصل مباشر" : "Direct Contact"}</h4>
             <ul className="space-y-4">
               <li className="text-sm font-light text-gray-300">
-                <span className="text-gray-600">البريد:</span>{" "}
+                <span className="text-gray-600">{isRTL ? "البريد:" : "Email:"}</span>{" "}
                 <a href={`mailto:${email}`} className="transition-all duration-300 hover:text-[#C5A059]">
                   {email}
                 </a>
               </li>
               <li className="text-sm font-light text-gray-300">
-                <span className="text-gray-600">الهاتف:</span>{" "}
+                <span className="text-gray-600">{isRTL ? "الهاتف:" : "Phone:"}</span>{" "}
                 <a href={`tel:${phone}`} className="transition-all duration-300 hover:text-[#C5A059]">
                   {phone}
                 </a>
               </li>
               <li className="text-sm font-light text-gray-300">
-                <span className="text-gray-600">العنوان:</span> <span>{officeAddress}</span>
+                <span className="text-gray-600">{isRTL ? "العنوان:" : "Address:"}</span> <span>{officeAddress}</span>
               </li>
             </ul>
           </motion.div>
 
           <motion.div variants={columnVariants} className="space-y-8">
-            <h4 className="text-xs font-light uppercase tracking-widest text-gray-500">قائمة النخبة</h4>
+            <h4 className="text-xs font-light uppercase tracking-widest text-gray-500">{isRTL ? "قائمة النخبة" : "Elite List"}</h4>
             <form onSubmit={handleEliteSubmit} className="space-y-6">
               <div className="relative">
-                <label htmlFor="footer-email" className="sr-only">
-                  البريد الإلكتروني
-                </label>
+                <label htmlFor="footer-email" className="sr-only">{isRTL ? "البريد الإلكتروني" : "Email Address"}</label>
                 <input
                   id="footer-email"
                   type="email"
@@ -161,7 +160,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
                   autoComplete="email"
                   value={eliteEmail}
                   onChange={(e) => setEliteEmail(e.target.value)}
-                  placeholder="أدخل بريدك الإلكتروني"
+                  placeholder={isRTL ? "أدخل بريدك الإلكتروني" : "Enter your email"}
                   className="w-full border-0 border-b border-[#C5A059]/30 bg-transparent px-0 py-3 text-sm font-light text-white transition-all duration-500 placeholder:font-light placeholder:text-gray-600 focus:border-[#C5A059] focus:outline-none"
                   required
                                   />
@@ -173,12 +172,10 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#C5A059]/30 border-t-[#C5A059]" />
-                    جارٍ الإرسال...
-                  </span>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#C5A059]/30 border-t-[#C5A059]" />{isRTL ? "جارٍ الإرسال..." : "Sending..."}</span>
                 ) : (
                   <>
-                    انضم الآن
+                    {isRTL ? "انضم الآن" : "Join Now"}
                     <ChevronLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
                   </>
                 )}

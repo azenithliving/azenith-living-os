@@ -339,7 +339,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
             {loading ? (
               <div className="relative z-20 bg-transparent py-20 text-center">
                 <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-brand-primary border-t-transparent" />
-                <p className="text-white/40">تنسيق المساحات البصرية...</p>
+                <p className="text-white/40">{isRTL ? "تنسيق المساحات البصرية..." : "Formatting visual spaces..."}</p>
               </div>
             ) : null}
           </div>

@@ -3,11 +3,20 @@
 import React, { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
-const styles = [
+import useSessionStore from "@/stores/useSessionStore";
+
+const stylesAr = [
   { id: "modern", label: "مودرن" },
   { id: "classic", label: "كلاسيك" },
   { id: "industrial", label: "صناعي" },
   { id: "scandinavian", label: "سكاندينافي" },
+];
+
+const stylesEn = [
+  { id: "modern", label: "Modern" },
+  { id: "classic", label: "Classic" },
+  { id: "industrial", label: "Industrial" },
+  { id: "scandinavian", label: "Scandinavian" },
 ];
 
 interface AIStylePickerProps {
@@ -17,7 +26,10 @@ interface AIStylePickerProps {
   options?: ReadonlyArray<{ id: string; label: string }>;
 }
 
-const AIStylePicker: React.FC<AIStylePickerProps> = ({ selectedStyle, onStyleChange, options = styles }) => {
+const AIStylePicker: React.FC<AIStylePickerProps> = ({ selectedStyle, onStyleChange, options }) => {
+  const currentLang = useSessionStore((state) => state.language);
+  const isRTL = currentLang === "ar";
+  const currentOptions = options || (isRTL ? stylesAr : stylesEn);
   const [mounted, setMounted] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
@@ -30,7 +42,7 @@ const AIStylePicker: React.FC<AIStylePickerProps> = ({ selectedStyle, onStyleCha
     return (
       <div className="flex flex-col items-center mb-16 px-4">
         <div className="relative flex flex-wrap justify-center items-center bg-white/[0.03] backdrop-blur-md p-1.5 rounded-full border border-white/10">
-          {options.map((style) => (
+          {currentOptions.map((style) => (
             <div
               key={style.id}
               className="relative px-8 py-2.5 text-sm md:text-base text-white/40"
@@ -48,7 +60,7 @@ const AIStylePicker: React.FC<AIStylePickerProps> = ({ selectedStyle, onStyleCha
   return (
     <div className="flex flex-col items-center mb-16 px-4">
       <div className="relative flex flex-wrap justify-center items-center bg-white/[0.03] backdrop-blur-md p-1.5 rounded-full border border-white/10">
-        {options.map((style) => {
+        {currentOptions.map((style) => {
           const isActive = selectedStyle === style.id;
           return (
             <button
