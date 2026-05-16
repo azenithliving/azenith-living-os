@@ -189,7 +189,8 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
         }
 
         // Step 2: For rooms without CMS images, fetch from Pexels API
-        const imagePromises = roomList.map(async (room, index) => {
+        const allRooms = [...roomList, { slug: "interior-design", title: "Comprehensive Interior Design" }];
+        const imagePromises = allRooms.map(async (room, index) => {
           // If CMS image exists, use it
           if (cmsImages[room.slug]) {
             return { [room.slug]: cmsImages[room.slug] };
@@ -316,31 +317,6 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
                     <p className="line-clamp-2 text-sm leading-relaxed text-white/70">{isRTL ? "حلول متكاملة لتصميم مساحتك بالكامل." : "Integrated solutions to design your entire space."}</p>
                   </div>
                 </Link>
-              </div>
-
-              <div className="group relative z-20 bg-transparent">
-                <div className="relative block aspect-[16/10] overflow-hidden rounded-[2.5rem] border-2 border-[#C5A059] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1A1A1B] via-[#0D0D0E] to-black shadow-[0_0_50px_rgba(197,160,89,0.3)] transition-all duration-500 group-hover:-translate-y-3 group-hover:border-brand-primary/30">
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                    <div className="mb-4 flex items-center gap-2">
-                      <Sparkles className="h-3 w-3 animate-pulse text-[#C5A059]" />
-                      <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-[#C5A059] animate-pulse">{isRTL ? "الخطوة الحصرية" : "EXCLUSIVE STEP"}</span>
-                    </div>
-                    <h2 className="mb-4 text-xl font-black leading-tight text-white md:text-2xl">
-                      {isRTL ? "استكشف " : "Explore "} <span className="bg-gradient-to-r from-[#C5A059] to-[#E5C170] bg-clip-text text-transparent">{isRTL ? "المساحات" : "Spaces"}</span>
-                    </h2>
-                    <p className="mb-6 max-w-[200px] text-xs leading-relaxed text-white/50 md:text-sm">
-                      {styleSwitchCount > 2 ? (isRTL ? "وجدنا الستايل المناسب لك.. لنبدأ التنفيذ" : "Found the right style.. Let's start execution") : (isRTL ? "اكتشف إبداعاتنا في التصميم الداخلي المبتكر." : "Discover our innovative interior design creations.")}
-                    </p>
-                    <Link
-                      href={styleSwitchCount > 2 ? primaryHref : "/rooms"}
-                      onClick={styleSwitchCount > 2 ? handlePrimaryClick : undefined}
-                      className="w-full rounded-xl bg-gradient-to-r from-[#C5A059] to-[#E5C170] px-4 py-3 text-center text-sm font-black text-black shadow-[0_15px_30px_-10px_rgba(197,160,89,0.6)] transition-all hover:shadow-[0_0_20px_rgba(197,160,89,0.5)] active:scale-95"
-                    >
-                      {styleSwitchCount > 2 ? (isRTL ? "اطلب استشارة دمج مجانية" : "Request Free Mix Consultation") : (isRTL ? "استكشف المساحات" : "Explore Spaces")}
-                    </Link>
-                    <span className="mt-4 text-[8px] font-medium text-white/40">{isRTL ? "تصاميم فريدة • جودة استثنائية" : "Unique Designs • Exceptional Quality"}</span>
-                  </div>
-                </div>
               </div>
 
               <div className="relative z-50 flex aspect-[16/10] transform flex-col items-center justify-center overflow-hidden rounded-[2.5rem] border-2 border-[#C5A059] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1A1A1B] via-[#0D0D0E] to-black p-8 text-center shadow-[0_0_50px_rgba(197,160,89,0.3)] transition-all duration-500 hover:scale-105 md:col-span-2 lg:col-span-1">
