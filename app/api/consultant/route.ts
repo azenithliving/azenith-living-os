@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin as supabase } from "@/lib/supabase-server";
-import { askGroq, askGroqMessages } from "@/lib/ai-orchestrator";
+import { askGroq, askOrchestratorMessages } from "@/lib/ai-orchestrator";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 interface GroqMessage {
@@ -331,12 +331,13 @@ export async function POST(
       userName || existingSession?.insights?.userName, 
       allLearnings, 
       existingSession?.insights,
-      mutations || []
+      mutations || [],
+      language
     );
 
     // Get AI response using Groq with full conversation context
     console.log(`[Consultant] Calling AI (Groq/Fallback)...`);
-    const aiResult = await askGroqMessages(groqMessages, {
+    const aiResult = await askOrchestratorMessages(groqMessages, {
       maxTokens: 2048,
       temperature: 0.7,
     });
@@ -478,7 +479,8 @@ function buildGroqMessages(
   userName?: string,
   learnings: string[] = [],
   insights?: Insights,
-  activeMutations: any[] = []
+  activeMutations: any[] = [],
+  language?: string
 ): GroqMessage[] {
   // Start with system message
   let systemContent = SYSTEM_PROMPT;
@@ -513,6 +515,15 @@ function buildGroqMessages(
     learnings.forEach((learning, index) => {
       systemContent += `${index + 1}. ${learning}\n`;
     });
+  }
+
+  
+
+  // Enforce language constraint based on UI language
+  if (language === "en") {
+    systemContent += "\n\n[CRITICAL DIRECTIVE - HIGHEST PRIORITY]: The user is browsing the English version of the website. YOU MUST RESPOND ENTIRELY IN ENGLISH. Do not use Arabic words, greetings, or phrases under any circumstances. Translate your sales tactics, luxury tone, and closing statements into perfect, native-sounding English.";
+  } else {
+    systemContent += "\n\n[توجيه هام]: العميل يتصفح النسخة العربية. يجب أن تكون كل ردودك باللغة العربية (الفصحى أو لهجة مصرية راقية).";
   }
 
   const messages: GroqMessage[] = [
@@ -727,3 +738,4 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
+

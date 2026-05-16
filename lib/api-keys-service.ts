@@ -6,21 +6,44 @@
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
-// Parse key pools from environment
-const parseKeyPool = (envValue: string | undefined): string[] => {
-  if (!envValue) return [];
-  return envValue.split(",").map((k) => k.trim()).filter((k) => k.length > 0);
+// Parse key pools from environment and support chunked variables (e.g., GROQ_KEYS_1, GROQ_KEYS_2)
+const parseKeyPool = (envPrefix: string): string[] => {
+  let allKeys: string[] = [];
+  
+  // Also check the exact base name
+  if (process.env[envPrefix]) {
+    allKeys = allKeys.concat(process.env[envPrefix]!.split(",").map((k) => k.trim()).filter(Boolean));
+  }
+  
+  // Check for chunked vars like GROQ_KEYS_1, GROQ_KEYS_2, etc.
+  for (let i = 1; i <= 20; i++) {
+    const chunkName = `${envPrefix}_${i}`;
+    if (process.env[chunkName]) {
+      allKeys = allKeys.concat(process.env[chunkName]!.split(",").map((k) => k.trim()).filter(Boolean));
+    }
+  }
+  
+  // Remove duplicates
+  return Array.from(new Set(allKeys));
 };
 
 // Environment key pools
 const ENV_KEY_POOLS = {
-  groq: parseKeyPool(process.env.GROQ_KEYS),
-  openrouter: parseKeyPool(process.env.OPENROUTER_KEYS),
-  mistral: parseKeyPool(process.env.MISTRAL_KEYS),
-  pexels: parseKeyPool(process.env.PEXELS_KEYS),
-  deepseek: parseKeyPool(process.env.DEEPSEEK_KEYS),
-  openai: parseKeyPool(process.env.OPENAI_KEYS),
-  google: parseKeyPool(process.env.GOOGLE_AI_KEYS || process.env.GEMINI_API_KEY),
+  groq: parseKeyPool("GROQ_KEYS"),
+  openrouter: parseKeyPool("OPENROUTER_KEYS"),
+  mistral: parseKeyPool("MISTRAL_KEYS"),
+  pexels: parseKeyPool("PEXELS_KEYS"),
+  deepseek: parseKeyPool("DEEPSEEK_KEYS"),
+  openai: parseKeyPool("OPENAI_KEYS"),
+  google: parseKeyPool("GOOGLE_AI_KEYS").length > 0 ? parseKeyPool("GOOGLE_AI_KEYS") : parseKeyPool("GEMINI_API_KEY"),
+  anthropic: parseKeyPool("ANTHROPIC_KEYS"),
+  sambanova: parseKeyPool("SAMBANOVA_KEYS"),
+  together: parseKeyPool("TOGETHER_API_KEYS"),
+  xai: parseKeyPool("XAI_KEYS"),
+  api_ninjas: parseKeyPool("API_NINJAS_KEYS"),
+  aimlapi: parseKeyPool("AIMLAPI_KEYS"),
+  apifreellm: parseKeyPool("APIFREELLM_KEYS"),
+  bytez: parseKeyPool("BYTEZ_KEYS"),
 };
 
 // In-memory key state
@@ -39,6 +62,14 @@ const keyStates: Record<string, KeyState[]> = {
   deepseek: [],
   openai: [],
   google: [],
+  anthropic: [],
+  sambanova: [],
+  together: [],
+  xai: [],
+  api_ninjas: [],
+  aimlapi: [],
+  apifreellm: [],
+  bytez: [],
 };
 
 let keysLoaded = false;
@@ -84,7 +115,7 @@ export async function loadKeysFromDB(): Promise<void> {
     }
 
     // Merge with env keys (avoid duplicates)
-    const providers = ["groq", "openrouter", "mistral", "pexels", "deepseek", "openai", "google"] as const;
+    const providers = ["groq", "openrouter", "mistral", "pexels", "deepseek", "openai", "google", "anthropic", "sambanova", "together", "xai", "api_ninjas", "aimlapi", "apifreellm", "bytez"] as const;
     for (const provider of providers) {
       const existingKeys = new Set(keyStates[provider].map((k) => k.key));
       for (const envKey of ENV_KEY_POOLS[provider]) {
@@ -113,7 +144,7 @@ export async function loadKeysFromDB(): Promise<void> {
  * Fallback to environment keys only
  */
 function fallbackToEnvKeys(): void {
-  const providers = ["groq", "openrouter", "mistral", "pexels", "deepseek", "openai", "google"] as const;
+  const providers = ["groq", "openrouter", "mistral", "pexels", "deepseek", "openai", "google", "anthropic", "sambanova", "together", "xai", "api_ninjas", "aimlapi", "apifreellm", "bytez"] as const;
   for (const provider of providers) {
     keyStates[provider] = ENV_KEY_POOLS[provider].map((k) => ({
       key: k,
@@ -129,7 +160,7 @@ function fallbackToEnvKeys(): void {
  * Get a single key from database (preferred) or environment
  */
 export async function getKeyFromDB(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google"
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova" | "together" | "xai" | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez"
 ): Promise<string | null> {
   try {
     const supabase = getSupabaseAdminClient();
@@ -170,13 +201,21 @@ const keyIndices: Record<string, number> = {
   deepseek: 0,
   openai: 0,
   google: 0,
+  anthropic: 0,
+  sambanova: 0,
+  together: 0,
+  xai: 0,
+  api_ninjas: 0,
+  aimlapi: 0,
+  apifreellm: 0,
+  bytez: 0,
 };
 
 /**
  * Get next available key using round-robin with cooldown support
  */
 export async function getNextAvailableKey(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google"
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova" | "together" | "xai" | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez"
 ): Promise<{ key: string; index: number } | null> {
   if (!keysLoaded) {
     await loadKeysFromDB();
@@ -218,7 +257,7 @@ export async function getNextAvailableKey(
  * Set cooldown for a specific key
  */
 export async function setKeyCooldown(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google",
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova" | "together" | "xai" | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez",
   key: string,
   durationMs: number
 ): Promise<void> {
@@ -254,7 +293,7 @@ export async function setKeyCooldown(
  * Increment request count for a key
  */
 export async function incrementKeyUsage(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google",
+  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova" | "together" | "xai" | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez",
   key: string
 ): Promise<void> {
   // Update in-memory
@@ -287,7 +326,7 @@ export async function incrementKeyUsage(
 /**
  * Get all key stats for a provider
  */
-export async function getKeyStats(provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google"): Promise<{
+export async function getKeyStats(provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova" | "together" | "xai" | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez"): Promise<{
   total: number;
   active: number;
   inCooldown: number;

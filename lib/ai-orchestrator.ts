@@ -7,15 +7,17 @@ import { runMastermind } from "./mastermind-graph";
 import { routeRequest, getBestModelForTask } from "./openrouter-service";
 import { getNextAvailableKey, setKeyCooldown, incrementKeyUsage, getKeyStats } from "./api-keys-service";
 
-// Model Configuration
 const CONFIG = {
-  GROQ_MODEL: "llama-3.3-70b-versatile",
-  OPENROUTER_VISION_MODEL: "anthropic/claude-3.5-sonnet",
+  // === The Absolute Best Models on the Market ===
+  GROQ_MODEL: "llama-3.3-70b-versatile", // Blazing fast, top tier open source
+  ANTHROPIC_MODEL: "claude-3-5-sonnet-20241022", // The undisputed king of coding and complex logic
+  OPENROUTER_VISION_MODEL: "anthropic/claude-3.5-sonnet", // Best vision model
   MISTRAL_CODE_MODEL: "codestral-latest",
   MISTRAL_GENERAL_MODEL: "mistral-large-latest",
-  DEEPSEEK_MODEL: "deepseek-chat",
-  OPENAI_MODEL: "gpt-4o",
-  GOOGLE_MODEL: "gemini-2.0-flash",
+  DEEPSEEK_MODEL: "deepseek-chat", // DeepSeek V3 (excellent logic)
+  OPENAI_MODEL: "gpt-4o", // Top tier reasoning
+  GOOGLE_MODEL: "gemini-2.0-flash", // Extremely fast and capable
+  SAMBANOVA_MODEL: "Meta-Llama-3.1-70B-Instruct", // Lightning fast Llama
   MAX_RETRIES: 3,
   RETRY_DELAY_MS: 500,
 };
@@ -30,7 +32,7 @@ const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(r
 
 // Provider-specific fetch with retry logic
 async function fetchWithRetry<T>(
-  provider: "groq" | "openrouter" | "mistral" | "deepseek" | "openai" | "google",
+  provider: "groq" | "openrouter" | "mistral" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova",
   fetchFn: (key: string) => Promise<Response>,
   parseFn: (data: any) => T
 ): Promise<{ success: true; data: T } | { success: false; error: string; status?: number }> {
@@ -262,6 +264,170 @@ export async function askGoogle(prompt: string, options?: any) {
     (data) => data.candidates?.[0]?.content?.parts?.[0]?.text || ""
   );
   return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+export async function askGoogleMessages(messages: Array<{ role: string; content: string }>, options?: any) {
+  const model = options?.model || CONFIG.GOOGLE_MODEL;
+  
+  // Format messages for Google API
+  const formattedContents = messages.map(msg => ({
+    role: msg.role === "assistant" ? "model" : "user",
+    parts: [{ text: msg.content }]
+  }));
+  
+  const result = await fetchWithRetry(
+    "google",
+    (key) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: formattedContents,
+        generationConfig: { temperature: options?.temperature ?? 0.7, maxOutputTokens: options?.maxTokens ?? 2048 },
+      }),
+    }),
+    (data) => data.candidates?.[0]?.content?.parts?.[0]?.text || ""
+  );
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+/**
+ * Ask Anthropic (Claude) with full message history
+ */
+export async function askAnthropicMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  // Extract system prompt if present
+  let systemPrompt = "";
+  const filteredMessages = messages.filter(m => {
+    if (m.role === "system") {
+      systemPrompt = m.content;
+      return false;
+    }
+    return true;
+  });
+
+  const body: Record<string, unknown> = {
+    model: options?.model || CONFIG.ANTHROPIC_MODEL,
+    messages: filteredMessages,
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (systemPrompt) {
+    body.system = systemPrompt;
+  }
+
+  const result = await fetchWithRetry(
+    "anthropic",
+    (key) => fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }),
+    (data) => data.content?.[0]?.text || ""
+  );
+
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+/**
+ * Ask SambaNova with full message history (extremely fast)
+ */
+export async function askSambaNovaMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const result = await fetchWithRetry(
+    "sambanova",
+    (key) => fetch("https://api.sambanova.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: options?.model || CONFIG.SAMBANOVA_MODEL,
+        messages: messages,
+        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? 2048,
+      }),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+/**
+ * Master Orchestrator: Dynamically reads .env fallback configs and routes the request
+ * with high availability and smart fallback.
+ */
+export async function askOrchestratorMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  
+  const providersToTry = [
+    process.env.DEFAULT_AI_PROVIDER || "groq",
+    process.env.FALLBACK_AI_PROVIDER_1 || "gemini",
+    process.env.FALLBACK_AI_PROVIDER_2 || "openrouter",
+    process.env.FALLBACK_AI_PROVIDER_3 || "openai",
+  ];
+
+  // Additional emergency fallbacks
+  if (!providersToTry.includes("anthropic")) providersToTry.push("anthropic");
+  if (!providersToTry.includes("sambanova")) providersToTry.push("sambanova");
+
+  console.log(`[Orchestrator] Starting inference. Provider sequence: ${providersToTry.join(' -> ')}`);
+
+  for (const provider of providersToTry) {
+    try {
+      console.log(`[Orchestrator] Attempting provider: ${provider}`);
+      let result;
+
+      switch (provider.toLowerCase()) {
+        case "groq":
+          result = await askGroqMessages(messages, options);
+          break;
+        case "gemini":
+        case "google":
+          result = await askGoogleMessages(messages, options);
+          break;
+        case "openai":
+          result = await askOpenAIMessages(messages, options);
+          break;
+        case "anthropic":
+        case "claude":
+          result = await askAnthropicMessages(messages, options);
+          break;
+        case "sambanova":
+          result = await askSambaNovaMessages(messages, options);
+          break;
+        case "openrouter":
+          // OpenRouter is typically called using askGroqMessages structure, but we'll adapt askOpenRouter
+          result = await askOpenRouter(messages[messages.length - 1].content);
+          break;
+        default:
+          continue; // skip unknown
+      }
+
+      if (result.success && result.content && result.content.trim().length > 0) {
+        console.log(`[Orchestrator] ✅ Success with ${provider}`);
+        return result;
+      } else {
+        console.warn(`[Orchestrator] ⚠️ Provider ${provider} failed or returned empty content. Trying next...`);
+      }
+    } catch (e: any) {
+      console.error(`[Orchestrator] ❌ Provider ${provider} threw an error:`, e.message);
+    }
+  }
+
+  return { success: false, content: "", error: "All Orchestrator fallbacks exhausted. The Hive Mind is unreachable." };
 }
 
 /**
