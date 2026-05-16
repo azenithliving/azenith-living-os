@@ -1,86 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getNextAvailableKey, setKeyCooldown, getKeyStats } from "@/lib/api-keys-service";
 
 // Smart Key Rotation Manager with Blacklisting for Pexels
 class PexelsKeyRotationManager {
-  private keys: string[];
-  private currentIndex: number = 0;
-  private blacklistedKeys: Map<string, number> = new Map(); // key -> timestamp when blacklisted
   private readonly BLACKLIST_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
-  constructor() {
-    this.keys = this.loadKeys();
-    console.log('[Pexels API] Smart Rotation: Loaded', this.keys.length, 'keys');
+  async getNextKey(): Promise<{ key: string | null; index: number; total: number }> {
+    const keyRecord = await getNextAvailableKey("pexels");
+    if (!keyRecord) return { key: null, index: -1, total: 0 };
+    return { key: keyRecord.key, index: keyRecord.index, total: 1 };
   }
 
-  private loadKeys(): string[] {
-    const keys: string[] = [];
-    
-    // Primary: PEXELS_KEYS (comma-separated for multiple keys)
-    if (process.env.PEXELS_KEYS) {
-      keys.push(...process.env.PEXELS_KEYS.split(',').map(k => k.trim()).filter(k => k.length > 0));
-    }
-    
-    // Fallback to single key env vars
-    if (process.env.NEXT_PUBLIC_PEXELS_API_KEY) {
-      keys.push(process.env.NEXT_PUBLIC_PEXELS_API_KEY.trim());
-    }
-    if (process.env.PEXELS_API_KEY) {
-      keys.push(process.env.PEXELS_API_KEY.trim());
-    }
-    
-    // Remove duplicates while preserving order
-    return [...new Set(keys)];
+  async blacklistKey(key: string): Promise<void> {
+    await setKeyCooldown("pexels", key, this.BLACKLIST_DURATION_MS);
+    console.log(`[Pexels API] Key blacklisted in memory/DB for 10 minutes`);
   }
 
-  private isBlacklisted(key: string): boolean {
-    const blacklistedAt = this.blacklistedKeys.get(key);
-    if (!blacklistedAt) return false;
-    
-    const now = Date.now();
-    if (now - blacklistedAt > this.BLACKLIST_DURATION_MS) {
-      this.blacklistedKeys.delete(key);
-      console.log('[Pexels API] Key unblacklisted after 10min cooldown');
-      return false;
-    }
-    return true;
-  }
-
-  private getAvailableKeys(): string[] {
-    const now = Date.now();
-    for (const [key, timestamp] of this.blacklistedKeys.entries()) {
-      if (now - timestamp > this.BLACKLIST_DURATION_MS) {
-        this.blacklistedKeys.delete(key);
-      }
-    }
-    return this.keys.filter(key => !this.isBlacklisted(key));
-  }
-
-  // Round-robin: get next available key
-  getNextKey(): { key: string | null; index: number; total: number } {
-    const available = this.getAvailableKeys();
-    
-    if (available.length === 0) {
-      return { key: null, index: -1, total: this.keys.length };
-    }
-
-    this.currentIndex = (this.currentIndex + 1) % available.length;
-    const selectedKey = available[this.currentIndex];
-    const originalIndex = this.keys.indexOf(selectedKey) + 1;
-    
-    return { key: selectedKey, index: originalIndex, total: this.keys.length };
-  }
-
-  blacklistKey(key: string): void {
-    this.blacklistedKeys.set(key, Date.now());
-    const keyIndex = this.keys.indexOf(key) + 1;
-    console.log(`[Pexels API] Key ${keyIndex} blacklisted for 10 minutes (429 detected)`);
-  }
-
-  getStats(): { total: number; available: number; blacklisted: number } {
+  async getStats(): Promise<{ total: number; available: number; blacklisted: number }> {
+    const stats = await getKeyStats("pexels");
     return {
-      total: this.keys.length,
-      available: this.getAvailableKeys().length,
-      blacklisted: this.blacklistedKeys.size
+      total: stats.total,
+      available: stats.active,
+      blacklisted: stats.inCooldown
     };
   }
 }
@@ -173,15 +114,12 @@ export async function GET(request: NextRequest) {
     const page = Math.max(Number(searchParams.get("page") || "1"), 1);
     const orientation = searchParams.get("orientation") || "landscape";
 
-    const stats = keyManager.getStats();
+    const stats = await keyManager.getStats();
     console.log(`[Pexels API] Stats: ${stats.total} total, ${stats.available} available, ${stats.blacklisted} blacklisted`);
 
-    if (stats.total === 0) {
-      console.error("❌ Azenith Critical: No Pexels API keys found.");
-      return NextResponse.json(
-        { ok: false, message: "No API keys available in environment" },
-        { status: 500 }
-      );
+    if (stats.available === 0) {
+      console.warn("⚠️ No available Pexels API keys found. Returning fallback images.");
+      return NextResponse.json(getStaticLuxuryFallback());
     }
 
     // Smart Round-Robin Key Rotation
@@ -189,7 +127,7 @@ export async function GET(request: NextRequest) {
     const maxAttempts = stats.total * 2;
     
     while (attempts < maxAttempts) {
-      const { key, index, total } = keyManager.getNextKey();
+      const { key, index, total } = await keyManager.getNextKey();
       
       if (!key) {
         console.log('[Pexels API] No available keys (all blacklisted)');
@@ -215,7 +153,7 @@ export async function GET(request: NextRequest) {
           
           if (isPexelsRateLimit(response.status, errorData)) {
             console.log(`[Pexels API] Key ${index} hit rate limit (${response.status}), blacklisting...`);
-            keyManager.blacklistKey(key);
+            await keyManager.blacklistKey(key);
             continue; // Get next key via round-robin
           }
           
@@ -232,7 +170,7 @@ export async function GET(request: NextRequest) {
           photos: data.photos || [],
           keyUsed: index,
           totalKeys: total,
-          blacklisted: keyManager.getStats().blacklisted
+          blacklisted: (await keyManager.getStats()).blacklisted
         });
         
       } catch (error) {

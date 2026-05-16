@@ -145,7 +145,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
     }
 
     return ranked;
-  }, [displayStyle]);
+  }, [displayStyle, isRTL]);
 
   useEffect(() => {
     const timers = timersRef.current;

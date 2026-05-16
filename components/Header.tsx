@@ -19,7 +19,7 @@ export default function Header() {
   // Use session store for language state
   const currentLang = useSessionStore((state) => state.language);
   const setLanguage = useSessionStore((state) => state.setLanguage);
-  const isHydrated = useSessionStore((state) => state.isHydrated);
+  const [mounted, setMounted] = useState(false);
 
   const handleLanguageChange = (lang: 'ar' | 'en') => {
     if (lang === currentLang) return;
@@ -29,6 +29,7 @@ export default function Header() {
   };
 
   useEffect(() => {
+    setMounted(true);
     return () => {
       if (clickTimerRef.current) {
         clearTimeout(clickTimerRef.current);
@@ -71,27 +72,27 @@ export default function Header() {
       >
         <nav dir="rtl" className="hidden items-center gap-8 text-sm font-medium text-white md:flex">
           <Link href="/about" className="transition-colors hover:text-[#C5A059]">
-            {currentLang === 'ar' ? 'من نحن' : 'About Us'}
+            {!mounted ? 'من نحن' : (currentLang === 'ar' ? 'من نحن' : 'About Us')}
           </Link>
           <Link href="/rooms" className="transition-colors hover:text-[#C5A059]">
-            {currentLang === 'ar' ? 'المساحات' : 'Spaces'}
+            {!mounted ? 'المساحات' : (currentLang === 'ar' ? 'المساحات' : 'Spaces')}
           </Link>
           <Link href="/request" className="transition-colors hover:text-[#C5A059]">
-            {currentLang === 'ar' ? 'تواصل معنا' : 'Contact Us'}
+            {!mounted ? 'تواصل معنا' : (currentLang === 'ar' ? 'تواصل معنا' : 'Contact Us')}
           </Link>
-          <div className="flex items-center gap-2 border border-[#C5A059]/30 rounded-lg px-3 py-1">
+          <div className="flex items-center gap-2 border border-[#C5A059]/30 rounded-lg px-3 py-1" dir="ltr">
             <button
-              onClick={() => handleLanguageChange('ar')}
-              className={`text-sm ${currentLang === 'ar' ? 'text-[#C5A059] font-bold' : 'text-white/60'}`}
+              onClick={() => handleLanguageChange('en')}
+              className={`text-sm ${!mounted ? 'text-white/60' : (currentLang === 'en' ? 'text-[#C5A059] font-bold' : 'text-white/60')}`}
             >
-              AR
+              EN
             </button>
             <span className="text-white/30">|</span>
             <button
-              onClick={() => handleLanguageChange('en')}
-              className={`text-sm ${currentLang === 'en' ? 'text-[#C5A059] font-bold' : 'text-white/60'}`}
+              onClick={() => handleLanguageChange('ar')}
+              className={`text-sm ${!mounted ? 'text-[#C5A059] font-bold' : (currentLang === 'ar' ? 'text-[#C5A059] font-bold' : 'text-white/60')}`}
             >
-              EN
+              AR
             </button>
           </div>
         </nav>
@@ -137,28 +138,28 @@ export default function Header() {
           >
             <div className="flex flex-col items-end space-y-6 px-6 py-8" dir="rtl">
               <Link href="/about" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                {currentLang === 'ar' ? 'من نحن' : 'About Us'}
+                {!mounted ? 'من نحن' : (currentLang === 'ar' ? 'من نحن' : 'About Us')}
               </Link>
               <Link href="/rooms" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                {currentLang === 'ar' ? 'المساحات' : 'Spaces'}
+                {!mounted ? 'المساحات' : (currentLang === 'ar' ? 'المساحات' : 'Spaces')}
               </Link>
               <Link href="/request" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                {currentLang === 'ar' ? 'تواصل معنا' : 'Contact Us'}
+                {!mounted ? 'تواصل معنا' : (currentLang === 'ar' ? 'تواصل معنا' : 'Contact Us')}
               </Link>
               <div className="pt-4 border-t border-white/10 w-full flex justify-end">
-                <div className="flex items-center gap-2 border border-[#C5A059]/30 rounded-lg px-3 py-1">
+                <div className="flex items-center gap-2 border border-[#C5A059]/30 rounded-lg px-3 py-1" dir="ltr">
                   <button
-                    onClick={() => handleLanguageChange('ar')}
-                    className={`text-sm ${currentLang === 'ar' ? 'text-[#C5A059] font-bold' : 'text-white/60'}`}
+                    onClick={() => handleLanguageChange('en')}
+                    className={`text-sm ${!mounted ? 'text-white/60' : (currentLang === 'en' ? 'text-[#C5A059] font-bold' : 'text-white/60')}`}
                   >
-                    AR
+                    EN
                   </button>
                   <span className="text-white/30">|</span>
                   <button
-                    onClick={() => handleLanguageChange('en')}
-                    className={`text-sm ${currentLang === 'en' ? 'text-[#C5A059] font-bold' : 'text-white/60'}`}
+                    onClick={() => handleLanguageChange('ar')}
+                    className={`text-sm ${!mounted ? 'text-[#C5A059] font-bold' : (currentLang === 'ar' ? 'text-[#C5A059] font-bold' : 'text-white/60')}`}
                   >
-                    EN
+                    AR
                   </button>
                 </div>
               </div>
