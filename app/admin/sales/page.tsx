@@ -255,42 +255,20 @@ function SalesManagerTab() {
         </div>
       </div>
 
-      {activeSubTab === "chat" && (
-        <div className="space-y-4">
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 h-[400px] overflow-y-auto">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`mb-4 ${msg.role === "user" ? "text-left" : "text-right"}`}>
-                <div className={`inline-block max-w-[80%] rounded-xl p-3 ${
-                  msg.role === "user" ? "bg-[#C5A059]/20 text-white" : "bg-white/10 text-white"
-                }`}>
-                  <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
-                  {msg.timestamp && (
-                    <p className="text-xs text-white/40 mt-1">
-                      {new Date(msg.timestamp).toLocaleTimeString("ar-EG")}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-              placeholder="اكتب رسالتك..."
-              className="flex-1 rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3 text-white placeholder:text-white/40"
-            />
-            <button
-              onClick={sendMessage}
-              disabled={isLoading || !inputMessage.trim()}
-              className="rounded-xl bg-[#C5A059] px-4 py-3 text-[#1a1a1a] font-medium hover:bg-[#d8b56d] disabled:opacity-50"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </div>
+            {activeSubTab === "chat" && (
+        <div className="rounded-2xl border border-[#C5A059]/30 bg-[#C5A059]/5 p-8 text-center space-y-4">
+          <Brain className="w-12 h-12 text-[#C5A059] mx-auto" />
+          <h3 className="text-lg font-bold text-white">المحادثة الإدارية انتقلت للمساعد الموحّد</h3>
+          <p className="text-sm text-white/60 max-w-md mx-auto">
+            نفّذ أوامر المبيعات، المفاتيح، والوكلاء من مكان واحد بلغتك الطبيعية.
+          </p>
+          <Link
+            href="/admin/assistant"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#C5A059] px-6 py-3 text-[#1a1a1a] font-semibold hover:bg-[#d8b56d]"
+          >
+            <MessageCircle className="w-5 h-5" />
+            افتح المساعد الموحّد
+          </Link>
         </div>
       )}
 

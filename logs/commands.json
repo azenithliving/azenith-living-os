@@ -678,5 +678,15 @@
     "status": "executed",
     "result_summary": "📊 <b>حالة المفاتيح</b>\n\n<b>المزودون:</b>\n🟢 <b>GROQ</b>: 7 نشط | ~67 طلب\n🟢 <b>MISTRAL</b>: 6 نشط | ~0 طلب\n🟢 <b>OPENROUTER</b>: 8 نشط | ~0 طلب\n\nاستخدم <code>check_keys</code> لتحديث العرض.",
     "parameters": null
+  },
+  {
+    "user_id": "03105dde-325a-43ff-987d-50a0424505b9",
+    "command_text": "list_keys",
+    "signature": "azenithliving@gmail.com",
+    "executor_ip": null,
+    "executed_at": "2026-05-17T01:43:34.598Z",
+    "status": "executed",
+    "result_summary": "Found 1000 key(s)",
+    "parameters": null
   }
 ]

@@ -23,9 +23,9 @@ import {
   Search,
   Sparkles,
   Cpu,
-  Activity
+  Activity,
+  MessageCircle,
 } from "lucide-react";
-import { FloatingAgentButton } from "@/components/admin/agents/FloatingAgentButton";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Home,
@@ -44,7 +44,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Database,
   Sparkles,
   Cpu,
-  Activity
+  Activity,
 };
 
 const navCategories = [
@@ -52,41 +52,32 @@ const navCategories = [
     title: "الرئيسية",
     items: [
       { href: "/admin", label: "نظرة عامة", icon: "Home" },
+      { href: "/admin/assistant", label: "المساعد الموحّد", icon: "Brain" },
       { href: "/admin/owner-dashboard", label: "لوحة المالك", icon: "Crown" },
-    ]
+    ],
   },
   {
-    title: "الذكاء الاصطناعي والقدر",
+    title: "العمل",
     items: [
-      { href: "/admin/agents", label: "نظام الوكلاء الذكي", icon: "Bot" },
-      { href: "/admin/fate", label: "التحكم في القدر", icon: "Sparkles" },
-      { href: "/admin/intel", label: "مركز الاستخبارات", icon: "Brain" },
-      { href: "/admin/browser", label: "تصفح الأتمتة", icon: "Globe" },
-      { href: "/admin/computer", label: "تحكم الكمبيوتر", icon: "Monitor" },
-      { href: "/admin/sandbox", label: "بيئة الاختبار", icon: "Code" },
-    ]
+      { href: "/admin/work", label: "مركز العمل", icon: "TrendingUp" },
+      { href: "/admin/sales", label: "المبيعات", icon: "MessageSquare" },
+      { href: "/admin/manufacturing", label: "التصنيع", icon: "Factory" },
+    ],
   },
   {
-    title: "العمليات والمبيعات",
+    title: "الذكاء",
     items: [
-      { href: "/admin/sales", label: "إدارة المبيعات", icon: "TrendingUp" },
-      { href: "/admin/manufacturing", label: "خطوط الإنتاج", icon: "Factory" },
-    ]
-  },
-  {
-    title: "الاتصالات",
-    items: [
-      { href: "/admin/whatsapp", label: "واتساب", icon: "MessageSquare" },
-      { href: "/admin/phone", label: "الهاتف", icon: "Phone" },
-    ]
+      { href: "/admin/intelligence", label: "مركز الذكاء", icon: "Bot" },
+      { href: "/admin/agents", label: "سجل الوكلاء", icon: "Cpu" },
+    ],
   },
   {
     title: "النظام",
     items: [
-      { href: "/admin/settings", label: "الإعدادات", icon: "Settings" },
-      { href: "/admin/database", label: "قاعدة البيانات", icon: "Database" },
-    ]
-  }
+      { href: "/admin/system", label: "مركز النظام", icon: "Settings" },
+      { href: "/admin/settings", label: "الإعدادات", icon: "Database" },
+    ],
+  },
 ];
 
 export default function AdminLayoutClient({
@@ -234,8 +225,14 @@ export default function AdminLayoutClient({
         </div>
       </main>
 
-      {/* Floating Action Button */}
-      <FloatingAgentButton />
+      <Link
+        href="/admin/assistant"
+        className="fixed z-50 bottom-6 left-6 lg:left-8 flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#C5A059] text-[#1a1a1a] shadow-lg shadow-[#C5A059]/30 hover:scale-105 transition-transform font-bold text-sm"
+        title="المساعد الموحّد"
+      >
+        <MessageCircle className="w-5 h-5" />
+        <span className="hidden sm:inline">المساعد</span>
+      </Link>
     </div>
   );
 }

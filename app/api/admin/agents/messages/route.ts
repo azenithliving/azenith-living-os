@@ -132,11 +132,44 @@ export async function POST(request: NextRequest) {
       .from('agent_conversations')
       .update({ last_message_at: new Date().toISOString() })
       .eq('id', conversationId);
+
+    let agentReply: { content: string } | null = null;
+
+    if (data.sender_type === 'user' && data.content?.trim()) {
+      try {
+        const { processAdminNaturalLanguageReply } = await import('@/lib/admin-natural-brain');
+        const brain = await processAdminNaturalLanguageReply(data.content, {
+          userEmail: process.env.ADMIN_GATE_EMAIL || 'admin@azenithliving.com',
+          source: 'agent_chat',
+          agentKey: data.agent_key,
+          sessionId: `agent-${data.agent_key}-${conversationId}`,
+        });
+
+        if (brain.reply) {
+          const { data: replyRow } = await supabaseServer
+            .from('agent_messages')
+            .insert({
+              conversation_id: conversationId,
+              sender_type: 'agent',
+              sender_name: data.agent_key.toUpperCase(),
+              content: brain.reply,
+              mentions: [],
+              created_at: new Date().toISOString(),
+            })
+            .select()
+            .single();
+          agentReply = replyRow ? { content: brain.reply } : { content: brain.reply };
+        }
+      } catch (brainErr) {
+        console.error('[Agent messages] brain reply failed:', brainErr);
+      }
+    }
     
     return NextResponse.json({ 
       success: true, 
       message: 'تم إرسال الرسالة',
-      data: message 
+      data: message,
+      agentReply,
     });
     
   } catch (error) {

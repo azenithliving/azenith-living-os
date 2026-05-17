@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image, MessageSquare, Activity, Factory } from "lucide-react";
 import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-components";
 import { ImageHarvestDashboard } from "./intel/components/ImageHarvestDashboard";
+import { AdminProactiveStrip } from "@/components/admin/AdminProactiveStrip";
 
 interface AnalyticsData {
   metrics: {
@@ -82,9 +83,14 @@ export default function AdminPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [systemStatus, setSystemStatus] = useState({
+  const [systemStatus, setSystemStatus] = useState<{
+    whatsapp: string;
+    aaca: string;
+    aacaMode?: string;
+    aacaLabel?: string;
+  }>({
     whatsapp: "loading",
-    aaca: "loading"
+    aaca: "loading",
   });
 
   // Fetch real data from APIs
@@ -228,11 +234,22 @@ export default function AdminPage() {
       try {
         const waRes = await fetch("/api/admin/whatsapp/status");
         const waData = await waRes.json();
-        const aacaRes = await fetch("http://localhost:3001/api/health").catch(() => ({ ok: false }));
+        let aacaJson: { status?: string; mode?: string; label?: string } = {
+          status: "OFFLINE",
+          mode: "cloud",
+        };
+        try {
+          const aacaRes = await fetch("/api/admin/aaca/status");
+          if (aacaRes.ok) aacaJson = await aacaRes.json();
+        } catch {
+          /* keep offline fallback */
+        }
         
         setSystemStatus({
           whatsapp: waData.status || "DISCONNECTED",
-          aaca: aacaRes.ok ? "READY" : "OFFLINE"
+          aaca: aacaJson.status === "READY" ? "READY" : "OFFLINE",
+          aacaMode: aacaJson.mode || "cloud",
+          aacaLabel: aacaJson.label || "",
         });
       } catch (e) {
         setSystemStatus({ whatsapp: "ERROR", aaca: "ERROR" });
@@ -288,6 +305,8 @@ export default function AdminPage() {
           </div>
         </div>
 
+        <AdminProactiveStrip />
+
         {/* System Health Overview */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-6 flex items-center justify-between">
@@ -314,8 +333,10 @@ export default function AdminPage() {
                 <Activity className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-sm">نظام الوكلاء (AACA)</h3>
-                <p className="text-[10px] text-white/40">حالة العقل المدبر للعمليات</p>
+                <h3 className="text-white font-bold text-sm">نظام الوكلاء (7 وكلاء)</h3>
+                <p className="text-[10px] text-white/40">
+                  {systemStatus.aacaLabel || "يعمل من الموقع المنشور — بدون جهازك"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -446,7 +467,15 @@ export default function AdminPage() {
         {/* Quick Navigation */}
         <section>
           <h2 className="text-lg font-semibold text-white mb-4">مراكز القوى</h2>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Link href="/admin/assistant" className="group rounded-2xl border-2 border-[#C5A059]/40 bg-[#C5A059]/10 p-6 transition-all hover:border-[#C5A059] hover:bg-[#C5A059]/15">
+              <div className="rounded-xl bg-[#C5A059]/30 p-3 w-fit mb-4">
+                <Brain className="w-6 h-6 text-[#C5A059]" />
+              </div>
+              <h3 className="text-lg font-bold text-[#C5A059]">المساعد الموحّد</h3>
+              <p className="text-sm text-white/60 mt-2">كل الذكاء والتنفيذ — مكان واحد</p>
+            </Link>
+
             <Link href="/admin/sales" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
               <div className="rounded-xl bg-[#C5A059]/20 p-3 w-fit mb-4">
                 <TrendingUp className="w-6 h-6 text-[#C5A059]" />

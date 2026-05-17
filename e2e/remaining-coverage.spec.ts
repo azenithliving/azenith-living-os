@@ -107,8 +107,11 @@ test.describe("Admin login + pages", () => {
 
   const ADMIN_PAGES_AFTER_LOGIN = [
     "/admin",
+    "/admin/assistant",
+    "/admin/work",
+    "/admin/intelligence",
+    "/admin/system",
     "/admin/agents",
-    "/admin/intel",
     "/admin/settings",
     "/admin/sales",
   ];

@@ -815,103 +815,21 @@ export interface ProcessMessageOptions {
 }
 
 /**
- * Process a user message through the intelligent Mastermind AI
+ * Process a user message — natural language only; auto-routes via Admin Natural Brain.
  */
 export async function processIntelligentMessage(
   message: string,
   options: ProcessMessageOptions
 ): Promise<AIResponse> {
-  const { sessionId, userId, userEmail, bypassAuth = false, isOwner = false } = options;
-  
-  // 1. Load conversation history (using userId if available)
-  const history = userId ? await loadHistory(userId) : [];
-  
-  // 2. Save user message
-  await saveMessage({
-    session_id: sessionId,
-    user_id: userId,
-    role: "user",
-    content: message,
+  const { processAdminNaturalLanguage } = await import("./admin-natural-brain");
+  return processAdminNaturalLanguage(message, {
+    sessionId: options.sessionId,
+    userId: options.userId,
+    userEmail: options.userEmail || "admin@azenithliving.com",
+    bypassRls: options.bypassAuth,
+    isOwner: options.isOwner,
+    source: "mastermind",
   });
-  
-  // 3. Detect if this is a command
-  const detectedCommand = detectCommand(message);
-  
-  let response: AIResponse;
-  
-  if (detectedCommand && detectedCommand.confidence > 0.8) {
-    // 4a. Execute the command
-    const supabase = getSupabaseClient();
-    
-    try {
-      const commandResult = await executeCommand(
-        `${detectedCommand.command} ${detectedCommand.args.join(" ")}`,
-        {
-          supabase,
-          userId: userId || "00000000-0000-0000-0000-000000000000",
-          userEmail: userEmail || "admin@azenithliving.com",
-          bypassRls: bypassAuth,
-          isOwner,
-        }
-      );
-      
-      // Generate natural response about the command result
-      const aiMessage = await generateAIResponse(message, history, {
-        commandExecuted: detectedCommand.command,
-        commandResult: commandResult,
-      });
-      
-      response = {
-        type: "mixed",
-        message: aiMessage,
-        command: {
-          name: detectedCommand.command,
-          args: detectedCommand.args,
-          result: commandResult,
-        },
-      };
-      
-    } catch (error) {
-      // Command failed, explain naturally
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      const aiMessage = await generateAIResponse(
-        message,
-        history,
-        { commandExecuted: detectedCommand.command, commandResult: { success: false, error: errorMessage } }
-      );
-      
-      response = {
-        type: "mixed",
-        message: aiMessage,
-        command: {
-          name: detectedCommand.command,
-          args: detectedCommand.args,
-          result: { success: false, error: errorMessage },
-        },
-      };
-    }
-    
-  } else {
-    // 4b. Pure conversation - no command to execute
-    const aiMessage = await generateAIResponse(message, history);
-    
-    response = {
-      type: "conversation",
-      message: aiMessage,
-    };
-  }
-  
-  // 5. Save assistant response
-  await saveMessage({
-    session_id: sessionId,
-    user_id: userId,
-    role: "assistant",
-    content: response.message,
-    command_executed: response.command?.name,
-    command_result: response.command?.result ? JSON.stringify(response.command.result) : undefined,
-  });
-  
-  return response;
 }
 
 // ============================================

@@ -3,7 +3,7 @@ import { getPendingApprovals, getSecurityStats, logAuditEvent } from "@/lib/ulti
 import { getMetricsSnapshot, detectAnomalies, generateOpportunities } from "@/lib/ultimate-agent/predictive-engine";
 import { getActiveGoals } from "@/lib/ultimate-agent/memory-store";
 import { resolvePrimaryCompanyId } from "@/lib/company-resolver";
-import { SovereignIntelligenceKernel } from "@/lib/sovereign-kernel";
+import { processAdminNaturalLanguageReply } from "@/lib/admin-natural-brain";
 
 export type ConversationMessage = { role: "user" | "assistant"; content: string };
 
@@ -64,6 +64,7 @@ export async function POST(req: Request) {
 
   try {
     const actorId = req.headers.get("x-admin-user-id") || "admin_dashboard";
+    const actorEmail = req.headers.get("x-admin-user-email") || "admin@azenithliving.com";
     const companyId = await resolvePrimaryCompanyId();
     const body = await req.json();
     const { type, payload } = body;
@@ -108,13 +109,18 @@ export async function POST(req: Request) {
           payload: { type, hasHistory: Array.isArray(conversationHistory) && conversationHistory.length > 0 },
         });
 
-        const kernel = SovereignIntelligenceKernel.getInstance();
-        const kernelReply = await kernel.processIntent(command, actorId);
+        const brain = await processAdminNaturalLanguageReply(command, {
+          userId: actorId,
+          userEmail: actorEmail,
+          source: "ultimate",
+          sessionId: `ultimate-${actorId}`,
+        });
 
         result = {
-          success: true,
-          message: kernelReply,
-          actionTaken: "sovereign_intent_processed",
+          success: brain.success,
+          message: brain.reply,
+          actionTaken: brain.executed ? "natural_language_executed" : "natural_language_reply",
+          data: brain.data,
         };
 
         if (commandLog?.id) {

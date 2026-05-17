@@ -9,7 +9,8 @@ import { ApprovalGate } from '@/components/admin/agents/ApprovalGate';
 import { ChatPanel } from '@/components/admin/agents/ChatPanel';
 import { GroupChatView } from '@/components/admin/agents/GroupChatView';
 
-import { Brain, Cpu, MessageSquare, ShieldAlert, Activity, LayoutGrid, Terminal } from 'lucide-react';
+import Link from 'next/link';
+import { Brain, Cpu, MessageSquare, ShieldAlert, Activity, LayoutGrid, Terminal, Sparkles } from 'lucide-react';
 
 export default function AgentsPage() {
   const router = useRouter();
@@ -37,6 +38,19 @@ export default function AgentsPage() {
   
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto bg-[#0A0A0A] min-h-screen text-white">
+      <Link
+        href="/admin/assistant"
+        className="block rounded-2xl border border-[#C5A059]/30 bg-[#C5A059]/10 p-4 hover:bg-[#C5A059]/15 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <Sparkles className="w-5 h-5 text-[#C5A059]" />
+          <div>
+            <p className="font-bold text-[#C5A059]">المساعد الموحّد</p>
+            <p className="text-xs text-white/50">تكلم عادي هنا — PRIME و Vanguard والوكلاء السبعة يشتغلوا من مكان واحد</p>
+          </div>
+        </div>
+      </Link>
+
       {/* Header Intelligence */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-5">

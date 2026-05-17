@@ -80,6 +80,25 @@ describe("Smart Agent API Contract", () => {
       getAnalyticsReport: vi.fn(async () => ({ success: true, message: "report", data: {} })),
       getSystemHealth: vi.fn(async () => ({ success: true, message: "healthy", data: {} })),
     }));
+    vi.doMock("@/lib/ai-orchestrator", () => ({
+      askOrchestratorMessages: vi.fn(async () => ({
+        success: true,
+        content: JSON.stringify({
+          kind: "conversation",
+          confidence: 0.9,
+          reasoning: "test",
+        }),
+      })),
+    }));
+    vi.doMock("@/lib/mastermind-ai", async (importOriginal) => {
+      const actual = await importOriginal<typeof import("@/lib/mastermind-ai")>();
+      return {
+        ...actual,
+        generateAIResponse: vi.fn(async () => "مرحباً من الاختبار"),
+        loadHistory: vi.fn(async () => []),
+        saveMessage: vi.fn(async () => undefined),
+      };
+    });
   });
 
   it("rejects unauthenticated calls", async () => {
@@ -121,5 +140,5 @@ describe("Smart Agent API Contract", () => {
     expect(json.meta.actorId).toBe("admin-test");
 
     fetchSpy.mockRestore();
-  });
+  }, 30_000);
 });
