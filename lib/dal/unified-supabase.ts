@@ -18,12 +18,17 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl) {
-  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_URL');
-}
+function createUnavailableSupabaseClient() {
+  const missing = [
+    !supabaseUrl ? 'NEXT_PUBLIC_SUPABASE_URL' : null,
+    !supabaseAnonKey ? 'NEXT_PUBLIC_SUPABASE_ANON_KEY' : null,
+  ].filter(Boolean).join(', ');
 
-if (!supabaseAnonKey) {
-  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  return new Proxy({}, {
+    get() {
+      throw new Error(`Supabase is not configured: missing ${missing}`);
+    },
+  }) as ReturnType<typeof createClient>;
 }
 
 // ===========================================
@@ -34,10 +39,9 @@ if (!supabaseAnonKey) {
  * Server-side client with anon key (for RLS-respecting operations)
  * Use this when you need to respect Row Level Security policies
  */
-export const supabaseAnon = createClient(
-  supabaseUrl,
-  supabaseAnonKey
-);
+export const supabaseAnon = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : createUnavailableSupabaseClient();
 
 /**
  * Server-side client with service role key (for admin operations)
@@ -45,7 +49,7 @@ export const supabaseAnon = createClient(
  * Only use for: background jobs, admin operations, agent tasks
  */
 export const supabaseServer = supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey, {
+  ? createClient(supabaseUrl!, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false

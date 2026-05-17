@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { supabaseService } from "@/lib/supabase-service";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +13,23 @@ interface SiteSetting {
   value: unknown;
   updated_at?: string;
   updated_by?: string | null;
+}
+
+function isUuid(value: string | null): value is string {
+  return Boolean(
+    value &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        value
+      )
+  );
+}
+
+function isMissingColumn(error: { code?: string; message?: string } | null) {
+  return (
+    error?.code === "42703" ||
+    error?.code === "PGRST204" ||
+    /column .* does not exist|could not find .* column/i.test(error?.message || "")
+  );
 }
 
 /**
@@ -24,11 +41,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const key = searchParams.get("key");
 
-    const supabase = await createClient();
-
     if (key) {
       // Get specific setting
-      const { data, error } = await supabase
+      const { data, error } = await supabaseService
         .from("site_settings")
         .select("*")
         .eq("key", key)
@@ -52,7 +67,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, setting: data as SiteSetting });
     } else {
       // Get all settings
-      const { data, error } = await supabase
+      const { data, error } = await supabaseService
         .from("site_settings")
         .select("*")
         .order("key", { ascending: true });
@@ -98,24 +113,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-
-    // Get current user for updated_by
-    const { data: { user } } = await supabase.auth.getUser();
-
     // Upsert (insert or update)
-    const { data, error } = await supabase
+    const payload: Record<string, unknown> = {
+      key,
+      value,
+    };
+
+    let { data, error } = await supabaseService
       .from("site_settings")
-      .upsert(
-        {
-          key,
-          value,
-          updated_by: user?.id || null,
-        },
-        { onConflict: "key" }
-      )
+      .upsert(payload as never, { onConflict: "key" })
       .select()
       .single();
+
+    if (error && isMissingColumn(error) && "updated_by" in payload) {
+      delete payload.updated_by;
+      const legacyResult = await supabaseService
+        .from("site_settings")
+        .upsert(payload as never, { onConflict: "key" })
+        .select()
+        .single();
+      data = legacyResult.data;
+      error = legacyResult.error;
+    }
 
     if (error) {
       console.error("[Settings API] Error saving setting:", error);
@@ -127,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      setting: data as SiteSetting,
+      setting: data as unknown as SiteSetting,
       message: "Setting saved successfully",
     });
   } catch (error) {
@@ -155,9 +174,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-
-    const { error } = await supabase
+    const { error } = await supabaseService
       .from("site_settings")
       .delete()
       .eq("key", key);

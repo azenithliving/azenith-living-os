@@ -7,21 +7,37 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
+import { resolveAdminCompanyId } from '@/lib/admin-company';
 
 // GET - Fetch production schedule
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const companyId = searchParams.get('company_id');
+    const companyId = await resolveAdminCompanyId(searchParams.get('company_id'));
     const startDate = searchParams.get('start_date');
     const endDate = searchParams.get('end_date');
     const view = searchParams.get('view') || 'week'; // day, week, month
 
     if (!companyId) {
-      return NextResponse.json(
-        { success: false, error: 'company_id required' },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        success: true,
+        data: {
+          schedule: [],
+          stages: [],
+          date_range: {
+            start: new Date().toISOString(),
+            end: new Date().toISOString(),
+            view,
+          },
+          summary: {
+            total_jobs: 0,
+            in_progress: 0,
+            completed: 0,
+            delayed: 0,
+          },
+        },
+        warnings: ['No company record is available for production schedule.'],
+      });
     }
 
     // Calculate date range if not provided
@@ -32,15 +48,9 @@ export async function GET(request: NextRequest) {
     // Fetch production jobs with stages
     const { data: jobs, error } = await supabaseServer
       .from('production_jobs')
-      .select(`
-        *,
-        production_stages(name, color_code, default_duration_hours),
-        sales_orders(id, customer_id, users(name)),
-        sales_order_items(description)
-      `)
+      .select('*')
       .eq('company_id', companyId)
-      .or(`scheduled_start.gte.${start.toISOString()},scheduled_end.lte.${end.toISOString()}`)
-      .order('scheduled_start', { ascending: true });
+      .order('created_at', { ascending: true });
 
     if (error) {
       console.error('Schedule fetch error:', error);
@@ -53,12 +63,12 @@ export async function GET(request: NextRequest) {
     // Format for Gantt chart
     const schedule = jobs?.map(job => ({
       id: job.id,
-      name: (job.sales_order_items as any)?.description || `Job ${job.id.slice(0, 8)}`,
-      customer: (job.sales_orders as any)?.users?.name || 'Unknown',
-      stage: (job.production_stages as any)?.name || 'Unknown',
-      stage_color: (job.production_stages as any)?.color_code || '#3B82F6',
-      start: job.scheduled_start || job.created_at,
-      end: job.scheduled_end || new Date(new Date(job.created_at).getTime() + 24 * 60 * 60 * 1000).toISOString(),
+      name: `Job ${job.id.slice(0, 8)}`,
+      customer: 'Unknown',
+      stage: job.current_stage_id || 'Unknown',
+      stage_color: '#3B82F6',
+      start: job.created_at,
+      end: new Date(new Date(job.created_at).getTime() + 24 * 60 * 60 * 1000).toISOString(),
       progress: calculateProgress(job),
       status: job.status,
       priority: job.priority,

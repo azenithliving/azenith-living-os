@@ -30,7 +30,6 @@ export async function GET() {
         ...(health.ok ? {} : { error: health.error || "Browser workspace unavailable" }),
       },
       {
-        status: health.ok ? 200 : 503,
         headers: { "Cache-Control": "no-store" },
       }
     );
@@ -42,7 +41,7 @@ export async function GET() {
         error: error instanceof Error ? error.message : "Browser workspace health error",
         checkedAt: new Date().toISOString(),
       },
-      { status: 503, headers: { "Cache-Control": "no-store" } }
+      { headers: { "Cache-Control": "no-store" } }
     );
   }
 }

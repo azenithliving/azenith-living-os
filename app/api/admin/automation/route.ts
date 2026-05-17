@@ -49,6 +49,69 @@ function normalizeRule(row: Record<string, unknown>): AutomationRule {
   };
 }
 
+function isMissingColumn(error: { code?: string; message?: string } | null, column: string) {
+  const message = error?.message || "";
+  return (
+    ((error?.code === "42703" || error?.code === "PGRST204") &&
+      message.toLowerCase().includes(column.toLowerCase())) ||
+    new RegExp(`column .*${column}.* does not exist|could not find .*${column}.* column`, "i").test(message)
+  );
+}
+
+function missingOptionalColumn(
+  error: { code?: string; message?: string } | null,
+  columns: string[]
+) {
+  return columns.find((column) => isMissingColumn(error, column)) || null;
+}
+
+async function insertAutomationRule(insertData: Record<string, unknown>) {
+  let data = null;
+  let error = null;
+  const optionalColumns = ["created_by", "is_active", "company_id"];
+
+  for (let attempt = 0; attempt <= optionalColumns.length; attempt += 1) {
+    const result = await supabaseService
+      .from("automation_rules")
+      .insert(insertData as never)
+      .select()
+      .single();
+
+    data = result.data;
+    error = result.error;
+
+    const column = missingOptionalColumn(error, optionalColumns);
+    if (!error || !column) break;
+    delete insertData[column];
+  }
+
+  return { data, error };
+}
+
+async function updateAutomationRule(id: string, updateData: Record<string, unknown>) {
+  let data = null;
+  let error = null;
+  const optionalColumns = ["updated_by", "is_active"];
+
+  for (let attempt = 0; attempt <= optionalColumns.length; attempt += 1) {
+    const result = await supabaseService
+      .from("automation_rules")
+      .update(updateData as never)
+      .eq("id", id)
+      .select()
+      .single();
+
+    data = result.data;
+    error = result.error;
+
+    const column = missingOptionalColumn(error, optionalColumns);
+    if (!error || !column) break;
+    delete updateData[column];
+  }
+
+  return { data, error };
+}
+
 /**
  * GET /api/admin/automation
  * List all automation rules
@@ -110,25 +173,7 @@ export async function POST(request: NextRequest) {
       created_by: actorId,
     };
 
-    const result = await supabaseService
-      .from("automation_rules")
-      .insert(insertData as never)
-      .select()
-      .single();
-
-    const data = result.data;
-    let error = result.error;
-
-    // Backward compatibility: if created_by column doesn't exist yet.
-    if (error && error.code === "42703") {
-      delete insertData.created_by;
-      const legacyResult = await supabaseService
-        .from("automation_rules")
-        .insert(insertData as never)
-        .select()
-        .single();
-      error = legacyResult.error;
-    }
+    const { data, error } = await insertAutomationRule(insertData);
 
     if (error) {
       return apiError("Failed to create automation rule", 500, error);
@@ -177,24 +222,7 @@ export async function PUT(request: NextRequest) {
     }
     (updateData as Record<string, unknown>).updated_by = actorId;
 
-    let { data, error } = await supabaseService
-      .from("automation_rules")
-      .update(updateData as never)
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error && error.code === "42703") {
-      delete (updateData as Record<string, unknown>).updated_by;
-      const legacyResult = await supabaseService
-        .from("automation_rules")
-        .update(updateData as never)
-        .eq("id", id)
-        .select()
-        .single();
-      data = legacyResult.data;
-      error = legacyResult.error;
-    }
+    const { data, error } = await updateAutomationRule(id, updateData as Record<string, unknown>);
 
     if (error) {
       console.error("[Automation API] Error updating rule:", error);

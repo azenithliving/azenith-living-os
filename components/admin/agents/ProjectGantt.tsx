@@ -26,23 +26,24 @@ export function ProjectGantt({ salesOrderId }: { salesOrderId?: string }) {
   async function fetchJobs() {
     try {
       const url = salesOrderId 
-        ? `/api/admin/manufacturing/schedule?sales_order_id=${salesOrderId}`
-        : '/api/admin/manufacturing/schedule';
+        ? `/api/admin/manufacturing/schedule?company_id=demo&sales_order_id=${salesOrderId}`
+        : '/api/admin/manufacturing/schedule?company_id=demo';
       
       const res = await fetch(url);
       const data = await res.json();
       
       if (data.success) {
-        setJobs(data.data.map((j: any) => ({
+        const schedule = Array.isArray(data.data) ? data.data : data.data?.schedule || [];
+        setJobs(schedule.map((j: any) => ({
           id: j.id,
-          title: j.title || `Job ${j.id.slice(0, 8)}`,
-          customer_name: j.customer_name || 'Unknown',
-          start: new Date(j.scheduled_start || j.created_at),
-          end: new Date(j.scheduled_end || j.created_at),
+          title: j.title || j.name || `Job ${j.id.slice(0, 8)}`,
+          customer_name: j.customer_name || j.customer || 'Unknown',
+          start: new Date(j.scheduled_start || j.start || j.created_at),
+          end: new Date(j.scheduled_end || j.end || j.created_at),
           status: j.status,
-          stage_name: j.stage_name || 'Unknown',
+          stage_name: j.stage_name || j.stage || 'Unknown',
           assigned_to: j.assigned_to_name,
-          progress: j.progress_percent || 0
+          progress: j.progress_percent || j.progress || 0
         })));
       }
     } catch (err) {

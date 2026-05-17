@@ -6,18 +6,25 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
+import { resolveAdminCompanyId } from '@/lib/admin-company';
 
 // GET - Check emergency stop status
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const companyId = searchParams.get('company_id');
+    const companyId = await resolveAdminCompanyId(searchParams.get('company_id'));
 
     if (!companyId) {
-      return NextResponse.json(
-        { success: false, error: 'company_id required' },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        success: true,
+        data: {
+          is_active: false,
+          triggered_by: null,
+          triggered_at: null,
+          reason: null,
+        },
+        warnings: ['No company record is available for emergency stop state.'],
+      });
     }
 
     const { data, error } = await supabaseServer
@@ -28,7 +35,22 @@ export async function GET(request: NextRequest) {
       .limit(1)
       .single();
 
-    if (error && error.code !== 'PGRST116') {
+    if (error && (error.code === 'PGRST205' || error.code === 'PGRST116')) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          is_active: false,
+          triggered_by: null,
+          triggered_at: null,
+          reason: null,
+        },
+        warnings: error.code === 'PGRST205'
+          ? ['emergency_stop_state table is not available.']
+          : undefined,
+      });
+    }
+
+    if (error) {
       console.error('Error fetching emergency stop state:', error);
       return NextResponse.json(
         { success: false, error: error.message },

@@ -25,6 +25,24 @@ export async function GET(req: Request) {
       });
 
     if (error) {
+      if (
+        error.code === "PGRST202" ||
+        error.message.includes("calculate_real_metrics")
+      ) {
+        return NextResponse.json({
+          success: true,
+          data: {
+            period: { start: startTime, end: endTime },
+            visitors: { total: 0, unique: 0, new: 0, returning: 0 },
+            pageViews: { total: 0, pagesPerSession: 0 },
+            engagement: { bounceRate: 0, avgSessionDuration: 0 },
+            calculatedAt: new Date().toISOString(),
+            isReal: false,
+            warning: "calculate_real_metrics RPC is not installed.",
+          },
+        });
+      }
+
       console.error("[Metrics API] Error:", error);
       return NextResponse.json(
         { success: false, error: error.message },

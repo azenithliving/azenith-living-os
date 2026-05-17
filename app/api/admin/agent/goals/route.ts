@@ -34,6 +34,15 @@ export async function GET(req: Request) {
     const { data: goals, error } = await query;
 
     if (error) {
+      if (error.code === "PGRST205" || error.message.includes("agent_goals_v2")) {
+        return NextResponse.json({
+          success: true,
+          goals: [],
+          total: 0,
+          warnings: ["agent_goals_v2 table is not available."],
+        });
+      }
+
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 500 }

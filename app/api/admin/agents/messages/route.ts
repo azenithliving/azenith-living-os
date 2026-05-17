@@ -23,20 +23,26 @@ export async function GET(request: NextRequest) {
     
     let query = supabaseServer
       .from('agent_messages')
-      .select(`
-        *,
-        agent_conversations!inner(participants)
-      `)
+      .select('*')
       .order('created_at', { ascending: true })
       .limit(limit);
     
     if (conversationId) {
       query = query.eq('conversation_id', conversationId);
     }
+
+    void agentKey;
     
     const { data: messages, error } = await query;
     
     if (error) {
+      if (error.code === 'PGRST205' || error.code === '42703') {
+        return NextResponse.json({
+          success: true,
+          data: [],
+          warnings: ['agent_messages schema is not available in the expected shape.'],
+        });
+      }
       throw error;
     }
     

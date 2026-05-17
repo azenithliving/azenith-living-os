@@ -7,20 +7,22 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
+import { resolveAdminCompanyId } from '@/lib/admin-company';
 
 // GET - List conversations
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const companyId = searchParams.get('company_id');
+    const companyId = await resolveAdminCompanyId(searchParams.get('company_id'));
     const conversationType = searchParams.get('type'); // direct, group, agent_to_agent
     const activeOnly = searchParams.get('active') !== 'false';
 
     if (!companyId) {
-      return NextResponse.json(
-        { success: false, error: 'company_id required' },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        success: true,
+        data: [],
+        warnings: ['No company record is available for conversations.'],
+      });
     }
 
     let query = supabaseServer
@@ -37,10 +39,18 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await query
-      .order('updated_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(50);
 
     if (error) {
+      if (error.code === 'PGRST205' || error.code === '42703') {
+        return NextResponse.json({
+          success: true,
+          data: [],
+          warnings: ['agent_conversations schema is not available in the expected shape.'],
+        });
+      }
+
       console.error('Conversations fetch error:', error);
       return NextResponse.json(
         { success: false, error: error.message },

@@ -7,21 +7,23 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
+import { resolveAdminCompanyId } from '@/lib/admin-company';
 
 // GET - Fetch inventory
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const companyId = searchParams.get('company_id');
+    const companyId = await resolveAdminCompanyId(searchParams.get('company_id'));
     const lowStock = searchParams.get('low_stock') === 'true';
     const category = searchParams.get('category');
     const search = searchParams.get('search');
 
     if (!companyId) {
-      return NextResponse.json(
-        { success: false, error: 'company_id required' },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        success: true,
+        data: [],
+        warnings: ['No company record is available for inventory.'],
+      });
     }
 
     let query = supabaseServer

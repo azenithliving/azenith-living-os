@@ -1,9 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 describe('API Endpoints', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.resetModules();
     global.fetch = vi.fn();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.resetModules();
   });
 
   describe('Config API', () => {
@@ -85,6 +91,7 @@ describe('API Endpoints', () => {
     });
 
     it('should return fallback photos when all keys exhausted', async () => {
+      vi.resetModules();
       vi.doMock('@/lib/api-keys-service', () => ({
         getNextAvailableKey: vi.fn(async () => null),
         setKeyCooldown: vi.fn(async () => {}),
@@ -99,6 +106,7 @@ describe('API Endpoints', () => {
       expect(data.ok).toBe(true);
       expect(Array.isArray(data.photos)).toBe(true);
       expect(data.photos.length).toBeGreaterThan(0);
+      vi.doUnmock('@/lib/api-keys-service');
       vi.resetModules();
     });
 
