@@ -3,7 +3,9 @@ import {
   validateAdminGateCredentials,
   normalizeAdminEmail,
   isAdminGateConfigured,
+  getPrimaryAdminLegacy2FASecret,
 } from "@/lib/admin-gate";
+import { generateTotpToken, verifyTotpToken } from "@/lib/totp-verify";
 
 describe("Admin gate credentials", () => {
   const email = process.env.ADMIN_GATE_EMAIL || "azenithliving@gmail.com";
@@ -37,6 +39,15 @@ describe("Admin gate credentials", () => {
     expect(validateAdminGateCredentials("not-admin@example.com", password)).toBe(
       false
     );
+  });
+});
+
+describe("Admin 2FA TOTP", () => {
+  it("env secret generates verifiable token", () => {
+    const secret = getPrimaryAdminLegacy2FASecret();
+    if (!secret) return;
+    const token = generateTotpToken(secret);
+    expect(verifyTotpToken(secret, token)).toBe(true);
   });
 });
 

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import speakeasy from "speakeasy";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { sendSecurityAlert } from "@/lib/telegram-notify";
@@ -9,6 +8,12 @@ import {
   normalizeAdminEmail,
   validateAdminGateCredentials,
 } from "@/lib/admin-gate";
+import {
+  collectUniqueTotpSecrets,
+  normalizeBase32Secret,
+  normalizeTotpToken,
+  verifyTotpAgainstSecrets,
+} from "@/lib/totp-verify";
 
 type User2FARecord = {
   secret: string;
@@ -120,28 +125,43 @@ async function resolveUser2FARecord(userId: string, email: string): Promise<User
   return legacyRecord as User2FARecord;
 }
 
-async function syncPrimaryAdmin2FASecret(userId: string, email: string) {
+async function syncPrimaryAdmin2FASecret(userId: string, email: string, secret?: string) {
+  const envSecret = secret || getPrimaryAdminLegacy2FASecret();
+  if (!envSecret) return;
+
   const supabaseAdmin = getSupabaseAdminClient();
   const client = supabaseAdmin ?? await createClient();
 
-  await client
-    .from("user_2fa")
-    .upsert({
-      user_id: userId,
-      email: normalizeAdminEmail(email),
-      secret: getPrimaryAdminLegacy2FASecret() || "",
-      is_enabled: true,
-      updated_at: new Date().toISOString(),
-    });
+  await client.from("user_2fa").upsert({
+    user_id: userId,
+    email: normalizeAdminEmail(email),
+    secret: normalizeBase32Secret(envSecret),
+    is_enabled: true,
+    updated_at: new Date().toISOString(),
+  });
+}
+
+async function ensurePrimaryAdmin2FARecord(
+  userId: string,
+  email: string
+): Promise<User2FARecord | null> {
+  const envSecret = getPrimaryAdminLegacy2FASecret();
+  if (!envSecret) return null;
+  await syncPrimaryAdmin2FASecret(userId, email, envSecret);
+  return {
+    secret: normalizeBase32Secret(envSecret),
+    is_enabled: true,
+    backup_codes: [],
+  };
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { token, email, password } = body;
+    const { email, password } = body;
+    const token = normalizeTotpToken(String(body.token ?? ""));
 
-    // Validate inputs
-    if (!token || token.length !== 6) {
+    if (token.length !== 6) {
       return NextResponse.json(
         { error: "Invalid token format. Must be 6 digits." },
         { status: 400 }
@@ -184,14 +204,24 @@ export async function POST(request: NextRequest) {
     }
 
     const user = authData.user;
+    const isPrimaryAdmin = isPrimaryAdminCredentials(normalizedEmail, password);
 
-    // Step 2: Fetch 2FA data for the user
-    const user2FA = await resolveUser2FARecord(user.id, user.email || normalizedEmail);
+    // Step 2: Fetch 2FA data — provision from env for primary admin if missing
+    let user2FA = await resolveUser2FARecord(user.id, user.email || normalizedEmail);
+    if (!user2FA && isPrimaryAdmin) {
+      user2FA = await ensurePrimaryAdmin2FARecord(user.id, user.email || normalizedEmail);
+    }
+
     if (!user2FA) {
       return NextResponse.json(
         { error: "2FA not setup for this user" },
         { status: 400 }
       );
+    }
+
+    if (!user2FA.is_enabled && isPrimaryAdmin && getPrimaryAdminLegacy2FASecret()) {
+      await syncPrimaryAdmin2FASecret(user.id, user.email || normalizedEmail);
+      user2FA = { ...user2FA, is_enabled: true };
     }
 
     if (!user2FA.is_enabled) {
@@ -201,33 +231,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 3: Verify the 2FA token using speakeasy
-    let verified = speakeasy.totp.verify({
-      secret: user2FA.secret,
-      encoding: "base32",
-      token: token,
-      window: 2, // Time window tolerance (±1 minute)
-    });
-    let usedLegacyPrimaryAdminSecret = false;
-    let legacyDelta: number | null = null;
+    // Step 3: Verify TOTP — env secret first for primary admin, then DB secret
+    const envSecret = isPrimaryAdmin ? getPrimaryAdminLegacy2FASecret() : null;
+    const dbSecret = user2FA.secret?.trim() ? user2FA.secret : null;
+    const secretsToTry = isPrimaryAdmin
+      ? collectUniqueTotpSecrets(envSecret, dbSecret)
+      : collectUniqueTotpSecrets(dbSecret);
 
-    if (!verified && isPrimaryAdminCredentials(normalizedEmail, password)) {
-      const legacySecret = getPrimaryAdminLegacy2FASecret();
-      const legacyMatch = legacySecret
-        ? speakeasy.totp.verifyDelta({
-            secret: legacySecret,
-            encoding: "base32",
-            token,
-            window: 10,
-          })
-        : null;
+    const { verified, matchedSecret } = verifyTotpAgainstSecrets(token, secretsToTry, 6);
+    const usedEnvSecret =
+      Boolean(envSecret) &&
+      Boolean(matchedSecret) &&
+      matchedSecret === normalizeBase32Secret(envSecret!);
 
-      if (legacyMatch) {
-        verified = true;
-        usedLegacyPrimaryAdminSecret = true;
-        legacyDelta = legacyMatch.delta;
-        await syncPrimaryAdmin2FASecret(user.id, user.email || normalizedEmail);
-      }
+    if (verified && isPrimaryAdmin && usedEnvSecret && dbSecret !== matchedSecret) {
+      await syncPrimaryAdmin2FASecret(user.id, user.email || normalizedEmail, matchedSecret!);
     }
 
     if (!verified) {
@@ -245,13 +263,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (usedLegacyPrimaryAdminSecret) {
+    if (verified && usedEnvSecret && dbSecret && dbSecret !== matchedSecret) {
       await sendSecurityAlert(
-        `🔐 PRIMARY ADMIN 2FA FALLBACK USED\n` +
-        `User: ${user.email}\n` +
-        `Time: ${new Date().toISOString()}\n` +
-        `Delta Steps: ${legacyDelta ?? "unknown"}\n` +
-        `IP: ${request.headers.get("x-forwarded-for") || "unknown"}`
+        `🔐 PRIMARY ADMIN 2FA SYNCED FROM ENV\n` +
+          `User: ${user.email}\n` +
+          `Time: ${new Date().toISOString()}\n` +
+          `IP: ${request.headers.get("x-forwarded-for") || "unknown"}`
       );
     }
 

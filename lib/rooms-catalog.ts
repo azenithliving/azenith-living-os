@@ -33,3 +33,7 @@ export function isValidRoomSlug(rawSlug: string): boolean {
   if (!rawSlug || rawSlug.includes("..")) return false;
   return VALID_ROOM_SLUGS.has(resolveRoomSlug(rawSlug));
 }
+
+/** For tests and audits */
+export const VALID_ROOM_SLUG_LIST = [...VALID_ROOM_SLUGS] as const;
+export const ROOM_ALIAS_SLUG_LIST = Object.keys(ROOM_SLUG_ALIASES) as (keyof typeof ROOM_SLUG_ALIASES)[];

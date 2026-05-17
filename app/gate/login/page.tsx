@@ -80,7 +80,11 @@ export default function GateLoginPage() {
 
         {/* Login Card */}
         <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8">
-          <form onSubmit={step === "login" ? handleLogin : handleVerify2FA} className="space-y-4">
+          <form
+            onSubmit={step === "login" ? handleLogin : handleVerify2FA}
+            className="space-y-4"
+            autoComplete="off"
+          >
             <div className="mb-6 text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#C5A059]/10">
                 <Shield className="h-8 w-8 text-[#C5A059]" />
@@ -100,10 +104,12 @@ export default function GateLoginPage() {
                     <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
                     <input
                       type="email"
+                      name="gate-email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full rounded-2xl border border-white/10 bg-[#111112] py-3 pr-4 pl-12 text-white outline-none transition focus:border-[#C5A059]"
-                      placeholder="azenithliving@gmail.com"
+                      placeholder="admin@example.com"
+                      autoComplete="off"
                       required
                       autoFocus
                     />
@@ -117,10 +123,12 @@ export default function GateLoginPage() {
                     <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
                     <input
                       type="password"
+                      name="gate-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full rounded-2xl border border-white/10 bg-[#111112] py-3 pr-4 pl-12 text-white outline-none transition focus:border-[#C5A059]"
                       placeholder="••••••••"
+                      autoComplete="new-password"
                       required
                     />
                   </div>
@@ -172,7 +180,9 @@ export default function GateLoginPage() {
                   <input
                     type="text"
                     value={token}
-                    onChange={(e) => setToken(e.target.value)}
+                    onChange={(e) =>
+                      setToken(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
                     className="w-full rounded-2xl border border-white/10 bg-[#111112] py-3 px-4 text-white text-center text-2xl tracking-[0.5em] outline-none transition focus:border-[#C5A059]"
                     placeholder="000000"
                     maxLength={6}

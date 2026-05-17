@@ -22,11 +22,9 @@ const isMonitoringEnabled = process.env.NODE_ENV === 'production' || process.env
 const monitoringInterval: NodeJS.Timeout | null = null;
 const lastMonitoringRun: Date | null = null;
 
-// Start monitoring on module load (server-side only) using imported function
-if (typeof window === 'undefined') {
-  // Run immediately on startup using the imported startKeyMonitoring from key-monitor.ts
-  import('@/lib/key-monitor').then(({ startKeyMonitoring }) => {
-    startKeyMonitoring(60); // Start with 60 minute interval
+if (typeof window === "undefined" && process.env.ENABLE_KEY_MONITORING === "true") {
+  import("@/lib/key-monitor").then(({ startKeyMonitoring }) => {
+    startKeyMonitoring(60);
   });
 }
 
