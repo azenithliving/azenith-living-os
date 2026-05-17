@@ -19,7 +19,9 @@ export async function proxy(request: NextRequest) {
   const referer = request.headers.get('referer');
   let rateLimitHeaders: Record<string, string> | null = null;
   const isAdminLoginApi =
-    pathname === "/api/admin/verify-2fa" || pathname === "/api/admin/gate/validate";
+    pathname === "/api/admin/verify-2fa" ||
+    pathname === "/api/admin/gate/validate" ||
+    pathname === "/api/admin/gate/health";
 
   const applyResponseHeaders = (response: NextResponse) => {
     if (!rateLimitHeaders) return response;

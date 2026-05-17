@@ -139,4 +139,14 @@ test.describe("Gate security", () => {
     });
     expect(res.status()).toBe(401);
   });
+
+  test("gate health is public and reports config flags", async ({ request }) => {
+    const res = await request.get("/api/admin/gate/health");
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.emailConfigured).toBe(true);
+    expect(body.passwordConfigured).toBe(true);
+    expect(body.totpConfigured).toBe(true);
+  });
 });
