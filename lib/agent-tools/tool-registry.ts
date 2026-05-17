@@ -22,7 +22,9 @@ export type ToolCategory =
   | "analytics" 
   | "system" 
   | "revenue" 
-  | "speed";
+  | "speed"
+  | "crm"
+  | "research";
 
 export type RiskLevel = "low" | "medium" | "high" | "destructive";
 
@@ -221,7 +223,35 @@ import {
   executeSEOAnalysis as seoAnalyzeHandler,
   executeRevenueAnalysis as revenueAnalyzeHandler,
   executeSpeedOptimization as speedOptimizeHandler,
+  executeSystemHealthCheck as systemHealthCheckHandler,
+  executeMetricsRealtime as metricsRealtimeHandler,
+  executeBackupList as backupListHandler,
+  executeSeoFixIssues as seoFixIssuesHandler,
+  executeGoalCreate as goalCreateHandler,
+  executeGoalList as goalListHandler,
+  executeGoalCheckProgress as goalCheckProgressHandler,
+  executeContentUpdate as contentUpdateHandler,
 } from "./tool-handlers";
+import {
+  executeBackupRestore as backupRestoreHandler,
+  executeContentHealthCheck as contentHealthCheckHandler,
+  executeProductAdd as productAddHandler,
+  executeProductList as productListHandler,
+  executeWebSearch as webSearchHandler,
+  executeReadWebsite as readWebsiteHandler,
+  executeRevenueOpportunities as revenueOpportunitiesHandler,
+  executeSpeedDeepAudit as speedDeepAuditHandler,
+  executeLeadList as leadListHandler,
+  executeLeadDossierSend as leadDossierSendHandler,
+  executeRoomUpdate as roomUpdateHandler,
+  executeInventoryCheckLow as inventoryCheckLowHandler,
+  executeInventoryUpdateTool as inventoryUpdateHandler,
+  executeManufacturingInventory as mfgInventoryHandler,
+  executeManufacturingStockAdjust as mfgStockAdjustHandler,
+  executeManufacturingOrders as mfgOrdersHandler,
+  executeDeployTrigger as deployTriggerHandler,
+  executeProjectEvolve as projectEvolveHandler,
+} from "@/lib/admin-extended-handlers";
 
 // ============================================
 // Tool Registry Definition
@@ -296,10 +326,7 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
     riskLevel: "medium",
     requiresApproval: true,
     parameters: ContentUpdateSchema,
-    handler: async () => ({ 
-      success: false, 
-      message: "content_update handler not yet implemented" 
-    }),
+    handler: contentUpdateHandler,
     examples: [
       "غيّر عنوان المنتج X",
       "حدث وصف الغرفة Y",
@@ -336,16 +363,13 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
     parameters: {
       type: "object",
       properties: {
-        analysisId: { type: "string", description: "معرف التحليل", required: true },
+        analysisId: { type: "string", description: "معرف التحليل" },
+        url: { type: "string", description: "رابط الصفحة للتحليل والإصلاح" },
         issueCodes: { type: "array", description: "رموز المشاكل للإصلاح", items: { type: "string" } },
         autoFixAll: { type: "boolean", description: "إصلاح الكل" },
       },
-      required: ["analysisId"],
     },
-    handler: async () => ({ 
-      success: false, 
-      message: "seo_fix_issues handler not yet implemented" 
-    }),
+    handler: seoFixIssuesHandler,
     examples: [
       "أصلح مشاكل SEO المكتشفة",
       "فقد المشاكل الحرجة",
@@ -379,11 +403,20 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
     category: "backup",
     riskLevel: "destructive",
     requiresApproval: true,
-    parameters: BackupRestoreSchema,
-    handler: async () => ({ 
-      success: false, 
-      message: "backup_restore handler not yet implemented" 
-    }),
+    parameters: {
+      type: "object",
+      properties: {
+        backupId: { type: "string", description: "معرف النسخة أو latest" },
+        confirmRestore: { type: "boolean", description: "تنفيذ فعلي" },
+        confirmFullRestore: { type: "boolean", description: "استعادة كاملة للجداول" },
+        confirmUsersRestore: {
+          type: "boolean",
+          description: "دمج users/requests من النسخة (upsert فقط، بدون حذف)",
+        },
+        restoreTier: { type: "string", description: "safe|standard|full", enum: ["safe", "standard", "full"] },
+      },
+    },
+    handler: backupRestoreHandler,
     examples: [
       "استعادة النسخة الاحتياطية X",
       "ارجع للنسخة Y",
@@ -404,10 +437,7 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
         limit: { type: "number", description: "عدد النتائج" },
       },
     },
-    handler: async () => ({ 
-      success: false, 
-      message: "backup_list handler not yet implemented" 
-    }),
+    handler: backupListHandler,
     examples: [
       "اعرض النسخ الاحتياطية",
       "قائمة backups",
@@ -448,10 +478,7 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
         includeRecommendations: { type: "boolean", description: "تضمين التوصيات" },
       },
     },
-    handler: async () => ({ 
-      success: false, 
-      message: "system_health_check handler not yet implemented" 
-    }),
+    handler: systemHealthCheckHandler,
     examples: [
       "فحص صحة النظام",
       "system health check",
@@ -492,10 +519,7 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
         timeRange: { type: "string", description: "النطاق الزمني", enum: ["1h", "24h", "7d", "30d"] },
       },
     },
-    handler: async () => ({ 
-      success: false, 
-      message: "metrics_realtime handler not yet implemented" 
-    }),
+    handler: metricsRealtimeHandler,
     examples: [
       "المؤشرات الحالية",
       "realtime metrics",
@@ -556,10 +580,7 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
     riskLevel: "low",
     requiresApproval: false,
     parameters: GoalCreateSchema,
-    handler: async () => ({ 
-      success: false, 
-      message: "goal_create handler not yet implemented" 
-    }),
+    handler: goalCreateHandler,
     examples: [
       "أنشئ هدف جديد",
       "create goal increase conversion by 10%",
@@ -580,10 +601,7 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
         includeProgress: { type: "boolean", description: "تضمين التقدم" },
       },
     },
-    handler: async () => ({ 
-      success: false, 
-      message: "goal_list handler not yet implemented" 
-    }),
+    handler: goalListHandler,
     examples: [
       "اعرض الأهداف",
       "list goals",
@@ -600,17 +618,309 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
     parameters: {
       type: "object",
       properties: {
-        goalId: { type: "string", description: "معرف الهدف", required: true },
+        goalId: { type: "string", description: "معرف الهدف أو latest" },
       },
-      required: ["goalId"],
     },
-    handler: async () => ({ 
-      success: false, 
-      message: "goal_check_progress handler not yet implemented" 
-    }),
+    handler: goalCheckProgressHandler,
     examples: [
       "فحص تقدم الهدف X",
       "check goal progress",
+    ],
+  },
+
+  content_health_check: {
+    name: "content_health_check",
+    displayName: "فحص صحة المحتوى",
+    description: "فحص جودة واكتمال محتوى الصفحات",
+    category: "content",
+    riskLevel: "low",
+    requiresApproval: false,
+    parameters: {
+      type: "object",
+      properties: {
+        pageSlug: { type: "string", description: "slug الصفحة", enum: ["home", "about", "contact"] },
+      },
+    },
+    handler: contentHealthCheckHandler,
+    examples: ["افحص صحة محتوى الصفحة الرئيسية", "content health home"],
+  },
+
+  product_add: {
+    name: "product_add",
+    displayName: "إضافة منتج",
+    description: "إضافة منتج جديد للكتالوج",
+    category: "content",
+    riskLevel: "medium",
+    requiresApproval: true,
+    parameters: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "اسم المنتج", required: true },
+        price: { type: "number", description: "السعر", required: true },
+        description: { type: "string", description: "الوصف" },
+      },
+      required: ["name", "price"],
+    },
+    handler: productAddHandler,
+    examples: ["أضف منتج جديد", "add product sofa 5000"],
+  },
+
+  product_list: {
+    name: "product_list",
+    displayName: "قائمة المنتجات",
+    description: "عرض المنتجات المسجّلة",
+    category: "content",
+    riskLevel: "low",
+    requiresApproval: false,
+    parameters: { type: "object", properties: {} },
+    handler: productListHandler,
+    examples: ["اعرض المنتجات", "list products"],
+  },
+
+  web_search: {
+    name: "web_search",
+    displayName: "بحث ويب",
+    description: "بحث خارجي للمعلومات والمراجع",
+    category: "research",
+    riskLevel: "low",
+    requiresApproval: false,
+    parameters: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "استعلام البحث", required: true },
+        maxResults: { type: "number", description: "عدد النتائج" },
+      },
+      required: ["query"],
+    },
+    handler: webSearchHandler,
+    examples: ["ابحث عن اتجاهات التصميم 2026", "web search luxury interiors"],
+  },
+
+  read_website: {
+    name: "read_website",
+    displayName: "قراءة موقع",
+    description: "جلب وتحليل محتوى صفحة ويب",
+    category: "research",
+    riskLevel: "low",
+    requiresApproval: false,
+    parameters: {
+      type: "object",
+      properties: {
+        url: { type: "string", description: "الرابط", required: true },
+      },
+      required: ["url"],
+    },
+    handler: readWebsiteHandler,
+    examples: ["اقرأ محتوى https://example.com", "read website content"],
+  },
+
+  revenue_opportunities: {
+    name: "revenue_opportunities",
+    displayName: "فرص الإيراد",
+    description: "تحليل فرص زيادة الإيراد والتحويل",
+    category: "revenue",
+    riskLevel: "low",
+    requiresApproval: false,
+    parameters: {
+      type: "object",
+      properties: {
+        days: { type: "number", description: "عدد الأيام" },
+      },
+    },
+    handler: revenueOpportunitiesHandler,
+    examples: ["فرص الإيراد", "revenue opportunities"],
+  },
+
+  speed_deep_audit: {
+    name: "speed_deep_audit",
+    displayName: "تدقيق سرعة عميق",
+    description: "تدقيق أداء شامل عبر architect-tools",
+    category: "speed",
+    riskLevel: "medium",
+    requiresApproval: true,
+    parameters: {
+      type: "object",
+      properties: {
+        url: { type: "string", description: "الرابط" },
+        applyFixes: { type: "boolean", description: "تطبيق إصلاحات" },
+      },
+    },
+    handler: speedDeepAuditHandler,
+    examples: ["تدقيق سرعة عميق للموقع", "deep speed audit"],
+  },
+
+  lead_list: {
+    name: "lead_list",
+    displayName: "قائمة العملاء",
+    description: "عرض leads/عملاء حسب النية والتاريخ",
+    category: "crm",
+    riskLevel: "low",
+    requiresApproval: false,
+    parameters: {
+      type: "object",
+      properties: {
+        limit: { type: "number", description: "الحد الأقصى" },
+        intent: { type: "string", description: "browsing|interested|buyer|all" },
+      },
+    },
+    handler: leadListHandler,
+    examples: ["اعرض العملاء الجدد", "list diamond leads", "قائمة leads"],
+  },
+
+  lead_dossier_send: {
+    name: "lead_dossier_send",
+    displayName: "إرسال ملف عميل واتساب",
+    description: "بناء dossier وإرساله للمالك على واتساب",
+    category: "crm",
+    riskLevel: "medium",
+    requiresApproval: true,
+    parameters: {
+      type: "object",
+      properties: {
+        leadId: { type: "string", description: "معرف العميل", required: true },
+        adminPhone: { type: "string", description: "رقم واتساب المالك" },
+      },
+      required: ["leadId"],
+    },
+    handler: leadDossierSendHandler,
+    examples: ["ابعت ملف العميل على واتساب", "send lead dossier whatsapp"],
+  },
+
+  room_update: {
+    name: "room_update",
+    displayName: "تحديث غرفة/عميل",
+    description: "تحديث نوع الغرفة، الميزانية، الأسلوب، النقاط",
+    category: "crm",
+    riskLevel: "medium",
+    requiresApproval: true,
+    parameters: {
+      type: "object",
+      properties: {
+        userId: { type: "string", description: "معرف المستخدم" },
+        leadId: { type: "string", description: "معرف lead" },
+        roomType: { type: "string", description: "نوع الغرفة" },
+        budget: { type: "string", description: "الميزانية" },
+        style: { type: "string", description: "الأسلوب" },
+        score: { type: "number", description: "النقاط" },
+        intent: { type: "string", description: "النية" },
+      },
+    },
+    handler: roomUpdateHandler,
+    examples: ["حدّث ميزانية غرفة الماستر", "update lead room type"],
+  },
+
+  inventory_check_low: {
+    name: "inventory_check_low",
+    displayName: "مخزون منخفض (منتجات)",
+    description: "فحص المنتجات ذات المخزون المنخفض",
+    category: "crm",
+    riskLevel: "low",
+    requiresApproval: false,
+    parameters: { type: "object", properties: {} },
+    handler: inventoryCheckLowHandler,
+    examples: ["افحص المخزون المنخفض", "low stock products"],
+  },
+
+  inventory_update: {
+    name: "inventory_update",
+    displayName: "تعديل مخزون منتج",
+    description: "زيادة أو تقليد stock_quantity لمنتج",
+    category: "crm",
+    riskLevel: "medium",
+    requiresApproval: true,
+    parameters: {
+      type: "object",
+      properties: {
+        productId: { type: "string", description: "معرف المنتج", required: true },
+        quantityChange: { type: "number", description: "التغيير (+/-)", required: true },
+        reason: { type: "string", description: "السبب" },
+      },
+      required: ["productId", "quantityChange"],
+    },
+    handler: inventoryUpdateHandler,
+    examples: ["زود مخزون المنتج 10", "inventory update"],
+  },
+
+  mfg_inventory_list: {
+    name: "mfg_inventory_list",
+    displayName: "مخزون التصنيع",
+    description: "عرض أصناف inventory_items",
+    category: "system",
+    riskLevel: "low",
+    requiresApproval: false,
+    parameters: {
+      type: "object",
+      properties: { lowStockOnly: { type: "boolean", description: "المنخفض فقط" } },
+    },
+    handler: mfgInventoryHandler,
+    examples: ["اعرض مخزون التصنيع", "مخزون المصنع المنخفض"],
+  },
+
+  mfg_stock_adjust: {
+    name: "mfg_stock_adjust",
+    displayName: "تعديل مخزون تصنيع",
+    description: "إدخال/إخراج inventory_items",
+    category: "system",
+    riskLevel: "high",
+    requiresApproval: true,
+    parameters: {
+      type: "object",
+      properties: {
+        inventoryItemId: { type: "string", description: "معرف الصنف", required: true },
+        quantity: { type: "number", description: "الكمية", required: true },
+        action: { type: "string", description: "stock_in|stock_out", enum: ["stock_in", "stock_out"] },
+      },
+      required: ["inventoryItemId", "quantity"],
+    },
+    handler: mfgStockAdjustHandler,
+    examples: ["أدخل 50 وحدة للمخزون", "stock in manufacturing"],
+  },
+
+  mfg_orders_list: {
+    name: "mfg_orders_list",
+    displayName: "أوامر التصنيع",
+    description: "قائمة sales_orders",
+    category: "system",
+    riskLevel: "low",
+    requiresApproval: false,
+    parameters: {
+      type: "object",
+      properties: { status: { type: "string", description: "الحالة" } },
+    },
+    handler: mfgOrdersHandler,
+    examples: ["اعرض أوامر التصنيع", "manufacturing orders"],
+  },
+
+  deploy_trigger: {
+    name: "deploy_trigger",
+    displayName: "نشر Vercel",
+    description: "تشغيل deploy hook",
+    category: "system",
+    riskLevel: "high",
+    requiresApproval: true,
+    parameters: { type: "object", properties: {} },
+    handler: deployTriggerHandler,
+    examples: ["انشر الموقع", "trigger vercel deploy"],
+  },
+
+  project_evolve: {
+    name: "project_evolve",
+    displayName: "تطوير المشروع (PR متعدد الملفات)",
+    description: "تحليل + تعديل ملفات عبر GitHub PR أو موافقة — يعمل على Vercel",
+    category: "system",
+    riskLevel: "high",
+    requiresApproval: true,
+    parameters: {
+      type: "object",
+      properties: {
+        mission: { type: "string", description: "وصف المهمة" },
+      },
+    },
+    handler: projectEvolveHandler,
+    examples: [
+      "طوّر المشروع من الأخطاء",
+      "project evolve SEO and performance",
+      "أصلح الكود وافتح PR",
     ],
   },
 };

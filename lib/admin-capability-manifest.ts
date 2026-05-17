@@ -29,14 +29,16 @@ export function listUltimateToolNames(): string[] {
 }
 
 export function buildCapabilitySummaryForUser(): string {
-  const tools = listUltimateToolNames().slice(0, 12).join("، ");
+  const toolCount = listUltimateToolNames().length;
   return (
-    `أقدر أنفّذ لك:\n` +
-    `• أوامر الإدارة: مفاتيح API، إحصائيات، كاش، نسخ احتياطي، evolve\n` +
-    `• أدوات Ultimate: ${tools}…\n` +
-    `• تحليلات وزوار، صحة النظام، إعدادات وأتمتة\n` +
-    `• مهام كبيرة عبر الوكلاء السحابيين (تحليل + تنفيذ + أمن)\n` +
-    `• Genesis للتكوين المعماري\n\n` +
-    `لو طلبك جديد، هوجّهه لأقرب محرك وأنفّذه أو أشرح لك الخطوة التالية.`
+    `أقدر أنفّذ لك (${toolCount} أداة + 16 أمر):\n` +
+    `• مفاتيح API، إحصائيات، كاش، نسخ احتياطي/استعادة، evolve\n` +
+    `• SEO، سرعة، إيرادات، أهداف، صحة النظام والمحتوى\n` +
+    `• عملاء/leads، واتساب dossier، منتجات، بحث ويب\n` +
+    `• وكلاء سحابة للمهام الكبيرة + Genesis\n` +
+    `• SEO: DB + تعديل app/layout.tsx عبر PR | استعادة عملاء (merge)\n` +
+    `• project_evolve: PR متعدد الملفات | evolve سحابي | نشر Vercel\n` +
+    `• واتساب dossier تلقائي | «تذكّر» | «تقرير يومي»\n\n` +
+    `الحساس يمر بموافقتك — لكنه قدرة كاملة وليس «قريباً».`
   );
 }

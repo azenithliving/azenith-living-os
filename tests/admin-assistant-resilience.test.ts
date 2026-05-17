@@ -1,9 +1,16 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { isGenericAiFailureMessage, formatCommandResultForUser } from "@/lib/admin-response-format";
 
+vi.mock("@/lib/admin-sovereign-mind", () => ({
+  createAdminProposal: vi.fn(async () => ({
+    success: true,
+    requestId: "test-req-1",
+  })),
+}));
+
 vi.mock("@/lib/admin-intent-classifier", () => ({
   classifyAdminIntent: vi.fn(async (message: string) => {
-    if (/list_keys|مفاتيح/i.test(message)) {
+    if (/list_keys/i.test(message)) {
       return {
         kind: "command",
         command: "list_keys",
@@ -11,7 +18,7 @@ vi.mock("@/lib/admin-intent-classifier", () => ({
         confidence: 1,
       };
     }
-    if (/حدّث|غرفة/i.test(message)) {
+    if (/VIP|غرفة|حدّث|حدث/i.test(message)) {
       return { kind: "agents", confidence: 0.9, reasoning: "test-agents" };
     }
     return { kind: "conversation", confidence: 0.6 };
@@ -98,8 +105,7 @@ describe("admin assistant resilience", () => {
       }
     );
 
-    expect(result.type).toBe("mixed");
-    expect(result.message).toMatch(/وكلاء|تكليف|الخطة/i);
+    expect(result.message).toMatch(/أحتاج إذنك|موافقة|عقل النظام/i);
   }, 15_000);
 
   it("formatCommandResultForUser handles list_keys data", () => {

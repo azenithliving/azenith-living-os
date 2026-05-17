@@ -7,6 +7,7 @@ import { askOrchestratorMessages } from "./ai-orchestrator";
 import { detectCommand } from "./mastermind-ai";
 import type { ClassifiedIntent, IntentKind } from "./admin-intent-types";
 import { inferUltimateTool, wantsGenesis } from "./admin-tool-bridge";
+import { matchLearnedPattern } from "./admin-learned-patterns";
 
 export function needsMultiAgentMission(message: string): boolean {
   const t = message.trim();
@@ -53,6 +54,11 @@ export function heuristicClassify(
   const minConf = opts?.minConfidence ?? 0.75;
   const lower = message.toLowerCase().trim();
 
+  const learned = matchLearnedPattern(message);
+  if (learned && (learned.confidence ?? 0) >= minConf - 0.1) {
+    return learned;
+  }
+
   if (/فحص.*المفاتيح|check.*keys|usage.*keys/i.test(lower)) {
     return {
       kind: "command",
@@ -74,6 +80,86 @@ export function heuristicClassify(
         reasoning: "settings-backup",
       };
     }
+  }
+
+  if (/list.*backup|backup.*list|قائمة.*نسخ|اعرض.*نسخ/i.test(lower)) {
+    return {
+      kind: "ultimate_tool",
+      toolName: "backup_list",
+      toolParams: {},
+      confidence: 0.88,
+      reasoning: "backup-list",
+    };
+  }
+
+  if (/استرجع|restore/i.test(lower) && /نسخ|backup/i.test(lower) && !/قاعدة|\bdb\b/i.test(lower)) {
+    return {
+      kind: "ultimate_tool",
+      toolName: "backup_restore",
+      toolParams: { backupId: "latest", confirmRestore: false },
+      confidence: 0.88,
+      reasoning: "backup-restore",
+    };
+  }
+
+  if (/اعرض.*(عملاء|leads|زبائن)|قائمة.*عملاء|list.*leads/i.test(lower)) {
+    return {
+      kind: "ultimate_tool",
+      toolName: "lead_list",
+      toolParams: { limit: 20 },
+      confidence: 0.86,
+      reasoning: "lead-list",
+    };
+  }
+
+  if (/صحة.*محتوى|content\s*health/i.test(lower)) {
+    return {
+      kind: "ultimate_tool",
+      toolName: "content_health_check",
+      toolParams: { pageSlug: "home" },
+      confidence: 0.85,
+      reasoning: "content-health",
+    };
+  }
+
+  if (/فرص.*إيراد|revenue.*opportunit/i.test(lower)) {
+    return {
+      kind: "ultimate_tool",
+      toolName: "revenue_opportunities",
+      toolParams: { days: 30 },
+      confidence: 0.84,
+      reasoning: "revenue-opps",
+    };
+  }
+
+  if (/مخزون.*منخفض|low\s*stock/i.test(lower)) {
+    return {
+      kind: "ultimate_tool",
+      toolName: /تصنيع|مصنع|mfg/i.test(lower) ? "mfg_inventory_list" : "inventory_check_low",
+      toolParams: /تصنيع|مصنع/i.test(lower) ? { lowStockOnly: true } : {},
+      confidence: 0.86,
+      reasoning: "inventory",
+    };
+  }
+
+  if (/مخزون.*تصنيع|أوامر.*تصنيع|manufacturing/i.test(lower)) {
+    return {
+      kind: "ultimate_tool",
+      toolName: /أوامر|orders/i.test(lower) ? "mfg_orders_list" : "mfg_inventory_list",
+      toolParams: {},
+      confidence: 0.85,
+      reasoning: "manufacturing",
+    };
+  }
+
+  if (/انشر.*vercel|deploy.*site/i.test(lower)) {
+    return {
+      kind: "ultimate_tool",
+      toolName: "deploy_trigger",
+      toolParams: {},
+      confidence: 0.88,
+      reasoning: "deploy",
+    };
   }
 
   const cmd = detectCommand(message);
@@ -182,6 +268,16 @@ export function heuristicClassify(
       commandLine: "backup_db",
       confidence: 0.85,
       reasoning: "backup-cmd",
+    };
+  }
+
+  if (/طوّ?ر.*(المشروع|الكود)|project\s*evolve|pr.*تلقائي/i.test(lower)) {
+    return {
+      kind: "ultimate_tool",
+      toolName: "project_evolve",
+      toolParams: { mission: message },
+      confidence: 0.88,
+      reasoning: "project-evolve",
     };
   }
 

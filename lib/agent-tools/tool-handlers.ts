@@ -6,8 +6,10 @@
  */
 
 import { createClient } from "@/lib/supabase-server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { put } from "@vercel/blob";
 import { analyzeSEO as analyzeSEOPage } from "@/lib/seo-analyzer";
+import { getSystemHealth, getAnalyticsReport } from "@/lib/architect-tools";
 import type {
   ToolExecutionContext,
   ToolExecutionResult,
@@ -20,6 +22,15 @@ import type { Json } from "@/lib/supabase/database.types";
 
 async function getSupabase() {
   return await createClient();
+}
+
+function getServiceSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createServiceClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
 
 function generateSlug(name: string): string {
@@ -850,6 +861,306 @@ export async function executeSpeedOptimization(
       success: false,
       message: `فشل تحليل السرعة: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
       error: error instanceof Error ? error.message : "Unknown error",
+      executionId: context.executionId,
+    };
+  }
+}
+
+export async function executeSystemHealthCheck(
+  _params: Record<string, unknown>,
+  context: ToolExecutionContext
+): Promise<ToolExecutionResult> {
+  try {
+    const health = await getSystemHealth();
+    return {
+      success: health.success !== false,
+      message: health.message || "تم فحص صحة النظام",
+      data: health.data as Record<string, unknown> | undefined,
+      executionId: context.executionId,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "فشل فحص الصحة",
+      executionId: context.executionId,
+    };
+  }
+}
+
+export async function executeMetricsRealtime(
+  params: Record<string, unknown>,
+  context: ToolExecutionContext
+): Promise<ToolExecutionResult> {
+  const range = (params.timeRange as string) || "7d";
+  const days = range === "30d" ? 30 : range === "24h" || range === "1h" ? 1 : 7;
+  try {
+    const report = await getAnalyticsReport({ days: days as 7 | 30 | 90 });
+    return {
+      success: report.success !== false,
+      message: report.message || `مؤشرات آخر ${days} يوم`,
+      data: report.data as Record<string, unknown> | undefined,
+      executionId: context.executionId,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "فشل المؤشرات",
+      executionId: context.executionId,
+    };
+  }
+}
+
+export async function executeBackupList(
+  _params: Record<string, unknown>,
+  context: ToolExecutionContext
+): Promise<ToolExecutionResult> {
+  const supabase = getServiceSupabase() || (await getSupabase());
+  try {
+    const { data, error } = await supabase
+      .from("backup_snapshots")
+      .select("id, backup_name, backup_type, backup_status, created_at, size_bytes")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (error) throw error;
+    const count = data?.length || 0;
+    return {
+      success: true,
+      message: `عندك ${count} نسخة احتياطية مسجّلة`,
+      data: { backups: data || [] },
+      executionId: context.executionId,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "تعذر قراءة النسخ الاحتياطية",
+      executionId: context.executionId,
+    };
+  }
+}
+
+export async function executeSeoFixIssues(
+  params: Record<string, unknown>,
+  context: ToolExecutionContext
+): Promise<ToolExecutionResult> {
+  const url =
+    (params.url as string) ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://azenith-living-os.vercel.app";
+  const { applySeoAutoFixes } = await import("@/lib/seo-auto-fixer");
+  const fix = await applySeoAutoFixes({
+    url,
+    autoFixAll: params.autoFixAll === true,
+    issueCodes: params.issueCodes as string[] | undefined,
+  });
+  return {
+    success: fix.success,
+    message: fix.message + (fix.applied.length ? `\n✅ ${fix.applied.join("\n✅ ")}` : ""),
+    data: { applied: fix.applied, skipped: fix.skipped, ...fix.data },
+    executionId: context.executionId,
+  };
+}
+
+export async function executeGoalCreate(
+  params: Record<string, unknown>,
+  context: ToolExecutionContext
+): Promise<ToolExecutionResult> {
+  const supabase = getServiceSupabase() || (await getSupabase());
+  try {
+    const { data, error } = await supabase
+      .from("agent_goals_v2")
+      .insert({
+        title: (params.title as string) || "هدف من المساعد",
+        description: (params.description as string) || "",
+        goal_type: "metric_target",
+        target_metric: (params.targetMetric as string) || "conversion_rate",
+        target_value: Number(params.targetValue) || 5,
+        unit: "percent",
+        company_id: context.companyId || process.env.MASTER_COMPANY_ID || null,
+        created_by: context.actorUserId,
+        status: "active",
+        progress_percent: 0,
+        current_value: 0,
+        priority: Number(params.priority) || 5,
+        auto_check_enabled: params.autoCheck === true,
+      })
+      .select("id, title, target_metric, target_value")
+      .single();
+    if (error) throw error;
+    return {
+      success: true,
+      message: `تم إنشاء الهدف: ${data.title}`,
+      data,
+      executionId: context.executionId,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "فشل إنشاء الهدف",
+      executionId: context.executionId,
+    };
+  }
+}
+
+export async function executeGoalList(
+  params: Record<string, unknown>,
+  context: ToolExecutionContext
+): Promise<ToolExecutionResult> {
+  const supabase = getServiceSupabase() || (await getSupabase());
+  const status = (params.status as string) || "active";
+  try {
+    let q = supabase
+      .from("agent_goals_v2")
+      .select("id, title, status, progress_percent, target_metric, target_value, current_value")
+      .order("created_at", { ascending: false })
+      .limit(25);
+    if (status !== "all") q = q.eq("status", status);
+    const { data, error } = await q;
+    if (error) throw error;
+    return {
+      success: true,
+      message: `${data?.length || 0} هدف`,
+      data: { goals: data || [] },
+      executionId: context.executionId,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "فشل قراءة الأهداف",
+      executionId: context.executionId,
+    };
+  }
+}
+
+export async function executeGoalCheckProgress(
+  params: Record<string, unknown>,
+  context: ToolExecutionContext
+): Promise<ToolExecutionResult> {
+  const supabase = getServiceSupabase() || (await getSupabase());
+  const goalId = params.goalId as string;
+  try {
+    const { data: goal, error } =
+      goalId && goalId !== "latest"
+        ? await supabase.from("agent_goals_v2").select("*").eq("id", goalId).single()
+        : await supabase
+            .from("agent_goals_v2")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(1);
+    if (error) throw error;
+    const g = Array.isArray(goal) ? goal[0] : goal;
+    if (!g) {
+      return { success: false, message: "لا يوجد هدف", executionId: context.executionId };
+    }
+    return {
+      success: true,
+      message: `الهدف «${g.title}»: ${g.progress_percent ?? 0}% (الحالي ${g.current_value} / الهدف ${g.target_value})`,
+      data: g,
+      executionId: context.executionId,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "فشل فحص الهدف",
+      executionId: context.executionId,
+    };
+  }
+}
+
+export async function executeContentUpdate(
+  params: Record<string, unknown>,
+  context: ToolExecutionContext
+): Promise<ToolExecutionResult> {
+  const supabase = await getSupabase();
+  const entityType = (params.entityType as string) || "section";
+  const entityId = params.entityId as string;
+  const newValue = params.newValue as Record<string, unknown>;
+  if (!entityId || !newValue) {
+    return {
+      success: false,
+      message: "entityId و newValue مطلوبان",
+      executionId: context.executionId,
+    };
+  }
+  const svc = getServiceSupabase() || supabase;
+
+  try {
+    if (entityType === "section") {
+      const { error } = await svc
+        .from("site_sections")
+        .update({
+          content: newValue as Json,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", entityId);
+      if (error) throw error;
+      return {
+        success: true,
+        message: "تم تحديث محتوى القسم",
+        data: { entityId },
+        executionId: context.executionId,
+      };
+    }
+
+    if (entityType === "product") {
+      const { error } = await svc
+        .from("products")
+        .update({
+          ...newValue,
+          updated_at: new Date().toISOString(),
+        } as never)
+        .eq("id", entityId);
+      if (error) throw error;
+      return {
+        success: true,
+        message: "تم تحديث المنتج",
+        data: { entityId },
+        executionId: context.executionId,
+      };
+    }
+
+    if (entityType === "lead" || entityType === "user") {
+      const allowed = ["full_name", "phone", "email", "room_type", "budget", "style", "score", "intent", "notes"];
+      const patch: Record<string, unknown> = {};
+      for (const k of allowed) {
+        if (k in newValue) patch[k] = newValue[k];
+      }
+      const { error } = await svc.from("users").update(patch).eq("id", entityId);
+      if (error) throw error;
+      return {
+        success: true,
+        message: "تم تحديث بيانات العميل",
+        data: { entityId },
+        executionId: context.executionId,
+      };
+    }
+
+    if (entityType === "site_setting") {
+      const key = (newValue.key as string) || entityId;
+      const { error } = await svc
+        .from("site_settings")
+        .upsert({
+          key,
+          value: (newValue.value ?? newValue) as Json,
+          updated_at: new Date().toISOString(),
+        } as never, { onConflict: "key" });
+      if (error) throw error;
+      return {
+        success: true,
+        message: `تم تحديث الإعداد ${key}`,
+        data: { key },
+        executionId: context.executionId,
+      };
+    }
+
+    return {
+      success: false,
+      message: `نوع الكيان ${entityType} غير مدعوم — استخدم: section, product, lead, site_setting`,
+      executionId: context.executionId,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "فشل تحديث المحتوى",
       executionId: context.executionId,
     };
   }

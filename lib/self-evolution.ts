@@ -506,7 +506,6 @@ export async function executeSuggestion(
     };
   }
 
-  // Execute via sandbox
   const result = await applySandboxSuggestion({
     type: suggestion.type,
     targetFile: suggestion.targetFile,
@@ -514,6 +513,19 @@ export async function executeSuggestion(
     replacement: suggestion.replacement,
     description: suggestion.description,
   });
+
+  if (
+    !result.success &&
+    /production|read-only|سحابي|cloud/i.test(result.message)
+  ) {
+    const { queueCloudEvolutionPatch, suggestionToCloudPatch } = await import(
+      "./admin-cloud-evolution"
+    );
+    const patch = suggestionToCloudPatch(suggestion);
+    if (patch) {
+      return queueCloudEvolutionPatch(patch);
+    }
+  }
 
   return result;
 }

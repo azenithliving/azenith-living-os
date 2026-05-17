@@ -42,75 +42,144 @@ export function inferUltimateTool(
   const lower = message.toLowerCase();
   const url = siteUrl();
 
-  if (/صلح.*seo|fix.*seo|seo_fix|مشاكل.*seo/i.test(lower)) {
-    return { toolName: "seo_fix_issues", params: { url } };
+  if (/تذكّ?ر|remember/i.test(lower)) return null;
+
+  if (/صلح.*seo|fix.*seo|seo_fix|مشاكل.*seo|أصلح.*seo/i.test(lower)) {
+    return { toolName: "seo_fix_issues", params: { url, autoFixAll: true } };
   }
-  if (/seo|تحسين.*بحث|محركات|meta\s*tags/i.test(lower)) {
+  if (/seo|تحسين.*بحث|محركات|meta\s*tags/i.test(lower) && !/fix|صلح/i.test(lower)) {
     return { toolName: "seo_analyze", params: { url } };
   }
-  if (
-    /نسخ.*احتياط|backup(?!_db)|احتياطي/i.test(lower) &&
-    !/قاعدة|\bdb\b/i.test(lower) &&
-    /إعداد|settings|جداول|tables/i.test(lower)
-  ) {
-    return { toolName: "backup_create", params: { tables: ["site_settings"] } };
+
+  if (/صحة.*محتوى|content\s*health|فحص.*محتوى/i.test(lower)) {
+    const slug = /about|من نحن/i.test(lower) ? "about" : /contact|تواصل/i.test(lower) ? "contact" : "home";
+    return { toolName: "content_health_check", params: { pageSlug: slug } };
   }
-  if (/نسخ.*احتياط|backup(?!_db)|احتياطي/i.test(lower) && !/قاعدة|\bdb\b/i.test(lower)) {
-    return { toolName: "backup_create", params: { tables: ["site_settings"] } };
-  }
-  if (/استرجع|restore.*backup/i.test(lower)) {
-    const idMatch = lower.match(/backup[_-]?(\w+)/);
+
+  if (/استرجع|restore.*backup|ارجع.*نسخة/i.test(lower)) {
+    const idMatch = message.match(/\b[0-9a-f-]{36}\b/i);
     return {
       toolName: "backup_restore",
-      params: { backupId: idMatch?.[1] || "latest" },
+      params: {
+        backupId: idMatch?.[0] || "latest",
+        confirmRestore: /confirm|أكّ?د|نفّ?ذ.*استعادة/i.test(lower),
+      },
     };
   }
-  if (/قائمة.*نسخ|list.*backup/i.test(lower)) {
+  if (/list.*backup|backup.*list|قائمة.*نسخ|اعرض.*نسخ/i.test(lower)) {
     return { toolName: "backup_list", params: {} };
   }
+  if (
+    /نسخ.*احتياط|backup(?!_db)/i.test(lower) &&
+    !/قاعدة|\bdb\b|list|قائمة|استرجع|restore/i.test(lower)
+  ) {
+    return { toolName: "backup_create", params: { tables: ["site_settings", "site_sections"] } };
+  }
+
+  if (/أضف.*منتج|add.*product|منتج جديد/i.test(lower)) {
+    const priceMatch = lower.match(/(\d{2,7})/);
+    return {
+      toolName: "product_add",
+      params: {
+        name: message.replace(/أضف|منتج|add|product/gi, "").trim().slice(0, 80) || "منتج جديد",
+        price: priceMatch ? Number(priceMatch[1]) : 0,
+      },
+    };
+  }
+  if (/اعرض.*منتج|list.*product|المنتجات/i.test(lower)) {
+    return { toolName: "product_list", params: {} };
+  }
+
+  if (/ابحث.*عن|web\s*search|بحث.*ويب/i.test(lower)) {
+    const q = message.replace(/ابحث.*عن|web\s*search|بحث.*ويب/gi, "").trim();
+    return { toolName: "web_search", params: { query: q || message } };
+  }
+  if (/اقرأ.*موقع|read.*website|محتوى.*رابط/i.test(lower)) {
+    const urlMatch = message.match(/https?:\/\/\S+/i);
+    return { toolName: "read_website", params: { url: urlMatch?.[0] || url } };
+  }
+
+  if (/فرص.*إيراد|revenue.*opportunit/i.test(lower)) {
+    return { toolName: "revenue_opportunities", params: { days: 30 } };
+  }
+  if (/تدقيق.*سرعة.*عميق|deep.*speed|speed.*deep/i.test(lower)) {
+    return { toolName: "speed_deep_audit", params: { url } };
+  }
+
+  if (/اعرض.*(عملاء|leads|زبائن)|قائمة.*عملاء|list.*leads/i.test(lower)) {
+    const intent = /buyer|مشتري/i.test(lower)
+      ? "buyer"
+      : /interested|مهتم/i.test(lower)
+        ? "interested"
+        : "all";
+    return { toolName: "lead_list", params: { limit: 20, intent } };
+  }
+  if (/ملف.*عميل|dossier|ابعت.*واتساب.*عميل/i.test(lower)) {
+    const idMatch = message.match(/\b[0-9a-f-]{36}\b/i);
+    return { toolName: "lead_dossier_send", params: { leadId: idMatch?.[0] || "" } };
+  }
+  if (/حدّ?ث.*(غرفة|سعر|ميزانية|lead)|update.*room/i.test(lower)) {
+    const idMatch = message.match(/\b[0-9a-f-]{36}\b/i);
+    return {
+      toolName: "room_update",
+      params: {
+        userId: idMatch?.[0],
+        budget: /ميزانية|budget/i.test(lower) ? message.slice(0, 120) : undefined,
+        roomType: /غرفة|room/i.test(lower) ? message.slice(0, 80) : undefined,
+      },
+    };
+  }
+
   if (/أنشئ.*قسم|انشئ.*قسم|create.*section|قسم جديد/i.test(lower)) {
     return {
       toolName: "section_create",
       params: {
-        title: "قسم جديد",
-        slug: `section-${Date.now()}`,
-        pageSlug: "home",
-        placement: "main",
+        name: "قسم جديد",
+        type: "content",
+        pagePlacement: "home",
       },
     };
   }
   if (/حدّ?ث.*قسم|update.*section/i.test(lower)) {
-    return {
-      toolName: "section_update",
-      params: { sectionId: "latest", title: message.slice(0, 80) },
-    };
+    return { toolName: "section_update", params: { sectionId: "latest", name: message.slice(0, 80) } };
   }
   if (/احذف.*قسم|delete.*section/i.test(lower)) {
     return { toolName: "section_delete", params: { sectionId: "latest" } };
   }
-  if (/حدّ?ث.*محتوى|content_update|نص.*الصفحة/i.test(lower)) {
+  if (/حدّ?ث.*محتوى|content_update|نص.*صفحة|حدّ?ث.*منتج/i.test(lower)) {
+    const entityType = /منتج|product/i.test(lower)
+      ? "product"
+      : /عميل|lead|user/i.test(lower)
+        ? "lead"
+        : "section";
+    const idMatch = message.match(/\b[0-9a-f-]{36}\b/i);
     return {
       toolName: "content_update",
-      params: { entityType: "section", entityId: "home", newValue: { body: message } },
+      params: {
+        entityType,
+        entityId: idMatch?.[0] || "latest",
+        newValue: { body: message, note: message.slice(0, 300) },
+      },
     };
   }
-  if (/سرعة|performance|core web|lcp|سرعة.*الموقع/i.test(lower)) {
+
+  if (/سرعة|performance|core web|lcp/i.test(lower)) {
     if (/حسّ?ن|optimize|تحسين/i.test(lower)) {
       return { toolName: "speed_optimize", params: { url } };
     }
     return { toolName: "speed_analyze", params: { url } };
   }
-  if (/إيراد|revenue|مبيعات.*تحليل|ربح/i.test(lower)) {
+  if (/إيراد|revenue|مبيعات.*تحليل/i.test(lower) && !/فرص/i.test(lower)) {
     return { toolName: "revenue_analyze", params: { days: 30 } };
   }
-  if (/مؤشرات.*لحظ|realtime|metrics.*live/i.test(lower)) {
-    return { toolName: "metrics_realtime", params: {} };
+  if (/مؤشرات.*لحظ|realtime|metrics.*live|المؤشرات.*الآن/i.test(lower)) {
+    return { toolName: "metrics_realtime", params: { timeRange: "24h" } };
   }
   if (/هدف|goal|okr|أهداف/i.test(lower)) {
     if (/قائمة|list|اعرض|وريني/i.test(lower)) {
       return { toolName: "goal_list", params: {} };
     }
-    if (/تقدم|progress/i.test(lower)) {
+    if (/تقدم|progress|وين.*الهدف/i.test(lower)) {
       return { toolName: "goal_check_progress", params: { goalId: "latest" } };
     }
     return {
@@ -122,7 +191,7 @@ export function inferUltimateTool(
       },
     };
   }
-  if (/إعداد|setting|config/i.test(lower) && /حدّ?ث|غيّر|update/i.test(lower)) {
+  if (/إعداد|setting/i.test(lower) && /حدّ?ث|غيّر|update/i.test(lower)) {
     return {
       toolName: "setting_update",
       params: { key: "general", value: { note: message.slice(0, 200) } },
@@ -130,6 +199,34 @@ export function inferUltimateTool(
   }
   if (/system_health|فحص.*تقني.*عميق/i.test(lower)) {
     return { toolName: "system_health_check", params: {} };
+  }
+
+  if (/مخزون.*منخفض|low\s*stock|نفاد.*مخزون/i.test(lower)) {
+    if (/تصنيع|مصنع|mfg|inventory_items/i.test(lower)) {
+      return { toolName: "mfg_inventory_list", params: { lowStockOnly: true } };
+    }
+    return { toolName: "inventory_check_low", params: {} };
+  }
+  if (/مخزون.*تصنيع|مصنع.*مخزون|mfg.*inventory/i.test(lower)) {
+    return { toolName: "mfg_inventory_list", params: {} };
+  }
+  if (/أوامر.*(تصنيع|بيع)|manufacturing\s*orders|production\s*orders/i.test(lower)) {
+    return { toolName: "mfg_orders_list", params: { status: "pending" } };
+  }
+  if (/انشر.*(الموقع|vercel)|deploy.*(site|vercel)/i.test(lower)) {
+    return { toolName: "deploy_trigger", params: {} };
+  }
+  if (/طوّ?ر.*(المشروع|الكود)|project\s*evolve|أصلح.*الكود/i.test(lower)) {
+    return { toolName: "project_evolve", params: { mission: message } };
+  }
+  if (/زود.*مخزون|inventory\s*update|عدّل.*مخزون/i.test(lower)) {
+    return {
+      toolName: "inventory_update",
+      params: {
+        productId: (message.match(/\b[0-9a-f-]{36}\b/i) || [])[0] || "",
+        quantityChange: Number((lower.match(/(\d+)/) || [])[1]) || 1,
+      },
+    };
   }
 
   return null;

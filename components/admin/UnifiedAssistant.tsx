@@ -14,6 +14,7 @@ import {
   Shield,
   Wrench,
 } from "lucide-react";
+import { SovereignMindPanel } from "@/components/admin/SovereignMindPanel";
 
 type ChatMessage = {
   id: string;
@@ -216,7 +217,9 @@ export function UnifiedAssistant() {
               </div>
             </form>
           </div>
-          <aside className="lg:col-span-4 flex flex-col rounded-2xl border border-white/10 bg-white/[0.02] min-h-[280px]">
+          <aside className="lg:col-span-4 flex flex-col gap-4 min-h-[280px]">
+            <SovereignMindPanel />
+            <div className="flex flex-col flex-1 rounded-2xl border border-white/10 bg-white/[0.02] min-h-0">
             <div className="p-4 border-b border-white/10 flex items-center gap-2 text-sm font-bold">
               <Sparkles className="w-4 h-4 text-[#C5A059]" />
               سجل التنفيذ
@@ -232,6 +235,7 @@ export function UnifiedAssistant() {
                   <p className="text-white/40 line-clamp-2">{(ex.execution_data?.userMessage as string) || "—"}</p>
                 </div>
               ))}
+            </div>
             </div>
           </aside>
         </div>

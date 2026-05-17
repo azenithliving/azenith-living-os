@@ -22,11 +22,20 @@ import {
 import type { ClassifiedIntent } from "./admin-intent-types";
 import { buildExecutionPlan } from "./admin-planner";
 import { buildCapabilitySummaryForUser } from "./admin-capability-manifest";
+import { recordExecutionLearning } from "./admin-capability-evolution";
+import {
+  parseRememberInstruction,
+  rememberOwnerPreference,
+  buildOwnerMemoryPrompt,
+} from "./admin-owner-memory";
+import { buildAdminDailyReport } from "./admin-daily-report";
 import {
   classifyAdminIntent,
   detectActionOrientedRequest,
   needsMultiAgentMission,
 } from "./admin-intent-classifier";
+import { createAdminProposal } from "./admin-sovereign-mind";
+import { requiresOwnerApproval } from "./admin-approval-policy";
 import { runGenesisManifest, runUltimateTool } from "./admin-tool-bridge";
 
 export type { IntentKind, ClassifiedIntent } from "./admin-intent-types";
@@ -68,6 +77,18 @@ function finalizeReply(
   return `${plan}\n\n${body}`;
 }
 
+function describeIntentForOwner(intent: ClassifiedIntent, message: string): string {
+  if (intent.kind === "command") {
+    return `تنفيذ أمر: ${intent.commandLine || intent.command || message}`;
+  }
+  if (intent.kind === "ultimate_tool") {
+    return `تشغيل أداة: ${intent.toolName || "ultimate"}`;
+  }
+  if (intent.kind === "agents") return `مهمة وكلاء سحابيين: ${message.slice(0, 120)}`;
+  if (intent.kind === "genesis") return `Genesis / تكوين: ${message.slice(0, 120)}`;
+  return message.slice(0, 160);
+}
+
 /**
  * Main entry: natural language in → automatic execution out.
  */
@@ -92,6 +113,31 @@ export async function processAdminNaturalLanguage(
     content: message,
   });
 
+  const remember = parseRememberInstruction(message);
+  if (remember && userId) {
+    await rememberOwnerPreference(userId, remember.key, remember.value);
+    const memHint = await buildOwnerMemoryPrompt(userId);
+    const reply = `✅ **حفظت تفضيلك:** ${remember.key}\n${remember.value}${memHint ? `\n\n${memHint}` : ""}`;
+    await saveMessage({
+      session_id: sessionId,
+      user_id: userId,
+      role: "assistant",
+      content: reply,
+    });
+    return { type: "conversation", message: reply };
+  }
+
+  if (/تقرير.*يومي|daily\s*report|ملخص.*اليوم/i.test(message)) {
+    const report = await buildAdminDailyReport();
+    await saveMessage({
+      session_id: sessionId,
+      user_id: userId,
+      role: "assistant",
+      content: report.fullTextAr,
+    });
+    return { type: "mixed", message: report.fullTextAr };
+  }
+
   let intent = await classifyAdminIntent(message, history);
   if (
     intent.kind === "conversation" &&
@@ -111,7 +157,27 @@ export async function processAdminNaturalLanguage(
   let response: AIResponse;
 
   try {
-    switch (intent.kind) {
+    if (requiresOwnerApproval(intent)) {
+      const proposal = await createAdminProposal({
+        title: "طلب تنفيذ من المساعد",
+        description: describeIntentForOwner(intent, message),
+        reasoning: intent.reasoning || "يتطلب موافقة المالك",
+        userMessage: message,
+        intent,
+        userId,
+        userEmail,
+      });
+      const reply = proposal.success
+        ? `🛡️ **أحتاج إذنك قبل التنفيذ**\n\n${describeIntentForOwner(intent, message)}\n\n**لماذا:** ${intent.reasoning || "إجراء حساس أو واسع النطاق"}\n\n✅ راجع لوحة «عقل النظام» على اليمين واضغط **موافقة** أو **رفض**. لن أنفّذ شيئاً حتى توافق.`
+        : `🛡️ أحتاج موافقتك لكن تعذر حفظ الطلب: ${proposal.error || "خطأ"}. جرّب من لوحة عقل النظام.`;
+      response = {
+        type: "conversation",
+        message: finalizeReply(message, intent, reply),
+        command: proposal.requestId
+          ? { name: "awaiting_approval", args: [], result: { requestId: proposal.requestId } }
+          : undefined,
+      };
+    } else switch (intent.kind) {
       case "command": {
         const line =
           intent.commandLine ||
@@ -339,6 +405,16 @@ export async function processAdminNaturalLanguage(
       ? JSON.stringify(response.command.result)
       : undefined,
   });
+
+  const cmdResult = response.command?.result as { success?: boolean } | undefined;
+  const executedOk =
+    response.type === "mixed" &&
+    (cmdResult?.success !== false || !cmdResult);
+  void recordExecutionLearning({
+    message,
+    intent,
+    success: executedOk || intent.kind === "conversation",
+  }).catch(() => {});
 
   return response;
 }

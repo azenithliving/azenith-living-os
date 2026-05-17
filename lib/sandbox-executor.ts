@@ -20,6 +20,13 @@ const ALLOWED_FILES = [
   "lib/self-evolution.ts",
   "lib/mastermind-ai.ts",
   "lib/key-monitor.ts",
+  "lib/admin-natural-brain.ts",
+  "lib/admin-intent-classifier.ts",
+  "lib/admin-tool-bridge.ts",
+  "lib/admin-extended-handlers.ts",
+  "lib/admin-learned-patterns.ts",
+  "lib/agent-tools/tool-handlers.ts",
+  "lib/agent-tools/tool-registry.ts",
   "components/ui/Button.tsx",
   "app/globals.css",
 ];
@@ -216,21 +223,26 @@ export async function applySuggestion(suggestion: {
   replacement: string;
   description: string;
 }): Promise<{ success: boolean; message: string }> {
-  // Security check 0: Disable in production (Vercel has read-only filesystem)
-  if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
-    return {
-      success: false,
-      message: "🚫 التنفيذ الذاتي معطل في بيئة الإنتاج (Vercel filesystem is read-only)",
-    };
+  const { isVercelProduction, isSelfExecutionEnabled, queueCloudEvolutionPatch } =
+    await import("./admin-cloud-evolution");
+
+  if (isVercelProduction() && !isSelfExecutionEnabled()) {
+    const queued = await queueCloudEvolutionPatch({
+      targetFile: suggestion.targetFile,
+      searchPattern: suggestion.searchPattern,
+      replacement: suggestion.replacement,
+      description: suggestion.description,
+      type: suggestion.type,
+    });
+    return { success: queued.success, message: queued.message };
   }
 
-  // Security check 1: Self-execution enabled?
-  if (process.env.ENABLE_SELF_EXECUTION !== "true") {
+  if (!isSelfExecutionEnabled()) {
     return {
       success: false,
       message:
-        "⚠️ التنفيذ الذاتي معطل.\n" +
-        "أضف ENABLE_SELF_EXECUTION=true في .env.local لتفعيله.",
+        "⚠️ التنفيذ الذاتي معطل محلياً.\n" +
+        "أضف ENABLE_SELF_EXECUTION=true في .env.local — على Vercel يُستخدم مسار التطوير السحابي تلقائياً.",
     };
   }
 

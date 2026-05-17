@@ -671,6 +671,28 @@ export async function evolve(
   try {
     console.log("[CommandExecutor] Running self-evolution analysis...");
 
+    const { isVercelProduction } = await import("./admin-cloud-evolution");
+    if (isVercelProduction() || args.includes("pr") || args.includes("cloud")) {
+      const { executeProjectEvolutionMission } = await import("./admin-project-evolver");
+      const mission =
+        args.filter((a) => !/^(pr|cloud)$/i.test(a)).join(" ") ||
+        "تحسين المشروع من سجل الأوامر";
+      const prResult = await executeProjectEvolutionMission(mission, {
+        userId: context.userId,
+      });
+      if (prResult.success) {
+        return {
+          success: true,
+          message: prResult.message,
+          data: {
+            prUrl: prResult.prUrl,
+            mode: "project_evolution",
+            details: prResult.data,
+          },
+        };
+      }
+    }
+
     // Analyze command logs
     const analysis = await analyzeCommandLogs(context.supabase);
 
@@ -684,12 +706,18 @@ export async function evolve(
       // Store first suggestion for potential execution
       pendingSuggestion = autoApplicable[0];
 
+      const { isVercelProduction } = await import("./admin-cloud-evolution");
+      const cloudNote = isVercelProduction()
+        ? "\n\n☁️ على Vercel: التطبيق يمر عبر **عقل النظام** (موافقة + PR اختياري) — ليس حظراً."
+        : "";
+
       const interactiveMessage =
         report +
-        `\n\n🤖 **هل تريد تطبيق الاقتراح الأول تلقائياً؟**\n` +
+        `\n\n🤖 **هل تريد تطبيق الاقتراح الأول؟**\n` +
         `**الاقتراح:** ${pendingSuggestion.description}\n` +
         `**الملف:** ${pendingSuggestion.targetFile}\n\n` +
-        `اكتب **"نعم"** أو **"yes"** للتطبيق، أو **"لا"** للرفض.`;
+        `اكتب **"نعم"** أو **"yes"** للتطبيق، أو **"لا"** للرفض.` +
+        cloudNote;
 
       return {
         success: true,
