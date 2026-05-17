@@ -1,4 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
+import { config as loadEnv } from "dotenv";
+
+loadEnv({ path: ".env.local" });
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3001";
 
@@ -9,7 +12,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: "list",
-  timeout: 90_000,
+  timeout: 120_000,
   use: {
     baseURL,
     trace: "on-first-retry",

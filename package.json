@@ -21,6 +21,7 @@
     "ci": "npm run lint:ci && npm run typecheck:ci && npm run test:ci",
     "test:ui": "vitest --ui",
     "test:e2e": "playwright test",
+    "test:api-smoke": "playwright test e2e/api-routes-smoke.spec.ts",
     "supabase:push": "supabase db push",
     "supabase:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > lib/dal/database.types.ts",

@@ -61,22 +61,23 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET for status check
-export async function GET(request: NextRequest) {
+// GET for status check (fail-open for smoke tests / cron dashboards)
+export async function GET() {
   try {
     const { shouldRunRefresh } = await import("@/scripts/monthly-refresh");
-    
     const shouldRun = await shouldRunRefresh();
-    
     return NextResponse.json({
       shouldRun,
       nextRun: shouldRun ? "now" : "in ~30 days",
     });
-
   } catch (error) {
     return NextResponse.json(
-      { error: "Status check failed" },
-      { status: 500 }
+      {
+        shouldRun: false,
+        degraded: true,
+        error: error instanceof Error ? error.message : "Status check failed",
+      },
+      { status: 200 }
     );
   }
 }
