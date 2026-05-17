@@ -2,7 +2,7 @@ import { Job } from 'bullmq';
 import { EventBus } from '../events/event-bus';
 import { Logger } from '../utils/logger';
 import { prisma } from '../database/prisma-client';
-import { askGroq } from '../../lib/ai-orchestrator';
+import { askGroqLite } from '../lib/ask-groq-lite';
 import { 
   AITask, 
   TaskStatus, 
@@ -486,11 +486,11 @@ export class EvolutionAgentService {
     يجب أن يستخدم الكود EventBus لإرسال الأحداث.
     أرجع الكود فقط بدون أي شرح أو علامات Markdown.`;
 
-    const result = await askGroq(prompt, { temperature: 0.2 });
+    const result = await askGroqLite(prompt, { temperature: 0.2 });
     
     if (result.success) {
       // Clean up markdown code blocks if any
-      return result.content.replace(/```typescript|```/g, '').trim();
+      return (result.content || "").replace(/```typescript|```/g, "").trim();
     }
 
     this.logger.warn('AI code generation failed, falling back to template');

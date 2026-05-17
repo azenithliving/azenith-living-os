@@ -28,7 +28,7 @@
 | Consultant POST | ✅ |
 | Cron GET status | ✅ |
 | Affiliate redirect | ✅ |
-| AACA worker | 📦 `npm run aaca:start` |
+| AACA worker | ✅ `npm run aaca:start` / `npm run aaca:verify` |
 
 ---
 
@@ -142,7 +142,7 @@
 | Mastermind / KeyMonitor | ✅ |
 | Rate limit / Redis queue | ✅ fail-open |
 | ثنائية اللغة (تحميل صفحات) | ✅ |
-| AACA | 📦 منفصل |
+| AACA | ✅ `npm run aaca:start` (port 3100) |
 
 ---
 
@@ -180,7 +180,26 @@
 
 ---
 
-## 10. ملفات الاختبار
+## 10. AACA (Autonomous Company AI)
+
+| البند | ✅ |
+|--------|---|
+| `npm run aaca:start` | ✅ |
+| `npm run aaca:verify` | ✅ health + root |
+| `GET /api/v1/health` | ✅ |
+| Redis غير متاح | ✅ degraded mode (MemoryEventBus) |
+| Vitest `tests/aaca-smoke.test.ts` | ✅ |
+| المنفذ الافتراضي | **3100** (لا يتعارض مع Next 3000/3001) |
+
+```bash
+npm run aaca:start    # تشغيل مستمر
+npm run aaca:verify   # تشغيل + فحص + إيقاف
+npm run aaca:dev      # وضع تطوير مع watch
+```
+
+---
+
+## 11. ملفات الاختبار
 
 | الملف | الغرض |
 |-------|--------|
@@ -188,24 +207,29 @@
 | `e2e/full-coverage.spec.ts` | صفحات + APIs |
 | `e2e/api-routes-smoke.spec.ts` | كل مسارات API |
 | `e2e/remaining-coverage.spec.ts` | consultant, cron, admin login |
+| `e2e/aaca.spec.ts` | AACA (عند تشغيل الخدمة) |
 | `e2e/helpers/discover-api-routes.ts` | اكتشاف المسارات |
+| `tests/aaca-smoke.test.ts` | degraded bus + askGroqLite |
 
 ---
 
-## 11. أوامر
+## 12. أوامر
 
 ```bash
 npm run ci
 npm run test:e2e
 npm run build
+npm run aaca:start
+npm run aaca:verify
 ```
 
 ---
 
-## 12. سجل التغييرات
+## 13. سجل التغييرات
 
 | التاريخ | الملخص |
 |---------|--------|
+| 2026-05-17 | AACA: تشغيل على 3100، degraded Redis، aaca:verify |
 | 2026-05-17 | تغطية كاملة: 101 E2E، API smoke، admin login، consultant، cron |
 | 2026-05-17 | `76448e8` gate/health عام |
 | 2026-05-17 | `60d85d9` totp-verify |
@@ -213,4 +237,4 @@ npm run build
 
 ---
 
-*لا توجد بنود ⚠️ للموقع المنشور على Vercel. الوحيد 📦 هو AACA (تشغيل اختياري: `npm run aaca:start`).*
+*الموقع (Vercel) و AACA (منفذ 3100) مُختبران. لتشغيل AACA مع Next معاً: Next على 3000 و AACA على 3100.*

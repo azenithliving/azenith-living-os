@@ -24,7 +24,7 @@ import { connectDatabase, disconnectDatabase } from './database/prisma-client';
 
 const logger = new Logger('AACA-Main');
 
-const PORT = process.env.AACA_PORT || 3001;
+const PORT = process.env.AACA_PORT || 3100;
 
 class AzenithAutonomousCompanyAI {
   private app: express.Application;

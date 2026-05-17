@@ -10,10 +10,15 @@
  * - TaskWorker that bridges queues and events
  */
 
-import { createBullMQConnection, createEventBusClient, checkRedisHealth } from './config/redis';
+import { createBullMQConnection, checkRedisHealth } from './config/redis';
 import { getQueueManager, QueueManager } from './queues/queue-manager';
 import { getEventBus, EventBus } from './events/event-bus';
 import { getTaskWorker, TaskWorker } from './workers/task-worker';
+import {
+  MemoryEventBus,
+  DegradedQueueManager,
+  DegradedTaskWorker,
+} from './stubs/degraded-infrastructure';
 import { Logger } from './utils/logger';
 import { connectDatabase, disconnectDatabase } from './database/prisma-client';
 
@@ -30,11 +35,12 @@ const DEFAULT_CONFIG: Phase2Config = {
 };
 
 class NervousSystem {
-  private queueManager!: QueueManager;
-  private eventBus!: EventBus;
-  private taskWorker!: TaskWorker;
+  private queueManager!: QueueManager | DegradedQueueManager;
+  private eventBus!: EventBus | MemoryEventBus;
+  private taskWorker!: TaskWorker | DegradedTaskWorker;
   private config: Phase2Config;
   private isRunning: boolean = false;
+  private degradedMode: boolean = false;
 
   constructor(config: Partial<Phase2Config> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -52,10 +58,20 @@ class NervousSystem {
       await connectDatabase();
       logger.info('✅ Database connected');
 
-      // 2. Test Redis connection
+      // 2. Test Redis connection (optional degraded mode)
       logger.info('🔴 Testing Redis connection...');
-      await this.testRedisConnection();
-      logger.info('✅ Redis connected');
+      const allowDegraded = process.env.AACA_ALLOW_REDIS_FAILURE !== 'false';
+      try {
+        await this.testRedisConnection();
+        logger.info('✅ Redis connected');
+      } catch (redisError) {
+        if (!allowDegraded) throw redisError;
+        logger.warn(
+          'Redis unavailable — continuing in degraded mode (in-memory events, no BullMQ)',
+          { error: redisError instanceof Error ? redisError.message : String(redisError) }
+        );
+        return this.initializeDegraded();
+      }
 
       // 3. Initialize Event Bus
       logger.info('📡 Initializing Event Bus...');
@@ -106,6 +122,33 @@ class NervousSystem {
       });
       throw error;
     }
+  }
+
+  private async initializeDegraded(): Promise<void> {
+    this.degradedMode = true;
+    this.eventBus = new MemoryEventBus();
+    await this.eventBus.connect();
+
+    this.queueManager = new DegradedQueueManager();
+    await this.queueManager.initialize();
+
+    this.taskWorker = new DegradedTaskWorker();
+    await this.taskWorker.start();
+
+    await this.setupEventSubscriptions();
+
+    this.isRunning = true;
+    await this.eventBus.publish({
+      type: 'system:nervous-system:ready',
+      source: 'phase2-degraded',
+      payload: {
+        timestamp: new Date().toISOString(),
+        degraded: true,
+        queues: this.queueManager.getQueueNames(),
+      },
+    });
+
+    logger.info('🧠 Phase 2: Nervous System READY (degraded — no Redis)');
   }
 
   /**
@@ -186,27 +229,43 @@ class NervousSystem {
     redis: { healthy: boolean; latencyMs: number };
     eventBus: { connected: boolean; handlers: number };
     queues: string[];
-    worker: ReturnType<TaskWorker['getStats']>;
+    worker: ReturnType<TaskWorker['getStats']> | ReturnType<DegradedTaskWorker['getStats']>;
+    degraded?: boolean;
   }> {
+    const eventStats = this.eventBus.getStats();
+    const workerStats = this.taskWorker.getStats();
+
+    if (this.degradedMode) {
+      return {
+        status: this.isRunning ? 'degraded' : 'stopped',
+        degraded: true,
+        redis: { healthy: false, latencyMs: 0 },
+        eventBus: {
+          connected: eventStats.connected,
+          handlers: eventStats.handlers,
+        },
+        queues: this.queueManager.getQueueNames(),
+        worker: workerStats,
+      };
+    }
+
     const connection = createBullMQConnection({ url: this.config.redisUrl });
-    
+
     try {
       const redisHealth = await checkRedisHealth(connection);
-      const eventStats = this.eventBus.getStats();
-      const workerStats = this.taskWorker.getStats();
-      
+
       return {
         status: this.isRunning ? 'healthy' : 'stopped',
         redis: {
           healthy: redisHealth.healthy,
-          latencyMs: redisHealth.latencyMs
+          latencyMs: redisHealth.latencyMs,
         },
         eventBus: {
           connected: eventStats.connected,
-          handlers: eventStats.handlers
+          handlers: eventStats.handlers,
         },
         queues: this.queueManager.getQueueNames(),
-        worker: workerStats
+        worker: workerStats,
       };
     } finally {
       await connection.quit();
@@ -237,9 +296,10 @@ class NervousSystem {
     await this.taskWorker.stop();
     logger.info('👷 Task Worker stopped');
 
-    // Close queue manager
-    await this.queueManager.close();
-    logger.info('📬 Queue Manager closed');
+    if ('close' in this.queueManager) {
+      await this.queueManager.close();
+      logger.info('📬 Queue Manager closed');
+    }
 
     // Disconnect event bus
     await this.eventBus.disconnect();
@@ -262,9 +322,9 @@ class NervousSystem {
     taskWorker: TaskWorker;
   } {
     return {
-      queueManager: this.queueManager,
-      eventBus: this.eventBus,
-      taskWorker: this.taskWorker
+      queueManager: this.queueManager as QueueManager,
+      eventBus: this.eventBus as EventBus,
+      taskWorker: this.taskWorker as TaskWorker,
     };
   }
 }
