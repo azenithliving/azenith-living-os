@@ -3,14 +3,16 @@ import { spawn } from 'child_process';
 import { execSync } from 'child_process';
 
 const ENV_VARS = [
-  { key: 'CLOUDFLARE_ACCOUNT_ID', value: 'ec262170b16c9dfa861c6622844657c7' },
-  { key: 'CLOUDFLARE_API_TOKEN', value: 'cfat_p3iab6LrauegNvqLNPW4vujMrE9JQz0mzn6wK2VZ33b61785' },
-  { key: 'HUGGINGFACE_API_KEY', value: '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' },
-  { key: 'COHERE_API_KEY', value: 'bnX37aY0yPhjWiZckvtoR3QLGNmHNvMNWFRFtvX3' },
-  { key: 'CEREBRAS_API_KEY', value: 'csk-pxcjmnpmvc3ymwj82rx3hddtm33543c69j4e2h6ct8hrhekp' },
-  { key: 'POLLINATIONS_ENABLED', value: 'true' },
-  { key: 'LIBRETTS_ENABLED', value: 'true' }
-];
+  "CLOUDFLARE_ACCOUNT_ID",
+  "CLOUDFLARE_API_TOKEN",
+  "HUGGINGFACE_API_KEY",
+  "COHERE_API_KEY",
+  "CEREBRAS_API_KEY",
+  "POLLINATIONS_ENABLED",
+  "LIBRETTS_ENABLED"
+]
+  .map((key) => ({ key, value: process.env[key] }))
+  .filter((entry) => entry.value);
 
 const ENVIRONMENTS = ['production', 'preview', 'development'];
 
@@ -28,7 +30,7 @@ function addEnvVar(key, value, env) {
 
     const proc = spawn('powershell.exe', ['-Command', `vercel env add ${key} ${env}`], {
       stdio: ['pipe', 'pipe', 'pipe'],
-      cwd: 'd:\\azenith living\\my-app'
+      cwd: process.cwd()
     });
 
     let output = '';

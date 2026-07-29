@@ -277,6 +277,231 @@ export const roomDefinitions: RoomDefinition[] = [
     outcome: "منزل متناسق يعكس شخصيتكم.",
     bullets: ["تصميم شامل", "اختيار خامات", "إشراف تنفيذ"],
     furniture: []
+  },
+  {
+    slug: "children-room",
+    title: "غرف الأطفال",
+    titleEn: "Children's Rooms",
+    eyebrow: "أحلام صغيرة",
+    eyebrowEn: "Little Dreams",
+    summaryEn: "A safe and joyful space that grows with your child, combining fun and functionality.",
+    outcomeEn: "A creative environment designed for safety, learning, and playful exploration.",
+    bulletsEn: ["Safe cornerless design", "Scalable storage solutions", "Cheerful color palettes", "Interactive study desks"],
+    summary: "مساحة آمنة ومبهجة تنمو مع طفلك، تجمع بين المرح والوظيفة.",
+    outcome: "بيئة إبداعية مصممة للأمان والتعلم والاستكشاف الممتع.",
+    bullets: ["تصميم آمن بدون زوايا حادة", "حلول تخزين قابلة للتطوير", "لوحة ألوان مبهجة", "مكاتب دراسة تفاعلية"],
+    furniture: [
+      {
+        slug: "kids-bed",
+        title: "سرير أطفال ذكي",
+        titleEn: "Smart Kids Bed",
+        images: ["/images/youth-sofa-1.jpg"],
+        description: "سرير مريح وآمن مصمم خصيصًا للأطفال مع حواف دائرية وتخزين تحت السرير.",
+        priceRange: "12,000 - 22,000 EGP",
+        features: ["خشب آمن", "حواف دائرية", "تخزين مدمج"],
+        variations: ["أزرق باستيل", "وردي ناعم", "أبيض خشبي"]
+      }
+    ]
+  },
+  {
+    slug: "teen-room",
+    title: "غرف المراهقين",
+    titleEn: "Teen Rooms",
+    eyebrow: "شخصية ناشئة",
+    eyebrowEn: "Emerging Personality",
+    summaryEn: "Design suited for adolescence with dedicated spaces for study, media, and self-expression.",
+    outcomeEn: "A modern, flexible room that reflects identity and fosters independent productivity.",
+    bulletsEn: ["Ergonomic study zone", "Modular shelving", "Ambient lighting control", "Lounge seating corner"],
+    summary: "تصميم يناسب مرحلة النضج مع مساحات مخصصة للدراسة والتعبير الذاتي.",
+    outcome: "غرفة مودرن مرنة تعكس الشخصية وتدعم الإنتاجية المستقلة.",
+    bullets: ["ركن دراسة مريح وعملي", "أرفف جدارية مرنة", "تحكم بالإضاءة المحيطة", "زاوية جلوس واسترخاء"],
+    furniture: [
+      {
+        slug: "teen-desk-set",
+        title: "مجموعة مكتب ودراسة للمراهقين",
+        titleEn: "Teen Study Desk Set",
+        images: ["/images/office-sofa-1.jpg"],
+        description: "مكتب دراسي متكامل بتصميم مودرن مع إدارة كابلات وأرفف متعددة.",
+        priceRange: "15,000 - 28,000 EGP",
+        features: ["إدارة كابلات", "أرفف قابلة للتعديل", "كرسي مريح"],
+        variations: ["رمادي عصري", "أسود مات", "بلوط فاتح"]
+      }
+    ]
+  },
+  {
+    slug: "corner-sofa",
+    title: "الكنب الزاوية",
+    titleEn: "Corner Sofas",
+    eyebrow: "راحة مطلقة",
+    eyebrowEn: "Absolute Comfort",
+    summaryEn: "Luxury sectional sofas engineered for spacious relaxation and smart corner optimization.",
+    outcomeEn: "Maximized seating capacity with premium ergonomics and contemporary aesthetics.",
+    bulletsEn: ["L-shape & U-shape configurations", "Modular extensions", "Stain-resistant upholstery", "Built-in storage compartments"],
+    summary: "قطع مفروشات فاخرة تضيف لمسة عصرية ومساحة جلوس واسعة.",
+    outcome: "استغلال مثالي للمساحات والزوايا مع راحة استثنائية وأنسجة عالية التدفئة.",
+    bullets: ["تشكيلات L وU مرنة", "وحدات قاطعة قابلة للتعديل", "أقمشة مقاومة للبقع", "تخزين مدمج هادئ"],
+    furniture: [
+      {
+        slug: "modular-corner-sofa",
+        title: "كنبة زاوية مودولار فاخرة",
+        titleEn: "Luxury Modular Corner Sofa",
+        images: ["/images/corner-sofa-living-1.jpg"],
+        description: "كنبة زاوية قاطعة بتصميم إيطالي راقٍ وأنسجة مخملية ناعمة.",
+        priceRange: "38,000 - 65,000 EGP",
+        features: ["تعديل مسند الرأس", "أقمشة إيطالية", "هيكل فولاذي"],
+        variations: ["رمادي رماد", "بيج رملي", "أخضر زمردي"]
+      }
+    ]
+  },
+  {
+    slug: "lounge",
+    title: "اللاونج",
+    titleEn: "Lounges",
+    eyebrow: "استرخاء أنيق",
+    eyebrowEn: "Elegant Relaxation",
+    summaryEn: "A private sanctuary for reading, conversations, and peaceful downtime.",
+    outcomeEn: "An intimate, hotel-inspired lounge atmosphere with curated comfort lighting.",
+    bulletsEn: ["Accent lounge chairs", "Low ambient coffee tables", "Mood lighting fixtures", "Acoustic plush rugs"],
+    summary: "زاوية خاصة للاسترخاء والقراءة بلمسات أنيقة وخامات ناعمة.",
+    outcome: "أجواء لاونج فندقية دافئة تشجع على الهدوء والتواصل الراقي.",
+    bullets: ["كراسي استرخاء مميزة", "طاولات قهوة منخفضة", "إضاءة مزاجية دافئة", "سجاد مخملي ممتص للصوت"],
+    furniture: [
+      {
+        slug: "lounge-chair-pair",
+        title: "ثنائي كراسي اللاونج الملكي",
+        titleEn: "Royal Lounge Chair Pair",
+        images: ["/images/sofa-master-1.jpg"],
+        description: "كراسي لاونج بتصميم مريح وأرجل معدنية مذهبة للاسترخاء التام.",
+        priceRange: "20,000 - 35,000 EGP",
+        features: ["دعم قطني ممتازة", "جلد طبيعي أو مخمل", "أرجل ذهبية"],
+        variations: ["أسود فاخر", "بني جلد", "أوف وايت"]
+      }
+    ]
+  },
+  {
+    slug: "guest-bedroom",
+    title: "غرف نوم الضيوف",
+    titleEn: "Guest Bedrooms",
+    eyebrow: "ضيافة أنيقة",
+    eyebrowEn: "Elegant Hospitality",
+    summaryEn: "Welcoming guest bedroom design offering hotel luxury, high privacy, and serene ambiance.",
+    outcomeEn: "A memorable guest stay with refined comfort and versatile space usage.",
+    bulletsEn: ["Hotel-standard bedding", "Luggage & wardrobe space", "Neutral welcoming colors", "Soft bedside lighting"],
+    summary: "راحة فاخرة لضيوفك مع تصميم دافئ يلائم كل الأذواق بأعلى معايير الخصوصية.",
+    outcome: "تجربة ضيافة لا تُنسى تجمع بين الرفاهية والهدوء والتنظيم الفندقي.",
+    bullets: ["معايير فندقية في المفروشات", "مساحات أمتعة وخزائن مخصصة", "ألوان محايدة مريحة", "إضاءة ليلية دافئة"],
+    furniture: [
+      {
+        slug: "guest-bed-set",
+        title: "طقم سرير الضيوف الفندقي",
+        titleEn: "Hotel Guest Bed Set",
+        images: ["/images/master-bed-1.jpg"],
+        description: "سرير ضيوف متين ومريح بخامات فندقية سهلة العناية والتنظيف.",
+        priceRange: "18,000 - 32,000 EGP",
+        features: ["مرتبة فندقية", "قماش مقاوم", "تصميم محايد"],
+        variations: ["بيج فندقي", "رمادي فاتح"]
+      }
+    ]
+  },
+  {
+    slug: "study-room",
+    title: "غرف الدراسة",
+    titleEn: "Study Rooms",
+    eyebrow: "تركيز وهدوء",
+    eyebrowEn: "Focus & Calm",
+    summaryEn: "A peaceful environment crafted for reading, deep work, and learning away from household noise.",
+    outcomeEn: "Maximum intellectual productivity with sound insulation and ergonomic seating.",
+    bulletsEn: ["Acoustic wall treatments", "Built-in library shelves", "Anti-glare task lighting", "Ergonomic study desks"],
+    summary: "بيئة مثالية للقراءة والتعلم بعيدًا عن المشتتات والضوضاء اليومية.",
+    outcome: "إنتاجية ذهنية عالية بفضل المعالجات الصوتية والإضاءة المريحة للعين.",
+    bullets: ["معالجات جدارية ماصة للصوت", "مكتبات جدارية مدمجة", "إضاءة موجهة مانعة للانعكاس", "مكاتب دراسية مريحة"],
+    furniture: [
+      {
+        slug: "library-desk-combo",
+        title: "مكتبة ومكتب دراسة مدمج",
+        titleEn: "Integrated Study Library & Desk",
+        images: ["/images/office-sofa-1.jpg"],
+        description: "وحدة دراسة جدارية تضم مكتبًا واسعًا وأرفف كتب مغلقة ومفتوحة.",
+        priceRange: "22,000 - 42,000 EGP",
+        features: ["أخشاب صلبة", "إضاءة LED للمطبوعات", "خزائن مغلقة"],
+        variations: ["جوز داكن", "بلوط طبيعي"]
+      }
+    ]
+  },
+  {
+    slug: "bathroom",
+    title: "الحمامات",
+    titleEn: "Bathrooms",
+    eyebrow: "رفاهية يومية",
+    eyebrowEn: "Daily Luxury",
+    summaryEn: "Spa-like luxury bathroom architecture blending premium stone finishes with functional sanitary solutions.",
+    outcomeEn: "A tranquil sanctuary for daily rejuvenation with moisture-resistant materials.",
+    bulletsEn: ["Marble & porcelain cladding", "Concealed plumbing fixtures", "Anti-fog illuminated mirrors", "Rain shower & freestanding tub design"],
+    summary: "تصميم حمامات فاخرة تجمع بين الوظيفة والاسترخاء بأجواء السبا الفندقي.",
+    outcome: "ملاذ يومي للانتعاش بخامات عزل ورخام يقاوم الرطوبة وسنوات الاستخدام.",
+    bullets: ["تكسيات رخام وبورسلين فاخرة", "خلاطات ومدفونات حديثة", "مرايا مضاءة مانعة للبخار", "شور ورخام حر مستدام"],
+    furniture: [
+      {
+        slug: "bathroom-vanity-unit",
+        title: "وحدة حوض ورخام حمام فاخرة",
+        titleEn: "Luxury Bathroom Vanity Unit",
+        images: ["/images/dressing-sofa-1.jpg"],
+        description: "وحدة حوض رخام طبيعي مع أدراج مقاومة للمياه وإضاءة خلفية.",
+        priceRange: "25,000 - 48,000 EGP",
+        features: ["رخام كلكتا", "خشب مقاوم للمياه", "إضاءة مدمجة"],
+        variations: ["رخام أبيض", "رخام أسود مذهّب"]
+      }
+    ]
+  },
+  {
+    slug: "guest-bathroom",
+    title: "حمامات الضيوف",
+    titleEn: "Guest Bathrooms",
+    eyebrow: "ضيافة مثالية",
+    eyebrowEn: "Perfect Hospitality",
+    summaryEn: "Sophisticated powder rooms tailored to make a memorable impression on guests.",
+    outcomeEn: "Compact elegance featuring statement vanities and ambient background lighting.",
+    bulletsEn: ["Statement vanity designs", "Warm ambient accent lighting", "Water-resistant wall panels", "Compact space optimization"],
+    summary: "أناقة عملية لحمام الضيوف مع لمسات فاخرة تعكس الذوق الرفيع.",
+    outcome: "انطباع مبهر للضيوف في مساحة مدمجة ومصممة بعناية فائقة.",
+    bullets: ["وحدات أحواض مميزة", "إضاءة جدارية دافئة", "تكسيات جدارية مقاومة للماء", "استغلال مثالي للمساحات الصغرى"],
+    furniture: [
+      {
+        slug: "powder-room-vanity",
+        title: "وحدة حوض مدمجة بتصميم معماري مبتكر لحمامات الضيوف.",
+        titleEn: "Elegant Powder Room Vanity",
+        images: ["/images/dressing-sofa-1.jpg"],
+        description: "وحدة حوض مدمجة بتصميم معماري مبتكر لحمامات الضيوف.",
+        priceRange: "16,000 - 30,000 EGP",
+        features: ["تصميم نحيف", "رخام فاخر", "خلاط نحاسي"],
+        variations: ["أسود مات", "ذهبي فرشي"]
+      }
+    ]
+  },
+  {
+    slug: "entrance-lobby",
+    title: "المداخل",
+    titleEn: "Entrances",
+    eyebrow: "انطباع أول",
+    eyebrowEn: "First Impression",
+    summaryEn: "Grand foyers and entrance lobbies designed to set the luxury tone of the residence immediately.",
+    outcomeEn: "A majestic first step into your home with statement consoles, lighting, and mirrors.",
+    bulletsEn: ["Statement console tables", "Full-height accent mirrors", "Custom flooring inlays", "Chandelier focus points"],
+    summary: "مدخل مهيب يعكس أناقة منزلك من أول خطوة بفخامة هندسية مدروسة.",
+    outcome: "انطباع أول ساحر يربط بين مدخل المنزل وباقي المساحات بهوية بصري موحدة.",
+    bullets: ["طاولات كونسول فاخرة", "مرايا جدارية عملاقة", "تطعيمات أرضيات رخامية", "إضاءة مركزية مهيبة"],
+    furniture: [
+      {
+        slug: "entrance-console-set",
+        title: "كونسول مدخل ورخام ملكي",
+        titleEn: "Royal Entrance Console & Mirror",
+        images: ["/images/living-sofa-1.jpg"],
+        description: "طاولة كونسول رخام مع مرآة جدارية عملاقة بتفاصيل برونزية.",
+        priceRange: "28,000 - 52,000 EGP",
+        features: ["رخام إيطالي", "مرآة برونزية", "هيكل معدني مذهب"],
+        variations: ["ذهبي فاخر", "أسود ملكي"]
+      }
+    ]
   }
 ];
 

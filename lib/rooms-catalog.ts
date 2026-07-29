@@ -4,6 +4,7 @@ export const ROOM_SLUG_ALIASES: Record<string, string> = {
   office: "home-office",
   "kids-room": "children-room",
   bedroom: "master-bedroom",
+  "youth-room": "teen-room",
 };
 
 export const VALID_ROOM_SLUGS = new Set([

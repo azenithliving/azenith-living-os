@@ -39,12 +39,17 @@ const ENV_KEY_POOLS = {
   anthropic: parseKeyPool("ANTHROPIC_KEYS"),
   sambanova: parseKeyPool("SAMBANOVA_KEYS"),
   together: parseKeyPool("TOGETHER_API_KEYS"),
+  cerebras: parseKeyPool("CEREBRAS_API_KEY"),
+  cohere: parseKeyPool("COHERE_API_KEY"),
   xai: parseKeyPool("XAI_KEYS"),
   api_ninjas: parseKeyPool("API_NINJAS_KEYS"),
   aimlapi: parseKeyPool("AIMLAPI_KEYS"),
   apifreellm: parseKeyPool("APIFREELLM_KEYS"),
   bytez: parseKeyPool("BYTEZ_KEYS"),
 };
+
+type ApiKeyProvider = keyof typeof ENV_KEY_POOLS;
+const PROVIDERS = Object.keys(ENV_KEY_POOLS) as ApiKeyProvider[];
 
 // In-memory key state
 interface KeyState {
@@ -65,6 +70,8 @@ const keyStates: Record<string, KeyState[]> = {
   anthropic: [],
   sambanova: [],
   together: [],
+  cerebras: [],
+  cohere: [],
   xai: [],
   api_ninjas: [],
   aimlapi: [],
@@ -115,8 +122,7 @@ export async function loadKeysFromDB(): Promise<void> {
     }
 
     // Merge with env keys (avoid duplicates)
-    const providers = ["groq", "openrouter", "mistral", "pexels", "deepseek", "openai", "google", "anthropic", "sambanova", "together", "xai", "api_ninjas", "aimlapi", "apifreellm", "bytez"] as const;
-    for (const provider of providers) {
+    for (const provider of PROVIDERS) {
       const existingKeys = new Set(keyStates[provider].map((k) => k.key));
       for (const envKey of ENV_KEY_POOLS[provider]) {
         if (!existingKeys.has(envKey)) {
@@ -144,8 +150,7 @@ export async function loadKeysFromDB(): Promise<void> {
  * Fallback to environment keys only
  */
 function fallbackToEnvKeys(): void {
-  const providers = ["groq", "openrouter", "mistral", "pexels", "deepseek", "openai", "google", "anthropic", "sambanova", "together", "xai", "api_ninjas", "aimlapi", "apifreellm", "bytez"] as const;
-  for (const provider of providers) {
+  for (const provider of PROVIDERS) {
     keyStates[provider] = ENV_KEY_POOLS[provider].map((k) => ({
       key: k,
       cooldownUntil: null,
@@ -160,7 +165,7 @@ function fallbackToEnvKeys(): void {
  * Get a single key from database (preferred) or environment
  */
 export async function getKeyFromDB(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova" | "together" | "xai" | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez"
+  provider: ApiKeyProvider
 ): Promise<string | null> {
   try {
     const supabase = getSupabaseAdminClient();
@@ -204,6 +209,8 @@ const keyIndices: Record<string, number> = {
   anthropic: 0,
   sambanova: 0,
   together: 0,
+  cerebras: 0,
+  cohere: 0,
   xai: 0,
   api_ninjas: 0,
   aimlapi: 0,
@@ -215,7 +222,7 @@ const keyIndices: Record<string, number> = {
  * Get next available key using round-robin with cooldown support
  */
 export async function getNextAvailableKey(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova" | "together" | "xai" | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez"
+  provider: ApiKeyProvider
 ): Promise<{ key: string; index: number } | null> {
   if (!keysLoaded) {
     await loadKeysFromDB();
@@ -257,7 +264,7 @@ export async function getNextAvailableKey(
  * Set cooldown for a specific key
  */
 export async function setKeyCooldown(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova" | "together" | "xai" | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez",
+  provider: ApiKeyProvider,
   key: string,
   durationMs: number
 ): Promise<void> {
@@ -293,7 +300,7 @@ export async function setKeyCooldown(
  * Increment request count for a key
  */
 export async function incrementKeyUsage(
-  provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova" | "together" | "xai" | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez",
+  provider: ApiKeyProvider,
   key: string
 ): Promise<void> {
   // Update in-memory
@@ -326,7 +333,7 @@ export async function incrementKeyUsage(
 /**
  * Get all key stats for a provider
  */
-export async function getKeyStats(provider: "groq" | "openrouter" | "mistral" | "pexels" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova" | "together" | "xai" | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez"): Promise<{
+export async function getKeyStats(provider: ApiKeyProvider): Promise<{
   total: number;
   active: number;
   inCooldown: number;

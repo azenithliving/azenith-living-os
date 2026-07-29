@@ -8,6 +8,9 @@ import {
 } from "@/lib/command-executor";
 import { logAssistantExecution, listAssistantExecutions } from "@/lib/admin-assistant-log";
 import { checkAacaHealth } from "@/lib/aaca-client";
+import { buildCapabilityAuditReport } from "@/lib/admin-assistant-capabilities";
+import { buildAssistantEvidenceLedger } from "@/lib/admin-assistant-evidence";
+import { buildResultActions } from "@/lib/admin-result-actions";
 
 export const maxDuration = 60;
 
@@ -57,6 +60,8 @@ export async function GET(req: NextRequest) {
     listAssistantExecutions(user.id, 20),
     checkAacaHealth(),
   ]);
+  const capabilityAudit = buildCapabilityAuditReport();
+  const evidenceLedger = buildAssistantEvidenceLedger(executions);
 
   const supabase = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -74,6 +79,8 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     success: true,
     agents: agentsHealth,
+    capabilityAudit,
+    evidenceLedger,
     executions,
     history: (history || []).reverse(),
   });
@@ -143,6 +150,7 @@ export async function POST(req: NextRequest) {
           reply: confirmResult.message,
           type: "mixed",
           tool: "evolve_confirm",
+          actions: buildResultActions(confirmResult),
         });
       }
     }
@@ -175,6 +183,7 @@ export async function POST(req: NextRequest) {
       reply: result.message,
       type: result.type,
       command: result.command,
+      actions: buildResultActions(result.command?.result?.data ?? result.command?.result),
       executionId,
       durationMs: Date.now() - start,
     });

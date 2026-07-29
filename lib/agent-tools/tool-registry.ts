@@ -165,7 +165,7 @@ const SettingUpdateSchema: ToolParameterSchema = {
 const ContentUpdateSchema: ToolParameterSchema = {
   type: "object",
   properties: {
-    entityType: { type: "string", description: "نوع الكيان", required: true, enum: ["site_section", "room", "product", "blog_post", "page"] },
+    entityType: { type: "string", description: "نوع الكيان", required: true, enum: ["site_section", "section", "room", "product", "blog_post", "page", "lead", "user", "site_setting"] },
     entityId: { type: "string", description: "معرف الكيان", required: true },
     fieldPath: { type: "array", description: "مسار الحقل (متداخل)", items: { type: "string" } },
     newValue: { type: "object", description: "القيمة الجديدة", required: true },
@@ -239,6 +239,7 @@ import {
   executeProductList as productListHandler,
   executeWebSearch as webSearchHandler,
   executeReadWebsite as readWebsiteHandler,
+  executeBrowserResearch as browserResearchHandler,
   executeRevenueOpportunities as revenueOpportunitiesHandler,
   executeSpeedDeepAudit as speedDeepAuditHandler,
   executeLeadList as leadListHandler,
@@ -712,6 +713,31 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
     },
     handler: readWebsiteHandler,
     examples: ["اقرأ محتوى https://example.com", "read website content"],
+  },
+
+  browser_research: {
+    name: "browser_research",
+    displayName: "بحث وتعلم بالمتصفح الحي",
+    description:
+      "استخدام Chromium الداخلي للبحث، فتح النتائج، قراءة الصفحات، استخراج مصادر وخطوات تعلم قابلة للتنفيذ",
+    category: "research",
+    riskLevel: "low",
+    requiresApproval: false,
+    parameters: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "موضوع البحث أو الرابط", required: true },
+        objective: { type: "string", description: "هدف البحث أو التعلم" },
+        maxSources: { type: "number", description: "أقصى عدد مصادر يفتحها المتصفح" },
+      },
+      required: ["query"],
+    },
+    handler: browserResearchHandler,
+    examples: [
+      "استخدم المتصفح واتعلم أحدث أدوات AI agents",
+      "افتح هذا الموقع بالمتصفح وطلعلي تقرير",
+      "ابحث بالمتصفح عن أفضل طريقة لتحسين التحويل",
+    ],
   },
 
   revenue_opportunities: {

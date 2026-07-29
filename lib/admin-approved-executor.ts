@@ -8,6 +8,7 @@ import { runAdminAgentMission } from "./aaca-client";
 import { runGenesisManifest, runUltimateTool } from "./admin-tool-bridge";
 import { executeStoredSuggestion } from "./general-agent";
 import type { ClassifiedIntent } from "./admin-intent-types";
+import { buildResultActions, type ResultAction } from "./admin-result-actions";
 
 export interface AdminProposalMetadata {
   executor: "admin_assistant";
@@ -149,7 +150,13 @@ export async function executeAdminProposal(
 export async function approveAdminProposal(
   requestId: string,
   approvedBy: string
-): Promise<{ success: boolean; message: string; error?: string }> {
+): Promise<{
+  success: boolean;
+  message: string;
+  error?: string;
+  data?: unknown;
+  actions?: ResultAction[];
+}> {
   const supabase = getServiceSupabase();
   const { data: request, error } = await supabase
     .from("approval_requests")
@@ -178,6 +185,7 @@ export async function approveAdminProposal(
       const exec = {
         success: true,
         message: `تمت الموافقة على ${patches.length} ملف. PR: ${rawMeta.prUrl}\n${deploy.message}`,
+        data: { prUrl: rawMeta.prUrl, patches: patches.length },
       };
       await supabase
         .from("approval_requests")
@@ -187,7 +195,12 @@ export async function approveAdminProposal(
           approved_at: new Date().toISOString(),
         })
         .eq("id", requestId);
-      return { success: exec.success, message: exec.message };
+      return {
+        success: exec.success,
+        message: exec.message,
+        data: exec.data,
+        actions: buildResultActions(exec.data),
+      };
     }
     const exec = await applyCloudEvolutionFromApproval({
       patch: rawMeta.patch as import("./admin-cloud-evolution").CloudPatchPayload,
@@ -202,7 +215,13 @@ export async function approveAdminProposal(
         rejection_reason: exec.success ? null : exec.message,
       })
       .eq("id", requestId);
-    return { success: exec.success, message: exec.message, error: exec.success ? undefined : exec.message };
+    return {
+      success: exec.success,
+      message: exec.message,
+      error: exec.success ? undefined : exec.message,
+      data: exec,
+      actions: buildResultActions(exec),
+    };
   }
 
   const metadata = request.metadata as AdminProposalMetadata | null;
@@ -241,6 +260,8 @@ export async function approveAdminProposal(
     success: exec.success,
     message: exec.message,
     error: exec.success ? undefined : exec.message,
+    data: exec.data,
+    actions: buildResultActions(exec.data),
   };
 }
 

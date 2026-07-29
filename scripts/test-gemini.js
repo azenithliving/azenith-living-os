@@ -1,4 +1,9 @@
-const GEMINI_API_KEY = 'AIzaSyBRMnRCXpwUvWVk4XI8pLCJbWiA_ccPNVw';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEYS?.split(",")[0];
+
+if (!GEMINI_API_KEY) {
+  console.log("Gemini key is not configured.");
+  process.exit(1);
+}
 
 async function testGemini() {
   try {

@@ -13,6 +13,9 @@ import type { ClassifiedIntent } from "./admin-intent-types";
 import type { AdminProposalMetadata } from "./admin-approved-executor";
 import { heuristicClassify } from "./admin-intent-classifier";
 import { runCapabilityEvolutionCycle } from "./admin-capability-evolution";
+import { normalizeApprovalRiskLevel } from "./approval-risk";
+import { buildAdminApprovalReport } from "./admin-approval-report";
+import { sendAdminTelegramSummon } from "./admin-telegram-summon";
 
 export interface MindProposal {
   title: string;
@@ -234,20 +237,25 @@ export async function createAdminProposal(params: {
     proactive: params.proactive,
     suggestionId: params.suggestionId,
   };
+  const approvalReport = buildAdminApprovalReport(params.intent, params.userMessage);
 
-  const risk = riskLevelForIntent(params.intent);
+  const risk = normalizeApprovalRiskLevel(riskLevelForIntent(params.intent));
   const expiresAt = new Date();
   expiresAt.setHours(expiresAt.getHours() + 48);
 
   const row = {
     action_id: crypto.randomUUID(),
     action_type: `assistant_${params.intent.kind}`,
-    description: `${params.title}\n\n${params.description}`,
+    description: `${approvalReport.title}\n\n${approvalReport.actionLabel}`,
     risk_level: risk,
     requested_at: new Date().toISOString(),
     expires_at: expiresAt.toISOString(),
     status: "pending",
-    metadata,
+    metadata: {
+      ...metadata,
+      approvalReport,
+      legacyDescription: params.description,
+    },
     actor_user_id: params.userId || null,
     company_id: process.env.MASTER_COMPANY_ID || null,
   };
@@ -264,10 +272,56 @@ export async function createAdminProposal(params: {
     delete legacy.company_id;
     const retry = await supabase.from("approval_requests").insert(legacy).select("id").single();
     if (retry.error) return { success: false, error: retry.error.message };
+    void summonOwnerForProposal({
+      title: params.title,
+      reportTitle: approvalReport.title,
+      message: params.description,
+      requestId: retry.data?.id,
+      risk,
+      proactive: params.proactive,
+    });
     return { success: true, requestId: retry.data?.id };
   }
 
+  void summonOwnerForProposal({
+    title: params.title,
+    reportTitle: approvalReport.title,
+    message: params.description,
+    requestId: data?.id,
+    risk,
+    proactive: params.proactive,
+  });
+
   return { success: true, requestId: data?.id };
+}
+
+function summonOwnerForProposal(params: {
+  title: string;
+  reportTitle: string;
+  message: string;
+  requestId?: string;
+  risk: string;
+  proactive?: boolean;
+}) {
+  if (process.env.ADMIN_ASSISTANT_TELEGRAM_AUTO_SUMMON === "off") return;
+
+  return sendAdminTelegramSummon({
+    title: params.reportTitle || params.title,
+    message: [
+      params.message,
+      "",
+      `Risk: ${params.risk}`,
+      params.proactive ? "Source: proactive system mind" : "Source: assistant request",
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    reason: params.risk === "critical" ? "critical_alert" : "approval_required",
+    href: params.requestId
+      ? `/admin/assistant?approval=${encodeURIComponent(params.requestId)}`
+      : "/admin/assistant",
+  }).catch(() => {
+    /* Telegram summon is best-effort and must not block proposal creation. */
+  });
 }
 
 export async function runSovereignMindCycle(options?: {
@@ -335,4 +389,3 @@ export async function listPendingAdminProposals(limit = 20) {
 
   return data || [];
 }
-

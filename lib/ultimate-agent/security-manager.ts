@@ -12,6 +12,7 @@
 
 import { createClient as createServerClient } from "@/utils/supabase/server";
 import { storeMemory } from "./memory-store";
+import { normalizeApprovalRiskLevel } from "@/lib/approval-risk";
 
 // Risk levels for actions
 export type RiskLevel = "info" | "normal" | "critical" | "forbidden";
@@ -244,7 +245,7 @@ export async function createApprovalRequest(
       action_id: action.id || crypto.randomUUID(),
       action_type: action.type,
       description: action.description,
-      risk_level: action.riskLevel,
+      risk_level: normalizeApprovalRiskLevel(action.riskLevel),
       requested_at: new Date().toISOString(),
       expires_at: expiresAt.toISOString(),
       status: "pending",

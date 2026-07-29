@@ -7,14 +7,20 @@ import { execSync } from 'child_process';
 import readline from 'readline';
 
 const ENV_VARS = [
-  { key: 'CLOUDFLARE_ACCOUNT_ID', value: 'ec262170b16c9dfa861c6622844657c7', type: 'encrypted' },
-  { key: 'CLOUDFLARE_API_TOKEN', value: 'cfat_p3iab6LrauegNvqLNPW4vujMrE9JQz0mzn6wK2VZ33b61785', type: 'encrypted' },
-  { key: 'HUGGINGFACE_API_KEY', value: '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', type: 'encrypted' },
-  { key: 'COHERE_API_KEY', value: 'bnX37aY0yPhjWiZckvtoR3QLGNmHNvMNWFRFtvX3', type: 'encrypted' },
-  { key: 'CEREBRAS_API_KEY', value: 'csk-pxcjmnpmvc3ymwj82rx3hddtm33543c69j4e2h6ct8hrhekp', type: 'encrypted' },
-  { key: 'POLLINATIONS_ENABLED', value: 'true', type: 'plain' },
-  { key: 'LIBRETTS_ENABLED', value: 'true', type: 'plain' }
-];
+  "CLOUDFLARE_ACCOUNT_ID",
+  "CLOUDFLARE_API_TOKEN",
+  "HUGGINGFACE_API_KEY",
+  "COHERE_API_KEY",
+  "CEREBRAS_API_KEY",
+  "POLLINATIONS_ENABLED",
+  "LIBRETTS_ENABLED"
+]
+  .map((key) => ({
+    key,
+    value: process.env[key],
+    type: key.endsWith("_ENABLED") ? "plain" : "encrypted",
+  }))
+  .filter((entry) => entry.value);
 
 const ENVIRONMENTS = ['production', 'preview', 'development'];
 const PROJECT_ID = 'azenith-living-os';

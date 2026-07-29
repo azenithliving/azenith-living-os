@@ -73,7 +73,13 @@ export function inferUltimateTool(
     /نسخ.*احتياط|backup(?!_db)/i.test(lower) &&
     !/قاعدة|\bdb\b|list|قائمة|استرجع|restore/i.test(lower)
   ) {
-    return { toolName: "backup_create", params: { tables: ["site_settings", "site_sections"] } };
+    return {
+      toolName: "backup_create",
+      params: {
+        name: `assistant-backup-${new Date().toISOString().slice(0, 10)}`,
+        tables: ["site_settings", "site_sections"],
+      },
+    };
   }
 
   if (/أضف.*منتج|add.*product|منتج جديد/i.test(lower)) {
@@ -86,7 +92,7 @@ export function inferUltimateTool(
       },
     };
   }
-  if (/اعرض.*منتج|list.*product|المنتجات/i.test(lower)) {
+  if (/اعرض.*منتج|show.*products?|list.*products?|المنتجات/i.test(lower)) {
     return { toolName: "product_list", params: {} };
   }
 
@@ -151,7 +157,7 @@ export function inferUltimateTool(
       ? "product"
       : /عميل|lead|user/i.test(lower)
         ? "lead"
-        : "section";
+        : "site_section";
     const idMatch = message.match(/\b[0-9a-f-]{36}\b/i);
     return {
       toolName: "content_update",
@@ -197,7 +203,7 @@ export function inferUltimateTool(
       params: { key: "general", value: { note: message.slice(0, 200) } },
     };
   }
-  if (/system_health|فحص.*تقني.*عميق/i.test(lower)) {
+  if (/system_health|deep.*system.*health|system.*health.*check|فحص.*تقني.*عميق/i.test(lower)) {
     return { toolName: "system_health_check", params: {} };
   }
 

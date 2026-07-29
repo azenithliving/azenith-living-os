@@ -36,7 +36,13 @@ import {
 } from "./admin-intent-classifier";
 import { createAdminProposal } from "./admin-sovereign-mind";
 import { requiresOwnerApproval } from "./admin-approval-policy";
-import { runGenesisManifest, runUltimateTool } from "./admin-tool-bridge";
+import { inferUltimateTool, runGenesisManifest, runUltimateTool } from "./admin-tool-bridge";
+import { validateToolParams } from "./agent-tools/tool-registry";
+import { buildAdminApprovalReport, formatApprovalReportForChat } from "./admin-approval-report";
+import {
+  formatBrowserAugmentationForChat,
+  runBrowserAugmentation,
+} from "./admin-browser-augmentation";
 
 export type { IntentKind, ClassifiedIntent } from "./admin-intent-types";
 export { needsMultiAgentMission } from "./admin-intent-classifier";
@@ -89,6 +95,26 @@ function describeIntentForOwner(intent: ClassifiedIntent, message: string): stri
   return message.slice(0, 160);
 }
 
+function repairUltimateToolIntent(message: string, intent: ClassifiedIntent): ClassifiedIntent {
+  if (intent.kind !== "ultimate_tool" || !intent.toolName) return intent;
+  const validation = validateToolParams(intent.toolName, intent.toolParams || {});
+  if (validation.valid) return intent;
+
+  const inferred = inferUltimateTool(message);
+  if (inferred?.toolName === intent.toolName) {
+    const repairedParams = { ...(intent.toolParams || {}), ...inferred.params };
+    const repaired = validateToolParams(intent.toolName, repairedParams);
+    if (repaired.valid) {
+      return {
+        ...intent,
+        toolParams: repairedParams,
+        reasoning: `${intent.reasoning || "ultimate"}+param-repair`,
+      };
+    }
+  }
+  return intent;
+}
+
 /**
  * Main entry: natural language in → automatic execution out.
  */
@@ -138,7 +164,7 @@ export async function processAdminNaturalLanguage(
     return { type: "mixed", message: report.fullTextAr };
   }
 
-  let intent = await classifyAdminIntent(message, history);
+  let intent = repairUltimateToolIntent(message, await classifyAdminIntent(message, history));
   if (
     intent.kind === "conversation" &&
     detectActionOrientedRequest(message)
@@ -155,12 +181,14 @@ export async function processAdminNaturalLanguage(
   };
 
   let response: AIResponse;
+  const browserAugmentation = await runBrowserAugmentation(message, intent);
 
   try {
     if (requiresOwnerApproval(intent)) {
+      const approvalReport = buildAdminApprovalReport(intent, message);
       const proposal = await createAdminProposal({
-        title: "طلب تنفيذ من المساعد",
-        description: describeIntentForOwner(intent, message),
+        title: approvalReport.title,
+        description: approvalReport.actionLabel || describeIntentForOwner(intent, message),
         reasoning: intent.reasoning || "يتطلب موافقة المالك",
         userMessage: message,
         intent,
@@ -168,7 +196,7 @@ export async function processAdminNaturalLanguage(
         userEmail,
       });
       const reply = proposal.success
-        ? `🛡️ **أحتاج إذنك قبل التنفيذ**\n\n${describeIntentForOwner(intent, message)}\n\n**لماذا:** ${intent.reasoning || "إجراء حساس أو واسع النطاق"}\n\n✅ راجع لوحة «عقل النظام» على اليمين واضغط **موافقة** أو **رفض**. لن أنفّذ شيئاً حتى توافق.`
+        ? formatApprovalReportForChat(approvalReport)
         : `🛡️ أحتاج موافقتك لكن تعذر حفظ الطلب: ${proposal.error || "خطأ"}. جرّب من لوحة عقل النظام.`;
       response = {
         type: "conversation",
@@ -242,41 +270,37 @@ export async function processAdminNaturalLanguage(
 
       case "analytics": {
         const report = await getAnalyticsReport({ days: intent.analyticsDays || 7 });
-        let reply =
+        const reply =
           report.success && report.message
             ? report.message
             : "تم جلب التحليلات.";
-        try {
-          const aiMessage = await generateAIResponse(message, history, {
-            commandExecuted: "analytics",
-            commandResult: report,
-          });
-          if (!isGenericAiFailureMessage(aiMessage)) reply = aiMessage;
-        } catch {
-          /* keep report message */
-        }
         response = {
           type: "mixed",
           message: finalizeReply(message, intent, reply),
+          command: {
+            name: "analytics",
+            args: [],
+            result: report,
+          },
         };
         break;
       }
 
       case "health": {
         const health = await getSystemHealth();
-        let reply = health.success && health.message ? health.message : "تم فحص النظام.";
-        try {
-          const aiMessage = await generateAIResponse(message, history, {
-            commandExecuted: "system_health",
-            commandResult: health,
-          });
-          if (!isGenericAiFailureMessage(aiMessage)) reply = aiMessage;
-        } catch {
-          /* keep health message */
-        }
+        const healthData = (health.data || {}) as { status?: string; pendingTasks?: number };
+        const reply =
+          health.success && health.message
+            ? `${health.message}\n\nالدليل: status=${healthData.status || "unknown"}, pendingTasks=${healthData.pendingTasks ?? "unknown"}`
+            : "فشل فحص النظام.";
         response = {
           type: "mixed",
           message: finalizeReply(message, intent, reply),
+          command: {
+            name: "system_health",
+            args: [],
+            result: health,
+          },
         };
         break;
       }
@@ -393,6 +417,23 @@ export async function processAdminNaturalLanguage(
       reply = `${reply}\n\n${buildCapabilitySummaryForUser()}`;
     }
     response = { type: "conversation", message: finalizeReply(message, intent, reply) };
+  }
+
+  const browserContext = browserAugmentation
+    ? formatBrowserAugmentationForChat(browserAugmentation)
+    : "";
+  if (browserContext) {
+    response.message = `${response.message}\n\n${browserContext}`;
+  }
+  if (browserAugmentation?.used && response.command?.result && typeof response.command.result === "object") {
+    response.command.result = {
+      ...response.command.result,
+      browserAugmentation: {
+        reason: browserAugmentation.reason,
+        sources: browserAugmentation.sources,
+        learned: browserAugmentation.learned,
+      },
+    };
   }
 
   await saveMessage({

@@ -6,11 +6,11 @@ export class WhatsAppManager extends EventEmitter {
   private status: 'DISCONNECTED' | 'INITIALIZING' | 'QR_READY' | 'READY' = 'DISCONNECTED';
   private qrCode: string | null = null;
   private serviceUrl = process.env.WHATSAPP_SERVICE_URL || 'http://localhost:3001';
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
 
   private constructor() {
     super();
-    console.log('[WhatsApp Proxy] Instance created, starting poll...');
-    this.pollStatus();
+    console.log('[WhatsApp Proxy] Instance created.');
   }
 
   public static getInstance(): WhatsAppManager {
@@ -28,8 +28,10 @@ export class WhatsAppManager extends EventEmitter {
     return WhatsAppManager.instance;
   }
 
-  private async pollStatus() {
-    setInterval(async () => {
+  private startPolling() {
+    if (this.pollTimer) return;
+    console.log('[WhatsApp Proxy] Starting poll...');
+    this.pollTimer = setInterval(async () => {
       try {
         const apiKey = process.env.INTERNAL_API_KEY || '8f3d6c1b-a2e5-4d7c-9b8a-1c5e4d2b3a9f';
         const response = await axios.get(`${this.serviceUrl}/health`, {
@@ -57,6 +59,7 @@ export class WhatsAppManager extends EventEmitter {
 
   public async initialize() {
     // In the current script, initialization is automatic on startup
+    this.startPolling();
     console.log('[WhatsApp Proxy] Station is managed externally.');
   }
 
@@ -69,6 +72,7 @@ export class WhatsAppManager extends EventEmitter {
   }
 
   public async sendMessage(to: string, message: string) {
+    this.startPolling();
     try {
       const apiKey = process.env.INTERNAL_API_KEY || '8f3d6c1b-a2e5-4d7c-9b8a-1c5e4d2b3a9f';
       const response = await axios.post(`${this.serviceUrl}/send-message`, 
@@ -82,4 +86,10 @@ export class WhatsAppManager extends EventEmitter {
   }
 }
 
-export const whatsAppManager = WhatsAppManager.getInstance();
+export const whatsAppManager = {
+  initialize: () => WhatsAppManager.getInstance().initialize(),
+  getStatus: () => WhatsAppManager.getInstance().getStatus(),
+  getQR: () => WhatsAppManager.getInstance().getQR(),
+  sendMessage: (to: string, message: string) =>
+    WhatsAppManager.getInstance().sendMessage(to, message),
+};

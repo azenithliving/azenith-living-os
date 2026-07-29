@@ -7,13 +7,9 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const keys = [
-  'AIzaSyBF4vC-AJtQDQIShLlVQntL8CUFrmfB6gs',
-  'AIzaSyDwQeAvJhTXng5GpUBPWtSliwRlY91BqMc',
-  'AIzaSyBO5FYxm19gI8Jw4TtD5fypSkQUBswburc',
-  'AIzaSyA0M7f_dHNr-aJBrQyAJllrIetdmTBCBk',
-  'AIzaSyDI82ZONLM9dxsvkJm9hlgYxSNAcwa3SvI',
-  'AIzaSyAc1hKNXXtWKtZG_S1VXEWSXc5D8fBE3cg'
-];
+  ...(process.env.GOOGLE_AI_KEYS || "").split(","),
+  ...(process.env.GEMINI_API_KEY || "").split(","),
+].map((key) => key.trim()).filter(Boolean);
 
 async function testKey(key, index) {
   try {
@@ -34,7 +30,7 @@ async function testKey(key, index) {
 }
 
 async function main() {
-  console.log('\n🔑 Testing 6 Gemini API Keys\n');
+  console.log(`\nTesting ${keys.length} Gemini API key(s)\n`);
   console.log('='.repeat(50));
   
   let validCount = 0;

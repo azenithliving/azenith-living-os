@@ -6,8 +6,10 @@
 import { execSync } from 'child_process';
 
 const ENV_VARS = [
-  { key: 'HUGGINGFACE_KEYS', value: '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,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,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,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' }
-];
+  "HUGGINGFACE_KEYS",
+]
+  .map((key) => ({ key, value: process.env[key] }))
+  .filter((entry) => entry.value);
 
 const ENVIRONMENTS = ['production', 'preview', 'development'];
 
@@ -31,7 +33,7 @@ async function addEnvVar(key, value, env) {
       fs.writeFileSync(removeFile, `y\n`);
       execSync(
         `vercel env rm ${key} ${env} < "${removeFile}"`,
-        { encoding: 'utf8', stdio: 'pipe', cwd: 'd:\\azenith living\\my-app' }
+        { encoding: 'utf8', stdio: 'pipe', cwd: process.cwd() }
       );
       fs.unlinkSync(removeFile);
       console.log(`${colors.yellow}🗑️ Removed existing ${key} from ${env}${colors.reset}`);
@@ -45,7 +47,7 @@ async function addEnvVar(key, value, env) {
 
     const result = execSync(
       `vercel env add ${key} ${env} < "${inputFile}"`,
-      { encoding: 'utf8', stdio: 'pipe', cwd: 'd:\\azenith living\\my-app' }
+      { encoding: 'utf8', stdio: 'pipe', cwd: process.cwd() }
     );
 
     fs.unlinkSync(inputFile);

@@ -16,6 +16,7 @@ import { buildLeadDossier, sendWhatsAppDossier } from "@/lib/whatsapp-dossier";
 import { resolveAdminWhatsAppPhone } from "@/lib/admin-whatsapp-resolver";
 import { executeTool as executeRealTool } from "@/lib/real-tool-executor";
 import { triggerVercelDeploy } from "@/lib/admin-cloud-evolution";
+import { runBrowserResearchMission } from "@/lib/admin-browser-copilot-brain";
 import type { ToolExecutionContext, ToolExecutionResult } from "@/lib/agent-tools/tool-registry";
 
 function getServiceSupabase() {
@@ -58,6 +59,49 @@ const STANDARD_RESTORE_TABLES = new Set([
 const ALWAYS_BLOCKED_RESTORE = new Set(["immutable_command_log", "approval_requests"]);
 
 const USERS_MERGE_TABLES = new Set(["users", "requests"]);
+
+async function loadBackupJson(snapshot: {
+  storage_url?: string | null;
+  storage_provider?: string | null;
+  checksum?: string | null;
+}) {
+  const storageUrl = snapshot.storage_url || "";
+  if (!storageUrl) throw new Error("النسخة الاحتياطية لا تحتوي على مسار تخزين");
+
+  let raw = "";
+  if (storageUrl.startsWith("data:application/json;base64,")) {
+    raw = Buffer.from(
+      storageUrl.slice("data:application/json;base64,".length),
+      "base64"
+    ).toString("utf8");
+  } else {
+    const res = await fetch(storageUrl);
+    if (!res.ok) throw new Error(`تعذر تحميل النسخة: ${res.status}`);
+    raw = await res.text();
+  }
+
+  const parsed = JSON.parse(raw) as {
+    metadata?: { tables?: string[] };
+    data?: Record<string, unknown[]>;
+    checksum?: string;
+  };
+
+  if (snapshot.checksum) {
+    const comparable = { ...parsed, checksum: "" };
+    const digest = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(JSON.stringify(comparable))
+    );
+    const checksum = Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    if (checksum !== snapshot.checksum) {
+      throw new Error("فشل تحقق سلامة النسخة الاحتياطية");
+    }
+  }
+
+  return parsed;
+}
 
 export async function executeBackupRestore(
   params: Record<string, unknown>,
@@ -102,12 +146,7 @@ export async function executeBackupRestore(
       };
     }
 
-    const res = await fetch(snapshot.storage_url);
-    if (!res.ok) throw new Error(`تعذر تحميل النسخة: ${res.status}`);
-    const backup = (await res.json()) as {
-      metadata?: { tables?: string[] };
-      data?: Record<string, unknown[]>;
-    };
+    const backup = await loadBackupJson(snapshot);
 
     const tables =
       backup.metadata?.tables || Object.keys(backup.data || {}).filter((t) => t !== "metadata");
@@ -266,6 +305,33 @@ export async function executeReadWebsite(
 ): Promise<ToolExecutionResult> {
   const r = await readWebsite({ url: (params.url as string) || "" });
   return { ...architectToTool(r), executionId: context.executionId };
+}
+
+export async function executeBrowserResearch(
+  params: Record<string, unknown>,
+  context: ToolExecutionContext
+): Promise<ToolExecutionResult> {
+  const query = String(params.query || params.objective || "").trim();
+  if (!query) {
+    return {
+      success: false,
+      message: "اكتب موضوع البحث أو الرابط الذي تريد من المتصفح الحي استكشافه.",
+      executionId: context.executionId,
+    };
+  }
+
+  const result = await runBrowserResearchMission({
+    query,
+    objective: typeof params.objective === "string" ? params.objective : undefined,
+    maxSources: Number(params.maxSources) || 3,
+  });
+
+  return {
+    success: result.success,
+    message: result.message,
+    data: result.data as unknown as Record<string, unknown>,
+    executionId: context.executionId,
+  };
 }
 
 export async function executeRevenueOpportunities(

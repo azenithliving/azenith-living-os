@@ -36,6 +36,14 @@ test.describe("Unified admin hub", () => {
     ).toBeVisible({ timeout: 15_000 });
   });
 
+  test("gate login redirects when already authenticated", async ({ page }) => {
+    await adminGateLogin(page);
+    const res = await page.goto("/gate/login");
+    expect(res?.status()).toBeLessThan(500);
+    expect(page.url()).toContain("/admin");
+    expect(page.url()).not.toContain("/gate/login");
+  });
+
   const HUB_PAGES = [
     "/admin/work",
     "/admin/intelligence",

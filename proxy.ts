@@ -128,6 +128,7 @@ export async function proxy(request: NextRequest) {
 
   const needsSession =
     pathname.startsWith("/api/admin") ||
+    pathname.startsWith("/gate/login") ||
     pathname.startsWith("/admin-gate") ||
     pathname.startsWith("/admin");
 
@@ -165,7 +166,7 @@ export async function proxy(request: NextRequest) {
     return applyResponseHeaders(NextResponse.redirect(url));
   }
 
-  if (pathname.startsWith("/admin-gate/login") && user) {
+  if ((pathname.startsWith("/gate/login") || pathname.startsWith("/admin-gate/login")) && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
     return applyResponseHeaders(NextResponse.redirect(url));

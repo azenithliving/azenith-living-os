@@ -1,0 +1,3010 @@
+(node:19004) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+⚠ Blocked cross-origin request to Next.js dev resource /_next/webpack-hmr from "127.0.0.1".
+Cross-origin access to Next.js dev resources is blocked by default for safety.
+
+To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+
+// next.config.js
+module.exports = {
+  allowedDevOrigins: ['127.0.0.1'],
+}
+
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/admin/assistant'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Orchestrator] ⚠️ Provider groq failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider gemini failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider openrouter failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider openai failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider anthropic failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider sambanova failed or returned empty content. Trying next...
+[MemoryStore] Failed to store memory: {
+  code: 'PGRST204',
+  details: null,
+  hint: null,
+  message: "Could not find the 'actor_user_id' column of 'agent_memory' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/admin/mind'
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/admin/assistant'
+}
+⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Production status error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Pending approvals error: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'approval_requests' and 'users' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'approval_logs' instead of 'approval_requests'.",
+  message: "Could not find a relationship between 'approval_requests' and 'users' in the schema cache"
+}
+System alerts error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column agent_events.severity does not exist'
+}
+Low stock error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Revenue stats error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+Orders summary error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "demo"'
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/admin/mind'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/admin/assistant'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Orchestrator] ⚠️ Provider groq failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider gemini failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider openrouter failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider openai failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider anthropic failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider sambanova failed or returned empty content. Trying next...
+[MemoryStore] Failed to store memory: {
+  code: 'PGRST204',
+  details: null,
+  hint: null,
+  message: "Could not find the 'actor_user_id' column of 'agent_memory' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⚠️ Fast Neural Mapping failed: google API error: 429 - You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+Please retry in 36.246545344s.
+[MemoryStore] Failed to store memory: {
+  code: 'PGRST204',
+  details: null,
+  hint: null,
+  message: "Could not find the 'actor_user_id' column of 'agent_memory' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[CommandExecutor] Failed to log command to Supabase: new row for relation "immutable_command_log" violates check constraint "no_update_allowed"
+[MemoryStore] Failed to store memory: {
+  code: 'PGRST204',
+  details: null,
+  hint: null,
+  message: "Could not find the 'actor_user_id' column of 'agent_memory' in the schema cache"
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/admin/mind'
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/admin/assistant'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Orchestrator] ⚠️ Provider groq failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider gemini failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider openrouter failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider openai failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider anthropic failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider sambanova failed or returned empty content. Trying next...
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[TypeError: fetch failed] {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 104.18.38.10:443, 172.64.149.246:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 104.18.38.10:443, 172.64.149.246:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 104.18.38.10:443, 172.64.149.246:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND dmavypdmtbxzwrexqesu.supabase.co
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'dmavypdmtbxzwrexqesu.supabase.co'
+  }
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Orchestrator] ⚠️ Provider groq failed or returned empty content. Trying next...
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Orchestrator] ⚠️ Provider gemini failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider openrouter failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider openai failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider anthropic failed or returned empty content. Trying next...
+[Orchestrator] ⚠️ Provider sambanova failed or returned empty content. Trying next...
+[MemoryStore] Failed to store memory: {
+  code: 'PGRST204',
+  details: null,
+  hint: null,
+  message: "Could not find the 'actor_user_id' column of 'agent_memory' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[MemoryStore] Failed to store memory: {
+  code: 'PGRST204',
+  details: null,
+  hint: null,
+  message: "Could not find the 'actor_user_id' column of 'agent_memory' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+⨯ ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx
+[browser] ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+[browser] ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+⨯ ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx
+[browser] ./components/admin/SovereignMindPanel.tsx
+Error:   x Expected '</', got 'ident'
+     ,-[C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\SovereignMindPanel.tsx:138:1]
+ 135 |         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+ 136 |           {proposals.map((p) => (
+ 137 |             {
+ 138 |               const report = p.metadata?.approvalReport;
+     :                     ^^^^^^
+ 139 |               return (
+ 140 |             <div
+ 141 |               key={p.id}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/admin/SovereignMindPanel.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⚠ Server is approaching the used memory threshold, restarting...
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] ReferenceError: showAllCapabilities is not defined
+    at UnifiedAssistant (components\admin\UnifiedAssistant.tsx:273:29)
+  271 |   const visibleCapabilities = useMemo(() => {
+  272 |     return showAllCapabilities ? filteredCapabilities : filteredCapabilities.slice(0, 12);
+> 273 |   }, [filteredCapabilities, showAllCapabilities]);
+      |                             ^
+  274 |
+  275 |   const capabilityFilterOptions: Array<{ value: CapabilityFilter; label: string }> = [
+  276 |     { value: "all", label: "الكل" }, (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: showAllCapabilities is not defined
+    at UnifiedAssistant (components\admin\UnifiedAssistant.tsx:273:29)
+  271 |   const visibleCapabilities = useMemo(() => {
+  272 |     return showAllCapabilities ? filteredCapabilities : filteredCapabilities.slice(0, 12);
+> 273 |   }, [filteredCapabilities, showAllCapabilities]);
+      |                             ^
+  274 |
+  275 |   const capabilityFilterOptions: Array<{ value: CapabilityFilter; label: string }> = [
+  276 |     { value: "all", label: "الكل" }, (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: QUICK_PROMPTS is not defined
+    at UnifiedAssistant (components\admin\UnifiedAssistant.tsx:325:12)
+  323 |             اختبر نفسك
+  324 |           </button>
+> 325 |           {QUICK_PROMPTS.map((chip) => (
+      |            ^
+  326 |             <button
+  327 |               key={chip.label}
+  328 |               type="button" (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: CheckCircle2 is not defined
+    at UnifiedAssistant (components\admin\UnifiedAssistant.tsx:538:24)
+  536 |                   <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/...
+  537 |                     <div className="flex items-center gap-2 font-semibold">
+> 538 |                       <CheckCircle2 className="w-4 h-4" />
+      |                        ^
+  539 |                       كل القدرات المسجلة لها تحقق ودليل
+  540 |                     </div>
+  541 |                   </div> (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] Can't perform a React state update on a component that hasn't mounted yet. This indicates that you have a side-effect in your render function that asynchronously tries to update the component. Move this work to useEffect instead. 
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/admin/assistant'
+}
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/admin/assistant'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/admin/assistant'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] ReferenceError: Cannot access 'refreshBuiltInBrowser' before initialization
+    at AssistantBrowserCopilot (components\admin\AssistantBrowserCopilot.tsx:175:45)
+  173 |     if (!open || builtInBrowser || builtInLoading) return;
+  174 |     void refreshBuiltInBrowser();
+> 175 |   }, [builtInBrowser, builtInLoading, open, refreshBuiltInBrowser]);
+      |                                             ^
+  176 |
+  177 |   useEffect(() => {
+  178 |     if (!open || !browser) return; (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: Cannot access 'refreshBuiltInBrowser' before initialization
+    at AssistantBrowserCopilot (components\admin\AssistantBrowserCopilot.tsx:175:45)
+  173 |     if (!open || builtInBrowser || builtInLoading) return;
+  174 |     void refreshBuiltInBrowser();
+> 175 |   }, [builtInBrowser, builtInLoading, open, refreshBuiltInBrowser]);
+      |                                             ^
+  176 |
+  177 |   useEffect(() => {
+  178 |     if (!open || !browser) return; (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: Cannot access 'refreshBuiltInBrowser' before initialization
+    at AssistantBrowserCopilot (components\admin\AssistantBrowserCopilot.tsx:175:45)
+  173 |     if (!open || builtInBrowser || builtInLoading) return;
+  174 |     void refreshBuiltInBrowser();
+> 175 |   }, [builtInBrowser, builtInLoading, open, refreshBuiltInBrowser]);
+      |                                             ^
+  176 |
+  177 |   useEffect(() => {
+  178 |     if (!open || !browser) return; (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: Cannot access 'refreshBuiltInBrowser' before initialization
+    at AssistantBrowserCopilot (components\admin\AssistantBrowserCopilot.tsx:175:45)
+  173 |     if (!open || builtInBrowser || builtInLoading) return;
+  174 |     void refreshBuiltInBrowser();
+> 175 |   }, [builtInBrowser, builtInLoading, open, refreshBuiltInBrowser]);
+      |                                             ^
+  176 |
+  177 |   useEffect(() => {
+  178 |     if (!open || !browser) return; (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: Cannot access 'refreshBuiltInBrowser' before initialization
+    at AssistantBrowserCopilot (components\admin\AssistantBrowserCopilot.tsx:175:45)
+  173 |     if (!open || builtInBrowser || builtInLoading) return;
+  174 |     void refreshBuiltInBrowser();
+> 175 |   }, [builtInBrowser, builtInLoading, open, refreshBuiltInBrowser]);
+      |                                             ^
+  176 |
+  177 |   useEffect(() => {
+  178 |     if (!open || !browser) return; (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: Cannot access 'refreshBuiltInBrowser' before initialization
+    at AssistantBrowserCopilot (components\admin\AssistantBrowserCopilot.tsx:176:45)
+  174 |     if (!open || builtInBrowser || builtInLoading) return;
+  175 |     void refreshBuiltInBrowser();
+> 176 |   }, [builtInBrowser, builtInLoading, open, refreshBuiltInBrowser]);
+      |                                             ^
+  177 |
+  178 |   useEffect(() => {
+  179 |     if (!open || !browser) return; (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: Cannot access 'refreshBuiltInBrowser' before initialization
+    at AssistantBrowserCopilot (components\admin\AssistantBrowserCopilot.tsx:176:45)
+  174 |     if (!open || builtInBrowser || builtInLoading) return;
+  175 |     void refreshBuiltInBrowser();
+> 176 |   }, [builtInBrowser, builtInLoading, open, refreshBuiltInBrowser]);
+      |                                             ^
+  177 |
+  178 |   useEffect(() => {
+  179 |     if (!open || !browser) return; (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: Cannot access 'refreshBuiltInBrowser' before initialization
+    at AssistantBrowserCopilot (components\admin\AssistantBrowserCopilot.tsx:176:45)
+  174 |     if (!open || builtInBrowser || builtInLoading) return;
+  175 |     void refreshBuiltInBrowser();
+> 176 |   }, [builtInBrowser, builtInLoading, open, refreshBuiltInBrowser]);
+      |                                             ^
+  177 |
+  178 |   useEffect(() => {
+  179 |     if (!open || !browser) return; (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] ReferenceError: textDraft is not defined
+    at AssistantBrowserCopilot (components\admin\AssistantBrowserCopilot.tsx:512:28)
+  510 |                 <div className="mt-3 flex gap-2">
+  511 |                   <input
+> 512 |                     value={textDraft}
+      |                            ^
+  513 |                     onChange={(event) => setTextDraft(event.target.value)}
+  514 |                     onKeyDown={(event) => {
+  515 |                       if (event.key === "Enter" && textDraft.trim()) { (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: textDraft is not defined
+    at AssistantBrowserCopilot (components\admin\AssistantBrowserCopilot.tsx:512:28)
+  510 |                 <div className="mt-3 flex gap-2">
+  511 |                   <input
+> 512 |                     value={textDraft}
+      |                            ^
+  513 |                     onChange={(event) => setTextDraft(event.target.value)}
+  514 |                     onKeyDown={(event) => {
+  515 |                       if (event.key === "Enter" && textDraft.trim()) { (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+⨯ ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx
+[browser] ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+[browser] ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+⨯ ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx
+⨯ ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx
+⨯ ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx
+[browser] ./components/admin/AssistantBrowserCopilot.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from C:\Users\noura\OneDrive\Desktop\New folder\my-app\components\admin\AssistantBrowserCopilot.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./components/admin/AssistantBrowserCopilot.tsx
+./components/admin/UnifiedAssistant.tsx 
+    at console.error (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461) (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/admin/mind'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] Can't perform a React state update on a component that hasn't mounted yet. This indicates that you have a side-effect in your render function that asynchronously tries to update the component. Move this work to useEffect instead. 
+[browser] Uncaught ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at RootLayout (app\layout.tsx:151:9)
+  149 |           />
+  150 |         ) : null}
+> 151 |         <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainL...
+      |         ^
+  152 |         <Toaster
+  153 |           position="bottom-center"
+  154 |           toastOptions={{
+[browser] ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at RootLayout (app\layout.tsx:151:9)
+  149 |           />
+  150 |         ) : null}
+> 151 |         <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainL...
+      |         ^
+  152 |         <Toaster
+  153 |           position="bottom-center"
+  154 |           toastOptions={{ (app\global-error.tsx:15:13)
+[browser] ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at RootLayout (app\layout.tsx:151:9)
+  149 |           />
+  150 |         ) : null}
+> 151 |         <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainL...
+      |         ^
+  152 |         <Toaster
+  153 |           position="bottom-center"
+  154 |           toastOptions={{ (app\global-error.tsx:15:13)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+⚠ Server is approaching the used memory threshold, restarting...
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/reality/check'
+}
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/admin/assistant'
+}
+[browser] Can't perform a React state update on a component that hasn't mounted yet. This indicates that you have a side-effect in your render function that asynchronously tries to update the component. Move this work to useEffect instead. 
+[browser] Uncaught ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at RootLayout (app\layout.tsx:151:9)
+  149 |           />
+  150 |         ) : null}
+> 151 |         <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainL...
+      |         ^
+  152 |         <Toaster
+  153 |           position="bottom-center"
+  154 |           toastOptions={{
+[browser] ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at RootLayout (app\layout.tsx:151:9)
+  149 |           />
+  150 |         ) : null}
+> 151 |         <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainL...
+      |         ^
+  152 |         <Toaster
+  153 |           position="bottom-center"
+  154 |           toastOptions={{ (app\global-error.tsx:15:13)
+[browser] ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at RootLayout (app\layout.tsx:151:9)
+  149 |           />
+  150 |         ) : null}
+> 151 |         <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainL...
+      |         ^
+  152 |         <Toaster
+  153 |           position="bottom-center"
+  154 |           toastOptions={{ (app\global-error.tsx:15:13)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] Uncaught ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at RootLayout (app\layout.tsx:151:9)
+  149 |           />
+  150 |         ) : null}
+> 151 |         <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainL...
+      |         ^
+  152 |         <Toaster
+  153 |           position="bottom-center"
+  154 |           toastOptions={{
+[browser] ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at RootLayout (app\layout.tsx:151:9)
+  149 |           />
+  150 |         ) : null}
+> 151 |         <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainL...
+      |         ^
+  152 |         <Toaster
+  153 |           position="bottom-center"
+  154 |           toastOptions={{ (app\global-error.tsx:15:13)
+[browser] ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at RootLayout (app\layout.tsx:151:9)
+  149 |           />
+  150 |         ) : null}
+> 151 |         <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainL...
+      |         ^
+  152 |         <Toaster
+  153 |           position="bottom-center"
+  154 |           toastOptions={{ (app\global-error.tsx:15:13)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[AssistantLog] insert failed: Could not find the table 'public.agent_executions' in the schema cache
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Discovery] Error fetching tables: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.automation_rules'",
+  message: "Could not find the table 'public.information_schema.tables' in the schema cache"
+}
+[Image Stats API] Error: {
+  message: 'TypeError: fetch failed',
+  details: 'TypeError: fetch failed\n' +
+    '\n' +
+    'Caused by: ConnectTimeoutError: Connect Timeout Error (attempted addresses: 172.64.149.246:443, 104.18.38.10:443, timeout: 10000ms) (UND_ERR_CONNECT_TIMEOUT)\n' +
+    'ConnectTimeoutError: Connect Timeout Error (attempted addresses: 172.64.149.246:443, 104.18.38.10:443, timeout: 10000ms)\n' +
+    '    at onConnectTimeout (node:internal/deps/undici/undici:1981:23)\n' +
+    '    at Immediate._onImmediate (node:internal/deps/undici/undici:1947:35)\n' +
+    '    at process.processImmediate (node:internal/timers:504:21)\n' +
+    '    at process.callbackTrampoline (node:internal/async_hooks:130:17)',
+  hint: '',
+  code: ''
+}
+[TypeError: fetch failed] {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 172.64.149.246:443, 104.18.38.10:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 172.64.149.246:443, 104.18.38.10:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 172.64.149.246:443, 104.18.38.10:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/admin/images/stats'
+}
+[browser] Failed to fetch stats: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/reality/check'
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/admin'
+}
+[browser] Can't perform a React state update on a component that hasn't mounted yet. This indicates that you have a side-effect in your render function that asynchronously tries to update the component. Move this work to useEffect instead. 
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/admin'
+}
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: MessageCircle is not defined
+    at AdminLayoutClient (app\admin\layout-client.tsx:233:10)
+  231 |         title="المساعد الموحّد"
+  232 |       >
+> 233 |         <MessageCircle className="w-5 h-5" />
+      |          ^
+  234 |         <span className="hidden sm:inline">المساعد</span>
+  235 |       </Link>
+  236 |     </div> (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] ReferenceError: MessageCircle is not defined
+    at AdminLayoutClient (app\admin\layout-client.tsx:233:10)
+  231 |         title="المساعد الموحّد"
+  232 |       >
+> 233 |         <MessageCircle className="w-5 h-5" />
+      |          ^
+  234 |         <span className="hidden sm:inline">المساعد</span>
+  235 |       </Link>
+  236 |     </div> (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+[browser] [KILL SWITCH] Forcing loading end after 10s timeout (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/reality/check'
+}
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/reality/check'
+}
+⨯ Error: Manifest file is empty
+    at ignore-listed frames {
+  page: '/api/admin/images/stats'
+}
+[browser] Failed to fetch stats: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON (https://us-assets.i.posthog.com/static/posthog-recorder.js?v=1.369.3:1:87461)
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/api/reality/check'
+}

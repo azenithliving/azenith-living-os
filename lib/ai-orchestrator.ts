@@ -7,6 +7,20 @@ import { runMastermind } from "./mastermind-graph";
 import { routeRequest, getBestModelForTask } from "./openrouter-service";
 import { getNextAvailableKey, setKeyCooldown, incrementKeyUsage, getKeyStats } from "./api-keys-service";
 
+type AIProvider =
+  | "groq"
+  | "openrouter"
+  | "mistral"
+  | "deepseek"
+  | "openai"
+  | "google"
+  | "anthropic"
+  | "sambanova"
+  | "together"
+  | "aimlapi"
+  | "cerebras"
+  | "cohere";
+
 const CONFIG = {
   // === The Absolute Best Models on the Market ===
   GROQ_MODEL: "llama-3.3-70b-versatile", // Blazing fast, top tier open source
@@ -18,6 +32,10 @@ const CONFIG = {
   OPENAI_MODEL: "gpt-4o", // Top tier reasoning
   GOOGLE_MODEL: "gemini-2.0-flash", // Extremely fast and capable
   SAMBANOVA_MODEL: "Meta-Llama-3.1-70B-Instruct", // Lightning fast Llama
+  TOGETHER_MODEL: process.env.TOGETHER_MODEL || "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  AIMLAPI_MODEL: process.env.AIMLAPI_MODEL || "openai/gpt-4.1-mini",
+  CEREBRAS_MODEL: process.env.CEREBRAS_MODEL || "gpt-oss-120b",
+  COHERE_MODEL: process.env.COHERE_MODEL || "command-a-03-2025",
   MAX_RETRIES: 3,
   RETRY_DELAY_MS: 500,
 };
@@ -32,7 +50,7 @@ const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(r
 
 // Provider-specific fetch with retry logic
 async function fetchWithRetry<T>(
-  provider: "groq" | "openrouter" | "mistral" | "deepseek" | "openai" | "google" | "anthropic" | "sambanova",
+  provider: AIProvider,
   fetchFn: (key: string) => Promise<Response>,
   parseFn: (data: any) => T
 ): Promise<{ success: true; data: T } | { success: false; error: string; status?: number }> {
@@ -262,6 +280,123 @@ export async function askOpenAI(prompt: string, options?: any) {
   return askOpenAIMessages([{ role: "user", content: prompt }], options);
 }
 
+export async function askTogetherMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const body: Record<string, unknown> = {
+    model: options?.model || CONFIG.TOGETHER_MODEL,
+    messages,
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (options?.jsonMode) {
+    body.response_format = { type: "json_object" };
+  }
+
+  const result = await fetchWithRetry(
+    "together",
+    (key) => fetch("https://api.together.xyz/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+export async function askAIMLAPIMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const body: Record<string, unknown> = {
+    model: options?.model || CONFIG.AIMLAPI_MODEL,
+    messages,
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (options?.jsonMode) {
+    body.response_format = { type: "json_object" };
+  }
+
+  const result = await fetchWithRetry(
+    "aimlapi",
+    (key) => fetch("https://api.aimlapi.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+export async function askCerebrasMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const result = await fetchWithRetry(
+    "cerebras",
+    (key) => fetch("https://api.cerebras.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: options?.model || CONFIG.CEREBRAS_MODEL,
+        messages,
+        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? 2048,
+      }),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+export async function askCohereMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const lastUserMessage = [...messages].reverse().find((message) => message.role !== "system")?.content || "";
+  const systemPrompt = messages.find((message) => message.role === "system")?.content;
+  const result = await fetchWithRetry(
+    "cohere",
+    (key) => fetch("https://api.cohere.com/v2/chat", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: options?.model || CONFIG.COHERE_MODEL,
+        messages: [
+          ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
+          { role: "user", content: lastUserMessage },
+        ],
+        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? 2048,
+      }),
+    }),
+    (data) => data.message?.content?.map((part: { text?: string }) => part.text || "").join("") || ""
+  );
+
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
 export async function askGoogle(prompt: string, options?: any) {
   const model = options?.model || CONFIG.GOOGLE_MODEL;
   const result = await fetchWithRetry(
@@ -395,6 +530,10 @@ export async function askOrchestratorMessages(
   // Additional emergency fallbacks
   if (!providersToTry.includes("anthropic")) providersToTry.push("anthropic");
   if (!providersToTry.includes("sambanova")) providersToTry.push("sambanova");
+  if (!providersToTry.includes("together")) providersToTry.push("together");
+  if (!providersToTry.includes("aimlapi")) providersToTry.push("aimlapi");
+  if (!providersToTry.includes("cerebras")) providersToTry.push("cerebras");
+  if (!providersToTry.includes("cohere")) providersToTry.push("cohere");
 
   console.log(`[Orchestrator] Starting inference. Provider sequence: ${providersToTry.join(' -> ')}`);
 
@@ -420,6 +559,18 @@ export async function askOrchestratorMessages(
           break;
         case "sambanova":
           result = await askSambaNovaMessages(messages, options);
+          break;
+        case "together":
+          result = await askTogetherMessages(messages, options);
+          break;
+        case "aimlapi":
+          result = await askAIMLAPIMessages(messages, options);
+          break;
+        case "cerebras":
+          result = await askCerebrasMessages(messages, options);
+          break;
+        case "cohere":
+          result = await askCohereMessages(messages, options);
           break;
         case "openrouter":
           // OpenRouter is typically called using askGroqMessages structure, but we'll adapt askOpenRouter

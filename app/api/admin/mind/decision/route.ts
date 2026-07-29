@@ -48,6 +48,8 @@ export async function POST(req: NextRequest) {
       success: result.success,
       message: result.message,
       error: result.error,
+      data: result.data,
+      actions: result.actions,
     });
   }
 

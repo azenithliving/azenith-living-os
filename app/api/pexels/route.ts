@@ -37,79 +37,147 @@ function isPexelsRateLimit(status: number, errorData: any): boolean {
 }
 
 // Static luxury fallback images when all keys exhausted
-function getStaticLuxuryFallback() {
-  console.log('[Pexels API] Returning static luxury fallback images');
-  // Premium luxury interior placeholder images
+const ROOM_FALLBACK_IMAGES: Record<string, string[]> = {
+  "master-bedroom": [
+    "https://images.pexels.com/photos/6580220/pexels-photo-6580220.jpeg",
+    "https://images.pexels.com/photos/6758350/pexels-photo-6758350.jpeg",
+    "https://images.pexels.com/photos/5998138/pexels-photo-5998138.jpeg"
+  ],
+  "children-room": [
+    "https://images.pexels.com/photos/3661202/pexels-photo-3661202.jpeg",
+    "https://images.pexels.com/photos/6434622/pexels-photo-6434622.jpeg",
+    "https://images.pexels.com/photos/5598284/pexels-photo-5598284.jpeg"
+  ],
+  "teen-room": [
+    "https://images.pexels.com/photos/6980712/pexels-photo-6980712.jpeg",
+    "https://images.pexels.com/photos/6207812/pexels-photo-6207812.jpeg",
+    "https://images.pexels.com/photos/7018391/pexels-photo-7018391.jpeg"
+  ],
+  "living-room": [
+    "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
+    "https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg",
+    "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg"
+  ],
+  "dining-room": [
+    "https://images.pexels.com/photos/6207819/pexels-photo-6207819.jpeg",
+    "https://images.pexels.com/photos/6198651/pexels-photo-6198651.jpeg",
+    "https://images.pexels.com/photos/3016430/pexels-photo-3016430.jpeg"
+  ],
+  "corner-sofa": [
+    "https://images.pexels.com/photos/4850315/pexels-photo-4850315.jpeg",
+    "https://images.pexels.com/photos/6934169/pexels-photo-6934169.jpeg",
+    "https://images.pexels.com/photos/3757055/pexels-photo-3757055.jpeg"
+  ],
+  "lounge": [
+    "https://images.pexels.com/photos/6588592/pexels-photo-6588592.jpeg",
+    "https://images.pexels.com/photos/6480197/pexels-photo-6480197.jpeg",
+    "https://images.pexels.com/photos/6969824/pexels-photo-6969824.jpeg"
+  ],
+  "dressing-room": [
+    "https://images.pexels.com/photos/6045084/pexels-photo-6045084.jpeg",
+    "https://images.pexels.com/photos/6957085/pexels-photo-6957085.jpeg",
+    "https://images.pexels.com/photos/6045048/pexels-photo-6045048.jpeg"
+  ],
+  "kitchen": [
+    "https://images.pexels.com/photos/2724749/pexels-photo-2724749.jpeg",
+    "https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg",
+    "https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg"
+  ],
+  "home-office": [
+    "https://images.pexels.com/photos/6634140/pexels-photo-6634140.jpeg",
+    "https://images.pexels.com/photos/6474483/pexels-photo-6474483.jpeg",
+    "https://images.pexels.com/photos/4316737/pexels-photo-4316737.jpeg"
+  ],
+  "interior-design": [
+    "https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg",
+    "https://images.pexels.com/photos/259962/pexels-photo-259962.jpeg",
+    "https://images.pexels.com/photos/1034584/pexels-photo-1034584.jpeg"
+  ],
+  "guest-bedroom": [
+    "https://images.pexels.com/photos/3797991/pexels-photo-3797991.jpeg",
+    "https://images.pexels.com/photos/545034/pexels-photo-545034.jpeg",
+    "https://images.pexels.com/photos/2029731/pexels-photo-2029731.jpeg"
+  ],
+  "study-room": [
+    "https://images.pexels.com/photos/2908984/pexels-photo-2908984.jpeg",
+    "https://images.pexels.com/photos/1907785/pexels-photo-1907785.jpeg",
+    "https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg"
+  ],
+  "bathroom": [
+    "https://images.pexels.com/photos/1910472/pexels-photo-1910472.jpeg",
+    "https://images.pexels.com/photos/1040893/pexels-photo-1040893.jpeg",
+    "https://images.pexels.com/photos/2030037/pexels-photo-2030037.jpeg"
+  ],
+  "guest-bathroom": [
+    "https://images.pexels.com/photos/6413919/pexels-photo-6413919.jpeg",
+    "https://images.pexels.com/photos/6585757/pexels-photo-6585757.jpeg",
+    "https://images.pexels.com/photos/6198662/pexels-photo-6198662.jpeg"
+  ],
+  "entrance-lobby": [
+    "https://images.pexels.com/photos/6958434/pexels-photo-6958434.jpeg",
+    "https://images.pexels.com/photos/6956441/pexels-photo-6956441.jpeg",
+    "https://images.pexels.com/photos/2263510/pexels-photo-2263510.jpeg"
+  ]
+};
+
+// Static luxury fallback images when all keys exhausted
+function getStaticLuxuryFallback(query?: string) {
+  console.log('[Pexels API] Returning static luxury fallback images for query:', query);
+  
+  let detectedRoom = "living-room";
+  if (query) {
+    const q = query.toLowerCase();
+    if (q.includes("kids") || q.includes("children")) detectedRoom = "children-room";
+    else if (q.includes("teenager") || q.includes("teen")) detectedRoom = "teen-room";
+    else if (q.includes("master bedroom") || (q.includes("bedroom") && !q.includes("guest"))) detectedRoom = "master-bedroom";
+    else if (q.includes("guest bedroom")) detectedRoom = "guest-bedroom";
+    else if (q.includes("dining")) detectedRoom = "dining-room";
+    else if (q.includes("corner sofa") || q.includes("sectional")) detectedRoom = "corner-sofa";
+    else if (q.includes("living room") || q.includes("living")) detectedRoom = "living-room";
+    else if (q.includes("lounge")) detectedRoom = "lounge";
+    else if (q.includes("dressing") || q.includes("closet")) detectedRoom = "dressing-room";
+    else if (q.includes("kitchen")) detectedRoom = "kitchen";
+    else if (q.includes("home office") || q.includes("desk")) detectedRoom = "home-office";
+    else if (q.includes("study room") || q.includes("library")) detectedRoom = "study-room";
+    else if (q.includes("guest bathroom") || q.includes("powder")) detectedRoom = "guest-bathroom";
+    else if (q.includes("bathroom")) detectedRoom = "bathroom";
+    else if (q.includes("entrance") || q.includes("lobby") || q.includes("foyer")) detectedRoom = "entrance-lobby";
+    else if (q.includes("interior") || q.includes("architecture")) detectedRoom = "interior-design";
+  }
+
+  const urls = ROOM_FALLBACK_IMAGES[detectedRoom] || ROOM_FALLBACK_IMAGES["living-room"];
+  
   return {
     ok: true,
-    photos: [
-      {
-        id: 999001,
-        width: 1920,
-        height: 1280,
-        url: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
-        photographer: "Azenith Luxury Collection",
-        photographer_url: "#",
-        src: {
-          original: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
-          large2x: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-          large: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
-          medium: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&h=350",
-          small: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&h=130",
-          portrait: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=800",
-          landscape: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-          tiny: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=280"
-        },
-        avg_color: "#8B7355"
+    photos: urls.map((url, i) => ({
+      id: 999000 + i + 1,
+      width: 1920,
+      height: 1280,
+      url: url,
+      photographer: "Azenith Luxury Collection",
+      photographer_url: "#",
+      src: {
+        original: url,
+        large2x: `${url}?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940`,
+        large: `${url}?auto=compress&cs=tinysrgb&h=650&w=940`,
+        medium: `${url}?auto=compress&cs=tinysrgb&h=350`,
+        small: `${url}?auto=compress&cs=tinysrgb&h=130`,
+        portrait: `${url}?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=800`,
+        landscape: `${url}?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200`,
+        tiny: `${url}?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=280`
       },
-      {
-        id: 999002,
-        width: 1920,
-        height: 1280,
-        url: "https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg",
-        photographer: "Azenith Luxury Collection",
-        photographer_url: "#",
-        src: {
-          original: "https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg",
-          large2x: "https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-          large: "https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
-          medium: "https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg?auto=compress&cs=tinysrgb&h=350",
-          small: "https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg?auto=compress&cs=tinysrgb&h=130",
-          portrait: "https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=800",
-          landscape: "https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-          tiny: "https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=280"
-        },
-        avg_color: "#4A4A4A"
-      },
-      {
-        id: 999003,
-        width: 1920,
-        height: 1280,
-        url: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg",
-        photographer: "Azenith Luxury Collection",
-        photographer_url: "#",
-        src: {
-          original: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg",
-          large2x: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-          large: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
-          medium: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&h=350",
-          small: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&h=130",
-          portrait: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=800",
-          landscape: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-          tiny: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=280"
-        },
-        avg_color: "#C5A059"
-      }
-    ],
+      avg_color: "#8B7355"
+    })),
     fallbackMode: true,
     keyUsed: -1
   };
 }
 
 export async function GET(request: NextRequest) {
+  let query = "luxury modern industrial interior";
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get("query") || "luxury modern industrial interior";
+    query = searchParams.get("query") || "luxury modern industrial interior";
     const perPage = Math.min(Math.max(Number(searchParams.get("per_page") || "12"), 1), 50);
     const page = Math.max(Number(searchParams.get("page") || "1"), 1);
     const orientation = searchParams.get("orientation") || "landscape";
@@ -119,7 +187,7 @@ export async function GET(request: NextRequest) {
 
     if (stats.available === 0) {
       console.warn("⚠️ No available Pexels API keys found. Returning fallback images.");
-      return NextResponse.json(getStaticLuxuryFallback());
+      return NextResponse.json(getStaticLuxuryFallback(query));
     }
 
     // Smart Round-Robin Key Rotation
@@ -181,10 +249,10 @@ export async function GET(request: NextRequest) {
 
     // All keys exhausted - return static luxury fallback
     console.error(`[Pexels API] All ${stats.total} keys exhausted. Blacklisted: ${stats.blacklisted}`);
-    return NextResponse.json(getStaticLuxuryFallback());
+    return NextResponse.json(getStaticLuxuryFallback(query));
     
   } catch (error) {
     console.error("❌ Pexels API error, returning static fallback:", error);
-    return NextResponse.json(getStaticLuxuryFallback());
+    return NextResponse.json(getStaticLuxuryFallback(query));
   }
 }

@@ -162,6 +162,25 @@ export function heuristicClassify(
     };
   }
 
+  if (
+    /browser|ai agents?|متصفح|تصفح|المتصفح|تعلم|اتعلم|استكشف|ذكاءات|مهارات|tools?/i.test(
+      lower
+    )
+  ) {
+    const urlMatch = message.match(/https?:\/\/\S+/i);
+    return {
+      kind: "ultimate_tool",
+      toolName: "browser_research",
+      toolParams: {
+        query: urlMatch?.[0] || message,
+        objective: "بحث وتعلم حي بالمتصفح ثم تحويل النتائج إلى خطة قابلة للتنفيذ",
+        maxSources: 3,
+      },
+      confidence: 0.9,
+      reasoning: "live-browser-learning",
+    };
+  }
+
   const cmd = detectCommand(message);
   if (cmd && cmd.confidence >= minConf) {
     return {
@@ -175,6 +194,25 @@ export function heuristicClassify(
 
   if (wantsGenesis(message)) {
     return { kind: "genesis", confidence: 0.85, reasoning: "genesis" };
+  }
+
+  if (
+    /متصفح|browser|تصفح|استخدم.*المتصفح|تعلم.*(من|عن)|استكشف|ai agents?|ذكاءات صناعية|مهارات|tools?/i.test(
+      lower
+    )
+  ) {
+    const urlMatch = message.match(/https?:\/\/\S+/i);
+    return {
+      kind: "ultimate_tool",
+      toolName: "browser_research",
+      toolParams: {
+        query: urlMatch?.[0] || message,
+        objective: "بحث وتعلم حي بالمتصفح ثم تحويل النتائج إلى خطة قابلة للتنفيذ",
+        maxSources: 3,
+      },
+      confidence: 0.9,
+      reasoning: "live-browser-learning",
+    };
   }
 
   const ultimate = inferUltimateTool(message);

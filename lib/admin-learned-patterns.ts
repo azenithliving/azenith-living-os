@@ -5,6 +5,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import type { ClassifiedIntent } from "./admin-intent-types";
+import { inferUltimateTool } from "./admin-tool-bridge";
 
 export interface LearnedPattern {
   id: string;
@@ -159,7 +160,17 @@ export function matchLearnedPattern(message: string): ClassifiedIntent | null {
     }
   }
   if (!best) return null;
-  return { ...best.intent, reasoning: best.intent.reasoning || `pattern:${best.id}` };
+  const intent = { ...best.intent, reasoning: best.intent.reasoning || `pattern:${best.id}` };
+  if (intent.kind === "ultimate_tool" && intent.toolName) {
+    const inferred = inferUltimateTool(message);
+    if (inferred?.toolName === intent.toolName) {
+      return {
+        ...intent,
+        toolParams: { ...(intent.toolParams || {}), ...inferred.params },
+      };
+    }
+  }
+  return intent;
 }
 
 export function reinforceLearnedPattern(

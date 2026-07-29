@@ -138,15 +138,23 @@ async function fetchFromPexels(
 
     const roomQueries: Record<string, string> = {
       "master-bedroom": "luxury master bedroom interior",
+      "children-room": "luxury kids bedroom playful interior",
+      "teen-room": "modern teenager bedroom study area interior",
       "living-room": "luxury living room lounge",
-      "kitchen": "modern high-end kitchen",
-      "dressing-room": "walk-in closet design",
-      "home-office": "luxury home office study",
-      "youth-room": "modern youth bedroom",
-      "dining-room": "luxury dining room",
-      "interior-design": "luxury interior design",
+      "dining-room": "luxury dining room chandelier",
+      "corner-sofa": "luxury sectional corner sofa living room",
+      "lounge": "luxury lounge seating interior",
+      "dressing-room": "walk-in closet dressing room design",
+      "kitchen": "modern high-end kitchen marble",
+      "home-office": "luxury home office study desk interior",
+      "interior-design": "luxury architectural interior design",
+      "guest-bedroom": "luxury cozy guest bedroom interior",
+      "study-room": "luxury home library study room focus",
+      "bathroom": "luxury spa bathroom marble interior",
+      "guest-bathroom": "luxury powder room guest bathroom",
+      "entrance-lobby": "luxury entrance foyer lobby grand interior",
+      "youth-room": "modern youth bedroom study",
       "bedroom": "luxury bedroom interior",
-      "bathroom": "luxury bathroom interior",
     };
 
     const styleHints: Record<string, string> = {

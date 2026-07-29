@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { GlobalAssistantDock } from "@/components/admin/GlobalAssistantDock";
 import { 
   Home, 
   Shield, 
@@ -24,7 +25,6 @@ import {
   Sparkles,
   Cpu,
   Activity,
-  MessageCircle,
 } from "lucide-react";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -225,14 +225,7 @@ export default function AdminLayoutClient({
         </div>
       </main>
 
-      <Link
-        href="/admin/assistant"
-        className="fixed z-50 bottom-6 left-6 lg:left-8 flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#C5A059] text-[#1a1a1a] shadow-lg shadow-[#C5A059]/30 hover:scale-105 transition-transform font-bold text-sm"
-        title="المساعد الموحّد"
-      >
-        <MessageCircle className="w-5 h-5" />
-        <span className="hidden sm:inline">المساعد</span>
-      </Link>
+      <GlobalAssistantDock />
     </div>
   );
 }

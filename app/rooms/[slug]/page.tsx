@@ -263,6 +263,36 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { category: string;
     industrial: { category: "استرخاء صناعي", categoryEn: "Industrial Relaxation", description: "كرسي جلد وطاولة خشبية خام لزاوية مميزة.", descriptionEn: "Leather chair and raw wooden table for a distinctive corner." },
     scandinavian: { category: "دفء وقراءة", categoryEn: "Warmth & Reading", description: "كرسي ناعم وإضاءة طبيعية لزاوية قراءة مريحة.", descriptionEn: "Soft chair and natural lighting for a comfortable reading corner." },
   },
+  "guest-bedroom": {
+    modern: { category: "ضيافة عصرية", categoryEn: "Modern Hospitality", description: "تصميم فندقي مريح بألوان هادئة وإضاءة دافئة ترحب بضيوفك.", descriptionEn: "Comfortable hotel design with calm colors and warm lighting welcoming your guests." },
+    classic: { category: "فخامة الأصالة", categoryEn: "Heritage Luxury", description: "سرير فخم ومفارش حريرية تمنح ضيوفك تجربة إقامة ملكية.", descriptionEn: "Luxurious bed and silk linens giving your guests a royal stay experience." },
+    industrial: { category: "لمسة عصرية", categoryEn: "Urban Touch", description: "تفاصيل معدنية وألوان دافئة لجلسة ضيوف مريحة وغير تقليدية.", descriptionEn: "Metal details and warm colors for a comfortable, unconventional guest stay." },
+    scandinavian: { category: "هدوء الاسكندنافي", categoryEn: "Nordic Serenity", description: "ألوان فاتحة وأنسجة قطنية طبيعية تشعر ضيفك بالراحة المنزلية.", descriptionEn: "Light colors and natural cotton fabrics making your guest feel right at home." },
+  },
+  "study-room": {
+    modern: { category: "تركيز معماري", categoryEn: "Architectural Focus", description: "إضاءة صحية ومكتب متكامل لعمل ذكي وقراءة عميقة.", descriptionEn: "Healthy lighting and integrated desk for smart working and deep reading." },
+    classic: { category: "مكتبة الفكر", categoryEn: "Intellectual Library", description: "خزائن كتب جدارية من الخشب الصافي وتفاصيل راقية تعين على الابتكار.", descriptionEn: "Solid wood wall bookcases and refined details aiding innovation." },
+    industrial: { category: "إنتاجية خام", categoryEn: "Raw Productivity", description: "طاولات معدنية وأرفف مفتوحة لبيئة دراسية محفزة للإبداع.", descriptionEn: "Metal desks and open shelves for a study environment inspiring creativity." },
+    scandinavian: { category: "هدوء وتفكير", categoryEn: "Calm Thinking", description: "إضاءة ناعمة ونباتات طبيعية تجعل الدراسة وقتًا ممتعًا.", descriptionEn: "Soft lighting and natural plants making study time enjoyable." },
+  },
+  bathroom: {
+    modern: { category: "سبا مودرن", categoryEn: "Modern Spa", description: "تكسيات رخامية ومرايا مضاءة تحول حمامك إلى سبا شخصي.", descriptionEn: "Marble cladding and illuminated mirrors turning your bathroom into a personal spa." },
+    classic: { category: "رخام ملكي", categoryEn: "Royal Marble", description: "رخام إيطالي وخلاطات ذهبية تعيد تعريف الفخامة في الاستحمام.", descriptionEn: "Italian marble and golden faucets redefining bathing luxury." },
+    industrial: { category: "تصميم حجري", categoryEn: "Stone Design", description: "خرسانة مصقولة وتكسيات داكنة لأجواء استحمام عصرية جريئة.", descriptionEn: "Polished concrete and dark cladding for a bold modern bathing ambiance." },
+    scandinavian: { category: "نقاء الانتعاش", categoryEn: "Refreshing Purity", description: "سيراميك أبيض وأخشاب طبيعية مقاومة للمياه للانتعاش اليومي.", descriptionEn: "White ceramic and water-resistant natural wood for daily freshness." },
+  },
+  "guest-bathroom": {
+    modern: { category: "أناقة مدمجة", categoryEn: "Compact Elegance", description: "حوض رخام فاخر وإضاءة مخفية تترك انطباعًا متميزًا لدى الضيوف.", descriptionEn: "Luxury marble basin and hidden lighting leaving a distinct impression on guests." },
+    classic: { category: "ضيافة كلاسيكية", categoryEn: "Classic Hospitality", description: "تفاصيل ذهبية ومرايا مزخرفة تعكس كرم الضيافة في المساحات الصغرى.", descriptionEn: "Gold details and ornate mirrors reflecting hospitality in small spaces." },
+    industrial: { category: "جرأة التصميم", categoryEn: "Bold Design", description: "لمسات معدنية وأحواض حجرية فريدة تعطي طابعًا استثنائيًا.", descriptionEn: "Metal accents and unique stone basins providing an exceptional character." },
+    scandinavian: { category: "بساطة ناصعة", categoryEn: "Pure Simplicity", description: "ألوان فاتحة ونباتات صغيرة تجعل حمام الضيوف أنيقًا ومنتعشًا.", descriptionEn: "Light colors and small plants making the guest bathroom elegant and fresh." },
+  },
+  "entrance-lobby": {
+    modern: { category: "مدخل مهيب", categoryEn: "Majestic Foyer", description: "مرايا عملاقة وطاولة كونسول رخام لاستقبال ينبض بالأناقة.", descriptionEn: "Giant mirrors and a marble console table for a reception pulsing with elegance." },
+    classic: { category: "انطباع ملوك", categoryEn: "Royal Impression", description: "ثريا كريستال وأرضيات تطعيم رخامي تعبر عن فخامة بيتك.", descriptionEn: "Crystal chandelier and marble inlay floors expressing your home's luxury." },
+    industrial: { category: "حضور مميز", categoryEn: "Distinct Presence", description: "إضاءة معلقة وهياكل معدنية سوداء لمدخل عصري جريء.", descriptionEn: "Pendant lighting and black metal structures for a bold modern entry." },
+    scandinavian: { category: "ترحيب دافئ", categoryEn: "Warm Welcome", description: "إضاءة ناعمة وخشب فاتح يمنح الزوار شعورًا بالراحة والدفء فورًا.", descriptionEn: "Soft lighting and light wood giving visitors an instant sense of warmth." },
+  },
 };
 
 async function fetchRoomPhotos(query: string, style: string, roomId: string) {

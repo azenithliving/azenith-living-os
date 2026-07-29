@@ -12,6 +12,7 @@ import { TOOL_REGISTRY, executeTool, getTool, type ToolExecutionContext } from "
 import { createExecutionRecord, updateExecutionRecord } from "./execution-tracker";
 import { logAuditEvent } from "@/lib/ultimate-agent/security-manager";
 import type { Json } from "@/lib/supabase/database.types";
+import { normalizeApprovalRiskLevel } from "@/lib/approval-risk";
 
 export interface ApprovalRequest {
   id: string;
@@ -81,7 +82,7 @@ export async function createApprovalRequest(
         action_id: input.toolName,
         action_type: input.toolName,
         description: input.description || `Execute ${tool.displayName}`,
-        risk_level: tool.riskLevel,
+        risk_level: normalizeApprovalRiskLevel(tool.riskLevel),
         requested_at: new Date().toISOString(),
         expires_at: input.expiresInMinutes
           ? new Date(Date.now() + input.expiresInMinutes * 60 * 1000).toISOString()

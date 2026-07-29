@@ -3,12 +3,21 @@ import { Queue } from "bullmq";
 import type IORedis from "ioredis";
 
 type RedisGlobal = { redisConnection?: IORedis; visitorQueue?: Queue };
+type AnalyticsRedisGlobal = RedisGlobal & { analyticsQueueDisabled?: boolean };
+
+function isFatalRedisError(error: Error): boolean {
+  return /WRONGPASS|NOAUTH|ENOTFOUND|ECONNREFUSED|invalid username-password/i.test(error.message);
+}
 
 function getRedisConnection(): IORedis | null {
-  const redisUrl = process.env.REDIS_URL?.trim();
+  const redisUrl =
+    process.env.ANALYTICS_REDIS_URL?.trim() ||
+    (process.env.ENABLE_ANALYTICS_REDIS_QUEUE === "true" ? process.env.REDIS_URL?.trim() : "");
   if (!redisUrl) return null;
 
-  const globalForRedis = global as unknown as RedisGlobal;
+  const globalForRedis = global as unknown as AnalyticsRedisGlobal;
+  if (globalForRedis.analyticsQueueDisabled) return null;
+
   if (globalForRedis.redisConnection) {
     return globalForRedis.redisConnection;
   }
@@ -25,6 +34,10 @@ function getRedisConnection(): IORedis | null {
 
     connection.on("error", (err: Error) => {
       console.warn("[analytics/session] Redis error (non-fatal):", err.message);
+      if (isFatalRedisError(err)) {
+        globalForRedis.analyticsQueueDisabled = true;
+        connection.disconnect();
+      }
     });
 
     if (process.env.NODE_ENV !== "production") {
@@ -38,7 +51,8 @@ function getRedisConnection(): IORedis | null {
 }
 
 function getVisitorQueue(): Queue | null {
-  const globalForRedis = global as unknown as RedisGlobal;
+  const globalForRedis = global as unknown as AnalyticsRedisGlobal;
+  if (globalForRedis.analyticsQueueDisabled) return null;
   if (globalForRedis.visitorQueue) return globalForRedis.visitorQueue;
 
   const connection = getRedisConnection();
@@ -78,7 +92,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, queued: true });
   } catch (error) {
-    console.error("Failed to queue analytics data:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    if (isFatalRedisError(new Error(message))) {
+      (global as unknown as AnalyticsRedisGlobal).analyticsQueueDisabled = true;
+    }
+    console.warn("Failed to queue analytics data:", message);
     return NextResponse.json(
       { success: true, queued: false, degraded: true },
       { status: 200 }

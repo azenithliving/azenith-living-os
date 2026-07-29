@@ -41,6 +41,13 @@ function generateSlug(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
+function jsonToDataUrl(value: unknown): string {
+  return `data:application/json;base64,${Buffer.from(
+    JSON.stringify(value, null, 2),
+    "utf8"
+  ).toString("base64")}`;
+}
+
 // ============================================
 // Content Management Handlers
 // ============================================
@@ -466,12 +473,29 @@ export async function executeBackupCreate(
 
     backup.checksum = checksumHex;
 
-    // Upload to Vercel Blob
+    // Upload to Vercel Blob, with a real database-inline backup as fallback.
     const blobName = `backups/executive-agent/${name}-${Date.now()}.json`;
-    const blob = await put(blobName, JSON.stringify(backup, null, 2), {
-      access: "public",
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    });
+    let storageProvider = "vercel_blob";
+    let storageUrl = "";
+    let storagePath = "";
+    let storageNote = "";
+
+    try {
+      const blob = await put(blobName, JSON.stringify(backup, null, 2), {
+        access: "public",
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
+      storageUrl = blob.url;
+      storagePath = blob.pathname;
+    } catch (uploadError) {
+      storageProvider = "database_inline";
+      storageUrl = jsonToDataUrl(backup);
+      storagePath = `backup_snapshots.storage_url:${blobName}`;
+      storageNote =
+        uploadError instanceof Error
+          ? `Blob unavailable: ${uploadError.message}`
+          : "Blob unavailable";
+    }
 
     // Store in database
     const { data: snapshot, error: dbError } = await supabase
@@ -483,9 +507,9 @@ export async function executeBackupCreate(
         backup_type: "data",
         backup_name: name,
         backup_description: description,
-        storage_provider: "vercel_blob",
-        storage_url: blob.url,
-        storage_path: blob.pathname,
+        storage_provider: storageProvider,
+        storage_url: storageUrl,
+        storage_path: storagePath,
         size_bytes: backupJson.length,
         checksum: checksumHex,
         checksum_algorithm: "sha256",
@@ -495,6 +519,7 @@ export async function executeBackupCreate(
         retention_days: retentionDays,
         expires_at: new Date(Date.now() + retentionDays * 24 * 60 * 60 * 1000).toISOString(),
         backup_status: "completed",
+        restoration_result: storageNote ? { storageNote } as unknown as Json : null,
         completed_at: new Date().toISOString(),
       })
       .select()
@@ -506,11 +531,15 @@ export async function executeBackupCreate(
 
     return {
       success: true,
-      message: `تم إنشاء نسخة احتياطية "${name}" بنجاح`,
+      message:
+        storageProvider === "database_inline"
+          ? `تم إنشاء نسخة احتياطية "${name}" بنجاح داخل قاعدة البيانات كمسار بديل حقيقي`
+          : `تم إنشاء نسخة احتياطية "${name}" بنجاح`,
       data: {
         backupId: snapshot.id,
         name: snapshot.backup_name,
-        downloadUrl: blob.url,
+        downloadUrl: storageProvider === "vercel_blob" ? storageUrl : undefined,
+        storageProvider,
         sizeBytes: backupJson.length,
         tables: tables,
         expiresAt: snapshot.expires_at,
@@ -518,24 +547,6 @@ export async function executeBackupCreate(
       executionId: context.executionId,
     };
   } catch (error) {
-    // Fallback: Return simulated success if blob fails
-    if (error instanceof Error && error.message.includes("BLOB_READ_WRITE_TOKEN")) {
-      return {
-        success: true,
-        message: "تم إنشاء نسخة احتياطية (وضع محاكاة - ينقص BLOB token)",
-        data: {
-          backupId: `backup-${Date.now()}`,
-          name: params.name,
-          downloadUrl: "https://placeholder-url.com/backup.json",
-          sizeBytes: 0,
-          tables: params.tables || [],
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          simulated: true,
-        },
-        executionId: context.executionId,
-      };
-    }
-
     return {
       success: false,
       message: `فشل إنشاء النسخة الاحتياطية: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
@@ -1072,7 +1083,7 @@ export async function executeContentUpdate(
 ): Promise<ToolExecutionResult> {
   const supabase = await getSupabase();
   const entityType = (params.entityType as string) || "section";
-  const entityId = params.entityId as string;
+  let entityId = params.entityId as string;
   const newValue = params.newValue as Record<string, unknown>;
   if (!entityId || !newValue) {
     return {
@@ -1084,15 +1095,30 @@ export async function executeContentUpdate(
   const svc = getServiceSupabase() || supabase;
 
   try {
-    if (entityType === "section") {
-      const { error } = await svc
+    if (entityType === "section" || entityType === "site_section") {
+      if (entityId === "latest") {
+        const { data: latest, error: latestError } = await svc
+          .from("site_sections")
+          .select("id")
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (latestError) throw latestError;
+        if (!latest?.id) throw new Error("لم أجد قسماً لتحديثه");
+        entityId = latest.id;
+      }
+
+      const { data, error } = await svc
         .from("site_sections")
         .update({
-          content: newValue as Json,
+          section_content: newValue as Json,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", entityId);
+        .eq("id", entityId)
+        .select("id")
+        .maybeSingle();
       if (error) throw error;
+      if (!data?.id) throw new Error("لم يتم تحديث أي قسم");
       return {
         success: true,
         message: "تم تحديث محتوى القسم",
@@ -1102,14 +1128,29 @@ export async function executeContentUpdate(
     }
 
     if (entityType === "product") {
-      const { error } = await svc
+      if (entityId === "latest") {
+        const { data: latest, error: latestError } = await svc
+          .from("products")
+          .select("id")
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (latestError) throw latestError;
+        if (!latest?.id) throw new Error("لم أجد منتجاً لتحديثه");
+        entityId = latest.id;
+      }
+
+      const { data, error } = await svc
         .from("products")
         .update({
           ...newValue,
           updated_at: new Date().toISOString(),
         } as never)
-        .eq("id", entityId);
+        .eq("id", entityId)
+        .select("id")
+        .maybeSingle();
       if (error) throw error;
+      if (!data?.id) throw new Error("لم يتم تحديث أي منتج");
       return {
         success: true,
         message: "تم تحديث المنتج",
@@ -1119,13 +1160,34 @@ export async function executeContentUpdate(
     }
 
     if (entityType === "lead" || entityType === "user") {
+      if (entityId === "latest") {
+        const { data: latest, error: latestError } = await svc
+          .from("users")
+          .select("id")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (latestError) throw latestError;
+        if (!latest?.id) throw new Error("لم أجد عميلاً لتحديثه");
+        entityId = latest.id;
+      }
+
       const allowed = ["full_name", "phone", "email", "room_type", "budget", "style", "score", "intent", "notes"];
       const patch: Record<string, unknown> = {};
       for (const k of allowed) {
         if (k in newValue) patch[k] = newValue[k];
       }
-      const { error } = await svc.from("users").update(patch).eq("id", entityId);
+      if (Object.keys(patch).length === 0) {
+        throw new Error("لا توجد حقول عميل مسموح بتحديثها في الطلب");
+      }
+      const { data, error } = await svc
+        .from("users")
+        .update(patch)
+        .eq("id", entityId)
+        .select("id")
+        .maybeSingle();
       if (error) throw error;
+      if (!data?.id) throw new Error("لم يتم تحديث أي عميل");
       return {
         success: true,
         message: "تم تحديث بيانات العميل",

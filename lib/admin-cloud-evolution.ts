@@ -5,6 +5,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import type { EvolutionSuggestion } from "@/lib/self-evolution";
+import { normalizeApprovalRiskLevel } from "@/lib/approval-risk";
 
 export interface CloudPatchPayload {
   targetFile: string;
@@ -70,7 +71,7 @@ export async function queueCloudEvolutionPatch(
       action_id: patchId,
       action_type: "code_evolution_patch",
       description: `تعديل كود: ${suggestion.description}\n\nالملف: ${suggestion.targetFile}`,
-      risk_level: "high",
+      risk_level: normalizeApprovalRiskLevel("high"),
       requested_at: new Date().toISOString(),
       expires_at: expiresAt.toISOString(),
       status: "pending",
