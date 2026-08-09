@@ -74,9 +74,6 @@ export default function Header() {
           <Link href="/about" className="transition-colors hover:text-[#C5A059]">
             {!mounted ? 'من نحن' : (currentLang === 'ar' ? 'من نحن' : 'About Us')}
           </Link>
-          <Link href="/rooms" className="transition-colors hover:text-[#C5A059]">
-            {!mounted ? 'المساحات' : (currentLang === 'ar' ? 'المساحات' : 'Spaces')}
-          </Link>
           <Link href="/request" className="transition-colors hover:text-[#C5A059]">
             {!mounted ? 'تواصل معنا' : (currentLang === 'ar' ? 'تواصل معنا' : 'Contact Us')}
           </Link>
@@ -139,9 +136,6 @@ export default function Header() {
             <div className="flex flex-col items-end space-y-6 px-6 py-8" dir="rtl">
               <Link href="/about" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
                 {!mounted ? 'من نحن' : (currentLang === 'ar' ? 'من نحن' : 'About Us')}
-              </Link>
-              <Link href="/rooms" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
-                {!mounted ? 'المساحات' : (currentLang === 'ar' ? 'المساحات' : 'Spaces')}
               </Link>
               <Link href="/request" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
                 {!mounted ? 'تواصل معنا' : (currentLang === 'ar' ? 'تواصل معنا' : 'Contact Us')}

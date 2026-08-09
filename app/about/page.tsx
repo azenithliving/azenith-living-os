@@ -49,26 +49,24 @@ export default function AboutPage() {
         {/* Team & CTA */}
         <section className="rounded-[2rem] border border-white/10 bg-gradient-to-b from-white/[0.02] to-transparent p-12 text-center backdrop-blur-sm animate-fadeInUp animation-delay-400">
           <p className="text-2xl text-white/90 mb-6">{isRTL ? aboutData.team : aboutData.teamEn}</p>
-          <div className="max-w-md mx-auto space-y-4">
-            <Link 
-              href="/rooms" 
-              className="block w-full rounded-full bg-brand-primary text-brand-accent px-8 py-4 font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-[#d8b56d] transition-all"
-            >
-              {isRTL ? "المساحات" : "Spaces"}
-            </Link>
-            {runtimeConfig.whatsappNumber && (
+          <div className="max-w-md mx-auto">
+            {runtimeConfig.whatsappNumber ? (
               <Link 
                 href={`https://wa.me/${runtimeConfig.whatsappNumber}?text=${isRTL ? "مرحبا، أنا مهتم بـ" : "Hello, I'm interested in"} ${isRTL ? aboutData.title : aboutData.titleEn}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="block w-full rounded-full border-2 border-brand-primary/50 bg-transparent text-brand-primary px-8 py-4 font-semibold text-lg hover:bg-brand-primary/10 hover:border-brand-primary transition-all"
+                className="block w-full rounded-full bg-brand-primary text-brand-accent px-8 py-4 font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-[#d8b56d] transition-all"
+              >
+                {isRTL ? "تواصل معنا" : "Contact Us"}
+              </Link>
+            ) : (
+              <Link 
+                href="/request" 
+                className="block w-full rounded-full bg-brand-primary text-brand-accent px-8 py-4 font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-[#d8b56d] transition-all"
               >
                 {isRTL ? "تواصل معنا" : "Contact Us"}
               </Link>
             )}
-            <Link href="/furniture" className="block w-full rounded-full border border-white/20 bg-white/[0.05] text-white px-8 py-4 font-semibold hover:border-brand-primary hover:bg-brand-primary/10 transition-all">
-              {isRTL ? "تصفح الأثاث" : "Browse Furniture"}
-            </Link>
           </div>
         </section>
       </div>

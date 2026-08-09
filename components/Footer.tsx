@@ -3,10 +3,6 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import { ChevronLeft } from "lucide-react";
-import { toast } from "react-hot-toast";
-import { subscribeToNewsletter } from "@/app/actions/subscribeAction";
 import type { RuntimeConfig } from "@/lib/runtime-config";
 import useSessionStore from "@/stores/useSessionStore";
 
@@ -42,42 +38,9 @@ type FooterProps = {
 export default function Footer({ contactEmail, contactPhone, businessAddress }: FooterProps) {
   const currentLang = useSessionStore((state) => state.language);
   const isRTL = currentLang === "ar";
-  const [eliteEmail, setEliteEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const email = contactEmail ?? "azenithliving@gmail.com";
   const phone = contactPhone ?? "201090819584";
   const officeAddress = businessAddress ?? "السلام، القاهرة، مصر";
-
-  const handleEliteSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!eliteEmail.trim()) {
-      toast.error(isRTL ? "أدخل بريدك الإلكتروني أولًا." : "Please enter your email first.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    const formData = new FormData();
-    formData.append("email", eliteEmail);
-    formData.append("source", "footer_elite_form");
-
-    try {
-      const result = await subscribeToNewsletter(formData);
-
-      if (result.success) {
-        toast.success(result.message);
-        setEliteEmail("");
-      } else {
-        toast.error(result.error);
-      }
-    } catch (error) {
-      toast.error(isRTL ? "حدث خطأ غير متوقع. حاول مرة أخرى." : "An unexpected error occurred. Please try again.");
-      console.error("Newsletter subscription error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <footer className="relative z-20 border-t border-[#1A1A1A] bg-black">
@@ -88,7 +51,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
         viewport={{ once: true, margin: "-50px" }}
         className="mx-auto max-w-7xl px-6 py-24 md:px-12 lg:px-16"
       >
-        <div className="grid grid-cols-1 items-start gap-12 md:grid-cols-4 md:gap-16 lg:gap-32">
+        <div className="grid grid-cols-1 items-start gap-12 md:grid-cols-3 md:gap-16 lg:gap-32">
           <motion.div variants={columnVariants} className="space-y-8">
             <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }} className="flex flex-col items-start">
               <Image
@@ -146,41 +109,6 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
                 <span className="text-gray-600">{isRTL ? "العنوان:" : "Address:"}</span> <span>{officeAddress}</span>
               </li>
             </ul>
-          </motion.div>
-
-          <motion.div variants={columnVariants} className="space-y-8">
-            <h4 className="text-xs font-light uppercase tracking-widest text-gray-500">{isRTL ? "قائمة النخبة" : "Elite List"}</h4>
-            <form onSubmit={handleEliteSubmit} className="space-y-6">
-              <div className="relative">
-                <label htmlFor="footer-email" className="sr-only">{isRTL ? "البريد الإلكتروني" : "Email Address"}</label>
-                <input
-                  id="footer-email"
-                  type="email"
-                  name="email"
-                  autoComplete="email"
-                  value={eliteEmail}
-                  onChange={(e) => setEliteEmail(e.target.value)}
-                  placeholder={isRTL ? "أدخل بريدك الإلكتروني" : "Enter your email"}
-                  className="w-full border-0 border-b border-[#C5A059]/30 bg-transparent px-0 py-3 text-sm font-light text-white transition-all duration-500 placeholder:font-light placeholder:text-gray-600 focus:border-[#C5A059] focus:outline-none"
-                  required
-                                  />
-              </div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group flex w-full items-center justify-center gap-2 border border-[#C5A059] px-6 py-4 text-xs font-light uppercase tracking-widest text-[#C5A059] transition-all duration-500 hover:bg-[#C5A059] hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#C5A059]/30 border-t-[#C5A059]" />{isRTL ? "جارٍ الإرسال..." : "Sending..."}</span>
-                ) : (
-                  <>
-                    {isRTL ? "انضم الآن" : "Join Now"}
-                    <ChevronLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
-                  </>
-                )}
-              </button>
-            </form>
           </motion.div>
         </div>
       </motion.div>

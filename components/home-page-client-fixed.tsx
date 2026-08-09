@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sparkles, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
 
-import Footer from "./Footer";
 import AIStylePicker from "./AIStylePicker";
 import AboutAzenith from "./AboutAzenith";
 
@@ -363,12 +362,6 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
           {primaryCtaText}
         </Link>
       </div>
-
-      <Footer
-        contactEmail={runtimeConfig.contactEmail}
-        contactPhone={runtimeConfig.contactPhone}
-        businessAddress={runtimeConfig.businessAddress}
-      />
     </>
   );
 }

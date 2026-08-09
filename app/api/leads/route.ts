@@ -38,6 +38,43 @@ export async function POST(request: Request) {
       );
     }
 
+    // ── Telegram Notification on Lead Success ──────────────────────────────
+    const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
+    const telegramChatId = process.env.TELEGRAM_CHAT_ID;
+    const telegramEnabled = process.env.TELEGRAM_ENABLED === "true";
+
+    if (telegramEnabled && telegramToken && telegramChatId) {
+      const clientName = parsed.data.fullName || "غير محدد";
+      const clientPhone = parsed.data.phone || "غير محدد";
+      const clientEmail = parsed.data.email || "غير محدد";
+      const clientNotes = parsed.data.notes || "لا توجد ملاحظات";
+
+      const tgMessage = `
+🏛️ <b>طلب تصميم جديد | أزينث ليفينج</b>
+
+👤 <b>العميل:</b> ${clientName}
+📞 <b>الهاتف:</b> ${clientPhone}
+📧 <b>البريد:</b> ${clientEmail}
+
+📝 <b>تفاصيل كراسة متطلبات المشروع:</b>
+${clientNotes}
+
+<i>تم الحفظ بنجاح في قاعدة البيانات وتوليد كراسة الشروط تلقائياً.</i>
+      `.trim();
+
+      fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: telegramChatId,
+          text: tgMessage,
+          parse_mode: "HTML",
+        }),
+      }).catch((err) => {
+        console.error("Failed to send Telegram lead alert:", err);
+      });
+    }
+
     return NextResponse.json({
       ok: true,
       requestId: result.requestId,
