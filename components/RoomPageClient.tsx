@@ -12,6 +12,7 @@ import GoldPulseLoader from "./GoldPulseLoader";
 import useSessionStore, { type StylePreference } from "@/stores/useSessionStore";
 import { useImageTracking } from "@/hooks/useImageTracking";
 import { getRoomTips, type RoomDesignTip } from "@/lib/room-design-tips";
+import { getRoomFallbackImages } from "@/lib/room-image-fallback";
 
 // Client-only gallery to avoid hydration issues
 const DynamicGallery = dynamic(() => import("./DynamicGallery"), { ssr: false });
@@ -63,7 +64,12 @@ export default function RoomPageClient({
   const roomDescription = isRTL ? room.description : room.descriptionEn;
 
   // Simplified local state
-  const [photos, setPhotos] = useState(initialPhotos);
+  // GUARANTEE images: if server sent no photos, seed with verified static fallback
+  const seededPhotos = initialPhotos && initialPhotos.length > 0
+    ? initialPhotos
+    : getRoomFallbackImages(room.id, initialStyle);
+
+  const [photos, setPhotos] = useState(seededPhotos);
   const [currentStyle, setCurrentStyle] = useState(initialStyle);
   const [poolSize, setPoolSize] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -72,7 +78,7 @@ export default function RoomPageClient({
 
   // Batch image loading state
   const [batchPage, setBatchPage] = useState(1); // 1, 2, 3 max
-  const [allBatchPhotos, setAllBatchPhotos] = useState(initialPhotos);
+  const [allBatchPhotos, setAllBatchPhotos] = useState(seededPhotos);
   const [batchTips, setBatchTips] = useState<RoomDesignTip[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMoreBatches, setHasMoreBatches] = useState(true);
@@ -175,10 +181,13 @@ export default function RoomPageClient({
 
   // Update batch photos when initialPhotos changes (e.g. from server navigation)
   useEffect(() => {
-    setAllBatchPhotos(initialPhotos);
+    const nextPhotos = initialPhotos && initialPhotos.length > 0
+      ? initialPhotos
+      : getRoomFallbackImages(room.id, currentStyle);
+    setAllBatchPhotos(nextPhotos);
     setBatchPage(1);
-    setHasMoreBatches(initialPhotos.length >= PHOTOS_PER_BATCH && 1 < MAX_BATCHES);
-  }, [initialPhotos, room.id]);
+    setHasMoreBatches(nextPhotos.length >= PHOTOS_PER_BATCH && 1 < MAX_BATCHES);
+  }, [initialPhotos, room.id, currentStyle]);
 
   // Ref-Gate for profile updates
   const hasRoomViewDispatchedRef = useRef<boolean>(false);
@@ -254,17 +263,26 @@ export default function RoomPageClient({
 
       if (response.ok) {
         const data = await response.json();
-        if (data.photos?.length > 0) {
-          setPhotos(data.photos);
-          setAllBatchPhotos(data.photos);
-          setBatchPage(1);
-          setHasMoreBatches(data.photos.length >= PHOTOS_PER_BATCH && 1 < MAX_BATCHES);
-          setPoolSize(data.poolSize || 0);
-          reservoirRef.current = { poolSize: data.poolSize, lastSeed: newSeed };
-        }
+        const newPhotos = data.photos?.length > 0
+          ? data.photos
+          : getRoomFallbackImages(room.id, currentStyle);
+        setPhotos(newPhotos);
+        setAllBatchPhotos(newPhotos);
+        setBatchPage(1);
+        setHasMoreBatches(newPhotos.length >= PHOTOS_PER_BATCH && 1 < MAX_BATCHES);
+        setPoolSize(data.poolSize || 0);
+        reservoirRef.current = { poolSize: data.poolSize, lastSeed: newSeed };
+      } else {
+        // API failed — never leave the user with an empty gallery
+        const fallback = getRoomFallbackImages(room.id, currentStyle);
+        setPhotos(fallback);
+        setAllBatchPhotos(fallback);
       }
     } catch (error) {
       console.error("[Shuffle] Failed:", error);
+      const fallback = getRoomFallbackImages(room.id, currentStyle);
+      setPhotos(fallback);
+      setAllBatchPhotos(fallback);
     } finally {
       setLoading(false);
     }
@@ -298,17 +316,26 @@ export default function RoomPageClient({
 
       if (response.ok) {
         const data = await response.json();
-        if (data.photos?.length > 0) {
-          setPhotos(data.photos);
-          setAllBatchPhotos(data.photos);
-          setBatchPage(1);
-          setHasMoreBatches(data.photos.length >= PHOTOS_PER_BATCH && 1 < MAX_BATCHES);
-          setPoolSize(data.poolSize || 0);
-          reservoirRef.current = { poolSize: data.poolSize, lastSeed: newSeed };
-        }
+        const newPhotos = data.photos?.length > 0
+          ? data.photos
+          : getRoomFallbackImages(room.id, newStyle);
+        setPhotos(newPhotos);
+        setAllBatchPhotos(newPhotos);
+        setBatchPage(1);
+        setHasMoreBatches(newPhotos.length >= PHOTOS_PER_BATCH && 1 < MAX_BATCHES);
+        setPoolSize(data.poolSize || 0);
+        reservoirRef.current = { poolSize: data.poolSize, lastSeed: newSeed };
+      } else {
+        // API failed — never leave the user with an empty gallery
+        const fallback = getRoomFallbackImages(room.id, newStyle);
+        setPhotos(fallback);
+        setAllBatchPhotos(fallback);
       }
     } catch (error) {
       console.error("[Style Change] Failed:", error);
+      const fallback = getRoomFallbackImages(room.id, newStyle);
+      setPhotos(fallback);
+      setAllBatchPhotos(fallback);
     } finally {
       setLoading(false);
     }
@@ -345,14 +372,27 @@ export default function RoomPageClient({
         setBatchPage(nextPage);
         setHasMoreBatches(nextPage < MAX_BATCHES && data.photos.length >= PHOTOS_PER_BATCH);
       } else {
+        // No more from API — append static fallback so the grid never runs dry
+        const existing = new Set(allBatchPhotos.map((p) => p.id));
+        const fallback = getRoomFallbackImages(room.id, currentStyle).filter((f) => !existing.has(f.id));
+        if (fallback.length > 0) {
+          setAllBatchPhotos(prev => [...prev, ...fallback]);
+          setBatchPage(nextPage);
+        }
         setHasMoreBatches(false);
       }
     } catch (error) {
       console.error("[Load More] Failed:", error);
+      const existing = new Set(allBatchPhotos.map((p) => p.id));
+      const fallback = getRoomFallbackImages(room.id, currentStyle).filter((f) => !existing.has(f.id));
+      if (fallback.length > 0) {
+        setAllBatchPhotos(prev => [...prev, ...fallback]);
+      }
+      setHasMoreBatches(false);
     } finally {
       setIsLoadingMore(false);
     }
-  }, [batchPage, currentStyle, isLoadingMore, room.id]);
+  }, [batchPage, currentStyle, isLoadingMore, room.id, allBatchPhotos]);
 
   const nextImage = useCallback(() => {
     setLightboxIndex((prev) => (prev + 1) % photos.length);

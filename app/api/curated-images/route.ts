@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin as supabase } from "@/lib/supabase-server";
+import { getRoomFallbackImages } from "@/lib/room-image-fallback";
 
 // Constants
 const DELIVERY_SIZE = 30; // Images delivered per request
@@ -20,7 +21,7 @@ export interface PhotoCandidate {
 
 export interface CuratedImagesResponse {
   photos: PhotoCandidate[];
-  source: "storage" | "pexels_fallback" | "none";
+  source: "storage" | "pexels_fallback" | "static_fallback" | "none";
   count: number;
   folder: string;
 }
@@ -103,10 +104,22 @@ export async function GET(request: NextRequest): Promise<NextResponse<CuratedIma
     console.log(`[Curated Images] No stored images, falling back to Pexels`);
     
     const pexelsPhotos = await fetchFromPexels(room, style, perPage, page);
+
+    // 4. NEVER return empty — fall back to verified static images
+    if (pexelsPhotos.length === 0) {
+      const staticPhotos = getRoomFallbackImages(room, style);
+      console.warn(`[Curated Images] Pexels empty. Using static fallback (${staticPhotos.length} images).`);
+      return NextResponse.json({
+        photos: staticPhotos,
+        source: "static_fallback",
+        count: staticPhotos.length,
+        folder: folderPath,
+      });
+    }
     
     return NextResponse.json({
       photos: pexelsPhotos,
-      source: pexelsPhotos.length > 0 ? "pexels_fallback" : "none",
+      source: "pexels_fallback",
       count: pexelsPhotos.length,
       folder: folderPath,
     });

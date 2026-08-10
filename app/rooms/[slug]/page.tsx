@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import RoomPageClient from "@/components/RoomPageClient";
 import { resolveRoomSlug } from "@/lib/rooms-catalog";
 import { absoluteUrl, buildPageMetadata, SEO_ROOMS, SITE_NAME } from "@/lib/seo";
+import { getRoomFallbackImages } from "@/lib/room-image-fallback";
 
 type RoomMeta = {
   id: string;
@@ -193,7 +194,8 @@ const STYLE_QUERY_HINTS: Record<string, string> = {
 };
 
 /**
- * Deterministic seed generator for consistent image fetching per room+style
+ * Deterministic seed generator for consistent image fetching per room+style.
+ * Pexels API caps pagination at ~80 pages, so we ALWAYS return a page in [1, 80].
  */
 function getDeterministicSeed(roomId: string, style: string): number {
   let hash = 0;
@@ -203,7 +205,7 @@ function getDeterministicSeed(roomId: string, style: string): number {
     hash = ((hash << 5) - hash) + char;
     hash = hash & hash; // Convert to 32bit integer
   }
-  return Math.abs(hash) % 1000 + 1; // Page 1-1000
+  return (Math.abs(hash) % 80) + 1; // Safe page 1-80 (Pexels pagination limit)
 }
 
 const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { category: string; categoryEn: string; description: string; descriptionEn: string }>> = {
@@ -340,13 +342,15 @@ async function fetchRoomPhotos(query: string, style: string, roomId: string) {
     });
 
     if (!response.ok) {
-      return [];
+      return getRoomFallbackImages(roomId, style);
     }
 
     const data = await response.json().catch(() => null);
-    return Array.isArray(data?.photos) ? data.photos : [];
+    const photos = Array.isArray(data?.photos) ? data.photos : [];
+    // Never return an empty gallery — always guarantee images
+    return photos.length > 0 ? photos : getRoomFallbackImages(roomId, style);
   } catch {
-    return [];
+    return getRoomFallbackImages(roomId, style);
   }
 }
 
