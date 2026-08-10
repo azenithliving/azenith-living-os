@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNextAvailableKey, setKeyCooldown, getKeyStats } from "@/lib/api-keys-service";
 
+/**
+ * Deterministic seed generator for consistent image fetching per room+style
+ */
+function getDeterministicSeed(room: string, style: string): number {
+  let hash = 0;
+  const str = `${room}-${style}`;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash) % 1000 + 1;
+}
+
 // Smart Key Rotation Manager with Blacklisting for Pexels
 class PexelsKeyRotationManager {
   private readonly BLACKLIST_DURATION_MS = 10 * 60 * 1000; // 10 minutes
@@ -179,8 +193,52 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     query = searchParams.get("query") || "luxury modern industrial interior";
     const perPage = Math.min(Math.max(Number(searchParams.get("per_page") || "12"), 1), 50);
-    const page = Math.max(Number(searchParams.get("page") || "1"), 1);
+    let page = Math.max(Number(searchParams.get("page") || "1"), 1);
     const orientation = searchParams.get("orientation") || "landscape";
+    
+    // Extract room and style for deterministic seed and style-aware queries
+    const room = searchParams.get("room") || "";
+    const style = searchParams.get("style") || "";
+    
+    // If room and style are provided, build a more specific query and use deterministic page
+    if (room && style) {
+      const styleHints: Record<string, string> = {
+        modern: "modern minimal",
+        classic: "classic elegant",
+        industrial: "industrial loft",
+        scandinavian: "scandinavian cozy",
+        minimalist: "minimalist clean",
+        luxury: "luxury premium",
+        contemporary: "contemporary design",
+      };
+      
+      const roomQueries: Record<string, string> = {
+        "master-bedroom": "luxury master bedroom interior",
+        "children-room": "luxury kids bedroom playful interior",
+        "teen-room": "modern teenager bedroom study area interior",
+        "living-room": "luxury living room lounge",
+        "dining-room": "luxury dining room chandelier",
+        "corner-sofa": "luxury sectional corner sofa living room",
+        "lounge": "luxury lounge seating interior",
+        "dressing-room": "walk-in closet dressing room design",
+        "kitchen": "modern high-end kitchen marble",
+        "home-office": "luxury home office study desk interior",
+        "interior-design": "luxury architectural interior design",
+        "guest-bedroom": "luxury cozy guest bedroom interior",
+        "study-room": "luxury home library study room focus",
+        "bathroom": "luxury spa bathroom marble interior",
+        "guest-bathroom": "luxury powder room guest bathroom",
+        "entrance-lobby": "luxury entrance foyer lobby grand interior",
+      };
+      
+      const roomQuery = roomQueries[room] || `${room} interior`;
+      const styleHint = styleHints[style] || style;
+      query = `${styleHint} ${roomQuery}`;
+      
+      // Use deterministic page based on room+style for consistency
+      const deterministicPage = getDeterministicSeed(room, style);
+      page = deterministicPage;
+    }
 
     const stats = await keyManager.getStats();
     console.log(`[Pexels API] Stats: ${stats.total} total, ${stats.available} available, ${stats.blacklisted} blacklisted`);

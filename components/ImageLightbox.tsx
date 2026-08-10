@@ -196,6 +196,9 @@ export default function ImageLightbox({
               className="object-contain"
               sizes="90vw"
               priority
+              onError={(e) => {
+                e.currentTarget.src = "/placeholder-room.jpg";
+              }}
             />
           </motion.div>
 
@@ -221,6 +224,9 @@ export default function ImageLightbox({
                     fill
                     className="object-cover"
                     sizes="96px"
+                    onError={(e) => {
+                      e.currentTarget.src = "/placeholder-room.jpg";
+                    }}
                   />
                 </button>
               ))}

@@ -192,6 +192,20 @@ const STYLE_QUERY_HINTS: Record<string, string> = {
   scandinavian: "scandinavian cozy luxury",
 };
 
+/**
+ * Deterministic seed generator for consistent image fetching per room+style
+ */
+function getDeterministicSeed(roomId: string, style: string): number {
+  let hash = 0;
+  const str = `${roomId}-${style}`;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash) % 1000 + 1; // Page 1-1000
+}
+
 const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { category: string; categoryEn: string; description: string; descriptionEn: string }>> = {
   "master-bedroom": {
     modern: { category: "نقاء عصري", categoryEn: "Modern Purity", description: "خطوط نظيفة وتصميم مينيمال يمنحك هدوءاً عصرياً مع تخزين ذكي خفي.", descriptionEn: "Clean lines and minimalist design that gives you modern serenity with hidden smart storage." },
@@ -205,7 +219,7 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { category: string;
     industrial: { category: "روح المدينة", categoryEn: "Urban Spirit", description: "جدران طوبية وأسقف عالية مع لمسات معدنية جريئة وشخصية قوية.", descriptionEn: "Brick walls and high ceilings with bold metallic touches and strong personality." },
     scandinavian: { category: "بساطة شمالية", categoryEn: "Nordic Simplicity", description: "إضاءة طبيعية وقماش مريح يجعل كل لحظة استرخاء تجربة فريدة.", descriptionEn: "Natural lighting and comfortable fabric making every relaxation moment a unique experience." },
   },
-  kitchen: {
+  "kitchen": {
     modern: { category: "أداء ذكي", categoryEn: "Smart Performance", description: "أسطح خشبية نظيفة وأجهزة مخفية لمساحة طهي أنيقة وعملية.", descriptionEn: "Clean wooden surfaces and hidden appliances for an elegant and practical cooking space." },
     classic: { category: "تراث الطبخ", categoryEn: "Culinary Heritage", description: "خزائن خشبية نقشية وأرضيات رخامية تعكس أصالة المطبخ التقليدي.", descriptionEn: "Carved wooden cabinets and marble floors reflecting traditional kitchen authenticity." },
     industrial: { category: "قوة الخامة", categoryEn: "Raw Power", description: "أسطح معدنية ولمسات خشبية قوية للطهاة المحترفين والمحبي الجرأة.", descriptionEn: "Metallic surfaces and strong wooden touches for professional chefs and bold enthusiasts." },
@@ -222,12 +236,6 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { category: string;
     classic: { category: "مكتب تنفيذي", categoryEn: "Executive Office", description: "خشب داكن وجلد فاخر يخلقان حضوراً مهنياً يليق بالقرارات الكبرى.", descriptionEn: "Dark wood and premium leather creating a professional presence worthy of major decisions." },
     industrial: { category: "إبداع صناعي", categoryEn: "Industrial Creativity", description: "جدران طوبية وطاولات معدنية لمساحة عمل ملهمة وقوية الشخصية.", descriptionEn: "Brick walls and metal desks for an inspiring workspace with strong personality." },
     scandinavian: { category: "توازن وهدوء", categoryEn: "Balance & Calm", description: "ضوء طبيعي ونباتات وألوان هادئة تدعم الإنتاجية والراحة النفسية.", descriptionEn: "Natural light, plants, and calm colors supporting productivity and mental well-being." },
-  },
-  "youth-room": {
-    modern: { category: "مرونة عصرية", categoryEn: "Modern Flexibility", description: "تصميم متكيف مع مساحات تخزين ذكية تنمو مع احتياجات الشباب المتغيرة.", descriptionEn: "Adaptive design with smart storage spaces that grow with changing youth needs." },
-    classic: { category: "أناقة شبابية", categoryEn: "Youthful Elegance", description: "خشب نقي وتفاصيل دافئة تمنح الأبناء قيمة الجودة منذ الصغر.", descriptionEn: "Pure wood and warm details giving children the value of quality from an early age." },
-    industrial: { category: "شخصية قوية", categoryEn: "Strong Personality", description: "لمسات معدنية وخشب خام لمساحة تعبر عن الجرأة والاستقلالية.", descriptionEn: "Metallic touches and raw wood for a space expressing boldness and independence." },
-    scandinavian: { category: "نمو بصحة", categoryEn: "Healthy Growth", description: "ألوان هادئة وإضاءة طبيعية تخلق بيئة مثالية للدراسة والراحة.", descriptionEn: "Calm colors and natural lighting creating an ideal environment for study and rest." },
   },
   "dining-room": {
     modern: { category: "تجمع عصري", categoryEn: "Modern Gathering", description: "طاولات نظيفة وإضاءة معمارية لجلسات طعام أنيقة وعصرية.", descriptionEn: "Clean tables and architectural lighting for elegant and modern dining sessions." },
@@ -259,7 +267,7 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { category: string;
     industrial: { category: "خامة أصيلة", categoryEn: "Authentic Texture", description: "جلد طبيعي وهيكل معدني لمساحة جريئة.", descriptionEn: "Natural leather and metal frame for a bold space." },
     scandinavian: { category: "راحة شمالية", categoryEn: "Nordic Comfort", description: "قماش ناعم وألوان فاتحة لراحة مطلقة.", descriptionEn: "Soft fabric and light colors for absolute comfort." },
   },
-  lounge: {
+  "lounge": {
     modern: { category: "زاوية هادئة", categoryEn: "Quiet Corner", description: "مساحة استرخاء عصرية بتصميم مينيمال أنيق.", descriptionEn: "Contemporary relaxation space with elegant minimalist design." },
     classic: { category: "أناقة قراءة", categoryEn: "Reading Elegance", description: "كرسي استرخاء فاخر وإضاءة دافئة للقراءة.", descriptionEn: "Luxury relaxation chair and warm lighting for reading." },
     industrial: { category: "استرخاء صناعي", categoryEn: "Industrial Relaxation", description: "كرسي جلد وطاولة خشبية خام لزاوية مميزة.", descriptionEn: "Leather chair and raw wooden table for a distinctive corner." },
@@ -323,8 +331,8 @@ async function fetchRoomPhotos(query: string, style: string, roomId: string) {
   const protocol = headerStore.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
   const styleHint = STYLE_QUERY_HINTS[style] || style;
   const fullQuery = `${styleHint} luxury interior design ${query}`;
-  const randomPage = Math.floor(Math.random() * 5) + 1;
-  const url = `${protocol}://${host}/api/pexels?query=${encodeURIComponent(fullQuery)}&per_page=50&page=${randomPage}`;
+  const deterministicPage = getDeterministicSeed(roomId, style);
+  const url = `${protocol}://${host}/api/pexels?query=${encodeURIComponent(fullQuery)}&per_page=50&page=${deterministicPage}`;
 
   try {
     const response = await fetch(url, {

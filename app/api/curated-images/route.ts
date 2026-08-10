@@ -153,8 +153,6 @@ async function fetchFromPexels(
       "bathroom": "luxury spa bathroom marble interior",
       "guest-bathroom": "luxury powder room guest bathroom",
       "entrance-lobby": "luxury entrance foyer lobby grand interior",
-      "youth-room": "modern youth bedroom study",
-      "bedroom": "luxury bedroom interior",
     };
 
     const styleHints: Record<string, string> = {

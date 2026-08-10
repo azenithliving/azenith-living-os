@@ -430,6 +430,9 @@ export default function RoomPageClient({
             className="object-cover"
             priority={true}
             loading="eager"
+            onError={(e) => {
+              e.currentTarget.src = "/placeholder-room.jpg";
+            }}
           />
         ) : (
           <div className="flex h-full items-center justify-center bg-gradient-to-br from-amber-900/20 to-black">
@@ -500,6 +503,9 @@ export default function RoomPageClient({
                             priority={isPriority}
                             loading={isPriority ? "eager" : "lazy"}
                             quality={85}
+                            onError={(e) => {
+                              e.currentTarget.src = "/placeholder-room.jpg";
+                            }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 hover:opacity-100">
                             <span className="absolute bottom-3 left-3 text-xs text-white/80">

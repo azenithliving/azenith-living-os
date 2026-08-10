@@ -204,41 +204,7 @@ export const roomDefinitions: RoomDefinition[] = [
       }
     ]
   },
-  {
-    slug: "youth-room",
-    title: "غرف الشباب والأطفال",
-    titleEn: "Kids & Teen Rooms",
-    eyebrow: "مرونة تنمو مع الوقت",
-    eyebrowEn: "Flexibility That Grows Over Time",
-    summaryEn: "Rooms that combine personality and practicality with scalable solutions instead of rapid change.",
-    outcomeEn: "A flexible space for sleeping, studying, and storage, with an identity that suits age and use.",
-    bulletsEn: ["Clear study corners","Storage that reduces clutter","Calculated colors","Furniture that can be developed later"],
-    summary: "غرف تجمع بين الشخصية والعملية مع حلول قابلة للتطوير بدل التغيير السريع.",
-    outcome: "مساحة مرنة للنوم والدراسة والتخزين، مع هوية تناسب العمر والاستخدام.",
-    bullets: ["زوايا دراسة واضحة", "تخزين يخفف الفوضى", "ألوان محسوبة", "أثاث يقبل التطوير لاحقًا"],
-    furniture: [
-      {
-        slug: "youth-sofa",
-        title: "كنب شبابي متعدد الاستخدامات",
-        titleEn: "Versatile Youth Sofa",
-        images: ["/images/youth-sofa-1.jpg"],
-        description: "كنب مريح يتحول إلى سرير مع تخزين مدمج للغرف الصغيرة.",
-        priceRange: "12,000 - 20,000 EGP",
-        features: ["تحويل سرير", "تخزين", "أقمشة مقاومة"],
-        variations: ["أزرق", "رمادي", "أخضر"]
-      },
-      {
-        slug: "corner-sofa-youth",
-        title: "كنبة زاوية للغرف الشبابية",
-        titleEn: "Youth Room Corner Sofa",
-        images: ["/images/corner-sofa-youth-1.jpg"],
-        description: "كنبة زاوية صغيرة متعددة الوظائف للغرف المحدودة المساحة.",
-        priceRange: "15,000 - 25,000 EGP",
-        features: ["صغيرة الحجم", "تحويل سرير", "ألوان مبهجة"],
-        variations: ["أزرق فاتح", "أخضر", "رمادي"]
-      }
-    ]
-  },
+  
   {
     slug: "dining-room",
     title: "غرف الطعام",
