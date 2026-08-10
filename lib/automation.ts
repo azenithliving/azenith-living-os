@@ -1,6 +1,7 @@
 import { getSupabaseAdminClient } from "./supabase-admin";
 import { getCurrentTenant } from "./tenant";
 import { notifyDiamondLeadAsync } from "./lead-dossier";
+import { sendTelegramMessage, getActiveTelegramConfig } from "./telegram-config";
 
 export interface AutomationTrigger {
   type: "booking_status_changed" | "lead_created" | "lead_updated";
@@ -261,8 +262,9 @@ async function sendTelegramNotification(
   if (!supabase) throw new Error("Supabase not initialized");
 
   const message = action.message;
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const cfg = await getActiveTelegramConfig();
+  const token = cfg.botToken;
+  const chatId = cfg.chatId;
 
   // Diamond leads: send full dossier via Telegram (non-blocking)
   if (trigger.type === "lead_created" && trigger.leadId) {
@@ -337,15 +339,7 @@ async function sendTelegramNotification(
       .join("\n");
 
     if (token && chatId) {
-      await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: alertText,
-          parse_mode: "HTML",
-        }),
-      }).catch((err) =>
+      await sendTelegramMessage(alertText, { silent: false }).catch((err) =>
         console.error("[Automation] Telegram booking alert failed:", err)
       );
     }

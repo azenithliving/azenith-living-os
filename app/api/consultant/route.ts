@@ -4,6 +4,7 @@ import { askGroq, askOrchestratorMessages } from "@/lib/ai-orchestrator";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { predatoryDefense } from "@/lib/predatory-defense";
 import { semanticCache } from "@/lib/semantic-cache";
+import { sendTelegramMessage } from "@/lib/telegram-config";
 import { storeMemory, storeUserPreference, getUserPreferences } from "@/lib/ultimate-agent/memory-store";
 import { LearningEngine } from "@/lib/ultimate-agent/learning-engine";
 
@@ -366,42 +367,19 @@ async function notifyAdminUnknownQuestion(
   }
 
   // 2. Send DIRECT Telegram notification (fire-and-forget)
-  const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
-  const telegramChatId = process.env.TELEGRAM_CHAT_ID;
+  const allText2 = [...history.map((m: any) => m.content), question].join(" ");
+  const phoneMatch2 = allText2.match(/(?:\+?20\s?)?0?1[0125][\s-]?\d{4}[\s-]?\d{4}/);
+  const phone2 = phoneMatch2 ? phoneMatch2[0].replace(/\s+/g, "") : null;
+  const dashboardUrl2 = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living.vercel.app'}/admin/sales?tab=leads&expand=${sessionId}`;
 
-  if (telegramToken && telegramChatId) {
-    // Pull phone from the conversation so the team can call immediately.
-    const allText = [...history.map((m) => m.content), question].join(" ");
-    const phoneMatch = allText.match(/(?:\+?20\s?)?0?1[0125][\s-]?\d{4}[\s-]?\d{4}/);
-    const phone = phoneMatch ? phoneMatch[0].replace(/\s+/g, "") : null;
-    const dashboardUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living.vercel.app'}/admin/sales?tab=leads&expand=${sessionId}`;
+  const msg2 =
+    `⚠️ <b>رسالة صعبة — تحتاج تدخل بشري</b>\n` +
+    `<b>العميل:</b> ${displayName}\n` +
+    (phone2 ? `<b>الهاتف:</b> ${phone2}\n` : "") +
+    `<b>الرسالة:</b> ${question}\n\n` +
+    `<a href="${dashboardUrl2}">افتح لوحة الأدمن</a>`;
 
-    const msg =
-      `*⚠️ Difficult message - needs human*
-Customer: ${displayName}
-Phone: ${phone || "not provided"}
-Session: ${sessionId}
-Message: ${question}
-
-[Reply from the dashboard](${dashboardUrl})`;
-
-    Promise.resolve().then(async () => {
-      try {
-        const tRes = await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: telegramChatId, text: msg, parse_mode: 'Markdown' }),
-        });
-        const tData = await tRes.json();
-        if (tData.ok) console.log("[Consultant] Telegram sent");
-        else console.error("[Consultant] Telegram error:", tData.description);
-      } catch (e) {
-        console.error("[Consultant] Telegram fetch failed:", e);
-      }
-    });
-  } else {
-    console.warn("[Consultant] Telegram not configured - missing token or chatId");
-  }
+  sendTelegramMessage(msg2).catch(() => {});
 }
 
 /**
@@ -787,64 +765,37 @@ export async function POST(
       const phoneMatch = allText.match(/0[0-9]{10}/);
       const phone = phoneMatch ? phoneMatch[0] : "Not provided";
 
-      const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
-      const telegramChatId = process.env.TELEGRAM_CHAT_ID;
-      if (telegramToken && telegramChatId) {
-        const dashboardUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living.vercel.app'}/admin/sales?tab=leads&expand=${sessionId}`;
-        const bookingMsg = `*New completed booking*
-Customer: ${userName || insights?.summary?.split(" ")[0] || "Unknown"}
-Phone: ${phone}
-Request: ${insights?.roomType || "Unknown"}
-Budget: ${insights?.budget || "Unknown"}
-Location: ${insights?.location || "Unknown"}
-Best call time: ${insights?.bestTime || "Unknown"}
-Style: ${insights?.style || "Unknown"}
-Smart summary: ${insights?.summary || "No summary"}
-Last message: ${message}
-
-Dashboard:
-[Open conversation and lead](${dashboardUrl})`;
-        try {
-          await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chat_id: telegramChatId, text: bookingMsg, parse_mode: "Markdown" }),
-          });
-          console.log("[Consultant] Booking alert with full insights sent to Telegram");
-        } catch (e) {
-          console.error("[Consultant] Booking Telegram failed:", e);
-        }
-      }
+      const dashboardUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living.vercel.app'}/admin/sales?tab=leads&expand=${sessionId}`;
+      const bookingMsg =
+        `📋 <b>حجز مكتمل جديد</b>\n` +
+        `<b>العميل:</b> ${userName || insights?.summary?.split(" ")[0] || "Unknown"}\n` +
+        `<b>الهاتف:</b> ${phone}\n` +
+        `<b>الطلب:</b> ${insights?.roomType || "Unknown"}\n` +
+        `<b>الميزانية:</b> ${insights?.budget || "Unknown"}\n` +
+        `<b>الأسلوب:</b> ${insights?.style || "Unknown"}\n\n` +
+        `<a href="${dashboardUrl}">افتح لوحة الأدمن</a>`;
+      sendTelegramMessage(bookingMsg).catch((e) => console.error("[Consultant] Booking Telegram failed:", e));
 
       // --- SAA vInfinity: Telegram Admin Notification + Catalog Log ---
       if (phone !== "Not provided") {
-        // Fire-and-forget: notify admin on Telegram when a new client completes onboarding
         Promise.resolve().then(async () => {
           try {
             const { analyzeStyleDNAFast } = await import("@/lib/pdf-generator");
-
             const clientName = userName || insights?.summary?.split(" ")[0] || "عزيزي العميل";
             const styleLabel = insights?.style || "modern luxury";
-            const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
-            const telegramChatId = process.env.TELEGRAM_CHAT_ID;
-
-            const styleDNA = await analyzeStyleDNAFast([]);
+            await analyzeStyleDNAFast([]);
             const catalogUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living.vercel.app'}/catalog?style=${encodeURIComponent(styleLabel)}`;
+            const msg =
+              `👤 <b>عميل جديد أكمل المحادثة</b>\n\n` +
+              `<b>الاسم:</b> ${clientName}\n` +
+              `<b>التليفون:</b> ${phone}\n` +
+              `<b>الذوق:</b> ${styleLabel}\n` +
+              `<b>الميزانية:</b> ${insights?.budget || "غير محدد"}\n\n` +
+              `<a href="${catalogUrl}">🎨 رابط الكتالوج المخصص</a>`;
+            await sendTelegramMessage(msg, { silent: false });
+            console.log(`[SAA-Telegram] Client notification sent for session ${sessionId}`);
 
-            if (telegramToken && telegramChatId) {
-              const msg =
-                `👤 <b>عميل جديد أكمل المحادثة</b>\n\n` +
-                `<b>الاسم:</b> ${clientName}\n` +
-                `<b>التليفون:</b> ${phone}\n` +
-                `<b>الذوق:</b> ${styleLabel}\n` +
-                `<b>الميزانية:</b> ${insights?.budget || "غير محدد"}\n\n` +
-                `<a href="${catalogUrl}">🎨 رابط الكتالوج المخصص</a>`;
-
-              await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: telegramChatId, text: msg, parse_mode: "HTML", disable_web_page_preview: true }),
-              });
+              await sendTelegramMessage(msg, { silent: false });
               console.log(`[SAA-Telegram] Client notification sent for session ${sessionId}`);
             }
           } catch (tgErr) {

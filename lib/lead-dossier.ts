@@ -3,14 +3,7 @@ import "server-only";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { analyzeStyleDNAFast, StyleDNA } from "@/lib/pdf-generator";
 import { fireAndForget } from "@/lib/background-processor";
-
-/**
- * Lead Dossier System — Telegram Edition
- * Generates and sends comprehensive lead briefs to consultants via Telegram
- */
-
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
+import { sendTelegramMessage, getActiveTelegramConfig } from "@/lib/telegram-config";
 
 export type AestheticAdvice = {
   visualHarmony: string;
@@ -209,41 +202,21 @@ export async function sendTelegramDossier(
   const supabase = getSupabaseAdminClient();
   if (!supabase) throw new Error("Supabase not initialized");
 
-  const token = TELEGRAM_BOT_TOKEN;
-  const chatId = TELEGRAM_CHAT_ID;
-
   try {
     const message = formatDossierMessage(dossier);
+    const cfg = await getActiveTelegramConfig();
 
-    if (token && chatId) {
-      const url = `https://api.telegram.org/bot${token}/sendMessage`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message,
-          parse_mode: "HTML",
-          disable_notification: dossier.qualification.priority !== "urgent",
-        }),
+    if (cfg.botToken && cfg.chatId && cfg.enabled) {
+      const ok = await sendTelegramMessage(message, {
+        silent: dossier.qualification.priority !== "urgent",
       });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        console.error("[LeadDossier] Telegram send failed:", err);
-      } else {
-        console.log(
-          `[LeadDossier] Telegram dossier sent for ${dossier.fullName}`
-        );
+      if (ok) {
+        console.log(`[LeadDossier] Dossier sent for ${dossier.fullName}`);
       }
     } else {
-      console.log(
-        "[LeadDossier] Telegram not configured — dossier logged only:",
-        message
-      );
+      console.log("[LeadDossier] Telegram not configured — dossier logged only");
     }
 
-    // Log event
     await supabase.from("events").insert({
       company_id: tenantId,
       user_id: dossier.leadId,

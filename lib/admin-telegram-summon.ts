@@ -1,3 +1,5 @@
+import { sendTelegramMessage, getActiveTelegramConfig } from "@/lib/telegram-config";
+
 export type AdminSummonReason =
   | "needs_owner"
   | "approval_required"
@@ -11,14 +13,13 @@ export async function sendAdminTelegramSummon(params: {
   reason?: AdminSummonReason;
   href?: string;
 }) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const cfg = await getActiveTelegramConfig();
 
-  if (!token || !chatId) {
+  if (!cfg.botToken || !cfg.chatId) {
     return {
       success: false,
       configured: false,
-      message: "Telegram is not configured. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID.",
+      message: "Telegram is not configured.",
     };
   }
 
@@ -40,27 +41,14 @@ export async function sendAdminTelegramSummon(params: {
     `<a href="${escapeTelegramHtml(url)}">افتح لوحة الأدمن</a>`,
   ].join("\n");
 
-  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-      parse_mode: "HTML",
-      disable_web_page_preview: true,
-      disable_notification: reason !== "critical_alert",
-    }),
+  const ok = await sendTelegramMessage(text, {
+    silent: reason !== "critical_alert",
   });
 
-  const payload = (await response.json().catch(() => ({}))) as {
-    ok?: boolean;
-    description?: string;
-  };
-
   return {
-    success: response.ok && payload.ok !== false,
+    success: ok,
     configured: true,
-    message: payload.description || (response.ok ? "Telegram summon sent" : "Telegram summon failed"),
+    message: ok ? "Telegram summon sent" : "Telegram summon failed",
   };
 }
 

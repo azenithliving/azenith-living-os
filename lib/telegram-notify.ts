@@ -3,9 +3,7 @@
  * Sends instant alerts for security events
  */
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
-const TELEGRAM_ENABLED = process.env.TELEGRAM_ENABLED === "true";
+import { sendTelegramMessage, getActiveTelegramConfig } from "@/lib/telegram-config";
 
 interface SecurityEvent {
   type: "login" | "2fa" | "command" | "signature" | "alert" | "warning" | "critical";
@@ -20,42 +18,12 @@ interface SecurityEvent {
  * Send a security alert via Telegram
  */
 export async function sendSecurityAlert(message: string): Promise<boolean> {
-  // إذا كان Telegram غير مفعل، نكتب في السجل فقط
-  if (!TELEGRAM_ENABLED || !TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+  const cfg = await getActiveTelegramConfig();
+  if (!cfg.enabled || !cfg.botToken || !cfg.chatId) {
     console.log("[TELEGRAM ALERT - Simulated]", message);
     return true;
   }
-
-  try {
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: "HTML",
-        disable_notification: false,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error("Telegram notification failed:", errorData);
-      return false;
-    }
-
-    console.log("[TELEGRAM ALERT SENT]");
-    return true;
-
-  } catch (error) {
-    console.error("Telegram notification error:", error);
-    // لا نريد فشل العملية بسبب عدم إرسال الإشعار
-    return false;
-  }
+  return sendTelegramMessage(message, { silent: false });
 }
 
 /**
@@ -153,20 +121,24 @@ export async function notifyDangerousCommand(
  * Test Telegram configuration
  */
 export async function testTelegramConfig(): Promise<boolean> {
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.log("Telegram not configured - Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID");
+  const cfg = await getActiveTelegramConfig();
+  if (!cfg.botToken) {
+    console.log("Telegram not configured");
     return false;
   }
-
   try {
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getMe`;
-    const response = await fetch(url);
-    
+    const response = await fetch(`https://api.telegram.org/bot${cfg.botToken}/getMe`);
     if (response.ok) {
       const data = await response.json();
       console.log("Telegram bot connected:", data.result?.username);
       return true;
     }
+    return false;
+  } catch (error) {
+    console.error("Telegram test failed:", error);
+    return false;
+  }
+}
     
     return false;
   } catch (error) {

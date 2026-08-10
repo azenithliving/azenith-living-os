@@ -13,6 +13,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase-service";
+import { clearTelegramConfigCache } from "@/lib/telegram-config";
 
 export const dynamic = "force-dynamic";
 
@@ -118,6 +119,7 @@ export async function POST(request: NextRequest) {
       .upsert({ key: SETTINGS_KEY, value: newConfig } as any, { onConflict: "key" });
 
     if (error) throw error;
+    clearTelegramConfigCache();
 
     return NextResponse.json({
       success: true,
@@ -162,7 +164,7 @@ export async function PATCH(request: NextRequest) {
       .upsert({ key: SETTINGS_KEY, value: patched } as any, { onConflict: "key" });
 
     if (error) throw error;
-
+    clearTelegramConfigCache();
     return NextResponse.json({
       success: true,
       message: "تم تحديث الإعدادات",
@@ -187,7 +189,7 @@ export async function DELETE() {
       .eq("key", SETTINGS_KEY);
 
     if (error) throw error;
-
+    clearTelegramConfigCache();
     return NextResponse.json({ success: true, message: "تم حذف إعدادات تليجرام" });
   } catch (err: any) {
     console.error("[Telegram Config] DELETE error:", err);
