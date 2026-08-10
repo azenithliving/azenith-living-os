@@ -28,7 +28,8 @@
     "supabase:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > lib/dal/database.types.ts",
     "db:migrate": "npm run supabase:push && npm run db:types",
-    "build:check": "npm run typecheck && npm run lint && next build"
+    "build:check": "npm run typecheck && npm run lint && next build",
+    "seed:dashboard": "node scripts/seed-dashboard.js"
   },
   "dependencies": {
     "@bull-board/express": "^6.9.1",

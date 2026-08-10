@@ -632,20 +632,95 @@ export async function askNileChat(prompt: string, options?: any) {
 export async function askAllam(prompt: string, options?: any) {
   return askHuggingFace("SDAIA/ALLaM-7B-Instruct", `### Instruction:\n${prompt}\n\n### Response:\n`, options);
 }
+export async function testProviderHealth(provider: string): Promise<{
+  responsive: boolean;
+  responseTimeMs: number;
+  error: string | null;
+}> {
+  const start = Date.now();
+  try {
+    let result;
+    switch (provider) {
+      case "groq":
+        result = await askGroq("ping", { maxTokens: 5 });
+        break;
+      case "mistral":
+        result = await askMistral("ping", { maxTokens: 5 });
+        break;
+      case "openrouter":
+        result = await askOpenRouter("ping", undefined, { maxTokens: 5 });
+        break;
+      case "deepseek":
+        result = await askDeepSeek("ping", { maxTokens: 5 });
+        break;
+      case "openai":
+        result = await askOpenAI("ping", { maxTokens: 5 });
+        break;
+      case "google":
+        result = await askGoogle("ping", { maxTokens: 5 });
+        break;
+      default:
+        return { responsive: false, responseTimeMs: 0, error: "Unknown provider" };
+    }
+    return {
+      responsive: result.success && !!result.content,
+      responseTimeMs: Date.now() - start,
+      error: result.error || null,
+    };
+  } catch (err: any) {
+    return {
+      responsive: false,
+      responseTimeMs: Date.now() - start,
+      error: err.message || "Connection failed",
+    };
+  }
+}
+
 export async function getOrchestratorHealth() {
   const providers = ["groq", "openrouter", "mistral", "deepseek", "openai", "google"] as const;
   const health: any = {};
-  
-  for (const p of providers) {
+
+  const healthPromises = providers.map(async (p) => {
     const stats = await getKeyStats(p);
-    health[p] = { 
-      keys: stats.total, 
-      healthy: stats.active > 0,
-      active: stats.active,
-      cooldown: stats.inCooldown
+    const ping = await testProviderHealth(p);
+    return {
+      provider: p,
+      data: {
+        keys: stats.total,
+        healthy: stats.active > 0 && ping.responsive,
+        active: stats.active,
+        cooldown: stats.inCooldown,
+        responsive: ping.responsive,
+        responseTimeMs: ping.responseTimeMs,
+        lastError: ping.error,
+        lastChecked: new Date().toISOString(),
+      },
     };
+  });
+
+  const results = await Promise.allSettled(healthPromises);
+
+  results.forEach((result) => {
+    if (result.status === "fulfilled") {
+      health[result.value.provider] = result.value.data;
+    }
+  });
+
+  for (const p of providers) {
+    if (!health[p]) {
+      health[p] = {
+        keys: 0,
+        healthy: false,
+        active: 0,
+        cooldown: 0,
+        responsive: false,
+        responseTimeMs: 0,
+        lastError: "Health check failed",
+        lastChecked: new Date().toISOString(),
+      };
+    }
   }
-  
+
   return health;
 }
 

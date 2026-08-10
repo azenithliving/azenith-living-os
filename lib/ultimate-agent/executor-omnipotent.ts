@@ -7,7 +7,7 @@
  * - Database operations (read/write/schema)
  * - File system operations (within safe boundaries)
  * - API calls (internal and external)
- * - External service integrations (WhatsApp, Telegram, Email)
+ * - External service integrations (Telegram, Email)
  * - Environment variable management
  * - Deployment operations
  */
@@ -380,45 +380,7 @@ export async function callInternalAPI(
   }
 }
 
-/**
- * Send WhatsApp message
- */
-export async function sendWhatsAppMessage(
-  to: string,
-  message: string,
-  template?: string
-): Promise<ExternalServiceResult> {
-  try {
-    // Use existing WhatsApp service if available
-    try {
-      const waModule = await import("@/lib/whatsapp-service");
-      if (waModule && typeof waModule.sendMessage === 'function') {
-        const result = await waModule.sendMessage(to, message, template);
-        return {
-          success: result.success,
-          message: result.messageId || "Message sent",
-          service: "whatsapp",
-        };
-      }
-    } catch {
-      // Module not available, continue to fallback
-    }
 
-    // Fallback to simulated
-    console.log(`[WhatsApp] To: ${to}, Message: ${message}`);
-    return {
-      success: true,
-      message: "Message queued for sending",
-      service: "whatsapp",
-    };
-  } catch {
-    return {
-      success: false,
-      error: "Failed to send WhatsApp message",
-      service: "whatsapp",
-    };
-  }
-}
 
 /**
  * Send Telegram notification
@@ -804,19 +766,6 @@ export async function executeAction(
           success: apiResult.success,
           data: apiResult.data,
           error: apiResult.error,
-        };
-        break;
-
-      case "send_whatsapp":
-        const waResult = await sendWhatsAppMessage(
-          payload.to as string,
-          payload.message as string,
-          payload.template as string
-        );
-        result = {
-          success: waResult.success,
-          message: waResult.message,
-          error: waResult.error,
         };
         break;
 

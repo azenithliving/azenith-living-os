@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image, MessageSquare, Activity, Factory } from "lucide-react";
+import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image, MessageSquare, Activity, Factory, Bell } from "lucide-react";
 import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-components";
 import { ImageHarvestDashboard } from "./intel/components/ImageHarvestDashboard";
 import { AdminProactiveStrip } from "@/components/admin/AdminProactiveStrip";
+import { NotificationsPanel } from "@/components/admin/NotificationsPanel";
+import TelegramControlPanel from "@/components/admin/TelegramControlPanel";
 
 interface AnalyticsData {
   metrics: {
@@ -84,14 +86,16 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [systemStatus, setSystemStatus] = useState<{
-    whatsapp: string;
+    telegram: string;
     aaca: string;
     aacaMode?: string;
     aacaLabel?: string;
   }>({
-    whatsapp: "loading",
+    telegram: "loading",
     aaca: "loading",
   });
+  const [mastermindData, setMastermindData] = useState<any>(null);
+  const [telegramPanelOpen, setTelegramPanelOpen] = useState(false);
 
   // Fetch real data from APIs
   useEffect(() => {
@@ -103,13 +107,14 @@ export default function AdminPage() {
         // Fetch all APIs in parallel
         const [analyticsRes, healthRes, mastermindRes] = await Promise.all([
           fetch("/api/analytics?period=30days"),
-          fetch("/api/system-health"),
-          fetch("/api/admin/mastermind/stats"),
+          fetch("/api/system-health", { cache: "no-store" }),
+          fetch("/api/admin/mastermind/stats", { cache: "no-store" }),
         ]);
 
         const analytics: AnalyticsData = analyticsRes.ok ? await analyticsRes.json() : { metrics: {} };
         const health: SystemHealthData = healthRes.ok ? await healthRes.json() : { health: {}, pendingAlerts: [] };
         const mastermind: MastermindStatsData = mastermindRes.ok ? await mastermindRes.json() : { commands: {}, security: {}, recentCommands: [] };
+        setMastermindData(mastermind);
 
         // Map real data to metrics
         const realMetrics = [
@@ -160,7 +165,7 @@ export default function AdminPage() {
           {
             title: "نشاط المنصة",
             value: analytics.metrics?.uniqueVisitors || 0,
-            subtitle: analytics.metrics?.whatsappClicks ? `${analytics.metrics.whatsappClicks} نقر واتساب` : "هذا الشهر",
+            subtitle: "هذا الشهر",
             icon: <Clock className="h-6 w-6" />,
             color: "gold" as const,
             href: "/admin",
@@ -229,11 +234,11 @@ export default function AdminPage() {
 
     fetchDashboardData();
 
-    // Fetch system health (WhatsApp & AACA)
+    const refreshInterval = setInterval(fetchDashboardData, 60000);
+
+    // Fetch system health (Telegram & AACA)
     const checkSystems = async () => {
       try {
-        const waRes = await fetch("/api/admin/whatsapp/status");
-        const waData = await waRes.json();
         let aacaJson: { status?: string; mode?: string; label?: string } = {
           status: "OFFLINE",
           mode: "cloud",
@@ -244,18 +249,34 @@ export default function AdminPage() {
         } catch {
           /* keep offline fallback */
         }
-        
+
+        // Check Telegram connectivity via a lightweight server-side ping
+        let telegramStatus = "UNKNOWN";
+        try {
+          const tgRes = await fetch("/api/admin/telegram/status");
+          if (tgRes.ok) {
+            const tgData = await tgRes.json();
+            telegramStatus = tgData.connected ? "CONNECTED" : "DISCONNECTED";
+          } else {
+            telegramStatus = "DISCONNECTED";
+          }
+        } catch {
+          telegramStatus = "DISCONNECTED";
+        }
+
         setSystemStatus({
-          whatsapp: waData.status || "DISCONNECTED",
+          telegram: telegramStatus,
           aaca: aacaJson.status === "READY" ? "READY" : "OFFLINE",
           aacaMode: aacaJson.mode || "cloud",
           aacaLabel: aacaJson.label || "",
         });
       } catch (e) {
-        setSystemStatus({ whatsapp: "ERROR", aaca: "ERROR" });
+        setSystemStatus({ telegram: "ERROR", aaca: "ERROR" });
       }
     };
     checkSystems();
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const colorClasses: Record<string, string> = {
@@ -269,11 +290,13 @@ export default function AdminPage() {
   useEffect(() => {
     const fetchAIHealth = async () => {
       try {
-        const res = await fetch("/api/admin/ai/health");
+        const res = await fetch("/api/admin/ai/health", { cache: "no-store" });
         if (res.ok) setAiHealth(await res.json());
       } catch (e) { console.error(e); }
     };
     fetchAIHealth();
+    const interval = setInterval(fetchAIHealth, 120000);
+    return () => clearInterval(interval);
   }, []);
 
   const iconColors: Record<string, string> = {
@@ -309,20 +332,23 @@ export default function AdminPage() {
 
         {/* System Health Overview */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-6 flex items-center justify-between">
+          <div
+            onClick={() => setTelegramPanelOpen(true)}
+            className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-6 flex items-center justify-between cursor-pointer hover:bg-white/[0.05] hover:border-white/15 transition-all group"
+          >
             <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-2xl ${systemStatus.whatsapp === 'READY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+              <div className={`p-3 rounded-2xl ${systemStatus.telegram === 'CONNECTED' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
                 <MessageSquare className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-sm">خدمة الواتساب</h3>
-                <p className="text-[10px] text-white/40">الحالة الحالية لمحرك التواصل</p>
+                <h3 className="text-white font-bold text-sm">خدمة تليجرام</h3>
+                <p className="text-[10px] text-white/40 group-hover:text-white/60 transition-colors">اضغط للإعدادات والتحكم الكامل</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`h-2 w-2 rounded-full animate-pulse ${systemStatus.whatsapp === 'READY' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-              <span className={`text-xs font-bold ${systemStatus.whatsapp === 'READY' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {systemStatus.whatsapp === 'READY' ? 'متصل' : 'غير متصل'}
+              <span className={`h-2 w-2 rounded-full animate-pulse ${systemStatus.telegram === 'CONNECTED' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+              <span className={`text-xs font-bold ${systemStatus.telegram === 'CONNECTED' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {systemStatus.telegram === 'CONNECTED' ? 'متصل' : systemStatus.telegram === 'loading' ? 'جاري التحقق...' : 'غير متصل'}
               </span>
             </div>
           </div>
@@ -355,27 +381,90 @@ export default function AdminPage() {
               <Brain className="w-5 h-5 text-purple-400" />
               مراقبة أحواض الذكاء الاصطناعي
             </h2>
-            <span className="text-[10px] text-white/30 uppercase tracking-widest">تحديث مباشر</span>
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/admin/ai/health');
+                  if (res.ok) setAiHealth(await res.json());
+                } catch (e) { console.error(e); }
+              }}
+              className="text-[10px] text-purple-400/60 uppercase tracking-widest hover:text-purple-400 transition-colors flex items-center gap-1"
+            >
+              <Activity className="w-3 h-3" />
+              تحديث مباشر
+            </button>
           </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {aiHealth && aiHealth.pools && Object.entries(aiHealth.pools).map(([name, pool]: [string, any]) => (
-              <div key={name} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 transition-all hover:bg-white/[0.04]">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{name}</span>
-                  <div className={`h-1.5 w-1.5 rounded-full ${pool.healthy ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}`} />
+
+          {!aiHealth || !aiHealth.pools ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-5 h-5 text-purple-400 animate-spin ml-2" />
+              <span className="text-white/40 text-sm">جاري فحص الأحواض...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {Object.entries(aiHealth.pools).map(([name, pool]: [string, any]) => (
+                <div key={`pool-${name}`} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 transition-all hover:bg-white/[0.04]">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{name}</span>
+                    <div className={`h-1.5 w-1.5 rounded-full ${pool.healthy ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}`} />
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-bold text-white">{pool.keys}</span>
+                    <span className="text-[10px] text-white/30">مفتاح</span>
+                  </div>
+                  <div className="mt-2 h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full transition-all ${pool.healthy ? 'bg-emerald-500/50' : 'bg-rose-500/50'}`} style={{ width: pool.keys > 0 ? '100%' : '0%' }} />
+                  </div>
+                  {pool.responseTimeMs !== undefined && (
+                    <div className="mt-2 flex items-center justify-between text-[9px] text-white/25">
+                      <span>{pool.responsive ? '✓' : '✗'} {pool.responseTimeMs}ms</span>
+                      {pool.cooldown > 0 && <span className="text-amber-400/60">{pool.cooldown} معطّل</span>}
+                    </div>
+                  )}
+                  {pool.lastError && !pool.responsive && (
+                    <div className="mt-1 text-[8px] text-rose-400/50 truncate" title={pool.lastError}>
+                      {pool.lastError}
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-xl font-bold text-white">{pool.keys}</span>
-                  <span className="text-[10px] text-white/30">مفتاح</span>
-                </div>
-                <div className="mt-2 h-1 bg-white/5 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${pool.healthy ? 'bg-emerald-500/50' : 'bg-rose-500/50'}`} style={{ width: pool.keys > 0 ? '100%' : '0%' }} />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {aiHealth?.timestamp && (
+            <p className="text-[9px] text-white/20 text-left">
+              آخر فحص: {new Date(aiHealth.timestamp).toLocaleTimeString('ar-EG')}
+            </p>
+          )}
         </section>
+
+        {/* Agent Status Cards */}
+        {!loading && !error && (
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <Bot className="w-5 h-5 text-blue-400" />
+              حالة الوكلاء الذكية
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AgentStatusCard
+                agentKey="prime"
+                agentName="PRIME"
+                agentRole="مهندس التصميم والتطوير"
+                color="purple"
+                icon="🧠"
+                mastermindData={mastermindData}
+              />
+              <AgentStatusCard
+                agentKey="vanguard"
+                agentName="Vanguard"
+                agentRole="مدير العمليات والمبيعات"
+                color="emerald"
+                icon="💼"
+                mastermindData={mastermindData}
+              />
+            </div>
+          </section>
+        )}
 
         {/* 6 Metric Cards */}
         <section>
@@ -516,6 +605,29 @@ export default function AdminPage() {
           <ImageHarvestDashboard />
         </section>
 
+        {/* Notifications & Quality */}
+        {!loading && !error && (
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Notifications Panel */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Bell className="w-5 h-5 text-amber-400" />
+                الإشعارات والتنبيهات
+              </h2>
+              <NotificationsPanel />
+            </div>
+
+            {/* Quality Metrics */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-emerald-400" />
+                مؤشرات الجودة
+              </h2>
+              <QualityMetricsPanel />
+            </div>
+          </div>
+        )}
+
         {/* Footer */}
         <div className="pt-8 border-t border-white/10">
           <div className="flex items-center justify-between text-sm text-white/40">
@@ -524,6 +636,223 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
+
+      {/* Telegram Control Panel Drawer */}
+      <TelegramControlPanel
+        open={telegramPanelOpen}
+        onClose={() => setTelegramPanelOpen(false)}
+      />
+    </div>
+  );
+}
+
+function AgentStatusCard({
+  agentKey,
+  agentName,
+  agentRole,
+  color,
+  icon,
+  mastermindData,
+}: {
+  agentKey: string;
+  agentName: string;
+  agentRole: string;
+  color: "purple" | "emerald";
+  icon: string;
+  mastermindData: any;
+}) {
+  const agentStats = mastermindData?.agents?.[agentKey];
+  const tasksCompleted = agentStats?.completed || 0;
+  const totalTasks = agentStats?.tasks || 0;
+  const successRate = agentStats?.successRate || 0;
+  const avgTime = agentStats?.avgTime || 0;
+
+  const colorClasses = {
+    purple: {
+      border: "border-purple-500/20",
+      bg: "bg-purple-500/5",
+      text: "text-purple-400",
+      bar: "bg-purple-500/50",
+    },
+    emerald: {
+      border: "border-emerald-500/20",
+      bg: "bg-emerald-500/5",
+      text: "text-emerald-400",
+      bar: "bg-emerald-500/50",
+    },
+  };
+
+  const colors = colorClasses[color];
+
+  return (
+    <div className={`rounded-2xl border ${colors.border} ${colors.bg} p-5 transition-all hover:scale-[1.01]`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="text-2xl">{icon}</div>
+          <div>
+            <h3 className={`font-bold ${colors.text}`}>{agentName}</h3>
+            <p className="text-[10px] text-white/40">{agentRole}</p>
+          </div>
+        </div>
+        <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${colors.bg}`}>
+          <div className={`w-1.5 h-1.5 rounded-full ${totalTasks > 0 ? "bg-emerald-500 animate-pulse" : "bg-white/20"}`} />
+          <span className={`text-[10px] font-bold ${colors.text}`}>
+            {totalTasks > 0 ? "نشط" : "جاهز"}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <div className="text-center">
+          <p className="text-lg font-bold text-white">{tasksCompleted}</p>
+          <p className="text-[9px] text-white/30">مكتمل</p>
+        </div>
+        <div className="text-center">
+          <p className="text-lg font-bold text-white">{successRate}%</p>
+          <p className="text-[9px] text-white/30">نجاح</p>
+        </div>
+        <div className="text-center">
+          <p className="text-lg font-bold text-white">
+            {avgTime > 60000 ? `${Math.round(avgTime / 60000)}m` : `${Math.round(avgTime / 1000)}s`}
+          </p>
+          <p className="text-[9px] text-white/30">متوسط</p>
+        </div>
+      </div>
+
+      {totalTasks > 0 && (
+        <div className="mt-3 h-1.5 bg-white/5 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${colors.bar}`}
+            style={{ width: `${successRate}%` }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface QualityMetrics {
+  total_checks: number;
+  pass_count: number;
+  fail_count: number;
+  conditional_count: number;
+  pass_rate: number;
+  incoming_material_count: number;
+  in_process_count: number;
+  pre_finish_count: number;
+  final_count: number;
+}
+
+function QualityMetricsPanel() {
+  const [metrics, setMetrics] = useState<QualityMetrics | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMetrics() {
+      try {
+        const res = await fetch('/api/admin/quality?limit=100', { cache: 'no-store' });
+        const data = await res.json();
+        if (data.success && data.data) {
+          const checks = data.data;
+          const total = checks.length;
+          const pass = checks.filter((c: any) => c.status === 'pass').length;
+          const fail = checks.filter((c: any) => c.status === 'fail').length;
+          const conditional = checks.filter((c: any) => c.status === 'conditional_pass').length;
+          setMetrics({
+            total_checks: total,
+            pass_count: pass,
+            fail_count: fail,
+            conditional_count: conditional,
+            pass_rate: total > 0 ? Math.round((pass / total) * 100) : 0,
+            incoming_material_count: checks.filter((c: any) => c.check_type === 'incoming_material').length,
+            in_process_count: checks.filter((c: any) => c.check_type === 'in_process').length,
+            pre_finish_count: checks.filter((c: any) => c.check_type === 'pre_finish').length,
+            final_count: checks.filter((c: any) => c.check_type === 'final').length,
+          });
+        }
+      } catch (err) {
+        console.error('Quality metrics error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchMetrics();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 flex items-center justify-center">
+        <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!metrics || metrics.total_checks === 0) {
+    return (
+      <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-center">
+        <CheckCircle className="w-10 h-10 text-emerald-400/30 mx-auto mb-3" />
+        <p className="text-white/40 text-sm">لا توجد فحوصات جودة بعد</p>
+        <p className="text-white/20 text-xs mt-1">ابدأ بتسجيل أول فحص جودة</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="text-center p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+          <p className="text-2xl font-bold text-emerald-400">{metrics.pass_count}</p>
+          <p className="text-[10px] text-white/40">ناجح</p>
+        </div>
+        <div className="text-center p-3 bg-rose-500/10 rounded-xl border border-rose-500/20">
+          <p className="text-2xl font-bold text-rose-400">{metrics.fail_count}</p>
+          <p className="text-[10px] text-white/40">فاشل</p>
+        </div>
+        <div className="text-center p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
+          <p className="text-2xl font-bold text-amber-400">{metrics.conditional_count}</p>
+          <p className="text-[10px] text-white/40">مشروط</p>
+        </div>
+        <div className="text-center p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+          <p className="text-2xl font-bold text-blue-400">{metrics.pass_rate}%</p>
+          <p className="text-[10px] text-white/40">نسبة النجاح</p>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-white/40">معدل النجاح</span>
+          <span className="text-white font-bold">{metrics.pass_rate}%</span>
+        </div>
+        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-emerald-500 rounded-full transition-all"
+            style={{ width: `${metrics.pass_rate}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2 text-center">
+        <div>
+          <p className="text-sm font-bold text-white">{metrics.incoming_material_count}</p>
+          <p className="text-[8px] text-white/30">مواد</p>
+        </div>
+        <div>
+          <p className="text-sm font-bold text-white">{metrics.in_process_count}</p>
+          <p className="text-[8px] text-white/30">أثناء</p>
+        </div>
+        <div>
+          <p className="text-sm font-bold text-white">{metrics.pre_finish_count}</p>
+          <p className="text-[8px] text-white/30">قبل تشطيب</p>
+        </div>
+        <div>
+          <p className="text-sm font-bold text-white">{metrics.final_count}</p>
+          <p className="text-[8px] text-white/30">نهائي</p>
+        </div>
+      </div>
+
+      <p className="text-[9px] text-white/20 text-center">
+        إجمالي: {metrics.total_checks} فحص
+      </p>
     </div>
   );
 }

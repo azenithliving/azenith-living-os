@@ -1,14 +1,16 @@
 import "server-only";
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-import { analyzeStyleDNAFast, LeadDossier, StyleDNA } from "@/lib/pdf-generator";
+import { analyzeStyleDNAFast, StyleDNA } from "@/lib/pdf-generator";
 import { fireAndForget } from "@/lib/background-processor";
-import { whatsAppManager } from "./whatsapp-proxy";
 
 /**
- * WhatsApp Lead Dossier System
- * Generates and sends comprehensive lead briefs to consultants
+ * Lead Dossier System — Telegram Edition
+ * Generates and sends comprehensive lead briefs to consultants via Telegram
  */
+
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
 
 export type AestheticAdvice = {
   visualHarmony: string;
@@ -23,7 +25,7 @@ export type InvestmentSelection = {
   description: string;
 };
 
-export type WhatsAppDossier = {
+export type LeadDossier = {
   leadId: string;
   fullName: string;
   phone: string;
@@ -41,7 +43,6 @@ export type WhatsAppDossier = {
   };
   viewedImages: string[];
   createdAt: string;
-  // New fields for Creative Visionary Suite
   language?: "ar" | "en";
   aestheticAdvice?: AestheticAdvice | null;
   investmentSelection?: InvestmentSelection | null;
@@ -56,11 +57,13 @@ export type WhatsAppDossier = {
 /**
  * Build comprehensive lead dossier from database
  */
-export async function buildLeadDossier(leadId: string, tenantId: string): Promise<WhatsAppDossier | null> {
+export async function buildLeadDossier(
+  leadId: string,
+  tenantId: string
+): Promise<LeadDossier | null> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("Supabase not initialized");
 
-  // Fetch user/lead data
   const { data: user, error: userError } = await supabase
     .from("users")
     .select("*")
@@ -69,11 +72,10 @@ export async function buildLeadDossier(leadId: string, tenantId: string): Promis
     .single();
 
   if (userError || !user) {
-    console.error("[WhatsAppDossier] Failed to fetch user:", userError);
+    console.error("[LeadDossier] Failed to fetch user:", userError);
     return null;
   }
 
-  // Fetch latest request for this user
   const { data: request, error: requestError } = await supabase
     .from("requests")
     .select("*")
@@ -84,10 +86,9 @@ export async function buildLeadDossier(leadId: string, tenantId: string): Promis
     .single();
 
   if (requestError) {
-    console.error("[WhatsAppDossier] Failed to fetch request:", requestError);
+    console.error("[LeadDossier] Failed to fetch request:", requestError);
   }
 
-  // Fetch recent events for viewed images
   const { data: events } = await supabase
     .from("events")
     .select("metadata")
@@ -97,14 +98,13 @@ export async function buildLeadDossier(leadId: string, tenantId: string): Promis
     .order("created_at", { ascending: false })
     .limit(10);
 
-  const viewedImages = events
-    ?.map((e) => e.metadata?.imageUrl)
-    .filter(Boolean) as string[] || [];
+  const viewedImages =
+    (events?.map((e) => e.metadata?.imageUrl).filter(Boolean) as string[]) ||
+    [];
 
-  // Determine qualification based on score
   const score = user.score || 0;
-  let tier: WhatsAppDossier["qualification"]["tier"] = "Silver";
-  let priority: WhatsAppDossier["qualification"]["priority"] = "low";
+  let tier: LeadDossier["qualification"]["tier"] = "Silver";
+  let priority: LeadDossier["qualification"]["priority"] = "low";
 
   if (score >= 60) {
     tier = "Diamond";
@@ -117,12 +117,11 @@ export async function buildLeadDossier(leadId: string, tenantId: string): Promis
     priority = "medium";
   }
 
-  // Analyze Style DNA
   let styleDNA: StyleDNA;
   if (viewedImages.length > 0) {
     const { styleDNA: fastResult } = await analyzeStyleDNAFast(viewedImages, {
       userId: leadId,
-      tenantId: tenantId,
+      tenantId,
     });
     styleDNA = fastResult;
   } else {
@@ -140,7 +139,8 @@ export async function buildLeadDossier(leadId: string, tenantId: string): Promis
 
   return {
     leadId,
-    fullName: user.full_name || contact?.fullName || user.session_id || "Unknown",
+    fullName:
+      user.full_name || contact?.fullName || user.session_id || "Unknown",
     phone: user.phone || contact?.phone || "N/A",
     email: user.email || contact?.email,
     scope: user.room_type || request?.room_type || "Not specified",
@@ -156,9 +156,9 @@ export async function buildLeadDossier(leadId: string, tenantId: string): Promis
 }
 
 /**
- * Format lead dossier as WhatsApp message
+ * Format lead dossier as a Telegram HTML message
  */
-export function formatWhatsAppDossier(dossier: WhatsAppDossier): string {
+export function formatDossierMessage(dossier: LeadDossier): string {
   const tierEmoji = {
     Diamond: "💎",
     Gold: "🥇",
@@ -172,90 +172,121 @@ export function formatWhatsAppDossier(dossier: WhatsAppDossier): string {
     low: "🔵",
   }[dossier.qualification.priority];
 
+  const escape = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
   const lines = [
-    `${tierEmoji} *NEW ${dossier.qualification.tier.toUpperCase()} LEAD* ${tierEmoji}`,
+    `${tierEmoji} <b>NEW ${dossier.qualification.tier.toUpperCase()} LEAD</b> ${tierEmoji}`,
     "",
-    `*Client:* ${dossier.fullName}`,
-    `*Phone:* ${dossier.phone}`,
-    dossier.email ? `*Email:* ${dossier.email}` : "",
+    `<b>Client:</b> ${escape(dossier.fullName)}`,
+    `<b>Phone:</b> ${escape(dossier.phone)}`,
+    dossier.email ? `<b>Email:</b> ${escape(dossier.email)}` : "",
     "",
-    `*Project Scope:* ${dossier.scope}`,
-    `*Investment:* ${dossier.budget}`,
-    `*Timeline:* ${dossier.timeline}`,
+    `<b>Project Scope:</b> ${escape(dossier.scope)}`,
+    `<b>Investment:</b> ${escape(dossier.budget)}`,
+    `<b>Timeline:</b> ${escape(dossier.timeline)}`,
     "",
-    `*Priority:* ${priorityEmoji} ${dossier.qualification.priority.toUpperCase()}`,
-    `*Score:* ${dossier.qualification.score}/100`,
+    `<b>Priority:</b> ${priorityEmoji} ${dossier.qualification.priority.toUpperCase()}`,
+    `<b>Score:</b> ${dossier.qualification.score}/100`,
     "",
-    "*Style DNA Analysis:*",
-    `• Styles: ${dossier.styleDNA.dominantStyles.join(", ")}`,
-    `• Colors: ${dossier.styleDNA.colorPalette.join(", ")}`,
+    "<b>Style DNA Analysis:</b>",
+    `• Styles: ${escape(dossier.styleDNA.dominantStyles.join(", "))}`,
+    `• Colors: ${escape(dossier.styleDNA.colorPalette.join(", "))}`,
     "",
-    "Reply READY to claim this lead"
+    "✅ افتح لوحة التحكم لمتابعة هذا العميل",
   ];
 
-  return lines.filter(Boolean).join("\n");
+  return lines.filter((l) => l !== undefined && l !== null).join("\n");
 }
 
 /**
- * Send WhatsApp dossier to admin
+ * Send lead dossier to admin via Telegram
  */
-export async function sendWhatsAppDossier(
-  dossier: WhatsAppDossier,
-  adminPhone: string,
+export async function sendTelegramDossier(
+  dossier: LeadDossier,
   tenantId: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("Supabase not initialized");
+
+  const token = TELEGRAM_BOT_TOKEN;
+  const chatId = TELEGRAM_CHAT_ID;
 
   try {
-    const message = formatWhatsAppDossier(dossier);
-    
-    // Call the actual WhatsApp proxy
-    try {
-      await whatsAppManager.sendMessage(adminPhone, message);
-    } catch (sendErr: any) {
-      console.error(`[WhatsAppDossier] Proxy Send Failed:`, sendErr.message);
+    const message = formatDossierMessage(dossier);
+
+    if (token && chatId) {
+      const url = `https://api.telegram.org/bot${token}/sendMessage`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+          parse_mode: "HTML",
+          disable_notification: dossier.qualification.priority !== "urgent",
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("[LeadDossier] Telegram send failed:", err);
+      } else {
+        console.log(
+          `[LeadDossier] Telegram dossier sent for ${dossier.fullName}`
+        );
+      }
+    } else {
+      console.log(
+        "[LeadDossier] Telegram not configured — dossier logged only:",
+        message
+      );
     }
 
     // Log event
     await supabase.from("events").insert({
       company_id: tenantId,
       user_id: dossier.leadId,
-      type: "whatsapp_dossier_sent",
+      type: "telegram_dossier_sent",
       value: dossier.qualification.tier,
-      metadata: { to: adminPhone, tier: dossier.qualification.tier },
+      metadata: {
+        tier: dossier.qualification.tier,
+        score: dossier.qualification.score,
+        channel: "telegram",
+      },
     });
 
     return { success: true, messageId: crypto.randomUUID() };
   } catch (error: any) {
-    console.error("[WhatsAppDossier] Failed to send:", error);
+    console.error("[LeadDossier] Failed to send:", error);
     return { success: false, error: error.message };
   }
 }
 
 /**
- * Auto-trigger WhatsApp for Diamond leads
+ * Notify admin of a Diamond lead via Telegram
  */
 export async function notifyDiamondLead(
   leadId: string,
-  tenantId: string,
-  adminPhone: string
+  tenantId: string
 ): Promise<{ success: boolean; error?: string }> {
   const dossier = await buildLeadDossier(leadId, tenantId);
   if (!dossier) return { success: false, error: "Failed to build lead dossier" };
   if (dossier.qualification.tier !== "Diamond") return { success: true };
-  return sendWhatsAppDossier(dossier, adminPhone, tenantId);
+  return sendTelegramDossier(dossier, tenantId);
 }
 
 /**
- * Auto-trigger WhatsApp for Diamond leads - ASYNC VERSION
+ * Non-blocking Diamond lead notification
  */
 export function notifyDiamondLeadAsync(
   leadId: string,
-  tenantId: string,
-  adminPhone: string
+  tenantId: string
 ): void {
-  fireAndForget(async () => {
-    await notifyDiamondLead(leadId, tenantId, adminPhone);
-  }, (error) => console.error(`[notifyDiamondLeadAsync] Error:`, error));
+  fireAndForget(
+    async () => {
+      await notifyDiamondLead(leadId, tenantId);
+    },
+    (error) => console.error(`[notifyDiamondLeadAsync] Error:`, error)
+  );
 }

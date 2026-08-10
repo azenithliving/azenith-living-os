@@ -12,8 +12,7 @@ import {
   analyzeRevenueOpportunitiesWithInput,
   optimizeSpeedWithInput,
 } from "@/lib/architect-tools";
-import { buildLeadDossier, sendWhatsAppDossier } from "@/lib/whatsapp-dossier";
-import { resolveAdminWhatsAppPhone } from "@/lib/admin-whatsapp-resolver";
+import { buildLeadDossier, sendTelegramDossier } from "@/lib/lead-dossier";
 import { executeTool as executeRealTool } from "@/lib/real-tool-executor";
 import { triggerVercelDeploy } from "@/lib/admin-cloud-evolution";
 import { runBrowserResearchMission } from "@/lib/admin-browser-copilot-brain";
@@ -410,17 +409,10 @@ export async function executeLeadDossierSend(
     return { success: false, message: "leadId مطلوب", executionId: context.executionId };
   }
 
-  const { phone: adminPhone, source } = await resolveAdminWhatsAppPhone({
-    override: params.adminPhone as string | undefined,
-    tenantId,
-    companyId: tenantId,
-  });
-
-  if (!tenantId || !adminPhone) {
+  if (!tenantId) {
     return {
       success: false,
-      message:
-        "لم أجد رقم واتساب — أضفه في إعدادات الشركة أو WHATSAPP_DEFAULT_NUMBER",
+      message: "tenantId مطلوب",
       executionId: context.executionId,
     };
   }
@@ -430,13 +422,13 @@ export async function executeLeadDossierSend(
     if (!dossier) {
       return { success: false, message: "لم أجد الـ lead", executionId: context.executionId };
     }
-    const sent = await sendWhatsAppDossier(dossier, adminPhone, tenantId);
+    const sent = await sendTelegramDossier(dossier, tenantId);
     return {
       success: sent.success,
       message: sent.success
-        ? `تم إرسال ملف العميل ${dossier.fullName} على واتساب (${source})`
+        ? `تم إرسال ملف العميل ${dossier.fullName} على تليجرام`
         : sent.error || "فشل الإرسال",
-      data: { leadId, tier: dossier.qualification.tier, phoneSource: source },
+      data: { leadId, tier: dossier.qualification.tier, channel: "telegram" },
       executionId: context.executionId,
     };
   } catch (error) {

@@ -816,40 +816,39 @@ Dashboard:
         }
       }
 
-      // --- SAA vInfinity: WhatsApp + PDF Catalog Dispatch ---
+      // --- SAA vInfinity: Telegram Admin Notification + Catalog Log ---
       if (phone !== "Not provided") {
-        // Fire-and-forget: never blocks the response
+        // Fire-and-forget: notify admin on Telegram when a new client completes onboarding
         Promise.resolve().then(async () => {
           try {
-            const { sendMessage } = await import("@/lib/whatsapp-service");
             const { analyzeStyleDNAFast } = await import("@/lib/pdf-generator");
 
             const clientName = userName || insights?.summary?.split(" ")[0] || "عزيزي العميل";
             const styleLabel = insights?.style || "modern luxury";
-            const budgetLabel = insights?.budget || "premium";
+            const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
+            const telegramChatId = process.env.TELEGRAM_CHAT_ID;
 
-            // 1. Immediate WhatsApp greeting message
-            const greetMsg =
-              `✨ أهلاً وسهلاً ${clientName}!\n\n` +
-              `شكراً لاهتمامك بـ Azenith Living 🏛️\n` +
-              `تم استلام طلبك بنجاح وسيتواصل معك أحد مستشارينا خلال وقت قصير.\n\n` +
-              `للاستفسار: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living.vercel.app'}`;
-
-            await sendMessage(phone, greetMsg);
-            console.log(`[SAA-WhatsApp] Greeting sent to ${phone} for session ${sessionId}`);
-
-            // 2. Generate Style DNA from insights and send PDF catalog link
             const styleDNA = await analyzeStyleDNAFast([]);
-            if (styleDNA) {
-              const catalogMsg =
-                `🎨 لقد قمنا بإعداد كتالوج مخصص يناسب ذوقك في الطراز ${styleLabel} وميزانيتك ${budgetLabel}.\n\n` +
-                `يمكنك الاطلاع على أعمالنا المختارة خصيصاً لك:\n` +
-                `${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living.vercel.app'}/catalog?style=${encodeURIComponent(styleLabel)}`;
-              await sendMessage(phone, catalogMsg);
-              console.log(`[SAA-WhatsApp] Personalized catalog sent to ${phone}`);
+            const catalogUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living.vercel.app'}/catalog?style=${encodeURIComponent(styleLabel)}`;
+
+            if (telegramToken && telegramChatId) {
+              const msg =
+                `👤 <b>عميل جديد أكمل المحادثة</b>\n\n` +
+                `<b>الاسم:</b> ${clientName}\n` +
+                `<b>التليفون:</b> ${phone}\n` +
+                `<b>الذوق:</b> ${styleLabel}\n` +
+                `<b>الميزانية:</b> ${insights?.budget || "غير محدد"}\n\n` +
+                `<a href="${catalogUrl}">🎨 رابط الكتالوج المخصص</a>`;
+
+              await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: telegramChatId, text: msg, parse_mode: "HTML", disable_web_page_preview: true }),
+              });
+              console.log(`[SAA-Telegram] Client notification sent for session ${sessionId}`);
             }
-          } catch (waErr) {
-            console.error("[SAA-WhatsApp] WhatsApp+PDF dispatch failed:", waErr);
+          } catch (tgErr) {
+            console.error("[SAA-Telegram] Notification failed:", tgErr);
           }
         });
       }

@@ -31,10 +31,6 @@ interface CommunicationConfig {
     botToken: string;
     defaultChatId: string;
   };
-  whatsapp: {
-    enabled: boolean;
-    defaultNumber: string;
-  };
   dashboard: {
     enabled: boolean;
     maxMessages: number;
@@ -74,10 +70,6 @@ const DEFAULT_CONFIG: CommunicationConfig = {
     enabled: true,
     botToken: process.env.TELEGRAM_BOT_TOKEN || '',
     defaultChatId: process.env.TELEGRAM_CHAT_ID || ''
-  },
-  whatsapp: {
-    enabled: true,
-    defaultNumber: process.env.WHATSAPP_DEFAULT_NUMBER || ''
   },
   dashboard: {
     enabled: true,
@@ -203,11 +195,12 @@ export class CommunicationAgentService {
           break;
 
         case NotificationChannel.WHATSAPP:
-          if (this.config.whatsapp.enabled) {
-            await this.sendWhatsApp(recipientId || this.config.whatsapp.defaultNumber, message);
+          // Route to Telegram — WhatsApp removed
+          if (this.config.telegram.enabled && this.config.telegram.botToken) {
+            await this.sendTelegram(title, message, data);
             sentChannels.push(NotificationChannel.WHATSAPP);
           } else {
-            errors.push('WhatsApp not enabled');
+            errors.push('Telegram not configured (WHATSAPP channel routed to Telegram)');
           }
           break;
 
@@ -532,19 +525,6 @@ export class CommunicationAgentService {
     });
 
     this.logger.info('Telegram message sent', { chatId: this.config.telegram.defaultChatId });
-  }
-
-  private async sendWhatsApp(to: string, message: string): Promise<void> {
-    const { sendMessage } = await import('@/lib/whatsapp-service');
-    
-    this.logger.info('Sending real WhatsApp message', { to, message: message.substring(0, 50) + '...' });
-    
-    const result = await sendMessage(to, message);
-    
-    if (!result.success) {
-      this.logger.error('Failed to send real WhatsApp message', { error: result.error });
-      throw new Error(`WhatsApp delivery failed: ${result.error}`);
-    }
   }
 
   private async sendToDashboard(

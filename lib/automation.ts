@@ -1,6 +1,6 @@
 import { getSupabaseAdminClient } from "./supabase-admin";
 import { getCurrentTenant } from "./tenant";
-import { notifyDiamondLead, notifyDiamondLeadAsync } from "./whatsapp-dossier";
+import { notifyDiamondLeadAsync } from "./lead-dossier";
 
 export interface AutomationTrigger {
   type: "booking_status_changed" | "lead_created" | "lead_updated";
@@ -13,7 +13,7 @@ export interface AutomationTrigger {
 }
 
 export interface AutomationAction {
-  type: "send_whatsapp" | "update_lead_score" | "update_lead_intent";
+  type: "send_telegram" | "update_lead_score" | "update_lead_intent";
   message?: string;
   phoneNumber?: string;
   score?: number;
@@ -34,16 +34,13 @@ export async function processAutomation(trigger: AutomationTrigger) {
     const tenant = await getCurrentTenant();
     if (!tenant) return;
 
-    // Get active automation rules for this tenant
     const rules = await getAutomationRules(tenant.id, trigger.type);
 
     for (const rule of rules) {
       if (await checkConditions(rule, trigger)) {
-        // Convert tenant to execution format (ensure whatsapp is not null)
         const tenantForExecution = {
           id: tenant.id,
-          whatsapp: tenant.whatsapp ?? "",
-          name: tenant.name
+          name: tenant.name,
         };
         await executeActions(rule.actions, trigger, tenantForExecution);
       }
@@ -54,80 +51,98 @@ export async function processAutomation(trigger: AutomationTrigger) {
 }
 
 async function getDefaultAutomationRules(): Promise<AutomationRule[]> {
-  // Default rules seeded for new tenants
   return [
     {
-      id: "booking_accepted_whatsapp",
-      name: "إشعار قبول الحجز عبر واتساب",
+      id: "booking_accepted_telegram",
+      name: "إشعار قبول الحجز عبر تليجرام",
       trigger: "booking_status_changed",
       conditions: { newStatus: "accepted" },
-      actions: [{
-        type: "send_whatsapp",
-        message: "تم قبول حجزك! سنتواصل معك قريباً لترتيب التفاصيل."
-      }],
-      enabled: true
+      actions: [
+        {
+          type: "send_telegram",
+          message: "تم قبول حجزك! سنتواصل معك قريباً لترتيب التفاصيل.",
+        },
+      ],
+      enabled: true,
     },
     {
-      id: "booking_rejected_whatsapp",
-      name: "إشعار رفض الحجز عبر واتساب",
+      id: "booking_rejected_telegram",
+      name: "إشعار رفض الحجز عبر تليجرام",
       trigger: "booking_status_changed",
       conditions: { newStatus: "rejected" },
-      actions: [{
-        type: "send_whatsapp",
-        message: "نعتذر، لم نتمكن من قبول حجزك حالياً. سنتواصل معك لمناقشة البدائل."
-      }],
-      enabled: true
+      actions: [
+        {
+          type: "send_telegram",
+          message:
+            "نعتذر، لم نتمكن من قبول حجزك حالياً. سنتواصل معك لمناقشة البدائل.",
+        },
+      ],
+      enabled: true,
     },
     {
-      id: "diamond_lead_whatsapp",
+      id: "diamond_lead_telegram",
       name: "إشعار Lead ماسي جديد - أولوية عالية",
       trigger: "lead_created",
       conditions: { isDiamond: true },
-      actions: [{
-        type: "send_whatsapp",
-        message: "🚨 LEAD MASI: New high-value inquiry received! Check dashboard immediately for details."
-      }],
-      enabled: true
+      actions: [
+        {
+          type: "send_telegram",
+          message:
+            "🚨 LEAD MASI: New high-value inquiry received! Check dashboard immediately for details.",
+        },
+      ],
+      enabled: true,
     },
     {
       id: "lead_high_score_intent",
       name: "تحديث نية العميل عالي النتيجة",
       trigger: "lead_updated",
       conditions: { score: { gte: 30 } },
-      actions: [{
-        type: "update_lead_intent",
-        intent: "buyer"
-      }],
-      enabled: true
+      actions: [
+        {
+          type: "update_lead_intent",
+          intent: "buyer",
+        },
+      ],
+      enabled: true,
     },
     {
       id: "lead_medium_score_intent",
       name: "تحديث نية العميل متوسط النتيجة",
       trigger: "lead_updated",
       conditions: { score: { gte: 15, lt: 30 } },
-      actions: [{
-        type: "update_lead_intent",
-        intent: "interested"
-      }],
-      enabled: true
-    }
+      actions: [
+        {
+          type: "update_lead_intent",
+          intent: "interested",
+        },
+      ],
+      enabled: true,
+    },
   ];
 }
 
-async function getAutomationRules(tenantId: string, triggerType: string): Promise<AutomationRule[]> {
+async function getAutomationRules(
+  tenantId: string,
+  triggerType: string
+): Promise<AutomationRule[]> {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("Supabase not initialized");
 
   try {
-    // Try to load rules from database
     const { data: dbRules, error } = await supabase
       .from("automation_rules")
       .select("*");
 
     if (error) {
-      console.warn("Error loading automation rules from DB, falling back to defaults:", error);
+      console.warn(
+        "Error loading automation rules from DB, falling back to defaults:",
+        error
+      );
       const defaults = await getDefaultAutomationRules();
-      return defaults.filter(rule => rule.trigger === triggerType && rule.enabled);
+      return defaults.filter(
+        (rule) => rule.trigger === triggerType && rule.enabled
+      );
     }
 
     const rows = (dbRules ?? []) as Array<{
@@ -140,47 +155,60 @@ async function getAutomationRules(tenantId: string, triggerType: string): Promis
     }>;
 
     if (rows && rows.length > 0) {
-      // Convert database rows to AutomationRule objects
       return rows
-        .filter(row => row.trigger === triggerType && row.enabled)
-        .map(row => ({
+        .filter((row) => row.trigger === triggerType && row.enabled)
+        .map((row) => ({
           id: row.id,
           name: row.name,
           trigger: row.trigger as AutomationTrigger["type"],
           conditions: row.conditions,
           actions: row.actions,
-          enabled: row.enabled
+          enabled: row.enabled,
         }));
     }
 
-    // No database rules found, return defaults
     const defaults = await getDefaultAutomationRules();
-    return defaults.filter(rule => rule.trigger === triggerType && rule.enabled);
+    return defaults.filter(
+      (rule) => rule.trigger === triggerType && rule.enabled
+    );
   } catch (err) {
     console.error("Unexpected error loading automation rules:", err);
     const defaults = await getDefaultAutomationRules();
-    return defaults.filter(rule => rule.trigger === triggerType && rule.enabled);
+    return defaults.filter(
+      (rule) => rule.trigger === triggerType && rule.enabled
+    );
   }
 }
 
-async function checkConditions(rule: AutomationRule, trigger: AutomationTrigger): Promise<boolean> {
+async function checkConditions(
+  rule: AutomationRule,
+  trigger: AutomationTrigger
+): Promise<boolean> {
   for (const [key, condition] of Object.entries(rule.conditions)) {
     const triggerValue = trigger[key as keyof AutomationTrigger];
 
-    if (typeof condition === 'object' && condition !== null && !Array.isArray(condition)) {
-      // Handle range conditions like { gte: 30, lt: 50 }
+    if (
+      typeof condition === "object" &&
+      condition !== null &&
+      !Array.isArray(condition)
+    ) {
       const condObj = condition as Record<string, unknown>;
-      if ('gte' in condObj && typeof triggerValue === 'number' && typeof condObj.gte === 'number') {
+      if (
+        "gte" in condObj &&
+        typeof triggerValue === "number" &&
+        typeof condObj.gte === "number"
+      ) {
         if (triggerValue < condObj.gte) return false;
       }
-      if ('lt' in condObj && typeof triggerValue === 'number' && typeof condObj.lt === 'number') {
+      if (
+        "lt" in condObj &&
+        typeof triggerValue === "number" &&
+        typeof condObj.lt === "number"
+      ) {
         if (triggerValue >= condObj.lt) return false;
       }
     } else {
-      // Simple equality check
-      if (triggerValue !== condition) {
-        return false;
-      }
+      if (triggerValue !== condition) return false;
     }
   }
   return true;
@@ -189,7 +217,7 @@ async function checkConditions(rule: AutomationRule, trigger: AutomationTrigger)
 async function executeActions(
   actions: AutomationAction[],
   trigger: AutomationTrigger,
-  tenant: { id: string; whatsapp: string; name: string }
+  tenant: { id: string; name: string }
 ) {
   for (const action of actions) {
     try {
@@ -203,11 +231,11 @@ async function executeActions(
 async function executeAction(
   action: AutomationAction,
   trigger: AutomationTrigger,
-  tenant: { id: string; whatsapp: string; name: string }
+  tenant: { id: string; name: string }
 ) {
   switch (action.type) {
-    case "send_whatsapp":
-      await sendWhatsAppMessage(action, trigger, tenant);
+    case "send_telegram":
+      await sendTelegramNotification(action, trigger, tenant);
       break;
     case "update_lead_score":
       if (action.score !== undefined && trigger.leadId) {
@@ -220,25 +248,24 @@ async function executeAction(
       }
       break;
     default:
-      console.warn(`Unknown action type: ${action.type}`);
+      console.warn(`Unknown action type: ${(action as AutomationAction).type}`);
   }
 }
 
-async function sendWhatsAppMessage(
+async function sendTelegramNotification(
   action: AutomationAction,
   trigger: AutomationTrigger,
-  tenant: { id: string; whatsapp: string; name: string }
+  tenant: { id: string; name: string }
 ) {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
-  const message = action.message;
-  let userId: string | null = null;
-  let phoneNumber: string | null = null;
-  let metadata: Record<string, unknown> = {};
+  if (!supabase) throw new Error("Supabase not initialized");
 
-  // Handle lead_created trigger
+  const message = action.message;
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  // Diamond leads: send full dossier via Telegram (non-blocking)
   if (trigger.type === "lead_created" && trigger.leadId) {
-    // Get lead details from users table
     const { data: user } = await supabase
       .from("users")
       .select("id, phone, full_name, score, tier")
@@ -246,37 +273,40 @@ async function sendWhatsAppMessage(
       .eq("company_id", tenant.id)
       .single();
 
-    if (!user?.phone) {
-      console.log("[Automation] No phone number for lead:", trigger.leadId);
+    if (!user) {
+      console.log("[Automation] Lead not found:", trigger.leadId);
       return;
     }
 
-    userId = user.id;
-    phoneNumber = user.phone;
-    metadata = {
-      leadId: trigger.leadId,
-      leadName: user.full_name,
-      leadScore: user.score,
-      leadTier: user.tier,
-      isDiamond: trigger.leadData?.isDiamond,
-      scope: trigger.leadData?.scope,
-      budget: trigger.leadData?.budget,
-    };
-
-    // Send to admin WhatsApp number for Diamond leads
-    if (tenant.whatsapp && trigger.leadData?.isDiamond) {
-      console.log(`[Automation] 🚨 DIAMOND LEAD ALERT to Admin ${tenant.whatsapp}: ${message}`);
-      console.log(`[Automation] Lead Details: ${user.full_name} | Score: ${user.score} | Scope: ${trigger.leadData?.scope}`);
-
-      // Trigger full WhatsApp dossier for Diamond leads - ASYNC (non-blocking)
-      console.log(`[Automation] Triggering notifyDiamondLeadAsync for lead ${trigger.leadId}`);
-      notifyDiamondLeadAsync(trigger.leadId, tenant.id, tenant.whatsapp);
-      console.log(`[Automation] ✅ WhatsApp dossier queued for background processing`);
+    if (trigger.leadData?.isDiamond) {
+      console.log(
+        `[Automation] 🚨 DIAMOND LEAD — triggering Telegram dossier for ${user.full_name}`
+      );
+      notifyDiamondLeadAsync(trigger.leadId, tenant.id);
+      console.log(`[Automation] ✅ Telegram dossier queued for background processing`);
     }
+
+    // Log event for audit trail
+    await supabase.from("events").insert({
+      company_id: tenant.id,
+      user_id: user.id,
+      type: "automation_telegram_sent",
+      value: "notification",
+      metadata: {
+        message,
+        trigger: trigger.type,
+        leadId: trigger.leadId,
+        leadName: user.full_name,
+        leadScore: user.score,
+        isDiamond: trigger.leadData?.isDiamond,
+      },
+    });
+
+    return;
   }
-  // Handle booking_status_changed trigger
-  else if (trigger.bookingId) {
-    // Get booking request details
+
+  // Booking status changes: send short Telegram alert to admin
+  if (trigger.bookingId) {
     const { data: request } = await supabase
       .from("requests")
       .select("user_id")
@@ -286,7 +316,6 @@ async function sendWhatsAppMessage(
 
     if (!request) return;
 
-    // Get user session data and events for phone number
     const { data: events } = await supabase
       .from("events")
       .select("metadata")
@@ -295,46 +324,55 @@ async function sendWhatsAppMessage(
       .eq("metadata->>requestId", trigger.bookingId);
 
     const event = events?.[0];
-    if (!event?.metadata?.phone) return;
+    const clientPhone = event?.metadata?.phone as string | undefined;
 
-    userId = request.user_id;
-    phoneNumber = event.metadata.phone;
-    metadata = {
-      bookingId: trigger.bookingId,
-      oldStatus: trigger.oldStatus,
-      newStatus: trigger.newStatus,
-    };
-  }
+    const alertText = [
+      `📋 <b>تحديث حجز</b>`,
+      `<b>الحالة:</b> ${trigger.newStatus === "accepted" ? "✅ مقبول" : "❌ مرفوض"}`,
+      clientPhone ? `<b>تليفون العميل:</b> ${clientPhone}` : "",
+      `<b>رقم الحجز:</b> ${trigger.bookingId}`,
+      message ? `<b>الرسالة:</b> ${message}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
 
-  if (!phoneNumber || !userId) {
-    console.log("[Automation] Missing phone or user ID, skipping WhatsApp");
-    return;
-  }
+    if (token && chatId) {
+      await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: alertText,
+          parse_mode: "HTML",
+        }),
+      }).catch((err) =>
+        console.error("[Automation] Telegram booking alert failed:", err)
+      );
+    }
 
-  // Log the automation action
-  // Note: In production, integrate with WhatsApp Business API to send actual messages
-  // This logs the message intent for audit trail and admin monitoring
-  console.log(`[Automation] Sending WhatsApp to ${phoneNumber}: ${message}`);
-
-  await supabase
-    .from("events")
-    .insert({
+    await supabase.from("events").insert({
       company_id: tenant.id,
-      user_id: userId,
-      type: "automation_whatsapp_sent",
+      user_id: request.user_id,
+      type: "automation_telegram_sent",
       value: "notification",
       metadata: {
-        message: message,
-        phoneNumber: phoneNumber,
+        message,
         trigger: trigger.type,
-        ...metadata,
-      }
+        bookingId: trigger.bookingId,
+        oldStatus: trigger.oldStatus,
+        newStatus: trigger.newStatus,
+      },
     });
+  }
 }
 
-async function updateLeadScore(leadId: string, score: number, tenantId: string) {
+async function updateLeadScore(
+  leadId: string,
+  score: number,
+  tenantId: string
+) {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("Supabase not initialized");
 
   const { error } = await supabase
     .from("users")
@@ -349,9 +387,13 @@ async function updateLeadScore(leadId: string, score: number, tenantId: string) 
   }
 }
 
-async function updateLeadIntent(leadId: string, intent: string, tenantId: string) {
+async function updateLeadIntent(
+  leadId: string,
+  intent: string,
+  tenantId: string
+) {
   const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error('Supabase not initialized');
+  if (!supabase) throw new Error("Supabase not initialized");
 
   const { error } = await supabase
     .from("users")

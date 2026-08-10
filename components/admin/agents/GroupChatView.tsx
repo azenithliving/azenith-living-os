@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, Users, AtSign } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Send, Bot, User, Users, AtSign, Loader2 } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -20,141 +20,242 @@ interface GroupChatViewProps {
   onClose?: () => void;
 }
 
-export function GroupChatView({ 
-  conversationId = 'group-chat', 
+const AGENT_PERSONAS: Record<string, { name: string; role: string; color: string }> = {
+  PRIME: {
+    name: 'PRIME',
+    role: 'كبير مهندسي التصميم والتطوير',
+    color: 'purple',
+  },
+  Vanguard: {
+    name: 'Vanguard',
+    role: 'مدير العمليات والمبيعات',
+    color: 'emerald',
+  },
+};
+
+export function GroupChatView({
+  conversationId = 'group-chat',
   participants = ['PRIME', 'Vanguard', 'You'],
-  onClose 
+  onClose,
 }: GroupChatViewProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       sender_type: 'system',
       sender_name: 'System',
-      content: `👋 مرحباً! تم بدء محادثة جماعية بين: ${participants.join(', ')}`,
-      timestamp: new Date().toISOString()
-    }
+      content: `👋 مرحباً! تم بدء محادثة جماعية بين: ${participants.filter((p) => p !== 'You').join(', ')} — يمكنك مخاطبة أي وكيل باستخدام @`,
+      timestamp: new Date().toISOString(),
+    },
   ]);
   const [inputMessage, setInputMessage] = useState('');
-  const [activeParticipants, setActiveParticipants] = useState<string[]>(['PRIME', 'Vanguard']);
+  const [activeParticipants, setActiveParticipants] = useState<string[]>(
+    participants.filter((p) => p !== 'You')
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Auto-scroll to bottom
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Simulate agent responses
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (activeParticipants.includes('PRIME') && messages.length > 1) {
-        addMessage({
-          sender_type: 'agent',
-          sender_name: 'PRIME',
-          content: 'أنا جاهز للمساعدة في أي مهمة تصميم أو تقنية! 👨‍💻',
-          mentions: []
-        });
-      }
-    }, 3000);
-
-    return () => clearTimeout(timer);
   }, []);
 
-  function addMessage(message: Partial<Message>) {
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
+
+  const addMessage = useCallback((message: Partial<Message>) => {
     const newMessage: Message = {
-      id: `msg-${Date.now()}`,
-      sender_type: 'agent',
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      sender_type: 'user',
       sender_name: 'Unknown',
       content: '',
       timestamp: new Date().toISOString(),
-      ...message
+      ...message,
     };
-    setMessages(prev => [...prev, newMessage]);
-  }
+    setMessages((prev) => [...prev, newMessage]);
+    return newMessage.id;
+  }, []);
 
-  function handleSendMessage() {
-    if (!inputMessage.trim()) return;
+  const updateMessage = useCallback((id: string, updates: Partial<Message>) => {
+    setMessages((prev) =>
+      prev.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg))
+    );
+  }, []);
 
-    // Add user message
+  const callAgentAPI = useCallback(
+    async (agentKey: string, userMessage: string, mention: string) => {
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      try {
+        const res = await fetch('/api/admin/agents/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            agent_key: agentKey.toLowerCase(),
+            content: userMessage,
+            sender_type: 'user',
+            mentions: [mention],
+          }),
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          throw new Error(`API error: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        if (data.success && data.agentReply?.content) {
+          return data.agentReply.content;
+        }
+
+        if (data.success && data.data?.content) {
+          return data.data.content;
+        }
+
+        return generateFallbackResponse(agentKey, userMessage);
+      } catch (err: any) {
+        if (err.name === 'AbortError') {
+          return null;
+        }
+        console.error(`[GroupChat] Agent ${agentKey} error:`, err);
+        return generateFallbackResponse(agentKey, userMessage);
+      }
+    },
+    []
+  );
+
+  const generateFallbackResponse = (agentKey: string, userMessage: string): string => {
+    const persona = AGENT_PERSONAS[agentKey];
+    if (!persona) return 'عذراً، لم أتمكن من فهم طلبك.';
+
+    const lowerMsg = userMessage.toLowerCase();
+
+    if (lowerMsg.includes('تصميم') || lowerMsg.includes('لون') || lowerMsg.includes('ديكور')) {
+      return agentKey === 'PRIME'
+        ? `🎨 بصفتي ${persona.role}، أقترح عليك استخدام ألوان دافئة مع لمسات ذهبية. هل تريد أن أُنشئ لك لوحة ألوان مخصصة؟`
+        : `📋 سأُجهز مواصفات التصميم وأرسلها لفريق الإنتاج. ما هي المدة المطلوبة؟`;
+    }
+
+    if (lowerMsg.includes('سعر') || lowerMsg.includes('تكلفة') || lowerMsg.includes('ميزانية')) {
+      return agentKey === 'PRIME'
+        ? `💰 التكلفة تعتمد على المواد والتصميم. سأُجهز تقدير أولي خلال دقائق.`
+        : `📊 سأُراجع العروض السابقة وأُجهز لك عرض سعر تنافسي.`;
+    }
+
+    if (lowerMsg.includes('مشكلة') || lowerMsg.includes('خطأ') || lowerMsg.includes('عطل')) {
+      return `⚠️ سأفحص المشكلة فوراً. هل يمكنك وصف المشكلة بالتفصيل حتى أجد الحل المناسب؟`;
+    }
+
+    if (lowerMsg.includes('مساعدة') || lowerMsg.includes('help')) {
+      return `👋 بالطبع! كيف يمكنني مساعدتك؟ يمكنني المساعدة في التصميم، الأسعار، متابعة الطلبات، أو أي استفسار آخر.`;
+    }
+
+    return `✅ تم استلام رسالتك! سأقوم بمراجعة طلبك والرد عليك فوراً. هل هناك أي تفاصيل إضافية؟`;
+  };
+
+  const handleSendMessage = useCallback(async () => {
+    if (!inputMessage.trim() || isLoading) return;
+
+    const userMsg = inputMessage.trim();
+    setInputMessage('');
+    setError(null);
+
     addMessage({
       sender_type: 'user',
       sender_name: 'You',
-      content: inputMessage
+      content: userMsg,
     });
 
-    // Parse mentions
-    const mentions = inputMessage.match(/@\w+/g) || [];
-    const mentionedAgents = mentions.map(m => m.substring(1));
+    const mentions = userMsg.match(/@\w+/g) || [];
+    const mentionedAgents = mentions.map((m) => m.substring(1));
+    const agentsToRespond =
+      mentionedAgents.length > 0
+        ? mentionedAgents.filter((a) => activeParticipants.includes(a))
+        : activeParticipants;
 
-    // Simulate agent responses after delay
-    setTimeout(() => {
-      if (mentionedAgents.includes('PRIME') || mentionedAgents.length === 0) {
-        addMessage({
-          sender_type: 'agent',
-          sender_name: 'PRIME',
-          content: '⏳ جاري معالجة طلبك...',
-          isTyping: true
-        });
-      }
-      if (mentionedAgents.includes('Vanguard')) {
-        addMessage({
-          sender_type: 'agent',
-          sender_name: 'Vanguard',
-          content: '⏳ أحضر المعلومات المطلوبة...',
-          isTyping: true
-        });
-      }
-    }, 500);
+    if (agentsToRespond.length === 0) {
+      addMessage({
+        sender_type: 'system',
+        sender_name: 'System',
+        content: '⚠️ لا يوجد وكلاء نشطون حالياً. يرجى تفعيل وكيل واحد على الأقل.',
+      });
+      return;
+    }
 
-    setInputMessage('');
-  }
+    setIsLoading(true);
+
+    for (const agentName of agentsToRespond) {
+      const typingId = addMessage({
+        sender_type: 'agent',
+        sender_name: agentName,
+        content: '...',
+        isTyping: true,
+      });
+
+      const response = await callAgentAPI(agentName, userMsg, `@${agentName}`);
+
+      if (response) {
+        updateMessage(typingId, {
+          content: response,
+          isTyping: false,
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        setMessages((prev) => prev.filter((m) => m.id !== typingId));
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+
+    setIsLoading(false);
+  }, [inputMessage, isLoading, activeParticipants, addMessage, updateMessage, callAgentAPI]);
 
   function toggleParticipant(name: string) {
-    if (name === 'You') return; // Can't remove yourself
-    setActiveParticipants(prev => 
-      prev.includes(name) 
-        ? prev.filter(p => p !== name)
-        : [...prev, name]
+    if (name === 'You') return;
+    setActiveParticipants((prev) =>
+      prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow flex flex-col h-[500px]">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+    <div className="bg-[#111] rounded-2xl shadow-2xl flex flex-col h-[500px] border border-white/10">
+      <div className="p-4 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-            <Users className="w-5 h-5 text-blue-600" />
+          <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
+            <Users className="w-5 h-5 text-blue-400" />
           </div>
           <div>
-            <h3 className="font-semibold">المحادثة الجماعية</h3>
-            <p className="text-sm text-gray-500">
+            <h3 className="font-bold text-white">المحادثة الجماعية</h3>
+            <p className="text-sm text-white/40">
               {activeParticipants.join(' + ')} + أنت
             </p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600"
+          className="text-white/40 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-lg"
         >
           ✕
         </button>
       </div>
 
-      {/* Participants Toggle */}
-      <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
-        <span className="text-xs text-gray-500">المشاركين:</span>
-        {['PRIME', 'Vanguard', 'You'].map(participant => (
+      <div className="px-4 py-2 bg-white/5 border-b border-white/10 flex items-center gap-2">
+        <span className="text-xs text-white/40">المشاركين:</span>
+        {participants.map((participant) => (
           <button
             key={participant}
             onClick={() => toggleParticipant(participant)}
             className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-              participant === 'You' || activeParticipants.includes(participant)
-                ? participant === 'PRIME' 
-                  ? 'bg-purple-100 text-purple-800'
-                  : participant === 'Vanguard'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-blue-100 text-blue-800'
-                : 'bg-gray-200 text-gray-500 line-through'
+              participant === 'You'
+                ? 'bg-blue-500/20 text-blue-300'
+                : activeParticipants.includes(participant)
+                ? participant === 'PRIME'
+                  ? 'bg-purple-500/20 text-purple-300'
+                  : 'bg-emerald-500/20 text-emerald-300'
+                : 'bg-white/5 text-white/30 line-through'
             }`}
           >
             {participant === 'PRIME' && '🧠 '}
@@ -164,48 +265,58 @@ export function GroupChatView({
         ))}
       </div>
 
-      {/* Messages */}
+      {error && (
+        <div className="mx-4 mt-2 p-2 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-xs text-center">
+          {error}
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map((message) => (
           <MessageBubble key={message.id} message={message} />
         ))}
+        {isLoading && (
+          <div className="flex items-center gap-2 text-white/30 text-xs px-2">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>الوكلاء يفكرون...</span>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
               placeholder="اكتب رسالة... استخدم @PRIME أو @Vanguard"
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 transition-colors"
+              disabled={isLoading}
             />
-            <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
           </div>
           <button
             onClick={handleSendMessage}
-            disabled={!inputMessage.trim()}
-            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!inputMessage.trim() || isLoading}
+            className="p-3 bg-purple-600 text-white rounded-xl hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           >
-            <Send className="w-5 h-5" />
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
           </button>
         </div>
-        
-        {/* Quick Mentions */}
+
         <div className="flex gap-2 mt-2">
           <button
-            onClick={() => setInputMessage(prev => prev + '@PRIME ')}
-            className="text-xs px-2 py-1 bg-purple-50 text-purple-700 rounded hover:bg-purple-100"
+            onClick={() => setInputMessage((prev) => prev + '@PRIME ')}
+            className="text-xs px-2 py-1 bg-purple-500/10 text-purple-300 rounded hover:bg-purple-500/20 transition-colors"
           >
             @PRIME
           </button>
           <button
-            onClick={() => setInputMessage(prev => prev + '@Vanguard ')}
-            className="text-xs px-2 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100"
+            onClick={() => setInputMessage((prev) => prev + '@Vanguard ')}
+            className="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-300 rounded hover:bg-emerald-500/20 transition-colors"
           >
             @Vanguard
           </button>
@@ -223,7 +334,7 @@ function MessageBubble({ message }: { message: Message }) {
   if (isSystem) {
     return (
       <div className="text-center">
-        <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+        <span className="text-xs text-white/40 bg-white/5 px-3 py-1 rounded-full">
           {message.content}
         </span>
       </div>
@@ -232,40 +343,44 @@ function MessageBubble({ message }: { message: Message }) {
 
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-        isUser 
-          ? 'bg-blue-500 text-white'
-          : isPRIME
-            ? 'bg-purple-100 text-purple-600'
-            : 'bg-green-100 text-green-600'
-      }`}>
-        {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-      </div>
-      <div className={`max-w-[70%] ${isUser ? 'text-left' : 'text-right'}`}>
-        <div className={`text-xs mb-1 ${isUser ? 'text-blue-600' : 'text-gray-500'}`}>
-          {message.sender_name}
-        </div>
-        <div className={`rounded-lg px-3 py-2 ${
+      <div
+        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
           isUser
             ? 'bg-blue-500 text-white'
             : isPRIME
-              ? 'bg-purple-50 text-gray-800 border border-purple-100'
-              : 'bg-green-50 text-gray-800 border border-green-100'
-        }`}>
+            ? 'bg-purple-500/20 text-purple-400'
+            : 'bg-emerald-500/20 text-emerald-400'
+        }`}
+      >
+        {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+      </div>
+      <div className={`max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
+        <div className={`text-xs mb-1 ${isUser ? 'text-blue-400' : isPRIME ? 'text-purple-400' : 'text-emerald-400'}`}>
+          {message.sender_name}
+        </div>
+        <div
+          className={`rounded-2xl px-4 py-2.5 ${
+            isUser
+              ? 'bg-blue-600 text-white rounded-tr-md'
+              : isPRIME
+              ? 'bg-purple-500/10 text-purple-100 border border-purple-500/20 rounded-tl-md'
+              : 'bg-emerald-500/10 text-emerald-100 border border-emerald-500/20 rounded-tl-md'
+          }`}
+        >
           {message.isTyping ? (
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
-              <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-100" />
-              <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-200" />
+            <div className="flex items-center gap-1.5 py-1">
+              <div className="w-2 h-2 bg-white/40 rounded-full animate-bounce" />
+              <div className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+              <div className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
             </div>
           ) : (
-            <p className="text-sm">{message.content}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
           )}
         </div>
-        <div className="text-xs text-gray-400 mt-1">
-          {new Date(message.timestamp).toLocaleTimeString('ar-EG', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        <div className="text-[10px] text-white/20 mt-1">
+          {new Date(message.timestamp).toLocaleTimeString('ar-EG', {
+            hour: '2-digit',
+            minute: '2-digit',
           })}
         </div>
       </div>

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TOOL_REGISTRY } from "@/lib/agent-tools/tool-registry";
 import { isSelfExecutionEnabled, isVercelProduction } from "@/lib/admin-cloud-evolution";
-import { resolveAdminWhatsAppPhone } from "@/lib/admin-whatsapp-resolver";
 import { heuristicClassify } from "@/lib/admin-intent-classifier";
 import { isDbFixable } from "@/lib/seo-auto-fixer";
 
@@ -28,14 +27,6 @@ describe("full capabilities (no intentional gaps)", () => {
   it("seo auto-fixer covers db-fixable issues", () => {
     expect(isDbFixable("missing_title")).toBe(true);
     expect(isDbFixable("images_missing_alt")).toBe(true);
-  });
-
-  it("whatsapp resolver finds a phone without WHATSAPP_ADMIN_PHONE", async () => {
-    const prev = process.env.WHATSAPP_ADMIN_PHONE;
-    delete process.env.WHATSAPP_ADMIN_PHONE;
-    const r = await resolveAdminWhatsAppPhone();
-    if (prev) process.env.WHATSAPP_ADMIN_PHONE = prev;
-    expect(typeof r.source).toBe("string");
   });
 
   it("cloud evolution path exists for production", () => {

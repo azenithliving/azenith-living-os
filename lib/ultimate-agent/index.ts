@@ -110,7 +110,6 @@ export {
   writeSafeFile,
   listSafeFiles,
   callInternalAPI,
-  sendWhatsAppMessage,
   sendTelegramNotification,
   sendEmail,
   updateEnvironmentVariable,
