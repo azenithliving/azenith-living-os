@@ -37,6 +37,14 @@ vi.mock("@/lib/supabase-admin", () => ({
   }),
 }));
 
+// ── Admin API guard mock (unit tests run outside a real session) ──────────
+vi.mock("@/lib/admin-api-guard", () => ({
+  requireAdminApi: vi.fn().mockResolvedValue({
+    user: { id: "test-admin", email: "admin@test.local" },
+    unauthorized: null,
+  }),
+}));
+
 // ── AI orchestrator mock ───────────────────────────────────────────────────
 vi.mock("@/lib/ai-orchestrator", () => ({
   askGroq: vi.fn().mockResolvedValue({ success: true, content: '["Arabic Q1", "English Q1", "Q3"]' }),

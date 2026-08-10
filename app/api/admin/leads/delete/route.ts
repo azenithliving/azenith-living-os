@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const { sessionIds } = await request.json();
 
     if (!sessionIds || !Array.isArray(sessionIds) || sessionIds.length === 0) {

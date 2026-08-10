@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const { sessionId, message } = await request.json();
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
 
-    if (!sessionId || !message) {
+    const { sessionId, message } = await request.json();
+    const cleanMessage = typeof message === "string" ? message.trim() : "";
+
+    if (!sessionId || !cleanMessage) {
       return NextResponse.json({ error: "Missing sessionId or message" }, { status: 400 });
     }
 
@@ -14,7 +19,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
 
-    // 1. Fetch current session to update history
     const { data: session, error: sessionErr } = await supabase
       .from("consultant_sessions")
       .select("messages")
@@ -28,21 +32,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const updatedMessages = [
       ...(session.messages || []),
-      { role: "assistant", content: `👨‍💼 [تدخل الإدارة]: ${message}`, timestamp: new Date().toISOString() }
+      {
+        role: "assistant",
+        content: cleanMessage,
+        source: "admin",
+        timestamp: new Date().toISOString(),
+      },
     ];
 
-    // 2. Update session messages
-    await supabase
+    const { error: updateErr } = await supabase
       .from("consultant_sessions")
       .update({ messages: updatedMessages, updated_at: new Date().toISOString() })
       .eq("session_id", sessionId);
 
-    // 3. Add to pending questions as answered so the widget picks it up immediately via polling
+    if (updateErr) {
+      console.error("[AdminReply] Error updating session:", updateErr);
+      return NextResponse.json({ error: "Failed to update session" }, { status: 500 });
+    }
+
     await supabase.from("consultant_pending_questions").insert({
       session_id: sessionId,
       question: "DIRECT_MESSAGE",
       status: "answered",
-      answered_reply: message
+      answered_reply: cleanMessage,
     });
 
     return NextResponse.json({ success: true });

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   console.log("[Fate API] Starting fate trigger request...");
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const body = await request.json();
     const { sessionId, action, payload } = body;
 

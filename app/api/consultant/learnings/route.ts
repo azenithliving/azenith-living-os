@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
 const IN_MEMORY_LEARNINGS = new Map<string, { id: string; instruction: string; created_at: string }>();
 
@@ -44,6 +45,9 @@ export async function GET(): Promise<NextResponse> {
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const body = await request.json();
     const { instruction } = body;
 
@@ -128,11 +132,77 @@ Return JSON array of strings only. Format: ["question 1", "question 2", ...]`;
 }
 
 /**
+ * PATCH /api/consultant/learnings?id=xxx
+ * Update a learning by ID
+ */
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const { instruction } = await request.json();
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Missing id parameter" },
+        { status: 400 }
+      );
+    }
+
+    if (!instruction || typeof instruction !== "string" || !instruction.trim()) {
+      return NextResponse.json(
+        { error: "Missing required field: instruction" },
+        { status: 400 }
+      );
+    }
+
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      const existing = IN_MEMORY_LEARNINGS.get(id);
+      if (!existing) {
+        return NextResponse.json({ error: "Learning not found" }, { status: 404 });
+      }
+      const updated = { ...existing, instruction: instruction.trim() };
+      IN_MEMORY_LEARNINGS.set(id, updated);
+      return NextResponse.json({ success: true, learning: updated });
+    }
+
+    const { data, error } = await supabase
+      .from("consultant_learnings")
+      .update({ instruction: instruction.trim() })
+      .eq("id", id)
+      .select("id, instruction, created_at")
+      .single();
+
+    if (error) {
+      console.error("[ConsultantLearnings] Error updating:", error);
+      return NextResponse.json(
+        { error: "Failed to update learning" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true, learning: data });
+  } catch (error) {
+    console.error("[ConsultantLearnings] Error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * DELETE /api/consultant/learnings?id=xxx
  * Delete a learning by ID
  */
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 

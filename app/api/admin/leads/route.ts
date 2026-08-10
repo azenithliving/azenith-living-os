@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(_request: NextRequest): Promise<NextResponse> {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const supabase = getSupabaseAdminClient();
     if (!supabase) {
       return NextResponse.json({ error: "Database not initialized" }, { status: 500 });
