@@ -332,7 +332,7 @@ async function fetchRoomPhotos(query: string, style: string, roomId: string) {
   const styleHint = STYLE_QUERY_HINTS[style] || style;
   const fullQuery = `${styleHint} luxury interior design ${query}`;
   const deterministicPage = getDeterministicSeed(roomId, style);
-  const url = `${protocol}://${host}/api/pexels?query=${encodeURIComponent(fullQuery)}&per_page=50&page=${deterministicPage}`;
+  const url = `${protocol}://${host}/api/pexels?query=${encodeURIComponent(fullQuery)}&per_page=50&page=${deterministicPage}&room=${encodeURIComponent(roomId)}&style=${encodeURIComponent(style)}`;
 
   try {
     const response = await fetch(url, {
