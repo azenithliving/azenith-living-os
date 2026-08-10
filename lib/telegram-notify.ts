@@ -139,10 +139,3 @@ export async function testTelegramConfig(): Promise<boolean> {
     return false;
   }
 }
-    
-    return false;
-  } catch (error) {
-    console.error("Telegram test failed:", error);
-    return false;
-  }
-}

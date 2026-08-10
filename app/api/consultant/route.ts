@@ -794,10 +794,6 @@ export async function POST(
               `<a href="${catalogUrl}">🎨 رابط الكتالوج المخصص</a>`;
             await sendTelegramMessage(msg, { silent: false });
             console.log(`[SAA-Telegram] Client notification sent for session ${sessionId}`);
-
-              await sendTelegramMessage(msg, { silent: false });
-              console.log(`[SAA-Telegram] Client notification sent for session ${sessionId}`);
-            }
           } catch (tgErr) {
             console.error("[SAA-Telegram] Notification failed:", tgErr);
           }

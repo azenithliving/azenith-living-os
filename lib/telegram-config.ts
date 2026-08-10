@@ -35,7 +35,7 @@ async function loadFromDB(): Promise<ActiveTelegramConfig | null> {
       .from("site_settings")
       .select("value")
       .eq("key", "telegram_config")
-      .maybeSingle() as Promise<{ data: { value: unknown } | null; error: unknown }>);
+      .maybeSingle() as unknown as Promise<{ data: { value: unknown } | null; error: unknown }>);
 
     if (!data?.value) return null;
 
