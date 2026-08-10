@@ -358,7 +358,7 @@ Context: ${context}
 Provide a concise root cause analysis in 1-2 sentences. Focus on actionable insights.`;
 
   const result = await askGoogle(prompt, {
-    model: "gemini-2.0-flash",
+    model: "gemini-3-flash-preview",
     temperature: 0.2,
     maxTokens: 200,
   });

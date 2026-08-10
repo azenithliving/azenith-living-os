@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         `${systemPrompt}\n\nطلب المستخدم: "${command}"\n\nأعد JSON فقط بدون أي شرح إضافي:`,
         undefined,
         {
-          model: "anthropic/claude-3.5-sonnet",
+          model: "anthropic/claude-opus-5",
           temperature: 0.3, // Lower temperature for more deterministic function calling
           maxTokens: 1024
         }

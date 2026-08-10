@@ -23,10 +23,10 @@ export {
 // Model Configuration
 const CONFIG = {
   GROQ_MODEL: "llama-3.3-70b-versatile",
-  OPENROUTER_VISION_MODEL: "anthropic/claude-3.5-sonnet",
+  OPENROUTER_VISION_MODEL: "anthropic/claude-opus-5",
   MISTRAL_CODE_MODEL: "codestral-latest",
   MISTRAL_GENERAL_MODEL: "mistral-large-latest",
-  DEEPSEEK_MODEL: "deepseek-chat",
+  DEEPSEEK_MODEL: "deepseek-v4-flash",
   MAX_RETRIES: 3,
   RETRY_DELAY_MS: 500,
 };

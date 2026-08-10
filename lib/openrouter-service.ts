@@ -42,48 +42,48 @@ export interface ModelResponse {
 // قائمة النماذج المجانية المتاحة على OpenRouter
 const FREE_MODELS: Record<string, string[]> = {
   coding: [
-    "mistralai/codestral-2501",
-    "deepseek/deepseek-coder-v2",
-    "nousresearch/hermes-3-llama-3.1-405b",
+    "moonshotai/kimi-k2.6",
+    "qwen/qwen3.6-27b",
+    "deepseek/deepseek-v4-flash",
   ],
   translation: [
-    "google/gemma-2-9b-it",
-    "mistralai/mistral-7b-instruct-v0.3",
-    "meta-llama/llama-3.1-8b-instruct",
+    "openai/gpt-4o-mini",
+    "nousresearch/hermes-3-llama-3.1-405b",
+    "qwen/qwen-2.5-72b-instruct",
   ],
   vision: [
     "openai/gpt-4o-mini",
-    "google/gemini-flash-1.5",
-    "meta-llama/llama-3.2-90b-vision-instruct",
+    "anthropic/claude-opus-5",
+    "google/gemini-2.5-flash",
   ],
   creative: [
-    "anthropic/claude-3.5-haiku",
+    "anthropic/claude-opus-5",
     "qwen/qwen-2.5-72b-instruct",
-    "microsoft/wizardlm-2-7b",
+    "openai/gpt-4o-mini",
   ],
   analysis: [
-    "perplexity/llama-3.1-sonar-small-128k-online",
     "openai/gpt-4o-mini",
-    "anthropic/claude-3.5-haiku",
+    "qwen/qwen-2.5-72b-instruct",
+    "anthropic/claude-opus-5",
   ],
   general: [
+    "openai/gpt-4o-mini",
     "meta-llama/llama-3.1-8b-instruct",
-    "mistralai/mistral-7b-instruct-v0.3",
-    "google/gemma-2-9b-it",
+    "qwen/qwen-2.5-72b-instruct",
   ],
 };
 
 // الأولويات للنماذج
 const MODEL_PRIORITIES: Record<string, string> = {
-  coding: "google/gemini-2.0-flash-exp:free",
-  translation: "google/gemma-2-9b-it",
-  vision: "google/gemini-flash-1.5",
-  creative: "anthropic/claude-3.5-haiku",
+  coding: "moonshotai/kimi-k2.6",
+  translation: "openai/gpt-4o-mini",
+  vision: "anthropic/claude-opus-5",
+  creative: "anthropic/claude-opus-5",
   analysis: "openai/gpt-4o-mini",
-  general: "meta-llama/llama-3.1-8b-instruct",
-  planning: "meta-llama/llama-3.3-70b-instruct:free",
-  security: "meta-llama/llama-3.3-70b-instruct:free",
-  reasoning: "meta-llama/llama-3.3-70b-instruct:free",
+  general: "openai/gpt-4o-mini",
+  planning: "moonshotai/kimi-k2.6",
+  security: "qwen/qwen3.6-27b",
+  reasoning: "deepseek/deepseek-v4-flash",
 };
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1";
@@ -125,7 +125,7 @@ export async function routeRequest(
             "Authorization": `Bearer ${key}`,
           },
           body: JSON.stringify({
-            model: "deepseek-chat",
+            model: "deepseek-v4-flash",
             messages: [
               ...(request.systemPrompt ? [{ role: "system", content: request.systemPrompt }] : []),
               { role: "user", content: request.prompt },
@@ -141,7 +141,7 @@ export async function routeRequest(
           return {
             success: true,
             content: data.choices[0]?.message?.content || "",
-            model: "deepseek-chat",
+            model: "deepseek-v4-flash",
             usage: data.usage,
           };
         }
@@ -241,11 +241,11 @@ export async function routeRequest(
     // 2. Comprehensive fallback list
     const reliableFallbacks = [
       "moonshotai/kimi-k2.6",
-      "minimax/minimax-m2.5:free",
-      "google/gemma-4-26b-a4b-it:free",
-      "arcee-ai/trinity-large-preview:free",
-      "nvidia/nemotron-3-super-120b-a12b:free",
-      "google/lyria-3-pro-preview",
+      "openai/gpt-4o-mini",
+      "google/gemini-2.5-flash",
+      "qwen/qwen-2.5-72b-instruct",
+      "deepseek/deepseek-v4-flash",
+      "openrouter/auto",
       "openrouter/free"
     ];
 
@@ -294,7 +294,7 @@ export async function routeRequest(
 
   // 4. LAST DITCH: Zero-Auth Attempt (Sometimes works for free models when keys are flagged)
   try {
-    const lastDitchModels = ["google/gemini-2.0-flash-exp:free", "meta-llama/llama-3.1-8b-instruct:free"];
+    const lastDitchModels = ["openai/gpt-4o-mini", "meta-llama/llama-3.1-8b-instruct"];
     for (const modelId of lastDitchModels) {
       const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
         method: "POST",
@@ -370,40 +370,40 @@ function detectTaskType(prompt: string): string {
 function getFallbackModels(): OpenRouterModel[] {
   return [
     {
-      id: "meta-llama/llama-3.1-8b-instruct",
-      name: "Llama 3.1 8B",
+      id: "openai/gpt-4o-mini",
+      name: "GPT-4o mini",
       description: "General purpose model",
       context_length: 128000,
       pricing: { prompt: 0, completion: 0 },
-      top_provider: "Meta",
+      top_provider: "OpenAI",
     },
     {
-      id: "mistralai/mistral-7b-instruct-v0.3",
-      name: "Mistral 7B",
+      id: "qwen/qwen-2.5-72b-instruct",
+      name: "Qwen 2.5 72B",
       description: "Fast and efficient",
-      context_length: 32768,
+      context_length: 131072,
       pricing: { prompt: 0, completion: 0 },
-      top_provider: "Mistral",
+      top_provider: "Qwen",
     },
     {
-      id: "deepseek/deepseek-coder-v2",
-      name: "DeepSeek Coder V2",
+      id: "deepseek/deepseek-v4-flash",
+      name: "DeepSeek V4 Flash",
       description: "Coding specialist",
       context_length: 128000,
       pricing: { prompt: 0, completion: 0 },
       top_provider: "DeepSeek",
     },
     {
-      id: "anthropic/claude-3.5-haiku",
-      name: "Claude 3.5 Haiku",
+      id: "anthropic/claude-opus-5",
+      name: "Claude Opus 5",
       description: "Fast Claude model",
       context_length: 200000,
       pricing: { prompt: 0, completion: 0 },
       top_provider: "Anthropic",
     },
     {
-      id: "moonshotai/kimi-k2",
-      name: "Kimi K2",
+      id: "moonshotai/kimi-k2.6",
+      name: "Kimi K2.6",
       description: "Planning and analysis",
       context_length: 256000,
       pricing: { prompt: 0, completion: 0 },

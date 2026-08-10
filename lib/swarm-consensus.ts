@@ -122,12 +122,12 @@ export class InfiniteSwarmEngine {
 
   private async loadNodesFromEnvironment() {
     const providers = [
-      { name: "groq" as const, envVar: "GROQ_KEYS", models: ["llama-3.3-70b-versatile", "mixtral-8x7b", "gemma-2-9b"] },
-      { name: "openrouter" as const, envVar: "OPENROUTER_KEYS", models: ["anthropic/claude-3.5-sonnet", "anthropic/claude-3-opus", "openai/gpt-4o"] },
-      { name: "mistral" as const, envVar: "MISTRAL_KEYS", models: ["mistral-large-latest", "mistral-medium", "codestral"] },
-      { name: "anthropic" as const, envVar: "ANTHROPIC_KEYS", models: ["claude-3-5-sonnet-20241022", "claude-3-opus-20240229"] },
-      { name: "openai" as const, envVar: "OPENAI_KEYS", models: ["gpt-4o", "gpt-4o-mini", "o1-preview"] },
-      { name: "google" as const, envVar: "GOOGLE_KEYS", models: ["gemini-1.5-pro", "gemini-1.5-flash"] },
+      { name: "groq" as const, envVar: "GROQ_KEYS", models: ["llama-3.3-70b-versatile", "qwen/qwen3.6-27b", "openai/gpt-oss-20b"] },
+      { name: "openrouter" as const, envVar: "OPENROUTER_KEYS", models: ["anthropic/claude-opus-5", "anthropic/claude-sonnet-5", "openai/gpt-4o"] },
+      { name: "mistral" as const, envVar: "MISTRAL_KEYS", models: ["mistral-large-latest", "mistral-medium-latest", "codestral-latest"] },
+      { name: "anthropic" as const, envVar: "ANTHROPIC_KEYS", models: ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"] },
+      { name: "openai" as const, envVar: "OPENAI_KEYS", models: ["gpt-4o", "gpt-4o-mini", "gpt-4.1-mini"] },
+      { name: "google" as const, envVar: "GOOGLE_KEYS", models: ["gemini-3-flash-preview", "gemini-flash-lite-latest"] },
       { name: "cohere" as const, envVar: "COHERE_KEYS", models: ["command-r-plus", "command-r"] },
       { name: "ai21" as const, envVar: "AI21_KEYS", models: ["jamba-1.5-large", "jamba-1.5-mini"] },
     ];
@@ -198,11 +198,12 @@ export class InfiniteSwarmEngine {
 
   private calculateIntelligence(provider: string, model: string): number {
     const scores: Record<string, number> = {
-      "claude-3-opus": 98,
+      "claude-opus": 98,
       "gpt-4o": 97,
-      "claude-3-5-sonnet": 96,
-      "gemini-1.5-pro": 95,
-      "mixtral-8x7b": 92,
+      "claude-sonnet": 96,
+      "gemini-3-flash-preview": 95,
+      "gemini-flash-lite-latest": 94,
+      "qwen3.6": 92,
       "llama-3.3-70b": 91,
       "command-r-plus": 90,
       "mistral-large": 89,
@@ -217,7 +218,7 @@ export class InfiniteSwarmEngine {
   private calculateSpeed(provider: string, model: string): number {
     const speeds: Record<string, number> = {
       "groq": 98,
-      "gemini-1.5-flash": 95,
+      "gemini-3-flash-preview": 95,
       "gpt-4o-mini": 92,
       "mistral": 88,
       "claude": 75,

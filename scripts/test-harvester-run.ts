@@ -197,7 +197,7 @@ async function analyzePhotoWithGeminiSDK(photo: any, category: string, style: st
     // Initialize SDK with API key - use v1 API version (not v1beta)
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel(
-      { model: "gemini-1.5-flash-001" },
+      { model: "gemini-flash-lite-latest" },
       { apiVersion: "v1" }
     );
 

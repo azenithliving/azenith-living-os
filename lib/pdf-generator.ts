@@ -68,7 +68,7 @@ Provide a JSON analysis with:
 Return ONLY valid JSON, no markdown formatting.`;
 
   const result = await askOpenRouter(prompt, undefined, {
-    model: "anthropic/claude-3.5-sonnet",
+    model: "anthropic/claude-opus-5",
     temperature: 0.3,
     maxTokens: 1024,
   });
@@ -279,7 +279,7 @@ Use elegant typography, gold accents, and professional luxury aesthetic. Include
 Return ONLY the HTML content, no markdown.`;
 
   const result = await askOpenRouter(prompt, undefined, {
-    model: "anthropic/claude-3.5-sonnet",
+    model: "anthropic/claude-opus-5",
     temperature: 0.4,
     maxTokens: 4096,
   });

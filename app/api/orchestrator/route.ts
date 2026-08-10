@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const providers = [
     { name: 'deepseek', fn: (p: string) => askDeepSeek(p, options) },
     { name: 'groq', fn: (p: string) => askGroqMessages([{ role: 'user', content: p }], options) },
-    { name: 'openrouter', fn: (p: string) => askOpenRouter(p, undefined, { ...options, model: "google/gemini-2.0-pro-exp-05:free" }) }
+    { name: 'openrouter', fn: (p: string) => askOpenRouter(p, undefined, { ...options, model: "google/gemini-2.5-flash" }) }
   ];
 
   // Sort based on health score (simple heuristic for now)

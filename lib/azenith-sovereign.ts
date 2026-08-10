@@ -40,7 +40,7 @@ export async function processMastermindRequest(command: string, sessionId: strin
   
   // Try OpenRouter first
   const openRouterResult = await askOpenRouter(prompt, undefined, {
-    model: "anthropic/claude-3.5-sonnet",
+    model: "anthropic/claude-opus-5",
     temperature: 0.9,
     maxTokens: 1024,
   });

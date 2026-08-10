@@ -246,7 +246,7 @@ Rules:
       
       try {
         const genAI = new GoogleGenerativeAI(key);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
         const result = await model.generateContent(prompt);
         response = result.response.text();
         console.log(`[Curate API] Key ${index} succeeded!`);

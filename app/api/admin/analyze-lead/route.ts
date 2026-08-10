@@ -47,7 +47,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalyzeLe
     const prompt = buildLuxuryConsultantPrompt(sessionState, bufferedInteractions);
 
     // Call Gemini API
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text().trim();

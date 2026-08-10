@@ -98,10 +98,10 @@ Do not use generic disclaimers. Provide direct answers.`;
           { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
           { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
         ];
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro", systemInstruction: systemPrompt, safetySettings });
+        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview", systemInstruction: systemPrompt, safetySettings });
         const result = await model.generateContent(userPrompt);
         aiContent = result.response.text();
-        aiModel = "gemini-1.5-pro-sovereign-uncensored";
+        aiModel = "gemini-3-flash-preview-sovereign-uncensored";
       } catch (geminiError: any) {
         return NextResponse.json({ error: 'AI Synthesis completely failed on all nodes.', details: geminiError.message }, { status: 502 });
       }

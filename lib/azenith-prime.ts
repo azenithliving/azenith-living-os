@@ -393,8 +393,8 @@ export class AzenithPrime {
         integrated: false,
       },
       {
-        id: "claude-3-5-latest",
-        name: "Claude 3.5 Sonnet Latest",
+        id: "claude-sonnet-5",
+        name: "Claude Sonnet 5",
         provider: "anthropic",
         capabilities: ["analysis", "code", "creative"],
         intelligence: 96,

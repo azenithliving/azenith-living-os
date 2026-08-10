@@ -242,7 +242,7 @@ CRITICAL RULES:
 
 STRICT OUTPUT: Return JSON only. Empty approvedIndices if nothing passes.`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
     
     const result = await model.generateContent(prompt);
     const response = result.response.text().trim();

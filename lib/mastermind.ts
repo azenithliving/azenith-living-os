@@ -552,7 +552,7 @@ ${conversationContext ? `=== سياق المحادثة السابق ===\n${conve
     
     // Fallback to OpenRouter (Claude for better conversation)
     result = await askOpenRouter(fullPrompt, undefined, { 
-      model: "anthropic/claude-3.5-sonnet",
+      model: "anthropic/claude-opus-5",
       temperature: 0.8, 
       maxTokens: 2048 
     });

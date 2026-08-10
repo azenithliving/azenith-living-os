@@ -295,7 +295,7 @@ Return ONLY valid JSON array.`;
 
   try {
     const result = await askOpenRouter(prompt, undefined, {
-      model: "anthropic/claude-3.5-sonnet",
+      model: "anthropic/claude-opus-5",
       temperature: 0.4,
       maxTokens: 800,
     });

@@ -49,7 +49,7 @@ const PROVIDER_CONFIG = {
     timeout: 3000, // 3s for instant UI
   },
   openrouter: {
-    model: "anthropic/claude-3.7-sonnet",
+    model: "anthropic/claude-opus-5",
     maxTokens: 2048,
     temperature: 0.4, // Higher for creative luxury copy
     timeout: 8000, // 8s for quality content

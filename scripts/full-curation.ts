@@ -325,7 +325,7 @@ async function scoreWithVision(
     const response = await axios.post(
       'https://openrouter.ai/api/v1/chat/completions',
       {
-        model: 'anthropic/claude-3.5-sonnet',
+        model: 'anthropic/claude-opus-5',
         messages: [
           {
             role: 'user',

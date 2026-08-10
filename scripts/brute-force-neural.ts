@@ -12,10 +12,10 @@ async function bruteForce() {
   const allKeys = orKeysMatch[1].split(',').map(k => k.replace(/['"]+/g, '').trim()).filter(Boolean);
   const models = [
     "moonshotai/kimi-k2.6",
-    "minimax/minimax-m2.5:free",
-    "google/gemma-2-9b-it:free",
-    "meta-llama/llama-3.1-8b-instruct:free",
-    "google/gemini-flash-1.5-8b:free",
+    "openai/gpt-oss-20b:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "meta-llama/llama-3.1-8b-instruct",
+    "google/gemini-3-flash-preview",
     "openrouter/auto"
   ];
 

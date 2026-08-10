@@ -40,7 +40,7 @@ export async function analyzeUserPersona(
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
 
     // Build comprehensive prompt with all behavioral data
     const prompt = buildAnalysisPrompt(sessionProfile, userPhone);

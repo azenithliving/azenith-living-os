@@ -285,13 +285,13 @@ export class AzenithMastermind {
         if (stats.providers.openrouter.active > 0) {
           return {
             provider: "openrouter",
-            model: "anthropic/claude-3.5-sonnet",
+            model: "anthropic/claude-opus-5",
             reason: "Best vision analysis capabilities",
           };
         }
         return {
           provider: "groq",
-          model: "llama-3.2-90b-vision-preview",
+          model: "llama-3.3-70b-versatile",
           reason: "Fallback vision model (limited)",
         };
 
@@ -300,7 +300,7 @@ export class AzenithMastermind {
         if (stats.providers.openrouter.active > 0) {
           return {
             provider: "openrouter",
-            model: "anthropic/claude-3.5-sonnet",
+            model: "anthropic/claude-opus-5",
             reason: "Superior creative writing",
           };
         }

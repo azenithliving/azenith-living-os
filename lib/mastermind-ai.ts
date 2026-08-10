@@ -26,7 +26,7 @@ const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 // Models
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 const MISTRAL_MODEL = "mistral-large-latest";
-const OPENROUTER_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
+const OPENROUTER_MODEL = "moonshotai/kimi-k2.6";
 
 // ============================================
 // KEY MANAGEMENT - Round Robin & Cooldown

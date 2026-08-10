@@ -198,7 +198,7 @@ async function openRouterScore(image: ImageData): Promise<GeminiScore | null> {
     const response = await axios.post(
       'https://openrouter.ai/api/v1/chat/completions',
       {
-        model: 'google/gemini-flash-1.5',
+        model: 'google/gemini-3-flash-preview',
         messages: [
           {
             role: 'user',

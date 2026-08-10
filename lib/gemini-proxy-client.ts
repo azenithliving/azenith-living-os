@@ -59,7 +59,7 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
       // --- GEMINI DIRECT (35 Keys) ---
       if (currentProvider === "gemini" && SHUFFLED_GEMINI.length > 0) {
         const key = SHUFFLED_GEMINI[geminiIdx++ % SHUFFLED_GEMINI.length];
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${key}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -91,7 +91,7 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
           method: "POST",
           headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "llama-3.2-11b-vision-preview",
+            model: "qwen/qwen3.6-27b",
             messages: [{ role: "user", content: [
               { type: "text", text: strictPrompt },
               { type: "image_url", image_url: { url: imageUrl } }

@@ -95,7 +95,7 @@ Respond with JSON:
 }`;
 
     const response = await routeRequest({
-      modelPreference: "anthropic/claude-3.5-haiku",
+      modelPreference: "anthropic/claude-opus-5",
       prompt,
       systemPrompt: "You are a cybersecurity expert. Be thorough and specific.",
       temperature: 0.3,
@@ -176,7 +176,7 @@ Identify:
 Format findings as actionable items.`;
 
     const response = await routeRequest({
-      modelPreference: "anthropic/claude-3.5-haiku",
+      modelPreference: "anthropic/claude-opus-5",
       prompt,
       temperature: 0.3,
     });

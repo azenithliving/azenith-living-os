@@ -23,3 +23,17 @@ wwebjs-auth/
 data/
 debug-auth/
 fly.toml
+
+# Secrets & fleet reports - NEVER commit
+scripts/isolated-keys.json
+scripts/*balance-report*.json
+scripts/fleet-audit-report.json
+scripts/merge-fleet.mjs
+scripts/sync-fleet-to-db.mjs
+scripts/sync-fleet-insert.mjs
+scripts/sync-fleet-upsert.mjs
+scripts/normalize-fleet-db.mjs
+scripts/audit-fleet.mjs
+scripts/audit-models.mjs
+scripts/_*.mjs
+scripts/_*.ts

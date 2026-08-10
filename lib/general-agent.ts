@@ -93,7 +93,7 @@ async function callLLM(messages: LLMMessage[]): Promise<string> {
           ...(isOpenRouter ? { "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "" } : {}),
         },
         body: JSON.stringify({
-          model: isOpenRouter ? "anthropic/claude-3.5-sonnet" : "gpt-4",
+          model: isOpenRouter ? "anthropic/claude-opus-5" : "gpt-4o",
           messages,
           temperature: 0.7,
           max_tokens: 4000,

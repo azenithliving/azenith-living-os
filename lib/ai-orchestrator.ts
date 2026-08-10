@@ -24,14 +24,14 @@ type AIProvider =
 const CONFIG = {
   // === The Absolute Best Models on the Market ===
   GROQ_MODEL: "llama-3.3-70b-versatile", // Blazing fast, top tier open source
-  ANTHROPIC_MODEL: "claude-3-5-sonnet-20241022", // The undisputed king of coding and complex logic
-  OPENROUTER_VISION_MODEL: "anthropic/claude-3.5-sonnet", // Best vision model
+  ANTHROPIC_MODEL: "claude-sonnet-4-5-20250929", // The undisputed king of coding and complex logic
+  OPENROUTER_VISION_MODEL: "anthropic/claude-opus-5", // Best vision model
   MISTRAL_CODE_MODEL: "codestral-latest",
   MISTRAL_GENERAL_MODEL: "mistral-large-latest",
-  DEEPSEEK_MODEL: "deepseek-chat", // DeepSeek V3 (excellent logic)
+  DEEPSEEK_MODEL: "deepseek-v4-flash", // DeepSeek V4 Flash (excellent logic, fast)
   OPENAI_MODEL: "gpt-4o", // Top tier reasoning
-  GOOGLE_MODEL: "gemini-2.0-flash", // Extremely fast and capable
-  SAMBANOVA_MODEL: "Meta-Llama-3.1-70B-Instruct", // Lightning fast Llama
+  GOOGLE_MODEL: "gemini-3-flash-preview", // Extremely fast and capable
+  SAMBANOVA_MODEL: "Meta-Llama-3.3-70B-Instruct", // Lightning fast Llama
   TOGETHER_MODEL: process.env.TOGETHER_MODEL || "meta-llama/Llama-3.3-70B-Instruct-Turbo",
   AIMLAPI_MODEL: process.env.AIMLAPI_MODEL || "openai/gpt-4.1-mini",
   CEREBRAS_MODEL: process.env.CEREBRAS_MODEL || "gpt-oss-120b",
@@ -273,7 +273,7 @@ export async function askDeepSeek(prompt: string, options?: any) {
   );
 
   if (result.success) return { success: true, content: result.data };
-  return askOpenRouter(prompt, undefined, { model: "google/gemini-2.0-flash:free" });
+  return askOpenRouter(prompt, undefined, { model: "google/gemini-2.5-flash" });
 }
 
 export async function askOpenAI(prompt: string, options?: any) {

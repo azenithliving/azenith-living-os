@@ -119,7 +119,7 @@ const PROVIDER_CONFIG: Record<Provider, {
     priority: 1,
   },
   openrouter: {
-    model: "anthropic/claude-3.7-sonnet",
+    model: "anthropic/claude-opus-5",
     maxTokens: 2048,
     temperature: 0.4,
     timeout: 8000,

@@ -69,7 +69,7 @@ export class CoderAgent {
     const prompt = this.buildCodePrompt(task);
     
     const response = await routeRequest({
-      modelPreference: "deepseek/deepseek-coder-v2",
+      modelPreference: "deepseek/deepseek-v4-flash",
       prompt,
       systemPrompt: `You are an expert programmer. Write clean, efficient, well-documented code.
 Follow best practices and include error handling. Only return the code, no extra text.`,
@@ -127,7 +127,7 @@ ${code}
 Include edge cases and error scenarios.`;
 
     const response = await routeRequest({
-      modelPreference: "deepseek/deepseek-coder-v2",
+      modelPreference: "deepseek/deepseek-v4-flash",
       prompt,
       temperature: 0.3,
       maxTokens: 1024,
