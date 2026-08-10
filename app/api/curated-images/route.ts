@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin as supabase } from "@/lib/supabase-server";
 import { getRoomFallbackImages } from "@/lib/room-image-fallback";
+import { getNextAvailableKey } from "@/lib/api-keys-service";
 
 // Constants
 const DELIVERY_SIZE = 30; // Images delivered per request
@@ -143,11 +144,13 @@ async function fetchFromPexels(
   page: number
 ): Promise<PhotoCandidate[]> {
   try {
-    const apiKey = process.env.NEXT_PUBLIC_PEXELS_API_KEY || process.env.PEXELS_API_KEY;
-    if (!apiKey) {
+    // Use the key pool service (PEXELS_KEYS) instead of legacy single-key env vars
+    const keyRecord = await getNextAvailableKey("pexels");
+    if (!keyRecord?.key) {
       console.error("[Curated Images] No Pexels API key available");
       return [];
     }
+    const apiKey = keyRecord.key;
 
     const roomQueries: Record<string, string> = {
       "master-bedroom": "luxury master bedroom interior",
