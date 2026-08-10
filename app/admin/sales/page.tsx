@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import toast from "react-hot-toast";
+import { translateTag, summarizeInterest } from "@/lib/lead-insights";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // أنواع البيانات
@@ -631,6 +632,9 @@ function LeadsTab() {
   const [followUpFor, setFollowUpFor] = useState<string | null>(null);
   const [followUpTemplate, setFollowUpTemplate] = useState("");
   const [isLoadingFollowUp, setIsLoadingFollowUp] = useState(false);
+  const [analysisFor, setAnalysisFor] = useState<string | null>(null);
+  const [analysisProfile, setAnalysisProfile] = useState<Record<string, string> | null>(null);
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const searchParams = useSearchParams();
@@ -806,6 +810,33 @@ function LeadsTab() {
       toast.error("فشل توليد متابعة واتساب");
     } finally {
       setIsLoadingFollowUp(false);
+    }
+  };
+
+  const analyzeLead = async (lead: Lead) => {
+    const leadKey = lead.session_id || lead.id;
+    if (analysisFor === leadKey && analysisProfile) {
+      setAnalysisFor(null);
+      return;
+    }
+    setAnalysisFor(leadKey);
+    setAnalysisProfile(null);
+    setIsLoadingAnalysis(true);
+    try {
+      const res = await fetch("/api/admin/leads/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(lead),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to analyze lead");
+      setAnalysisProfile(data.profile || {});
+    } catch (err) {
+      console.error("Failed to analyze lead:", err);
+      setAnalysisProfile(null);
+      toast.error("فشل التحليل الذكي");
+    } finally {
+      setIsLoadingAnalysis(false);
     }
   };
 
@@ -1095,62 +1126,73 @@ function LeadsTab() {
                             </p>
                           </div>
                         </div>
-                        {lead.telemetry.hovered_elements && lead.telemetry.hovered_elements.length > 0 && (
-                          <div className="mt-3">
-                            <p className="text-white/40 text-xs mb-1">العناصر التي أطال النظر إليها:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {lead.telemetry.hovered_elements.map((tag: string, idx: number) => (
-                                <span key={idx} className="px-2 py-0.5 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded text-[10px]">
-                                  {tag}
-                                </span>
-                              ))}
+                        {lead.telemetry.hovered_elements && lead.telemetry.hovered_elements.length > 0 && (() => {
+                          const interest = summarizeInterest(lead.telemetry.hovered_elements);
+                          return (
+                            <div className="mt-3 space-y-2">
+                              <p className="text-white/40 text-xs">نقاط اهتمام الرادار:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {interest.all.map((tag: string, idx: number) => (
+                                  <span key={idx} className="px-2 py-0.5 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded text-[10px]">
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                              {interest.top.length > 0 && (
+                                <div className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2">
+                                  <p className="text-[11px] text-cyan-300">
+                                    <span className="font-bold">الأكثر لفتًا للانتباه: </span>
+                                    {interest.top.join("، ")}
+                                  </p>
+                                </div>
+                              )}
+                              {interest.styleGuess && (
+                                <div className="rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-2">
+                                  <p className="text-[11px] text-purple-300">
+                                    <span className="font-bold">الطراز المتوقع: </span>
+                                    {interest.styleGuess}
+                                  </p>
+                                </div>
+                              )}
+                              <button
+                                onClick={() => analyzeLead(lead)}
+                                disabled={isLoadingAnalysis && analysisFor === (lead.session_id || lead.id)}
+                                className="w-full flex items-center justify-center gap-2 rounded-lg bg-fuchsia-600/20 hover:bg-fuchsia-600/40 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold py-2 transition disabled:opacity-50"
+                              >
+                                <Brain size={14} />
+                                {isLoadingAnalysis && analysisFor === (lead.session_id || lead.id) ? "جارٍ التحليل..." : (analysisFor === (lead.session_id || lead.id) && analysisProfile ? "إخفاء التحليل" : "تحليل ذكي عميق")}
+                              </button>
+                              {analysisFor === (lead.session_id || lead.id) && analysisProfile && (
+                                <div className="space-y-2 rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 p-3 text-[11px] leading-relaxed">
+                                  {[
+                                    { key: "interests", label: "الاهتمامات", icon: "🎯" },
+                                    { key: "style", label: "الطراز والألوان", icon: "🎨" },
+                                    { key: "personality", label: "الشخصية", icon: "🧬" },
+                                    { key: "psychology", label: "الحالة النفسية", icon: "🧠" },
+                                    { key: "buying_signals", label: "إشارات الشراء", icon: "🛒" },
+                                    { key: "recommended_approach", label: "الخطوة الموصى بها", icon: "🤝" },
+                                    { key: "score_guide", label: "مؤشر التحويل", icon: "📊" },
+                                  ].map(({ key, label, icon }) => {
+                                    const val = analysisProfile[key] || analysisProfile[`${key}_ar`] || "";
+                                    if (!val) return null;
+                                    return (
+                                      <div key={key}>
+                                        <p className="font-bold text-fuchsia-300">{icon} {label}:</p>
+                                        <p className="text-white/80">{val}</p>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        )}
+                          );
+                        })()}
                       </div>
                     )}
                     {isDormantLead(lead) && (
-                      <div className="mt-4 rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                          <div>
-                            <p className="text-sm font-bold text-orange-300">هذا العميل خامل منذ أكثر من 24 ساعة</p>
-                            <p className="text-xs text-orange-200/60 mt-0.5">ولّد رسالة متابعة واتساب مخصصة لإعادة إحياء الاهتمام.</p>
-                          </div>
-                          <button
-                            onClick={() => generateFollowUp(lead)}
-                            disabled={isLoadingFollowUp}
-                            className="rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-xs font-bold text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {isLoadingFollowUp ? "جارٍ التوليد..." : "📱 متابعة واتساب"}
-                          </button>
-                        </div>
-                        {followUpFor === (lead.session_id || lead.id) && followUpTemplate && (
-                          <div className="space-y-3">
-                            <textarea
-                              readOnly
-                              value={followUpTemplate}
-                              className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-white/90 min-h-[120px] outline-none"
-                            />
-                            <div className="flex gap-2">
-                              <a
-                                href={`https://wa.me/${normalizeWhatsAppPhone(lead.phone) || lead.phone.replace(/\D/g, "")}?text=${encodeURIComponent(followUpTemplate)}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex-1 text-center rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-sm font-bold text-white transition"
-                              >
-                                فتح واتساب
-                              </a>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard?.writeText(followUpTemplate).then(() => toast.success("تم نسخ الرسالة"));
-                                }}
-                                className="flex-1 rounded-lg bg-white/10 hover:bg-white/20 px-4 py-2 text-sm font-bold text-white transition"
-                              >
-                                نسخ الرسالة
-                              </button>
-                            </div>
-                          </div>
-                        )}
+                      <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-3">
+                        <p className="text-sm font-bold text-orange-300">هذا العميل خامل منذ أكثر من 24 ساعة — أنسب وقت لمتابعة واتساب.</p>
+                        <p className="text-xs text-orange-200/60 mt-0.5">اضغط "متابعة واتساب" تحت لتوليد رسالة مخصصة.</p>
                       </div>
                     )}
                     <div className="flex gap-2">
@@ -1188,6 +1230,13 @@ function LeadsTab() {
                           💸 زر العرض الوهمي
                         </button>
                         <button 
+                          onClick={() => generateFollowUp(lead)}
+                          disabled={isLoadingFollowUp}
+                          className="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/40 text-emerald-400 text-xs font-bold rounded-lg transition flex items-center gap-2 disabled:opacity-50"
+                        >
+                          {isLoadingFollowUp ? "⏳ جارٍ التوليد..." : "📱 متابعة واتساب"}
+                        </button>
+                        <button 
                           onClick={() => setShowChatFor(showChatFor === lead.id ? null : lead.id)}
                           className="px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg transition"
                         >
@@ -1195,6 +1244,35 @@ function LeadsTab() {
                         </button>
                       </div>
                     </div>
+
+                    {followUpFor === (lead.session_id || lead.id) && followUpTemplate && (
+                      <div className="mt-4 space-y-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                        <p className="text-xs font-bold text-emerald-300">رسالة متابعة واتساب المقترحة:</p>
+                        <textarea
+                          readOnly
+                          value={followUpTemplate}
+                          className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-white/90 min-h-[120px] outline-none"
+                        />
+                        <div className="flex gap-2">
+                          <a
+                            href={`https://wa.me/${normalizeWhatsAppPhone(lead.phone) || lead.phone.replace(/\D/g, "")}?text=${encodeURIComponent(followUpTemplate)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex-1 text-center rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-sm font-bold text-white transition"
+                          >
+                            فتح واتساب
+                          </a>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard?.writeText(followUpTemplate).then(() => toast.success("تم نسخ الرسالة"));
+                            }}
+                            className="flex-1 rounded-lg bg-white/10 hover:bg-white/20 px-4 py-2 text-sm font-bold text-white transition"
+                          >
+                            نسخ الرسالة
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                     {showChatFor === lead.id && lead.messages && (
                       <div className="mt-4 p-4 rounded-xl border border-white/10 bg-black/50 space-y-4">
@@ -1231,6 +1309,45 @@ function LeadsTab() {
                             </button>
                           </div>
                         )}
+
+                        <div className="rounded-xl border border-[#C5A059]/40 bg-gradient-to-l from-[#C5A059]/15 to-black/30 p-4">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs font-bold text-[#C5A059] uppercase tracking-wide">🪪 الملف الشخصي للمشتري</p>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lead.score && lead.score > 70 ? "bg-emerald-500/20 text-emerald-300" : lead.score && lead.score > 30 ? "bg-amber-500/20 text-amber-300" : "bg-white/10 text-white/50"}`}>
+                              نية الشراء: {lead.score ?? "—"}/100
+                            </span>
+                          </div>
+                          <div className="mt-3 grid gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-4">
+                            <div>
+                              <p className="text-[10px] text-white/40">الاسم</p>
+                              <p className="text-xs font-bold text-white">{lead.name || "غير معروف"}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-white/40">الهاتف</p>
+                              <p className="text-xs text-white/80" dir="ltr">{lead.phone || "—"}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-white/40">المشروع</p>
+                              <p className="text-xs text-white/80">{lead.roomType || "غير محدد"}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-white/40">الميزانية</p>
+                              <p className="text-xs text-white/80">{lead.budget || "غير محدد"}</p>
+                            </div>
+                          </div>
+                          {lead.location && (
+                            <div className="mt-2">
+                              <p className="text-[10px] text-white/40">الموقع</p>
+                              <p className="text-xs text-white/80">{lead.location}</p>
+                            </div>
+                          )}
+                          {lead.summary && (
+                            <div className="mt-2 rounded-lg border border-white/10 bg-black/30 px-3 py-2">
+                              <p className="text-[10px] text-white/40 mb-0.5">خلاصة المحادثة (AI)</p>
+                              <p className="text-[11px] leading-relaxed text-white/80">{lead.summary}</p>
+                            </div>
+                          )}
+                        </div>
 
                         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
                           <div>

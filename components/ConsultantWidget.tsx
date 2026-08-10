@@ -16,6 +16,7 @@ interface ConsultantResponse {
   reply: string;
   sessionId: string;
   uiAction?: string;
+  queued?: boolean;
 }
 
 interface SessionData {
@@ -77,6 +78,7 @@ export default function ConsultantWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [hasLoadedSession, setHasLoadedSession] = useState(false);
+  const [takeoverActive, setTakeoverActive] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -289,7 +291,8 @@ export default function ConsultantWidget() {
     return () => window.removeEventListener("fate:open_chat", handleFateOpenChat);
   }, []);
 
-  // Poll for admin replies every 15 seconds when chat is open
+  // Poll for admin replies when chat is open (faster while takeover is active
+  // so a human reply reaches the visitor promptly, without any UI hint)
   useEffect(() => {
     if (!isOpen || !sessionId) return;
     const pollReplies = async () => {
@@ -307,15 +310,54 @@ export default function ConsultantWidget() {
         }
       } catch { /* silent */ }
     };
-    const interval = setInterval(pollReplies, 15000);
+
+    const interval = setInterval(pollReplies, takeoverActive ? 2000 : 5000);
+    return () => clearInterval(interval);
+  }, [isOpen, sessionId, takeoverActive]);
+
+  // Poll takeover status every 2 seconds when chat is open
+  useEffect(() => {
+    if (!isOpen || !sessionId) return;
+    const checkTakeover = async () => {
+      try {
+        const res = await fetch(`/api/consultant/check-takeover?sessionId=${encodeURIComponent(sessionId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setTakeoverActive(data.takeover_active === true);
+        }
+      } catch { /* silent */ }
+    };
+
+    // Check immediately
+    checkTakeover();
+    const interval = setInterval(checkTakeover, 2000);
     return () => clearInterval(interval);
   }, [isOpen, sessionId]);
+
+  // Sync local messages with DB before sending (single source of truth = DB)
+  const refreshFromDB = useCallback(async (): Promise<void> => {
+    if (!sessionId) return;
+    try {
+      const response = await fetch(`/api/consultant?sessionId=${encodeURIComponent(sessionId)}`);
+      if (response.ok) {
+        const data: SessionData = await response.json();
+        if (data.messages && data.messages.length > 0) {
+          setMessages(data.messages);
+        }
+      }
+    } catch {
+      /* silent - keep local state */
+    }
+  }, [sessionId]);
 
   // Send message to API
   const sendMessage = async (content: string) => {
     if (!content.trim() || isLoading) return;
 
     setIsLoading(true);
+
+    // Sync with DB first so AI always sees the full canonical history
+    await refreshFromDB();
 
     // Add user message to local state
     const userMessage: Message = {
@@ -342,7 +384,6 @@ export default function ConsultantWidget() {
           message: content.trim(),
           sessionId,
           userName: userName || undefined,
-          history: messages,
           language: currentLang,
         }),
       });
@@ -381,7 +422,12 @@ export default function ConsultantWidget() {
         content: finalReply,
         timestamp: new Date().toISOString(),
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      // If the message is queued for a human (takeover), do NOT show the
+      // generic "received" placeholder in the visitor chat. The real admin
+      // reply will arrive via /api/consultant/check-reply polling.
+      if (!data.queued) {
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
     } catch (error) {
       console.error("[ConsultantWidget] Error sending message:", error);
 

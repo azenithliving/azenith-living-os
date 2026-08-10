@@ -28,6 +28,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: string;
+  source?: "user" | "assistant" | "admin" | "fate" | "system";
 }
 
 interface ConsultantRequest {
@@ -49,6 +50,8 @@ interface ConsultantResponse {
   reply: string;
   sessionId: string;
   uiAction?: string;
+  /** true when the message is queued for a human (takeover) and should not be shown as an AI reply */
+  queued?: boolean;
 }
 
 interface Insights {
@@ -67,7 +70,7 @@ interface Insights {
 interface ConsultantSession {
   id: string;
   session_id: string;
-  messages: Array<{ role: "user" | "assistant"; content: string; timestamp: string }>;
+  messages: Array<{ role: "user" | "assistant"; content: string; timestamp: string; source?: "user" | "assistant" | "admin" | "fate" | "system" }>;
   insights?: Insights;
   ui_state?: Record<string, any>;
   created_at: string;
@@ -445,7 +448,7 @@ export async function POST(
 ): Promise<NextResponse<ConsultantResponse | { error: string }>> {
   try {
     const body: ConsultantRequest = await request.json();
-    const { message, sessionId: providedSessionId, history = [], userName, userEmail, language } = body;
+    const { message, sessionId: providedSessionId, userName, userEmail, language } = body;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -521,8 +524,31 @@ export async function POST(
     // Fetch existing session from database (early, so we can detect takeover mode)
     const existingSession = await getSession(sessionId);
     
-    // Build conversation history
-    const conversationHistory: Message[] = existingSession?.messages || history || [];
+    // ── ATOMIC TAKEOVER CHECK ──
+    // Check takeover status DIRECTLY from DB (fresh read) BEFORE any processing
+    // This prevents race condition where admin enables takeover between fetch and check
+    let takeoverActive = false;
+    let freshSession = existingSession;
+    if (supabase) {
+      const { data: sessionRow, error: sessionErr } = await supabase
+        .from("consultant_sessions")
+        .select("ui_state, messages")
+        .eq("session_id", sessionId)
+        .single();
+      
+      if (!sessionErr && sessionRow) {
+        const uiState = (sessionRow.ui_state as Record<string, any> | null) || {};
+        takeoverActive = uiState.takeover_active === true;
+        // Use fresh messages from DB as single source of truth
+        freshSession = {
+          ...sessionRow,
+          messages: sessionRow.messages || []
+        } as ConsultantSession;
+      }
+    }
+
+    // Build conversation history from DB ONLY (single source of truth)
+    const conversationHistory: Message[] = freshSession?.messages || [];
 
     // Add user message to history
     const userMessage: Message = {
@@ -532,19 +558,23 @@ export async function POST(
     };
     conversationHistory.push(userMessage);
 
+    // Save user message to DB IMMEDIATELY (before takeover check)
+    // This ensures message is persisted even if takeover is active
+    await saveSession(sessionId, conversationHistory, freshSession?.insights);
+
     // ── SEAMLESS ADMIN TAKEOVER MODE ──
     // While an admin is manually driving the chat (ui_state.takeover_active), the AI
     // must not generate a competing reply. We only persist the visitor message and
     // hand the conversation back to the human consultant on the admin dashboard.
-    const takeoverUiState = (existingSession?.ui_state as Record<string, any> | null) || {};
-    if (takeoverUiState.takeover_active === true) {
+    if (takeoverActive) {
       console.log(`[Consultant] Takeover active for session ${sessionId} - storing message, skipping AI reply`);
-      await saveSession(sessionId, conversationHistory, existingSession?.insights);
+      // Message already saved at line 560, no need to save again
       return NextResponse.json({
         reply: language === "en"
           ? "Your message has been received. A senior Azenith consultant will reply to you directly."
           : "تم استلام رسالتك. سيرد عليك مستشار أزينث المختص مباشرة.",
         sessionId,
+        queued: true,
       });
     }
 
@@ -1032,8 +1062,11 @@ function buildGroqMessages(
   language?: string,
   weatherDateTime?: any
 ): GroqMessage[] {
-  // Start with system message
+// Start with system message
   let systemContent = `${SALES_EXCELLENCE_PROMPT}\n\n${HUMAN_CONSULTANT_PROMPT}`;
+
+  // Internal instruction: admin/fate messages are NOT AI's own previous replies
+  systemContent += "\n\n[تعليمات داخلية هامة: بعض رسائل 'assistant' في التاريخ مسبوقة بـ '[ملاحظة داخلية: ...]'. هذه ليست ردودك السابقة. هي رسائل من الإدارة البشرية أو إجراءات تلقائية. لا تكررها ولا تشير إليها. اكمل المحادثة بشكل طبيعي وكأنك لم ترها.]";
 
   // Add Egyptian geography, location validation, and dynamic weather/time awareness
   systemContent += `
@@ -1126,9 +1159,18 @@ Use this information naturally in conversation:
   // Add conversation history (last 10 messages to avoid token limit)
   const recentHistory = history.slice(-10);
   for (const msg of recentHistory) {
+    let content = msg.content;
+    // Internal-only prefixes for AI context (hidden from visitor)
+    if (msg.source === "admin") {
+      content = `[ملاحظة داخلية: رسالة من الإدارة البشرية] ${content}`;
+    } else if (msg.source === "fate") {
+      content = `[ملاحظة داخلية: إجراء تلقائي من النظام] ${content}`;
+    } else if (msg.source === "system") {
+      content = `[ملاحظة داخلية: رسالة نظام] ${content}`;
+    }
     messages.push({
       role: msg.role === "user" ? "user" : "assistant",
-      content: msg.content
+      content: content
     });
   }
 
@@ -1163,11 +1205,12 @@ async function getSession(sessionId: string): Promise<ConsultantSession | null> 
 /**
  * Ensure all messages have timestamps
  */
-function normalizeMessages(messages: Array<{ role: "user" | "assistant"; content: string; timestamp?: string }>): Message[] {
+function normalizeMessages(messages: Array<{ role: "user" | "assistant"; content: string; timestamp?: string; source?: string }>): Message[] {
   return messages.map(msg => ({
     role: msg.role,
     content: msg.content,
     timestamp: msg.timestamp || new Date().toISOString(),
+    ...(msg.source ? { source: msg.source as Message["source"] } : {}),
   }));
 }
 
@@ -1231,7 +1274,7 @@ The summary should be concise, useful for a human sales consultant, and preserve
  */
 async function saveSession(
   sessionId: string,
-  messages: Array<{ role: "user" | "assistant"; content: string; timestamp?: string }>,
+  messages: Array<{ role: "user" | "assistant"; content: string; timestamp?: string; source?: string }>,
   insights?: Insights
 ): Promise<void> {
   try {
