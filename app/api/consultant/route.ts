@@ -565,6 +565,9 @@ export async function POST(
       allLearnings.push("[سلوك العميل: تم رصد تردد وبطء في الكتابة. قدم الدعم المعنوي والـ Social Proof وقسّم إجابتك لتكون مبسطة جداً ولا تضغط على العميل.]");
     }
 
+    // Fetch Cairo weather and date-time context
+    const weatherDateTime = await getCairoWeatherAndDateTime();
+
     // Build messages array for Groq with system prompt and conversation history
     const groqMessages = buildGroqMessages(
       conversationHistory, 
@@ -572,7 +575,8 @@ export async function POST(
       allLearnings, 
       existingSession?.insights,
       mutations || [],
-      language
+      language,
+      weatherDateTime
     );
 
     // Get AI response using Groq with full conversation context
@@ -850,6 +854,89 @@ Dashboard:
 }
 
 /**
+ * Fetch real-time Cairo weather and date-time information
+ */
+async function getCairoWeatherAndDateTime() {
+  const cairoTimeStr = new Date().toLocaleString("en-US", {
+    timeZone: "Africa/Cairo",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  
+  const cairoDateStr = new Date().toLocaleString("en-US", {
+    timeZone: "Africa/Cairo",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const cairoTimeStrAr = new Date().toLocaleString("ar-EG", {
+    timeZone: "Africa/Cairo",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  
+  const cairoDateStrAr = new Date().toLocaleString("ar-EG", {
+    timeZone: "Africa/Cairo",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  let weatherInfo = "Weather in Cairo: 28°C, Sunny and warm";
+  let weatherInfoAr = "الطقس في القاهرة: ٢٨°مئوية، مشمس ومعتدل";
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 600); // 600ms timeout
+    const res = await fetch(
+      "https://api.open-meteo.com/v1/forecast?latitude=30.0444&longitude=31.2357&current=temperature_2m,weather_code",
+      { signal: controller.signal }
+    );
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      const temp = data.current?.temperature_2m;
+      const code = data.current?.weather_code;
+
+      let condition = "Clear";
+      let conditionAr = "صافي";
+      if (code >= 1 && code <= 3) {
+        condition = "Partly Cloudy";
+        conditionAr = "غائم جزئيًا";
+      } else if (code >= 45 && code <= 48) {
+        condition = "Foggy";
+        conditionAr = "ضبابي";
+      } else if (code >= 51 && code <= 67) {
+        condition = "Rainy";
+        conditionAr = "ممطر";
+      } else if (code >= 71 && code <= 86) {
+        condition = "Snowy";
+        conditionAr = "ثلجي";
+      } else if (code >= 95) {
+        condition = "Thunderstorm";
+        conditionAr = "عاصف رعدي";
+      }
+
+      weatherInfo = `Weather in Cairo: ${temp}°C, ${condition}`;
+      weatherInfoAr = `الطقس في القاهرة: ${temp}°مئوية، ${conditionAr}`;
+    }
+  } catch (err) {
+    console.warn("[Consultant] Weather fetch timed out or failed:", err);
+  }
+
+  return {
+    en: { time: cairoTimeStr, date: cairoDateStr, weather: weatherInfo },
+    ar: { time: cairoTimeStrAr, date: cairoDateStrAr, weather: weatherInfoAr },
+  };
+}
+
+/**
  * Generate unique session ID
  */
 function generateSessionId(): string {
@@ -865,10 +952,53 @@ function buildGroqMessages(
   learnings: string[] = [],
   insights?: Insights,
   activeMutations: any[] = [],
-  language?: string
+  language?: string,
+  weatherDateTime?: any
 ): GroqMessage[] {
   // Start with system message
   let systemContent = `${SALES_EXCELLENCE_PROMPT}\n\n${HUMAN_CONSULTANT_PROMPT}`;
+
+  // Add Egyptian geography, location validation, and dynamic weather/time awareness
+  systemContent += `
+
+### 🌍 GEOGRAPHICAL AWARENESS & LOCATION VALIDATION (MANDATORY):
+- Azenith Living designs, executes, and manufactures premium luxury interior design and bespoke furniture EXCLUSIVELY in Egypt.
+- Core Regions & Neighborhoods you fully know:
+  * Greater Cairo (القاهرة الكبرى):
+    - Cairo Governorate: New Cairo (التجمع الخامس، الرحاب، مدينتي، الشروق، هليوبوليس الجديدة، بدر، العاصمة الإدارية الجديدة، النرجس، الياسمين، البنفسج، المستثمرين)، Heliopolis (مصر الجديدة، الكوربة، شيراتون)، Nasr City (مدينة نصر)، Maadi (المعادي، دجلة، زهراء المعادي)، Zamalek (الزمالك)، Garden City (جاردن سيتي).
+    - Giza Governorate: 6th of October (مدينة 6 أكتوبر)، Sheikh Zayed (الشيخ زايد)، Pyramids/Haram (الهرم)، Faisal (فيصل)، Dokki (الدقي)، Mohandessin (المهندسين)، October Al-Gedida (أكتوبر الجديدة)، Hadayek Al-Ahram (حدائق الأهرام).
+  * Coastal & Resorts:
+    - North Coast / Sahel (الساحل الشمالي): Marina (مارينا)، Sidi Abdel Rahman (سيدي عبد الرحمن)، El Alamein (العلمين الجديدة)، Ras El Hekma (رأس الحكمة)، Ghazala.
+    - Red Sea: Ain Sokhna (العين السخنة)، Hurghada (الغردقة)، El Gouna (الجونة)، Sahl Hasheesh (سهل حشيش)، Sharm El Sheikh (شرم الشيخ).
+  * Delta: Mansoura (المنصورة)، Tanta (طنطا)، El Mahalla (المحلة)، Zagazig (الزقازيق)، Damietta (دمياط)، Port Said (بورسعيد)، Ismailia (الإسماعيلية)، Suez (السويس).
+  * Upper Egypt: Fayoum (الفيوم)، Beni Suef (بني سويف)، Minya (المنيا)، Assiut (أسيوط)، Sohag (سوهاج)، Qena (قنا)، Luxor (الأقصر)، Aswan (أسوان).
+
+- Location Validation Rules:
+  1. If the user mentions any city/neighborhood outside Egypt (e.g., France, Paris, USA, Riyadh, Dubai, London):
+     - DO NOT say "great city, I am from there" or accept it blindly.
+     - Acknowledge their current location, but politely clarify that Azenith Living only manufactures and executes projects inside Egypt. Ask if their property/apartment/villa is located in Egypt (since many clients are expats living abroad but building their home/villa in Egypt).
+     - Example (Arabic): "أهلاً بك! فرنسا بلد جميل للغاية. لكن للتوضيح، نحن في أزينث ليفينج نقوم بتصميم وتنفيذ المشاريع الفاخرة وتصنيع الأثاث المخصص حصرياً داخل جمهورية مصر العربية (القاهرة، الجيزة، الساحل الشمالي، الإسكندرية، وباقي المحافظات). هل العقار أو الفيلا الخاصة بك التي تريد تصميمها تقع داخل مصر؟"
+     - Example (English): "Welcome! France is beautiful. However, please note that Azenith Living specializes in high-end design, execution, and custom furniture manufacturing exclusively within Egypt. Is your property or project located inside Egypt?"
+  2. If the user mentions a valid Egyptian city/neighborhood (e.g. New Cairo/Tagamoa, Sheikh Zayed, Sahel, Mansoura, Kafr Abdo):
+     - Show genuine local awareness! E.g. if they say "Tagamoa/New Cairo", mention things like contemporary architecture, modern villa developments, or premium compound finishing. If they say "Sheikh Zayed", speak of upscale villa expansions or Sheikh Zayed's signature layouts. If "Sahel/North Coast", speak of high-end summer chalets, marine-grade custom outdoor furniture, or sea-breeze resistant materials.
+  3. If they enter a completely non-existent or gibberish location, politely ask them to clarify which neighborhood or city in Egypt their property is located.
+
+### 🕰️ REAL-TIME TEMPORAL & CONTEXTUAL AWARENESS:
+`;
+
+  if (weatherDateTime) {
+    const ctx = language === "en" ? weatherDateTime.en : weatherDateTime.ar;
+    systemContent += `
+[CRITICAL SYSTEM TIME & WEATHER CONTEXT]:
+- Egypt Current Date: ${ctx.date}
+- Egypt Current Time: ${ctx.time} (Cairo Timezone, Africa/Cairo)
+- Current Weather: ${ctx.weather}
+
+Use this information naturally in conversation:
+- Greet the user correctly based on the time of day (e.g. morning vs. afternoon/evening/night).
+- Refer to the time of day or the weather/season naturally if it fits (e.g. if they are planning a Sahel chalet in summer/hot weather, or if it is late/early, adjust your tone to be extremely supportive and reassuring).
+`;
+  }
   
   // Add active reality mutations (Fate Actions) to context
   if (activeMutations.length > 0) {
