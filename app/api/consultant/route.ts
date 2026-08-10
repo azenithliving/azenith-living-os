@@ -170,6 +170,8 @@ function trimReply(reply: string): string {
 
 const AR_EN_PRICE_RE = /(سعر|السعر|تكلفة|التكلفة|كام|بكام|متر|المتر|ميزانية|عرض سعر|price|cost|quote|budget|how much)/i;
 const AR_EN_ESCALATION_RE = /(صاحب الشركة|المدير|الإدارة|اكلم حد|كلموني|مش فاهم|مش فاهمة|غبي|سيء|وحش|زفت|owner|manager|management|supervisor|human)/i;
+// Proactive human handoff: visitor explicitly wants a person on the phone / direct call / real answer.
+const HUMAN_HANDOFF_RE = /(اتصل بيا|اتصلي بيا|كلمني|كلميني|كلموني|كلموني|عايز حد يتصل|عايز أتكلم مع حد|عايز اتكلم|واحد يتصل|محتاج حد|موظف حقيقي|حد من الشركة|اتصلوا بي|اتصلو بيا|call me|call now|contact me|talk to (a |the )?human|human agent|speak to|أنا مش راضٍ|أنا مش راضي|عايز رد حقيقي|مش جاوبت|لسه مجاوبتش)/i;
 const BOOKING_CONFIRMATION_RE = /(تم\s+(?:حجز|تسجيل|تأكيد)|booking\s+confirmed|appointment\s+confirmed|confirmed\s+your\s+booking)/i;
 
 function buildHumanPriceReply(language?: string): string {
@@ -332,9 +334,16 @@ async function getLearnings(): Promise<string[]> {
 }
 
 /**
- * Send direct Telegram notification to admin about unknown question
+ * Send direct Telegram notification to admin about unknown/difficult question.
+ * Persists to the dashboard (pending questions) and pushes an instant,
+ * enriched Telegram alert with the customer's phone and a reply link.
  */
-async function notifyAdminUnknownQuestion(question: string, sessionId: string, userName?: string): Promise<void> {
+async function notifyAdminUnknownQuestion(
+  question: string,
+  sessionId: string,
+  userName?: string,
+  history: Message[] = []
+): Promise<void> {
   const displayName = userName || "Visitor";
   console.log(`[Consultant] Unknown question detected: "${question}"`);
 
@@ -353,31 +362,77 @@ async function notifyAdminUnknownQuestion(question: string, sessionId: string, u
     console.error("[Consultant] DB error:", e);
   }
 
-  // 2. Send DIRECT Telegram notification (no middleman)
+  // 2. Send DIRECT Telegram notification (fire-and-forget)
   const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
   const telegramChatId = process.env.TELEGRAM_CHAT_ID;
 
   if (telegramToken && telegramChatId) {
-    const msg = `*New customer question*
-Customer: ${displayName}
-Question: ${question}
-Session: ${sessionId}
+    // Pull phone from the conversation so the team can call immediately.
+    const allText = [...history.map((m) => m.content), question].join(" ");
+    const phoneMatch = allText.match(/(?:\+?20\s?)?0?1[0125][\s-]?\d{4}[\s-]?\d{4}/);
+    const phone = phoneMatch ? phoneMatch[0].replace(/\s+/g, "") : null;
+    const dashboardUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://azenith-living.vercel.app'}/admin/sales?tab=leads&expand=${sessionId}`;
 
-Answer it from the dashboard: Sales Manager > Questions`;
-    try {
-      const tRes = await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: telegramChatId, text: msg, parse_mode: 'Markdown' }),
-      });
-      const tData = await tRes.json();
-      if (tData.ok) console.log("[Consultant] Telegram sent");
-      else console.error("[Consultant] Telegram error:", tData.description);
-    } catch (e) {
-      console.error("[Consultant] Telegram fetch failed:", e);
-    }
+    const msg =
+      `*⚠️ Difficult message - needs human*
+Customer: ${displayName}
+Phone: ${phone || "not provided"}
+Session: ${sessionId}
+Message: ${question}
+
+[Reply from the dashboard](${dashboardUrl})`;
+
+    Promise.resolve().then(async () => {
+      try {
+        const tRes = await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: telegramChatId, text: msg, parse_mode: 'Markdown' }),
+        });
+        const tData = await tRes.json();
+        if (tData.ok) console.log("[Consultant] Telegram sent");
+        else console.error("[Consultant] Telegram error:", tData.description);
+      } catch (e) {
+        console.error("[Consultant] Telegram fetch failed:", e);
+      }
+    });
   } else {
     console.warn("[Consultant] Telegram not configured - missing token or chatId");
+  }
+}
+
+/**
+ * Mark a session as handed off to a human agent. Activating takeover makes the
+ * AI stop replying so the admin drives the conversation from the dashboard.
+ */
+async function markSessionHandoff(
+  sessionId: string,
+  session: ConsultantSession | null
+): Promise<void> {
+  try {
+    const supabaseClient = getSupabaseAdminClient();
+    if (!supabaseClient) return;
+
+    const currentUiState = (session?.ui_state as Record<string, any> | null) || {};
+    const { error } = await supabaseClient
+      .from("consultant_sessions")
+      .update({
+        ui_state: {
+          ...currentUiState,
+          takeover_active: true,
+          takeover_started_at: currentUiState.takeover_started_at || new Date().toISOString(),
+          handoff_to_human: true,
+          handoff_reason: "escalation",
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .eq("session_id", sessionId);
+
+    if (error) {
+      console.error("[Consultant] Error marking session handoff:", error);
+    }
+  } catch (err) {
+    console.error("[Consultant] Exception marking session handoff:", err);
   }
 }
 
@@ -657,7 +712,7 @@ export async function POST(
       "I do not have that information",
     ];
     
-    const isEscalation = guarded.escalated || escalationPhrases.some(p => reply.includes(p));
+    const isEscalation = guarded.escalated || HUMAN_HANDOFF_RE.test(message) || escalationPhrases.some(p => reply.includes(p));
     
     // Add AI response to history BEFORE checking booking so insights are accurate
     const assistantMessage: Message = {
@@ -668,8 +723,14 @@ export async function POST(
     conversationHistory.push(assistantMessage);
 
     if (isEscalation) {
-      console.log("[Consultant] Escalation detected - notifying admin via Telegram + Dashboard");
-      await notifyAdminUnknownQuestion(message, sessionId, userName);
+      // ── PROACTIVE HANDOFF TO HUMAN AGENT ────────────────────────────────
+      // The visitor is asking for a person, or the AI is admitting it cannot
+      // answer. We keep the polite handoff reply above, but hand the session
+      // to the admin: takeover activates so the AI stays silent afterwards,
+      // and the team gets an instant Telegram alert.
+      console.log(`[Consultant] Proactive handoff for session ${sessionId}`);
+      await markSessionHandoff(sessionId, existingSession);
+      await notifyAdminUnknownQuestion(message, sessionId, userName, conversationHistory);
     }
 
     // Booking detection: if reply contains confirmation keywords, send booking alert

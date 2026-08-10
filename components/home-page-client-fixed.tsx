@@ -276,6 +276,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
                     onMouseEnter={() => startRoomTimer(room.slug)}
                     onMouseLeave={() => clearRoomTimer(room.slug)}
                     onClick={() => handleRoomClick(room.slug)}
+                    data-telemetry={`غرفة: ${isRTL ? room.title : (room.titleEn || room.title)}`}
                     className="relative block aspect-[16/10] cursor-pointer overflow-hidden rounded-[2.5rem] border border-white/5 shadow-2xl transition-all duration-500 hover:-translate-y-3 hover:scale-[1.02] hover:border-brand-primary/30 hover:shadow-[0_20px_40px_rgba(197,160,89,0.3)]"
                   >
                     <Image

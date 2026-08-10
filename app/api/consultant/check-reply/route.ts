@@ -3,7 +3,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 /**
  * GET /api/consultant/check-reply?sessionId=xxx
- * Called by the widget to check if admin has answered a pending question for this session
+ * Called by the widget to poll delivered admin answers.
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -17,7 +17,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const supabase = getSupabaseAdminClient();
     if (!supabase) return NextResponse.json({ reply: null });
 
-    // Look for answered questions for this session
     const { data, error } = await supabase
       .from("consultant_pending_questions")
       .select("id, question, answered_reply")
@@ -31,18 +30,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ reply: null });
     }
 
-    // Mark as delivered so we don't send again
     await supabase
       .from("consultant_pending_questions")
       .update({ status: "delivered" })
       .eq("id", data.id);
 
-    const replyText = data.question === "DIRECT_MESSAGE" 
-        ? `👨‍💼 من الإدارة:\n${data.answered_reply}`
-        : `✅ رد الإدارة على سؤالك:\n${data.answered_reply}`;
+    const replyText =
+      data.question === "DIRECT_MESSAGE"
+        ? data.answered_reply
+        : `رد الادارة على سؤالك:\n${data.answered_reply}`;
 
     return NextResponse.json({
       reply: replyText,
+      source: data.question === "DIRECT_MESSAGE" ? "admin" : "admin_answer",
       question: data.question,
     });
   } catch (error) {

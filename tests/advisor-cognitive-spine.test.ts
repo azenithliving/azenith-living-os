@@ -303,4 +303,47 @@ describe("SAA vInfinity: Azenith Advisor Cognitive Spine Tests", () => {
     expect(data.reply).toContain("تم استلام رسالتك");
     expect(askOrchestratorMessages).not.toHaveBeenCalled();
   });
+
+  // ── Test 9 ───────────────────────────────────────────────────────────────
+  test("9. Proactive Handoff: escalation auto-activates takeover and notifies admin", async () => {
+    const { getSupabaseAdminClient } = await import("@/lib/supabase-admin");
+    const mockSupa = vi.mocked(getSupabaseAdminClient)();
+    (mockSupa.single as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: {
+        session_id: "session-escalation",
+        messages: [],
+        insights: null,
+        ui_state: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      error: null,
+    });
+
+    // Avoid real Telegram / weather network calls in this unit test.
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) }));
+
+    try {
+      const req = makeRequest(
+        "http://localhost:3000/api/consultant",
+        { message: "كلمني حد من الإدارة", sessionId: "session-escalation", language: "ar" }
+      );
+
+      const res = await consultantPost(req);
+      const data = await res.json();
+
+      expect(res.status).toBe(200);
+      // The AI still delivers the polite handoff reply for this message.
+      expect(data.reply).toContain("أتفهمك");
+
+      // The session must have been marked for human takeover (ui_state.takeover_active).
+      const updateCalls = vi.mocked(mockSupa.update).mock.calls;
+      const handoffCall = updateCalls.find((call) =>
+        (call[0] as { ui_state?: { takeover_active?: boolean } } | undefined)?.ui_state?.takeover_active === true
+      );
+      expect(handoffCall).toBeTruthy();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });

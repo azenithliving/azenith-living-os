@@ -68,6 +68,7 @@ interface Lead {
     typing_preview?: string;
     takeover_active?: boolean;
     takeover_started_at?: string;
+    handoff_to_human?: boolean;
   };
 }
 
@@ -769,8 +770,22 @@ function LeadsTab() {
     return digits;
   };
 
+  // آخر نشاط حقيقي للعميل: آخر توقيت رسالة (ولو من المستشار/الإدارة)، وإلا تاريخ الإنشاء.
+  const lastLeadActivity = (lead: Lead): number => {
+    let latest = new Date(lead.created_at).getTime();
+    if (!Number.isNaN(latest)) {
+      (lead.messages || []).forEach((m) => {
+        if (m.timestamp) {
+          const t = new Date(m.timestamp).getTime();
+          if (!Number.isNaN(t) && t > latest) latest = t;
+        }
+      });
+    }
+    return Number.isNaN(latest) ? Date.now() : latest;
+  };
+
   const isDormantLead = (lead: Lead) =>
-    Date.now() - new Date(lead.created_at).getTime() >= 24 * 60 * 60 * 1000;
+    Date.now() - lastLeadActivity(lead) >= 24 * 60 * 60 * 1000;
 
   const generateFollowUp = async (lead: Lead) => {
     const leadKey = lead.session_id || lead.id;
@@ -995,6 +1010,11 @@ function LeadsTab() {
                             <span className="text-[9px] text-purple-300 font-bold uppercase tracking-tighter">PRE-COG</span>
                           </div>
                         )}
+                        {lead.ui_state?.handoff_to_human && (
+                          <div className="flex items-center gap-1 px-1.5 py-0.5 bg-red-500/20 border border-red-500/30 rounded-full animate-pulse">
+                            <span className="text-[9px] text-red-300 font-bold uppercase tracking-tighter">HUMAN</span>
+                          </div>
+                        )}
                       </div>
                       <p className="text-sm text-white/50">
                         {lead.ui_state?.typing_preview ? (
@@ -1084,6 +1104,50 @@ function LeadsTab() {
                                   {tag}
                                 </span>
                               ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {isDormantLead(lead) && (
+                      <div className="mt-4 rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                          <div>
+                            <p className="text-sm font-bold text-orange-300">هذا العميل خامل منذ أكثر من 24 ساعة</p>
+                            <p className="text-xs text-orange-200/60 mt-0.5">ولّد رسالة متابعة واتساب مخصصة لإعادة إحياء الاهتمام.</p>
+                          </div>
+                          <button
+                            onClick={() => generateFollowUp(lead)}
+                            disabled={isLoadingFollowUp}
+                            className="rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-xs font-bold text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isLoadingFollowUp ? "جارٍ التوليد..." : "📱 متابعة واتساب"}
+                          </button>
+                        </div>
+                        {followUpFor === (lead.session_id || lead.id) && followUpTemplate && (
+                          <div className="space-y-3">
+                            <textarea
+                              readOnly
+                              value={followUpTemplate}
+                              className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-white/90 min-h-[120px] outline-none"
+                            />
+                            <div className="flex gap-2">
+                              <a
+                                href={`https://wa.me/${normalizeWhatsAppPhone(lead.phone) || lead.phone.replace(/\D/g, "")}?text=${encodeURIComponent(followUpTemplate)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex-1 text-center rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-sm font-bold text-white transition"
+                              >
+                                فتح واتساب
+                              </a>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard?.writeText(followUpTemplate).then(() => toast.success("تم نسخ الرسالة"));
+                                }}
+                                className="flex-1 rounded-lg bg-white/10 hover:bg-white/20 px-4 py-2 text-sm font-bold text-white transition"
+                              >
+                                نسخ الرسالة
+                              </button>
                             </div>
                           </div>
                         )}

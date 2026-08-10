@@ -142,14 +142,14 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       .eq("id", id);
 
     if (error) {
-      const existing = IN_MEMORY_PENDING_QUESTIONS.get(id);
-      if (existing) {
-        existing.status = "answered";
-        existing.answered_reply = answered_reply;
-      }
-      // If answered_reply column doesn't exist yet, just delete it
-      await supabase.from("consultant_pending_questions").delete().eq("id", id);
-      return NextResponse.json({ success: true, note: "deleted (column missing)" });
+      // Non-destructive: keep the pending question in the database. Never delete
+      // a customer question to work around a missing column — surface the error
+      // so the admin can fix the schema instead of losing data.
+      console.error("[PendingQuestions] Update error:", error);
+      return NextResponse.json(
+        { error: "Failed to mark question as answered", details: error.message },
+        { status: 500 }
+      );
     }
 
     const existing = IN_MEMORY_PENDING_QUESTIONS.get(id);

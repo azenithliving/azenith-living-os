@@ -174,6 +174,7 @@ function GalleryImage({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: isLoaded ? 1 : 0, scale: isLoaded ? 1 : 0.95 }}
       transition={{ duration: 0.3, delay: (index % 10) * 0.05 }}
+      data-telemetry={photo.alt || `صورة ${index + 1}`}
       className={`relative h-full w-full overflow-hidden rounded-xl border border-white/10 transition-all duration-300 hover:border-[#C5A059]/30 ${
         index % 5 === 0 ? "col-span-2 row-span-2" : "col-span-1 row-span-1"
       }`}

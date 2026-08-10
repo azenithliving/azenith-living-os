@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 export default function TelemetryTracker() {
   const pathname = usePathname();
-  const [hoveredElements, setHoveredElements] = useState<string[]>([]);
+  const hoveredElementsRef = useRef<string[]>([]);
 
   useEffect(() => {
     // We only track if there's a session ID established by the Consultant Widget
@@ -24,19 +24,40 @@ export default function TelemetryTracker() {
 
     const sessionId = getSessionId();
     let attentionScore = 0;
-    
-    // Listen for custom elements that have data-telemetry tags
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const tag = target.getAttribute("data-telemetry");
-      if (tag && !hoveredElements.includes(tag)) {
-        setHoveredElements(prev => {
-          const next = [...prev, tag].slice(-5); // keep last 5
-          return next;
-        });
-        attentionScore += 5; // boost attention when looking at tagged items
-      }
+
+    // Derive a readable interest tag from any hovered/clicked element.
+    const deriveTag = (e: MouseEvent): string | null => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return null;
+
+      // 1. Explicit data-telemetry attributes are the cleanest signal.
+      const tagged = (target.closest("[data-telemetry]") as HTMLElement | null);
+      const explicit = tagged?.getAttribute("data-telemetry");
+      if (explicit && explicit.trim()) return explicit.trim().slice(0, 80);
+
+      // 2. Fallback: any image with a meaningful alt text.
+      const img = target.closest("img") as HTMLImageElement | null;
+      if (img && img.alt && img.alt.trim()) return `صورة: ${img.alt.trim().slice(0, 80)}`;
+
+      // 3. Fallback: gallery/room/furniture links.
+      const link = target.closest('a[href*="/rooms"], a[href*="/furniture"], a[href*="/gallery"]') as HTMLAnchorElement | null;
+      if (link) return `رابط: ${link.getAttribute("href")?.slice(0, 80)}`;
+
+      return null;
     };
+
+    const recordInterest = (e: MouseEvent) => {
+      const tag = deriveTag(e);
+      if (!tag) return;
+      const prev = hoveredElementsRef.current;
+      if (prev.includes(tag)) return;
+      hoveredElementsRef.current = [...prev, tag].slice(-5); // keep last 5
+      attentionScore += 5; // boost attention when looking at tagged items
+    };
+
+    // Listen for custom elements that have data-telemetry tags
+    const handleMouseOver = (e: MouseEvent) => recordInterest(e);
+    const handleClick = (e: MouseEvent) => recordInterest(e);
 
     // Calculate generic attention score based on scroll activity
     let scrollTimer: any;
@@ -49,18 +70,19 @@ export default function TelemetryTracker() {
     };
 
     window.addEventListener("mouseover", handleMouseOver);
+    window.addEventListener("click", handleClick);
     window.addEventListener("scroll", handleScroll);
 
     // Debounced sync to Edge API
     const syncInterval = setInterval(() => {
-      if (attentionScore > 0 || hoveredElements.length > 0) {
+      if (attentionScore > 0 || hoveredElementsRef.current.length > 0) {
         fetch("/api/telemetry", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             sessionId,
             path: pathname,
-            hoveredElements,
+            hoveredElements: hoveredElementsRef.current,
             attentionScore: Math.min(attentionScore, 100) // cap at 100
           }),
           // Use keepalive to ensure it sends even if they navigate away
@@ -74,10 +96,11 @@ export default function TelemetryTracker() {
 
     return () => {
       window.removeEventListener("mouseover", handleMouseOver);
+      window.removeEventListener("click", handleClick);
       window.removeEventListener("scroll", handleScroll);
       clearInterval(syncInterval);
     };
-  }, [pathname, hoveredElements]);
+  }, [pathname]);
 
   return null; // Invisible component
 }

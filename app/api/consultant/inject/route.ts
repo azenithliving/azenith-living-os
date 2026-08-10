@@ -3,16 +3,15 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 /**
  * POST /api/consultant/inject
- * يحقن رسالة كـ "assistant" مباشرة في سجل المحادثة (Supabase)
- * يُستدعى عند:
- * 1. فتح الشات بعد التجميد (رسالة العرض الخاص)
- * 2. رد الأدمن المباشر من الداشبورد
+ * Injects a clean assistant-visible message into a consultant session.
+ * The source is stored separately so the client UI stays seamless.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const { sessionId, message, source = "fate" } = await request.json();
+    const cleanMessage = typeof message === "string" ? message.trim() : "";
 
-    if (!sessionId || !message) {
+    if (!sessionId || !cleanMessage) {
       return NextResponse.json({ error: "Missing sessionId or message" }, { status: 400 });
     }
 
@@ -21,7 +20,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "DB not available" }, { status: 500 });
     }
 
-    // جلب الجلسة الحالية
     const { data: session, error: fetchError } = await supabase
       .from("consultant_sessions")
       .select("messages")
@@ -32,32 +30,32 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: fetchError.message }, { status: 500 });
     }
 
-    const existingMessages = session?.messages || [];
-
-    // بناء الرسالة المحقونة مع prefix يخبر المستشار بالمصدر
-    const prefix = source === "admin" ? "[رسالة من الإدارة]: " : "[عرض خاص من الإدارة]: ";
     const injectedMessage = {
       role: "assistant" as const,
-      content: `${prefix}${message}`,
+      content: cleanMessage,
+      source: String(source || "fate"),
       timestamp: new Date().toISOString(),
     };
 
-    const updatedMessages = [...existingMessages, injectedMessage];
+    const updatedMessages = [...(session?.messages || []), injectedMessage];
+    const now = new Date().toISOString();
 
     if (session) {
-      // تحديث الجلسة الموجودة
-      await supabase
+      const { error } = await supabase
         .from("consultant_sessions")
-        .update({ messages: updatedMessages, updated_at: new Date().toISOString() })
+        .update({ messages: updatedMessages, updated_at: now })
         .eq("session_id", sessionId);
+
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     } else {
-      // إنشاء جلسة جديدة
-      await supabase.from("consultant_sessions").insert({
+      const { error } = await supabase.from("consultant_sessions").insert({
         session_id: sessionId,
         messages: updatedMessages,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: now,
+        updated_at: now,
       });
+
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     console.log(`[Inject API] Injected ${source} message into session ${sessionId}`);

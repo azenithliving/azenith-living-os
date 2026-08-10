@@ -28,7 +28,7 @@ export default function FurnitureCard({ furniture, whatsappUrl, isWishlisted = f
   };
 
   return (
-    <article className="group rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-6 overflow-hidden hover:border-brand-primary/50 transition-all hover:scale-[1.02] hover:shadow-2xl backdrop-blur-sm">
+    <article data-telemetry={`أثاث: ${furniture.title}`} className="group rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-6 overflow-hidden hover:border-brand-primary/50 transition-all hover:scale-[1.02] hover:shadow-2xl backdrop-blur-sm">
       {/* Furniture Image/Video */}
       <div className="relative h-48 w-full rounded-[1.25rem] overflow-hidden bg-gradient-to-br from-gray-900/50 to-gray-800/50 mb-4 group-hover:scale-105 transition-transform">
         <Image 
