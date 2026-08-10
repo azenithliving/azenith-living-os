@@ -114,7 +114,7 @@ function patchLayoutMetadataContent(
     if (!raw) return null;
     const title = escapeTs(input.title.slice(0, 70));
     const desc = escapeTs(input.description.slice(0, 160));
-    const url = input.canonicalUrl || "https://azenith-living-os.vercel.app";
+    const url = input.canonicalUrl || "https://azenith-living.vercel.app";
 
     let next = raw;
     next = next.replace(/title:\s*["'`][^"'`]*["'`]/, `title: "${title}"`);

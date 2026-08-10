@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import RoomPageClient from "@/components/RoomPageClient";
 import { resolveRoomSlug } from "@/lib/rooms-catalog";
+import { absoluteUrl, buildPageMetadata, SEO_ROOMS, SITE_NAME } from "@/lib/seo";
 
 type RoomMeta = {
   id: string;
@@ -295,6 +297,26 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { category: string;
   },
 };
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug: rawSlug } = await params;
+  const slug = resolveRoomSlug(rawSlug);
+  const roomSeo = SEO_ROOMS[slug];
+
+  if (!roomSeo) {
+    return {
+      title: "صفحة غير موجودة",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  return buildPageMetadata({
+    title: roomSeo.title,
+    description: roomSeo.description,
+    path: `/rooms/${slug}`,
+    keywords: [roomSeo.title, roomSeo.titleEn, "تصميم غرف", "Interior design"],
+  });
+}
+
 async function fetchRoomPhotos(query: string, style: string, roomId: string) {
   const headerStore = await headers();
   const host = headerStore.get("host") ?? "localhost:3000";
@@ -324,6 +346,7 @@ export default async function Page({ params, searchParams }: PageProps) {
   const { slug: rawSlug } = await params;
   const slug = resolveRoomSlug(rawSlug);
   const room = ROOMS.find((item) => item.id === slug);
+  const roomSeo = SEO_ROOMS[slug];
 
   if (!room) {
     notFound();
@@ -333,16 +356,103 @@ export default async function Page({ params, searchParams }: PageProps) {
   const style = typeof paramsObj.style === "string" ? paramsObj.style : "modern";
   const photos = await fetchRoomPhotos(room.query, style, slug);
   const styleDesc = ROOM_STYLE_DESCRIPTIONS[slug]?.[style];
+  const seoTitle = roomSeo?.title ?? room.titleEn;
+  const seoDescription = roomSeo?.description ?? room.descriptionEn;
+  const roomUrl = absoluteUrl(`/rooms/${slug}`);
+  const roomFaqs = [
+    {
+      question: `ما الذي تقدمه ${SITE_NAME} في ${seoTitle}؟`,
+      answer: `${SITE_NAME} تقدم رؤية تصميم متكاملة تشمل توزيع المساحة، اختيار الخامات، الإضاءة، الأثاث، وحلول التخزين بما يناسب الاستخدام اليومي والطابع الفاخر للمنزل.`,
+    },
+    {
+      question: `هل يمكن تخصيص تصميم ${seoTitle} حسب مساحة المنزل؟`,
+      answer: "نعم، يتم التعامل مع كل مشروع حسب المقاسات الفعلية، أسلوب الحياة، الميزانية، وطريقة استخدام الغرفة حتى تكون النتيجة عملية وراقية في نفس الوقت.",
+    },
+    {
+      question: "هل الخدمة مناسبة للشقق والفيلات في مصر؟",
+      answer: "نعم، صفحات أزينث ليفينج مهيأة لخدمات التصميم الداخلي والتشطيبات والأثاث المخصص للشقق والفيلات داخل القاهرة ومصر.",
+    },
+  ];
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "@id": `${roomUrl}#service`,
+      name: seoTitle,
+      alternateName: roomSeo?.titleEn ?? room.titleEn,
+      description: seoDescription,
+      provider: { "@id": `${absoluteUrl("/")}#organization` },
+      areaServed: ["Cairo", "Egypt"],
+      serviceType: "Interior design and custom furniture",
+      url: roomUrl,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": `${roomUrl}#faq`,
+      mainEntity: roomFaqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: { "@type": "Answer", text: faq.answer },
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "@id": `${roomUrl}#breadcrumb`,
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: SITE_NAME, item: absoluteUrl("/") },
+        { "@type": "ListItem", position: 2, name: "Rooms", item: absoluteUrl("/rooms") },
+        { "@type": "ListItem", position: 3, name: seoTitle, item: roomUrl },
+      ],
+    },
+  ];
 
   return (
     <main className="min-h-screen bg-black text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="container mx-auto px-4 py-16">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-6xl space-y-14">
           <RoomPageClient
             room={room}
             initialPhotos={photos}
             styleDesc={styleDesc}
           />
+          <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 md:p-10" dir="rtl" aria-labelledby="room-seo-heading">
+            <div className="max-w-4xl space-y-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-primary/80">
+                Azenith Living SEO Guide
+              </p>
+              <h2 id="room-seo-heading" className="font-serif text-3xl leading-tight text-white md:text-5xl">
+                {seoTitle}
+              </h2>
+              <p className="text-base leading-8 text-white/72 md:text-lg">
+                {seoDescription}
+              </p>
+              <div className="grid gap-4 md:grid-cols-3">
+                {[
+                  "تخطيط عملي للحركة والتخزين والإضاءة قبل اختيار الشكل النهائي.",
+                  "اختيار خامات وألوان وأثاث مخصص يناسب الشقق والفيلات في القاهرة ومصر.",
+                  "ربط التصميم الداخلي بالتشطيبات وقطع الأثاث حتى تظهر الغرفة كجزء من هوية واحدة.",
+                ].map((item) => (
+                  <p key={item} className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 text-white/68">
+                    {item}
+                  </p>
+                ))}
+              </div>
+              <div className="grid gap-4 md:grid-cols-3">
+                {roomFaqs.map((faq) => (
+                  <article key={faq.question} className="space-y-2 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                    <h3 className="text-base font-semibold text-white">{faq.question}</h3>
+                    <p className="text-sm leading-7 text-white/65">{faq.answer}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </main>

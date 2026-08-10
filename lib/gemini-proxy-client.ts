@@ -120,7 +120,7 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
           headers: {
             "Authorization": `Bearer ${key}`,
             "Content-Type": "application/json",
-            "HTTP-Referer": "https://azenith-living-os.vercel.app",
+            "HTTP-Referer": "https://azenith-living.vercel.app",
             "X-Title": "Azenith Living Harvester"
           },
           body: JSON.stringify({

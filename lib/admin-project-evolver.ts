@@ -28,7 +28,7 @@ export async function executeProjectEvolutionMission(
 
   if (/seo|meta|عنوان|وصف.*الموقع/i.test(lower)) {
     const url =
-      process.env.NEXT_PUBLIC_SITE_URL || "https://azenith-living-os.vercel.app";
+      process.env.NEXT_PUBLIC_SITE_URL || "https://azenith-living.vercel.app";
     const r = await fetchAndPatchStaticFromUrl(
       url,
       "Azenith Living | تصميم داخلي فاخر",

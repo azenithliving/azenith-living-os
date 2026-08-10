@@ -956,7 +956,7 @@ export async function executeSeoFixIssues(
   const url =
     (params.url as string) ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://azenith-living-os.vercel.app";
+    "https://azenith-living.vercel.app";
   const { applySeoAutoFixes } = await import("@/lib/seo-auto-fixer");
   const fix = await applySeoAutoFixes({
     url,

@@ -32,7 +32,7 @@ function siteUrl(): string {
   return (
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    "https://azenith-living-os.vercel.app"
+    "https://azenith-living.vercel.app"
   );
 }
 

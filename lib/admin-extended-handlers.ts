@@ -258,7 +258,7 @@ export async function executeContentHealthCheck(
   const base =
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    "https://azenith-living-os.vercel.app";
+    "https://azenith-living.vercel.app";
   const slug = (params.pageSlug as string) || "home";
   const url = slug === "home" ? base : `${base.replace(/\/$/, "")}/${slug}`;
   const r = await checkContentHealthWithInput({
@@ -352,7 +352,7 @@ export async function executeSpeedDeepAudit(
   const url =
     (params.url as string) ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://azenith-living-os.vercel.app";
+    "https://azenith-living.vercel.app";
   const r = await optimizeSpeedWithInput({
     url,
     strategy: params.deviceType === "desktop" ? "desktop" : "mobile",

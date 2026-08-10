@@ -6,8 +6,8 @@ export function getSupabaseAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!url || !serviceRoleKey) {
-    console.warn("[supabase-admin] Missing credentials - URL:", !!url, "ServiceRoleKey:", !!serviceRoleKey);
+  if (!url || !serviceRoleKey || serviceRoleKey === "placeholder-service-key") {
+    console.warn("[supabase-admin] Missing or placeholder credentials - URL:", !!url, "ServiceRoleKey:", !!serviceRoleKey);
     return null;
   }
 

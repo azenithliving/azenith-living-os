@@ -17,6 +17,7 @@ import { isValidRoomSlug } from "@/lib/rooms-catalog";
 export async function proxy(request: NextRequest) {
   const { pathname, search, origin } = request.nextUrl;
   const referer = request.headers.get('referer');
+  const host = request.headers.get("host")?.toLowerCase();
   let rateLimitHeaders: Record<string, string> | null = null;
   const isAdminLoginApi =
     pathname === "/api/admin/verify-2fa" ||
@@ -30,6 +31,12 @@ export async function proxy(request: NextRequest) {
     });
     return response;
   };
+
+  if (host === "azenith-living-os.vercel.app") {
+    const url = request.nextUrl.clone();
+    url.hostname = "azenith-living.vercel.app";
+    return NextResponse.redirect(url, 301);
+  }
 
   // 1. GATEKEEPER LEAK DETECTION (Sovereign Mesh)
   // Catch requests escaping from proxied dimensions (Referer: Mirror API)

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import useSessionStore from "@/stores/useSessionStore";
-import { MessageCircle, X, Send, User, RefreshCw } from "lucide-react";
+import { X, Send, User, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AvatarButton from "./AvatarButton";
 
@@ -15,6 +15,7 @@ interface Message {
 interface ConsultantResponse {
   reply: string;
   sessionId: string;
+  uiAction?: string;
 }
 
 interface SessionData {
@@ -24,13 +25,38 @@ interface SessionData {
   updatedAt: string;
 }
 
-const WELCOME_MESSAGE_NEW = (isRTL: boolean) => isRTL ? "أهلاً بك في أزينث ليفينج. أنا مُستشارك الشخصي. هل تسمح لي بمعرفة اسمك؟" : "Welcome to Azenith Living. I am your personal consultant. May I know your name?";
-const WELCOME_MESSAGE_RETURNING = (name: string, topic: string, isRTL: boolean) => isRTL ? `أهلاً بعودتك ${name}. هل ما زلت مهتمًا بـ ${topic}؟` : `Welcome back ${name}. Are you still interested in ${topic}?`;
+const HUMAN_WELCOME_NEW = (isRTL: boolean) => isRTL
+  ? "أهلًا بك في أزينث ليفينج. أنا مستشارك الشخصي للتصميم الداخلي، وهساعدك نبدأ من المساحة الأهم بالنسبة لك. ما اسمك؟"
+  : "Welcome to Azenith Living. I am your personal interior-design consultant. May I know your name?";
+const HUMAN_WELCOME_RETURNING = (name: string, topic: string, isRTL: boolean) => isRTL
+  ? `أهلًا بعودتك ${name}. هل ما زلت مهتمًا بـ ${topic}؟`
+  : `Welcome back ${name}. Are you still interested in ${topic}?`;
+const HUMAN_WELCOME_QUANTUM = (isRTL: boolean) => isRTL
+  ? "لاحظت اهتمامك بالعرض الحالي. خليني أساعدك تختار المساحة الأنسب ونحدد الخطوة العملية التالية. أي غرفة أو مشروع تفكر فيه؟"
+  : "I noticed your interest in the current offer. Let me help you choose the right space and next step. Which room or project are you considering?";
+const HUMAN_WELCOME_THUNDER = (isRTL: boolean) => isRTL
+  ? "أهلًا بك. أقدر أساعدك بسرعة في فهم أنسب اتجاه للتصميم أو التشطيب حسب المساحة. ما نوع مشروعك؟"
+  : "Welcome. I can quickly help you understand the best design or finishing direction for your space. What is your project type?";
+const HUMAN_WELCOME_CONTEXTUAL = (isRTL: boolean) => isRTL
+  ? "أهلًا بك في أزينث. احكِ لي عن المساحة التي لفتت نظرك، وسأقترح عليك بداية مناسبة."
+  : "Welcome to Azenith. Tell me which space caught your eye, and I will suggest a suitable starting point.";
 
-// Contextual welcome messages based on active Fate Actions
-const WELCOME_QUANTUM = (isRTL: boolean) => isRTL ? "لاحظت أنك ترى العرض الاستثنائي الآن! 🎯 هذا الخصم 25% متاح لفترة محدودة جداً وتم تخصيصه خصيصاً للزوار المميزين. أنا هنا لمساعدتك في استغلاله. ما الذي يستهويك في مجال التصميم الداخلي؟" : "I see you're looking at the exceptional offer! 🎯 This 25% discount is available for a very limited time. I am here to help you utilize it. What interests you in interior design?";
-const WELCOME_THUNDER = (isRTL: boolean) => isRTL ? "أرى أنك لاحظت عرضنا الخاص! ⚡ خصم 15% فوري على أول معاينة لمشروعك. هل أخبرك أحد من قبل أن أزينث تصنع قصوراً من الفضاء؟ ما نوع مشروعك؟" : "I see you noticed our special offer! ⚡ 15% instant discount on your first project consultation. Has anyone told you Azenith builds palaces from space? What's your project type?";
-const WELCOME_HALLUCINATION = (isRTL: boolean) => isRTL ? "مرحباً! هل تعلم أن 3 عملاء آخرين يتصفحون نفس التصاميم التي تراها الآن؟ 👀 المساحات تُحجز بسرعة. ما الذي يستهويك؟" : "Hello! Did you know 3 other clients are browsing the same designs? 👀 Spaces get booked fast. What catches your eye?";
+function extractHumanLastTopic(msgs: Message[]): string {
+  const roomKeywords = ["غرفة", "صالة", "مطبخ", "حمام", "مكتب", "غرفة نوم", "غرفة أطفال", "دريسنج", "فيلا"];
+  const styleKeywords = ["مودرن", "كلاسيك", "نيو كلاسيك", "صناعي", "اسكندنافي", "مينيمال"];
+
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    const content = msgs[i].content;
+    for (const keyword of roomKeywords) {
+      if (content.includes(keyword)) return keyword;
+    }
+    for (const keyword of styleKeywords) {
+      if (content.includes(keyword)) return `التصميم ${keyword}`;
+    }
+  }
+
+  return "التصميم الداخلي";
+}
 
 export default function ConsultantWidget() {
   const currentLang = useSessionStore((state) => state.language);
@@ -168,10 +194,10 @@ export default function ConsultantWidget() {
       if (sessionMessages && sessionMessages.length > 0) {
         // Returning user - add welcome back message
         const name = storedName || userName || "";
-        const lastTopic = extractLastTopic(sessionMessages);
+        const lastTopic = extractHumanLastTopic(sessionMessages);
         const welcomeBackMsg: Message = {
           role: "assistant",
-          content: WELCOME_MESSAGE_RETURNING(name, lastTopic, isRTL),
+          content: HUMAN_WELCOME_RETURNING(name, lastTopic, isRTL),
           timestamp: new Date().toISOString(),
         };
         setMessages(prev => [...prev, welcomeBackMsg]);
@@ -179,13 +205,13 @@ export default function ConsultantWidget() {
       }
     }
 
-    // New user — check for active Fate Actions and build contextual greeting
+    // New user - check for active Fate Actions and build contextual greeting
     if (messages.length === 0) {
       const latestAction = await fetchLatestFateAction();
-      let welcomeContent = WELCOME_MESSAGE_NEW(isRTL);
-      if (latestAction === "QUANTUM_OFFER") welcomeContent = WELCOME_QUANTUM(isRTL);
-      else if (latestAction === "THUNDER") welcomeContent = WELCOME_THUNDER(isRTL);
-      else if (latestAction === "HALLUCINATION") welcomeContent = WELCOME_HALLUCINATION(isRTL);
+      let welcomeContent = HUMAN_WELCOME_NEW(isRTL);
+      if (latestAction === "QUANTUM_OFFER") welcomeContent = HUMAN_WELCOME_QUANTUM(isRTL);
+      else if (latestAction === "THUNDER") welcomeContent = HUMAN_WELCOME_THUNDER(isRTL);
+      else if (latestAction === "HALLUCINATION") welcomeContent = HUMAN_WELCOME_CONTEXTUAL(isRTL);
 
       setMessages([{
         role: "assistant",
@@ -208,18 +234,18 @@ export default function ConsultantWidget() {
     }
   }, [handleOpen]);
 
-  // استمع لحدث "fate:open_chat" الصادر من RealityUIProvider بعد انتهاء التجميد
+  // Listen for the Fate open-chat event from RealityUIProvider.
   useEffect(() => {
     const handleFateOpenChat = (e: Event) => {
       const customEvent = e as CustomEvent<{ message: string }>;
       const specialMessage = customEvent.detail?.message;
 
-      // افتح الشات
+      // Open the chat.
       setIsOpen(true);
       setHasLoadedSession(true);
 
       if (specialMessage) {
-        // 1. أضف الرسالة للـ UI فوراً
+        // Add the injected message to the UI immediately.
         setMessages(prev => {
           if (prev.some(m => m.content === specialMessage)) return prev;
           return [...prev, {
@@ -229,7 +255,7 @@ export default function ConsultantWidget() {
           }];
         });
 
-        // 2. احفظها في Supabase لكي يعرف المستشار عنها عند الرد
+        // Persist it so the consultant can see the same context.
         const sid = localStorage.getItem("azenith_session_id");
         if (sid) {
           fetch("/api/consultant/inject", {
@@ -321,15 +347,18 @@ export default function ConsultantWidget() {
 
       // Parse and execute Reality UI mutations
       let finalReply = data.reply;
+      let uiAction = data.uiAction;
       const uiActionMatch = finalReply.match(/\[UI_ACTION:\s*([^\]]+)\]/);
       if (uiActionMatch) {
-        const action = uiActionMatch[1].trim();
+        uiAction = uiAction || uiActionMatch[1].trim();
         finalReply = finalReply.replace(/\[UI_ACTION:\s*[^\]]+\]/g, "").trim();
-        
+      }
+
+      if (uiAction) {
         // Dispatch global event for the Reality Distortion Engine to pick up
         if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("azenith_reality_mutation", { detail: { action } }));
-          console.log(`[Reality Engine] Executing UI Mutation: ${action}`);
+          window.dispatchEvent(new CustomEvent("azenith_reality_mutation", { detail: { action: uiAction } }));
+          console.log(`[Reality Engine] Executing UI Mutation: ${uiAction}`);
         }
       }
 
@@ -346,7 +375,7 @@ export default function ConsultantWidget() {
       // Add error message
       const errorMessage: Message = {
         role: "assistant",
-        content: isRTL ? "عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى." : "Sorry, a connection error occurred. Please try again.",
+        content: isRTL ? "عذرًا، الاتصال تعطل لحظة. حاول مرة أخرى، أو اترك رقمك وسيتواصل معك مستشار أزينث." : "Sorry, the connection paused for a moment. Please try again, or leave your phone number and an Azenith consultant will follow up.",
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -358,28 +387,6 @@ export default function ConsultantWidget() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     sendMessage(inputMessage);
-  };
-
-  // Extract last topic from conversation
-  const extractLastTopic = (msgs: Message[]): string => {
-    // Look for room or style mentions in messages
-    const roomKeywords = ["غرفة", "صالة", "مطبخ", "حمام", "مكتب", "غرفة نوم", "غرفة أطفال"];
-    const styleKeywords = ["مودرن", "كلاسيك", "صناعي", "اسكندنافي", "مينيمال"];
-
-    for (let i = msgs.length - 1; i >= 0; i--) {
-      const content = msgs[i].content;
-      for (const keyword of roomKeywords) {
-        if (content.includes(keyword)) {
-          return keyword;
-        }
-      }
-      for (const keyword of styleKeywords) {
-        if (content.includes(keyword)) {
-          return `التصميم ${keyword}`;
-        }
-      }
-    }
-    return "التصميم الداخلي";
   };
 
   const toggleChat = () => {
@@ -415,8 +422,8 @@ export default function ConsultantWidget() {
                 <User className="h-4 w-4 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-white">{isRTL ? "مُستشار أزينث" : "Azenith Consultant"}</h3>
-                <span className="text-xs text-white/80">{isRTL ? "متصل الآن" : "Online now"}</span>
+                <h3 className="font-semibold text-white">{isRTL ? "مستشار أزينث" : "Azenith Consultant"}</h3>
+                <span className="text-xs text-white/80">{isRTL ? "متاح الآن" : "Online now"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -427,7 +434,7 @@ export default function ConsultantWidget() {
                     setSessionId(null);
                     setMessages([{
                       role: "assistant",
-                      content: WELCOME_MESSAGE_NEW(isRTL),
+                      content: HUMAN_WELCOME_NEW(isRTL),
                       timestamp: new Date().toISOString(),
                     }]);
                     setUserName(null);

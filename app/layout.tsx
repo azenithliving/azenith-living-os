@@ -3,33 +3,33 @@ import Script from "next/script";
 
 import { Toaster } from "react-hot-toast";
 
-import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-
-import { Providers } from "./providers";
-import ConsultantWidgetWrapper from "./ConsultantWidgetWrapper";
+import MainLayout from "@/components/MainLayout";
 import RealityUIProvider from "@/components/RealityUIProvider";
 import TelemetryTracker from "@/components/TelemetryTracker";
-import MainLayout from "@/components/MainLayout";
+import { buildPageMetadata, getOrganizationJsonLd } from "@/lib/seo";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+
+import ConsultantWidgetWrapper from "./ConsultantWidgetWrapper";
 import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "أزينث ليفينج | تصميم داخلي فاخر في مصر | Azenith Living",
-  description: "أزينث ليفينج (Azenith Living) شركة رائدة في التصميم الداخلي والديكور الفاخر والتشطيبات. نحول المساحات إلى تجارب فاخرة للمنازل والشركات في القاهرة ومصر.",
-  keywords: ["تصميم داخلي", "ديكور فاخر", "تشطيبات", "أزينث ليفينج", "Azenith Living", "Interior Design Egypt", "Luxury Furniture"],
+  ...buildPageMetadata({
+    title: "أزينث ليفينج | تصميم داخلي فاخر وتشطيبات في مصر",
+    description:
+      "أزينث ليفينج تقدم تصميم داخلي فاخر، ديكور، تشطيبات، أثاث مخصص، غرف نوم، مطابخ، غرف معيشة، ودريسنج في القاهرة ومصر.",
+  }),
+  title: {
+    default: "أزينث ليفينج | تصميم داخلي فاخر وتشطيبات في مصر",
+    template: "%s | Azenith Living",
+  },
+  applicationName: "Azenith Living",
   authors: [{ name: "Azenith Living" }],
   creator: "Azenith Living",
-  openGraph: {
-    title: "أزينث ليفينج | تصميم داخلي فاخر في مصر",
-    description: "نحول المساحات إلى تجارب فاخرة. خدمات تصميم داخلي وتشطيبات متميزة.",
-    url: "https://azenith-living-os.vercel.app",
-    siteName: "Azenith Living",
-    locale: "ar_EG",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "أزينث ليفينج | تصميم داخلي فاخر",
-    description: "نحول المساحات إلى تجارب فاخرة. خدمات تصميم داخلي وتشطيبات متميزة.",
+  publisher: "Azenith Living",
+  category: "Interior Design",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
   icons: { icon: "/favicon.png", apple: "/favicon.png" },
 };
@@ -107,22 +107,7 @@ export default async function RootLayout({
 
   const adsenseEnabled = seo.adsenseEnabled === true;
   const adsenseClient = typeof seo.adsenseClient === "string" ? seo.adsenseClient : "";
-
-  const schemaData = {
-    "@context": "https://schema.org",
-    "@type": "HomeAndConstructionBusiness",
-    "name": "أزينث ليفينج | Azenith Living",
-    "image": "https://azenith-living-os.vercel.app/favicon.png",
-    "description": "شركة رائدة في التصميم الداخلي والديكور الفاخر والتشطيبات في مصر.",
-    "url": "https://azenith-living-os.vercel.app",
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "القاهرة",
-      "addressRegion": "القاهرة",
-      "addressCountry": "EG"
-    },
-    "priceRange": "$$$"
-  };
+  const schemaData = getOrganizationJsonLd();
 
   return (
     <html
@@ -148,7 +133,11 @@ export default async function RootLayout({
             strategy="afterInteractive"
           />
         ) : null}
-        <Providers><TelemetryTracker /><RealityUIProvider /><MainLayout>{children}</MainLayout></Providers>
+        <Providers>
+          <TelemetryTracker />
+          <RealityUIProvider />
+          <MainLayout>{children}</MainLayout>
+        </Providers>
         <Toaster
           position="bottom-center"
           toastOptions={{

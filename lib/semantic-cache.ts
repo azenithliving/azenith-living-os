@@ -131,11 +131,18 @@ export class SemanticCacheManager {
   }
 
   private normalizeText(text: string): string {
-    return text
+    const lowered = text
       .toLowerCase()
+      .replace(/\bpayment methods\b/g, "payment options")
+      .replace(/\bpayments\b/g, "payment")
+      .replace(/\bmethods\b/g, "options")
+      .replace(/\bmethod\b/g, "options")
+      .replace(/\boptions\b/g, "options")
       .replace(/[^\w\s]/g, " ")
       .replace(/\s+/g, " ")
-      .trim()
+      .trim();
+
+    return lowered
       .split(" ")
       .filter(w => w.length > 2)
       .sort()
@@ -164,7 +171,24 @@ export class SemanticCacheManager {
     const semanticHash = await this.computeSemanticHash(query.query, query.context);
     const threshold = query.similarityThreshold || 0.85;
 
-    // L0: In-memory cache (fastest)
+    // L0: In-memory cache similarity search (fastest)
+    for (const [hash, entry] of this.l0Cache) {
+      const similarity = this.calculateSimilarity(query.query, entry.exactMatch);
+      if (similarity >= threshold) {
+        entry.metadata.lastAccessed = new Date();
+        entry.metadata.accessCount++;
+        return {
+          hit: true,
+          entry,
+          source: "redis_l1",
+          responseTimeMs: Date.now() - startTime,
+          costSaved: 0.02,
+          similarity,
+        };
+      }
+    }
+
+    // L0: In-memory cache exact hash lookup
     const l0Result = this.l0Cache.get(semanticHash);
     if (l0Result) {
       l0Result.metadata.lastAccessed = new Date();

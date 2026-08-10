@@ -6,6 +6,17 @@ import Hero from "@/components/Hero";
 import HomePageClient from "@/components/home-page-client-fixed";
 import useSessionStore from "@/stores/useSessionStore";
 
+const seoEntryLinks = [
+  { href: "/seo/interior-design-egypt", label: "تصميم داخلي في مصر" },
+  { href: "/seo/luxury-interior-design-cairo", label: "تصميم داخلي فاخر في القاهرة" },
+  { href: "/seo/luxury-bedroom-design-cairo", label: "تصميم غرف نوم فاخرة" },
+  { href: "/seo/modern-kitchen-design-egypt", label: "تصميم مطابخ مودرن" },
+  { href: "/seo/living-room-interior-egypt", label: "تصميم صالات وغرف معيشة" },
+  { href: "/seo/dressing-room-design-cairo", label: "تصميم دريسنج روم" },
+  { href: "/seo/villa-finishing-interior-design", label: "تشطيب وتصميم فيلات" },
+  { href: "/seo/custom-furniture-egypt", label: "أثاث مخصص فاخر" },
+];
+
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const currentLang = useSessionStore((state) => state.language);
@@ -63,6 +74,29 @@ export default function Home() {
           <div id="inventory-section" className="relative z-20 pt-8">
             <HomePageClient runtimeConfig={runtimeConfig} initialRoomImages={initialRoomImages} />
           </div>
+
+          <section className="relative z-20 mx-auto max-w-6xl px-6 py-16 md:px-10" aria-labelledby="seo-entry-title">
+            <div className="space-y-5 border-t border-white/10 pt-10">
+              <p className="text-sm uppercase tracking-[0.28em] text-brand-primary/70">Azenith Living Search Hub</p>
+              <h2 id="seo-entry-title" className="font-serif text-3xl text-white md:text-5xl">
+                تصميم داخلي فاخر في مصر يبدأ من فهم المساحة قبل اختيار الشكل.
+              </h2>
+              <p className="max-w-3xl text-sm leading-8 text-white/68 md:text-base">
+                أزينث ليفينج تساعدك في تصميم غرف النوم، الصالات، المطابخ، الدريسنج، الفيلات، والأثاث المخصص بخطة واضحة تربط بين الجمال، الراحة، الميزانية، وقابلية التنفيذ.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {seoEntryLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="rounded-full border border-white/15 px-4 py-2 text-sm text-white/75 transition hover:border-brand-primary hover:text-brand-primary"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
         </section>
       </div>
     </main>
