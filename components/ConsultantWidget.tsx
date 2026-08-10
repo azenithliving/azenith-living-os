@@ -25,21 +25,30 @@ interface SessionData {
   updatedAt: string;
 }
 
-const HUMAN_WELCOME_NEW = (isRTL: boolean) => isRTL
-  ? "أهلًا بك في أزينث ليفينج. أنا مستشارك الشخصي للتصميم الداخلي، وهساعدك نبدأ من المساحة الأهم بالنسبة لك. ما اسمك؟"
-  : "Welcome to Azenith Living. I am your personal interior-design consultant. May I know your name?";
-const HUMAN_WELCOME_RETURNING = (name: string, topic: string, isRTL: boolean) => isRTL
-  ? `أهلًا بعودتك ${name}. هل ما زلت مهتمًا بـ ${topic}؟`
-  : `Welcome back ${name}. Are you still interested in ${topic}?`;
-const HUMAN_WELCOME_QUANTUM = (isRTL: boolean) => isRTL
-  ? "لاحظت اهتمامك بالعرض الحالي. خليني أساعدك تختار المساحة الأنسب ونحدد الخطوة العملية التالية. أي غرفة أو مشروع تفكر فيه؟"
-  : "I noticed your interest in the current offer. Let me help you choose the right space and next step. Which room or project are you considering?";
-const HUMAN_WELCOME_THUNDER = (isRTL: boolean) => isRTL
-  ? "أهلًا بك. أقدر أساعدك بسرعة في فهم أنسب اتجاه للتصميم أو التشطيب حسب المساحة. ما نوع مشروعك؟"
-  : "Welcome. I can quickly help you understand the best design or finishing direction for your space. What is your project type?";
-const HUMAN_WELCOME_CONTEXTUAL = (isRTL: boolean) => isRTL
-  ? "أهلًا بك في أزينث. احكِ لي عن المساحة التي لفتت نظرك، وسأقترح عليك بداية مناسبة."
-  : "Welcome to Azenith. Tell me which space caught your eye, and I will suggest a suitable starting point.";
+const HUMAN_WELCOME_NEW = (isRTL: boolean) =>
+  isRTL
+    ? "أهلًا بك في أزينث ليفينج. أنا مستشارك الشخصي للتصميم الداخلي، وهساعدك نبدأ من المساحة الأهم بالنسبة لك. ما اسمك؟"
+    : "Welcome to Azenith Living. I am your personal interior-design consultant. May I know your name?";
+
+const HUMAN_WELCOME_RETURNING = (name: string, topic: string, isRTL: boolean) =>
+  isRTL
+    ? `أهلًا بعودتك ${name}. هل ما زلت مهتمًا بـ ${topic}؟`
+    : `Welcome back ${name}. Are you still interested in ${topic}?`;
+
+const HUMAN_WELCOME_QUANTUM = (isRTL: boolean) =>
+  isRTL
+    ? "لاحظت اهتمامك بالعرض الحالي. خليني أساعدك تختار المساحة الأنسب ونحدد الخطوة العملية التالية. أي غرفة أو مشروع تفكر فيه؟"
+    : "I noticed your interest in the current offer. Let me help you choose the right space and next step. Which room or project are you considering?";
+
+const HUMAN_WELCOME_THUNDER = (isRTL: boolean) =>
+  isRTL
+    ? "أهلًا بك. أقدر أساعدك بسرعة في فهم أنسب اتجاه للتصميم أو التشطيب حسب المساحة. ما نوع مشروعك؟"
+    : "Welcome. I can quickly help you understand the best design or finishing direction for your space. What is your project type?";
+
+const HUMAN_WELCOME_CONTEXTUAL = (isRTL: boolean) =>
+  isRTL
+    ? "أهلًا بك في أزينث. احكِ لي عن المساحة التي لفتت نظرك، وسأقترح عليك بداية مناسبة."
+    : "Welcome to Azenith. Tell me which space caught your eye, and I will suggest a suitable starting point.";
 
 function extractHumanLastTopic(msgs: Message[]): string {
   const roomKeywords = ["غرفة", "صالة", "مطبخ", "حمام", "مكتب", "غرفة نوم", "غرفة أطفال", "دريسنج", "فيلا"];
@@ -80,10 +89,14 @@ export default function ConsultantWidget() {
 
     // Auto-expire session after 24 hours of inactivity
     if (lastUpdate && Date.now() - parseInt(lastUpdate, 10) > 86400000) {
+      // Session expired: clear storage and reset component state
       localStorage.removeItem("azenith_session_id");
       localStorage.removeItem("azenith_consultant_messages");
       localStorage.removeItem("azenith_consultant_name");
       localStorage.removeItem("azenith_consultant_last_update");
+      setSessionId(null);
+      setMessages([]);
+      setUserName(null);
       return;
     }
 
@@ -150,7 +163,7 @@ export default function ConsultantWidget() {
         if (data.messages && data.messages.length > 0) {
           setMessages(data.messages);
           // Extract name from first user message
-          const firstUserMsg = data.messages.find(m => m.role === "user");
+          const firstUserMsg = data.messages.find((m) => m.role === "user");
           if (firstUserMsg) {
             const extractedName = firstUserMsg.content.split(/\s+/)[0];
             if (extractedName.length > 1) {
@@ -200,7 +213,7 @@ export default function ConsultantWidget() {
           content: HUMAN_WELCOME_RETURNING(name, lastTopic, isRTL),
           timestamp: new Date().toISOString(),
         };
-        setMessages(prev => [...prev, welcomeBackMsg]);
+        setMessages((prev) => [...prev, welcomeBackMsg]);
         return;
       }
     }
@@ -219,7 +232,7 @@ export default function ConsultantWidget() {
         timestamp: new Date().toISOString(),
       }]);
     }
-  }, [hasLoadedSession, fetchSession, fetchLatestFateAction, messages.length, userName]);
+  }, [hasLoadedSession, fetchSession, fetchLatestFateAction, messages.length, userName, isRTL]);
 
   // Proactive trigger: Open chat after 15 seconds if first visit
   useEffect(() => {
@@ -230,6 +243,7 @@ export default function ConsultantWidget() {
         handleOpen();
         localStorage.setItem("azenith_consultant_auto_opened", "true");
       }, 15000);
+      // Cleanup timeout on unmount or when handleOpen changes
       return () => clearTimeout(timer);
     }
   }, [handleOpen]);
@@ -246,8 +260,8 @@ export default function ConsultantWidget() {
 
       if (specialMessage) {
         // Add the injected message to the UI immediately.
-        setMessages(prev => {
-          if (prev.some(m => m.content === specialMessage)) return prev;
+        setMessages((prev) => {
+          if (prev.some((m) => m.content === specialMessage)) return prev;
           return [...prev, {
             role: "assistant" as const,
             content: specialMessage,
@@ -266,7 +280,7 @@ export default function ConsultantWidget() {
               message: specialMessage,
               source: "fate",
             }),
-          }).catch(() => {/* silent */});
+          }).catch(() => { /* silent */ });
         }
       }
     };
@@ -284,7 +298,7 @@ export default function ConsultantWidget() {
         if (res.ok) {
           const data = await res.json();
           if (data.reply) {
-            setMessages(prev => [...prev, {
+            setMessages((prev) => [...prev, {
               role: "assistant",
               content: data.reply,
               timestamp: new Date().toISOString(),
@@ -296,7 +310,6 @@ export default function ConsultantWidget() {
     const interval = setInterval(pollReplies, 15000);
     return () => clearInterval(interval);
   }, [isOpen, sessionId]);
-
 
   // Send message to API
   const sendMessage = async (content: string) => {
@@ -310,7 +323,7 @@ export default function ConsultantWidget() {
       content: content.trim(),
       timestamp: new Date().toISOString(),
     };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
 
     // Extract name from first message if not known
@@ -368,17 +381,19 @@ export default function ConsultantWidget() {
         content: finalReply,
         timestamp: new Date().toISOString(),
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("[ConsultantWidget] Error sending message:", error);
 
       // Add error message
       const errorMessage: Message = {
         role: "assistant",
-        content: isRTL ? "عذرًا، الاتصال تعطل لحظة. حاول مرة أخرى، أو اترك رقمك وسيتواصل معك مستشار أزينث." : "Sorry, the connection paused for a moment. Please try again, or leave your phone number and an Azenith consultant will follow up.",
+        content: isRTL
+          ? "عذرًا، الاتصال تعطل لحظة. حاول مرة أخرى، أو اترك رقمك وسيتواصل معك مستشار أزينث."
+          : "Sorry, the connection paused for a moment. Please try again, or leave your phone number and an Azenith consultant will follow up.",
         timestamp: new Date().toISOString(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -465,9 +480,7 @@ export default function ConsultantWidget() {
                     key={index}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`flex max-w-[85%] ${
-                      msg.role === "user" ? "ml-auto" : "mr-auto"
-                    }`}
+                    className={`flex max-w-[85%] ${msg.role === "user" ? "ml-auto" : "mr-auto"}`}
                   >
                     <div
                       className={`rounded-2xl px-4 py-2.5 text-sm ${
@@ -511,16 +524,16 @@ export default function ConsultantWidget() {
                 type="text"
                 value={inputMessage}
                 onChange={(e) => {
-                    const val = e.target.value;
-                    setInputMessage(val);
-                    // Pre-Cog Typing Sensor
-                    if (sessionId) {
-                        fetch("/api/consultant/typing", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ sessionId, typingPreview: val })
-                        }).catch(() => {});
-                    }
+                  const val = e.target.value;
+                  setInputMessage(val);
+                  // Pre-Cog Typing Sensor
+                  if (sessionId) {
+                    fetch("/api/consultant/typing", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ sessionId, typingPreview: val }),
+                    }).catch(() => {});
+                  }
                 }}
                 placeholder={isRTL ? "اكتب رسالتك..." : "Type your message..."}
                 className="flex-1 rounded-lg border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-gray-400 focus:border-amber-500 focus:outline-none"
