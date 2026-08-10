@@ -21,7 +21,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { data: session, error: sessionErr } = await supabase
       .from("consultant_sessions")
-      .select("messages")
+      .select("messages, ui_state")
       .eq("session_id", sessionId)
       .single();
 
@@ -40,9 +40,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     ];
 
+    // Sending a manual reply automatically enters seamless takeover mode:
+    // the AI stops answering so the human consultant drives the chat.
+    const currentUiState = (session.ui_state as Record<string, any> | null) || {};
+    const now = new Date().toISOString();
     const { error: updateErr } = await supabase
       .from("consultant_sessions")
-      .update({ messages: updatedMessages, updated_at: new Date().toISOString() })
+      .update({
+        messages: updatedMessages,
+        ui_state: {
+          ...currentUiState,
+          takeover_active: true,
+          takeover_started_at: currentUiState.takeover_started_at || now,
+        },
+        updated_at: now,
+      })
       .eq("session_id", sessionId);
 
     if (updateErr) {

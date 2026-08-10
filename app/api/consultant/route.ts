@@ -462,6 +462,37 @@ export async function POST(
       });
     }
 
+    // NORMAL VISITOR MODE
+    // Fetch existing session from database (early, so we can detect takeover mode)
+    const existingSession = await getSession(sessionId);
+    
+    // Build conversation history
+    const conversationHistory: Message[] = existingSession?.messages || history || [];
+
+    // Add user message to history
+    const userMessage: Message = {
+      role: "user",
+      content: message,
+      timestamp: new Date().toISOString(),
+    };
+    conversationHistory.push(userMessage);
+
+    // ── SEAMLESS ADMIN TAKEOVER MODE ──
+    // While an admin is manually driving the chat (ui_state.takeover_active), the AI
+    // must not generate a competing reply. We only persist the visitor message and
+    // hand the conversation back to the human consultant on the admin dashboard.
+    const takeoverUiState = (existingSession?.ui_state as Record<string, any> | null) || {};
+    if (takeoverUiState.takeover_active === true) {
+      console.log(`[Consultant] Takeover active for session ${sessionId} - storing message, skipping AI reply`);
+      await saveSession(sessionId, conversationHistory, existingSession?.insights);
+      return NextResponse.json({
+        reply: language === "en"
+          ? "Your message has been received. A senior Azenith consultant will reply to you directly."
+          : "تم استلام رسالتك. سيرد عليك مستشار أزينث المختص مباشرة.",
+        sessionId,
+      });
+    }
+
     // --- L0-L3 SEMANTIC NEURAL CACHE ---
     try {
       const cacheResult = await semanticCache.get({
@@ -480,21 +511,6 @@ export async function POST(
     } catch (cacheErr) {
       console.warn("[Consultant] Semantic cache lookup failed, continuing with LLM:", cacheErr);
     }
-
-    // NORMAL VISITOR MODE
-    // Fetch existing session from database
-    const existingSession = await getSession(sessionId);
-    
-    // Build conversation history
-    const conversationHistory: Message[] = existingSession?.messages || history || [];
-
-    // Add user message to history
-    const userMessage: Message = {
-      role: "user",
-      content: message,
-      timestamp: new Date().toISOString(),
-    };
-    conversationHistory.push(userMessage);
 
     // Fetch all learnings and build enhanced system prompt
     const learnings = await getLearnings();

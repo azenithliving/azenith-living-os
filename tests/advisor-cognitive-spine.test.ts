@@ -273,4 +273,34 @@ describe("SAA vInfinity: Azenith Advisor Cognitive Spine Tests", () => {
     expect(postRes.status).toBe(200);
     expect(postData.success).toBe(true);
   });
+
+  // ── Test 8 ───────────────────────────────────────────────────────────────
+  test("8. Seamless Takeover: AI is silenced and visitor message stored while takeover_active", async () => {
+    const { askOrchestratorMessages } = await import("@/lib/ai-orchestrator");
+    const { getSupabaseAdminClient } = await import("@/lib/supabase-admin");
+    const mockSupa = vi.mocked(getSupabaseAdminClient)();
+    (mockSupa.single as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: {
+        session_id: "session-takeover",
+        messages: [{ role: "user", content: "السلام عليكم", timestamp: new Date().toISOString() }],
+        insights: { userName: "أحمد" },
+        ui_state: { takeover_active: true, takeover_started_at: new Date().toISOString() },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      error: null,
+    });
+
+    const req = makeRequest(
+      "http://localhost:3000/api/consultant",
+      { message: "ممكن أعرف سعر الدريسنج؟", sessionId: "session-takeover", language: "ar" }
+    );
+
+    const res = await consultantPost(req);
+    const data = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(data.reply).toContain("تم استلام رسالتك");
+    expect(askOrchestratorMessages).not.toHaveBeenCalled();
+  });
 });

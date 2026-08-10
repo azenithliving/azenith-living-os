@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 interface Message {
   role: "user" | "assistant";
   content: string;
+  source?: string;
   timestamp?: string;
 }
 
@@ -32,6 +33,13 @@ interface PendingQuestion {
   created_at: string;
 }
 
+interface AuditQuestion {
+  question: string;
+  category: string;
+  severity: "low" | "medium" | "high";
+  suggested_learning?: string;
+}
+
 interface Lead {
   id: string;
   session_id?: string;
@@ -47,7 +55,7 @@ interface Lead {
   score?: number;
   status: string;
   created_at: string;
-  messages?: Array<{ role: string; content: string; timestamp?: string }>;
+  messages?: Array<{ role: string; content: string; source?: string; timestamp?: string }>;
   telemetry?: {
     current_path?: string;
     attention_score?: number;
@@ -58,6 +66,8 @@ interface Lead {
     isFrozen?: boolean;
     lastOffer?: string;
     typing_preview?: string;
+    takeover_active?: boolean;
+    takeover_started_at?: string;
   };
 }
 
@@ -94,6 +104,12 @@ function SalesManagerTab() {
   const [savingInstruction, setSavingInstruction] = useState(false);
   const [answeringId, setAnsweringId] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState("");
+  const [editingLearningId, setEditingLearningId] = useState<string | null>(null);
+  const [editingInstruction, setEditingInstruction] = useState("");
+  const [auditQuestions, setAuditQuestions] = useState<AuditQuestion[]>([]);
+  const [isAuditing, setIsAuditing] = useState(false);
+  const [auditAnsweringIndex, setAuditAnsweringIndex] = useState<number | null>(null);
+  const [auditAnswerText, setAuditAnswerText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
 
@@ -159,6 +175,85 @@ function SalesManagerTab() {
       console.error("Error saving:", err);
     } finally {
       setSavingInstruction(false);
+    }
+  };
+
+  const startEditLearning = (item: KnowledgeItem) => {
+    setEditingLearningId(item.id);
+    setEditingInstruction(item.instruction);
+  };
+
+  const cancelEditLearning = () => {
+    setEditingLearningId(null);
+    setEditingInstruction("");
+  };
+
+  const updateLearning = async (id: string) => {
+    if (!editingInstruction.trim()) return;
+    try {
+      const res = await fetch(`/api/consultant/learnings?id=${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instruction: editingInstruction.trim() }),
+      });
+      if (!res.ok) throw new Error("Failed to update learning");
+      cancelEditLearning();
+      await loadKnowledge();
+      toast.success("تم تحديث قاعدة المعرفة");
+    } catch (err) {
+      console.error("Error updating learning:", err);
+      toast.error("فشل تحديث قاعدة المعرفة");
+    }
+  };
+
+  const deleteLearning = async (id: string) => {
+    try {
+      const res = await fetch(`/api/consultant/learnings?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete learning");
+      await loadKnowledge();
+      toast.success("تم حذف قاعدة المعرفة");
+    } catch (err) {
+      console.error("Error deleting learning:", err);
+      toast.error("فشل حذف قاعدة المعرفة");
+    }
+  };
+
+  const runKnowledgeAudit = async () => {
+    setIsAuditing(true);
+    try {
+      const res = await fetch("/api/admin/knowledge/audit", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Audit failed");
+      setAuditQuestions(data.questions || []);
+      if (!data.questions?.length) toast.success("لم يجد المدقق فجوات واضحة الآن");
+    } catch (err) {
+      console.error("Knowledge audit failed:", err);
+      toast.error("فشل تدقيق المعرفة");
+    } finally {
+      setIsAuditing(false);
+    }
+  };
+
+  const saveAuditAnswer = async (question: AuditQuestion, index: number) => {
+    if (!auditAnswerText.trim()) return;
+    const instruction = `Knowledge audit question: ${question.question}\nVerified admin answer: ${auditAnswerText.trim()}`;
+    try {
+      const res = await fetch("/api/consultant/learnings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instruction }),
+      });
+      if (!res.ok) throw new Error("Failed to save audit answer");
+      setAuditQuestions(prev => prev.filter((_, i) => i !== index));
+      setAuditAnsweringIndex(null);
+      setAuditAnswerText("");
+      await loadKnowledge();
+      toast.success("تم اعتماد الإجابة وإضافتها للمعرفة");
+    } catch (err) {
+      console.error("Audit answer save failed:", err);
+      toast.error("فشل حفظ إجابة التدقيق");
     }
   };
 
@@ -301,10 +396,122 @@ function SalesManagerTab() {
             ) : (
               knowledge.map((item) => (
                 <div key={item.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-sm text-white leading-relaxed">{item.instruction}</p>
-                  <p className="text-xs text-white/30 mt-2">{new Date(item.created_at).toLocaleDateString("ar-EG")}</p>
+                  {editingLearningId === item.id ? (
+                    <div className="space-y-3">
+                      <textarea
+                        value={editingInstruction}
+                        onChange={(e) => setEditingInstruction(e.target.value)}
+                        rows={4}
+                        className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => updateLearning(item.id)}
+                          disabled={!editingInstruction.trim()}
+                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs text-white hover:bg-emerald-500 disabled:opacity-50"
+                        >
+                          <Check className="h-3 w-3" />
+                          حفظ
+                        </button>
+                        <button
+                          onClick={cancelEditLearning}
+                          className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20"
+                        >
+                          <X className="h-3 w-3" />
+                          إلغاء
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-sm text-white leading-relaxed">{item.instruction}</p>
+                      <div className="mt-3 flex items-center justify-between gap-3">
+                        <p className="text-xs text-white/30">{new Date(item.created_at).toLocaleDateString("ar-EG")}</p>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => startEditLearning(item)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-white/60 hover:border-[#C5A059]/40 hover:text-[#C5A059]"
+                            title="تعديل"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => deleteLearning(item.id)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/20 text-red-300/70 hover:bg-red-500/10 hover:text-red-200"
+                            title="حذف"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))
+            )}
+          </div>
+          <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-purple-200">مدقق المعرفة التفاعلي</p>
+                <p className="text-xs text-white/45">يحلل قواعد المستشار ويقترح أسئلة لسد الفجوات قبل أن تظهر للعميل.</p>
+              </div>
+              <button
+                onClick={runKnowledgeAudit}
+                disabled={isAuditing}
+                className="rounded-lg bg-purple-500/20 px-4 py-2 text-sm text-purple-100 border border-purple-400/30 hover:bg-purple-500/30 disabled:opacity-50"
+              >
+                {isAuditing ? "جاري التدقيق..." : "تشغيل التدقيق"}
+              </button>
+            </div>
+            {auditQuestions.length > 0 && (
+              <div className="space-y-3">
+                {auditQuestions.map((q, index) => (
+                  <div key={`${q.question}-${index}`} className="rounded-lg border border-white/10 bg-black/30 p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm text-white">{q.question}</p>
+                        <p className="mt-1 text-[11px] uppercase tracking-wide text-purple-300">{q.category} | {q.severity}</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setAuditAnsweringIndex(index);
+                          setAuditAnswerText(q.suggested_learning || "");
+                        }}
+                        className="rounded-lg bg-[#C5A059]/20 px-3 py-1.5 text-xs text-[#C5A059] border border-[#C5A059]/30"
+                      >
+                        إجابة
+                      </button>
+                    </div>
+                    {auditAnsweringIndex === index && (
+                      <div className="mt-3 space-y-2">
+                        <textarea
+                          value={auditAnswerText}
+                          onChange={(e) => setAuditAnswerText(e.target.value)}
+                          rows={3}
+                          placeholder="اكتب الإجابة المعتمدة التي سيتعلمها المستشار..."
+                          className="w-full rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-sm text-white placeholder:text-white/30"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => saveAuditAnswer(q, index)}
+                            disabled={!auditAnswerText.trim()}
+                            className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs text-white hover:bg-emerald-500 disabled:opacity-50"
+                          >
+                            اعتماد وإضافة للمعرفة
+                          </button>
+                          <button
+                            onClick={() => { setAuditAnsweringIndex(null); setAuditAnswerText(""); }}
+                            className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20"
+                          >
+                            إلغاء
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -417,6 +624,12 @@ function LeadsTab() {
   const [showChatFor, setShowChatFor] = useState<string | null>(null);
   const [directReply, setDirectReply] = useState("");
   const [isSendingReply, setIsSendingReply] = useState(false);
+  const [copilotFor, setCopilotFor] = useState<string | null>(null);
+  const [copilotSuggestions, setCopilotSuggestions] = useState<string[]>([]);
+  const [isLoadingCopilot, setIsLoadingCopilot] = useState(false);
+  const [followUpFor, setFollowUpFor] = useState<string | null>(null);
+  const [followUpTemplate, setFollowUpTemplate] = useState("");
+  const [isLoadingFollowUp, setIsLoadingFollowUp] = useState(false);
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const searchParams = useSearchParams();
@@ -526,22 +739,83 @@ function LeadsTab() {
     }
   };
 
+  const loadCopilotSuggestions = async (lead: Lead) => {
+    const leadKey = lead.session_id || lead.id;
+    setCopilotFor(leadKey);
+    setIsLoadingCopilot(true);
+    try {
+      const res = await fetch("/api/admin/leads/suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(lead),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load suggestions");
+      setCopilotSuggestions(data.suggestions || []);
+    } catch (err) {
+      console.error("Failed to load copilot suggestions:", err);
+      setCopilotSuggestions([]);
+      toast.error("فشل تحميل اقتراحات المساعد");
+    } finally {
+      setIsLoadingCopilot(false);
+    }
+  };
+
+  const normalizeWhatsAppPhone = (phone: string) => {
+    const digits = (phone || "").replace(/\D/g, "");
+    if (!digits || digits.length < 10) return "";
+    if (digits.startsWith("20")) return digits;
+    if (digits.startsWith("0")) return `20${digits.slice(1)}`;
+    return digits;
+  };
+
+  const isDormantLead = (lead: Lead) =>
+    Date.now() - new Date(lead.created_at).getTime() >= 24 * 60 * 60 * 1000;
+
+  const generateFollowUp = async (lead: Lead) => {
+    const leadKey = lead.session_id || lead.id;
+    setFollowUpFor(leadKey);
+    setIsLoadingFollowUp(true);
+    try {
+      const res = await fetch("/api/admin/leads/follow-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(lead),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate follow-up");
+      setFollowUpTemplate(data.template || "");
+    } catch (err) {
+      console.error("Failed to generate follow-up:", err);
+      setFollowUpTemplate("");
+      toast.error("فشل توليد متابعة واتساب");
+    } finally {
+      setIsLoadingFollowUp(false);
+    }
+  };
+
   const sendDirectReply = async (sessionId: string) => {
     if (!directReply.trim()) return;
+    const cleanDirectReply = directReply.trim();
     setIsSendingReply(true);
     try {
       const res = await fetch("/api/admin/leads/reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, message: directReply.trim() })
+        body: JSON.stringify({ sessionId, message: cleanDirectReply })
       });
       if (res.ok) {
-        // Optimistically update the UI
+        // Optimistically update the UI without injecting a client-facing prefix.
         setLeads(leads.map(l => {
           if ((l.session_id || l.id) === sessionId && l.messages) {
             return {
               ...l,
-              messages: [...l.messages, { role: "assistant", content: `👨‍💼 [تدخل الإدارة]: ${directReply.trim()}` }]
+              messages: [...l.messages, {
+                role: "assistant",
+                content: cleanDirectReply,
+                source: "admin",
+                timestamp: new Date().toISOString(),
+              }]
             };
           }
           return l;
@@ -554,6 +828,46 @@ function LeadsTab() {
       setIsSendingReply(false);
     }
   };
+
+  const isAdminMessage = (msg: { content?: string; source?: string }) =>
+    msg.source === "admin" || msg.content?.includes("[تدخل الإدارة]") || msg.content?.includes("[ØªØ¯Ø®Ù„ Ø§Ù„Ø¥Ø¯Ø§Ø±Ø©]");
+
+  const setTakeover = async (lead: Lead, active: boolean) => {
+    const leadKey = lead.session_id || lead.id;
+    try {
+      const res = await fetch("/api/admin/leads/release", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: leadKey, active }),
+      });
+      if (res.ok) {
+        // Optimistically flip local state; the 3s leads poll keeps it in sync.
+        setLeads(prev => prev.map(l => {
+          if ((l.session_id || l.id) !== leadKey) return l;
+          return {
+            ...l,
+            ui_state: {
+              ...(l.ui_state || {}),
+              takeover_active: active,
+              ...(active ? { takeover_started_at: new Date().toISOString() } : {}),
+            },
+          };
+        }));
+        toast.success(active ? "🎮 تم تفعيل التحكم اليدوي - الـ AI متوقف" : "🤖 تم تسليم المحادثة للـ AI");
+      } else {
+        const data = await res.json().catch(() => null);
+        toast.error(data?.error || "فشل تغيير وضع التحكم");
+      }
+    } catch (e) {
+      console.error("Failed to set takeover state:", e);
+      toast.error("خطأ في الاتصال بالخادم");
+    }
+  };
+
+  const getDisplayMessage = (msg: { content?: string }) =>
+    (msg.content || "")
+      .replace(/^👨‍💼\s*\[تدخل الإدارة\]:\s*/u, "")
+      .replace(/^ðŸ‘¨â€ðŸ’¼\s*\[ØªØ¯Ø®Ù„ Ø§Ù„Ø¥Ø¯Ø§Ø±Ø©\]:\s*/u, "");
 
   return (
     <div className="space-y-6">
@@ -820,17 +1134,96 @@ function LeadsTab() {
 
                     {showChatFor === lead.id && lead.messages && (
                       <div className="mt-4 p-4 rounded-xl border border-white/10 bg-black/50 space-y-4">
-                        <div className="max-h-[300px] overflow-y-auto space-y-3 p-2">
-                          {lead.messages.map((msg, idx) => (
-                            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                              <div className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.role === 'user' ? 'bg-[#C5A059]/20 text-white' : msg.content.includes('[تدخل الإدارة]') ? 'bg-red-500/20 text-red-100 border border-red-500/30' : 'bg-white/10 text-white/90'}`}>
-                                <span className="block text-xs text-white/40 mb-1">
-                                  {msg.role === 'user' ? lead.name : msg.content.includes('[تدخل الإدارة]') ? 'أنت (الإدارة)' : 'المستشار الذكي'}
-                                </span>
-                                {msg.content.replace('👨‍💼 [تدخل الإدارة]: ', '')}
+                        {/* SEAMLESS TAKEOVER MODE BANNER */}
+                        {lead.ui_state?.takeover_active ? (
+                          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <span className="relative flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                              </span>
+                              <div>
+                                <p className="text-sm font-bold text-red-300">وضع التحكم اليدوي مفعّل</p>
+                                <p className="text-xs text-red-200/70">
+                                  الـ AI متوقف عن الرد وأنت تقود المحادثة الآن. رسائل العميل تصل لك مباشرة هنا.
+                                </p>
                               </div>
                             </div>
-                          ))}
+                            <button
+                              onClick={() => setTakeover(lead, false)}
+                              className="rounded-lg bg-red-500 px-4 py-2 text-xs font-bold text-white hover:bg-red-400 transition"
+                            >
+                              🤖 تسليم للـ AI
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5">
+                            <p className="text-xs text-white/50">الذكاء الاصطناعي يرد على العميل تلقائيًا.</p>
+                            <button
+                              onClick={() => setTakeover(lead, true)}
+                              className="rounded-lg border border-[#C5A059]/40 bg-[#C5A059]/10 px-4 py-2 text-xs font-bold text-[#C5A059] hover:bg-[#C5A059]/20 transition"
+                            >
+                              🎮 تحكم يدوي
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+                          <div>
+                            <div className="max-h-[300px] overflow-y-auto space-y-3 p-2">
+                              {lead.messages.map((msg, idx) => (
+                                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                  <div className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.role === 'user' ? 'bg-[#C5A059]/20 text-white' : isAdminMessage(msg) ? 'bg-red-500/20 text-red-100 border border-red-500/30' : 'bg-white/10 text-white/90'}`}>
+                                    <span className="block text-xs text-white/40 mb-1">
+                                      {msg.role === 'user' ? lead.name : isAdminMessage(msg) ? 'أنت (الإدارة)' : 'المستشار الذكي'}
+                                    </span>
+                                    {getDisplayMessage(msg)}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <aside className="rounded-xl border border-[#C5A059]/30 bg-[#C5A059]/5 p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <div>
+                                <p className="text-xs font-bold text-[#C5A059] uppercase tracking-wide">AI Copilot</p>
+                                <p className="text-[11px] text-white/40">اقتراحات الاستجابة</p>
+                              </div>
+                              <button
+                                onClick={() => loadCopilotSuggestions(lead)}
+                                disabled={isLoadingCopilot}
+                                className="rounded-lg border border-white/10 px-2 py-1 text-[10px] text-white/70 hover:bg-white/10 disabled:opacity-50"
+                              >
+                                {isLoadingCopilot ? "..." : "تحديث"}
+                              </button>
+                            </div>
+                            <div className="mt-3 space-y-2">
+                              {isLoadingCopilot ? (
+                                <div className="text-xs text-white/50">جاري توليد المقترحات...</div>
+                              ) : copilotFor === (lead.session_id || lead.id) && copilotSuggestions.length > 0 ? (
+                                copilotSuggestions.map((suggestion, idx) => (
+                                  <button
+                                    key={`${suggestion}-${idx}`}
+                                    onClick={() => {
+                                      setDirectReply(suggestion);
+                                      toast.success("تم نسخ اقتراح الرد");
+                                    }}
+                                    className="block w-full rounded-lg border border-white/10 bg-white/[0.04] px-2 py-2 text-left text-[11px] text-white/80 hover:bg-[#C5A059]/10 hover:text-white transition"
+                                  >
+                                    {suggestion}
+                                  </button>
+                                ))
+                              ) : (
+                                <button
+                                  onClick={() => loadCopilotSuggestions(lead)}
+                                  className="w-full rounded-lg border border-[#C5A059]/30 bg-[#C5A059]/10 px-2 py-2 text-[11px] text-[#C5A059] hover:bg-[#C5A059]/20"
+                                >
+                                  تحميل اقتراحات المساعد
+                                </button>
+                              )}
+                            </div>
+                          </aside>
                         </div>
                         
                         <div className="flex gap-2 border-t border-white/10 pt-4 mt-2">
