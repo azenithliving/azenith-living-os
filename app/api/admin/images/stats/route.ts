@@ -3,6 +3,10 @@ import { supabaseAdmin as supabase } from "@/lib/supabase-server";
 
 export async function GET(request: NextRequest) {
   try {
+    if (!supabase) {
+      return NextResponse.json({ success: false, error: "Database not initialized" }, { status: 500 });
+    }
+
     // Get total count
     const { count: totalCount, error: countError } = await supabase
       .from("curated_images")

@@ -728,7 +728,7 @@ Dashboard:
             console.log(`[SAA-WhatsApp] Greeting sent to ${phone} for session ${sessionId}`);
 
             // 2. Generate Style DNA from insights and send PDF catalog link
-            const styleDNA = await analyzeStyleDNAFast([], styleLabel);
+            const styleDNA = await analyzeStyleDNAFast([]);
             if (styleDNA) {
               const catalogMsg =
                 `🎨 لقد قمنا بإعداد كتالوج مخصص يناسب ذوقك في الطراز ${styleLabel} وميزانيتك ${budgetLabel}.\n\n` +

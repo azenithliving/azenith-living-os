@@ -10,6 +10,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
+    if (!supabaseServer) {
+      return NextResponse.json({ success: false, error: "Database client not initialized" }, { status: 500 });
+    }
+
     const { data, error } = await supabaseServer
       .from('evolution_log')
       .update({ 
