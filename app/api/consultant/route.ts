@@ -835,43 +835,11 @@ export async function POST(
         if (cohereIntent) {
           console.log(`[Cohere] Intent: ${cohereIntent.intent}, Confidence: ${cohereIntent.confidence}%`);
           
-          // Store enhanced intent in insights
+          // Store enhanced intent in insights for future use
           insights.intent = cohereIntent.intent;
           insights.intentConfidence = String(cohereIntent.confidence);
           insights.urgency = cohereIntent.urgency;
-          
-          // Try to update user score if userId is available
-          if (userId) {
-            try {
-              const { data: userData } = await supabase
-                .from("users")
-                .select("score, metadata")
-                .eq("id", userId)
-                .maybeSingle();
-              
-              if (userData) {
-                const scoreBoost = cohereIntent.confidence * 0.15; // Max +15 points
-                const newScore = Math.min(100, (userData.score || 50) + scoreBoost);
-                
-                await supabase
-                  .from("users")
-                  .update({
-                    score: newScore,
-                    metadata: {
-                      ...userData.metadata,
-                      intent: cohereIntent.intent,
-                      intentConfidence: cohereIntent.confidence,
-                      lastIntentCheck: new Date().toISOString(),
-                    },
-                  })
-                  .eq("id", userId);
-                
-                console.log(`[Cohere] Updated user score: ${userData.score} → ${newScore}`);
-              }
-            } catch (updateErr) {
-              console.log("[Cohere] Score update failed:", updateErr);
-            }
-          }
+          insights.suggestedAction = cohereIntent.suggestedAction;
         }
       } catch (cohereErr) {
         console.log("[Cohere] Intent classification skipped:", cohereErr);
