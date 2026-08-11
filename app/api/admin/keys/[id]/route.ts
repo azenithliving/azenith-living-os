@@ -50,6 +50,10 @@ export async function PATCH(
       updates.cooldown_until = null;
     }
 
+    if (body.cooldownUntil) {
+      updates.cooldown_until = body.cooldownUntil;
+    }
+
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(
         { error: "No updates provided" },

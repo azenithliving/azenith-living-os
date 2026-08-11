@@ -97,8 +97,7 @@ export async function loadKeysFromDB(): Promise<void> {
 
     const { data, error } = await supabase
       .from("api_keys")
-      .select("provider, key, cooldown_until, total_requests, last_used_at, last_error, error_count")
-      .eq("is_active", true);
+      .select("provider, key, cooldown_until, total_requests, last_used_at, last_error, error_count, is_active, is_backup");
 
     if (error) {
       console.error("[API Keys Service] Failed to load keys from DB:", error);
@@ -110,7 +109,7 @@ export async function loadKeysFromDB(): Promise<void> {
     // Reset states
     Object.keys(keyStates).forEach(k => { keyStates[k] = []; });
 
-    // Add DB keys
+    // Add DB keys (ALL keys, not just active)
     for (const row of data || []) {
       const provider = row.provider?.toLowerCase();
       if (keyStates[provider]) {
@@ -235,6 +234,7 @@ const keyIndices: Record<string, number> = {
 
 /**
  * Get next available key using round-robin with cooldown support
+ * ⚠️ SKIPS DEAD KEYS COMPLETELY - they never enter the work cycle
  */
 export async function getNextAvailableKey(
   provider: ApiKeyProvider
@@ -254,6 +254,12 @@ export async function getNextAvailableKey(
     const currentIndex = (startIndex + attempts) % pool.length;
     const keyEntry = pool[currentIndex];
 
+    // ⚠️ CRITICAL: Skip dead keys completely - they NEVER get used
+    if (keyEntry.isDead) {
+      attempts++;
+      continue;
+    }
+
     // Skip keys in cooldown
     if (keyEntry.cooldownUntil && keyEntry.cooldownUntil > now) {
       attempts++;
@@ -270,9 +276,14 @@ export async function getNextAvailableKey(
     return { key: keyEntry.key, index: currentIndex };
   }
 
-  // All keys in cooldown, return first anyway
-  keyIndices[provider] = (startIndex + 1) % pool.length;
-  return pool[startIndex] ? { key: pool[startIndex].key, index: startIndex } : null;
+  // All keys in cooldown or dead - try to find any non-dead key
+  const firstNonDead = pool.find(k => !k.isDead);
+  if (firstNonDead) {
+    keyIndices[provider] = (startIndex + 1) % pool.length;
+    return { key: firstNonDead.key, index: pool.indexOf(firstNonDead) };
+  }
+
+  return null; // No usable keys available
 }
 
 /**
@@ -447,6 +458,7 @@ export async function markKeyAsDead(
 
 /**
  * Increment error count for a key (3 errors = dead)
+ * ⚠️ النظام يستدعي autoMoveDeadKeyToFilter تلقائياً عند 3 أخطاء
  */
 export async function incrementKeyError(
   provider: ApiKeyProvider,
@@ -477,7 +489,6 @@ export async function incrementKeyError(
       .update({
         last_error: errorMessage,
         error_count: newErrorCount,
-        is_active: newErrorCount >= 3 ? false : true, // Deactivate after 3 errors
       })
       .eq("provider", provider)
       .eq("key", key);
@@ -485,12 +496,14 @@ export async function incrementKeyError(
     // Update in-memory
     if (keyEntry) {
       keyEntry.lastError = errorMessage;
-      if (newErrorCount >= 3) {
-        keyEntry.isDead = true;
-      }
     }
 
     console.log(`[API Keys] ${provider} key error count: ${newErrorCount}/3`);
+
+    // ⚠️ AUTOMATIC: Move to dead filter after 3 errors
+    if (newErrorCount >= 3) {
+      await autoMoveDeadKeyToFilter(provider, key, errorMessage);
+    }
   } catch (err) {
     console.error("[API Keys] Failed to increment error count:", err);
   }
@@ -517,5 +530,122 @@ export async function resetKeyErrors(
     }
   } catch (err) {
     // Silent fail
+  }
+}
+
+/**
+ * Auto-move key to backup when limit is near (automatically triggered)
+ * النظام يستدعي هذه الدالة تلقائياً عند اقتراب الليمت
+ */
+export async function autoMoveToBackup(
+  provider: ApiKeyProvider,
+  key: string,
+  reason: string
+): Promise<void> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      await supabase
+        .from("api_keys")
+        .update({
+          is_backup: true,
+          last_error: `Auto-moved to backup: ${reason}`,
+        })
+        .eq("provider", provider)
+        .eq("key", key);
+      
+      console.log(`[API Keys] ✅ Auto-moved ${provider} key to BACKUP: ${reason}`);
+    }
+  } catch (err) {
+    console.error("[API Keys] Failed to auto-move to backup:", err);
+  }
+}
+
+/**
+ * Auto-activate backup key when needed (automatically triggered)
+ * النظام يستدعي هذه الدالة تلقائياً عند الحاجة لمفاتيح إضافية
+ */
+export async function autoActivateBackupKey(
+  provider: ApiKeyProvider
+): Promise<string | null> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) return null;
+
+    // Find first backup key
+    const { data } = await supabase
+      .from("api_keys")
+      .select("key, id")
+      .eq("provider", provider)
+      .eq("is_backup", true)
+      .eq("is_active", false)
+      .limit(1)
+      .maybeSingle();
+
+    if (data) {
+      // Activate it
+      await supabase
+        .from("api_keys")
+        .update({
+          is_active: true,
+          is_backup: false,
+          last_error: "Auto-activated from backup",
+        })
+        .eq("id", data.id);
+
+      console.log(`[API Keys] ✅ Auto-activated BACKUP key for ${provider}`);
+      
+      // Reload keys to update in-memory state
+      await reloadKeys();
+      
+      return data.key;
+    }
+
+    return null;
+  } catch (err) {
+    console.error("[API Keys] Failed to auto-activate backup:", err);
+    return null;
+  }
+}
+
+/**
+ * Auto-move dead key out of work cycle (automatically triggered)
+ * ⚠️ النظام ينقل المفتاح الميت للفلتر الخاص بيه ويوقفه عن العمل تماماً
+ * ⚠️ لكن لا يحذفه نهائياً - الحذف يدوي فقط
+ */
+export async function autoMoveDeadKeyToFilter(
+  provider: ApiKeyProvider,
+  key: string,
+  errorMessage: string
+): Promise<void> {
+  // Update in-memory immediately
+  const pool = keyStates[provider];
+  if (pool) {
+    const keyEntry = pool.find((k) => k.key === key);
+    if (keyEntry) {
+      keyEntry.isDead = true;
+      keyEntry.lastError = errorMessage;
+    }
+  }
+
+  // Update in database
+  try {
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      await supabase
+        .from("api_keys")
+        .update({
+          is_active: false, // ← إيقاف من العمل تماماً
+          is_backup: false, // ← إزالة من الاحتياطي
+          error_count: 999, // ← رقم يدل على "ميت"
+          last_error: `[DEAD] ${errorMessage}`,
+        })
+        .eq("provider", provider)
+        .eq("key", key);
+      
+      console.log(`[API Keys] 💀 Auto-moved DEAD key to filter (removed from work cycle): ${provider}`);
+    }
+  } catch (err) {
+    console.error("[API Keys] Failed to auto-move dead key:", err);
   }
 }

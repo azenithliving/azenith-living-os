@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2, Power, PowerOff, RefreshCw, Check, AlertCircle, Info, Key, Shield, Activity } from "lucide-react";
+import { X, Plus, Trash2, Power, PowerOff, RefreshCw, Check, AlertCircle, Info, Key, Shield, Activity, Clock } from "lucide-react";
 
 interface ApiKey {
   id: number;
@@ -237,6 +237,58 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
       await loadKeys();
     } catch (error) {
       showMessage("error", "فشل الإجراء الجماعي");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const bulkMoveTo = async (target: "active" | "inactive" | "backup" | "cooldown" | "dead") => {
+    if (selectedKeys.size === 0) return;
+
+    try {
+      setActionLoading("bulk");
+      
+      // تحضير التحديثات حسب الفلتر المستهدف
+      const updates: any = {};
+      
+      if (target === "active") {
+        updates.isActive = true;
+        updates.isBackup = false;
+        updates.clearCooldown = true;
+      } else if (target === "inactive") {
+        updates.isActive = false;
+        updates.isBackup = false;
+      } else if (target === "backup") {
+        updates.isBackup = true;
+        updates.isActive = false;
+      } else if (target === "cooldown") {
+        updates.cooldownUntil = new Date(Date.now() + 3600000).toISOString(); // 1 hour
+      }
+
+      await Promise.all(
+        Array.from(selectedKeys).map((id) =>
+          fetch(`/api/admin/keys/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updates),
+          })
+        )
+      );
+
+      const targetNames: Record<string, string> = {
+        active: "نشط",
+        inactive: "متوقف",
+        backup: "احتياطي",
+        cooldown: "راحة",
+        dead: "ميت"
+      };
+
+      showMessage("success", `تم نقل ${selectedKeys.size} مفتاح إلى "${targetNames[target]}"`);
+      setSelectedKeys(new Set());
+      await reloadKeys();
+      await loadKeys();
+    } catch (error) {
+      showMessage("error", "فشل النقل");
     } finally {
       setActionLoading(null);
     }
@@ -527,24 +579,25 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                         <div className="text-slate-400 text-sm mr-2">
                           {selectedKeys.size} محدد
                         </div>
+                        <div className="text-slate-500 text-xs mr-1">نقل إلى:</div>
                         <button
-                          onClick={() => bulkToggle(true)}
+                          onClick={() => bulkMoveTo("active")}
                           className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
-                          title="تفعيل المحددة"
+                          title="نقل للمفاتيح النشطة"
                         >
                           <Power className="w-4 h-4" />
-                          تفعيل
+                          نشط
                         </button>
                         <button
-                          onClick={() => bulkToggle(false)}
-                          className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
-                          title="إيقاف المحددة"
+                          onClick={() => bulkMoveTo("inactive")}
+                          className="bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          title="نقل للمفاتيح المتوقفة"
                         >
                           <PowerOff className="w-4 h-4" />
-                          إيقاف
+                          متوقف
                         </button>
                         <button
-                          onClick={() => bulkSetBackup(true)}
+                          onClick={() => bulkMoveTo("backup")}
                           className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
                           title="نقل للاحتياطي"
                         >
@@ -552,9 +605,17 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                           احتياطي
                         </button>
                         <button
+                          onClick={() => bulkMoveTo("cooldown")}
+                          className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          title="نقل لفترة تهدئة (راحة)"
+                        >
+                          <Clock className="w-4 h-4" />
+                          راحة
+                        </button>
+                        <button
                           onClick={bulkDelete}
                           className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
-                          title="حذف المحددة"
+                          title="حذف المحددة نهائياً"
                         >
                           <Trash2 className="w-4 h-4" />
                           حذف
