@@ -19,6 +19,7 @@ import { BOMTable } from '@/components/admin/agents/BOMTable';
 import { Brain, Cpu, MessageSquare, ShieldAlert, Activity, LayoutGrid, Terminal, Sparkles, Factory, Users, Zap, Box, CheckCircle, Calendar, RefreshCw } from 'lucide-react';
 import { QuickActionsPanel } from '@/components/admin/agents/QuickActionsPanel';
 import { ProactiveSuggestions } from '@/components/admin/agents/ProactiveSuggestions';
+import { AgentActionsFeed } from '@/components/admin/agents/AgentActionsFeed';
 
 type TabType = 'command' | 'assistant' | 'manufacturing' | 'teams';
 
@@ -322,6 +323,11 @@ export default function AgentsPage() {
                 {/* Quick Actions الحقيقية */}
                 <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
                   <QuickActionsPanel />
+                </div>
+
+                {/* سجل الأحداث الحي */}
+                <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
+                  <AgentActionsFeed />
                 </div>
               </div>
             </div>
