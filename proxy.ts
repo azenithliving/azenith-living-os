@@ -170,13 +170,23 @@ export async function proxy(request: NextRequest) {
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/gate/login";
-    return applyResponseHeaders(NextResponse.redirect(url));
+    const redirectResponse = NextResponse.redirect(url);
+    // ✅ ننقل الـ cookies المُجدَّدة من supabaseResponse للـ redirect
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie);
+    });
+    return applyResponseHeaders(redirectResponse);
   }
 
   if ((pathname.startsWith("/gate/login") || pathname.startsWith("/admin-gate/login")) && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
-    return applyResponseHeaders(NextResponse.redirect(url));
+    const redirectResponse = NextResponse.redirect(url);
+    // ✅ ننقل الـ cookies المُجدَّدة للـ redirect
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie);
+    });
+    return applyResponseHeaders(redirectResponse);
   }
 
   if (pathname.startsWith("/api/admin") && user) {
