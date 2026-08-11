@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DeviceCard } from '@/components/admin/agents/DeviceCard';
 import { TaskQueue } from '@/components/admin/agents/TaskQueue';
@@ -16,32 +16,108 @@ import { QualityCheckPanel } from '@/components/admin/agents/QualityCheckPanel';
 import { InventoryManager } from '@/components/admin/agents/InventoryManager';
 import { BOMTable } from '@/components/admin/agents/BOMTable';
 
-import Link from 'next/link';
-import { Brain, Cpu, MessageSquare, ShieldAlert, Activity, LayoutGrid, Terminal, Sparkles, Factory, Users, Zap, Box, CheckCircle, Calendar } from 'lucide-react';
+import { Brain, Cpu, MessageSquare, ShieldAlert, Activity, LayoutGrid, Terminal, Sparkles, Factory, Users, Zap, Box, CheckCircle, Calendar, RefreshCw } from 'lucide-react';
 
 type TabType = 'command' | 'assistant' | 'manufacturing' | 'teams';
+
+// ── نوع حالة الوكيل من API ────────────────────────────────────────────
+interface AgentStatus {
+  agent: string;
+  status: 'online' | 'busy' | 'offline';
+  taskCount: number;
+  recentActivity: string;
+}
+
+// ── شريط حالة الوكلاء الحقيقي ────────────────────────────────────────
+function AgentStatusBar({ onStatusLoad }: { onStatusLoad?: (s: Record<string, AgentStatus>) => void }) {
+  const [statuses, setStatuses] = useState<Record<string, AgentStatus>>({});
+  const [loadingStatus, setLoadingStatus] = useState(true);
+
+  const fetchStatuses = useCallback(async () => {
+    try {
+      const res  = await fetch('/api/admin/agents/chat');
+      const data = await res.json();
+      if (data.success && data.data) {
+        setStatuses(data.data);
+        onStatusLoad?.(data.data);
+      }
+    } catch {
+      // صامت
+    } finally {
+      setLoadingStatus(false);
+    }
+  }, [onStatusLoad]);
+
+  useEffect(() => {
+    fetchStatuses();
+    const iv = setInterval(fetchStatuses, 30_000);
+    return () => clearInterval(iv);
+  }, [fetchStatuses]);
+
+  const statusColor = (s: string) =>
+    s === 'online' ? 'bg-emerald-500' :
+    s === 'busy'   ? 'bg-amber-500 animate-ping' :
+                     'bg-white/20';
+
+  const statusLabel = (s: string) =>
+    s === 'online' ? 'متاح' :
+    s === 'busy'   ? 'مشغول' : 'غير متاح';
+
+  const agentColor = (key: string) =>
+    key === 'prime' ? { ring: 'border-purple-500/20', bg: 'bg-purple-500/10', text: 'text-purple-400' }
+                    : { ring: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-400' };
+
+  return (
+    <div className="flex items-center gap-3 flex-wrap">
+      {loadingStatus
+        ? ['prime', 'vanguard'].map(k => (
+            <div key={k} className="h-9 w-36 bg-white/[0.03] border border-white/5 rounded-xl animate-pulse" />
+          ))
+        : ['prime', 'vanguard'].map(key => {
+            const st  = statuses[key];
+            const col = agentColor(key);
+            return (
+              <div key={key} className={`px-4 py-2 ${col.bg} border ${col.ring} rounded-xl flex items-center gap-2`}>
+                <div className={`w-2 h-2 rounded-full ${statusColor(st?.status ?? 'offline')}`} />
+                <span className={`text-xs font-bold ${col.text} uppercase tracking-widest`}>
+                  {key.toUpperCase()}
+                </span>
+                <span className="text-[10px] text-white/30">
+                  {st ? `${statusLabel(st.status)} · ${st.taskCount} مهمة` : '—'}
+                </span>
+              </div>
+            );
+          })
+      }
+    </div>
+  );
+}
 
 export default function AgentsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<TabType>('command');
-  const [devices, setDevices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showGroupChat, setShowGroupChat] = useState(false);
-  const [showPrimeChat, setShowPrimeChat] = useState(false);
+  const [activeTab, setActiveTab]       = useState<TabType>('command');
+  const [devices, setDevices]           = useState<any[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [showGroupChat, setShowGroupChat]     = useState(false);
+  const [showPrimeChat, setShowPrimeChat]     = useState(false);
   const [showVanguardChat, setShowVanguardChat] = useState(false);
-  
+
+  // إحصائيات التيمز الحقيقية
+  const [agentStatuses, setAgentStatuses] = useState<Record<string, AgentStatus>>({});
+  const [teamStats, setTeamStats]         = useState<{ totalTasks: number; completedToday: number; successRate: number }>({
+    totalTasks: 0, completedToday: 0, successRate: 0,
+  });
+  const [teamLoading, setTeamLoading] = useState(false);
+
   // Manufacturing sub-tabs
   const [mfgTab, setMfgTab] = useState<'overview' | 'schedule' | 'inventory' | 'quality'>('overview');
   const [metrics, setMetrics] = useState({
-    total_orders: 0,
-    in_production: 0,
-    ready: 0,
-    delivered: 0,
-    revenue: 0,
-    profit: 0
+    total_orders: 0, in_production: 0, ready: 0,
+    delivered: 0,    revenue: 0,       profit: 0,
   });
 
+  // ── قراءة tab من URL ────────────────────────────────────────────────
   useEffect(() => {
     const tab = searchParams?.get('tab') as TabType;
     if (tab && ['command', 'assistant', 'manufacturing', 'teams'].includes(tab)) {
@@ -49,45 +125,59 @@ export default function AgentsPage() {
     }
   }, [searchParams]);
 
+  // ── جلب الأجهزة ────────────────────────────────────────────────────
   useEffect(() => {
-    async function getDevices() {
+    (async () => {
       try {
-        const res = await fetch('/api/admin/agents/devices');
+        const res  = await fetch('/api/admin/agents/devices');
         const data = await res.json();
         setDevices(Array.isArray(data.data) ? data.data : []);
-      } catch (error) {
-        console.error("Failed to fetch devices:", error);
-        setDevices([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    getDevices();
+      } catch { setDevices([]); }
+      finally  { setLoading(false); }
+    })();
   }, []);
 
+  // ── إحصائيات التصنيع ───────────────────────────────────────────────
   useEffect(() => {
-    async function loadMetrics() {
+    if (activeTab !== 'manufacturing') return;
+    (async () => {
       try {
-        const response = await fetch('/api/admin/owner/dashboard?company_id=demo');
-        const data = await response.json();
-        if (data.success) {
-          setMetrics({
-            total_orders: data.data.this_month?.total_orders || 0,
-            in_production: data.data.today?.orders_in_production || 0,
-            ready: data.data.today?.orders_ready || 0,
-            delivered: data.data.this_month?.completed_orders || 0,
-            revenue: data.data.this_month?.total_revenue || 0,
-            profit: data.data.this_month?.estimated_profit || 0
-          });
-        }
-      } catch (error) {
-        console.error('Failed to load metrics:', error);
-      }
-    }
+        const res  = await fetch('/api/admin/owner/dashboard?company_id=demo');
+        const data = await res.json();
+        if (data.success) setMetrics({
+          total_orders:  data.data.this_month?.total_orders         || 0,
+          in_production: data.data.today?.orders_in_production      || 0,
+          ready:         data.data.today?.orders_ready              || 0,
+          delivered:     data.data.this_month?.completed_orders     || 0,
+          revenue:       data.data.this_month?.total_revenue        || 0,
+          profit:        data.data.this_month?.estimated_profit     || 0,
+        });
+      } catch { /* صامت */ }
+    })();
+  }, [activeTab]);
 
-    if (activeTab === 'manufacturing') {
-      loadMetrics();
-    }
+  // ── إحصائيات Teams من DB ───────────────────────────────────────────
+  useEffect(() => {
+    if (activeTab !== 'teams') return;
+    setTeamLoading(true);
+    (async () => {
+      try {
+        // المهام الإجمالية
+        const tasksRes  = await fetch('/api/admin/agents/tasks?limit=200');
+        const tasksData = await tasksRes.json();
+        const tasks: any[] = Array.isArray(tasksData.data) ? tasksData.data : [];
+
+        const today = new Date().toDateString();
+        const completedToday = tasks.filter(
+          t => t.status === 'completed' && new Date(t.completed_at || t.created_at).toDateString() === today
+        ).length;
+        const completed  = tasks.filter(t => t.status === 'completed').length;
+        const successRate = tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0;
+
+        setTeamStats({ totalTasks: tasks.length, completedToday, successRate });
+      } catch { /* صامت */ }
+      finally { setTeamLoading(false); }
+    })();
   }, [activeTab]);
 
   return (
@@ -109,16 +199,8 @@ export default function AgentsPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-            <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">PRIME Online</span>
-          </div>
-          <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Vanguard Ready</span>
-          </div>
-        </div>
+        {/* ── حالة الوكلاء الحقيقية ── */}
+        <AgentStatusBar onStatusLoad={setAgentStatuses} />
       </div>
 
       {/* Main Navigation Tabs */}
@@ -374,18 +456,58 @@ export default function AgentsPage() {
         {/* Teams Tab */}
         {activeTab === 'teams' && (
           <div className="space-y-6">
-            <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 text-center">
-              <Users className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">فريق الوكلاء السبعة</h2>
-              <p className="text-white/60 mb-6">إدارة كل الوكلاء وتنسيق العمل بينهم</p>
+            {/* إحصائيات سريعة حقيقية */}
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: 'إجمالي المهام', value: teamLoading ? '…' : teamStats.totalTasks.toString(), color: 'purple' },
+                { label: 'مكتملة اليوم',  value: teamLoading ? '…' : teamStats.completedToday.toString(), color: 'emerald' },
+                { label: 'معدل النجاح',   value: teamLoading ? '…' : `${teamStats.successRate}%`, color: 'amber' },
+              ].map(s => (
+                <div key={s.label} className={`rounded-2xl border p-5 bg-white/[0.02] ${
+                  s.color === 'purple'  ? 'border-purple-500/20'  :
+                  s.color === 'emerald' ? 'border-emerald-500/20' :
+                                          'border-amber-500/20'
+                }`}>
+                  <p className="text-xs text-white/40">{s.label}</p>
+                  <p className={`text-3xl font-black mt-1 ${
+                    s.color === 'purple'  ? 'text-purple-400'  :
+                    s.color === 'emerald' ? 'text-emerald-400' :
+                                            'text-amber-400'
+                  }`}>{s.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* بطاقات الوكلاء */}
+            <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8">
+              <h2 className="text-lg font-black mb-6 flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#C5A059]" />
+                فريق الوكلاء السبعة
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <AgentTeamCard name="PRIME" role="مهندس التصميم" color="purple" icon="🧠" />
-                <AgentTeamCard name="Vanguard" role="مدير المبيعات" color="emerald" icon="💼" />
-                <AgentTeamCard name="Architect" role="معماري النظام" color="blue" icon="🏗️" />
-                <AgentTeamCard name="Guardian" role="حارس الأمن" color="red" icon="🛡️" />
-                <AgentTeamCard name="Oracle" role="محلل البيانات" color="cyan" icon="🔮" />
-                <AgentTeamCard name="Nexus" role="منسق العمليات" color="yellow" icon="⚡" />
-                <AgentTeamCard name="Sage" role="مستشار الحكمة" color="indigo" icon="📚" />
+                {[
+                  { key: 'prime',    name: 'PRIME',    role: 'مهندس التصميم والتطوير', color: 'purple', icon: '🧠' },
+                  { key: 'vanguard', name: 'Vanguard', role: 'مدير العمليات والمبيعات', color: 'emerald', icon: '💼' },
+                  { key: 'analyst',  name: 'Analyst',  role: 'محلل البيانات والتقارير', color: 'blue',   icon: '📊' },
+                  { key: 'coder',    name: 'Coder',    role: 'مطور الكود والتقنية',    color: 'cyan',   icon: '💻' },
+                  { key: 'ops',      name: 'Ops',      role: 'مراقب العمليات والنظام',  color: 'yellow', icon: '⚙️' },
+                  { key: 'security', name: 'Security', role: 'حارس الأمن والتدقيق',   color: 'red',    icon: '🛡️' },
+                  { key: 'learner',  name: 'Learner',  role: 'محرك التعلم الذاتي',     color: 'indigo', icon: '🎓' },
+                ].map(agent => {
+                  const st = agentStatuses[agent.key];
+                  return (
+                    <AgentTeamCard
+                      key={agent.key}
+                      name={agent.name}
+                      role={agent.role}
+                      color={agent.color}
+                      icon={agent.icon}
+                      status={st?.status}
+                      taskCount={st?.taskCount}
+                      recentActivity={st?.recentActivity}
+                    />
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -453,26 +575,54 @@ function MetricCard({
   );
 }
 
-function AgentTeamCard({ name, role, color, icon }: { name: string; role: string; color: string; icon: string }) {
+function AgentTeamCard({
+  name, role, color, icon, status, taskCount, recentActivity
+}: {
+  name: string; role: string; color: string; icon: string;
+  status?: string; taskCount?: number; recentActivity?: string;
+}) {
   const colorClasses: Record<string, string> = {
     purple: 'border-purple-500/30 hover:bg-purple-500/10',
     emerald: 'border-emerald-500/30 hover:bg-emerald-500/10',
-    blue: 'border-blue-500/30 hover:bg-blue-500/10',
-    red: 'border-red-500/30 hover:bg-red-500/10',
-    cyan: 'border-cyan-500/30 hover:bg-cyan-500/10',
-    yellow: 'border-yellow-500/30 hover:bg-yellow-500/10',
-    indigo: 'border-indigo-500/30 hover:bg-indigo-500/10',
+    blue:    'border-blue-500/30 hover:bg-blue-500/10',
+    red:     'border-red-500/30 hover:bg-red-500/10',
+    cyan:    'border-cyan-500/30 hover:bg-cyan-500/10',
+    yellow:  'border-yellow-500/30 hover:bg-yellow-500/10',
+    indigo:  'border-indigo-500/30 hover:bg-indigo-500/10',
   };
 
+  const dotColor =
+    status === 'online'  ? 'bg-emerald-500' :
+    status === 'busy'    ? 'bg-amber-500 animate-pulse' :
+    status === 'offline' ? 'bg-white/20' :
+                           'bg-white/10';
+
+  const statusText =
+    status === 'online'  ? 'متاح' :
+    status === 'busy'    ? 'مشغول' :
+    status === 'offline' ? 'غير متاح' : 'جاري التحقق…';
+
   return (
-    <div className={`border rounded-2xl p-6 bg-white/[0.02] ${colorClasses[color]} transition-all cursor-pointer`}>
-      <div className="text-4xl mb-3">{icon}</div>
-      <h3 className="font-bold text-lg">{name}</h3>
-      <p className="text-sm text-white/60 mt-1">{role}</p>
-      <div className="mt-4 flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-green-500" />
-        <span className="text-xs text-white/40">نشط</span>
+    <div className={`border rounded-2xl p-5 bg-white/[0.02] ${colorClasses[color] ?? colorClasses.purple} transition-all`}>
+      <div className="flex items-start justify-between mb-3">
+        <span className="text-3xl">{icon}</span>
+        <div className="flex items-center gap-1.5">
+          <div className={`w-2 h-2 rounded-full ${dotColor}`} />
+          <span className="text-[10px] text-white/40">{statusText}</span>
+        </div>
       </div>
+      <h3 className="font-bold text-base">{name}</h3>
+      <p className="text-xs text-white/50 mt-0.5">{role}</p>
+      {taskCount !== undefined && (
+        <div className="mt-3 flex items-center gap-3 text-[10px] text-white/30">
+          <span>المهام: <strong className="text-white/60">{taskCount}</strong></span>
+          {recentActivity && recentActivity !== 'لا يوجد نشاط حديث' && recentActivity !== 'غير متاح' && (
+            <span className="truncate">
+              آخر نشاط: {new Date(recentActivity).toLocaleDateString('ar-EG')}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
