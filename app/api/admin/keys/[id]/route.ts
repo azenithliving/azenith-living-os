@@ -9,9 +9,10 @@ import { reloadKeys } from "@/lib/api-keys-service";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const id = params.id;
     const body = await request.json();
 
@@ -97,9 +98,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const id = params.id;
 
     if (!id) {
