@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image, MessageSquare, Activity, Factory, Bell } from "lucide-react";
+import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image, MessageSquare, Activity, Cpu, Bell } from "lucide-react";
 import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-components";
 import { ImageHarvestDashboard } from "./intel/components/ImageHarvestDashboard";
 import { AdminProactiveStrip } from "@/components/admin/AdminProactiveStrip";
@@ -146,7 +146,7 @@ export default function AdminPage() {
             subtitle: health.health?.uptime ? `${health.health.uptime} uptime` : "غير متاح",
             icon: <Shield className="h-6 w-6" />,
             color: health.health?.status === "optimal" ? "blue" : "blue" as const,
-            href: "/admin/intel",
+            href: "/admin/agents",
           },
           {
             title: "تفاعلات AI",
@@ -154,7 +154,7 @@ export default function AdminPage() {
             subtitle: mastermind.commands?.last24h ? `${mastermind.commands.last24h} في آخر 24 ساعة` : "هذا الشهر",
             icon: <Brain className="h-6 w-6" />,
             color: "purple" as const,
-            href: "/admin/intel",
+            href: "/admin/agents",
           },
           {
             title: "نظام الوكلاء",
@@ -162,7 +162,7 @@ export default function AdminPage() {
             subtitle: analytics.metrics?.totalBookings ? `${analytics.metrics.totalBookings} حجز مؤكد` : "قيد الانتظار",
             icon: <Bot className="h-6 w-6" />,
             color: "blue" as const,
-            href: "/admin/agents?tab=command",
+            href: "/admin/agents",
           },
           {
             title: "نشاط المنصة",
@@ -197,7 +197,7 @@ export default function AdminPage() {
             color: "rose" as const,
             text: `${mastermind.security.failedAttempts24h} محاولة دخول فاشلة`,
             subtext: "في آخر 24 ساعة - تحقق من الأمان",
-            link: "/admin/intel",
+            link: "/admin/agents",
           });
         }
 
@@ -209,7 +209,7 @@ export default function AdminPage() {
               color: alert.severity === "critical" ? "rose" : alert.severity === "warning" ? "amber" : "emerald" as const,
               text: alert.title,
               subtext: alert.description,
-              link: "/admin/intel",
+              link: "/admin/agents",
             });
           });
         }
@@ -503,13 +503,13 @@ export default function AdminPage() {
         {/* Quick Navigation */}
         <section>
           <h2 className="text-lg font-semibold text-white mb-4">مراكز القوى</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Link href="/admin/agents?tab=assistant" className="group rounded-2xl border-2 border-[#C5A059]/40 bg-[#C5A059]/10 p-6 transition-all hover:border-[#C5A059] hover:bg-[#C5A059]/15">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Link href="/admin/agents" className="group rounded-2xl border-2 border-[#C5A059]/40 bg-[#C5A059]/10 p-6 transition-all hover:border-[#C5A059] hover:bg-[#C5A059]/15">
               <div className="rounded-xl bg-[#C5A059]/30 p-3 w-fit mb-4">
-                <Brain className="w-6 h-6 text-[#C5A059]" />
+                <Cpu className="w-6 h-6 text-[#C5A059]" />
               </div>
-              <h3 className="text-lg font-bold text-[#C5A059]">المساعد الموحّد</h3>
-              <p className="text-sm text-white/60 mt-2">كل الذكاء والتنفيذ — مكان واحد</p>
+              <h3 className="text-lg font-bold text-white group-hover:text-[#C5A059] transition-colors">مركز قيادة الوكلاء</h3>
+              <p className="text-sm text-white/60 mt-2">كل الوكلاء والمهام والتصنيع في مكان واحد</p>
             </Link>
 
             <Link href="/admin/sales" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
@@ -520,20 +520,12 @@ export default function AdminPage() {
               <p className="text-sm text-white/50 mt-2">العملاء، المستأجرين، الإدارة</p>
             </Link>
 
-            <Link href="/admin/agents?tab=command" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-purple-500/30 hover:bg-white/[0.05]">
-              <div className="rounded-xl bg-purple-500/20 p-3 w-fit mb-4">
-                <Bot className="w-6 h-6 text-purple-400" />
+            <Link href="/admin/work" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
+              <div className="rounded-xl bg-[#C5A059]/20 p-3 w-fit mb-4">
+                <Activity className="w-6 h-6 text-[#C5A059]" />
               </div>
-              <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">الوكلاء</h3>
-              <p className="text-sm text-white/50 mt-2">التحليلات، الذكاء، التطوير</p>
-            </Link>
-
-            <Link href="/admin/agents?tab=manufacturing" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-cyan-500/30 hover:bg-white/[0.05]">
-              <div className="rounded-xl bg-cyan-500/20 p-3 w-fit mb-4">
-                <Factory className="w-6 h-6 text-cyan-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">التصنيع</h3>
-              <p className="text-sm text-white/50 mt-2">الأتمتة، الإنتاج، التوريد</p>
+              <h3 className="text-lg font-bold text-white group-hover:text-[#C5A059] transition-colors">مركز العمل</h3>
+              <p className="text-sm text-white/50 mt-2">المبيعات، واتساب، الهاتف</p>
             </Link>
           </div>
         </section>

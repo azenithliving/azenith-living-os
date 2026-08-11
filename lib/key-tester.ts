@@ -214,6 +214,24 @@ export async function smartTestKey(
         { Authorization: `Bearer ${key}` }
       );
 
+    case "xai":
+      return testViaModelsEndpoint(
+        "https://api.x.ai/v1/models",
+        { Authorization: `Bearer ${key}` }
+      );
+
+    case "nvidia":
+      return testViaModelsEndpoint(
+        "https://integrate.api.nvidia.com/v1/models",
+        { Authorization: `Bearer ${key}` }
+      );
+
+    case "chutes":
+      return testViaModelsEndpoint(
+        "https://api.chutes.ai/v1/models",
+        { Authorization: `Bearer ${key}` }
+      );
+
     case "aimlapi":
       return testViaModelsEndpoint(
         "https://api.aimlapi.com/v1/models",
@@ -238,21 +256,6 @@ export async function smartTestKey(
         {}
       );
 
-    // ── NVIDIA NIM — 100+ موديل مجاني ────────────────────────────
-    case "nvidia":
-      return testViaModelsEndpoint(
-        "https://integrate.api.nvidia.com/v1/models",
-        { Authorization: `Bearer ${key}` }
-      );
-
-    // ── Chutes AI — مجاني دائم ────────────────────────────────────
-    case "chutes":
-      return testViaAutoModel(
-        "https://llm.chutes.ai/v1/models",
-        "https://llm.chutes.ai/v1/chat/completions",
-        { Authorization: `Bearer ${key}` }
-      );
-
     // ── Providers تحتاج اكتشاف model ثم POST ──────────────────────
     case "cerebras":
       return testViaAutoModel(
@@ -261,23 +264,13 @@ export async function smartTestKey(
         { Authorization: `Bearer ${key}` }
       );
 
-    // ── Cloudflare Workers AI ──────────────────────────────────────
-    // مفتاحه بصيغة accountId:apiToken
-    case "cloudflare": {
-      const parts = key.split(":");
-      if (parts.length < 2) return { valid: true }; // نقبل ونتحقق عند الاستخدام
-      const [accountId, token] = parts;
-      return testViaModelsEndpoint(
-        `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/models/search`,
-        { Authorization: `Bearer ${token}` }
-      );
-    }
-
     // ── Providers بدون endpoint اختبار موثوق ─────────────────────
+    case "cloudflare":
     case "apifreellm":
     case "bytez":
     case "api_ninjas":
     default:
+      // نقبل مباشرة — المستخدم مسؤول عن صحة المفتاح
       return { valid: true };
   }
 }

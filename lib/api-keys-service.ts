@@ -27,19 +27,15 @@ const parseKeyPool = (envPrefix: string): string[] => {
 
 type ApiKeyProvider = 
   | "groq" | "openrouter" | "mistral" | "pexels" | "deepseek"
-  | "google" | "together"
-  | "cerebras" | "cohere" | "aimlapi"
-  | "nvidia" | "chutes"
-  | "cloudflare" | "huggingface"
-  | "apifreellm" | "bytez" | "api_ninjas";
+  | "google" | "together" | "cerebras" | "cohere" | "xai" 
+  | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez"
+  | "nvidia" | "chutes";
 
 const PROVIDERS: ApiKeyProvider[] = [
   "groq", "openrouter", "mistral", "pexels", "deepseek",
-  "google", "together",
-  "cerebras", "cohere", "aimlapi",
-  "nvidia", "chutes",
-  "cloudflare", "huggingface",
-  "apifreellm", "bytez", "api_ninjas",
+  "google", "together", "cerebras", "cohere", "xai",
+  "api_ninjas", "aimlapi", "apifreellm", "bytez",
+  "nvidia", "chutes"
 ];
 
 // In-memory key state
@@ -53,23 +49,22 @@ interface KeyState {
 }
 
 const keyStates: Record<string, KeyState[]> = {
-  groq:        [],
-  openrouter:  [],
-  mistral:     [],
-  pexels:      [],
-  deepseek:    [],
-  google:      [],
-  together:    [],
-  cerebras:    [],
-  cohere:      [],
-  aimlapi:     [],
-  nvidia:      [],
-  chutes:      [],
-  cloudflare:  [],
-  huggingface: [],
-  apifreellm:  [],
-  bytez:       [],
-  api_ninjas:  [],
+  groq: [],
+  openrouter: [],
+  mistral: [],
+  pexels: [],
+  deepseek: [],
+  google: [],
+  together: [],
+  cerebras: [],
+  cohere: [],
+  xai: [],
+  api_ninjas: [],
+  aimlapi: [],
+  apifreellm: [],
+  bytez: [],
+  nvidia: [],
+  chutes: [],
 };
 
 let keysLoaded = false;
@@ -175,23 +170,22 @@ export async function getKeyFromDB(
 
 // Key rotation indices per provider
 const keyIndices: Record<string, number> = {
-  groq:        0,
-  openrouter:  0,
-  mistral:     0,
-  pexels:      0,
-  deepseek:    0,
-  google:      0,
-  together:    0,
-  cerebras:    0,
-  cohere:      0,
-  aimlapi:     0,
-  nvidia:      0,
-  chutes:      0,
-  cloudflare:  0,
-  huggingface: 0,
-  apifreellm:  0,
-  bytez:       0,
-  api_ninjas:  0,
+  groq: 0,
+  openrouter: 0,
+  mistral: 0,
+  pexels: 0,
+  deepseek: 0,
+  google: 0,
+  together: 0,
+  cerebras: 0,
+  cohere: 0,
+  xai: 0,
+  api_ninjas: 0,
+  aimlapi: 0,
+  apifreellm: 0,
+  bytez: 0,
+  nvidia: 0,
+  chutes: 0,
 };
 
 /**

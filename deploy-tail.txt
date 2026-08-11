@@ -1,0 +1,30 @@
+﻿(Static)   
+prerendered as 
+static content
+Building: ΓùÅ  (SSG) 
+     prerendered as 
+static HTML (uses 
+generateStaticParams)
+Building: ╞Æ  
+(Dynamic)  
+server-rendered on 
+demand
+Building: Build 
+Completed in 
+/vercel/output [2m]
+Building: Deploying 
+outputs...
+Building: Deployment 
+completed
+Building: Creating 
+build cache...
+[2K[1A[2K[GProduc
+tion: https://azenith
+-living-gmc89iu3t-aze
+nithlivings-projects.
+vercel.app [3m]
+Completing...
+Aliased: https://azen
+ith-living.vercel.app
+ [3m]
+https://azenith-living-gmc89iu3t-azenithlivings-projects.vercel.app

@@ -208,7 +208,7 @@ export function GlobalAssistantDock() {
               {loading && <Loader2 className="h-3.5 w-3.5 animate-spin text-cyan-200" />}
             </div>
             <div className="flex items-center gap-1">
-              <Link href="/admin/assistant" className="rounded-lg p-1 text-white/55 hover:bg-white/10" title="افتح الصفحة الكاملة">
+              <Link href="/admin/agents?tab=assistant" className="rounded-lg p-1 text-white/55 hover:bg-white/10" title="افتح الصفحة الكاملة">
                 <ExternalLink className="h-4 w-4" />
               </Link>
               <button type="button" onClick={() => setOpen(false)} className="rounded-lg p-1 text-white/55 hover:bg-white/10">

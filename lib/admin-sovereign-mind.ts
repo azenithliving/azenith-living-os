@@ -317,8 +317,8 @@ function summonOwnerForProposal(params: {
       .join("\n"),
     reason: params.risk === "critical" ? "critical_alert" : "approval_required",
     href: params.requestId
-      ? `/admin/assistant?approval=${encodeURIComponent(params.requestId)}`
-      : "/admin/assistant",
+      ? `/admin/agents?tab=assistant&approval=${encodeURIComponent(params.requestId)}`
+      : "/admin/agents?tab=assistant",
   }).catch(() => {
     /* Telegram summon is best-effort and must not block proposal creation. */
   });

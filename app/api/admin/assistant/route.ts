@@ -8,7 +8,7 @@ import {
 } from "@/lib/command-executor";
 import { logAssistantExecution, listAssistantExecutions } from "@/lib/admin-assistant-log";
 import { checkAacaHealth } from "@/lib/aaca-client";
-import { buildCapabilityAuditReport } from "@/lib/admin-assistant-capabilities";
+import { buildCapabilityAuditReport, buildCapabilityAuditReportEnriched } from "@/lib/admin-assistant-capabilities";
 import { buildAssistantEvidenceLedger } from "@/lib/admin-assistant-evidence";
 import { buildResultActions } from "@/lib/admin-result-actions";
 
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     listAssistantExecutions(user.id, 20),
     checkAacaHealth(),
   ]);
-  const capabilityAudit = buildCapabilityAuditReport();
+  const capabilityAudit = await buildCapabilityAuditReportEnriched();
   const evidenceLedger = buildAssistantEvidenceLedger(executions);
 
   const supabase = createSupabaseClient(

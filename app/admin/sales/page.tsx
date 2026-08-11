@@ -360,7 +360,7 @@ function SalesManagerTab() {
             نفّذ أوامر المبيعات، المفاتيح، والوكلاء من مكان واحد بلغتك الطبيعية.
           </p>
           <Link
-            href="/admin/assistant"
+            href="/admin/agents?tab=assistant"
             className="inline-flex items-center gap-2 rounded-xl bg-[#C5A059] px-6 py-3 text-[#1a1a1a] font-semibold hover:bg-[#d8b56d]"
           >
             <MessageCircle className="w-5 h-5" />

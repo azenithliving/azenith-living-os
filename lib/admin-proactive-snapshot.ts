@@ -32,7 +32,7 @@ export async function getAdminProactiveSnapshot(userId: string): Promise<{
       severity: "warning",
       title: "الوكلاء غير جاهزين",
       description: "افتح المساعد الموحّد لتشغيل مهمة أو تحقق من الإعدادات.",
-      href: "/admin/assistant",
+      href: "/admin/agents?tab=assistant",
     });
   }
 
@@ -42,7 +42,7 @@ export async function getAdminProactiveSnapshot(userId: string): Promise<{
       severity: "warning",
       title: "صحة النظام تحتاج مراجعة",
       description: health.message || "شغّل فحص الصحة من المساعد.",
-      href: "/admin/assistant",
+      href: "/admin/agents?tab=assistant",
     });
   }
 
@@ -55,7 +55,7 @@ export async function getAdminProactiveSnapshot(userId: string): Promise<{
       severity: "info",
       title: `${failed.length} تنفيذ فاشل مؤخراً`,
       description: "راجع سجل التنفيذ في المساعد الموحّد.",
-      href: "/admin/assistant",
+      href: "/admin/agents?tab=assistant",
     });
   }
 
@@ -65,7 +65,7 @@ export async function getAdminProactiveSnapshot(userId: string): Promise<{
       severity: "info",
       title: "كل شيء يبدو مستقراً",
       description: "استخدم المساعد الموحّد لأي مهمة جديدة.",
-      href: "/admin/assistant",
+      href: "/admin/agents?tab=assistant",
     });
   }
 

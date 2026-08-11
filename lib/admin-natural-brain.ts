@@ -43,6 +43,7 @@ import {
   formatBrowserAugmentationForChat,
   runBrowserAugmentation,
 } from "./admin-browser-augmentation";
+import { initializeAdminEnv } from "./admin-env-resolver";
 
 export type { IntentKind, ClassifiedIntent } from "./admin-intent-types";
 export { needsMultiAgentMission } from "./admin-intent-classifier";
@@ -129,6 +130,9 @@ export async function processAdminNaturalLanguage(
     bypassRls = false,
     isOwner = false,
   } = ctx;
+
+  // ── تهيئة المتغيرات الحرجة تلقائياً ──────────────────────────────────
+  void initializeAdminEnv().catch(() => { /* صامت — لا يوقف التنفيذ */ });
 
   const history = userId ? await loadHistory(userId) : [];
 

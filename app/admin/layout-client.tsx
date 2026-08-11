@@ -65,10 +65,7 @@ const navCategories = [
   {
     title: "الوكلاء الذكية",
     items: [
-      { href: "/admin/agents?tab=command", label: "مركز القيادة", icon: "Cpu" },
-      { href: "/admin/agents?tab=assistant", label: "المساعد الموحد", icon: "Brain" },
-      { href: "/admin/agents?tab=manufacturing", label: "التصنيع", icon: "Factory" },
-      { href: "/admin/agents?tab=teams", label: "فريق الوكلاء", icon: "Bot" },
+      { href: "/admin/agents", label: "مركز قيادة الوكلاء", icon: "Cpu" },
     ],
   },
   {

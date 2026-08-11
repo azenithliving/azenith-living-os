@@ -17,7 +17,7 @@ import { createClient } from "@supabase/supabase-js";
 
 export interface SwarmNode {
   id: string;
-  provider: "groq" | "openrouter" | "mistral" | "anthropic" | "openai" | "google" | "cohere" | "ai21";
+  provider: "groq" | "openrouter" | "mistral" | "google" | "cohere" | "nvidia" | "chutes" | "cerebras" | "together" | "ai21";
   key: string;
   model: string;
   specialty: TaskSpecialty;
@@ -123,10 +123,10 @@ export class InfiniteSwarmEngine {
   private async loadNodesFromEnvironment() {
     const providers = [
       { name: "groq" as const, envVar: "GROQ_KEYS", models: ["llama-3.3-70b-versatile", "qwen/qwen3.6-27b", "openai/gpt-oss-20b"] },
-      { name: "openrouter" as const, envVar: "OPENROUTER_KEYS", models: ["anthropic/claude-opus-5", "anthropic/claude-sonnet-5", "openai/gpt-4o"] },
+      { name: "openrouter" as const, envVar: "OPENROUTER_KEYS", models: ["anthropic/claude-opus-5", "anthropic/claude-sonnet-5", "google/gemini-2.5-flash"] },
       { name: "mistral" as const, envVar: "MISTRAL_KEYS", models: ["mistral-large-latest", "mistral-medium-latest", "codestral-latest"] },
-      { name: "anthropic" as const, envVar: "ANTHROPIC_KEYS", models: ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"] },
-      { name: "openai" as const, envVar: "OPENAI_KEYS", models: ["gpt-4o", "gpt-4o-mini", "gpt-4.1-mini"] },
+      { name: "nvidia" as const, envVar: "NVIDIA_KEYS", models: ["meta/llama-3.3-70b-instruct", "deepseek/deepseek-v4", "qwen/qwen3-235b"] },
+      { name: "chutes" as const, envVar: "CHUTES_KEYS", models: ["deepseek/deepseek-r1", "meta/llama-4", "qwen/qwen3"] },
       { name: "google" as const, envVar: "GOOGLE_KEYS", models: ["gemini-3-flash-preview", "gemini-flash-lite-latest"] },
       { name: "cohere" as const, envVar: "COHERE_KEYS", models: ["command-r-plus", "command-r"] },
       { name: "ai21" as const, envVar: "AI21_KEYS", models: ["jamba-1.5-large", "jamba-1.5-mini"] },
@@ -231,8 +231,11 @@ export class InfiniteSwarmEngine {
       "groq": 0.0001,
       "gemini": 0.0002,
       "mistral": 0.0003,
-      "openai": 0.005,
-      "anthropic": 0.003,
+      "google": 0.0002,
+      "nvidia": 0,      // Free
+      "chutes": 0,      // Free
+      "cerebras": 0,    // Free
+      "together": 0.0001,
     };
     return costs[provider] || 0.001;
   }
@@ -359,11 +362,12 @@ export class InfiniteSwarmEngine {
       groq: this.callGroq.bind(this),
       openrouter: this.callOpenRouter.bind(this),
       mistral: this.callMistral.bind(this),
-      anthropic: this.callAnthropic.bind(this),
-      openai: this.callOpenAI.bind(this),
       google: this.callGoogle.bind(this),
+      nvidia: this.callNVIDIA.bind(this),
+      chutes: this.callChutes.bind(this),
+      cerebras: this.callCerebras.bind(this),
+      together: this.callTogether.bind(this),
       cohere: this.callCohere.bind(this),
-      ai21: this.callAI21.bind(this),
     };
 
     const handler = providerHandlers[node.provider];
@@ -545,46 +549,6 @@ export class InfiniteSwarmEngine {
     return data.choices[0].message.content;
   }
 
-  private async callAnthropic(node: SwarmNode, prompt: string): Promise<string> {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": node.key,
-        "Content-Type": "application/json",
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: node.model,
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 2048,
-      }),
-    });
-
-    if (!response.ok) throw new Error(`Anthropic error: ${response.status}`);
-    const data = await response.json();
-    return data.content[0].text;
-  }
-
-  private async callOpenAI(node: SwarmNode, prompt: string): Promise<string> {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${node.key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: node.model,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.3,
-        max_tokens: 2048,
-      }),
-    });
-
-    if (!response.ok) throw new Error(`OpenAI error: ${response.status}`);
-    const data = await response.json();
-    return data.choices[0].message.content;
-  }
-
   private async callGoogle(node: SwarmNode, prompt: string): Promise<string> {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${node.model}:generateContent?key=${node.key}`,
@@ -600,6 +564,86 @@ export class InfiniteSwarmEngine {
     if (!response.ok) throw new Error(`Google error: ${response.status}`);
     const data = await response.json();
     return data.candidates[0].content.parts[0].text;
+  }
+
+  private async callNVIDIA(node: SwarmNode, prompt: string): Promise<string> {
+    const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${node.key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: node.model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2048,
+      }),
+    });
+
+    if (!response.ok) throw new Error(`NVIDIA error: ${response.status}`);
+    const data = await response.json();
+    return data.choices[0].message.content;
+  }
+
+  private async callChutes(node: SwarmNode, prompt: string): Promise<string> {
+    const response = await fetch("https://api.chutes.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${node.key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: node.model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2048,
+      }),
+    });
+
+    if (!response.ok) throw new Error(`Chutes error: ${response.status}`);
+    const data = await response.json();
+    return data.choices[0].message.content;
+  }
+
+  private async callCerebras(node: SwarmNode, prompt: string): Promise<string> {
+    const response = await fetch("https://api.cerebras.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${node.key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: node.model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2048,
+      }),
+    });
+
+    if (!response.ok) throw new Error(`Cerebras error: ${response.status}`);
+    const data = await response.json();
+    return data.choices[0].message.content;
+  }
+
+  private async callTogether(node: SwarmNode, prompt: string): Promise<string> {
+    const response = await fetch("https://api.together.xyz/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${node.key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: node.model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2048,
+      }),
+    });
+
+    if (!response.ok) throw new Error(`Together error: ${response.status}`);
+    const data = await response.json();
+    return data.choices[0].message.content;
   }
 
   private async callCohere(node: SwarmNode, prompt: string): Promise<string> {
@@ -618,24 +662,6 @@ export class InfiniteSwarmEngine {
     if (!response.ok) throw new Error(`Cohere error: ${response.status}`);
     const data = await response.json();
     return data.text;
-  }
-
-  private async callAI21(node: SwarmNode, prompt: string): Promise<string> {
-    const response = await fetch("https://api.ai21.com/studio/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${node.key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: node.model,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-
-    if (!response.ok) throw new Error(`AI21 error: ${response.status}`);
-    const data = await response.json();
-    return data.choices[0].message.content;
   }
 
   // ==========================================

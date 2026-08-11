@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** مركز الاستخبارات → المساعد الموحّد (المرحلة 1) */
+/** مركز الاستخبارات → مركز قيادة الوكلاء الموحّد */
 export default function IntelRedirectPage() {
-  redirect("/admin/assistant?from=intel");
+  redirect("/admin/agents");
 }

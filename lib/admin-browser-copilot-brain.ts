@@ -2,6 +2,7 @@ import {
   inspectAdminLiveBrowserPage,
   runAdminLiveBrowserAction,
 } from "@/lib/admin-live-browser";
+import { cloudSearchAndRead, cloudFetchPage } from "@/lib/admin-live-browser-cloud";
 
 type BrowserSource = {
   title: string;
@@ -95,31 +96,46 @@ export async function runBrowserResearchMission(params: {
   const sources: BrowserSource[] = [];
   const directUrl = firstUrl(query);
 
-  await runAdminLiveBrowserAction({ action: "newTab", url: directUrl || searchUrl(query) });
-  steps.push(directUrl ? `فتح الرابط مباشرة: ${directUrl}` : `بحث حي في Bing عن: ${query}`);
+  // ── محاولة Playwright أولاً ─────────────────────────────────────────
+  try {
+    await runAdminLiveBrowserAction({ action: "newTab", url: directUrl || searchUrl(query) });
+    steps.push(directUrl ? `فتح الرابط مباشرة: ${directUrl}` : `بحث حي في Bing عن: ${query}`);
 
-  const landing = await inspectAdminLiveBrowserPage(10_000);
-  if (directUrl) {
-    sources.push({
-      title: landing.title || "صفحة مباشرة",
-      url: landing.url,
-      excerpt: cleanExcerpt(landing.text),
-    });
-  } else {
-    const resultLinks = landing.links
-      .filter((link) => isUsefulResult(link.href))
-      .filter((link, index, arr) => arr.findIndex((item) => item.href === link.href) === index)
-      .slice(0, maxSources);
+    const landing = await inspectAdminLiveBrowserPage(10_000);
+    if (directUrl) {
+      sources.push({ title: landing.title || "صفحة مباشرة", url: landing.url, excerpt: cleanExcerpt(landing.text) });
+    } else {
+      const resultLinks = landing.links
+        .filter((link) => isUsefulResult(link.href))
+        .filter((link, index, arr) => arr.findIndex((item) => item.href === link.href) === index)
+        .slice(0, maxSources);
 
-    for (const link of resultLinks) {
-      await runAdminLiveBrowserAction({ action: "goto", url: link.href });
-      steps.push(`فتح نتيجة: ${link.text || link.href}`);
-      const page = await inspectAdminLiveBrowserPage(10_000);
-      sources.push({
-        title: page.title || link.text || page.url,
-        url: page.url,
-        excerpt: cleanExcerpt(page.text),
-      });
+      for (const link of resultLinks) {
+        await runAdminLiveBrowserAction({ action: "goto", url: link.href });
+        steps.push(`فتح نتيجة: ${link.text || link.href}`);
+        const page = await inspectAdminLiveBrowserPage(10_000);
+        sources.push({ title: page.title || link.text || page.url, url: page.url, excerpt: cleanExcerpt(page.text) });
+      }
+    }
+  } catch (playwrightError) {
+    // ── Playwright غير متاح (serverless) → cloud fallback ────────────
+    const reason = playwrightError instanceof Error ? playwrightError.message : "Playwright unavailable";
+    steps.push(`تعذّر تشغيل Playwright (${reason.slice(0, 80)}) — أستخدم Cloud Browser`);
+
+    try {
+      if (directUrl) {
+        const page = await cloudFetchPage(directUrl);
+        sources.push({ title: page.title || "صفحة مباشرة", url: page.url, excerpt: cleanExcerpt(page.text) });
+        steps.push(`Cloud fetch: ${page.title || page.url} (${page.source})`);
+      } else {
+        const { sources: cloudSources, steps: cloudSteps } = await cloudSearchAndRead(query, maxSources);
+        for (const s of cloudSources) {
+          sources.push({ title: s.title || s.url, url: s.url, excerpt: cleanExcerpt(s.text) });
+        }
+        steps.push(...cloudSteps);
+      }
+    } catch (cloudError) {
+      steps.push(`فشل Cloud Browser أيضاً: ${cloudError instanceof Error ? cloudError.message : "خطأ"}`);
     }
   }
 
@@ -141,20 +157,12 @@ export async function runBrowserResearchMission(params: {
   return {
     success: sources.length > 0,
     message:
-      `استخدمت المتصفح الحي للبحث والتعلم.\n\n` +
+      `استخدمت المتصفح للبحث والتعلم.\n\n` +
       `الهدف: ${objective}\n\n` +
       `ما تم:\n${steps.map((step) => `• ${step}`).join("\n")}\n\n` +
       `ما تعلمته:\n${learned.map((item) => `• ${item}`).join("\n") || "• لم أجد محتوى كافياً، وسأحتاج صياغة بحث أدق."}\n\n` +
       `المصادر:\n${sourceLines || "لا توجد مصادر صالحة."}` +
       (needsHuman ? `\n\nيحتاج تدخل بشري:\n${needsHuman.map((item) => `• ${item}`).join("\n")}` : ""),
-    data: {
-      query,
-      objective,
-      steps,
-      sources,
-      learned,
-      nextActions,
-      needsHuman,
-    },
+    data: { query, objective, steps, sources, learned, nextActions, needsHuman },
   };
 }

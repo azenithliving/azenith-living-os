@@ -928,21 +928,199 @@ async function executeSettingUpdate(
 }
 
 // ============================================
-// Content Update Tool
+// Content Update Tool — Real Implementation
 // ============================================
 
 async function executeContentUpdate(
   params: Record<string, unknown>,
   context: ToolExecutionContext,
-  options: ToolExecutionOptions
+  _options: ToolExecutionOptions
 ): Promise<ExecutionResult> {
-  // Similar to setting update but for general content tables
+  const supabase = await createClient();
+  const startTime = Date.now();
+
+  const entityType = params.entityType as string;
+  const entityId   = params.entityId   as string;
+  const newValue   = params.newValue   as Record<string, unknown>;
+  const reason     = (params.reason as string) || "تحديث محتوى عبر المساعد";
+
+  if (!entityType || !entityId || !newValue) {
+    return {
+      success: false,
+      executionId: context.executionId,
+      message: "entityType و entityId و newValue مطلوبة",
+      error: "Missing required parameters",
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // ── جدول وحقول مسموحة لكل نوع كيان ──────────────────────────────────
+  const TABLE_MAP: Record<string, { table: string; allowedFields: string[] }> = {
+    site_section: { table: "site_sections", allowedFields: ["section_name","section_content","section_config","is_active","is_visible","sort_order"] },
+    section:      { table: "site_sections", allowedFields: ["section_name","section_content","section_config","is_active","is_visible","sort_order"] },
+    product:      { table: "products",      allowedFields: ["name","price","description","category","stock_quantity","is_active","images"] },
+    lead:         { table: "users",         allowedFields: ["full_name","phone","email","intent","score","room_type","budget","style"] },
+    user:         { table: "users",         allowedFields: ["full_name","phone","email","intent","score","room_type","budget","style"] },
+    room:         { table: "users",         allowedFields: ["room_type","budget","style","score"] },
+    site_setting: { table: "site_settings", allowedFields: ["setting_value"] },
+    blog_post:    { table: "blog_posts",    allowedFields: ["title","content","excerpt","is_published","meta_title","meta_description"] },
+    page:         { table: "pages",         allowedFields: ["title","content","meta_title","meta_description","is_published"] },
+  };
+
+  const mapping = TABLE_MAP[entityType];
+  if (!mapping) {
+    return {
+      success: false,
+      executionId: context.executionId,
+      message: `نوع الكيان غير مدعوم: ${entityType}. المتاح: ${Object.keys(TABLE_MAP).join(", ")}`,
+      error: "Unsupported entityType",
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // ── فلترة الحقول المسموح بها فقط ──────────────────────────────────────
+  const filteredValue: Record<string, unknown> = {};
+  const blockedFields: string[] = [];
+  for (const [field, val] of Object.entries(newValue)) {
+    if (mapping.allowedFields.includes(field)) {
+      filteredValue[field] = val;
+    } else {
+      blockedFields.push(field);
+    }
+  }
+
+  if (Object.keys(filteredValue).length === 0) {
+    return {
+      success: false,
+      executionId: context.executionId,
+      message: `لا توجد حقول مسموح بتعديلها. طلبت: ${Object.keys(newValue).join(", ")}. المسموح: ${mapping.allowedFields.join(", ")}`,
+      error: "No allowed fields in newValue",
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // ── قراءة السجل الحالي (before) ──────────────────────────────────────
+  const { data: existingRow, error: fetchError } = await supabase
+    .from(mapping.table as never)
+    .select("*")
+    .eq("id", entityId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return {
+      success: false,
+      executionId: context.executionId,
+      message: `فشل قراءة ${entityType} (${entityId}): ${fetchError.message}`,
+      error: fetchError.message,
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+  if (!existingRow) {
+    return {
+      success: false,
+      executionId: context.executionId,
+      message: `لم أجد ${entityType} بالـ ID: ${entityId}`,
+      error: "Record not found",
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // قيمة "before" — الحقول التي سنعدّلها فقط
+  const beforeValue: Record<string, unknown> = {};
+  for (const field of Object.keys(filteredValue)) {
+    beforeValue[field] = (existingRow as Record<string, unknown>)[field];
+  }
+
+  // ── تسجيل revision قبل التطبيق ────────────────────────────────────────
+  const { data: revision } = await supabase
+    .from("content_revisions")
+    .insert({
+      execution_id:   context.executionId ?? null,
+      company_id:     context.companyId   ?? null,
+      actor_user_id:  context.actorUserId  ?? null,
+      table_name:     mapping.table,
+      record_id:      entityId,
+      field_name:     Object.keys(filteredValue).join(","),
+      old_value:      beforeValue as unknown as Json,
+      new_value:      filteredValue as unknown as Json,
+      change_reason:  reason,
+      change_category: "content",
+      revision_status: "applied",
+    })
+    .select("id")
+    .single();
+
+  // ── تطبيق التحديث الفعلي ──────────────────────────────────────────────
+  const { data: updatedRow, error: updateError } = await supabase
+    .from(mapping.table as never)
+    .update({ ...filteredValue, updated_at: new Date().toISOString() } as never)
+    .eq("id", entityId)
+    .select()
+    .maybeSingle();
+
+  if (updateError) {
+    if (revision?.id) {
+      await supabase.from("content_revisions").update({ revision_status: "failed" }).eq("id", revision.id);
+    }
+    return {
+      success: false,
+      executionId: context.executionId,
+      message: `فشل تحديث ${entityType}: ${updateError.message}`,
+      error: updateError.message,
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // ── تحديث سجل التنفيذ ────────────────────────────────────────────────
+  if (context.executionId) {
+    await supabase
+      .from("agent_executions")
+      .update({
+        execution_status: "completed",
+        execution_result: { entityType, entityId, fields: Object.keys(filteredValue) } as unknown as Json,
+        completed_at: new Date().toISOString(),
+        affected_rows: 1,
+      })
+      .eq("id", context.executionId);
+  }
+
+  // ── audit log ──────────────────────────────────────────────────────────
+  await logAuditEvent(
+    "content_update",
+    `تحديث ${entityType} (${entityId}) — حقول: ${Object.keys(filteredValue).join(", ")}`,
+    context.actorUserId || "system",
+    { entityType, entityId, fields: Object.keys(filteredValue), revisionId: revision?.id },
+    "success",
+    { companyId: context.companyId, actorUserId: context.actorUserId, commandLogId: context.commandLogId }
+  );
+
+  const changesDesc = Object.entries(filteredValue)
+    .map(([k, v]) => `${k}: "${String(beforeValue[k] ?? "—")}" → "${String(v)}"`)
+    .join("، ");
+
+  const warningNote = blockedFields.length > 0
+    ? ` (تجاهلت الحقول غير المسموحة: ${blockedFields.join(", ")})`
+    : "";
+
   return {
-    success: false,
+    success: true,
     executionId: context.executionId,
-    message: "Content update tool not yet implemented",
-    error: "Not implemented",
-    executionTimeMs: Date.now() - Date.now(),
+    message: `تم تحديث ${entityType} بنجاح — ${changesDesc}${warningNote}`,
+    data: {
+      entityType,
+      entityId,
+      before: beforeValue,
+      after: filteredValue,
+      revisionId: revision?.id ?? null,
+      affectedFields: Object.keys(filteredValue),
+      blockedFields,
+      updatedRow: (updatedRow ?? {}) as Record<string, unknown>,
+      canRollback: !!revision?.id,
+    },
+    executionTimeMs: Date.now() - startTime,
+    affectedTables: [mapping.table, "content_revisions"],
+    affectedRows: 1,
+    canRollback: !!revision?.id,
   };
 }
 

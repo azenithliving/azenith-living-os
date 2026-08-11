@@ -49,23 +49,21 @@ interface AIKeysControlPanelProps {
 }
 
 const PROVIDER_INFO: Record<string, { name: string; color: string; icon: string; feature: string }> = {
-  groq:        { name: "Groq",          color: "bg-orange-500",  icon: "⚡", feature: "Ultra-fast LLM inference"     },
-  openrouter:  { name: "OpenRouter",    color: "bg-purple-500",  icon: "🔀", feature: "Multi-model routing (20+ free)" },
-  mistral:     { name: "Mistral AI",    color: "bg-blue-500",    icon: "🌊", feature: "European AI models — free tier" },
-  deepseek:    { name: "DeepSeek",      color: "bg-indigo-500",  icon: "🔍", feature: "Deep reasoning models"         },
-  google:      { name: "Google Gemini", color: "bg-yellow-500",  icon: "💎", feature: "Vision & multimodal — free"    },
-  cerebras:    { name: "Cerebras",      color: "bg-pink-500",    icon: "⚡", feature: "Ultra-fast responses — free"   },
-  together:    { name: "Together AI",   color: "bg-cyan-500",    icon: "📄", feature: "Llama 4 & open models — free"  },
-  cohere:      { name: "Cohere",        color: "bg-violet-500",  icon: "🎯", feature: "1000 req/month free"           },
-  pexels:      { name: "Pexels",        color: "bg-emerald-500", icon: "📷", feature: "Stock images — free"           },
-  aimlapi:     { name: "AIML API",      color: "bg-lime-500",    icon: "🔗", feature: "Unified AI gateway"            },
-  cloudflare:  { name: "Cloudflare AI", color: "bg-orange-400",  icon: "☁️", feature: "10K req/day free"              },
-  huggingface: { name: "Hugging Face",  color: "bg-yellow-400",  icon: "🤗", feature: "Open-source models — free"     },
-  nvidia:      { name: "NVIDIA NIM",    color: "bg-green-600",   icon: "🖥️", feature: "100+ models free — 40 RPM"     },
-  chutes:      { name: "Chutes AI",     color: "bg-teal-500",    icon: "🪝", feature: "DeepSeek R2 & Llama 4 — free"  },
-  apifreellm:  { name: "API Free LLM",  color: "bg-gray-500",    icon: "🆓", feature: "Free LLM gateway"              },
-  bytez:       { name: "Bytez",         color: "bg-slate-500",   icon: "🔬", feature: "Research models"               },
-  api_ninjas:  { name: "API Ninjas",    color: "bg-red-400",     icon: "🥷", feature: "Utility APIs"                  },
+  groq: { name: "Groq", color: "bg-orange-500", icon: "⚡", feature: "Ultra-fast LLM inference" },
+  openrouter: { name: "OpenRouter", color: "bg-purple-500", icon: "🔀", feature: "Multi-model routing" },
+  mistral: { name: "Mistral AI", color: "bg-blue-500", icon: "🌊", feature: "European AI models" },
+  deepseek: { name: "DeepSeek", color: "bg-indigo-500", icon: "🔍", feature: "Deep reasoning models" },
+  google: { name: "Google Gemini", color: "bg-yellow-500", icon: "💎", feature: "Vision & multimodal" },
+  cerebras: { name: "Cerebras", color: "bg-pink-500", icon: "⚡", feature: "Ultra-fast responses" },
+  together: { name: "Together AI", color: "bg-cyan-500", icon: "🤝", feature: "Llama 4 & Nova models" },
+  cohere: { name: "Cohere", color: "bg-violet-500", icon: "🎯", feature: "Intent classification" },
+  pexels: { name: "Pexels", color: "bg-emerald-500", icon: "📷", feature: "Stock images API" },
+  xai: { name: "xAI", color: "bg-slate-500", icon: "✖️", feature: "Grok models" },
+  aimlapi: { name: "AIML API", color: "bg-lime-500", icon: "🔗", feature: "Unified AI gateway" },
+  cloudflare: { name: "Cloudflare AI", color: "bg-orange-400", icon: "☁️", feature: "Edge inference" },
+  huggingface: { name: "Hugging Face", color: "bg-yellow-400", icon: "🤗", feature: "Open-source models" },
+  nvidia: { name: "NVIDIA NIM", color: "bg-green-500", icon: "🎮", feature: "100+ free models (Llama 4, DeepSeek, Qwen3)" },
+  chutes: { name: "Chutes AI", color: "bg-blue-400", icon: "🪂", feature: "Free DeepSeek R2, Llama 4, Qwen3" },
 };
 
 export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPanelProps) {
@@ -524,7 +522,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
             </button>
             <Key className="w-5 h-5 md:w-6 md:h-6 text-white" />
             <h2 className="text-lg md:text-2xl font-bold text-white">AI Keys Control</h2>
-            <span className="hidden sm:inline bg-white/20 text-white text-xs px-2 py-1 rounded">16 مزود</span>
+            <span className="hidden sm:inline bg-white/20 text-white text-xs px-2 py-1 rounded">15 مزود</span>
           </div>
           <div className="flex items-center gap-2">
             <button

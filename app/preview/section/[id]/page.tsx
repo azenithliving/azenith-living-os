@@ -156,7 +156,7 @@ export default async function SectionPreviewPage({ params }: PreviewPageProps) {
             <Badge variant="outline">{section.section_type}</Badge>
 
             <div className="border-l border-white/20 ml-3 pl-3 flex gap-2">
-              <Link href="/admin/intel">
+              <Link href="/admin/agents">
                 <Button variant="ghost" size="sm" className="text-white/80 hover:text-white">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   رجوع
@@ -247,7 +247,7 @@ export default async function SectionPreviewPage({ params }: PreviewPageProps) {
             هذه معاينة فقط. القسم لن يظهر للزوار حتى يتم نشره.
           </p>
           <div className="flex gap-3">
-            <Link href="/admin/intel">
+            <Link href="/admin/agents">
               <Button variant="outline">إلغاء</Button>
             </Link>
             <Button className="bg-[#C5A059] hover:bg-[#d5b26a] text-[#161616]">

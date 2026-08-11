@@ -77,6 +77,8 @@ type BrowserCopilotProps = {
   assistantMessages?: BrowserChatMessage[];
   assistantBusy?: boolean;
   onSendMessage?: (message: string) => void;
+  /** لما يكون true المتصفح يأخذ كل المساحة تلقائياً بدون زر الفتح */
+  fullPage?: boolean;
 };
 
 const CUSTOM_VIEWER_URL_KEY = "admin_browser_custom_viewer_url";
@@ -209,8 +211,10 @@ export function AssistantBrowserCopilot({
   assistantMessages = [],
   assistantBusy = false,
   onSendMessage,
+  fullPage = false,
 }: BrowserCopilotProps) {
-  const [open, setOpen] = useState(false);
+  // لما fullPage=true المتصفح يفتح مباشرة ومتمدد
+  const [open, setOpen] = useState(fullPage);
   const [expanded, setExpanded] = useState(false);
   const [session, setSession] = useState<BrowserSession | null>(null);
   const [loading, setLoading] = useState(false);
@@ -467,25 +471,30 @@ export function AssistantBrowserCopilot({
 
   return (
     <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-3 text-sm hover:border-cyan-300/60 md:w-auto"
-      >
-        <span className="flex items-center gap-2 font-semibold">
-          <Monitor className="h-4 w-4 text-cyan-200" />
-          المتصفح الحي
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/60">
-            {statusLabel}
+      {/* زر الفتح يختفي لما fullPage=true لأن المتصفح مفتوح بالكامل */}
+      {!fullPage && (
+        <button
+          type="button"
+          onClick={() => setOpen((value) => !value)}
+          className="flex w-full items-center justify-between gap-3 rounded-2xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-3 text-sm hover:border-cyan-300/60 md:w-auto"
+        >
+          <span className="flex items-center gap-2 font-semibold">
+            <Monitor className="h-4 w-4 text-cyan-200" />
+            المتصفح الحي
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/60">
+              {statusLabel}
+            </span>
           </span>
-        </span>
-        <ChevronDown className={`h-4 w-4 text-cyan-200 transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
+          <ChevronDown className={`h-4 w-4 text-cyan-200 transition-transform ${open ? "rotate-180" : ""}`} />
+        </button>
+      )}
 
       {open && (
         <div
           className={
-            expanded
+            fullPage
+              ? "w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f0f]"
+              : expanded
               ? "fixed inset-0 z-50 overflow-hidden bg-[#0b0b0b] shadow-2xl shadow-black/70"
               : "absolute right-0 top-full z-30 mt-2 w-[min(92vw,980px)] overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f0f] shadow-2xl shadow-black/50"
           }
@@ -578,18 +587,24 @@ export function AssistantBrowserCopilot({
             </div>
           </div>
 
-          <div className={expanded ? "p-0" : "p-4"}>
-            <div className={expanded ? "min-h-0 overflow-hidden bg-black" : "min-h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-black"}>
+          <div className={expanded ? "p-0" : fullPage ? "p-0" : "p-4"}>
+            <div className={expanded ? "min-h-0 overflow-hidden bg-black" : fullPage ? "min-h-0 overflow-hidden bg-black" : "min-h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-black"}>
               {externalBrowser?.viewerUrl ? (
                 <iframe
                   key={`${externalBrowser.viewerUrl}-${frameKey}`}
                   src={externalBrowser.viewerUrl}
                   title="المتصفح الحي داخل المساعد"
-                  className={expanded ? "h-[calc(100vh-43px)] w-full border-0 bg-black" : "h-[420px] w-full border-0 bg-black lg:h-[560px]"}
+                  className={expanded ? "h-[calc(100vh-43px)] w-full border-0 bg-black" : fullPage ? "h-[calc(100vh-280px)] w-full border-0 bg-black" : "h-[420px] w-full border-0 bg-black lg:h-[560px]"}
                   allow="clipboard-read; clipboard-write; fullscreen"
                 />
               ) : builtInBrowser?.ready ? (
-                <div className={expanded ? "flex h-[calc(100vh-43px)] flex-col bg-black" : "flex h-[420px] flex-col bg-black lg:h-[560px]"}>
+                <div className={
+                  fullPage
+                    ? "flex h-[calc(100vh-280px)] flex-col bg-black"
+                    : expanded
+                    ? "flex h-[calc(100vh-43px)] flex-col bg-black"
+                    : "flex h-[420px] flex-col bg-black lg:h-[560px]"
+                }>
                   <div className="flex items-end gap-1 border-b border-white/10 bg-[#101010] px-2 pt-2">
                     <div className="flex min-w-0 flex-1 items-end gap-1 overflow-x-auto">
                       {(builtInBrowser.tabs || []).map((tab) => (
@@ -746,7 +761,7 @@ export function AssistantBrowserCopilot({
                     <img
                       src={
                         builtInBrowser.ready
-                          ? `/api/admin/live-browser/stream?fps=${expanded ? 6 : 4}&t=${streamKey}`
+                          ? `/api/admin/live-browser/stream?fps=${fullPage ? 5 : expanded ? 6 : 4}&t=${streamKey}`
                           : `/api/admin/live-browser/screenshot?t=${screenshotKey}`
                       }
                       alt="بث المتصفح الحي"

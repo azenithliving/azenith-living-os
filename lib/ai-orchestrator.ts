@@ -1,7 +1,6 @@
 /**
  * AI Orchestrator - The Sovereign Neural Spine
- * ✅ FREE PROVIDERS ONLY — All paid APIs removed
- * Updated: 2026-08-12
+ * Phase 2: Unlimited Intelligence
  */
 
 import { runMastermind } from "./mastermind-graph";
@@ -22,19 +21,19 @@ type AIProvider =
   | "chutes";
 
 const CONFIG = {
-  // === أفضل النماذج المجانية فقط ===
-  GROQ_MODEL: "llama-3.3-70b-versatile",
-  OPENROUTER_VISION_MODEL: "google/gemini-4-flash-preview-2-5:free",
+  // === The Absolute Best Models on the Market ===
+  GROQ_MODEL: "llama-3.3-70b-versatile", // Blazing fast, top tier open source
+  OPENROUTER_VISION_MODEL: "anthropic/claude-opus-5", // Best vision model
   MISTRAL_CODE_MODEL: "codestral-latest",
   MISTRAL_GENERAL_MODEL: "mistral-large-latest",
-  DEEPSEEK_MODEL: "deepseek-v4-flash",
-  GOOGLE_MODEL: "gemini-3-flash-preview",
+  DEEPSEEK_MODEL: "deepseek-v4-flash", // DeepSeek V4 Flash (excellent logic, fast)
+  GOOGLE_MODEL: "gemini-3-flash-preview", // Extremely fast and capable
   TOGETHER_MODEL: process.env.TOGETHER_MODEL || "meta-llama/Llama-3.3-70B-Instruct-Turbo",
-  AIMLAPI_MODEL: process.env.AIMLAPI_MODEL || "gpt-4o-mini",
+  AIMLAPI_MODEL: process.env.AIMLAPI_MODEL || "openai/gpt-4.1-mini",
   CEREBRAS_MODEL: process.env.CEREBRAS_MODEL || "gpt-oss-120b",
   COHERE_MODEL: process.env.COHERE_MODEL || "command-a-03-2025",
-  NVIDIA_MODEL: process.env.NVIDIA_MODEL || "nvidia/llama-3.1-nemotron-70b-instruct",
-  CHUTES_MODEL: process.env.CHUTES_MODEL || "deepseek/deepseek-r1",
+  NVIDIA_MODEL: process.env.NVIDIA_MODEL || "meta/llama-3.3-70b-instruct", // NVIDIA NIM default model
+  CHUTES_MODEL: process.env.CHUTES_MODEL || "deepseek/deepseek-r1", // Chutes AI default model
   MAX_RETRIES: 3,
   RETRY_DELAY_MS: 500,
 };
@@ -179,6 +178,9 @@ export async function askGroqMessages(
 
   const deepseekResult = await askDeepSeek(messages[messages.length - 1]?.content || "", options);
   if (deepseekResult.success) return deepseekResult;
+
+  const nvidiaResult = await askNVIDIAMessages(messages, options);
+  if (nvidiaResult.success) return nvidiaResult;
 
   return askGoogle(messages[messages.length - 1].content, options);
 }
@@ -355,6 +357,74 @@ export async function askCohereMessages(
   return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
 }
 
+/**
+ * Ask NVIDIA NIM - 100+ free models including Llama 4, DeepSeek, Qwen3
+ */
+export async function askNVIDIAMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const body: Record<string, unknown> = {
+    model: options?.model || CONFIG.NVIDIA_MODEL,
+    messages,
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (options?.jsonMode) {
+    body.response_format = { type: "json_object" };
+  }
+
+  const result = await fetchWithRetry(
+    "nvidia",
+    (key) => fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+/**
+ * Ask Chutes AI - Free DeepSeek R2, Llama 4, Qwen3
+ */
+export async function askChutesMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const body: Record<string, unknown> = {
+    model: options?.model || CONFIG.CHUTES_MODEL,
+    messages,
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (options?.jsonMode) {
+    body.response_format = { type: "json_object" };
+  }
+
+  const result = await fetchWithRetry(
+    "chutes",
+    (key) => fetch("https://api.chutes.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
 export async function askGoogle(prompt: string, options?: any) {
   const model = options?.model || CONFIG.GOOGLE_MODEL;
   const result = await fetchWithRetry(
@@ -397,8 +467,8 @@ export async function askGoogleMessages(messages: Array<{ role: string; content:
 }
 
 /**
- * ✅ Master Orchestrator — FREE PROVIDERS ONLY
- * Dynamic fallback chain with smart provider selection
+ * Master Orchestrator: Dynamically reads .env fallback configs and routes the request
+ * with high availability and smart fallback.
  */
 export async function askOrchestratorMessages(
   messages: Array<{ role: string; content: string }>,
@@ -409,15 +479,14 @@ export async function askOrchestratorMessages(
     process.env.DEFAULT_AI_PROVIDER || "groq",
     process.env.FALLBACK_AI_PROVIDER_1 || "gemini",
     process.env.FALLBACK_AI_PROVIDER_2 || "openrouter",
-    process.env.FALLBACK_AI_PROVIDER_3 || "deepseek",
+    process.env.FALLBACK_AI_PROVIDER_3 || "nvidia",
   ];
 
-  // Additional emergency fallbacks — ALL FREE
+  // Additional emergency fallbacks
   if (!providersToTry.includes("together")) providersToTry.push("together");
   if (!providersToTry.includes("aimlapi")) providersToTry.push("aimlapi");
   if (!providersToTry.includes("cerebras")) providersToTry.push("cerebras");
   if (!providersToTry.includes("cohere")) providersToTry.push("cohere");
-  if (!providersToTry.includes("nvidia")) providersToTry.push("nvidia");
   if (!providersToTry.includes("chutes")) providersToTry.push("chutes");
 
   console.log(`[Orchestrator] Starting inference. Provider sequence: ${providersToTry.join(' -> ')}`);
@@ -435,6 +504,12 @@ export async function askOrchestratorMessages(
         case "google":
           result = await askGoogleMessages(messages, options);
           break;
+        case "nvidia":
+          result = await askNVIDIAMessages(messages, options);
+          break;
+        case "chutes":
+          result = await askChutesMessages(messages, options);
+          break;
         case "together":
           result = await askTogetherMessages(messages, options);
           break;
@@ -447,14 +522,11 @@ export async function askOrchestratorMessages(
         case "cohere":
           result = await askCohereMessages(messages, options);
           break;
-        case "deepseek":
-          result = await askDeepSeek(messages[messages.length - 1].content, options);
-          break;
         case "openrouter":
           result = await askOpenRouter(messages[messages.length - 1].content);
           break;
         default:
-          continue; // skip unknown
+          continue;
       }
 
       if (result.success && result.content && result.content.trim().length > 0) {
@@ -509,7 +581,6 @@ export async function askNileChat(prompt: string, options?: any) {
 export async function askAllam(prompt: string, options?: any) {
   return askHuggingFace("SDAIA/ALLaM-7B-Instruct", `### Instruction:\n${prompt}\n\n### Response:\n`, options);
 }
-
 export async function testProviderHealth(provider: string): Promise<{
   responsive: boolean;
   responseTimeMs: number;
@@ -543,6 +614,12 @@ export async function testProviderHealth(provider: string): Promise<{
       case "cohere":
         result = await askCohereMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
         break;
+      case "nvidia":
+        result = await askNVIDIAMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
+        break;
+      case "chutes":
+        result = await askChutesMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
+        break;
       default:
         return { responsive: false, responseTimeMs: 0, error: "Unknown provider" };
     }
@@ -569,7 +646,9 @@ export async function getOrchestratorHealth() {
     "google",
     "cerebras",
     "together",
-    "cohere"
+    "cohere",
+    "nvidia",
+    "chutes"
   ] as const;
   const health: any = {};
 
@@ -638,6 +717,7 @@ export class AIOrchestrator {
       openRouterConfigured: h.openrouter.healthy,
       mistralConfigured: h.mistral.healthy,
       deepseekConfigured: h.deepseek.healthy,
+      openaiConfigured: h.openai.healthy,
       googleConfigured: h.google.healthy,
     };
   }
@@ -660,6 +740,8 @@ export function createLLMClient(provider: any) {
       else if (provider === "groq") res = await askGroq(prompt);
       else if (provider === "mistral") res = await askMistral(prompt);
       else if (provider === "openrouter") res = await askOpenRouter(prompt);
+      else if (provider === "nvidia") res = await askNVIDIAMessages([{ role: "user", content: prompt }]);
+      else if (provider === "chutes") res = await askChutesMessages([{ role: "user", content: prompt }]);
       else res = await askDeepSeek(prompt);
       return res.success ? res.content : "Connection error. 😅";
     }

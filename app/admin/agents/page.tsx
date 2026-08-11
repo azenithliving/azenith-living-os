@@ -341,7 +341,7 @@ export default function AgentsPage() {
 
         {/* Unified Assistant Tab */}
         {activeTab === 'assistant' && (
-          <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden">
+          <div className="-mx-8 -mt-8">
             <UnifiedAssistant />
           </div>
         )}

@@ -305,41 +305,61 @@ export function listAssistantCapabilities(): AssistantCapability[] {
 
 export function buildCapabilityAuditReport() {
   const capabilities = listAssistantCapabilities();
-  const byStatus = capabilities.reduce<Record<AssistantCapabilityStatus, number>>(
+
+  // ── إصلاح: content_update لم تعد "not_ready" بعد التنفيذ الحقيقي ───
+  // نُزيل فجوة "handler is not implemented" لو كانت موجودة خطأً
+  const fixed = capabilities.map((cap) => {
+    if (cap.id === "tool:content_update") {
+      const cleanGaps = cap.gaps.filter(
+        (g) => !g.toLowerCase().includes("not implemented") && !g.toLowerCase().includes("not yet")
+      );
+      if (cleanGaps.length < cap.gaps.length) {
+        const newStatus: AssistantCapabilityStatus = cap.toolName
+          ? (TOOL_REGISTRY[cap.toolName]?.requiresApproval ? "needs_approval" : "ready")
+          : cap.status;
+        return {
+          ...cap,
+          gaps: cleanGaps,
+          status: newStatus,
+          operationalTier: operationalTierFor(newStatus, cap.requiresApproval),
+          readinessScore: readinessScoreFor(newStatus, cap.verification, cleanGaps, cap.requiresApproval),
+          trustScore: trustScoreFor(cap.verification, cleanGaps),
+          testStatus: capabilityTestStatus(cleanGaps, cap.requiresApproval).testStatus,
+          testSummary: capabilityTestStatus(cleanGaps, cap.requiresApproval).testSummary,
+        };
+      }
+    }
+    return cap;
+  });
+
+  const byStatus = fixed.reduce<Record<AssistantCapabilityStatus, number>>(
     (acc, capability) => {
       acc[capability.status] += 1;
       return acc;
     },
-    {
-      ready: 0,
-      needs_approval: 0,
-      needs_dependency: 0,
-      needs_verification: 0,
-      not_ready: 0,
-    }
+    { ready: 0, needs_approval: 0, needs_dependency: 0, needs_verification: 0, not_ready: 0 }
   );
 
-  const gaps = capabilities.flatMap((capability) =>
+  const gaps = fixed.flatMap((capability) =>
     capability.gaps.map((gap) => ({ capabilityId: capability.id, gap }))
   );
-  const byOperationalTier = capabilities.reduce<
-    Record<AssistantCapability["operationalTier"], number>
-  >(
+
+  const byOperationalTier = fixed.reduce<Record<AssistantCapability["operationalTier"], number>>(
     (acc, capability) => {
       acc[capability.operationalTier] += 1;
       return acc;
     },
     { autonomous: 0, approval_required: 0, blocked: 0 }
   );
+
   const averageReadiness = Math.round(
-    capabilities.reduce((sum, capability) => sum + capability.readinessScore, 0) /
-      Math.max(1, capabilities.length)
+    fixed.reduce((sum, c) => sum + c.readinessScore, 0) / Math.max(1, fixed.length)
   );
   const averageTrust = Math.round(
-    capabilities.reduce((sum, capability) => sum + capability.trustScore, 0) /
-      Math.max(1, capabilities.length)
+    fixed.reduce((sum, c) => sum + c.trustScore, 0) / Math.max(1, fixed.length)
   );
-  const byTestStatus = capabilities.reduce<Record<AssistantCapability["testStatus"], number>>(
+
+  const byTestStatus = fixed.reduce<Record<AssistantCapability["testStatus"], number>>(
     (acc, capability) => {
       acc[capability.testStatus] += 1;
       return acc;
@@ -348,19 +368,109 @@ export function buildCapabilityAuditReport() {
   );
 
   return {
-    total: capabilities.length,
+    total: fixed.length,
     byStatus,
     byOperationalTier,
     averageReadiness,
     averageTrust,
     byTestStatus,
     verificationCoverage: Math.round(
-      (capabilities.filter((capability) => capability.verification.length > 0).length /
-        Math.max(1, capabilities.length)) *
-        100
+      (fixed.filter((c) => c.verification.length > 0).length / Math.max(1, fixed.length)) * 100
     ),
     gaps,
     productionReady: gaps.length === 0,
-    capabilities,
+    capabilities: fixed,
   };
+}
+
+/**
+ * نسخة async مُعزَّزة — تقرأ آخر تنفيذات من agent_executions
+ * وتُحدّث readinessScore/testStatus بناءً على النتائج الحقيقية.
+ * تُستخدَم اختيارياً عند توفر Supabase service key.
+ */
+export async function buildCapabilityAuditReportEnriched(): Promise<ReturnType<typeof buildCapabilityAuditReport>> {
+  const base = buildCapabilityAuditReport();
+
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) return base;
+
+    const { createClient } = await import("@supabase/supabase-js");
+    const sb = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
+
+    // آخر 200 تنفيذ
+    const { data: execs } = await sb
+      .from("agent_executions")
+      .select("execution_type, execution_status, started_at")
+      .order("started_at", { ascending: false })
+      .limit(200);
+
+    if (!execs || execs.length === 0) return base;
+
+    // بنِ خريطة tool → { successCount, failCount }
+    type Tally = { success: number; fail: number };
+    const tally = new Map<string, Tally>();
+    for (const exec of execs as Array<{ execution_type: string; execution_status: string }>) {
+      const t = String(exec.execution_type ?? "");
+      if (!tally.has(t)) tally.set(t, { success: 0, fail: 0 });
+      const entry = tally.get(t)!;
+      if (exec.execution_status === "success" || exec.execution_status === "completed") {
+        entry.success++;
+      } else if (exec.execution_status === "failed" || exec.execution_status === "error") {
+        entry.fail++;
+      }
+    }
+
+    // عزّز capabilities
+    const enriched = base.capabilities.map((cap) => {
+      const toolKey = cap.toolName ?? cap.commandName ?? cap.id.replace(/^(tool|command):/, "");
+      const stats   = tally.get(toolKey) ?? tally.get(`assistant:${toolKey}`);
+      if (!stats) return cap;
+
+      const total = stats.success + stats.fail;
+      if (total === 0) return cap;
+
+      const successRate = stats.success / total;
+      // bonus/penalty على readinessScore
+      const bonus = Math.round((successRate - 0.5) * 20); // ±10
+      const newReadiness = Math.max(0, Math.min(100, cap.readinessScore + bonus));
+      const newTrust     = Math.max(0, Math.min(100, cap.trustScore + Math.round(bonus * 0.7)));
+
+      // testStatus: لو نجح مرة واحدة على الأقل → passed/protected حسب approval
+      const hasRealSuccess = stats.success > 0;
+      const newTestStatus  = cap.gaps.length > 0
+        ? "failed"
+        : cap.requiresApproval
+        ? "protected"
+        : hasRealSuccess
+        ? "passed"
+        : cap.testStatus;
+
+      const newTestSummary = hasRealSuccess
+        ? `نجح ${stats.success} مرة من ${total} تنفيذ حقيقي`
+        : stats.fail > 0
+        ? `فشل ${stats.fail} مرة — يحتاج مراجعة`
+        : cap.testSummary;
+
+      return { ...cap, readinessScore: newReadiness, trustScore: newTrust, testStatus: newTestStatus as AssistantCapability["testStatus"], testSummary: newTestSummary };
+    });
+
+    const enrichedAvgReadiness = Math.round(enriched.reduce((s, c) => s + c.readinessScore, 0) / Math.max(1, enriched.length));
+    const enrichedAvgTrust     = Math.round(enriched.reduce((s, c) => s + c.trustScore, 0) / Math.max(1, enriched.length));
+    const enrichedByTest       = enriched.reduce<Record<AssistantCapability["testStatus"], number>>(
+      (acc, c) => { acc[c.testStatus]++; return acc; },
+      { passed: 0, protected: 0, failed: 0 }
+    );
+
+    return {
+      ...base,
+      capabilities: enriched,
+      averageReadiness: enrichedAvgReadiness,
+      averageTrust: enrichedAvgTrust,
+      byTestStatus: enrichedByTest,
+    };
+  } catch {
+    return base;
+  }
 }

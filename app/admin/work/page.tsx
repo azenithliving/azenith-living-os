@@ -1,11 +1,8 @@
 import Link from "next/link";
 import {
   TrendingUp,
-  Factory,
   MessageSquare,
   Phone,
-  Brain,
-  ListTodo,
 } from "lucide-react";
 
 const workLinks = [
@@ -14,12 +11,6 @@ const workLinks = [
     label: "المبيعات والعملاء",
     desc: "العملاء، المعرفة، والأسئلة المعلّقة",
     icon: TrendingUp,
-  },
-  {
-    href: "/admin/manufacturing",
-    label: "التصنيع",
-    desc: "خط الإنتاج والطلبات",
-    icon: Factory,
   },
   {
     href: "/admin/whatsapp",
@@ -32,18 +23,6 @@ const workLinks = [
     label: "الهاتف",
     desc: "المكالمات والرد الآلي",
     icon: Phone,
-  },
-  {
-    href: "/admin/assistant",
-    label: "المساعد الموحّد",
-    desc: "نفّذ أي مهمة بلغتك الطبيعية",
-    icon: Brain,
-  },
-  {
-    href: "/admin/agents",
-    label: "مهام الوكلاء",
-    desc: "سجل المهام والتنفيذ التفصيلي",
-    icon: ListTodo,
   },
 ];
 

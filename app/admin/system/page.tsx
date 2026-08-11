@@ -27,7 +27,7 @@ const links = [
     icon: Code,
   },
   {
-    href: "/admin/assistant",
+    href: "/admin/agents?tab=assistant",
     label: "فحص الصحة",
     desc: "اسأل: هل الموقع شغال تمام؟",
     icon: Shield,
