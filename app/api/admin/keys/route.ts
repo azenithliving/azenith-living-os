@@ -6,216 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { reloadKeys, getAllLiveStats } from "@/lib/api-keys-service";
-
-// ═══════════════════════════════════════════════════════════════════
-// اختبار المفاتيح — مع timeout صارم وتغطية كاملة لكل provider
-// ═══════════════════════════════════════════════════════════════════
-
-const TEST_TIMEOUT_MS = 8000; // 8 ثواني كحد أقصى
-
-interface TestConfig {
-  url: string;
-  method?: "GET" | "POST";
-  headers: Record<string, string>;
-  body?: string;
-  extraValidStatuses?: number[];
-}
-
-function buildTestConfig(provider: string, key: string): TestConfig | null {
-  const p = provider.toLowerCase();
-
-  switch (p) {
-    case "groq":
-      return {
-        url: "https://api.groq.com/openai/v1/models",
-        headers: { Authorization: `Bearer ${key}` },
-      };
-
-    case "openrouter":
-      return {
-        url: "https://openrouter.ai/api/v1/models",
-        headers: {
-          Authorization: `Bearer ${key}`,
-          "HTTP-Referer": "https://azenithliving.com",
-        },
-      };
-
-    case "mistral":
-      return {
-        url: "https://api.mistral.ai/v1/models",
-        headers: { Authorization: `Bearer ${key}` },
-      };
-
-    case "openai":
-      return {
-        url: "https://api.openai.com/v1/models",
-        headers: { Authorization: `Bearer ${key}` },
-      };
-
-    case "deepseek":
-      return {
-        url: "https://api.deepseek.com/v1/models",
-        headers: {
-          Authorization: `Bearer ${key}`,
-          Accept: "application/json",
-        },
-      };
-
-    case "together":
-      return {
-        url: "https://api.together.xyz/v1/models",
-        headers: { Authorization: `Bearer ${key}` },
-      };
-
-    case "cohere":
-      return {
-        url: "https://api.cohere.ai/v1/models",
-        headers: { Authorization: `Bearer ${key}` },
-      };
-
-    case "xai":
-      return {
-        url: "https://api.x.ai/v1/models",
-        headers: { Authorization: `Bearer ${key}` },
-      };
-
-    case "aimlapi":
-      return {
-        url: "https://api.aimlapi.com/v1/models",
-        headers: { Authorization: `Bearer ${key}` },
-      };
-
-    case "huggingface":
-      return {
-        url: "https://huggingface.co/api/whoami",
-        headers: { Authorization: `Bearer ${key}` },
-      };
-
-    case "pexels":
-      return {
-        url: "https://api.pexels.com/v1/curated?per_page=1",
-        headers: { Authorization: key },
-      };
-
-    case "google":
-      return {
-        url: `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`,
-        headers: {},
-      };
-
-    case "anthropic":
-      return {
-        url: "https://api.anthropic.com/v1/messages",
-        method: "POST",
-        headers: {
-          "x-api-key": key,
-          "anthropic-version": "2023-06-01",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-3-haiku-20240307",
-          messages: [{ role: "user", content: "hi" }],
-          max_tokens: 1,
-        }),
-        extraValidStatuses: [400],
-      };
-
-    case "cerebras":
-      return {
-        url: "https://api.cerebras.ai/v1/chat/completions",
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${key}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-oss-120b",
-          messages: [{ role: "user", content: "hi" }],
-          max_tokens: 1,
-        }),
-        extraValidStatuses: [400],
-      };
-
-    case "sambanova":
-      return {
-        url: "https://api.sambanova.ai/v1/chat/completions",
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${key}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "Meta-Llama-3.1-8B-Instruct",
-          messages: [{ role: "user", content: "hi" }],
-          max_tokens: 1,
-        }),
-        extraValidStatuses: [400],
-      };
-
-    case "cloudflare":
-    case "apifreellm":
-    case "bytez":
-    case "api_ninjas":
-    default:
-      return null;
-  }
-}
-
-async function testApiKey(
-  provider: string,
-  key: string
-): Promise<{ valid: boolean; error?: string }> {
-  const config = buildTestConfig(provider, key);
-  if (!config) return { valid: true };
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TEST_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(config.url, {
-      method:  config.method || "GET",
-      headers: config.headers,
-      body:    config.body,
-      signal:  controller.signal,
-    });
-
-    clearTimeout(timer);
-
-    if (response.status === 429 || response.status === 402) {
-      return { valid: true };
-    }
-
-    if (response.status === 401) {
-      return { valid: false, error: "مفتاح غير صحيح (401 Unauthorized)" };
-    }
-    if (response.status === 403) {
-      return { valid: false, error: "مفتاح محظور (403 Forbidden)" };
-    }
-
-    const extra = config.extraValidStatuses || [];
-    const valid  = response.ok || extra.includes(response.status);
-
-    if (valid) return { valid: true };
-
-    return {
-      valid: false,
-      error: `HTTP ${response.status}: ${response.statusText}`,
-    };
-
-  } catch (err: any) {
-    clearTimeout(timer);
-
-    if (err.name === "AbortError") {
-      console.warn(`[Key Test] Timeout for ${provider} — accepting key`);
-      return { valid: true };
-    }
-
-    return {
-      valid: false,
-      error: `خطأ في الاتصال: ${err.message || "Connection failed"}`,
-    };
-  }
-}
+import { smartTestKey } from "@/lib/key-tester";
 
 export async function GET(request: NextRequest) {
   try {
@@ -331,7 +122,7 @@ export async function POST(request: NextRequest) {
 
     if (shouldTest) {
       console.log(`[Admin API] Testing ${provider} key...`);
-      const testResult = await testApiKey(provider, key);
+      const testResult = await smartTestKey(provider, key);
 
       if (!testResult.valid) {
         return NextResponse.json(
@@ -344,7 +135,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.log(`[Admin API] ✅ ${provider} key passed test`);
+      console.log(`[Admin API] ✅ ${provider} key passed test${testResult.modelUsed ? ` (model: ${testResult.modelUsed})` : ""}`);
     }
 
     const supabase = getSupabaseAdminClient();

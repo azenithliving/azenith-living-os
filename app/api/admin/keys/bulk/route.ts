@@ -12,122 +12,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { reloadKeys } from "@/lib/api-keys-service";
-
-const TEST_TIMEOUT_MS = 8000;
-
-// ── اختبار مفتاح واحد ────────────────────────────────────────────────
-async function testSingleKey(
-  provider: string,
-  key: string
-): Promise<{ valid: boolean; timedOut?: boolean; error?: string }> {
-  const p = provider.toLowerCase();
-
-  type Cfg = {
-    url: string;
-    method?: "GET" | "POST";
-    headers: Record<string, string>;
-    body?: string;
-    extraOk?: number[];
-  };
-
-  let cfg: Cfg | null = null;
-
-  switch (p) {
-    case "groq":
-      cfg = { url: "https://api.groq.com/openai/v1/models", headers: { Authorization: `Bearer ${key}` } };
-      break;
-    case "openrouter":
-      cfg = { url: "https://openrouter.ai/api/v1/models", headers: { Authorization: `Bearer ${key}`, "HTTP-Referer": "https://azenithliving.com" } };
-      break;
-    case "mistral":
-      cfg = { url: "https://api.mistral.ai/v1/models", headers: { Authorization: `Bearer ${key}` } };
-      break;
-    case "openai":
-      cfg = { url: "https://api.openai.com/v1/models", headers: { Authorization: `Bearer ${key}` } };
-      break;
-    case "deepseek":
-      cfg = { url: "https://api.deepseek.com/v1/models", headers: { Authorization: `Bearer ${key}`, Accept: "application/json" } };
-      break;
-    case "together":
-      cfg = { url: "https://api.together.xyz/v1/models", headers: { Authorization: `Bearer ${key}` } };
-      break;
-    case "cohere":
-      cfg = { url: "https://api.cohere.ai/v1/models", headers: { Authorization: `Bearer ${key}` } };
-      break;
-    case "xai":
-      cfg = { url: "https://api.x.ai/v1/models", headers: { Authorization: `Bearer ${key}` } };
-      break;
-    case "aimlapi":
-      cfg = { url: "https://api.aimlapi.com/v1/models", headers: { Authorization: `Bearer ${key}` } };
-      break;
-    case "huggingface":
-      cfg = { url: "https://huggingface.co/api/whoami", headers: { Authorization: `Bearer ${key}` } };
-      break;
-    case "pexels":
-      cfg = { url: "https://api.pexels.com/v1/curated?per_page=1", headers: { Authorization: key } };
-      break;
-    case "google":
-      cfg = { url: `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`, headers: {} };
-      break;
-    case "anthropic":
-      cfg = {
-        url: "https://api.anthropic.com/v1/messages", method: "POST",
-        headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "claude-3-haiku-20240307", messages: [{ role: "user", content: "hi" }], max_tokens: 1 }),
-        extraOk: [400],
-      };
-      break;
-    case "cerebras":
-      cfg = {
-        url: "https://api.cerebras.ai/v1/chat/completions", method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "gpt-oss-120b", messages: [{ role: "user", content: "hi" }], max_tokens: 1 }),
-        extraOk: [400],
-      };
-      break;
-    case "sambanova":
-      cfg = {
-        url: "https://api.sambanova.ai/v1/chat/completions", method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "Meta-Llama-3.1-8B-Instruct", messages: [{ role: "user", content: "hi" }], max_tokens: 1 }),
-        extraOk: [400],
-      };
-      break;
-    default:
-      // provider بدون endpoint اختبار → نقبله مباشرة
-      return { valid: true };
-  }
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TEST_TIMEOUT_MS);
-
-  try {
-    const res = await fetch(cfg.url, {
-      method:  cfg.method || "GET",
-      headers: cfg.headers,
-      body:    cfg.body,
-      signal:  controller.signal,
-    });
-    clearTimeout(timer);
-
-    // quota / payment = مفتاح صحيح
-    if (res.status === 429 || res.status === 402) return { valid: true };
-    // رفض صريح = مفتاح غلط
-    if (res.status === 401) return { valid: false, error: "401 Unauthorized" };
-    if (res.status === 403) return { valid: false, error: "403 Forbidden" };
-
-    const extra = cfg.extraOk ?? [];
-    return res.ok || extra.includes(res.status)
-      ? { valid: true }
-      : { valid: false, error: `HTTP ${res.status}: ${res.statusText}` };
-
-  } catch (err: any) {
-    clearTimeout(timer);
-    // Timeout → نقبل المفتاح
-    if (err.name === "AbortError") return { valid: true, timedOut: true };
-    return { valid: false, error: err.message ?? "Connection failed" };
-  }
-}
+import { smartTestKey } from "@/lib/key-tester";
 
 // ── حفظ دفعة في DB بـ INSERT واحدة واحدة (أكثر موثوقية من upsert) ───
 async function insertKeys(
@@ -236,7 +121,7 @@ export async function POST(request: NextRequest) {
       for (let i = 0; i < cleaned.length; i += batchSize) {
         const batch = cleaned.slice(i, i + batchSize);
         const batchRes = await Promise.all(
-          batch.map(async (key) => ({ key, ...(await testSingleKey(provider, key)) }))
+          batch.map(async (key) => ({ key, ...(await smartTestKey(provider, key)) }))
         );
         testResults.push(...batchRes);
       }
