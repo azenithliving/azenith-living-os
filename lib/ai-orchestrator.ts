@@ -1,6 +1,7 @@
 /**
  * AI Orchestrator - The Sovereign Neural Spine
- * Phase 2: Unlimited Intelligence
+ * ✅ FREE PROVIDERS ONLY — All paid APIs removed
+ * Updated: 2026-08-12
  */
 
 import { runMastermind } from "./mastermind-graph";
@@ -12,30 +13,28 @@ type AIProvider =
   | "openrouter"
   | "mistral"
   | "deepseek"
-  | "openai"
   | "google"
-  | "anthropic"
-  | "sambanova"
   | "together"
   | "aimlapi"
   | "cerebras"
-  | "cohere";
+  | "cohere"
+  | "nvidia"
+  | "chutes";
 
 const CONFIG = {
-  // === The Absolute Best Models on the Market ===
-  GROQ_MODEL: "llama-3.3-70b-versatile", // Blazing fast, top tier open source
-  ANTHROPIC_MODEL: "claude-sonnet-4-5-20250929", // The undisputed king of coding and complex logic
-  OPENROUTER_VISION_MODEL: "anthropic/claude-opus-5", // Best vision model
+  // === أفضل النماذج المجانية فقط ===
+  GROQ_MODEL: "llama-3.3-70b-versatile",
+  OPENROUTER_VISION_MODEL: "google/gemini-4-flash-preview-2-5:free",
   MISTRAL_CODE_MODEL: "codestral-latest",
   MISTRAL_GENERAL_MODEL: "mistral-large-latest",
-  DEEPSEEK_MODEL: "deepseek-v4-flash", // DeepSeek V4 Flash (excellent logic, fast)
-  OPENAI_MODEL: "gpt-4o", // Top tier reasoning
-  GOOGLE_MODEL: "gemini-3-flash-preview", // Extremely fast and capable
-  SAMBANOVA_MODEL: "Meta-Llama-3.3-70B-Instruct", // Lightning fast Llama
+  DEEPSEEK_MODEL: "deepseek-v4-flash",
+  GOOGLE_MODEL: "gemini-3-flash-preview",
   TOGETHER_MODEL: process.env.TOGETHER_MODEL || "meta-llama/Llama-3.3-70B-Instruct-Turbo",
-  AIMLAPI_MODEL: process.env.AIMLAPI_MODEL || "openai/gpt-4.1-mini",
+  AIMLAPI_MODEL: process.env.AIMLAPI_MODEL || "gpt-4o-mini",
   CEREBRAS_MODEL: process.env.CEREBRAS_MODEL || "gpt-oss-120b",
   COHERE_MODEL: process.env.COHERE_MODEL || "command-a-03-2025",
+  NVIDIA_MODEL: process.env.NVIDIA_MODEL || "nvidia/llama-3.1-nemotron-70b-instruct",
+  CHUTES_MODEL: process.env.CHUTES_MODEL || "deepseek/deepseek-r1",
   MAX_RETRIES: 3,
   RETRY_DELAY_MS: 500,
 };
@@ -181,44 +180,7 @@ export async function askGroqMessages(
   const deepseekResult = await askDeepSeek(messages[messages.length - 1]?.content || "", options);
   if (deepseekResult.success) return deepseekResult;
 
-  const openaiResult = await askOpenAIMessages(messages, options);
-  if (openaiResult.success) return openaiResult;
-
   return askGoogle(messages[messages.length - 1].content, options);
-}
-
-/**
- * Ask OpenAI with full message history
- */
-export async function askOpenAIMessages(
-  messages: Array<{ role: string; content: string }>,
-  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
-): Promise<{ success: boolean; content: string; error?: string }> {
-  const body: Record<string, unknown> = {
-    model: options?.model || CONFIG.OPENAI_MODEL,
-    messages: messages,
-    temperature: options?.temperature ?? 0.7,
-    max_tokens: options?.maxTokens ?? 2048,
-  };
-
-  if (options?.jsonMode) {
-    body.response_format = { type: "json_object" };
-  }
-
-  const result = await fetchWithRetry(
-    "openai",
-    (key) => fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    }),
-    (data) => data.choices?.[0]?.message?.content || ""
-  );
-
-  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
 }
 
 export async function askGroq(prompt: string, options?: any) {
@@ -274,10 +236,6 @@ export async function askDeepSeek(prompt: string, options?: any) {
 
   if (result.success) return { success: true, content: result.data };
   return askOpenRouter(prompt, undefined, { model: "google/gemini-2.5-flash" });
-}
-
-export async function askOpenAI(prompt: string, options?: any) {
-  return askOpenAIMessages([{ role: "user", content: prompt }], options);
 }
 
 export async function askTogetherMessages(
@@ -439,81 +397,8 @@ export async function askGoogleMessages(messages: Array<{ role: string; content:
 }
 
 /**
- * Ask Anthropic (Claude) with full message history
- */
-export async function askAnthropicMessages(
-  messages: Array<{ role: string; content: string }>,
-  options?: { model?: string; temperature?: number; maxTokens?: number }
-): Promise<{ success: boolean; content: string; error?: string }> {
-  // Extract system prompt if present
-  let systemPrompt = "";
-  const filteredMessages = messages.filter(m => {
-    if (m.role === "system") {
-      systemPrompt = m.content;
-      return false;
-    }
-    return true;
-  });
-
-  const body: Record<string, unknown> = {
-    model: options?.model || CONFIG.ANTHROPIC_MODEL,
-    messages: filteredMessages,
-    temperature: options?.temperature ?? 0.7,
-    max_tokens: options?.maxTokens ?? 2048,
-  };
-
-  if (systemPrompt) {
-    body.system = systemPrompt;
-  }
-
-  const result = await fetchWithRetry(
-    "anthropic",
-    (key) => fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    }),
-    (data) => data.content?.[0]?.text || ""
-  );
-
-  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
-}
-
-/**
- * Ask SambaNova with full message history (extremely fast)
- */
-export async function askSambaNovaMessages(
-  messages: Array<{ role: string; content: string }>,
-  options?: { model?: string; temperature?: number; maxTokens?: number }
-): Promise<{ success: boolean; content: string; error?: string }> {
-  const result = await fetchWithRetry(
-    "sambanova",
-    (key) => fetch("https://api.sambanova.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: options?.model || CONFIG.SAMBANOVA_MODEL,
-        messages: messages,
-        temperature: options?.temperature ?? 0.7,
-        max_tokens: options?.maxTokens ?? 2048,
-      }),
-    }),
-    (data) => data.choices?.[0]?.message?.content || ""
-  );
-
-  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
-}
-
-/**
- * Master Orchestrator: Dynamically reads .env fallback configs and routes the request
- * with high availability and smart fallback.
+ * ✅ Master Orchestrator — FREE PROVIDERS ONLY
+ * Dynamic fallback chain with smart provider selection
  */
 export async function askOrchestratorMessages(
   messages: Array<{ role: string; content: string }>,
@@ -524,16 +409,16 @@ export async function askOrchestratorMessages(
     process.env.DEFAULT_AI_PROVIDER || "groq",
     process.env.FALLBACK_AI_PROVIDER_1 || "gemini",
     process.env.FALLBACK_AI_PROVIDER_2 || "openrouter",
-    process.env.FALLBACK_AI_PROVIDER_3 || "openai",
+    process.env.FALLBACK_AI_PROVIDER_3 || "deepseek",
   ];
 
-  // Additional emergency fallbacks
-  if (!providersToTry.includes("anthropic")) providersToTry.push("anthropic");
-  if (!providersToTry.includes("sambanova")) providersToTry.push("sambanova");
+  // Additional emergency fallbacks — ALL FREE
   if (!providersToTry.includes("together")) providersToTry.push("together");
   if (!providersToTry.includes("aimlapi")) providersToTry.push("aimlapi");
   if (!providersToTry.includes("cerebras")) providersToTry.push("cerebras");
   if (!providersToTry.includes("cohere")) providersToTry.push("cohere");
+  if (!providersToTry.includes("nvidia")) providersToTry.push("nvidia");
+  if (!providersToTry.includes("chutes")) providersToTry.push("chutes");
 
   console.log(`[Orchestrator] Starting inference. Provider sequence: ${providersToTry.join(' -> ')}`);
 
@@ -550,16 +435,6 @@ export async function askOrchestratorMessages(
         case "google":
           result = await askGoogleMessages(messages, options);
           break;
-        case "openai":
-          result = await askOpenAIMessages(messages, options);
-          break;
-        case "anthropic":
-        case "claude":
-          result = await askAnthropicMessages(messages, options);
-          break;
-        case "sambanova":
-          result = await askSambaNovaMessages(messages, options);
-          break;
         case "together":
           result = await askTogetherMessages(messages, options);
           break;
@@ -572,8 +447,10 @@ export async function askOrchestratorMessages(
         case "cohere":
           result = await askCohereMessages(messages, options);
           break;
+        case "deepseek":
+          result = await askDeepSeek(messages[messages.length - 1].content, options);
+          break;
         case "openrouter":
-          // OpenRouter is typically called using askGroqMessages structure, but we'll adapt askOpenRouter
           result = await askOpenRouter(messages[messages.length - 1].content);
           break;
         default:
@@ -632,6 +509,7 @@ export async function askNileChat(prompt: string, options?: any) {
 export async function askAllam(prompt: string, options?: any) {
   return askHuggingFace("SDAIA/ALLaM-7B-Instruct", `### Instruction:\n${prompt}\n\n### Response:\n`, options);
 }
+
 export async function testProviderHealth(provider: string): Promise<{
   responsive: boolean;
   responseTimeMs: number;
@@ -653,20 +531,11 @@ export async function testProviderHealth(provider: string): Promise<{
       case "deepseek":
         result = await askDeepSeek("ping", { maxTokens: 5 });
         break;
-      case "openai":
-        result = await askOpenAI("ping", { maxTokens: 5 });
-        break;
       case "google":
         result = await askGoogle("ping", { maxTokens: 5 });
         break;
-      case "anthropic":
-        result = await askAnthropicMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
-        break;
       case "cerebras":
         result = await askCerebrasMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
-        break;
-      case "sambanova":
-        result = await askSambaNovaMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
         break;
       case "together":
         result = await askTogetherMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
@@ -697,11 +566,8 @@ export async function getOrchestratorHealth() {
     "openrouter", 
     "mistral", 
     "deepseek", 
-    "openai", 
     "google",
-    "anthropic",
     "cerebras",
-    "sambanova",
     "together",
     "cohere"
   ] as const;
@@ -772,7 +638,6 @@ export class AIOrchestrator {
       openRouterConfigured: h.openrouter.healthy,
       mistralConfigured: h.mistral.healthy,
       deepseekConfigured: h.deepseek.healthy,
-      openaiConfigured: h.openai.healthy,
       googleConfigured: h.google.healthy,
     };
   }
@@ -790,8 +655,7 @@ export function createLLMClient(provider: any) {
   return {
     async complete(prompt: string): Promise<string> {
       let res;
-      if (provider === "openai") res = await askOpenAI(prompt);
-      else if (provider === "google") res = await askGoogle(prompt);
+      if (provider === "google") res = await askGoogle(prompt);
       else if (provider === "deepseek") res = await askDeepSeek(prompt);
       else if (provider === "groq") res = await askGroq(prompt);
       else if (provider === "mistral") res = await askMistral(prompt);

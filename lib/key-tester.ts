@@ -196,12 +196,6 @@ export async function smartTestKey(
         { Authorization: `Bearer ${key}` }
       );
 
-    case "openai":
-      return testViaModelsEndpoint(
-        "https://api.openai.com/v1/models",
-        { Authorization: `Bearer ${key}` }
-      );
-
     case "deepseek":
       return testViaModelsEndpoint(
         "https://api.deepseek.com/v1/models",
@@ -217,12 +211,6 @@ export async function smartTestKey(
     case "cohere":
       return testViaModelsEndpoint(
         "https://api.cohere.ai/v1/models",
-        { Authorization: `Bearer ${key}` }
-      );
-
-    case "xai":
-      return testViaModelsEndpoint(
-        "https://api.x.ai/v1/models",
         { Authorization: `Bearer ${key}` }
       );
 
@@ -250,6 +238,21 @@ export async function smartTestKey(
         {}
       );
 
+    // ── NVIDIA NIM — 100+ موديل مجاني ────────────────────────────
+    case "nvidia":
+      return testViaModelsEndpoint(
+        "https://integrate.api.nvidia.com/v1/models",
+        { Authorization: `Bearer ${key}` }
+      );
+
+    // ── Chutes AI — مجاني دائم ────────────────────────────────────
+    case "chutes":
+      return testViaAutoModel(
+        "https://llm.chutes.ai/v1/models",
+        "https://llm.chutes.ai/v1/chat/completions",
+        { Authorization: `Bearer ${key}` }
+      );
+
     // ── Providers تحتاج اكتشاف model ثم POST ──────────────────────
     case "cerebras":
       return testViaAutoModel(
@@ -258,66 +261,23 @@ export async function smartTestKey(
         { Authorization: `Bearer ${key}` }
       );
 
-    case "sambanova":
-      return testViaAutoModel(
-        "https://api.sambanova.ai/v1/models",
-        "https://api.sambanova.ai/v1/chat/completions",
-        { Authorization: `Bearer ${key}` }
+    // ── Cloudflare Workers AI ──────────────────────────────────────
+    // مفتاحه بصيغة accountId:apiToken
+    case "cloudflare": {
+      const parts = key.split(":");
+      if (parts.length < 2) return { valid: true }; // نقبل ونتحقق عند الاستخدام
+      const [accountId, token] = parts;
+      return testViaModelsEndpoint(
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/models/search`,
+        { Authorization: `Bearer ${token}` }
       );
-
-    case "anthropic": {
-      // Anthropic لا تدعم /models بشكل عام → POST مباشر
-      // لكن نفس المشكلة — الـ model قد يتغير
-      // الحل: نجلب /v1/models وإلا نستخدم قائمة fallback معروفة
-      const authH = { "x-api-key": key, "anthropic-version": "2023-06-01" };
-
-      // جرب جلب models (قد لا يكون متاحاً)
-      let models: string[] = [];
-      try {
-        const mr = await fetchWithTimeout("https://api.anthropic.com/v1/models", { headers: authH });
-        if (mr.status === 401 || mr.status === 403) return { valid: false, error: `HTTP ${mr.status}` };
-        if (mr.ok) {
-          const j = await mr.json();
-          models = Array.isArray(j.data) ? j.data.map((m: any) => m.id).filter(Boolean) : [];
-        }
-      } catch { /* fallback */ }
-
-      // Fallback models معروفة مرتبة من الأرخص للأغلى
-      if (models.length === 0) {
-        models = [
-          "claude-haiku-4-5",
-          "claude-3-haiku-20240307",
-          "claude-3-5-haiku-20241022",
-          "claude-3-5-sonnet-20241022",
-        ];
-      }
-
-      for (const modelId of models.slice(0, 3)) {
-        try {
-          const res = await fetchWithTimeout("https://api.anthropic.com/v1/messages", {
-            method:  "POST",
-            headers: { ...authH, "Content-Type": "application/json" },
-            body:    JSON.stringify({
-              model: modelId, messages: [{ role: "user", content: "hi" }], max_tokens: 1,
-            }),
-          });
-          const st = interpretStatus(res.status, [400, 422]);
-          if (st === "valid")   return { valid: true,  modelUsed: modelId };
-          if (st === "invalid") return { valid: false, error: `HTTP ${res.status}` };
-        } catch (err: any) {
-          if (err.name === "AbortError") return { valid: true, timedOut: true };
-        }
-      }
-      return { valid: true }; // ما حددناش → نقبل
     }
 
     // ── Providers بدون endpoint اختبار موثوق ─────────────────────
-    case "cloudflare":
     case "apifreellm":
     case "bytez":
     case "api_ninjas":
     default:
-      // نقبل مباشرة — المستخدم مسؤول عن صحة المفتاح
       return { valid: true };
   }
 }

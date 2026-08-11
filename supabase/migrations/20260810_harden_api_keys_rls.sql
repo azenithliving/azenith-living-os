@@ -18,3 +18,10 @@ REVOKE ALL ON public.api_keys FROM anon, authenticated;
 
 -- Service role bypasses RLS (BYPASSRLS) - used by server-side admin client
 GRANT ALL ON public.api_keys TO service_role;
+
+-- Explicit policy for service_role (some Supabase versions need this even with BYPASSRLS)
+CREATE POLICY "Service role full access" ON public.api_keys
+  FOR ALL
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
