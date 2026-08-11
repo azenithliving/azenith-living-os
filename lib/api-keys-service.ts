@@ -57,6 +57,8 @@ interface KeyState {
   cooldownUntil: Date | null;
   totalRequests: number;
   lastUsedAt: Date | null;
+  isDead?: boolean;
+  lastError?: string | null;
 }
 
 const keyStates: Record<string, KeyState[]> = {
@@ -95,7 +97,7 @@ export async function loadKeysFromDB(): Promise<void> {
 
     const { data, error } = await supabase
       .from("api_keys")
-      .select("provider, key, cooldown_until, total_requests, last_used_at")
+      .select("provider, key, cooldown_until, total_requests, last_used_at, last_error, error_count")
       .eq("is_active", true);
 
     if (error) {
@@ -112,11 +114,24 @@ export async function loadKeysFromDB(): Promise<void> {
     for (const row of data || []) {
       const provider = row.provider?.toLowerCase();
       if (keyStates[provider]) {
+        // مفتاح يُعتبر "ميت" لو عنده 3 أخطاء متتالية أو أخطاء محددة
+        const isDead = 
+          (row.error_count && row.error_count >= 3) ||
+          (row.last_error && (
+            row.last_error.includes("401") ||
+            row.last_error.includes("403") ||
+            row.last_error.includes("Invalid") ||
+            row.last_error.includes("Unauthorized") ||
+            row.last_error.includes("Forbidden")
+          ));
+
         keyStates[provider].push({
           key: row.key,
           cooldownUntil: row.cooldown_until ? new Date(row.cooldown_until) : null,
           totalRequests: row.total_requests || 0,
           lastUsedAt: row.last_used_at ? new Date(row.last_used_at) : null,
+          isDead: isDead || false,
+          lastError: row.last_error || null,
         });
       }
     }
@@ -391,5 +406,116 @@ export async function reloadKeys(): Promise<{
       providers: {},
       error: error.message || "Unknown error during reload",
     };
+  }
+}
+
+/**
+ * Mark a key as dead (failed permanently)
+ */
+export async function markKeyAsDead(
+  provider: ApiKeyProvider,
+  key: string,
+  errorMessage: string
+): Promise<void> {
+  // Update in-memory
+  const pool = keyStates[provider];
+  if (!pool) return;
+  const keyEntry = pool.find((k) => k.key === key);
+  if (keyEntry) {
+    keyEntry.isDead = true;
+    keyEntry.lastError = errorMessage;
+  }
+
+  // Update in database
+  try {
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      await supabase
+        .from("api_keys")
+        .update({
+          is_active: false,
+          last_error: errorMessage,
+          error_count: 999, // رقم كبير يعني "ميت نهائياً"
+        })
+        .eq("provider", provider)
+        .eq("key", key);
+    }
+  } catch (err) {
+    console.error("[API Keys] Failed to mark key as dead:", err);
+  }
+}
+
+/**
+ * Increment error count for a key (3 errors = dead)
+ */
+export async function incrementKeyError(
+  provider: ApiKeyProvider,
+  key: string,
+  errorMessage: string
+): Promise<void> {
+  const pool = keyStates[provider];
+  if (!pool) return;
+  const keyEntry = pool.find((k) => k.key === key);
+  
+  try {
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) return;
+
+    // Get current error count
+    const { data } = await supabase
+      .from("api_keys")
+      .select("error_count")
+      .eq("provider", provider)
+      .eq("key", key)
+      .maybeSingle();
+
+    const newErrorCount = (data?.error_count || 0) + 1;
+
+    // Update database
+    await supabase
+      .from("api_keys")
+      .update({
+        last_error: errorMessage,
+        error_count: newErrorCount,
+        is_active: newErrorCount >= 3 ? false : true, // Deactivate after 3 errors
+      })
+      .eq("provider", provider)
+      .eq("key", key);
+
+    // Update in-memory
+    if (keyEntry) {
+      keyEntry.lastError = errorMessage;
+      if (newErrorCount >= 3) {
+        keyEntry.isDead = true;
+      }
+    }
+
+    console.log(`[API Keys] ${provider} key error count: ${newErrorCount}/3`);
+  } catch (err) {
+    console.error("[API Keys] Failed to increment error count:", err);
+  }
+}
+
+/**
+ * Reset error count for a key (when it succeeds)
+ */
+export async function resetKeyErrors(
+  provider: ApiKeyProvider,
+  key: string
+): Promise<void> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      await supabase
+        .from("api_keys")
+        .update({
+          error_count: 0,
+          last_error: null,
+        })
+        .eq("provider", provider)
+        .eq("key", key);
+    }
+  } catch (err) {
+    // Silent fail
   }
 }

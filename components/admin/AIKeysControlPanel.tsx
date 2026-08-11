@@ -14,6 +14,8 @@ interface ApiKey {
   totalRequests: number;
   lastUsedAt: string | null;
   createdAt: string;
+  isDead?: boolean; // مفتاح ميت/محظور نهائياً
+  lastError?: string | null; // آخر خطأ حصل
 }
 
 interface ProviderData {
@@ -24,6 +26,7 @@ interface ProviderData {
     active: number;
     backup: number;
     inCooldown: number;
+    dead: number;
   };
 }
 
@@ -66,6 +69,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
+  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "backup" | "cooldown" | "dead">("all");
 
   useEffect(() => {
     if (isOpen) {
@@ -477,29 +481,95 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                   </div>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-4 gap-4 mb-6">
-                  <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                {/* Stats Cards - Filters */}
+                <div className="grid grid-cols-5 gap-4 mb-6">
+                  <button
+                    onClick={() => setFilterStatus("all")}
+                    className={`rounded-lg p-4 border transition-all ${
+                      filterStatus === "all"
+                        ? "bg-slate-700 border-slate-500 ring-2 ring-slate-400"
+                        : "bg-slate-800 border-slate-700 hover:border-slate-600"
+                    }`}
+                  >
                     <div className="text-slate-400 text-sm mb-1">Total Keys</div>
                     <div className="text-2xl font-bold text-white">{selectedProviderData.stats.total}</div>
-                  </div>
-                  <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                  </button>
+                  <button
+                    onClick={() => setFilterStatus("active")}
+                    className={`rounded-lg p-4 border transition-all ${
+                      filterStatus === "active"
+                        ? "bg-green-500/20 border-green-500 ring-2 ring-green-400"
+                        : "bg-green-500/10 border-green-500/30 hover:border-green-500/50"
+                    }`}
+                  >
                     <div className="text-green-400 text-sm mb-1">Active</div>
                     <div className="text-2xl font-bold text-green-400">{selectedProviderData.stats.active}</div>
-                  </div>
-                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                  </button>
+                  <button
+                    onClick={() => setFilterStatus("backup")}
+                    className={`rounded-lg p-4 border transition-all ${
+                      filterStatus === "backup"
+                        ? "bg-blue-500/20 border-blue-500 ring-2 ring-blue-400"
+                        : "bg-blue-500/10 border-blue-500/30 hover:border-blue-500/50"
+                    }`}
+                  >
                     <div className="text-blue-400 text-sm mb-1">Backup</div>
                     <div className="text-2xl font-bold text-blue-400">{selectedProviderData.stats.backup}</div>
-                  </div>
-                  <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
+                  </button>
+                  <button
+                    onClick={() => setFilterStatus("cooldown")}
+                    className={`rounded-lg p-4 border transition-all ${
+                      filterStatus === "cooldown"
+                        ? "bg-orange-500/20 border-orange-500 ring-2 ring-orange-400"
+                        : "bg-orange-500/10 border-orange-500/30 hover:border-orange-500/50"
+                    }`}
+                  >
                     <div className="text-orange-400 text-sm mb-1">In Cooldown</div>
                     <div className="text-2xl font-bold text-orange-400">{selectedProviderData.stats.inCooldown}</div>
-                  </div>
+                  </button>
+                  <button
+                    onClick={() => setFilterStatus("dead")}
+                    className={`rounded-lg p-4 border transition-all ${
+                      filterStatus === "dead"
+                        ? "bg-red-500/20 border-red-500 ring-2 ring-red-400"
+                        : "bg-red-500/10 border-red-500/30 hover:border-red-500/50"
+                    }`}
+                  >
+                    <div className="text-red-400 text-sm mb-1">Dead/Banned</div>
+                    <div className="text-2xl font-bold text-red-400">{selectedProviderData.stats.dead}</div>
+                  </button>
                 </div>
 
                 {/* Keys Table */}
                 <div className="space-y-2">
-                  {selectedProviderData.keys.length === 0 ? (
+                  {(() => {
+                    const filteredKeys = selectedProviderData.keys.filter((key) => {
+                      if (filterStatus === "all") return true;
+                      if (filterStatus === "active") return key.isActive && !key.isBackup && !key.isDead;
+                      if (filterStatus === "backup") return key.isBackup;
+                      if (filterStatus === "cooldown") {
+                        const inCooldown = key.cooldownUntil && new Date(key.cooldownUntil) > new Date();
+                        return inCooldown;
+                      }
+                      if (filterStatus === "dead") return key.isDead;
+                      return true;
+                    });
+
+                    if (filteredKeys.length === 0 && filterStatus !== "all") {
+                      return (
+                        <div className="bg-slate-800 rounded-lg p-8 text-center border border-slate-700">
+                          <p className="text-slate-400">
+                            {filterStatus === "active" && "لا توجد مفاتيح نشطة"}
+                            {filterStatus === "backup" && "لا توجد مفاتيح احتياطية"}
+                            {filterStatus === "cooldown" && "لا توجد مفاتيح في فترة تهدئة"}
+                            {filterStatus === "dead" && "لا توجد مفاتيح ميتة - رائع! ✅"}
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    if (selectedProviderData.keys.length === 0) {
+                      return (
                     <div className="bg-slate-800 rounded-lg p-8 text-center border border-slate-700">
                       <Key className="w-12 h-12 text-slate-600 mx-auto mb-3" />
                       <p className="text-slate-400">No keys added yet for this provider</p>
@@ -513,17 +583,26 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                         <Plus className="w-4 h-4" />
                         Add First Key
                       </button>
-                    </div>
-                  ) : (
-                    selectedProviderData.keys.map((key) => {
+                        </div>
+                      );
+                    }
+
+                    return filteredKeys.map((key) => {
                       const inCooldown = key.cooldownUntil && new Date(key.cooldownUntil) > new Date();
                       const isSelected = selectedKeys.has(key.id);
+                      const isDead = key.isDead || false;
 
                       return (
                         <div
                           key={key.id}
-                          className={`bg-slate-800 rounded-lg p-4 border transition ${
-                            isSelected ? "border-indigo-500 bg-indigo-500/10" : "border-slate-700"
+                          className={`rounded-lg p-4 border transition ${
+                            isDead
+                              ? "bg-red-500/10 border-red-500"
+                              : isSelected
+                              ? "border-indigo-500 bg-indigo-500/10"
+                              : inCooldown
+                              ? "bg-orange-500/5 border-orange-500/30"
+                              : "bg-slate-800 border-slate-700"
                           }`}
                         >
                           <div className="flex items-center gap-4">
@@ -543,62 +622,90 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
-                                <code className="text-sm text-slate-300 font-mono">{key.key}</code>
-                                {key.isBackup && (
+                                <code className={`text-sm font-mono ${isDead ? "text-red-400 line-through" : "text-slate-300"}`}>
+                                  {key.key}
+                                </code>
+                                {isDead && (
+                                  <span className="bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded flex items-center gap-1 animate-pulse">
+                                    <AlertCircle className="w-3 h-3" />
+                                    ميت / محظور
+                                  </span>
+                                )}
+                                {key.isBackup && !isDead && (
                                   <span className="bg-blue-500/20 text-blue-400 text-xs px-2 py-0.5 rounded flex items-center gap-1">
                                     <Shield className="w-3 h-3" />
                                     Backup
                                   </span>
                                 )}
-                                {inCooldown && (
+                                {inCooldown && !isDead && (
                                   <span className="bg-orange-500/20 text-orange-400 text-xs px-2 py-0.5 rounded">
-                                    Cooldown
+                                    يستريح...
                                   </span>
                                 )}
                               </div>
                               {key.notes && <div className="text-xs text-slate-400">{key.notes}</div>}
+                              {isDead && key.lastError && (
+                                <div className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                                  <AlertCircle className="w-3 h-3" />
+                                  خطأ: {key.lastError}
+                                </div>
+                              )}
                               <div className="flex gap-4 text-xs text-slate-500 mt-2">
-                                <span>{key.totalRequests} requests</span>
-                                {key.lastUsedAt && <span>Last used: {new Date(key.lastUsedAt).toLocaleString()}</span>}
+                                <span>{key.totalRequests} طلب</span>
+                                {key.lastUsedAt && <span>آخر استخدام: {new Date(key.lastUsedAt).toLocaleString("ar-EG")}</span>}
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              {inCooldown && (
+                              {isDead ? (
                                 <button
-                                  onClick={() => clearCooldown(key.id)}
-                                  disabled={actionLoading === `cooldown-${key.id}`}
-                                  className="text-orange-400 hover:text-orange-300 p-2"
-                                  title="Clear cooldown"
+                                  onClick={() => deleteKey(key.id)}
+                                  disabled={actionLoading === `delete-${key.id}`}
+                                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded transition flex items-center gap-1"
+                                  title="احذف نهائياً"
                                 >
-                                  <RefreshCw className="w-4 h-4" />
+                                  <Trash2 className="w-4 h-4" />
+                                  احذف
                                 </button>
+                              ) : (
+                                <>
+                                  {inCooldown && (
+                                    <button
+                                      onClick={() => clearCooldown(key.id)}
+                                      disabled={actionLoading === `cooldown-${key.id}`}
+                                      className="text-orange-400 hover:text-orange-300 p-2"
+                                      title="امسح فترة التهدئة"
+                                    >
+                                      <RefreshCw className="w-4 h-4" />
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => toggleKeyActive(key.id, key.isActive)}
+                                    disabled={actionLoading === `toggle-${key.id}`}
+                                    className={`p-2 rounded transition ${
+                                      key.isActive
+                                        ? "text-green-400 hover:text-green-300"
+                                        : "text-slate-500 hover:text-slate-400"
+                                    }`}
+                                    title={key.isActive ? "إيقاف" : "تفعيل"}
+                                  >
+                                    {key.isActive ? <Power className="w-5 h-5" /> : <PowerOff className="w-5 h-5" />}
+                                  </button>
+                                  <button
+                                    onClick={() => deleteKey(key.id)}
+                                    disabled={actionLoading === `delete-${key.id}`}
+                                    className="text-red-400 hover:text-red-300 p-2"
+                                    title="حذف المفتاح"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </>
                               )}
-                              <button
-                                onClick={() => toggleKeyActive(key.id, key.isActive)}
-                                disabled={actionLoading === `toggle-${key.id}`}
-                                className={`p-2 rounded transition ${
-                                  key.isActive
-                                    ? "text-green-400 hover:text-green-300"
-                                    : "text-slate-500 hover:text-slate-400"
-                                }`}
-                                title={key.isActive ? "Disable" : "Enable"}
-                              >
-                                {key.isActive ? <Power className="w-5 h-5" /> : <PowerOff className="w-5 h-5" />}
-                              </button>
-                              <button
-                                onClick={() => deleteKey(key.id)}
-                                disabled={actionLoading === `delete-${key.id}`}
-                                className="text-red-400 hover:text-red-300 p-2"
-                                title="Delete key"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
                             </div>
                           </div>
                         </div>
                       );
-                    })
-                  )}
+                    });
+                  })()}
                 </div>
               </div>
             ) : (

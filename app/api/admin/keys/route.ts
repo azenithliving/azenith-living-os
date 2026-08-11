@@ -157,9 +157,20 @@ export async function GET(request: NextRequest) {
             active: 0,
             backup: 0,
             inCooldown: 0,
+            dead: 0,
           },
         };
       }
+
+      // Check if key is dead
+      const isDead =
+        (key.error_count && key.error_count >= 3) ||
+        (key.last_error &&
+          (key.last_error.includes("401") ||
+            key.last_error.includes("403") ||
+            key.last_error.includes("Invalid") ||
+            key.last_error.includes("Unauthorized") ||
+            key.last_error.includes("Forbidden")));
 
       grouped[provider].keys.push({
         id: key.id,
@@ -172,14 +183,17 @@ export async function GET(request: NextRequest) {
         totalRequests: key.total_requests,
         lastUsedAt: key.last_used_at,
         createdAt: key.created_at,
+        isDead: isDead,
+        lastError: key.last_error,
       });
 
       grouped[provider].stats.total++;
-      if (key.is_active) grouped[provider].stats.active++;
+      if (key.is_active && !isDead) grouped[provider].stats.active++;
       if (key.is_backup) grouped[provider].stats.backup++;
       if (key.cooldown_until && new Date(key.cooldown_until) > now) {
         grouped[provider].stats.inCooldown++;
       }
+      if (isDead) grouped[provider].stats.dead++;
     }
 
     return NextResponse.json({
