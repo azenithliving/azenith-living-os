@@ -42,25 +42,80 @@ export class AgentOrchestrator {
 
   async chat(agentKey: AgentType, message: string, context?: Record<string, any>): Promise<AgentOrchestratorResult> {
     const selectedAgent = agentKey === "auto" ? this.detectAgent(message) : agentKey;
+    const supabase = getSupabaseAdminClient();
 
     try {
+      // ── 1. أوجد أو أنشئ محادثة لهذا الوكيل ──────────────────────
+      let conversationId: string | null = null;
+      if (supabase) {
+        const { data: existingConv } = await supabase
+          .from("agent_conversations")
+          .select("id")
+          .filter("participants", "cs", `{${selectedAgent}}`)
+          .order("last_message_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (existingConv) {
+          conversationId = existingConv.id;
+        } else {
+          const { data: newConv } = await supabase
+            .from("agent_conversations")
+            .insert({
+              company_id: "00000000-0000-0000-0000-000000000000",
+              title: `محادثة مع ${selectedAgent.toUpperCase()}`,
+              conversation_type: "direct",
+              participants: [selectedAgent],
+              is_active: true,
+              created_at: new Date().toISOString(),
+              last_message_at: new Date().toISOString(),
+            })
+            .select("id")
+            .single();
+          if (newConv) conversationId = newConv.id;
+        }
+
+        // ── 2. احفظ رسالة المستخدم ──────────────────────────────────
+        if (conversationId) {
+          await supabase.from("agent_messages").insert({
+            conversation_id: conversationId,
+            sender_type: "user",
+            sender_name: "أنت",
+            content: message,
+            created_at: new Date().toISOString(),
+          });
+        }
+      }
+
+      // ── 3. استدعِ الوكيل ──────────────────────────────────────────
       let response: string;
       let metadata: AgentOrchestratorResult["metadata"] = {};
 
       if (selectedAgent === "prime") {
-        const result = await primeAgent.chat(message, context);
-        response = result;
+        response = await primeAgent.chat(message, context);
       } else {
-        const result = await vanguardAgent.chat(message, context);
-        response = result;
+        response = await vanguardAgent.chat(message, context);
       }
 
-      return {
-        success: true,
-        agentUsed: selectedAgent,
-        response,
-        metadata,
-      };
+      // ── 4. احفظ رد الوكيل ─────────────────────────────────────────
+      if (supabase && conversationId) {
+        await supabase.from("agent_messages").insert({
+          conversation_id: conversationId,
+          sender_type: "agent",
+          sender_name: selectedAgent.toUpperCase(),
+          content: response,
+          created_at: new Date().toISOString(),
+        });
+
+        // حدّث last_message_at
+        await supabase
+          .from("agent_conversations")
+          .update({ last_message_at: new Date().toISOString() })
+          .eq("id", conversationId);
+      }
+
+      return { success: true, agentUsed: selectedAgent, response, metadata };
+
     } catch (error: any) {
       return {
         success: false,

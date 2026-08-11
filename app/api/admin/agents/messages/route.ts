@@ -17,24 +17,44 @@ const messageSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const agentKey = searchParams.get('agent_key');
+    const agentKey       = searchParams.get('agent_key');
     const conversationId = searchParams.get('conversation_id');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    
+    const limit          = parseInt(searchParams.get('limit') || '50');
+
+    // ── حل agent_key → conversation_id ──────────────────────────────
+    let resolvedConvId = conversationId;
+
+    if (!resolvedConvId && agentKey) {
+      // دور على المحادثة الأخيرة لهذا الوكيل
+      const { data: conv } = await supabaseServer
+        .from('agent_conversations')
+        .select('id')
+        .filter('participants', 'cs', `{${agentKey}}`)
+        .order('last_message_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (conv) {
+        resolvedConvId = conv.id;
+      } else {
+        // لا توجد محادثة بعد — أعد قائمة فارغة
+        return NextResponse.json({ success: true, data: [] });
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────
+
     let query = supabaseServer
       .from('agent_messages')
       .select('*')
       .order('created_at', { ascending: true })
       .limit(limit);
-    
-    if (conversationId) {
-      query = query.eq('conversation_id', conversationId);
+
+    if (resolvedConvId) {
+      query = query.eq('conversation_id', resolvedConvId);
     }
 
-    void agentKey;
-    
     const { data: messages, error } = await query;
-    
+
     if (error) {
       if (error.code === 'PGRST205' || error.code === '42703') {
         return NextResponse.json({
@@ -45,20 +65,17 @@ export async function GET(request: NextRequest) {
       }
       throw error;
     }
-    
+
     // format messages with sender names
-    const formattedMessages = messages?.map(msg => ({
+    const formattedMessages = (messages ?? []).map(msg => ({
       ...msg,
-      sender_name: msg.sender_type === 'user' ? 'أنت' : 
-                  msg.sender_type === 'system' ? 'النظام' :
-                  msg.agent_key?.toUpperCase() || 'Agent'
-    })) || [];
-    
-    return NextResponse.json({ 
-      success: true, 
-      data: formattedMessages 
-    });
-    
+      sender_name: msg.sender_type === 'user'   ? 'أنت'    :
+                   msg.sender_type === 'system'  ? 'النظام' :
+                   (msg as any).agent_key?.toUpperCase() || msg.sender_name || 'Agent',
+    }));
+
+    return NextResponse.json({ success: true, data: formattedMessages });
+
   } catch (error) {
     console.error('Get messages error:', error);
     return NextResponse.json(
