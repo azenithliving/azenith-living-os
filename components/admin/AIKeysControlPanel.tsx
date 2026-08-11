@@ -476,11 +476,11 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
             <button
               onClick={importFromEnv}
               disabled={actionLoading === "import"}
-              className="hidden md:flex items-center gap-1 md:gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 px-2 md:px-3 py-2 rounded-lg transition disabled:opacity-50 text-xs md:text-sm border border-yellow-500/30"
+              className="flex items-center gap-1 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 px-2 py-2 rounded-lg transition disabled:opacity-50 text-xs border border-yellow-500/30"
               title="استيراد المفاتيح من env variables إلى قاعدة البيانات"
             >
-              <span>📥</span>
-              <span className="hidden lg:inline">استيراد env</span>
+              <span className="text-base">📥</span>
+              <span className="hidden sm:inline text-xs">استيراد</span>
             </button>
             <button
               onClick={reloadKeys}
