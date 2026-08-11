@@ -20,6 +20,7 @@ import { Brain, Cpu, MessageSquare, ShieldAlert, Activity, LayoutGrid, Terminal,
 import { QuickActionsPanel } from '@/components/admin/agents/QuickActionsPanel';
 import { ProactiveSuggestions } from '@/components/admin/agents/ProactiveSuggestions';
 import { AgentActionsFeed } from '@/components/admin/agents/AgentActionsFeed';
+import { AgentHealthPanel } from '@/components/admin/agents/AgentHealthPanel';
 
 type TabType = 'command' | 'assistant' | 'manufacturing' | 'teams';
 
@@ -311,6 +312,10 @@ export default function AgentsPage() {
                 {/* اقتراحات استباقية حقيقية */}
                 <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
                   <ProactiveSuggestions />
+                </div>
+                {/* صحة النظام */}
+                <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
+                  <AgentHealthPanel />
                 </div>
               </div>
               
