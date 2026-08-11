@@ -96,30 +96,35 @@ export async function loadKeysFromDB(): Promise<void> {
     // Reset states
     Object.keys(keyStates).forEach(k => { keyStates[k] = []; });
 
-    // Add DB keys (ALL keys, not just active)
+    // Add DB keys — فقط المفاتيح النشطة وغير الميتة تدخل الذاكرة
     for (const row of data || []) {
       const provider = row.provider?.toLowerCase();
-      if (keyStates[provider]) {
-        // مفتاح يُعتبر "ميت" لو عنده 3 أخطاء متتالية أو أخطاء محددة
-        const isDead = 
-          (row.error_count && row.error_count >= 3) ||
-          (row.last_error && (
-            row.last_error.includes("401") ||
-            row.last_error.includes("403") ||
-            row.last_error.includes("Invalid") ||
-            row.last_error.includes("Unauthorized") ||
-            row.last_error.includes("Forbidden")
-          ));
+      if (!keyStates[provider]) continue;
 
-        keyStates[provider].push({
-          key: row.key,
-          cooldownUntil: row.cooldown_until ? new Date(row.cooldown_until) : null,
-          totalRequests: row.total_requests || 0,
-          lastUsedAt: row.last_used_at ? new Date(row.last_used_at) : null,
-          isDead: isDead || false,
-          lastError: row.last_error || null,
-        });
-      }
+      // مفتاح يُعتبر "ميت" لو عنده 3 أخطاء متتالية أو رسالة خطأ واضحة
+      const isDead =
+        (row.error_count && row.error_count >= 3) ||
+        (row.last_error && (
+          row.last_error.includes("401") ||
+          row.last_error.includes("403") ||
+          row.last_error.includes("Invalid") ||
+          row.last_error.includes("Unauthorized") ||
+          row.last_error.includes("Forbidden") ||
+          row.last_error.startsWith("[DEAD]")
+        ));
+
+      // ⚠️ المفاتيح الميتة أو غير النشطة لا تدخل حوض الذاكرة النشط
+      // المفاتيح الاحتياطية (is_backup) تُضاف لكن تُعامَل بشكل منفصل
+      if (isDead || !row.is_active) continue;
+
+      keyStates[provider].push({
+        key:           row.key,
+        cooldownUntil: row.cooldown_until ? new Date(row.cooldown_until) : null,
+        totalRequests: row.total_requests || 0,
+        lastUsedAt:    row.last_used_at   ? new Date(row.last_used_at)   : null,
+        isDead:        false,
+        lastError:     row.last_error || null,
+      });
     }
 
     keysLoaded = true;
