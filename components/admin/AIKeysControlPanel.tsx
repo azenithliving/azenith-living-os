@@ -260,6 +260,33 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
     }
   };
 
+  const importFromEnv = async () => {
+    if (!confirm("⚠️ هل أنت متأكد؟\n\nهذا سيستورد كل المفاتيح من env variables إلى قاعدة البيانات.\nالمفاتيح الموجودة مسبقاً لن تتأثر.\n\nمتابعة؟")) {
+      return;
+    }
+
+    try {
+      setActionLoading("import");
+      const res = await fetch("/api/admin/keys/import-env", { method: "POST" });
+      const data = await res.json();
+
+      if (data.success) {
+        showMessage("success", `✅ تم استيراد ${data.totalImported} مفتاح، تخطي ${data.totalSkipped} مكرر`);
+        await reloadKeys();
+        await loadKeys();
+        
+        // Show detailed breakdown
+        console.log("[Import Details]", data.details);
+      } else {
+        showMessage("error", data.error || "فشل الاستيراد");
+      }
+    } catch (error) {
+      showMessage("error", "خطأ في الشبكة");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const bulkToggle = async (active: boolean) => {
     if (selectedKeys.size === 0) return;
 
@@ -446,6 +473,15 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
             <span className="hidden sm:inline bg-white/20 text-white text-xs px-2 py-1 rounded">16 مزود</span>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={importFromEnv}
+              disabled={actionLoading === "import"}
+              className="hidden md:flex items-center gap-1 md:gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 px-2 md:px-3 py-2 rounded-lg transition disabled:opacity-50 text-xs md:text-sm border border-yellow-500/30"
+              title="استيراد المفاتيح من env variables إلى قاعدة البيانات"
+            >
+              <span>📥</span>
+              <span className="hidden lg:inline">استيراد env</span>
+            </button>
             <button
               onClick={reloadKeys}
               disabled={actionLoading === "reload"}
