@@ -56,6 +56,7 @@ export async function GET(request: NextRequest) {
         };
       }
 
+      // ⚠️ منطق isDead موحّد تماماً مع loadKeysFromDB في api-keys-service
       const isDead =
         (key.error_count && key.error_count >= 3) ||
         (key.last_error && (

@@ -69,6 +69,8 @@ const keyStates: Record<string, KeyState[]> = {
 };
 
 let keysLoaded = false;
+let lastLoadTime = 0;
+const RELOAD_INTERVAL_MS = 5 * 60 * 1000; // 5 دقائق max cache
 
 /**
  * Load keys from database ONLY
@@ -128,6 +130,7 @@ export async function loadKeysFromDB(): Promise<void> {
     }
 
     keysLoaded = true;
+    lastLoadTime = Date.now();
     console.log("[API Keys Service] ✅ Keys loaded from DB:", Object.fromEntries(
       Object.entries(keyStates).map(([k, v]) => [k, v.length])
     ));
@@ -194,7 +197,7 @@ const keyIndices: Record<string, number> = {
 export async function getNextAvailableKey(
   provider: ApiKeyProvider
 ): Promise<{ key: string; index: number } | null> {
-  if (!keysLoaded) {
+  if (!keysLoaded || (Date.now() - lastLoadTime > RELOAD_INTERVAL_MS)) {
     await loadKeysFromDB();
   }
 
@@ -320,7 +323,7 @@ export async function getKeyStats(provider: ApiKeyProvider): Promise<{
   inCooldown: number;
   totalRequests: number;
 }> {
-  if (!keysLoaded) {
+  if (!keysLoaded || (Date.now() - lastLoadTime > RELOAD_INTERVAL_MS)) {
     await loadKeysFromDB();
   }
 
@@ -347,7 +350,7 @@ export async function getAllLiveStats(): Promise<Record<string, {
   live_requests: number;    // مجموع الطلبات منذ بدء الـ server
   loaded: boolean;          // هل تم تحميل المفاتيح؟
 }>> {
-  if (!keysLoaded) {
+  if (!keysLoaded || (Date.now() - lastLoadTime > RELOAD_INTERVAL_MS)) {
     await loadKeysFromDB();
   }
 
