@@ -287,20 +287,6 @@ export default function AdminPage() {
     emerald: "border-emerald-500/30 bg-emerald-500/10",
   };
 
-  const [aiHealth, setAiHealth] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchAIHealth = async () => {
-      try {
-        const res = await fetch("/api/admin/ai/health", { cache: "no-store" });
-        if (res.ok) setAiHealth(await res.json());
-      } catch (e) { console.error(e); }
-    };
-    fetchAIHealth();
-    const interval = setInterval(fetchAIHealth, 120000);
-    return () => clearInterval(interval);
-  }, []);
-
   const iconColors: Record<string, string> = {
     rose: "text-rose-400",
     amber: "text-amber-400",
@@ -397,69 +383,7 @@ export default function AdminPage() {
           </div>
         </section>
 
-        {/* AI Key Pools Health */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Brain className="w-5 h-5 text-purple-400" />
-              مراقبة أحواض الذكاء الاصطناعي
-            </h2>
-            <button
-              onClick={async () => {
-                try {
-                  const res = await fetch('/api/admin/ai/health');
-                  if (res.ok) setAiHealth(await res.json());
-                } catch (e) { console.error(e); }
-              }}
-              className="text-[10px] text-purple-400/60 uppercase tracking-widest hover:text-purple-400 transition-colors flex items-center gap-1"
-            >
-              <Activity className="w-3 h-3" />
-              تحديث مباشر
-            </button>
-          </div>
 
-          {!aiHealth || !aiHealth.pools ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-5 h-5 text-purple-400 animate-spin ml-2" />
-              <span className="text-white/40 text-sm">جاري فحص الأحواض...</span>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {Object.entries(aiHealth.pools).map(([name, pool]: [string, any]) => (
-                <div key={`pool-${name}`} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 transition-all hover:bg-white/[0.04]">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{name}</span>
-                    <div className={`h-1.5 w-1.5 rounded-full ${pool.healthy ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}`} />
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-bold text-white">{pool.keys}</span>
-                    <span className="text-[10px] text-white/30">مفتاح</span>
-                  </div>
-                  <div className="mt-2 h-1 bg-white/5 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full transition-all ${pool.healthy ? 'bg-emerald-500/50' : 'bg-rose-500/50'}`} style={{ width: pool.keys > 0 ? '100%' : '0%' }} />
-                  </div>
-                  {pool.responseTimeMs !== undefined && (
-                    <div className="mt-2 flex items-center justify-between text-[9px] text-white/25">
-                      <span>{pool.responsive ? '✓' : '✗'} {pool.responseTimeMs}ms</span>
-                      {pool.cooldown > 0 && <span className="text-amber-400/60">{pool.cooldown} معطّل</span>}
-                    </div>
-                  )}
-                  {pool.lastError && !pool.responsive && (
-                    <div className="mt-1 text-[8px] text-rose-400/50 truncate" title={pool.lastError}>
-                      {pool.lastError}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {aiHealth?.timestamp && (
-            <p className="text-[9px] text-white/20 text-left">
-              آخر فحص: {new Date(aiHealth.timestamp).toLocaleTimeString('ar-EG')}
-            </p>
-          )}
-        </section>
 
         {/* Agent Status Cards */}
         {!loading && !error && (
