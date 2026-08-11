@@ -659,6 +659,21 @@ export async function testProviderHealth(provider: string): Promise<{
       case "google":
         result = await askGoogle("ping", { maxTokens: 5 });
         break;
+      case "anthropic":
+        result = await askAnthropicMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
+        break;
+      case "cerebras":
+        result = await askCerebrasMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
+        break;
+      case "sambanova":
+        result = await askSambaNovaMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
+        break;
+      case "together":
+        result = await askTogetherMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
+        break;
+      case "cohere":
+        result = await askCohereMessages([{ role: "user", content: "ping" }], { maxTokens: 5 });
+        break;
       default:
         return { responsive: false, responseTimeMs: 0, error: "Unknown provider" };
     }
@@ -677,7 +692,19 @@ export async function testProviderHealth(provider: string): Promise<{
 }
 
 export async function getOrchestratorHealth() {
-  const providers = ["groq", "openrouter", "mistral", "deepseek", "openai", "google"] as const;
+  const providers = [
+    "groq", 
+    "openrouter", 
+    "mistral", 
+    "deepseek", 
+    "openai", 
+    "google",
+    "anthropic",
+    "cerebras",
+    "sambanova",
+    "together",
+    "cohere"
+  ] as const;
   const health: any = {};
 
   const healthPromises = providers.map(async (p) => {

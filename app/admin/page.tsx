@@ -8,6 +8,7 @@ import { ImageHarvestDashboard } from "./intel/components/ImageHarvestDashboard"
 import { AdminProactiveStrip } from "@/components/admin/AdminProactiveStrip";
 import { NotificationsPanel } from "@/components/admin/NotificationsPanel";
 import TelegramControlPanel from "@/components/admin/TelegramControlPanel";
+import AIKeysControlPanel from "@/components/admin/AIKeysControlPanel";
 
 interface AnalyticsData {
   metrics: {
@@ -96,6 +97,7 @@ export default function AdminPage() {
   });
   const [mastermindData, setMastermindData] = useState<any>(null);
   const [telegramPanelOpen, setTelegramPanelOpen] = useState(false);
+  const [aiKeysPanelOpen, setAiKeysPanelOpen] = useState(false);
 
   // Fetch real data from APIs
   useEffect(() => {
@@ -331,7 +333,7 @@ export default function AdminPage() {
         <AdminProactiveStrip />
 
         {/* System Health Overview */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div
             onClick={() => setTelegramPanelOpen(true)}
             className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-6 flex items-center justify-between cursor-pointer hover:bg-white/[0.05] hover:border-white/15 transition-all group"
@@ -349,6 +351,27 @@ export default function AdminPage() {
               <span className={`h-2 w-2 rounded-full animate-pulse ${systemStatus.telegram === 'CONNECTED' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
               <span className={`text-xs font-bold ${systemStatus.telegram === 'CONNECTED' ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {systemStatus.telegram === 'CONNECTED' ? 'متصل' : systemStatus.telegram === 'loading' ? 'جاري التحقق...' : 'غير متصل'}
+              </span>
+            </div>
+          </div>
+
+          <div
+            onClick={() => setAiKeysPanelOpen(true)}
+            className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-6 flex items-center justify-between cursor-pointer hover:bg-white/[0.05] hover:border-white/15 transition-all group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-indigo-500/20 text-indigo-400">
+                <Brain className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-sm">مفاتيح AI (16 مزود)</h3>
+                <p className="text-[10px] text-white/40 group-hover:text-white/60 transition-colors">إدارة مفاتيح الذكاء الاصطناعي</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-indigo-400" />
+              <span className="text-xs font-bold text-indigo-400">
+                Hot-Reload
               </span>
             </div>
           </div>
@@ -641,6 +664,12 @@ export default function AdminPage() {
       <TelegramControlPanel
         open={telegramPanelOpen}
         onClose={() => setTelegramPanelOpen(false)}
+      />
+
+      {/* AI Keys Control Panel */}
+      <AIKeysControlPanel
+        isOpen={aiKeysPanelOpen}
+        onClose={() => setAiKeysPanelOpen(false)}
       />
     </div>
   );

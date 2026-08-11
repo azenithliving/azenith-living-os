@@ -7,6 +7,7 @@ import { semanticCache } from "@/lib/semantic-cache";
 import { sendTelegramMessage, broadcastTelegramMessage } from "@/lib/telegram-config";
 import { storeMemory, storeUserPreference, getUserPreferences } from "@/lib/ultimate-agent/memory-store";
 import { LearningEngine } from "@/lib/ultimate-agent/learning-engine";
+import { tryFastResponse, classifyIntent } from "@/lib/specialized-providers";
 
 interface GroqMessage {
   role: "system" | "user" | "assistant";
@@ -659,12 +660,26 @@ export async function POST(
       weatherDateTime
     );
 
-    // Get AI response using Groq with full conversation context
-    console.log(`[Consultant] Calling AI (Groq/Fallback)...`);
-    const aiResult = await askOrchestratorMessages(groqMessages, {
-      maxTokens: 2048,
-      temperature: 0.7,
-    });
+    // Try ultra-fast Cerebras response for simple, short queries
+    let aiResult;
+    const isSimpleQuery = message.length < 80 && !message.includes("?") && conversationHistory.length < 4;
+    
+    if (isSimpleQuery) {
+      const fastReply = await tryFastResponse(message);
+      if (fastReply) {
+        console.log(`[Consultant] ✅ Using Cerebras fast response`);
+        aiResult = { success: true, content: fastReply };
+      }
+    }
+    
+    // Standard AI call if no fast response
+    if (!aiResult) {
+      console.log(`[Consultant] Calling AI (Groq/Fallback)...`);
+      aiResult = await askOrchestratorMessages(groqMessages, {
+        maxTokens: 2048,
+        temperature: 0.7,
+      });
+    }
 
     if (!aiResult.success) {
       console.error("[Consultant] AI error:", aiResult.error);
@@ -805,6 +820,51 @@ export async function POST(
     } else if (conversationHistory.length >= 6 && conversationHistory.length <= 10) {
       // Normal insight extraction
       insights = await extractInsights(conversationHistory, userName);
+    }
+
+    // --- COHERE INTENT CLASSIFICATION ---
+    // Enhance lead scoring with Cohere intent analysis (graceful degradation)
+    if (insights && conversationHistory.length >= 4) {
+      try {
+        const fullConvo = conversationHistory
+          .map((m) => `${m.role}: ${m.content}`)
+          .join("\n");
+        
+        const cohereIntent = await classifyIntent(fullConvo);
+        
+        if (cohereIntent) {
+          console.log(`[Cohere] Intent: ${cohereIntent.intent}, Confidence: ${cohereIntent.confidence}%`);
+          
+          // Store enhanced intent in insights
+          insights.intent = cohereIntent.intent;
+          insights.intentConfidence = String(cohereIntent.confidence);
+          insights.urgency = cohereIntent.urgency;
+          
+          // Update user score if user exists
+          if (existingUser) {
+            const scoreBoost = cohereIntent.confidence * 0.15; // Max +15 points
+            const newScore = Math.min(100, (existingUser.score || 50) + scoreBoost);
+            
+            await supabase
+              .from("users")
+              .update({
+                score: newScore,
+                metadata: {
+                  ...existingUser.metadata,
+                  intent: cohereIntent.intent,
+                  intentConfidence: cohereIntent.confidence,
+                  lastIntentCheck: new Date().toISOString(),
+                },
+              })
+              .eq("id", existingUser.id);
+            
+            console.log(`[Cohere] Updated user score: ${existingUser.score} → ${newScore}`);
+          }
+        }
+      } catch (cohereErr) {
+        console.log("[Cohere] Intent classification skipped:", cohereErr);
+        // Graceful degradation - continue without enhanced scoring
+      }
     }
 
     // --- SAA vInfinity MEMORY SYNCING ---

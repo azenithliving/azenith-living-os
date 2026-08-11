@@ -1,292 +1,280 @@
 /**
- * API Keys Management API
- * Manage API keys from database with CRUD operations
+ * GET /api/admin/keys - List all API keys with stats per provider
+ * POST /api/admin/keys - Add new API key with optional test
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { reloadKeys } from "@/lib/api-keys-service";
 
-export const dynamic = "force-dynamic";
-
-// Helper to mask key (show first 4 and last 4 chars)
-function maskKey(key: string): string {
-  if (key.length <= 8) return "****";
-  return key.slice(0, 4) + "****" + key.slice(-4);
-}
-
-// Helper to test key validity
-async function testKey(provider: string, key: string): Promise<{ valid: boolean; message: string }> {
+// Test key validity by making a simple API call
+async function testApiKey(provider: string, key: string): Promise<{
+  valid: boolean;
+  error?: string;
+}> {
   try {
-    let testUrl: string;
-    const headers: Record<string, string> = { "Authorization": `Bearer ${key}` };
-
-    switch (provider) {
+    let response: Response;
+    
+    switch (provider.toLowerCase()) {
       case "groq":
-        testUrl = "https://api.groq.com/openai/v1/models";
+        response = await fetch("https://api.groq.com/openai/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
         break;
-      case "mistral":
-        testUrl = "https://api.mistral.ai/v1/models";
-        break;
+        
       case "openrouter":
-        testUrl = "https://openrouter.ai/api/v1/models";
+        response = await fetch("https://openrouter.ai/api/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
         break;
+        
+      case "mistral":
+        response = await fetch("https://api.mistral.ai/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+        
+      case "openai":
+        response = await fetch("https://api.openai.com/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+        
+      case "anthropic":
+        response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "x-api-key": key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "claude-3-haiku-20240307",
+            messages: [{ role: "user", content: "ping" }],
+            max_tokens: 5,
+          }),
+        });
+        break;
+        
+      case "google":
+        response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`
+        );
+        break;
+        
+      case "deepseek":
+        response = await fetch("https://api.deepseek.com/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+        
+      case "cerebras":
+        response = await fetch("https://api.cerebras.ai/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+        
+      case "sambanova":
+        response = await fetch("https://api.sambanova.ai/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+        
+      case "together":
+        response = await fetch("https://api.together.xyz/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+        
+      case "cohere":
+        response = await fetch("https://api.cohere.ai/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+        
       case "pexels":
-        testUrl = "https://api.pexels.com/v1/curated?per_page=1";
+        response = await fetch("https://api.pexels.com/v1/curated?per_page=1", {
+          headers: { Authorization: key },
+        });
         break;
+        
       default:
-        return { valid: false, message: "Unknown provider" };
+        // For providers without easy test endpoint, assume valid
+        return { valid: true };
     }
-
-    const response = await fetch(testUrl, { headers, method: "GET" });
-
-    if (response.ok) {
-      return { valid: true, message: "Key is valid" };
-    } else if (response.status === 401 || response.status === 403) {
-      return { valid: false, message: "Invalid key or unauthorized" };
-    } else if (response.status === 429) {
-      return { valid: true, message: "Key valid but rate limited" };
-    } else {
-      return { valid: false, message: `HTTP ${response.status}: ${response.statusText}` };
-    }
-  } catch (error) {
-    return { valid: false, message: error instanceof Error ? error.message : "Network error" };
+    
+    const valid = response.ok || response.status === 200;
+    return {
+      valid,
+      error: valid ? undefined : `HTTP ${response.status}: ${response.statusText}`,
+    };
+    
+  } catch (error: any) {
+    return {
+      valid: false,
+      error: error.message || "Connection failed",
+    };
   }
 }
 
-/**
- * GET /api/admin/keys
- * List all API keys (masked)
- */
-export async function GET() {
+// GET: List all keys grouped by provider
+export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Database not available" },
+        { status: 503 }
+      );
+    }
+
     const { data, error } = await supabase
       .from("api_keys")
-      .select("id, provider, key, is_active, is_backup, cooldown_until, total_requests, last_used_at, created_at")
+      .select("*")
       .order("provider", { ascending: true })
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("[Keys API] Error fetching keys:", JSON.stringify(error, null, 2));
+      console.error("[Admin API] Failed to fetch keys:", error);
       return NextResponse.json(
-        { success: false, error: "Failed to fetch keys", details: error },
+        { error: "Failed to fetch keys" },
         { status: 500 }
       );
     }
 
-    // Mask keys for security
-    const maskedKeys = data.map((k) => ({
-      id: k.id,
-      provider: k.provider,
-      key: maskKey(k.key),
-      is_active: k.is_active,
-      is_backup: (k as any).is_backup || false,
-      cooldown_until: k.cooldown_until,
-      total_requests: (k as any).total_requests,
-      last_used_at: k.last_used_at,
-      created_at: (k as any).created_at,
-    }));
+    // Group by provider with stats
+    const grouped: Record<string, any> = {};
+    const now = new Date();
 
-    // Group by provider
-    const grouped = {
-      groq: maskedKeys.filter((k) => k.provider === "groq"),
-      openrouter: maskedKeys.filter((k) => k.provider === "openrouter"),
-      mistral: maskedKeys.filter((k) => k.provider === "mistral"),
-      pexels: maskedKeys.filter((k) => k.provider === "pexels"),
-    };
+    for (const key of data || []) {
+      const provider = key.provider;
+      if (!grouped[provider]) {
+        grouped[provider] = {
+          provider,
+          keys: [],
+          stats: {
+            total: 0,
+            active: 0,
+            backup: 0,
+            inCooldown: 0,
+          },
+        };
+      }
 
-    return NextResponse.json({ success: true, keys: maskedKeys, grouped });
-  } catch (error) {
-    console.error("[Keys API] Error:", error);
+      grouped[provider].keys.push({
+        id: key.id,
+        key: key.key.substring(0, 12) + "..." + key.key.slice(-4), // Masked
+        keyFull: key.key, // For editing
+        isActive: key.is_active,
+        isBackup: key.is_backup,
+        notes: key.notes,
+        cooldownUntil: key.cooldown_until,
+        totalRequests: key.total_requests,
+        lastUsedAt: key.last_used_at,
+        createdAt: key.created_at,
+      });
+
+      grouped[provider].stats.total++;
+      if (key.is_active) grouped[provider].stats.active++;
+      if (key.is_backup) grouped[provider].stats.backup++;
+      if (key.cooldown_until && new Date(key.cooldown_until) > now) {
+        grouped[provider].stats.inCooldown++;
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      providers: Object.values(grouped),
+    });
+    
+  } catch (error: any) {
+    console.error("[Admin API] GET error:", error);
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { error: error.message || "Internal server error" },
       { status: 500 }
     );
   }
 }
 
-/**
- * POST /api/admin/keys
- * Add new key: { provider, key, is_backup? }
- * Test key: { provider, key, test: true }
- */
+// POST: Add new key
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { provider, key, test, is_backup = false } = body;
+    const { provider, key, notes, isBackup, testKey: shouldTest } = body;
 
     if (!provider || !key) {
       return NextResponse.json(
-        { success: false, error: "Missing provider or key" },
+        { error: "Provider and key are required" },
         { status: 400 }
       );
     }
 
-    // Validate provider
-    const validProviders = ["groq", "openrouter", "mistral", "pexels"];
-    if (!validProviders.includes(provider)) {
+    // Optional: Test key before adding
+    if (shouldTest) {
+      console.log(`[Admin API] Testing ${provider} key...`);
+      const testResult = await testApiKey(provider, key);
+      if (!testResult.valid) {
+        return NextResponse.json(
+          { 
+            error: "Key test failed",
+            details: testResult.error,
+            success: false 
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
       return NextResponse.json(
-        { success: false, error: `Invalid provider. Must be one of: ${validProviders.join(", ")}` },
-        { status: 400 }
+        { error: "Database not available" },
+        { status: 503 }
       );
     }
 
-    // Test key if requested
-    if (test) {
-      const testResult = await testKey(provider, key);
-      return NextResponse.json({
-        success: true,
-        valid: testResult.valid,
-        message: testResult.message,
-      });
-    }
-
-    // Insert key (backup keys start inactive)
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("api_keys")
       .insert({
-        provider,
+        provider: provider.toLowerCase(),
         key,
-        is_active: is_backup ? false : true, // Backup keys start inactive
-        is_backup: is_backup || false,
+        notes: notes || null,
+        is_backup: isBackup || false,
+        is_active: true,
       })
-      .select("id, provider, is_active, is_backup, created_at")
+      .select()
       .single();
 
     if (error) {
-      if (error.code === "23505") {
-        return NextResponse.json(
-          { success: false, error: "Key already exists for this provider" },
-          { status: 409 }
-        );
-      }
-      console.error("[Keys API] Error inserting key:", error);
+      console.error("[Admin API] Insert error:", error);
       return NextResponse.json(
-        { success: false, error: "Failed to add key" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      key: { ...data, key: maskKey(key) },
-      message: is_backup ? "Backup key added successfully (inactive)" : "Key added successfully",
-    });
-  } catch (error) {
-    console.error("[Keys API] Error:", error);
-    return NextResponse.json(
-      { success: false, error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * PATCH /api/admin/keys
- * Update key: { id, is_backup?, is_active? }
- */
-export async function PATCH(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { id, is_backup, is_active } = body;
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: "Missing key id" },
+        { 
+          error: error.message.includes("duplicate") 
+            ? "This key already exists" 
+            : "Failed to add key",
+          details: error.message 
+        },
         { status: 400 }
       );
     }
 
-    const supabase = await createClient();
-
-    // Build update object
-    const updateData: Record<string, any> = {};
-    if (typeof is_backup === "boolean") {
-      updateData.is_backup = is_backup;
-      // If marking as backup, deactivate it
-      if (is_backup) {
-        updateData.is_active = false;
-      }
-    }
-    if (typeof is_active === "boolean") {
-      updateData.is_active = is_active;
-    }
-
-    if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { success: false, error: "No fields to update" },
-        { status: 400 }
-      );
-    }
-
-    const { data, error } = await supabase
-      .from("api_keys")
-      .update(updateData)
-      .eq("id", id)
-      .select("id, provider, is_active, is_backup, updated_at")
-      .single();
-
-    if (error) {
-      console.error("[Keys API] Error updating key:", error);
-      return NextResponse.json(
-        { success: false, error: "Failed to update key" },
-        { status: 500 }
-      );
-    }
+    // Hot-reload keys
+    await reloadKeys();
 
     return NextResponse.json({
       success: true,
-      key: data,
-      message: "Key updated successfully",
+      message: "Key added successfully",
+      key: {
+        id: data.id,
+        provider: data.provider,
+        isBackup: data.is_backup,
+      },
     });
-  } catch (error) {
-    console.error("[Keys API] Error:", error);
+    
+  } catch (error: any) {
+    console.error("[Admin API] POST error:", error);
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * DELETE /api/admin/keys
- * Delete key: { id }
- */
-export async function DELETE(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { id } = body;
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: "Missing key id" },
-        { status: 400 }
-      );
-    }
-
-    const supabase = await createClient();
-    const { error } = await supabase
-      .from("api_keys")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      console.error("[Keys API] Error deleting key:", error);
-      return NextResponse.json(
-        { success: false, error: "Failed to delete key" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: `Key ${id} deleted successfully`,
-    });
-  } catch (error) {
-    console.error("[Keys API] Error:", error);
-    return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { error: error.message || "Internal server error" },
       { status: 500 }
     );
   }

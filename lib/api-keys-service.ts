@@ -353,3 +353,43 @@ export async function getKeyStats(provider: ApiKeyProvider): Promise<{
     totalRequests: pool.reduce((sum, k) => sum + k.totalRequests, 0),
   };
 }
+
+/**
+ * Hot-reload keys from database without server restart
+ * Called from admin panel after adding/removing/editing keys
+ */
+export async function reloadKeys(): Promise<{
+  success: boolean;
+  providers: Record<string, number>;
+  error?: string;
+}> {
+  try {
+    console.log("[API Keys Service] Hot-reloading keys from database...");
+    
+    // Reset the loaded flag to force fresh load
+    keysLoaded = false;
+    
+    // Reload from database
+    await loadKeysFromDB();
+    
+    // Collect stats for response
+    const providers: Record<string, number> = {};
+    for (const provider of PROVIDERS) {
+      providers[provider] = keyStates[provider].length;
+    }
+    
+    console.log("[API Keys Service] ✅ Hot-reload complete:", providers);
+    
+    return {
+      success: true,
+      providers,
+    };
+  } catch (error: any) {
+    console.error("[API Keys Service] ❌ Hot-reload failed:", error);
+    return {
+      success: false,
+      providers: {},
+      error: error.message || "Unknown error during reload",
+    };
+  }
+}
