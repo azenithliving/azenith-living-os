@@ -143,31 +143,84 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
     setTimeout(() => setMessage(null), 5000);
   };
 
+  // ── حساب عدد المفاتيح في الـ textarea ──────────────────────────────
+  const parsedKeyCount = newKey.key
+    .split(/[\n,]+/)
+    .map(k => k.trim())
+    .filter(Boolean).length;
+
   const addKey = async () => {
-    if (!newKey.provider || !newKey.key) {
+    if (!newKey.provider || !newKey.key.trim()) {
       showMessage("error", "Provider and key are required");
       return;
     }
 
+    // فصل المفاتيح: كل سطر أو فاصلة = مفتاح منفصل
+    const rawKeys = newKey.key
+      .split(/[\n,]+/)
+      .map(k => k.trim())
+      .filter(Boolean);
+
+    // ── مفتاح واحد — المسار العادي ───────────────────────────────────
+    if (rawKeys.length <= 1) {
+      try {
+        setActionLoading("add");
+        const res = await fetch("/api/admin/keys", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...newKey, key: rawKeys[0] ?? newKey.key.trim() }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showMessage("success", "تم إضافة المفتاح بنجاح ✅");
+          setNewKey({ provider: "", key: "", notes: "", isBackup: false, testKey: true });
+          setShowAddForm(false);
+          await reloadKeys();
+          await loadKeys();
+        } else {
+          showMessage("error", data.error || "Failed to add key");
+        }
+      } catch {
+        showMessage("error", "Network error");
+      } finally {
+        setActionLoading(null);
+      }
+      return;
+    }
+
+    // ── مفاتيح متعددة — Bulk Import ───────────────────────────────────
     try {
       setActionLoading("add");
-      const res = await fetch("/api/admin/keys", {
+      showMessage("success", `⏳ جاري إضافة ${rawKeys.length} مفتاح...`);
+
+      const res = await fetch("/api/admin/keys/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newKey),
+        body: JSON.stringify({
+          provider:    newKey.provider,
+          keys:        rawKeys,
+          notes:       newKey.notes,
+          isBackup:    newKey.isBackup,
+          testKeys:    newKey.testKey,
+          concurrency: 5,
+        }),
       });
       const data = await res.json();
 
       if (data.success) {
-        showMessage("success", "Key added successfully");
+        const { added, duplicate, failed } = data.summary;
+        showMessage(
+          "success",
+          `✅ أُضيف: ${added} | مكرر: ${duplicate} | فشل الاختبار: ${failed} (من ${rawKeys.length})`
+        );
         setNewKey({ provider: "", key: "", notes: "", isBackup: false, testKey: true });
         setShowAddForm(false);
         await reloadKeys();
         await loadKeys();
       } else {
-        showMessage("error", data.error || "Failed to add key");
+        showMessage("error", data.error || "فشل الاستيراد الجماعي");
       }
-    } catch (error) {
+    } catch {
       showMessage("error", "Network error");
     } finally {
       setActionLoading(null);
@@ -643,13 +696,20 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-300 mb-2">API Key</label>
-                    <input
-                      type="text"
+                    <label className="block text-sm text-slate-300 mb-2">
+                      API Key
+                      {parsedKeyCount > 1 && (
+                        <span className="mr-2 text-indigo-400 font-bold">
+                          ({parsedKeyCount} مفتاح محدد)
+                        </span>
+                      )}
+                    </label>
+                    <textarea
                       value={newKey.key}
                       onChange={(e) => setNewKey({ ...newKey, key: e.target.value })}
-                      placeholder="sk-..."
-                      className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-indigo-500 focus:outline-none font-mono text-sm"
+                      placeholder={"مفتاح واحد:\nsk-abc123...\n\nأو عدة مفاتيح (كل سطر مفتاح):\nsk-key1\nsk-key2\nsk-key3"}
+                      rows={4}
+                      className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-indigo-500 focus:outline-none font-mono text-sm resize-y"
                     />
                   </div>
                   <div>
@@ -687,9 +747,19 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                     <button
                       onClick={addKey}
                       disabled={actionLoading === "add"}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition disabled:opacity-50"
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      {actionLoading === "add" ? "Adding..." : "Add Key"}
+                      {actionLoading === "add" ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          {parsedKeyCount > 1 ? `جاري إضافة ${parsedKeyCount}...` : "جاري الإضافة..."}
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4" />
+                          {parsedKeyCount > 1 ? `إضافة ${parsedKeyCount} مفاتيح` : "Add Key"}
+                        </>
+                      )}
                     </button>
                     <button
                       onClick={() => setShowAddForm(false)}
