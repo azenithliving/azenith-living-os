@@ -6,7 +6,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { approveRequest, rejectRequest } from "@/lib/agent-tools/approval-system";
-import { sendTelegramMessage } from "@/lib/telegram-config";
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,18 +32,27 @@ export async function POST(request: NextRequest) {
     if (decision === "approved") {
       const result = await approveRequest(approval_id, actor, reason);
 
-      // إشعار Telegram عند الموافقة وتنفيذ الأداة
-      try {
-        const statusMsg = result.executionResult?.success
-          ? "✅ تم التنفيذ بنجاح"
-          : `⚠️ تمت الموافقة لكن فشل التنفيذ: ${result.executionResult?.error || "خطأ غير معروف"}`;
+      // إشعار Telegram
+      const statusMsg = result.executionResult?.success
+        ? "تم التنفيذ بنجاح"
+        : `فشل التنفيذ: ${result.executionResult?.error || "خطأ غير معروف"}`;
 
-        await sendTelegramMessage(
-          `🔑 موافقة على طلب\n\nالطلب: ${approval_id}\n${statusMsg}`
+      try {
+        await fetch(
+          `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/admin/agents/notify`,
+          {
+            method:  "POST",
+            headers: { "Content-Type": "application/json", "X-Internal-Key": process.env.INTERNAL_API_KEY || "" },
+            body:    JSON.stringify({
+              event:    result.executionResult?.success ? "task_completed" : "task_failed",
+              agent:    "system",
+              title:    "موافقة على طلب",
+              message:  `${statusMsg}\nالطلب: ${approval_id}`,
+              severity: result.executionResult?.success ? "info" : "warning",
+            }),
+          }
         );
-      } catch {
-        // الإشعار اختياري — لا يوقف التنفيذ
-      }
+      } catch { /* الإشعار اختياري */ }
 
       return NextResponse.json({
         success: result.success,
@@ -54,17 +62,25 @@ export async function POST(request: NextRequest) {
       });
 
     } else {
-      // rejected
       const result = await rejectRequest(approval_id, actor, reason);
 
       // إشعار Telegram عند الرفض
       try {
-        await sendTelegramMessage(
-          `❌ رفض طلب\n\nالطلب: ${approval_id}\nالسبب: ${reason || "لم يُحدَّد"}`
+        await fetch(
+          `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/admin/agents/notify`,
+          {
+            method:  "POST",
+            headers: { "Content-Type": "application/json", "X-Internal-Key": process.env.INTERNAL_API_KEY || "" },
+            body:    JSON.stringify({
+              event:   "custom",
+              agent:   "system",
+              title:   "رفض طلب",
+              message: `تم رفض الطلب: ${approval_id}\nالسبب: ${reason || "لم يُحدَّد"}`,
+              severity:"info",
+            }),
+          }
         );
-      } catch {
-        // الإشعار اختياري
-      }
+      } catch { /* الإشعار اختياري */ }
 
       return NextResponse.json({
         success: result.success,

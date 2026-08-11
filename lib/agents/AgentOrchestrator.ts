@@ -114,6 +114,30 @@ export class AgentOrchestrator {
           .eq("id", conversationId);
       }
 
+      // ── 5. إشعار Telegram إذا كانت الرسالة تتضمن تنفيذ مهمة ──────
+      try {
+        const lowerMsg = message.toLowerCase();
+        const isActionRequest =
+          lowerMsg.includes("نفذ") || lowerMsg.includes("اعمل") ||
+          lowerMsg.includes("حلل") || lowerMsg.includes("ابعت") ||
+          lowerMsg.includes("execute") || lowerMsg.includes("analyze");
+
+        if (isActionRequest) {
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+          await fetch(`${appUrl}/api/admin/agents/notify`, {
+            method:  "POST",
+            headers: { "Content-Type": "application/json", "X-Internal-Key": process.env.INTERNAL_API_KEY || "" },
+            body:    JSON.stringify({
+              event:   "task_completed",
+              agent:   selectedAgent,
+              title:   "رد الوكيل",
+              message: `${message.slice(0, 100)}...\n\nالرد: ${response.slice(0, 200)}`,
+              severity:"info",
+            }),
+          });
+        }
+      } catch { /* الإشعار اختياري */ }
+
       return { success: true, agentUsed: selectedAgent, response, metadata };
 
     } catch (error: any) {
