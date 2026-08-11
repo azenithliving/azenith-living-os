@@ -18,6 +18,7 @@ import { BOMTable } from '@/components/admin/agents/BOMTable';
 
 import { Brain, Cpu, MessageSquare, ShieldAlert, Activity, LayoutGrid, Terminal, Sparkles, Factory, Users, Zap, Box, CheckCircle, Calendar, RefreshCw } from 'lucide-react';
 import { QuickActionsPanel } from '@/components/admin/agents/QuickActionsPanel';
+import { ProactiveSuggestions } from '@/components/admin/agents/ProactiveSuggestions';
 
 type TabType = 'command' | 'assistant' | 'manufacturing' | 'teams';
 
@@ -305,6 +306,10 @@ export default function AgentsPage() {
                 </div>
                 <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-1 overflow-hidden shadow-2xl">
                   <CommandConsole />
+                </div>
+                {/* اقتراحات استباقية حقيقية */}
+                <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
+                  <ProactiveSuggestions />
                 </div>
               </div>
               
