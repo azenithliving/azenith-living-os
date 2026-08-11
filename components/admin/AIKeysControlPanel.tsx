@@ -145,9 +145,9 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
 
   // ── حساب عدد المفاتيح في الـ textarea ──────────────────────────────
   const parsedKeyCount = newKey.key
-    .split(/[\n,]+/)
+    .split(/[\n\r,;|\s]+/)
     .map(k => k.trim())
-    .filter(Boolean).length;
+    .filter(k => k.length > 8).length;
 
   const addKey = async () => {
     if (!newKey.provider || !newKey.key.trim()) {
@@ -155,11 +155,11 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
       return;
     }
 
-    // فصل المفاتيح: كل سطر أو فاصلة = مفتاح منفصل
+    // فصل المفاتيح: سطر جديد أو فاصلة أو مسافة بين مفاتيح (sk-/gsk-/eyJ...)
     const rawKeys = newKey.key
-      .split(/[\n,]+/)
+      .split(/[\n\r,;|\s]+/)
       .map(k => k.trim())
-      .filter(Boolean);
+      .filter(k => k.length > 8); // مفتاح أقل من 8 حروف مش مفتاح API
 
     // ── مفتاح واحد — المسار العادي ───────────────────────────────────
     if (rawKeys.length <= 1) {
