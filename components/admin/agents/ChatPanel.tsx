@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
+import { Send, Bot, User, Loader2, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -10,6 +10,7 @@ interface Message {
   content: string;
   created_at: string;
   isTyping?: boolean;
+  feedback?: 'positive' | 'negative' | null;
 }
 
 interface ChatPanelProps {
@@ -26,6 +27,27 @@ export function ChatPanel({ agentKey, agentName, agentColor = 'purple' }: ChatPa
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sessionIdRef = useRef(`chat-${agentKey}-${Date.now()}`);
+
+  // ── تسجيل التغذية الراجعة في SelfLearningEngine ──────────────────
+  const handleFeedback = useCallback(async (msgId: string, rating: 'positive' | 'negative') => {
+    // تحديث UI فوراً
+    setMessages(prev => prev.map(m =>
+      m.id === msgId ? { ...m, feedback: rating } : m
+    ));
+    // إرسال للـ API
+    try {
+      await fetch('/api/admin/agents/learn', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          interactionId: msgId,
+          agentKey,
+          rating: rating === 'positive' ? 5 : 1,
+          feedback: rating,
+        }),
+      });
+    } catch { /* صامت — UI محدَّثة بالفعل */ }
+  }, [agentKey]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -172,7 +194,7 @@ export function ChatPanel({ agentKey, agentName, agentColor = 'purple' }: ChatPa
           </div>
         ) : (
           messages.map((msg) => (
-            <MessageBubble key={msg.id} message={msg} agentColor={agentColor} />
+            <MessageBubble key={msg.id} message={msg} agentColor={agentColor} onFeedback={handleFeedback} />
           ))
         )}
 
@@ -223,8 +245,16 @@ export function ChatPanel({ agentKey, agentName, agentColor = 'purple' }: ChatPa
   );
 }
 
-function MessageBubble({ message, agentColor }: { message: Message; agentColor: string }) {
-  const isUser = message.sender_type === 'user';
+function MessageBubble({
+  message,
+  agentColor,
+  onFeedback,
+}: {
+  message: Message;
+  agentColor: string;
+  onFeedback?: (id: string, rating: 'positive' | 'negative') => void;
+}) {
+  const isUser   = message.sender_type === 'user';
   const isSystem = message.sender_type === 'system';
 
   if (isSystem) {
@@ -238,14 +268,8 @@ function MessageBubble({ message, agentColor }: { message: Message; agentColor: 
   }
 
   const colorClasses = {
-    purple: {
-      bubble: 'bg-purple-500/10 border-purple-500/20 text-purple-100',
-      name: 'text-purple-400',
-    },
-    emerald: {
-      bubble: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-100',
-      name: 'text-emerald-400',
-    },
+    purple:  { bubble: 'bg-purple-500/10 border-purple-500/20 text-purple-100', name: 'text-purple-400' },
+    emerald: { bubble: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-100', name: 'text-emerald-400' },
   };
 
   const colors = colorClasses[agentColor as keyof typeof colorClasses] || colorClasses.purple;
@@ -253,11 +277,9 @@ function MessageBubble({ message, agentColor }: { message: Message; agentColor: 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className={`flex max-w-[80%] ${isUser ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
-        <div
-          className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-            isUser ? 'bg-blue-500 text-white' : `${colors.bubble} border`
-          }`}
-        >
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+          isUser ? 'bg-blue-500 text-white' : `${colors.bubble} border`
+        }`}>
           {isUser ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
         </div>
 
@@ -265,18 +287,50 @@ function MessageBubble({ message, agentColor }: { message: Message; agentColor: 
           <p className={`text-[10px] mb-0.5 ${isUser ? 'text-blue-400' : colors.name}`}>
             {message.sender_name}
           </p>
-          <div
-            className={`p-3 rounded-2xl ${
-              isUser
-                ? 'bg-blue-600 text-white rounded-tr-md'
-                : `${colors.bubble} border rounded-tl-md`
-            }`}
-          >
+          <div className={`p-3 rounded-2xl ${
+            isUser
+              ? 'bg-blue-600 text-white rounded-tr-md'
+              : `${colors.bubble} border rounded-tl-md`
+          }`}>
             <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
           </div>
-          <p className="text-[9px] text-white/20 mt-1">
-            {new Date(message.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
-          </p>
+
+          {/* زري التقييم — فقط لرسائل الوكيل */}
+          {!isUser && onFeedback && (
+            <div className="flex items-center gap-1 mt-1">
+              <button
+                onClick={() => onFeedback(message.id, 'positive')}
+                title="إجابة مفيدة"
+                className={`p-1 rounded-lg transition-all ${
+                  message.feedback === 'positive'
+                    ? 'text-emerald-400 bg-emerald-500/20'
+                    : 'text-white/20 hover:text-emerald-400 hover:bg-emerald-500/10'
+                }`}
+              >
+                <ThumbsUp className="w-3 h-3" />
+              </button>
+              <button
+                onClick={() => onFeedback(message.id, 'negative')}
+                title="إجابة غير مفيدة"
+                className={`p-1 rounded-lg transition-all ${
+                  message.feedback === 'negative'
+                    ? 'text-rose-400 bg-rose-500/20'
+                    : 'text-white/20 hover:text-rose-400 hover:bg-rose-500/10'
+                }`}
+              >
+                <ThumbsDown className="w-3 h-3" />
+              </button>
+              <span className="text-[9px] text-white/20 mr-1">
+                {new Date(message.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )}
+
+          {isUser && (
+            <p className="text-[9px] text-white/20 mt-1">
+              {new Date(message.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          )}
         </div>
       </div>
     </div>
