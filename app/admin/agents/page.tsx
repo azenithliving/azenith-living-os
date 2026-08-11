@@ -17,6 +17,7 @@ import { InventoryManager } from '@/components/admin/agents/InventoryManager';
 import { BOMTable } from '@/components/admin/agents/BOMTable';
 
 import { Brain, Cpu, MessageSquare, ShieldAlert, Activity, LayoutGrid, Terminal, Sparkles, Factory, Users, Zap, Box, CheckCircle, Calendar, RefreshCw } from 'lucide-react';
+import { QuickActionsPanel } from '@/components/admin/agents/QuickActionsPanel';
 
 type TabType = 'command' | 'assistant' | 'manufacturing' | 'teams';
 
@@ -313,55 +314,9 @@ export default function AgentsPage() {
                   <ApprovalGate />
                 </div>
                 
-                {/* Quick Command Matrix */}
-                <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-3xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#C5A059]/5 blur-3xl rounded-full" />
-                  <h3 className="text-lg font-bold mb-6 flex items-center gap-3">
-                    <Terminal className="w-5 h-5 text-[#C5A059]" />
-                    مصفوفة الأوامر السريعة
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button 
-                      onClick={() => setShowPrimeChat(true)}
-                      className="group flex flex-col items-center justify-center p-6 bg-purple-500/5 border border-purple-500/10 rounded-3xl hover:bg-purple-500/20 transition-all gap-3"
-                    >
-                      <Brain className="w-6 h-6 text-purple-400 group-hover:scale-110 transition-transform" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-purple-300">مخاطبة PRIME</span>
-                    </button>
-                    <button 
-                      onClick={() => setShowVanguardChat(true)}
-                      className="group flex flex-col items-center justify-center p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl hover:bg-emerald-500/20 transition-all gap-3"
-                    >
-                      <MessageSquare className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300">مخاطبة Vanguard</span>
-                    </button>
-                    <button 
-                      onClick={() => setShowGroupChat(true)}
-                      className="group flex flex-col items-center justify-center p-6 bg-blue-500/5 border border-blue-500/10 rounded-3xl hover:bg-blue-500/20 transition-all gap-3"
-                    >
-                      <LayoutGrid className="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">مؤتمر الوكلاء</span>
-                    </button>
-                    <button 
-                      onClick={async () => {
-                        if (!confirm('🛑 بروتوكول الإيقاف الطارئ سيعطل كافة العمليات. هل أنت متأكد؟')) return;
-                        try {
-                          await fetch('/api/admin/owner/emergency-stop', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ action: 'trigger', reason: 'Critical Override from Agents Matrix' })
-                          });
-                          alert('🛑 تم تنشيط البروتوكول بنجاح.');
-                        } catch {
-                          alert('❌ خطأ في الاتصال بالأمن المركزي.');
-                        }
-                      }}
-                      className="group flex flex-col items-center justify-center p-6 bg-rose-500/5 border border-rose-500/10 rounded-3xl hover:bg-rose-500 transition-all gap-3"
-                    >
-                      <ShieldAlert className="w-6 h-6 text-rose-500 group-hover:text-white transition-colors" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-rose-300 group-hover:text-white">إيقاف سيادي</span>
-                    </button>
-                  </div>
+                {/* Quick Actions الحقيقية */}
+                <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
+                  <QuickActionsPanel />
                 </div>
               </div>
             </div>
