@@ -707,6 +707,20 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                     <textarea
                       value={newKey.key}
                       onChange={(e) => setNewKey({ ...newKey, key: e.target.value })}
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        const pasted = e.clipboardData.getData("text");
+                        // كل مفتاح API يبدأ بـ حرف/رقم ويكون طوله > 8
+                        // نحول المسافات المتعددة والأسطر لفاصل موحد ثم نعيد البناء
+                        const keys = pasted
+                          .split(/[\s,;|]+/)
+                          .map(k => k.trim())
+                          .filter(k => k.length > 8);
+                        const formatted = keys.length > 1
+                          ? keys.join("\n")
+                          : pasted; // لو مفتاح واحد خليه كما هو
+                        setNewKey({ ...newKey, key: (newKey.key ? newKey.key + "\n" : "") + formatted });
+                      }}
                       placeholder={"مفتاح واحد:\nsk-abc123...\n\nأو عدة مفاتيح (كل سطر مفتاح):\nsk-key1\nsk-key2\nsk-key3"}
                       rows={4}
                       className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-indigo-500 focus:outline-none font-mono text-sm resize-y"
