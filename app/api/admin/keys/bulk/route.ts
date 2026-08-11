@@ -81,7 +81,7 @@ async function testSingleKey(
       cfg = {
         url: "https://api.cerebras.ai/v1/chat/completions", method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "llama-3.3-70b", messages: [{ role: "user", content: "hi" }], max_tokens: 1 }),
+        body: JSON.stringify({ model: "gpt-oss-120b", messages: [{ role: "user", content: "hi" }], max_tokens: 1 }),
         extraOk: [400],
       };
       break;
