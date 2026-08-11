@@ -43,7 +43,7 @@ export default function AgentsPage() {
   });
 
   useEffect(() => {
-    const tab = searchParams.get('tab') as TabType;
+    const tab = searchParams?.get('tab') as TabType;
     if (tab && ['command', 'assistant', 'manufacturing', 'teams'].includes(tab)) {
       setActiveTab(tab);
     }
