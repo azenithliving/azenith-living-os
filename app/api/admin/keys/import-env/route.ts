@@ -59,56 +59,56 @@ export async function POST(request: NextRequest) {
     let totalSkipped = 0;
     const details: Record<string, { imported: number; skipped: number; total: number }> = {};
 
+    // ✅ Batch insert لكل provider دفعة واحدة بدل key واحد key واحد
     for (const [provider, keys] of Object.entries(ENV_KEY_POOLS)) {
       if (keys.length === 0) {
         details[provider] = { imported: 0, skipped: 0, total: 0 };
         continue;
       }
 
-      let imported = 0;
-      let skipped = 0;
+      // Get existing keys لهذا الـ provider دفعة واحدة
+      const { data: existingKeys } = await supabase
+        .from("api_keys")
+        .select("key")
+        .eq("provider", provider);
 
-      for (const key of keys) {
-        // Check if key already exists
-        const { data: existing } = await supabase
-          .from("api_keys")
-          .select("id")
-          .eq("provider", provider)
-          .eq("key", key)
-          .maybeSingle();
+      const existingKeysSet = new Set(existingKeys?.map(k => k.key) || []);
+      
+      // Filter out duplicates
+      const keysToInsert = keys.filter(k => !existingKeysSet.has(k));
+      const skipped = keys.length - keysToInsert.length;
 
-        if (existing) {
-          skipped++;
-          continue;
-        }
-
-        // Insert new key
+      if (keysToInsert.length > 0) {
+        // Bulk insert - دفعة واحدة!
         const { error: insertError } = await supabase
           .from("api_keys")
-          .insert({
-            provider: provider,
-            key: key,
-            is_active: true,
-            is_backup: false,
-            notes: "Imported from env variables",
-            total_requests: 0,
-          });
+          .insert(
+            keysToInsert.map(key => ({
+              provider: provider,
+              key: key,
+              is_active: true,
+              is_backup: false,
+              notes: "Imported from env variables",
+              total_requests: 0,
+            }))
+          );
 
         if (insertError) {
-          console.error(`[Import] Failed to insert ${provider} key:`, insertError);
-          skipped++;
+          console.error(`[Import] Failed to insert ${provider} keys:`, insertError);
+          details[provider] = { imported: 0, skipped: keys.length, total: keys.length };
         } else {
-          imported++;
+          totalImported += keysToInsert.length;
+          totalSkipped += skipped;
+          details[provider] = {
+            imported: keysToInsert.length,
+            skipped,
+            total: keys.length,
+          };
         }
+      } else {
+        totalSkipped += skipped;
+        details[provider] = { imported: 0, skipped, total: keys.length };
       }
-
-      totalImported += imported;
-      totalSkipped += skipped;
-      details[provider] = {
-        imported,
-        skipped,
-        total: keys.length,
-      };
     }
 
     return NextResponse.json({
