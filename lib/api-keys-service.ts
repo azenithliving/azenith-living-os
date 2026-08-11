@@ -381,6 +381,40 @@ export async function getKeyStats(provider: ApiKeyProvider): Promise<{
 }
 
 /**
+ * ✅ Get LIVE in-memory stats for ALL providers
+ * هذه هي الأرقام الحقيقية - ما يشتغل فعلاً في الـ server
+ */
+export async function getAllLiveStats(): Promise<Record<string, {
+  live_total: number;       // عدد المفاتيح المحملة فعلاً في الذاكرة
+  live_active: number;      // متاح للاستخدام الآن (مش cooldown ومش dead)
+  live_cooldown: number;    // في cooldown حالياً
+  live_dead: number;        // محدد كـ dead في الذاكرة
+  live_requests: number;    // مجموع الطلبات منذ بدء الـ server
+  loaded: boolean;          // هل تم تحميل المفاتيح؟
+}>> {
+  if (!keysLoaded) {
+    await loadKeysFromDB();
+  }
+
+  const now = new Date();
+  const result: Record<string, any> = {};
+
+  for (const provider of PROVIDERS) {
+    const pool = keyStates[provider] || [];
+    result[provider] = {
+      live_total: pool.length,
+      live_active: pool.filter(k => !k.isDead && (!k.cooldownUntil || k.cooldownUntil <= now)).length,
+      live_cooldown: pool.filter(k => !k.isDead && k.cooldownUntil && k.cooldownUntil > now).length,
+      live_dead: pool.filter(k => k.isDead === true).length,
+      live_requests: pool.reduce((sum, k) => sum + k.totalRequests, 0),
+      loaded: keysLoaded,
+    };
+  }
+
+  return result;
+}
+
+/**
  * Hot-reload keys from database without server restart
  * Called from admin panel after adding/removing/editing keys
  */

@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-import { reloadKeys } from "@/lib/api-keys-service";
+import { reloadKeys, getAllLiveStats } from "@/lib/api-keys-service";
 
 // Test key validity by making a simple API call
 async function testApiKey(provider: string, key: string): Promise<{
@@ -117,7 +117,7 @@ async function testApiKey(provider: string, key: string): Promise<{
   }
 }
 
-// GET: List all keys grouped by provider
+// GET: List all keys grouped by provider - يجمع DB + Live memory معاً
 export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabaseAdminClient();
@@ -128,14 +128,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { data, error } = await supabase
-      .from("api_keys")
-      .select("*")
-      .order("provider", { ascending: true })
-      .order("created_at", { ascending: false });
+    // ✅ اجلب DB data + Live memory stats في نفس الوقت
+    const [dbResult, liveStats] = await Promise.all([
+      supabase
+        .from("api_keys")
+        .select("*")
+        .order("provider", { ascending: true })
+        .order("created_at", { ascending: false }),
+      getAllLiveStats(),
+    ]);
 
-    if (error) {
-      console.error("[Admin API] Failed to fetch keys:", error);
+    if (dbResult.error) {
+      console.error("[Admin API] Failed to fetch keys:", dbResult.error);
       return NextResponse.json(
         { error: "Failed to fetch keys" },
         { status: 500 }
@@ -146,23 +150,34 @@ export async function GET(request: NextRequest) {
     const grouped: Record<string, any> = {};
     const now = new Date();
 
-    for (const key of data || []) {
+    for (const key of dbResult.data || []) {
       const provider = key.provider;
       if (!grouped[provider]) {
         grouped[provider] = {
           provider,
           keys: [],
           stats: {
+            // DB stats - ما هو مسجل في قاعدة البيانات
             total: 0,
             active: 0,
+            inactive: 0,
             backup: 0,
             inCooldown: 0,
             dead: 0,
+            // Live stats - ما يشتغل فعلاً في الذاكرة (يُضاف بعدين)
+            live: liveStats[provider] || {
+              live_total: 0,
+              live_active: 0,
+              live_cooldown: 0,
+              live_dead: 0,
+              live_requests: 0,
+              loaded: false,
+            },
           },
         };
       }
 
-      // Check if key is dead
+      // ✅ منطق موحد لتحديد isDead - نفس المنطق في api-keys-service
       const isDead =
         (key.error_count && key.error_count >= 3) ||
         (key.last_error &&
@@ -170,36 +185,48 @@ export async function GET(request: NextRequest) {
             key.last_error.includes("403") ||
             key.last_error.includes("Invalid") ||
             key.last_error.includes("Unauthorized") ||
-            key.last_error.includes("Forbidden")));
+            key.last_error.includes("Forbidden") ||
+            key.last_error.startsWith("[DEAD]")));
+
+      const inCooldown = key.cooldown_until && new Date(key.cooldown_until) > now;
 
       grouped[provider].keys.push({
         id: key.id,
-        key: key.key.substring(0, 12) + "..." + key.key.slice(-4), // Masked
-        keyFull: key.key, // For editing
+        key: key.key.substring(0, 12) + "..." + key.key.slice(-4),
+        keyFull: key.key,
         isActive: key.is_active,
         isBackup: key.is_backup,
         notes: key.notes,
         cooldownUntil: key.cooldown_until,
-        totalRequests: key.total_requests,
+        totalRequests: key.total_requests || 0,
         lastUsedAt: key.last_used_at,
         createdAt: key.created_at,
-        isDead: isDead,
+        isDead: isDead || false,
         lastError: key.last_error,
+        errorCount: key.error_count || 0,
       });
 
+      // ✅ حساب DB stats دقيق
       grouped[provider].stats.total++;
-      if (key.is_active && !isDead) grouped[provider].stats.active++;
-      if (!key.is_active && !isDead) grouped[provider].stats.inactive++;
-      if (key.is_backup) grouped[provider].stats.backup++;
-      if (key.cooldown_until && new Date(key.cooldown_until) > now) {
+      if (isDead) {
+        grouped[provider].stats.dead++;
+      } else if (key.is_backup) {
+        grouped[provider].stats.backup++;
+      } else if (inCooldown) {
         grouped[provider].stats.inCooldown++;
+      } else if (key.is_active) {
+        grouped[provider].stats.active++;
+      } else {
+        // is_active = false, not dead, not backup, not cooldown → inactive
+        grouped[provider].stats.inactive++;
       }
-      if (isDead) grouped[provider].stats.dead++;
     }
 
     return NextResponse.json({
       success: true,
       providers: Object.values(grouped),
+      // ✅ أرسل Live stats منفصلة أيضاً للـ sidebar
+      liveStats,
     });
     
   } catch (error: any) {

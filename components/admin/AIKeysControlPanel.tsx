@@ -18,16 +18,28 @@ interface ApiKey {
   lastError?: string | null; // آخر خطأ حصل
 }
 
+interface LiveStats {
+  live_total: number;    // محمل في الذاكرة فعلاً
+  live_active: number;   // شغال ومتاح الآن
+  live_cooldown: number; // في راحة
+  live_dead: number;     // ميت في الذاكرة
+  live_requests: number; // طلبات منذ بدء الـ server
+  loaded: boolean;
+}
+
 interface ProviderData {
   provider: string;
   keys: ApiKey[];
   stats: {
+    // DB stats
     total: number;
     active: number;
     backup: number;
     inCooldown: number;
     dead: number;
     inactive: number;
+    // Live stats من الذاكرة
+    live: LiveStats;
   };
 }
 
@@ -74,11 +86,22 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
   const [selectCount, setSelectCount] = useState<string>("");
   const [showSelectCountDialog, setShowSelectCountDialog] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [liveStats, setLiveStats] = useState<Record<string, LiveStats>>({});
+  const [liveRefreshing, setLiveRefreshing] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       loadKeys();
     }
+  }, [isOpen]);
+
+  // Auto-refresh live stats كل 15 ثانية
+  useEffect(() => {
+    if (!isOpen) return;
+    const interval = setInterval(() => {
+      fetchLiveStats();
+    }, 15000);
+    return () => clearInterval(interval);
   }, [isOpen]);
 
   const loadKeys = async () => {
@@ -88,11 +111,30 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
       const data = await res.json();
       if (data.success) {
         setProviders(data.providers);
+        // ✅ live stats تيجي مع نفس الـ response
+        if (data.liveStats) {
+          setLiveStats(data.liveStats);
+        }
       }
     } catch (error) {
       showMessage("error", "Failed to load keys");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLiveStats = async () => {
+    try {
+      setLiveRefreshing(true);
+      const res = await fetch("/api/admin/keys/live-stats");
+      const data = await res.json();
+      if (data.success) {
+        setLiveStats(data.byProvider);
+      }
+    } catch (_) {
+      // silent
+    } finally {
+      setLiveRefreshing(false);
     }
   };
 
@@ -478,7 +520,9 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                 {Object.keys(PROVIDER_INFO).map((providerKey) => {
                   const providerData = providers.find((p) => p.provider === providerKey);
                   const info = PROVIDER_INFO[providerKey];
-                  const stats = providerData?.stats || { total: 0, active: 0, backup: 0, inCooldown: 0 };
+                  const stats = providerData?.stats || { total: 0, active: 0, backup: 0, inCooldown: 0, dead: 0, inactive: 0 };
+                  // ✅ Live stats من الذاكرة - الأرقام الحقيقية
+                  const live = liveStats[providerKey] || null;
 
                   return (
                     <button
@@ -493,28 +537,47 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                           : "bg-slate-700/30 hover:bg-slate-700/50 text-slate-300"
                       }`}
                     >
+                      {/* Row 1: اسم المزود + عدد DB الكلي */}
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xl">{info.icon}</span>
                           <span className="font-semibold">{info.name}</span>
                         </div>
-                        <span className={`text-xs px-2 py-1 rounded ${info.color} text-white`}>
+                        <span className={`text-xs px-2 py-1 rounded ${info.color} text-white`} title="إجمالي المفاتيح في قاعدة البيانات">
                           {stats.total}
                         </span>
                       </div>
-                      <div className="text-xs opacity-70 mb-2">{info.feature}</div>
-                      <div className="flex gap-2 text-xs">
-                        <span className="flex items-center gap-1">
-                          <Activity className="w-3 h-3" />
-                          {stats.active} active
-                        </span>
-                        {stats.backup > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Shield className="w-3 h-3" />
-                            {stats.backup} backup
+
+                      {/* Row 2: Live indicator - الأرقام الحقيقية من الذاكرة */}
+                      {live && live.live_total > 0 ? (
+                        <div className="flex items-center gap-2 flex-wrap mt-1">
+                          <span className="relative flex h-2 w-2 flex-shrink-0">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                           </span>
-                        )}
-                      </div>
+                          <span className="text-green-400 text-xs font-bold">
+                            {live.live_active} شغال
+                          </span>
+                          {live.live_cooldown > 0 && (
+                            <span className="text-orange-400 text-xs">· {live.live_cooldown} راحة</span>
+                          )}
+                          {live.live_dead > 0 && (
+                            <span className="text-red-400 text-xs">· {live.live_dead} ميت</span>
+                          )}
+                          {live.live_requests > 0 && (
+                            <span className="text-slate-400 text-xs ml-auto">
+                              {live.live_requests.toLocaleString()} طلب
+                            </span>
+                          )}
+                        </div>
+                      ) : live && live.live_total === 0 ? (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-600"></span>
+                          <span className="text-slate-500 text-xs">غير محمل في الذاكرة</span>
+                        </div>
+                      ) : (
+                        <div className="text-xs opacity-50 mt-1">{info.feature}</div>
+                      )}
                     </button>
                   );
                 })}
@@ -696,74 +759,148 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                 </div>
 
                 {/* Stats Cards - Filters */}
+                {/* ✅ كل card يعرض رقمين: DB (فوق كبير) + Live memory (تحت صغير) */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-4 mb-4 md:mb-6">
+
+                  {/* الكل */}
                   <button
                     onClick={() => setFilterStatus("all")}
-                    className={`rounded-lg p-4 border transition-all ${
+                    className={`rounded-lg p-3 border transition-all text-left ${
                       filterStatus === "all"
                         ? "bg-slate-700 border-slate-500 ring-2 ring-slate-400"
                         : "bg-slate-800 border-slate-700 hover:border-slate-600"
                     }`}
                   >
-                    <div className="text-slate-400 text-sm mb-1">الكل</div>
+                    <div className="text-slate-400 text-xs mb-1">الكل</div>
                     <div className="text-2xl font-bold text-white">{selectedProviderData.stats.total}</div>
+                    {liveStats[selectedProvider!] && (
+                      <div className="text-slate-500 text-xs mt-1 border-t border-slate-700 pt-1">
+                        ذاكرة: {liveStats[selectedProvider!].live_total}
+                      </div>
+                    )}
                   </button>
+
+                  {/* نشط */}
                   <button
                     onClick={() => setFilterStatus("active")}
-                    className={`rounded-lg p-4 border transition-all ${
+                    className={`rounded-lg p-3 border transition-all text-left ${
                       filterStatus === "active"
                         ? "bg-green-500/20 border-green-500 ring-2 ring-green-400"
                         : "bg-green-500/10 border-green-500/30 hover:border-green-500/50"
                     }`}
                   >
-                    <div className="text-green-400 text-sm mb-1">نشط</div>
+                    <div className="text-green-400 text-xs mb-1">نشط (DB)</div>
                     <div className="text-2xl font-bold text-green-400">{selectedProviderData.stats.active}</div>
+                    {liveStats[selectedProvider!] && (
+                      <div className="text-green-600 text-xs mt-1 border-t border-green-900 pt-1 font-semibold">
+                        ⚡ حي: {liveStats[selectedProvider!].live_active}
+                      </div>
+                    )}
                   </button>
+
+                  {/* متوقف */}
                   <button
                     onClick={() => setFilterStatus("inactive")}
-                    className={`rounded-lg p-4 border transition-all ${
+                    className={`rounded-lg p-3 border transition-all text-left ${
                       filterStatus === "inactive"
                         ? "bg-slate-500/20 border-slate-500 ring-2 ring-slate-400"
                         : "bg-slate-500/10 border-slate-500/30 hover:border-slate-500/50"
                     }`}
                   >
-                    <div className="text-slate-400 text-sm mb-1">متوقف</div>
-                    <div className="text-2xl font-bold text-slate-400">{selectedProviderData.stats.inactive}</div>
+                    <div className="text-slate-400 text-xs mb-1">متوقف</div>
+                    <div className="text-2xl font-bold text-slate-300">{selectedProviderData.stats.inactive}</div>
+                    <div className="text-slate-600 text-xs mt-1 border-t border-slate-700 pt-1">
+                      DB فقط
+                    </div>
                   </button>
+
+                  {/* احتياطي */}
                   <button
                     onClick={() => setFilterStatus("backup")}
-                    className={`rounded-lg p-4 border transition-all ${
+                    className={`rounded-lg p-3 border transition-all text-left ${
                       filterStatus === "backup"
                         ? "bg-blue-500/20 border-blue-500 ring-2 ring-blue-400"
                         : "bg-blue-500/10 border-blue-500/30 hover:border-blue-500/50"
                     }`}
                   >
-                    <div className="text-blue-400 text-sm mb-1">احتياطي</div>
+                    <div className="text-blue-400 text-xs mb-1">احتياطي</div>
                     <div className="text-2xl font-bold text-blue-400">{selectedProviderData.stats.backup}</div>
+                    <div className="text-blue-900 text-xs mt-1 border-t border-blue-900 pt-1">
+                      DB فقط
+                    </div>
                   </button>
+
+                  {/* يستريح */}
                   <button
                     onClick={() => setFilterStatus("cooldown")}
-                    className={`rounded-lg p-4 border transition-all ${
+                    className={`rounded-lg p-3 border transition-all text-left ${
                       filterStatus === "cooldown"
                         ? "bg-orange-500/20 border-orange-500 ring-2 ring-orange-400"
                         : "bg-orange-500/10 border-orange-500/30 hover:border-orange-500/50"
                     }`}
                   >
-                    <div className="text-orange-400 text-sm mb-1">يستريح</div>
+                    <div className="text-orange-400 text-xs mb-1">راحة (DB)</div>
                     <div className="text-2xl font-bold text-orange-400">{selectedProviderData.stats.inCooldown}</div>
+                    {liveStats[selectedProvider!] && (
+                      <div className="text-orange-700 text-xs mt-1 border-t border-orange-900 pt-1 font-semibold">
+                        ⏱ حي: {liveStats[selectedProvider!].live_cooldown}
+                      </div>
+                    )}
                   </button>
+
+                  {/* ميت */}
                   <button
                     onClick={() => setFilterStatus("dead")}
-                    className={`rounded-lg p-4 border transition-all ${
+                    className={`rounded-lg p-3 border transition-all text-left ${
                       filterStatus === "dead"
                         ? "bg-red-500/20 border-red-500 ring-2 ring-red-400"
                         : "bg-red-500/10 border-red-500/30 hover:border-red-500/50"
                     }`}
                   >
-                    <div className="text-red-400 text-sm mb-1">ميت</div>
+                    <div className="text-red-400 text-xs mb-1">ميت (DB)</div>
                     <div className="text-2xl font-bold text-red-400">{selectedProviderData.stats.dead}</div>
+                    {liveStats[selectedProvider!] && (
+                      <div className="text-red-800 text-xs mt-1 border-t border-red-900 pt-1 font-semibold">
+                        💀 حي: {liveStats[selectedProvider!].live_dead}
+                      </div>
+                    )}
                   </button>
+
                 </div>
+
+                {/* ✅ Live Summary Bar - يظهر الفرق بين DB والذاكرة */}
+                {liveStats[selectedProvider!] && (
+                  <div className="bg-slate-800/80 border border-slate-700 rounded-lg px-4 py-2 mb-4 flex items-center gap-3 flex-wrap text-xs">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span className="text-slate-400 font-semibold">الذاكرة الحية:</span>
+                    <span className="text-white font-bold">
+                      {liveStats[selectedProvider!].live_active} شغال فعلاً
+                    </span>
+                    <span className="text-slate-500">|</span>
+                    <span className="text-slate-400">
+                      محمل: {liveStats[selectedProvider!].live_total} مفتاح
+                    </span>
+                    {liveStats[selectedProvider!].live_requests > 0 && (
+                      <>
+                        <span className="text-slate-500">|</span>
+                        <span className="text-indigo-400">
+                          {liveStats[selectedProvider!].live_requests.toLocaleString()} طلب منذ آخر تشغيل
+                        </span>
+                      </>
+                    )}
+                    <button
+                      onClick={fetchLiveStats}
+                      disabled={liveRefreshing}
+                      className="ml-auto text-slate-500 hover:text-slate-300 transition"
+                      title="تحديث البيانات الحية"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${liveRefreshing ? "animate-spin" : ""}`} />
+                    </button>
+                  </div>
+                )}
 
                 {/* Keys Table */}
                 <div className="space-y-2">
