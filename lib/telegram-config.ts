@@ -101,12 +101,12 @@ export function clearTelegramConfigCache() {
 }
 
 /**
- * Helper مباشر لإرسال رسالة — يستخدمها أي module
+ * بعت للحساب الافتراضي فقط — للإشعارات الحساسة (أمان، تسجيل دخول، إلخ)
  */
 export async function sendTelegramMessage(
   text: string,
   options?: {
-    chatId?: string;        // لو مش محدد يستخدم الافتراضي
+    chatId?: string;
     silent?: boolean;
   }
 ): Promise<boolean> {
@@ -128,17 +128,40 @@ export async function sendTelegramMessage(
     return false;
   }
 
+  return _sendOne(cfg.botToken, targetChatId, text, options?.silent ?? false);
+}
+
+/**
+ * بعت لكل الحسابات المضافة — للإشعارات العامة (مستشار، مبيعات، عملاء)
+ */
+export async function broadcastTelegramMessage(
+  text: string,
+  options?: { silent?: boolean }
+): Promise<void> {
+  const cfg = await getActiveTelegramConfig();
+  if (!cfg.botToken || !cfg.enabled) return;
+
+  const chats = cfg.allChats.length > 0
+    ? cfg.allChats
+    : cfg.chatId ? [{ id: "default", chatId: cfg.chatId, label: "", isDefault: true }] : [];
+
+  for (const chat of chats) {
+    await _sendOne(cfg.botToken, chat.chatId, text, options?.silent ?? false).catch(() => {});
+  }
+}
+
+async function _sendOne(token: string, chatId: string, text: string, silent: boolean): Promise<boolean> {
   try {
     const res = await fetch(
-      `https://api.telegram.org/bot${cfg.botToken}/sendMessage`,
+      `https://api.telegram.org/bot${token}/sendMessage`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          chat_id: targetChatId,
+          chat_id: chatId,
           text,
           parse_mode: "HTML",
-          disable_notification: options?.silent ?? false,
+          disable_notification: silent,
           disable_web_page_preview: true,
         }),
       }
@@ -146,7 +169,7 @@ export async function sendTelegramMessage(
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      console.error("[Telegram] Send failed:", err);
+      console.error("[Telegram] Send failed to", chatId, ":", err);
       return false;
     }
 
@@ -154,17 +177,5 @@ export async function sendTelegramMessage(
   } catch (err) {
     console.error("[Telegram] Send error:", err);
     return false;
-  }
-}
-
-/**
- * بعت لكل الـ chats المضافة (broadcast)
- */
-export async function broadcastTelegramMessage(text: string): Promise<void> {
-  const cfg = await getActiveTelegramConfig();
-  if (!cfg.botToken || !cfg.enabled) return;
-
-  for (const chat of cfg.allChats) {
-    await sendTelegramMessage(text, { chatId: chat.chatId }).catch(() => {});
   }
 }

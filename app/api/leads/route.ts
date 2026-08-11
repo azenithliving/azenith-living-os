@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { leadSubmissionSchema, persistLeadSubmission } from "@/lib/leads";
 import { normalizeHost } from "@/lib/tenant";
-import { sendTelegramMessage } from "@/lib/telegram-config";
+import { sendTelegramMessage, broadcastTelegramMessage } from "@/lib/telegram-config";
 
 export async function POST(request: Request) {
   try {
@@ -58,7 +58,8 @@ ${clientNotes}
 <i>تم الحفظ بنجاح في قاعدة البيانات وتوليد كراسة الشروط تلقائياً.</i>
     `.trim();
 
-    sendTelegramMessage(tgMessage).catch((err) => {
+    // إشعار مبيعات → كل الحسابات
+    broadcastTelegramMessage(tgMessage).catch((err) => {
       console.error("Failed to send Telegram lead alert:", err);
     });
 

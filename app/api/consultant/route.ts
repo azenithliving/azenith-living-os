@@ -4,7 +4,7 @@ import { askGroq, askOrchestratorMessages } from "@/lib/ai-orchestrator";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { predatoryDefense } from "@/lib/predatory-defense";
 import { semanticCache } from "@/lib/semantic-cache";
-import { sendTelegramMessage } from "@/lib/telegram-config";
+import { sendTelegramMessage, broadcastTelegramMessage } from "@/lib/telegram-config";
 import { storeMemory, storeUserPreference, getUserPreferences } from "@/lib/ultimate-agent/memory-store";
 import { LearningEngine } from "@/lib/ultimate-agent/learning-engine";
 
@@ -379,7 +379,8 @@ async function notifyAdminUnknownQuestion(
     `<b>الرسالة:</b> ${question}\n\n` +
     `<a href="${dashboardUrl2}">افتح لوحة الأدمن</a>`;
 
-  sendTelegramMessage(msg2).catch(() => {});
+  // إشعار رسالة صعبة → كل الحسابات
+  broadcastTelegramMessage(msg2).catch(() => {});
 }
 
 /**
@@ -774,7 +775,8 @@ export async function POST(
         `<b>الميزانية:</b> ${insights?.budget || "Unknown"}\n` +
         `<b>الأسلوب:</b> ${insights?.style || "Unknown"}\n\n` +
         `<a href="${dashboardUrl}">افتح لوحة الأدمن</a>`;
-      sendTelegramMessage(bookingMsg).catch((e) => console.error("[Consultant] Booking Telegram failed:", e));
+      // إشعار حجز مكتمل → كل الحسابات
+      broadcastTelegramMessage(bookingMsg).catch((e) => console.error("[Consultant] Booking Telegram failed:", e));
 
       // --- SAA vInfinity: Telegram Admin Notification + Catalog Log ---
       if (phone !== "Not provided") {
@@ -792,7 +794,8 @@ export async function POST(
               `<b>الذوق:</b> ${styleLabel}\n` +
               `<b>الميزانية:</b> ${insights?.budget || "غير محدد"}\n\n` +
               `<a href="${catalogUrl}">🎨 رابط الكتالوج المخصص</a>`;
-            await sendTelegramMessage(msg, { silent: false });
+            // إشعار عميل أكمل المحادثة → كل الحسابات
+            await broadcastTelegramMessage(msg);
             console.log(`[SAA-Telegram] Client notification sent for session ${sessionId}`);
           } catch (tgErr) {
             console.error("[SAA-Telegram] Notification failed:", tgErr);

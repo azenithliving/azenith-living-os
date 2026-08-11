@@ -3,7 +3,7 @@ import "server-only";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { analyzeStyleDNAFast, StyleDNA } from "@/lib/pdf-generator";
 import { fireAndForget } from "@/lib/background-processor";
-import { sendTelegramMessage, getActiveTelegramConfig } from "@/lib/telegram-config";
+import { sendTelegramMessage, broadcastTelegramMessage, getActiveTelegramConfig } from "@/lib/telegram-config";
 
 export type AestheticAdvice = {
   visualHarmony: string;
@@ -206,13 +206,10 @@ export async function sendTelegramDossier(
     const message = formatDossierMessage(dossier);
     const cfg = await getActiveTelegramConfig();
 
-    if (cfg.botToken && cfg.chatId && cfg.enabled) {
-      const ok = await sendTelegramMessage(message, {
-        silent: dossier.qualification.priority !== "urgent",
-      });
-      if (ok) {
-        console.log(`[LeadDossier] Dossier sent for ${dossier.fullName}`);
-      }
+    if (cfg.botToken && cfg.enabled) {
+      // Diamond lead dossier → كل الحسابات (فريق المبيعات كله لازم يشوف)
+      await broadcastTelegramMessage(message);
+      console.log(`[LeadDossier] Dossier broadcast for ${dossier.fullName}`);
     } else {
       console.log("[LeadDossier] Telegram not configured — dossier logged only");
     }

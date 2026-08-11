@@ -1,7 +1,7 @@
 import { getSupabaseAdminClient } from "./supabase-admin";
 import { getCurrentTenant } from "./tenant";
 import { notifyDiamondLeadAsync } from "./lead-dossier";
-import { sendTelegramMessage, getActiveTelegramConfig } from "./telegram-config";
+import { sendTelegramMessage, broadcastTelegramMessage, getActiveTelegramConfig } from "./telegram-config";
 
 export interface AutomationTrigger {
   type: "booking_status_changed" | "lead_created" | "lead_updated";
@@ -339,7 +339,8 @@ async function sendTelegramNotification(
       .join("\n");
 
     if (token && chatId) {
-      await sendTelegramMessage(alertText, { silent: false }).catch((err) =>
+      // إشعار تغيير حالة الحجز → كل الحسابات
+      await broadcastTelegramMessage(alertText).catch((err) =>
         console.error("[Automation] Telegram booking alert failed:", err)
       );
     }
