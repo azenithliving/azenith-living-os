@@ -1,12 +1,12 @@
 /**
  * POST /api/admin/keys/bulk
- * إضافة مفاتيح متعددة دفعة واحدة مع اختبار متوازٍ
+ * إضافة مفاتيح متعددة دفعة واحدة
  *
- * Body:
- *   { provider, keys: string[], notes?, isBackup?, testKeys?, concurrency? }
- *
- * Response:
- *   { success, summary: { total, added, duplicate, failed, errored }, results[], message }
+ * السلوك:
+ * - المفاتيح الناجحة في الاختبار  → تُضاف كـ active
+ * - المفاتيح الفاشلة في الاختبار  → تُضاف كـ dead (error_count=3) عشان تظهر في فلتر الميتة للمراجعة
+ * - المفاتيح المكررة               → تُتجاهل
+ * - Timeout أثناء الاختبار        → يُعامَل كنجاح (لا نعاقب المفتاح بسبب بطء الشبكة)
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -19,7 +19,7 @@ const TEST_TIMEOUT_MS = 8000;
 async function testSingleKey(
   provider: string,
   key: string
-): Promise<{ valid: boolean; error?: string }> {
+): Promise<{ valid: boolean; timedOut?: boolean; error?: string }> {
   const p = provider.toLowerCase();
 
   type Cfg = {
@@ -37,10 +37,7 @@ async function testSingleKey(
       cfg = { url: "https://api.groq.com/openai/v1/models", headers: { Authorization: `Bearer ${key}` } };
       break;
     case "openrouter":
-      cfg = {
-        url: "https://openrouter.ai/api/v1/models",
-        headers: { Authorization: `Bearer ${key}`, "HTTP-Referer": "https://azenithliving.com" },
-      };
+      cfg = { url: "https://openrouter.ai/api/v1/models", headers: { Authorization: `Bearer ${key}`, "HTTP-Referer": "https://azenithliving.com" } };
       break;
     case "mistral":
       cfg = { url: "https://api.mistral.ai/v1/models", headers: { Authorization: `Bearer ${key}` } };
@@ -74,8 +71,7 @@ async function testSingleKey(
       break;
     case "anthropic":
       cfg = {
-        url: "https://api.anthropic.com/v1/messages",
-        method: "POST",
+        url: "https://api.anthropic.com/v1/messages", method: "POST",
         headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
         body: JSON.stringify({ model: "claude-3-haiku-20240307", messages: [{ role: "user", content: "hi" }], max_tokens: 1 }),
         extraOk: [400],
@@ -83,8 +79,7 @@ async function testSingleKey(
       break;
     case "cerebras":
       cfg = {
-        url: "https://api.cerebras.ai/v1/chat/completions",
-        method: "POST",
+        url: "https://api.cerebras.ai/v1/chat/completions", method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify({ model: "llama-3.3-70b", messages: [{ role: "user", content: "hi" }], max_tokens: 1 }),
         extraOk: [400],
@@ -92,8 +87,7 @@ async function testSingleKey(
       break;
     case "sambanova":
       cfg = {
-        url: "https://api.sambanova.ai/v1/chat/completions",
-        method: "POST",
+        url: "https://api.sambanova.ai/v1/chat/completions", method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify({ model: "Meta-Llama-3.1-8B-Instruct", messages: [{ role: "user", content: "hi" }], max_tokens: 1 }),
         extraOk: [400],
@@ -116,10 +110,11 @@ async function testSingleKey(
     });
     clearTimeout(timer);
 
-    // quota / payment → المفتاح صحيح
+    // quota / payment = مفتاح صحيح
     if (res.status === 429 || res.status === 402) return { valid: true };
-    if (res.status === 401) return { valid: false, error: "401 Unauthorized — مفتاح غير صحيح" };
-    if (res.status === 403) return { valid: false, error: "403 Forbidden — مفتاح محظور" };
+    // رفض صريح = مفتاح غلط
+    if (res.status === 401) return { valid: false, error: "401 Unauthorized" };
+    if (res.status === 403) return { valid: false, error: "403 Forbidden" };
 
     const extra = cfg.extraOk ?? [];
     return res.ok || extra.includes(res.status)
@@ -128,10 +123,67 @@ async function testSingleKey(
 
   } catch (err: any) {
     clearTimeout(timer);
-    // Timeout → نقبل المفتاح (لا نرفضه بسبب بطء الشبكة)
-    if (err.name === "AbortError") return { valid: true };
+    // Timeout → نقبل المفتاح
+    if (err.name === "AbortError") return { valid: true, timedOut: true };
     return { valid: false, error: err.message ?? "Connection failed" };
   }
+}
+
+// ── حفظ دفعة في DB بـ INSERT واحدة واحدة (أكثر موثوقية من upsert) ───
+async function insertKeys(
+  supabase: ReturnType<typeof getSupabaseAdminClient>,
+  rows: {
+    provider: string;
+    key: string;
+    notes: string | null;
+    is_backup: boolean;
+    is_active: boolean;
+    error_count?: number;
+    last_error?: string;
+  }[]
+): Promise<{ added: string[]; duplicates: string[]; errors: { key: string; error: string }[] }> {
+  const added: string[] = [];
+  const duplicates: string[] = [];
+  const errors: { key: string; error: string }[] = [];
+
+  // نحفظ على دفعات 20 في كل مرة
+  const CHUNK = 20;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    const chunk = rows.slice(i, i + CHUNK);
+
+    // نحاول INSERT جماعي أولاً (أسرع)
+    const { data, error } = await supabase!
+      .from("api_keys")
+      .insert(chunk)
+      .select("key");
+
+    if (!error && data) {
+      data.forEach((r: any) => added.push(r.key));
+      continue;
+    }
+
+    // لو فشل الجماعي (على الأرجح بسبب duplicate) → واحدة واحدة
+    for (const row of chunk) {
+      const { data: d, error: e } = await supabase!
+        .from("api_keys")
+        .insert(row)
+        .select("key")
+        .single();
+
+      if (!e && d) {
+        added.push(d.key);
+      } else if (e) {
+        const msg = e.message ?? "";
+        if (msg.includes("duplicate") || msg.includes("unique") || e.code === "23505") {
+          duplicates.push(row.key);
+        } else {
+          errors.push({ key: row.key, error: msg });
+        }
+      }
+    }
+  }
+
+  return { added, duplicates, errors };
 }
 
 // ── Handler الرئيسي ───────────────────────────────────────────────────
@@ -141,16 +193,16 @@ export async function POST(request: NextRequest) {
     const {
       provider,
       keys,
-      notes      = "",
-      isBackup   = false,
-      testKeys   = true,
+      notes       = "",
+      isBackup    = false,
+      testKeys    = true,
       concurrency = 5,
     } = body as {
-      provider:    string;
-      keys:        string[];
-      notes?:      string;
-      isBackup?:   boolean;
-      testKeys?:   boolean;
+      provider:     string;
+      keys:         string[];
+      notes?:       string;
+      isBackup?:    boolean;
+      testKeys?:    boolean;
       concurrency?: number;
     };
 
@@ -161,18 +213,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // تنظيف: إزالة الفراغات والمكررات والفارغ
-    const cleaned = [...new Set(keys.map(k => k.trim()).filter(Boolean))];
-
+    // تنظيف
+    const cleaned = [...new Set(keys.map(k => k.trim()).filter(k => k.length > 0))];
     if (cleaned.length === 0) {
       return NextResponse.json(
-        { success: false, error: "لا توجد مفاتيح صالحة بعد التنظيف" },
+        { success: false, error: "لا توجد مفاتيح صالحة" },
         { status: 400 }
       );
     }
 
-    // ── اختبار بالتوازي على دفعات ──────────────────────────────────
-    const testResults: { key: string; valid: boolean; error?: string }[] = [];
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      return NextResponse.json({ success: false, error: "Database not available" }, { status: 503 });
+    }
+
+    // ── اختبار متوازٍ ────────────────────────────────────────────────
+    type TestResult = { key: string; valid: boolean; timedOut?: boolean; error?: string };
+    const testResults: TestResult[] = [];
 
     if (testKeys) {
       const batchSize = Math.max(1, Math.min(concurrency, 10));
@@ -187,73 +244,54 @@ export async function POST(request: NextRequest) {
       cleaned.forEach(key => testResults.push({ key, valid: true }));
     }
 
-    const validKeys   = testResults.filter(r => r.valid);
-    const invalidKeys = testResults.filter(r => !r.valid);
+    const passedKeys = testResults.filter(r => r.valid);
+    const failedKeys = testResults.filter(r => !r.valid);
 
-    // ── حفظ في DB ──────────────────────────────────────────────────
-    const supabase = getSupabaseAdminClient();
-    if (!supabase) {
-      return NextResponse.json({ success: false, error: "Database not available" }, { status: 503 });
-    }
+    // ── حفظ المفاتيح الناجحة ─────────────────────────────────────────
+    const passRows = passedKeys.map(r => ({
+      provider:  provider.toLowerCase(),
+      key:       r.key,
+      notes:     notes || null,
+      is_backup: isBackup,
+      is_active: true,
+    }));
 
-    type ResultStatus = "added" | "failed_test" | "duplicate" | "error";
-    const results: { key: string; status: ResultStatus; error?: string }[] = [];
+    // ── حفظ المفاتيح الفاشلة كـ "ميتة" للمراجعة ─────────────────────
+    const failRows = failedKeys.map(r => ({
+      provider:    provider.toLowerCase(),
+      key:         r.key,
+      notes:       notes || null,
+      is_backup:   false,
+      is_active:   false,
+      error_count: 3,              // يظهر فوراً في فلتر "ميت"
+      last_error:  `[DEAD] ${r.error ?? "Key test failed"}`,
+    }));
 
-    // سجّل الفاشلة مباشرة
-    invalidKeys.forEach(r => results.push({ key: r.key, status: "failed_test", error: r.error }));
+    const [passResult, failResult] = await Promise.all([
+      passRows.length > 0 ? insertKeys(supabase, passRows) : Promise.resolve({ added: [], duplicates: [], errors: [] }),
+      failRows.length > 0 ? insertKeys(supabase, failRows) : Promise.resolve({ added: [], duplicates: [], errors: [] }),
+    ]);
 
-    if (validKeys.length > 0) {
-      const rows = validKeys.map(r => ({
-        provider:  provider.toLowerCase(),
-        key:       r.key,
-        notes:     notes || null,
-        is_backup: isBackup,
-        is_active: true,
-      }));
-
-      // محاولة upsert جماعي أولاً
-      const { data: upserted, error: upsertErr } = await supabase
-        .from("api_keys")
-        .upsert(rows, { onConflict: "provider,key", ignoreDuplicates: true })
-        .select("key");
-
-      if (!upsertErr && upserted) {
-        const insertedKeys = new Set(upserted.map((r: any) => r.key));
-        validKeys.forEach(r => {
-          results.push({ key: r.key, status: insertedKeys.has(r.key) ? "added" : "duplicate" });
-        });
-      } else {
-        // fallback: إضافة واحدة واحدة
-        console.warn("[Bulk] upsert failed, falling back to single inserts:", upsertErr?.message);
-        for (const r of validKeys) {
-          const { error: singleErr } = await supabase
-            .from("api_keys")
-            .insert({ provider: provider.toLowerCase(), key: r.key, notes: notes || null, is_backup: isBackup, is_active: true });
-
-          if (!singleErr) {
-            results.push({ key: r.key, status: "added" });
-          } else if (singleErr.message.includes("duplicate") || singleErr.message.includes("unique")) {
-            results.push({ key: r.key, status: "duplicate" });
-          } else {
-            results.push({ key: r.key, status: "error", error: singleErr.message });
-          }
-        }
-      }
-    }
-
-    // Hot-reload الذاكرة
+    // Hot-reload
     await reloadKeys();
 
-    const added     = results.filter(r => r.status === "added").length;
-    const duplicate = results.filter(r => r.status === "duplicate").length;
-    const failed    = results.filter(r => r.status === "failed_test").length;
-    const errored   = results.filter(r => r.status === "error").length;
+    const summary = {
+      total:       cleaned.length,
+      added:       passResult.added.length,
+      duplicate:   passResult.duplicates.length + failResult.duplicates.length,
+      failed_test: failResult.added.length,       // فاشلة لكن حُفظت كـ dead
+      errored:     passResult.errors.length + failResult.errors.length,
+    };
 
     return NextResponse.json({
       success: true,
-      summary: { total: cleaned.length, added, duplicate, failed, errored },
-      results,
-      message: `تمت الإضافة: ${added} | مكرر: ${duplicate} | فشل الاختبار: ${failed}`,
+      summary,
+      message: [
+        `✅ أُضيف نشط: ${summary.added}`,
+        summary.failed_test  > 0 ? `💀 مضاف كـ ميت للمراجعة: ${summary.failed_test}` : "",
+        summary.duplicate    > 0 ? `⚠️ مكرر: ${summary.duplicate}` : "",
+        summary.errored      > 0 ? `❌ خطأ في الحفظ: ${summary.errored}` : "",
+      ].filter(Boolean).join(" | "),
     });
 
   } catch (error: any) {

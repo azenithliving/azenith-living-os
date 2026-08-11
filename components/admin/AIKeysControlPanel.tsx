@@ -208,10 +208,10 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
       const data = await res.json();
 
       if (data.success) {
-        const { added, duplicate, failed } = data.summary;
+        const { added, duplicate, failed_test } = data.summary;
         showMessage(
           "success",
-          `✅ أُضيف: ${added} | مكرر: ${duplicate} | فشل الاختبار: ${failed} (من ${rawKeys.length})`
+          data.message || `✅ أُضيف: ${added} | فشل: ${failed_test} (محفوظ كـ ميت للمراجعة) | مكرر: ${duplicate}`
         );
         setNewKey({ provider: "", key: "", notes: "", isBackup: false, testKey: true });
         setShowAddForm(false);
