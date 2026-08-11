@@ -162,7 +162,7 @@ export default function AdminPage() {
             subtitle: analytics.metrics?.totalBookings ? `${analytics.metrics.totalBookings} حجز مؤكد` : "قيد الانتظار",
             icon: <Bot className="h-6 w-6" />,
             color: "blue" as const,
-            href: "/admin/agents",
+            href: "/admin/agents?tab=command",
           },
           {
             title: "نشاط المنصة",
@@ -504,7 +504,7 @@ export default function AdminPage() {
         <section>
           <h2 className="text-lg font-semibold text-white mb-4">مراكز القوى</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Link href="/admin/assistant" className="group rounded-2xl border-2 border-[#C5A059]/40 bg-[#C5A059]/10 p-6 transition-all hover:border-[#C5A059] hover:bg-[#C5A059]/15">
+            <Link href="/admin/agents?tab=assistant" className="group rounded-2xl border-2 border-[#C5A059]/40 bg-[#C5A059]/10 p-6 transition-all hover:border-[#C5A059] hover:bg-[#C5A059]/15">
               <div className="rounded-xl bg-[#C5A059]/30 p-3 w-fit mb-4">
                 <Brain className="w-6 h-6 text-[#C5A059]" />
               </div>
@@ -520,7 +520,7 @@ export default function AdminPage() {
               <p className="text-sm text-white/50 mt-2">العملاء، المستأجرين، الإدارة</p>
             </Link>
 
-            <Link href="/admin/agents" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-purple-500/30 hover:bg-white/[0.05]">
+            <Link href="/admin/agents?tab=command" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-purple-500/30 hover:bg-white/[0.05]">
               <div className="rounded-xl bg-purple-500/20 p-3 w-fit mb-4">
                 <Bot className="w-6 h-6 text-purple-400" />
               </div>
@@ -528,7 +528,7 @@ export default function AdminPage() {
               <p className="text-sm text-white/50 mt-2">التحليلات، الذكاء، التطوير</p>
             </Link>
 
-            <Link href="/admin/manufacturing" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-cyan-500/30 hover:bg-white/[0.05]">
+            <Link href="/admin/agents?tab=manufacturing" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-cyan-500/30 hover:bg-white/[0.05]">
               <div className="rounded-xl bg-cyan-500/20 p-3 w-fit mb-4">
                 <Factory className="w-6 h-6 text-cyan-400" />
               </div>

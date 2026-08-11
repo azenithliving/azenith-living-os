@@ -52,7 +52,6 @@ const navCategories = [
     title: "الرئيسية",
     items: [
       { href: "/admin", label: "نظرة عامة", icon: "Home" },
-      { href: "/admin/assistant", label: "المساعد الموحّد", icon: "Brain" },
       { href: "/admin/owner-dashboard", label: "لوحة المالك", icon: "Crown" },
     ],
   },
@@ -61,14 +60,15 @@ const navCategories = [
     items: [
       { href: "/admin/work", label: "مركز العمل", icon: "TrendingUp" },
       { href: "/admin/sales", label: "المبيعات", icon: "MessageSquare" },
-      { href: "/admin/manufacturing", label: "التصنيع", icon: "Factory" },
     ],
   },
   {
-    title: "الذكاء",
+    title: "الوكلاء الذكية",
     items: [
-      { href: "/admin/intelligence", label: "مركز الذكاء", icon: "Bot" },
-      { href: "/admin/agents", label: "سجل الوكلاء", icon: "Cpu" },
+      { href: "/admin/agents?tab=command", label: "مركز القيادة", icon: "Cpu" },
+      { href: "/admin/agents?tab=assistant", label: "المساعد الموحد", icon: "Brain" },
+      { href: "/admin/agents?tab=manufacturing", label: "التصنيع", icon: "Factory" },
+      { href: "/admin/agents?tab=teams", label: "فريق الوكلاء", icon: "Bot" },
     ],
   },
   {
@@ -170,7 +170,9 @@ export default function AdminLayoutClient({
               </h3>
               <div className="space-y-1">
                 {category.items.map((item) => {
-                  const isActive = pathname === item.href || (item.href !== "/admin" && pathname?.startsWith(item.href + "/"));
+                  const isActive = pathname === item.href || 
+                    (item.href !== "/admin" && pathname?.startsWith(item.href.split('?')[0])) ||
+                    (item.href.includes('?') && pathname === item.href.split('?')[0]);
                   const Icon = iconMap[item.icon] || Code;
 
                   return (
