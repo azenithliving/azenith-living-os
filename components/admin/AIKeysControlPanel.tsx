@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2, Power, PowerOff, RefreshCw, Check, AlertCircle, Info, Key, Shield, Activity, Clock } from "lucide-react";
+import { X, Plus, Trash2, Power, PowerOff, RefreshCw, Check, AlertCircle, Info, Key, Shield, Activity, Clock, Menu } from "lucide-react";
 
 interface ApiKey {
   id: number;
@@ -73,6 +73,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "backup" | "cooldown" | "dead" | "inactive">("all");
   const [selectCount, setSelectCount] = useState<string>("");
   const [showSelectCountDialog, setShowSelectCountDialog] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -385,23 +386,31 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
   const selectedProviderData = providers.find((p) => p.provider === selectedProvider);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden border border-slate-700">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-hidden">
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden border border-slate-700 flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Key className="w-6 h-6 text-white" />
-            <h2 className="text-2xl font-bold text-white">AI Keys Control Panel</h2>
-            <span className="bg-white/20 text-white text-xs px-2 py-1 rounded">16 Providers</span>
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 md:px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setDrawerOpen(!drawerOpen)}
+              className="md:hidden text-white hover:bg-white/20 p-2 rounded-lg transition"
+              aria-label="Toggle menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <Key className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            <h2 className="text-lg md:text-2xl font-bold text-white">AI Keys Control</h2>
+            <span className="hidden sm:inline bg-white/20 text-white text-xs px-2 py-1 rounded">16 مزود</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={reloadKeys}
               disabled={actionLoading === "reload"}
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition disabled:opacity-50"
+              className="flex items-center gap-1 md:gap-2 bg-white/20 hover:bg-white/30 text-white px-2 md:px-4 py-2 rounded-lg transition disabled:opacity-50 text-sm"
             >
               <RefreshCw className={`w-4 h-4 ${actionLoading === "reload" ? "animate-spin" : ""}`} />
-              Hot Reload
+              <span className="hidden sm:inline">Hot Reload</span>
             </button>
             <button onClick={onClose} className="text-white hover:bg-white/20 p-2 rounded-lg transition">
               <X className="w-5 h-5" />
@@ -412,18 +421,46 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
         {/* Message Banner */}
         {message && (
           <div
-            className={`px-6 py-3 ${
+            className={`px-4 md:px-6 py-3 ${
               message.type === "success" ? "bg-green-500/20 text-green-300" : "bg-red-500/20 text-red-300"
-            } flex items-center gap-2`}
+            } flex items-center gap-2 text-sm flex-shrink-0`}
           >
-            {message.type === "success" ? <Check className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+            {message.type === "success" ? <Check className="w-4 h-4 md:w-5 md:h-5" /> : <AlertCircle className="w-4 h-4 md:w-5 md:h-5" />}
             {message.text}
           </div>
         )}
 
-        <div className="flex h-[calc(90vh-120px)]">
-          {/* Sidebar - Provider List */}
-          <div className="w-80 bg-slate-800/50 border-r border-slate-700 overflow-y-auto">
+        <div className="flex h-full min-h-0 relative">
+          {/* Drawer Backdrop */}
+          {drawerOpen && (
+            <div
+              className="fixed inset-0 bg-black/50 z-10 md:hidden"
+              onClick={() => setDrawerOpen(false)}
+            />
+          )}
+
+          {/* Drawer Tab (visible on mobile) */}
+          {!drawerOpen && (
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="fixed left-0 top-1/2 -translate-y-1/2 bg-indigo-600 text-white px-1 py-8 rounded-r-lg shadow-lg z-10 md:hidden flex flex-col items-center gap-1 text-xs font-bold"
+              style={{ writingMode: "vertical-rl" }}
+            >
+              MENU
+            </button>
+          )}
+
+          {/* Sidebar - Drawer on Mobile, Fixed on Desktop */}
+          <div
+            className={`
+              fixed md:relative inset-y-0 left-0 z-20
+              w-72 md:w-80
+              bg-slate-800/50 border-r border-slate-700
+              transform transition-transform duration-300 ease-in-out
+              ${drawerOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+              overflow-y-auto flex-shrink-0
+            `}
+          >
             <div className="p-4 border-b border-slate-700">
               <button
                 onClick={() => setShowAddForm(true)}
@@ -446,7 +483,10 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                   return (
                     <button
                       key={providerKey}
-                      onClick={() => setSelectedProvider(providerKey)}
+                      onClick={() => {
+                        setSelectedProvider(providerKey);
+                        setDrawerOpen(false); // Close drawer after selection on mobile
+                      }}
                       className={`w-full text-left p-3 rounded-lg mb-2 transition ${
                         selectedProvider === providerKey
                           ? "bg-indigo-600 text-white"
@@ -483,7 +523,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-3 md:p-6 min-w-0">
             {showAddForm ? (
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
                 <h3 className="text-xl font-bold text-white mb-4">Add New API Key</h3>
@@ -573,52 +613,52 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                   </div>
                   
                   {/* Bulk Actions */}
-                  <div className="flex gap-2 items-center">
+                  <div className="flex gap-1 md:gap-2 items-center flex-wrap">
                     {selectedKeys.size > 0 && (
                       <>
-                        <div className="text-slate-400 text-sm mr-2">
+                        <div className="text-slate-400 text-xs md:text-sm mr-1 md:mr-2 w-full md:w-auto mb-1 md:mb-0">
                           {selectedKeys.size} محدد
                         </div>
-                        <div className="text-slate-500 text-xs mr-1">نقل إلى:</div>
+                        <div className="text-slate-500 text-xs mr-1 hidden md:inline">نقل إلى:</div>
                         <button
                           onClick={() => bulkMoveTo("active")}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          className="bg-green-600 hover:bg-green-700 text-white px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm flex items-center gap-1 transition"
                           title="نقل للمفاتيح النشطة"
                         >
-                          <Power className="w-4 h-4" />
-                          نشط
+                          <Power className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="hidden sm:inline">نشط</span>
                         </button>
                         <button
                           onClick={() => bulkMoveTo("inactive")}
-                          className="bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          className="bg-slate-600 hover:bg-slate-700 text-white px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm flex items-center gap-1 transition"
                           title="نقل للمفاتيح المتوقفة"
                         >
-                          <PowerOff className="w-4 h-4" />
-                          متوقف
+                          <PowerOff className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="hidden sm:inline">متوقف</span>
                         </button>
                         <button
                           onClick={() => bulkMoveTo("backup")}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm flex items-center gap-1 transition"
                           title="نقل للاحتياطي"
                         >
-                          <Shield className="w-4 h-4" />
-                          احتياطي
+                          <Shield className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="hidden sm:inline">احتياطي</span>
                         </button>
                         <button
                           onClick={() => bulkMoveTo("cooldown")}
-                          className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          className="bg-orange-600 hover:bg-orange-700 text-white px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm flex items-center gap-1 transition"
                           title="نقل لفترة تهدئة (راحة)"
                         >
-                          <Clock className="w-4 h-4" />
-                          راحة
+                          <Clock className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="hidden sm:inline">راحة</span>
                         </button>
                         <button
                           onClick={bulkDelete}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          className="bg-red-600 hover:bg-red-700 text-white px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm flex items-center gap-1 transition"
                           title="حذف المحددة نهائياً"
                         >
-                          <Trash2 className="w-4 h-4" />
-                          حذف
+                          <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="hidden sm:inline">حذف</span>
                         </button>
                       </>
                     )}
@@ -628,15 +668,15 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                       <>
                         <button
                           onClick={selectAll}
-                          className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          className="bg-slate-700 hover:bg-slate-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm flex items-center gap-1 transition"
                           title="تحديد الكل"
                         >
-                          <Check className="w-4 h-4" />
-                          تحديد الكل
+                          <Check className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="hidden sm:inline">تحديد الكل</span>
                         </button>
                         <button
                           onClick={() => setShowSelectCountDialog(true)}
-                          className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm transition"
+                          className="bg-slate-700 hover:bg-slate-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm transition"
                           title="تحديد عدد"
                         >
                           عدد...
@@ -644,10 +684,10 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                         {selectedKeys.size > 0 && (
                           <button
                             onClick={() => setSelectedKeys(new Set())}
-                            className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm transition"
+                            className="bg-slate-700 hover:bg-slate-600 text-white px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm transition"
                             title="إلغاء التحديد"
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-3 h-3 md:w-4 md:h-4" />
                           </button>
                         )}
                       </>
@@ -656,7 +696,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                 </div>
 
                 {/* Stats Cards - Filters */}
-                <div className="grid grid-cols-6 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-4 mb-4 md:mb-6">
                   <button
                     onClick={() => setFilterStatus("all")}
                     className={`rounded-lg p-4 border transition-all ${
