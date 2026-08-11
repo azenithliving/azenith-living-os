@@ -457,13 +457,13 @@ export default function AgentsPage() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
-                  { key: 'prime',    name: 'PRIME',    role: 'مهندس التصميم والتطوير', color: 'purple', icon: '🧠' },
-                  { key: 'vanguard', name: 'Vanguard', role: 'مدير العمليات والمبيعات', color: 'emerald', icon: '💼' },
-                  { key: 'analyst',  name: 'Analyst',  role: 'محلل البيانات والتقارير', color: 'blue',   icon: '📊' },
-                  { key: 'coder',    name: 'Coder',    role: 'مطور الكود والتقنية',    color: 'cyan',   icon: '💻' },
-                  { key: 'ops',      name: 'Ops',      role: 'مراقب العمليات والنظام',  color: 'yellow', icon: '⚙️' },
-                  { key: 'security', name: 'Security', role: 'حارس الأمن والتدقيق',   color: 'red',    icon: '🛡️' },
-                  { key: 'learner',  name: 'Learner',  role: 'محرك التعلم الذاتي',     color: 'indigo', icon: '🎓' },
+                  { key: 'prime',    name: 'PRIME',    role: 'مهندس التصميم والتطوير', color: 'purple', icon: '🧠', canChat: true  },
+                  { key: 'vanguard', name: 'Vanguard', role: 'مدير العمليات والمبيعات', color: 'emerald', icon: '💼', canChat: true  },
+                  { key: 'analyst',  name: 'Analyst',  role: 'محلل البيانات والتقارير', color: 'blue',   icon: '📊', canChat: false },
+                  { key: 'coder',    name: 'Coder',    role: 'مطور الكود والتقنية',    color: 'cyan',   icon: '💻', canChat: false },
+                  { key: 'ops',      name: 'Ops',      role: 'مراقب العمليات والنظام',  color: 'yellow', icon: '⚙️', canChat: false },
+                  { key: 'security', name: 'Security', role: 'حارس الأمن والتدقيق',   color: 'red',    icon: '🛡️', canChat: false },
+                  { key: 'learner',  name: 'Learner',  role: 'محرك التعلم الذاتي',     color: 'indigo', icon: '🎓', canChat: false },
                 ].map(agent => {
                   const st = agentStatuses[agent.key];
                   return (
@@ -476,10 +476,19 @@ export default function AgentsPage() {
                       status={st?.status}
                       taskCount={st?.taskCount}
                       recentActivity={st?.recentActivity}
+                      onChat={agent.canChat
+                        ? () => agent.key === 'prime' ? setShowPrimeChat(true) : setShowVanguardChat(true)
+                        : undefined}
                     />
                   );
                 })}
               </div>
+            </div>
+
+            {/* محادثة مباشرة PRIME */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ChatPanel agentKey="prime" agentColor="purple" />
+              <ChatPanel agentKey="vanguard" agentColor="emerald" />
             </div>
           </div>
         )}
@@ -547,10 +556,11 @@ function MetricCard({
 }
 
 function AgentTeamCard({
-  name, role, color, icon, status, taskCount, recentActivity
+  name, role, color, icon, status, taskCount, recentActivity, onChat
 }: {
   name: string; role: string; color: string; icon: string;
   status?: string; taskCount?: number; recentActivity?: string;
+  onChat?: () => void;
 }) {
   const colorClasses: Record<string, string> = {
     purple: 'border-purple-500/30 hover:bg-purple-500/10',
@@ -593,6 +603,14 @@ function AgentTeamCard({
             </span>
           )}
         </div>
+      )}
+      {onChat && (
+        <button
+          onClick={onChat}
+          className="mt-3 w-full py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/50 hover:text-white/80 hover:bg-white/10 transition-all font-bold"
+        >
+          💬 تكلم
+        </button>
       )}
     </div>
   );
