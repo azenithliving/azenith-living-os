@@ -27,6 +27,7 @@ interface ProviderData {
     backup: number;
     inCooldown: number;
     dead: number;
+    inactive: number;
   };
 }
 
@@ -69,7 +70,9 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
-  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "backup" | "cooldown" | "dead">("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "backup" | "cooldown" | "dead" | "inactive">("all");
+  const [selectCount, setSelectCount] = useState<string>("");
+  const [showSelectCountDialog, setShowSelectCountDialog] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -228,15 +231,79 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
           })
         )
       );
-      showMessage("success", `${selectedKeys.size} keys ${active ? "activated" : "deactivated"}`);
+      showMessage("success", `${selectedKeys.size} مفتاح ${active ? "تم تفعيله" : "تم إيقافه"}`);
       setSelectedKeys(new Set());
       await reloadKeys();
       await loadKeys();
     } catch (error) {
-      showMessage("error", "Bulk action failed");
+      showMessage("error", "فشل الإجراء الجماعي");
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const bulkSetBackup = async (isBackup: boolean) => {
+    if (selectedKeys.size === 0) return;
+
+    try {
+      setActionLoading("bulk");
+      await Promise.all(
+        Array.from(selectedKeys).map((id) =>
+          fetch(`/api/admin/keys/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isBackup }),
+          })
+        )
+      );
+      showMessage("success", `${selectedKeys.size} مفتاح ${isBackup ? "تم نقله للاحتياطي" : "تم إلغاء الاحتياطي"}`);
+      setSelectedKeys(new Set());
+      await reloadKeys();
+      await loadKeys();
+    } catch (error) {
+      showMessage("error", "فشل النقل");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const selectAll = () => {
+    const filteredKeys = getFilteredKeys();
+    const allIds = new Set(filteredKeys.map((k) => k.id));
+    setSelectedKeys(allIds);
+  };
+
+  const selectByCount = () => {
+    const count = parseInt(selectCount);
+    if (isNaN(count) || count <= 0) {
+      showMessage("error", "أدخل رقم صحيح");
+      return;
+    }
+
+    const filteredKeys = getFilteredKeys();
+    const selectedIds = new Set(filteredKeys.slice(0, count).map((k) => k.id));
+    setSelectedKeys(selectedIds);
+    setShowSelectCountDialog(false);
+    setSelectCount("");
+  };
+
+  const getFilteredKeys = () => {
+    if (!selectedProvider || !providers.find((p) => p.provider === selectedProvider)) return [];
+    const providerData = providers.find((p) => p.provider === selectedProvider);
+    if (!providerData) return [];
+
+    return providerData.keys.filter((key) => {
+      if (filterStatus === "all") return true;
+      if (filterStatus === "active") return key.isActive && !key.isBackup && !key.isDead;
+      if (filterStatus === "backup") return key.isBackup;
+      if (filterStatus === "cooldown") {
+        const inCooldown = key.cooldownUntil && new Date(key.cooldownUntil) > new Date();
+        return inCooldown;
+      }
+      if (filterStatus === "dead") return key.isDead;
+      if (filterStatus === "inactive") return !key.isActive && !key.isDead;
+      return true;
+    });
   };
 
   const bulkDelete = async () => {
@@ -452,37 +519,83 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                     </h3>
                     <p className="text-slate-400 text-sm mt-1">{PROVIDER_INFO[selectedProvider!].feature}</p>
                   </div>
-                  <div className="flex gap-2">
+                  
+                  {/* Bulk Actions */}
+                  <div className="flex gap-2 items-center">
                     {selectedKeys.size > 0 && (
                       <>
+                        <div className="text-slate-400 text-sm mr-2">
+                          {selectedKeys.size} محدد
+                        </div>
                         <button
                           onClick={() => bulkToggle(true)}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1"
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          title="تفعيل المحددة"
                         >
                           <Power className="w-4 h-4" />
-                          Enable ({selectedKeys.size})
+                          تفعيل
                         </button>
                         <button
                           onClick={() => bulkToggle(false)}
-                          className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1"
+                          className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          title="إيقاف المحددة"
                         >
                           <PowerOff className="w-4 h-4" />
-                          Disable ({selectedKeys.size})
+                          إيقاف
+                        </button>
+                        <button
+                          onClick={() => bulkSetBackup(true)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          title="نقل للاحتياطي"
+                        >
+                          <Shield className="w-4 h-4" />
+                          احتياطي
                         </button>
                         <button
                           onClick={bulkDelete}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1"
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          title="حذف المحددة"
                         >
                           <Trash2 className="w-4 h-4" />
-                          Delete ({selectedKeys.size})
+                          حذف
                         </button>
+                      </>
+                    )}
+                    
+                    {/* Select Actions */}
+                    {getFilteredKeys().length > 0 && (
+                      <>
+                        <button
+                          onClick={selectAll}
+                          className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1 transition"
+                          title="تحديد الكل"
+                        >
+                          <Check className="w-4 h-4" />
+                          تحديد الكل
+                        </button>
+                        <button
+                          onClick={() => setShowSelectCountDialog(true)}
+                          className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm transition"
+                          title="تحديد عدد"
+                        >
+                          عدد...
+                        </button>
+                        {selectedKeys.size > 0 && (
+                          <button
+                            onClick={() => setSelectedKeys(new Set())}
+                            className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm transition"
+                            title="إلغاء التحديد"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
                       </>
                     )}
                   </div>
                 </div>
 
                 {/* Stats Cards - Filters */}
-                <div className="grid grid-cols-5 gap-4 mb-6">
+                <div className="grid grid-cols-6 gap-4 mb-6">
                   <button
                     onClick={() => setFilterStatus("all")}
                     className={`rounded-lg p-4 border transition-all ${
@@ -491,7 +604,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                         : "bg-slate-800 border-slate-700 hover:border-slate-600"
                     }`}
                   >
-                    <div className="text-slate-400 text-sm mb-1">Total Keys</div>
+                    <div className="text-slate-400 text-sm mb-1">الكل</div>
                     <div className="text-2xl font-bold text-white">{selectedProviderData.stats.total}</div>
                   </button>
                   <button
@@ -502,8 +615,19 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                         : "bg-green-500/10 border-green-500/30 hover:border-green-500/50"
                     }`}
                   >
-                    <div className="text-green-400 text-sm mb-1">Active</div>
+                    <div className="text-green-400 text-sm mb-1">نشط</div>
                     <div className="text-2xl font-bold text-green-400">{selectedProviderData.stats.active}</div>
+                  </button>
+                  <button
+                    onClick={() => setFilterStatus("inactive")}
+                    className={`rounded-lg p-4 border transition-all ${
+                      filterStatus === "inactive"
+                        ? "bg-slate-500/20 border-slate-500 ring-2 ring-slate-400"
+                        : "bg-slate-500/10 border-slate-500/30 hover:border-slate-500/50"
+                    }`}
+                  >
+                    <div className="text-slate-400 text-sm mb-1">متوقف</div>
+                    <div className="text-2xl font-bold text-slate-400">{selectedProviderData.stats.inactive}</div>
                   </button>
                   <button
                     onClick={() => setFilterStatus("backup")}
@@ -513,7 +637,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                         : "bg-blue-500/10 border-blue-500/30 hover:border-blue-500/50"
                     }`}
                   >
-                    <div className="text-blue-400 text-sm mb-1">Backup</div>
+                    <div className="text-blue-400 text-sm mb-1">احتياطي</div>
                     <div className="text-2xl font-bold text-blue-400">{selectedProviderData.stats.backup}</div>
                   </button>
                   <button
@@ -524,7 +648,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                         : "bg-orange-500/10 border-orange-500/30 hover:border-orange-500/50"
                     }`}
                   >
-                    <div className="text-orange-400 text-sm mb-1">In Cooldown</div>
+                    <div className="text-orange-400 text-sm mb-1">يستريح</div>
                     <div className="text-2xl font-bold text-orange-400">{selectedProviderData.stats.inCooldown}</div>
                   </button>
                   <button
@@ -535,7 +659,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                         : "bg-red-500/10 border-red-500/30 hover:border-red-500/50"
                     }`}
                   >
-                    <div className="text-red-400 text-sm mb-1">Dead/Banned</div>
+                    <div className="text-red-400 text-sm mb-1">ميت</div>
                     <div className="text-2xl font-bold text-red-400">{selectedProviderData.stats.dead}</div>
                   </button>
                 </div>
@@ -543,23 +667,14 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                 {/* Keys Table */}
                 <div className="space-y-2">
                   {(() => {
-                    const filteredKeys = selectedProviderData.keys.filter((key) => {
-                      if (filterStatus === "all") return true;
-                      if (filterStatus === "active") return key.isActive && !key.isBackup && !key.isDead;
-                      if (filterStatus === "backup") return key.isBackup;
-                      if (filterStatus === "cooldown") {
-                        const inCooldown = key.cooldownUntil && new Date(key.cooldownUntil) > new Date();
-                        return inCooldown;
-                      }
-                      if (filterStatus === "dead") return key.isDead;
-                      return true;
-                    });
+                    const filteredKeys = getFilteredKeys();
 
                     if (filteredKeys.length === 0 && filterStatus !== "all") {
                       return (
                         <div className="bg-slate-800 rounded-lg p-8 text-center border border-slate-700">
                           <p className="text-slate-400">
                             {filterStatus === "active" && "لا توجد مفاتيح نشطة"}
+                            {filterStatus === "inactive" && "لا توجد مفاتيح متوقفة"}
                             {filterStatus === "backup" && "لا توجد مفاتيح احتياطية"}
                             {filterStatus === "cooldown" && "لا توجد مفاتيح في فترة تهدئة"}
                             {filterStatus === "dead" && "لا توجد مفاتيح ميتة - رائع! ✅"}
@@ -719,6 +834,43 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
           </div>
         </div>
       </div>
+
+      {/* Select Count Dialog */}
+      {showSelectCountDialog && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 w-full max-w-md">
+            <h3 className="text-xl font-bold text-white mb-4">تحديد عدد من المفاتيح</h3>
+            <p className="text-slate-400 text-sm mb-4">
+              إجمالي المفاتيح في هذا الفلتر: <span className="text-white font-bold">{getFilteredKeys().length}</span>
+            </p>
+            <input
+              type="number"
+              value={selectCount}
+              onChange={(e) => setSelectCount(e.target.value)}
+              placeholder="أدخل العدد..."
+              className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg border border-slate-600 focus:border-indigo-500 focus:outline-none mb-4"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={selectByCount}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition"
+              >
+                تحديد
+              </button>
+              <button
+                onClick={() => {
+                  setShowSelectCountDialog(false);
+                  setSelectCount("");
+                }}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

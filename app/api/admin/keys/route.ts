@@ -189,6 +189,7 @@ export async function GET(request: NextRequest) {
 
       grouped[provider].stats.total++;
       if (key.is_active && !isDead) grouped[provider].stats.active++;
+      if (!key.is_active && !isDead) grouped[provider].stats.inactive++;
       if (key.is_backup) grouped[provider].stats.backup++;
       if (key.cooldown_until && new Date(key.cooldown_until) > now) {
         grouped[provider].stats.inCooldown++;
