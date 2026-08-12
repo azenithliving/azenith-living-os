@@ -168,53 +168,6 @@ export const agentProfilesDAL = {
 };
 
 /**
- * Agent Devices
- */
-export const agentDevicesDAL = {
-  async getByKey(deviceKey: string, companyId: string) {
-    return supabaseServer
-      .from('agent_devices')
-      .select('*')
-      .eq('device_key', deviceKey)
-      .eq('company_id', companyId)
-      .single();
-  },
-
-  async getOnline(companyId: string) {
-    return supabaseServer
-      .from('agent_devices')
-      .select('*')
-      .eq('company_id', companyId)
-      .eq('status', 'online');
-  },
-
-  async updateHeartbeat(deviceId: string, data: {
-    status: string;
-    cpu_percent?: number;
-    memory_percent?: number;
-    active_tasks?: number;
-  }) {
-    // Insert heartbeat
-    await supabaseServer
-      .from('agent_device_heartbeats')
-      .insert({
-        device_id: deviceId,
-        ...data,
-        recorded_at: new Date().toISOString()
-      });
-
-    // Update device status
-    return supabaseServer
-      .from('agent_devices')
-      .update({
-        status: data.status,
-        last_seen_at: new Date().toISOString()
-      })
-      .eq('id', deviceId);
-  }
-};
-
-/**
  * Agent Tasks
  */
 export const agentTasksDAL = {

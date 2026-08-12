@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { DeviceCard } from '@/components/admin/agents/DeviceCard';
 import { TaskQueue } from '@/components/admin/agents/TaskQueue';
 import { CommandConsole } from '@/components/admin/agents/CommandConsole';
 import { ApprovalGate } from '@/components/admin/agents/ApprovalGate';
@@ -16,7 +15,7 @@ import { QualityCheckPanel } from '@/components/admin/agents/QualityCheckPanel';
 import { InventoryManager } from '@/components/admin/agents/InventoryManager';
 import { BOMTable } from '@/components/admin/agents/BOMTable';
 
-import { Brain, Cpu, MessageSquare, ShieldAlert, Activity, LayoutGrid, Terminal, Sparkles, Factory, Users, Zap, Box, CheckCircle, Calendar, RefreshCw } from 'lucide-react';
+import { Brain, MessageSquare, ShieldAlert, Activity, Terminal, Sparkles, Factory, Users, Zap, Box, CheckCircle, Calendar, RefreshCw } from 'lucide-react';
 import { QuickActionsPanel } from '@/components/admin/agents/QuickActionsPanel';
 import { ProactiveSuggestions } from '@/components/admin/agents/ProactiveSuggestions';
 import { AgentActionsFeed } from '@/components/admin/agents/AgentActionsFeed';
@@ -101,8 +100,7 @@ export default function AgentsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab]       = useState<TabType>('command');
-  const [devices, setDevices]           = useState<any[]>([]);
-  const [loading, setLoading]           = useState(true);
+  const [loading, setLoading]           = useState(false);
   const [showGroupChat, setShowGroupChat]     = useState(false);
   const [showPrimeChat, setShowPrimeChat]     = useState(false);
   const [showVanguardChat, setShowVanguardChat] = useState(false);
@@ -128,18 +126,6 @@ export default function AgentsPage() {
       setActiveTab(tab);
     }
   }, [searchParams]);
-
-  // ── جلب الأجهزة ────────────────────────────────────────────────────
-  useEffect(() => {
-    (async () => {
-      try {
-        const res  = await fetch('/api/admin/agents/devices');
-        const data = await res.json();
-        setDevices(Array.isArray(data.data) ? data.data : []);
-      } catch { setDevices([]); }
-      finally  { setLoading(false); }
-    })();
-  }, []);
 
   // ── إحصائيات التصنيع ───────────────────────────────────────────────
   useEffect(() => {
@@ -265,40 +251,6 @@ export default function AgentsPage() {
         {/* Command Center Tab */}
         {activeTab === 'command' && (
           <>
-            {/* Neural Infrastructure Grid */}
-            <section className="space-y-4">
-              <div className="flex items-center gap-2 px-1">
-                <LayoutGrid className="w-4 h-4 text-[#C5A059]" />
-                <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#C5A059]">البنية التحتية العصبية (Devices)</h2>
-              </div>
-              {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="h-44 bg-white/[0.02] border border-white/5 animate-pulse rounded-[2rem]" />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {devices.map((device: any) => (
-                    <div key={device.id} className="transition-all hover:scale-[1.02]">
-                      <DeviceCard device={device} />
-                    </div>
-                  ))}
-                  {devices.length === 0 && (
-                    <div className="col-span-full p-12 text-center bg-white/[0.02] border border-white/5 border-dashed rounded-[2.5rem] group hover:border-[#C5A059]/30 transition-all">
-                      <div className="w-16 h-16 bg-white/[0.03] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#C5A059]/10">
-                        <Cpu className="w-8 h-8 text-white/20 group-hover:text-[#C5A059] transition-colors" />
-                      </div>
-                      <p className="text-white/60 font-bold">لا توجد أجهزة متصلة بالشبكة العصبية</p>
-                      <code className="text-[10px] text-white/20 mt-2 block font-mono bg-black/40 px-3 py-1 rounded inline-block">
-                        docker-compose up -d
-                      </code>
-                    </div>
-                  )}
-                </div>
-              )}
-            </section>
-            
             {/* Tactical Operations Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Intelligence Stream */}

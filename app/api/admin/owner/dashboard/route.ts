@@ -241,13 +241,6 @@ async function getAgentStats(companyId: string, startOfMonth: string) {
     .eq('company_id', companyId)
     .gte('created_at', startOfMonth);
 
-  // Get active devices
-  const { count: activeDevices } = await supabaseServer
-    .from('agent_devices')
-    .select('*', { count: 'exact' })
-    .eq('company_id', companyId)
-    .eq('status', 'online');
-
   const primeTasks = tasksData?.filter(t => t.agent_profile_id === primeProfile?.id) || [];
   const vanguardTasks = tasksData?.filter(t => t.agent_profile_id === vanguardProfile?.id) || [];
   const primeTasksToday = primeTasks.filter((t: any) => t.created_at >= startOfMonth).length;
@@ -266,7 +259,7 @@ async function getAgentStats(companyId: string, startOfMonth: string) {
       completed_tasks: vanguardTasks.filter(t => t.status === 'completed').length,
       deals_closed: vanguardTasks.filter(t => t.status === 'completed').length
     },
-    active_devices: activeDevices || 0
+    active_devices: 0
   };
 }
 
