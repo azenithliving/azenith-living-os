@@ -1,157 +1,85 @@
-/**
- * Omnipotent Agent API
- * Main endpoint for the General Agent - handles queries, planning, and execution
- */
-
 import { NextRequest, NextResponse } from "next/server";
 import { processQuery, executeStoredSuggestion, rejectSuggestion } from "@/lib/general-agent";
 import { runManualCheck, getRecentSuggestions } from "@/lib/proactive-agent";
 import { generateSystemSnapshot, getSystemOverview } from "@/lib/discovery-engine";
+import { AdminApiAuthError, requireAdminApiAccess } from "@/lib/admin-api-auth";
 
-// Security: Verify internal key or admin session
-async function verifyAccess(request: NextRequest): Promise<boolean> {
-  const internalKey = request.headers.get("X-Internal-Key");
-  if (internalKey === process.env.INTERNAL_API_KEY) {
-    return true;
+function unauthorizedResponse(error: unknown) {
+  if (error instanceof AdminApiAuthError) {
+    return NextResponse.json({ success: false, error: error.message }, { status: error.status });
   }
-
-  // Additional admin verification can be added here
-  // For now, we'll rely on the internal key
-  return false;
+  return null;
 }
 
-/**
- * POST /api/omnipotent
- * Main endpoint for querying the General Agent
- */
 export async function POST(request: NextRequest) {
   try {
-    if (!(await verifyAccess(request))) {
-      return NextResponse.json(
-        { error: "Unauthorized. Internal key required." },
-        { status: 401 }
-      );
-    }
-
+    const actor = await requireAdminApiAccess(request);
     const body = (await request.json()) as {
-      action: "query" | "execute" | "reject" | "monitor" | "snapshot" | "suggestions";
+      action?: "query" | "execute" | "reject" | "monitor" | "snapshot" | "suggestions";
       query?: string;
       suggestionId?: string;
-      userId?: string;
       reason?: string;
       checkType?: string;
     };
 
     switch (body.action) {
-      case "query": {
-        if (!body.query) {
-          return NextResponse.json(
-            { error: "Query is required" },
-            { status: 400 }
-          );
+      case "query":
+        if (!body.query?.trim()) {
+          return NextResponse.json({ success: false, error: "Query is required" }, { status: 400 });
         }
+        return NextResponse.json(await processQuery(body.query));
 
-        const result = await processQuery(body.query);
-        return NextResponse.json(result);
-      }
-
-      case "execute": {
-        if (!body.suggestionId || !body.userId) {
-          return NextResponse.json(
-            { error: "suggestionId and userId are required" },
-            { status: 400 }
-          );
+      case "execute":
+        if (!body.suggestionId) {
+          return NextResponse.json({ success: false, error: "suggestionId is required" }, { status: 400 });
         }
+        return NextResponse.json(await executeStoredSuggestion(body.suggestionId, actor.userId));
 
-        const result = await executeStoredSuggestion(body.suggestionId, body.userId);
-        return NextResponse.json(result);
-      }
-
-      case "reject": {
-        if (!body.suggestionId || !body.userId) {
-          return NextResponse.json(
-            { error: "suggestionId and userId are required" },
-            { status: 400 }
-          );
+      case "reject":
+        if (!body.suggestionId) {
+          return NextResponse.json({ success: false, error: "suggestionId is required" }, { status: 400 });
         }
+        return NextResponse.json(await rejectSuggestion(body.suggestionId, actor.userId, body.reason));
 
-        const result = await rejectSuggestion(body.suggestionId, body.userId, body.reason);
-        return NextResponse.json(result);
-      }
+      case "monitor":
+        return NextResponse.json({ success: true, findings: await runManualCheck(body.checkType || "all"), timestamp: new Date().toISOString() });
 
-      case "monitor": {
-        const findings = await runManualCheck(body.checkType || "all");
-        return NextResponse.json({
-          success: true,
-          findings,
-          timestamp: new Date().toISOString(),
-        });
-      }
+      case "snapshot":
+        return NextResponse.json({ success: true, snapshot: await generateSystemSnapshot() });
 
-      case "snapshot": {
-        const snapshot = await generateSystemSnapshot();
-        return NextResponse.json({
-          success: true,
-          snapshot,
-        });
-      }
-
-      case "suggestions": {
-        const suggestions = await getRecentSuggestions(20);
-        return NextResponse.json({
-          success: true,
-          suggestions,
-        });
-      }
+      case "suggestions":
+        return NextResponse.json({ success: true, suggestions: await getRecentSuggestions(20) });
 
       default:
-        return NextResponse.json(
-          { error: "Unknown action" },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: "Unknown action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[Omnipotent API] Error:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Internal error",
-      },
-      { status: 500 }
-    );
+    const authResponse = unauthorizedResponse(error);
+    if (authResponse) return authResponse;
+    console.error("[Omnipotent API] POST error:", error);
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Internal error" }, { status: 500 });
   }
 }
 
-/**
- * GET /api/omnipotent
- * Quick system overview endpoint
- */
 export async function GET(request: NextRequest) {
   try {
-    if (!(await verifyAccess(request))) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    await requireAdminApiAccess(request);
+    const action = new URL(request.url).searchParams.get("action");
 
-    const overview = await getSystemOverview();
-    const suggestions = await getRecentSuggestions(10, "pending");
+    if (action === "suggestions") {
+      return NextResponse.json({ success: true, suggestions: await getRecentSuggestions(20) });
+    }
 
     return NextResponse.json({
       success: true,
-      overview,
-      pendingSuggestions: suggestions.length,
+      overview: await getSystemOverview(),
+      pendingSuggestions: (await getRecentSuggestions(10, "pending")).length,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("[Omnipotent API] GET Error:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Internal error",
-      },
-      { status: 500 }
-    );
+    const authResponse = unauthorizedResponse(error);
+    if (authResponse) return authResponse;
+    console.error("[Omnipotent API] GET error:", error);
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Internal error" }, { status: 500 });
   }
 }
