@@ -1,53 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Lightbulb,
-  CheckCircle,
-  XCircle,
-  Clock,
-  AlertTriangle,
-  ChevronDown,
-  ChevronUp,
-  Play,
-  Loader2,
-  RefreshCw,
-  Sparkles,
-  Shield,
-  Database,
-  Zap,
-  FileText,
-} from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
+import { AlertTriangle, CheckCircle, Clock, Database, FileText, Lightbulb, Loader2, Play, RefreshCw, Shield, Sparkles, XCircle, Zap } from "lucide-react";
 
-// Types
-interface PlanStep {
-  id: number;
-  action: "sql" | "api" | "update_settings" | "send_notification" | "analyze";
-  description: string;
-  details: Record<string, unknown>;
-  requiresApproval: boolean;
-  riskLevel: "low" | "medium" | "high";
-}
+type PlanStep = { id: number; action: "sql" | "api" | "update_settings" | "send_notification" | "analyze"; description: string; requiresApproval: boolean; riskLevel: "low" | "medium" | "high" };
+type Suggestion = { id: string; title: string; description: string; status: "pending" | "approved" | "rejected" | "executed" | "failed"; created_at: string; risk_level: string; proposed_plan?: { steps: PlanStep[] }; execution_result?: { status: string; results: Array<{ success: boolean; error?: string }> } };
+type Filter = "all" | "pending" | "executed" | "rejected";
 
-interface ExecutionPlan {
-  title: string;
-  description: string;
-  steps: PlanStep[];
-  estimatedRisk: "low" | "medium" | "high";
-}
-
-interface Suggestion {
-  id: string;
-  title: string;
-  description: string;
-  status: "pending" | "approved" | "rejected" | "executed" | "failed";
-  created_at: string;
-  risk_level: string;
-  proposed_plan?: ExecutionPlan;
-  execution_result?: {
-    status: string;
-    results: Array<{ success: boolean; error?: string }>;
-  };
+async function readResponse(response: Response) {
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.success === false) throw new Error(data.error || `Request failed (${response.status})`);
+  return data;
 }
 
 export default function SmartSuggestions() {
@@ -55,423 +18,55 @@ export default function SmartSuggestions() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [executingId, setExecutingId] = useState<string | null>(null);
-  const [rejectingId, setRejectingId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "pending" | "executed" | "rejected">("all");
-  const [agentQuery, setAgentQuery] = useState("");
-  const [agentResponse, setAgentResponse] = useState<string | null>(null);
-  const [agentLoading, setAgentLoading] = useState(false);
-
-  // Fetch suggestions
-  useEffect(() => {
-    fetchSuggestions();
-  }, [filter]);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [query, setQuery] = useState("");
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [queryLoading, setQueryLoading] = useState(false);
 
   async function fetchSuggestions() {
     try {
       setLoading(true);
-      const response = await fetch("/api/omnipotent?action=suggestions", {
-        headers: {
-          "X-Internal-Key": process.env.NEXT_PUBLIC_INTERNAL_API_KEY || "",
-        },
-      });
-
-      if (!response.ok) throw new Error("Failed to fetch suggestions");
-
-      const data = await response.json();
-      if (data.success) {
-        setSuggestions(data.suggestions || []);
-      }
+      setError(null);
+      const data = await readResponse(await fetch("/api/omnipotent?action=suggestions", { cache: "no-store" }));
+      setSuggestions(Array.isArray(data.suggestions) ? data.suggestions : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error loading suggestions");
-    } finally {
-      setLoading(false);
-    }
+      setError(err instanceof Error ? err.message : "تعذر تحميل المقترحات");
+    } finally { setLoading(false); }
   }
 
-  // Execute a suggestion
-  async function executeSuggestion(id: string) {
+  useEffect(() => { void fetchSuggestions(); }, []);
+
+  async function mutate(action: "execute" | "reject", suggestionId: string) {
     try {
-      setExecutingId(id);
-      const response = await fetch("/api/omnipotent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Internal-Key": process.env.NEXT_PUBLIC_INTERNAL_API_KEY || "",
-        },
-        body: JSON.stringify({
-          action: "execute",
-          suggestionId: id,
-          userId: "admin", // Replace with actual user ID
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        await fetchSuggestions();
-      } else {
-        alert(`فشل التنفيذ: ${data.error}`);
-      }
+      setBusyId(suggestionId);
+      await readResponse(await fetch("/api/omnipotent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, suggestionId }) }));
+      await fetchSuggestions();
     } catch (err) {
-      alert(`خطأ: ${err instanceof Error ? err.message : "Unknown error"}`);
-    } finally {
-      setExecutingId(null);
-    }
+      setError(err instanceof Error ? err.message : "فشلت العملية");
+    } finally { setBusyId(null); }
   }
 
-  // Reject a suggestion
-  async function rejectSuggestion(id: string) {
+  async function askAgent(event: FormEvent) {
+    event.preventDefault();
+    if (!query.trim()) return;
     try {
-      setRejectingId(id);
-      const response = await fetch("/api/omnipotent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Internal-Key": process.env.NEXT_PUBLIC_INTERNAL_API_KEY || "",
-        },
-        body: JSON.stringify({
-          action: "reject",
-          suggestionId: id,
-          userId: "admin", // Replace with actual user ID
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        await fetchSuggestions();
-      }
-    } catch (err) {
-      alert(`خطأ: ${err instanceof Error ? err.message : "Unknown error"}`);
-    } finally {
-      setRejectingId(null);
-    }
+      setQueryLoading(true); setAnswer(null);
+      const data = await readResponse(await fetch("/api/omnipotent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "query", query: query.trim() }) }));
+      setAnswer(data.response || data.reply || "تمت المعالجة دون رد نصي.");
+    } catch (err) { setAnswer(`خطأ: ${err instanceof Error ? err.message : "تعذر الاتصال بالوكيل"}`); }
+    finally { setQueryLoading(false); }
   }
 
-  // Query the agent
-  async function queryAgent(e: React.FormEvent) {
-    e.preventDefault();
-    if (!agentQuery.trim()) return;
+  const visible = filter === "all" ? suggestions : suggestions.filter((item) => item.status === filter);
+  const icon = (action: string) => action === "sql" ? <Database className="h-4 w-4" /> : action === "api" ? <Zap className="h-4 w-4" /> : action === "update_settings" ? <FileText className="h-4 w-4" /> : action === "analyze" ? <Sparkles className="h-4 w-4" /> : <Shield className="h-4 w-4" />;
+  const statusIcon = (status: Suggestion["status"]) => status === "pending" ? <Clock className="h-5 w-5 text-amber-400" /> : status === "executed" || status === "approved" ? <CheckCircle className="h-5 w-5 text-emerald-400" /> : status === "rejected" ? <XCircle className="h-5 w-5 text-rose-400" /> : <AlertTriangle className="h-5 w-5 text-rose-400" />;
 
-    setAgentLoading(true);
-    setAgentResponse(null);
-
-    try {
-      const response = await fetch("/api/omnipotent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Internal-Key": process.env.NEXT_PUBLIC_INTERNAL_API_KEY || "",
-        },
-        body: JSON.stringify({
-          action: "query",
-          query: agentQuery,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setAgentResponse(data.response);
-      } else {
-        setAgentResponse(`خطأ: ${data.error || "Unknown error"}`);
-      }
-    } catch (err) {
-      setAgentResponse(`خطأ: ${err instanceof Error ? err.message : "Unknown error"}`);
-    } finally {
-      setAgentLoading(false);
-    }
-  }
-
-  // Get status icon
-  function getStatusIcon(status: string) {
-    switch (status) {
-      case "pending":
-        return <Clock className="w-5 h-5 text-amber-400" />;
-      case "executed":
-      case "approved":
-        return <CheckCircle className="w-5 h-5 text-emerald-400" />;
-      case "rejected":
-        return <XCircle className="w-5 h-5 text-rose-400" />;
-      case "failed":
-        return <AlertTriangle className="w-5 h-5 text-rose-400" />;
-      default:
-        return <Clock className="w-5 h-5 text-white/40" />;
-    }
-  }
-
-  // Get risk badge
-  function getRiskBadge(level: string) {
-    const colors = {
-      low: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-      medium: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-      high: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-    };
-
-    const labels = {
-      low: "خطر منخفض",
-      medium: "خطر متوسط",
-      high: "خطر مرتفع",
-    };
-
-    return (
-      <span
-        className={`px-2 py-1 rounded text-xs border ${
-          colors[level as keyof typeof colors] || colors.low
-        }`}
-      >
-        {labels[level as keyof typeof labels] || level}
-      </span>
-    );
-  }
-
-  // Get action icon
-  function getActionIcon(action: string) {
-    switch (action) {
-      case "sql":
-        return <Database className="w-4 h-4" />;
-      case "api":
-        return <Zap className="w-4 h-4" />;
-      case "update_settings":
-        return <FileText className="w-4 h-4" />;
-      case "analyze":
-        return <Sparkles className="w-4 h-4" />;
-      default:
-        return <Shield className="w-4 h-4" />;
-    }
-  }
-
-  const filteredSuggestions =
-    filter === "all" ? suggestions : suggestions.filter((s) => s.status === filter);
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Lightbulb className="w-6 h-6 text-[#C5A059]" />
-            المقترحات الذكية
-          </h2>
-          <p className="text-sm text-white/60 mt-1">
-            اقتراحات الوكيل الشامل لتحسين وإدارة النظام
-          </p>
-        </div>
-        <button
-          onClick={fetchSuggestions}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-white/70 hover:bg-white/10 transition-colors"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          تحديث
-        </button>
-      </div>
-
-      {/* Agent Query Interface */}
-      <div className="rounded-xl border border-[#C5A059]/30 bg-[#C5A059]/5 p-6">
-        <h3 className="font-medium text-white mb-4 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#C5A059]" />
-          سؤال الوكيل الذكي
-        </h3>
-        <form onSubmit={queryAgent} className="flex gap-2">
-          <input
-            type="text"
-            value={agentQuery}
-            onChange={(e) => setAgentQuery(e.target.value)}
-            placeholder="اسأل الوكيل مثلاً: 'كم عدد الجداول في قاعدة البيانات؟' أو 'حلل أداء الموقع'"
-            className="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-[#C5A059]/50"
-          />
-          <button
-            type="submit"
-            disabled={agentLoading || !agentQuery.trim()}
-            className="px-6 py-2 rounded-lg bg-[#C5A059] text-[#1a1a1a] font-medium hover:bg-[#d8b56d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {agentLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                يفكر...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4" />
-                إرسال
-              </>
-            )}
-          </button>
-        </form>
-        {agentResponse && (
-          <div className="mt-4 p-4 rounded-lg bg-white/5 border border-white/10">
-            <p className="text-white/80 whitespace-pre-wrap">{agentResponse}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="flex gap-2 border-b border-white/10 pb-4">
-        {[
-          { id: "all", label: "الكل", count: suggestions.length },
-          { id: "pending", label: "معلقة", count: suggestions.filter((s) => s.status === "pending").length },
-          { id: "executed", label: "منفذة", count: suggestions.filter((s) => s.status === "executed").length },
-          { id: "rejected", label: "مرفوضة", count: suggestions.filter((s) => s.status === "rejected").length },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setFilter(tab.id as typeof filter)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              filter === tab.id
-                ? "bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30"
-                : "text-white/70 hover:bg-white/5 hover:text-white"
-            }`}
-          >
-            {tab.label}
-            <span
-              className={`px-2 py-0.5 rounded text-xs ${
-                filter === tab.id ? "bg-[#C5A059]/30 text-[#C5A059]" : "bg-white/10 text-white/50"
-              }`}
-            >
-              {tab.count}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {/* Suggestions List */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-[#C5A059] animate-spin" />
-        </div>
-      ) : error ? (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-6 text-center">
-          <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-2" />
-          <p className="text-rose-400">{error}</p>
-        </div>
-      ) : filteredSuggestions.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-12 text-center">
-          <Lightbulb className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <p className="text-white/40">لا توجد اقتراحات {filter !== "all" ? "في هذا القسم" : ""}</p>
-          <p className="text-sm text-white/30 mt-2">
-            سيتم إنشاء اقتراحات تلقائياً كل 6 ساعات أو عند طلبك
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredSuggestions.map((suggestion) => (
-            <div
-              key={suggestion.id}
-              className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden"
-            >
-              {/* Header */}
-              <div
-                className="p-4 flex items-start gap-4 cursor-pointer hover:bg-white/5 transition-colors"
-                onClick={() => setExpandedId(expandedId === suggestion.id ? null : suggestion.id)}
-              >
-                {getStatusIcon(suggestion.status)}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
-                    <h3 className="font-medium text-white">{suggestion.title}</h3>
-                    {getRiskBadge(suggestion.risk_level)}
-                  </div>
-                  <p className="text-sm text-white/60 line-clamp-2">{suggestion.description}</p>
-                  <div className="flex items-center gap-4 mt-2 text-xs text-white/40">
-                    <span>{new Date(suggestion.created_at).toLocaleDateString("ar-SA")}</span>
-                    <span className="capitalize">{suggestion.status}</span>
-                  </div>
-                </div>
-                <button className="text-white/40 hover:text-white transition-colors">
-                  {expandedId === suggestion.id ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-
-              {/* Expanded Content */}
-              {expandedId === suggestion.id && (
-                <div className="border-t border-white/10 p-4">
-                  {/* Plan Steps */}
-                  {suggestion.proposed_plan && (
-                    <div className="mb-6">
-                      <h4 className="text-sm font-medium text-white/80 mb-3">خطة التنفيذ:</h4>
-                      <div className="space-y-2">
-                        {suggestion.proposed_plan.steps.map((step) => (
-                          <div
-                            key={step.id}
-                            className="flex items-start gap-3 p-3 rounded-lg bg-white/5"
-                          >
-                            <div className="text-[#C5A059]">{getActionIcon(step.action)}</div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm text-white">{step.description}</span>
-                                {step.requiresApproval && (
-                                  <Shield className="w-4 h-4 text-amber-400" />
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2 text-xs text-white/40">
-                                <span className="uppercase">{step.action}</span>
-                                <span>•</span>
-                                <span className="capitalize">{step.riskLevel} risk</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Execution Results */}
-                  {suggestion.execution_result && (
-                    <div className="mb-4 p-3 rounded-lg bg-white/5">
-                      <h4 className="text-sm font-medium text-white/80 mb-2">نتيجة التنفيذ:</h4>
-                      <div className="space-y-1">
-                        {suggestion.execution_result.results.map((result, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-sm">
-                            {result.success ? (
-                              <CheckCircle className="w-4 h-4 text-emerald-400" />
-                            ) : (
-                              <XCircle className="w-4 h-4 text-rose-400" />
-                            )}
-                            <span className={result.success ? "text-emerald-400" : "text-rose-400"}>
-                              {result.success ? "تم بنجاح" : result.error || "فشل"}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  {suggestion.status === "pending" && (
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => executeSuggestion(suggestion.id)}
-                        disabled={executingId === suggestion.id}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
-                      >
-                        {executingId === suggestion.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Play className="w-4 h-4" />
-                        )}
-                        {executingId === suggestion.id ? "جاري التنفيذ..." : "نفذ الخطة"}
-                      </button>
-                      <button
-                        onClick={() => rejectSuggestion(suggestion.id)}
-                        disabled={rejectingId === suggestion.id}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:bg-rose-500/30 transition-colors disabled:opacity-50"
-                      >
-                        {rejectingId === suggestion.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <XCircle className="w-4 h-4" />
-                        )}
-                        رفض
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  return <div className="space-y-6">
+    <header className="flex items-center justify-between"><div><h2 className="flex items-center gap-2 text-xl font-bold text-white"><Lightbulb className="h-6 w-6 text-[#C5A059]" />المقترحات الذكية</h2><p className="mt-1 text-sm text-white/60">عمليات حقيقية مرتبطة بجلسة الأدمن، بدون مفاتيح عامة أو هوية ثابتة.</p></div><button onClick={() => void fetchSuggestions()} className="flex items-center gap-2 rounded-lg bg-white/5 px-4 py-2 text-white/70"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />تحديث</button></header>
+    <form onSubmit={askAgent} className="rounded-xl border border-[#C5A059]/30 bg-[#C5A059]/5 p-6"><h3 className="mb-4 flex items-center gap-2 font-medium text-white"><Sparkles className="h-4 w-4 text-[#C5A059]" />سؤال الوكيل الذكي</h3><div className="flex gap-2"><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="اكتب سؤالًا للوكيل..." className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white outline-none" /><button disabled={queryLoading || !query.trim()} className="flex items-center gap-2 rounded-lg bg-[#C5A059] px-6 py-2 text-[#1a1a1a] disabled:opacity-50">{queryLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}إرسال</button></div>{answer && <p className="mt-4 whitespace-pre-wrap rounded-lg border border-white/10 bg-white/5 p-4 text-white/80">{answer}</p>}</form>
+    {error && <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-rose-300">{error}</div>}
+    <div className="flex gap-2 border-b border-white/10 pb-4">{(["all", "pending", "executed", "rejected"] as Filter[]).map((value) => <button key={value} onClick={() => setFilter(value)} className={`rounded-lg px-4 py-2 text-sm ${filter === value ? "border border-[#C5A059]/30 bg-[#C5A059]/20 text-[#C5A059]" : "text-white/60"}`}>{value === "all" ? "الكل" : value === "pending" ? "معلقة" : value === "executed" ? "منفذة" : "مرفوضة"} ({value === "all" ? suggestions.length : suggestions.filter((item) => item.status === value).length})</button>)}</div>
+    {loading ? <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-[#C5A059]" /></div> : visible.length === 0 ? <div className="rounded-xl border border-white/10 p-12 text-center text-white/40">لا توجد مقترحات</div> : <div className="space-y-4">{visible.map((item) => <article key={item.id} className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]"><button className="flex w-full items-start gap-4 p-4 text-right" onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}>{statusIcon(item.status)}<span className="flex-1"><strong className="text-white">{item.title}</strong><span className="mt-1 block text-sm text-white/60">{item.description}</span><span className="mt-2 block text-xs text-white/40">{new Date(item.created_at).toLocaleString("ar-SA")} · {item.status}</span></span>{expandedId === item.id ? <XCircle className="h-5 w-5 text-white/40" /> : <Clock className="h-5 w-5 text-white/40" />}</button>{expandedId === item.id && <div className="space-y-4 border-t border-white/10 p-4">{item.proposed_plan?.steps.map((step) => <div key={step.id} className="flex gap-3 rounded-lg bg-white/5 p-3 text-sm text-white/80">{icon(step.action)}<span>{step.description}{step.requiresApproval && <Shield className="ml-2 inline h-4 w-4 text-amber-400" />}</span></div>)}{item.execution_result && <div className="rounded-lg bg-white/5 p-3 text-sm text-white/70">الحالة: {item.execution_result.status}</div>}{item.status === "pending" && <div className="flex gap-3"><button disabled={busyId === item.id} onClick={() => void mutate("execute", item.id)} className="flex items-center gap-2 rounded-lg bg-emerald-500/20 px-4 py-2 text-emerald-300 disabled:opacity-50"><Play className="h-4 w-4" />{busyId === item.id ? "جارٍ التنفيذ..." : "نفذ الخطة"}</button><button disabled={busyId === item.id} onClick={() => void mutate("reject", item.id)} className="rounded-lg bg-rose-500/20 px-4 py-2 text-rose-300">رفض</button></div>}</div>}</article>)}</div>}
+  </div>;
 }
