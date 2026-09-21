@@ -1,47 +1,15 @@
-/**
- * GET /api/admin/keys/live-stats
- * يقرأ مباشرة من الذاكرة - الأرقام الحقيقية اللي الـ server شغال بيها فعلاً
- * نفس مصدر "مراقبة الأحواض" بالظبط
- */
-
 import { NextRequest, NextResponse } from "next/server";
 import { getAllLiveStats } from "@/lib/api-keys-service";
+import { AdminApiAuthError, requireAdminApiAccess } from "@/lib/admin-api-auth";
 
 export async function GET(request: NextRequest) {
   try {
+    await requireAdminApiAccess(request);
     const liveStats = await getAllLiveStats();
-
-    // حساب إجماليات كلية
-    let totalLive = 0;
-    let totalActive = 0;
-    let totalCooldown = 0;
-    let totalDead = 0;
-    let totalRequests = 0;
-
-    for (const stats of Object.values(liveStats)) {
-      totalLive += stats.live_total;
-      totalActive += stats.live_active;
-      totalCooldown += stats.live_cooldown;
-      totalDead += stats.live_dead;
-      totalRequests += stats.live_requests;
-    }
-
-    return NextResponse.json({
-      success: true,
-      timestamp: new Date().toISOString(),
-      summary: {
-        total_loaded: totalLive,
-        total_active: totalActive,
-        total_cooldown: totalCooldown,
-        total_dead: totalDead,
-        total_requests: totalRequests,
-      },
-      byProvider: liveStats,
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || "Failed to get live stats" },
-      { status: 500 }
-    );
+    const summary = Object.values(liveStats).reduce((total, stats) => ({ total_loaded: total.total_loaded + stats.live_total, total_active: total.total_active + stats.live_active, total_cooldown: total.total_cooldown + stats.live_cooldown, total_dead: total.total_dead + stats.live_dead, total_requests: total.total_requests + stats.live_requests }), { total_loaded: 0, total_active: 0, total_cooldown: 0, total_dead: 0, total_requests: 0 });
+    return NextResponse.json({ success: true, timestamp: new Date().toISOString(), summary, byProvider: liveStats });
+  } catch (error) {
+    if (error instanceof AdminApiAuthError) return NextResponse.json({ success: false, error: error.message }, { status: error.status });
+    return NextResponse.json({ success: false, error: "Failed to get live stats" }, { status: 500 });
   }
 }
