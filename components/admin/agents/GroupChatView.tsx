@@ -21,21 +21,18 @@ interface GroupChatViewProps {
 }
 
 const AGENT_PERSONAS: Record<string, { name: string; role: string; color: string }> = {
-  PRIME: {
-    name: 'PRIME',
-    role: 'كبير مهندسي التصميم والتطوير',
-    color: 'purple',
-  },
-  Vanguard: {
-    name: 'Vanguard',
-    role: 'مدير العمليات والمبيعات',
-    color: 'emerald',
-  },
+  PRIME:    { name: 'PRIME',    role: 'كبير مهندسي التصميم والتطوير', color: 'purple' },
+  Vanguard: { name: 'Vanguard', role: 'مدير العمليات والمبيعات', color: 'emerald' },
+  Analyst:  { name: 'Analyst',  role: 'محلل البيانات والتقارير', color: 'blue' },
+  Coder:    { name: 'Coder',    role: 'مطور الكود والتقنية', color: 'cyan' },
+  Ops:      { name: 'Ops',      role: 'مراقب العمليات والنظام', color: 'yellow' },
+  Security: { name: 'Security', role: 'حارس الأمن والتدقيق', color: 'red' },
+  Learner:  { name: 'Learner',  role: 'محرك التعلم الذاتي', color: 'indigo' },
 };
 
 export function GroupChatView({
   conversationId = 'group-chat',
-  participants = ['PRIME', 'Vanguard', 'You'],
+  participants = ['PRIME', 'Vanguard', 'Analyst', 'Coder', 'Ops', 'Security', 'Learner', 'You'],
   onClose,
 }: GroupChatViewProps) {
   const [messages, setMessages] = useState<Message[]>([
@@ -43,7 +40,7 @@ export function GroupChatView({
       id: '1',
       sender_type: 'system',
       sender_name: 'System',
-      content: `👋 مرحباً! تم بدء محادثة جماعية بين: ${participants.filter((p) => p !== 'You').join(', ')} — يمكنك مخاطبة أي وكيل باستخدام @`,
+      content: `👋 مرحباً! تم بدء محادثة جماعية بين الوكلاء — يمكنك التحدث للجميع أو مخاطبة وكيل محدد بكتابة اسمه أو @اسم_الوكيل.`,
       timestamp: new Date().toISOString(),
     },
   ]);
@@ -53,15 +50,20 @@ export function GroupChatView({
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = useCallback((smooth = true) => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
+    }
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
+    scrollToBottom(false);
   }, [messages, scrollToBottom]);
 
   const addMessage = useCallback((message: Partial<Message>) => {
@@ -89,72 +91,36 @@ export function GroupChatView({
       abortControllerRef.current = controller;
 
       try {
-        const res = await fetch('/api/admin/agents/messages', {
+        const res = await fetch('/api/admin/agents/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             agent_key: agentKey.toLowerCase(),
-            content: userMessage,
-            sender_type: 'user',
-            mentions: [mention],
+            message: userMessage,
+            context: { source: 'group_chat', mention },
           }),
           signal: controller.signal,
         });
 
         if (!res.ok) {
-          throw new Error(`API error: ${res.status}`);
+          const errData = await res.json().catch(() => null);
+          throw new Error(errData?.error || `API error: ${res.status}`);
         }
 
         const data = await res.json();
-
-        if (data.success && data.agentReply?.content) {
-          return data.agentReply.content;
+        if (data.success && data.data?.message) {
+          return data.data.message;
         }
 
-        if (data.success && data.data?.content) {
-          return data.data.content;
-        }
-
-        return generateFallbackResponse(agentKey, userMessage);
+        throw new Error(data.error || 'تعذر استلام رد من الوكيل');
       } catch (err: any) {
-        if (err.name === 'AbortError') {
-          return null;
-        }
+        if (err.name === 'AbortError') return null;
         console.error(`[GroupChat] Agent ${agentKey} error:`, err);
-        return generateFallbackResponse(agentKey, userMessage);
+        return `⚠️ تعذر استلام رد من ${agentKey}: ${err.message || 'خطأ في الاتصال'}`;
       }
     },
     []
   );
-
-  const generateFallbackResponse = (agentKey: string, userMessage: string): string => {
-    const persona = AGENT_PERSONAS[agentKey];
-    if (!persona) return 'عذراً، لم أتمكن من فهم طلبك.';
-
-    const lowerMsg = userMessage.toLowerCase();
-
-    if (lowerMsg.includes('تصميم') || lowerMsg.includes('لون') || lowerMsg.includes('ديكور')) {
-      return agentKey === 'PRIME'
-        ? `🎨 بصفتي ${persona.role}، أقترح عليك استخدام ألوان دافئة مع لمسات ذهبية. هل تريد أن أُنشئ لك لوحة ألوان مخصصة؟`
-        : `📋 سأُجهز مواصفات التصميم وأرسلها لفريق الإنتاج. ما هي المدة المطلوبة؟`;
-    }
-
-    if (lowerMsg.includes('سعر') || lowerMsg.includes('تكلفة') || lowerMsg.includes('ميزانية')) {
-      return agentKey === 'PRIME'
-        ? `💰 التكلفة تعتمد على المواد والتصميم. سأُجهز تقدير أولي خلال دقائق.`
-        : `📊 سأُراجع العروض السابقة وأُجهز لك عرض سعر تنافسي.`;
-    }
-
-    if (lowerMsg.includes('مشكلة') || lowerMsg.includes('خطأ') || lowerMsg.includes('عطل')) {
-      return `⚠️ سأفحص المشكلة فوراً. هل يمكنك وصف المشكلة بالتفصيل حتى أجد الحل المناسب؟`;
-    }
-
-    if (lowerMsg.includes('مساعدة') || lowerMsg.includes('help')) {
-      return `👋 بالطبع! كيف يمكنني مساعدتك؟ يمكنني المساعدة في التصميم، الأسعار، متابعة الطلبات، أو أي استفسار آخر.`;
-    }
-
-    return `✅ تم استلام رسالتك! سأقوم بمراجعة طلبك والرد عليك فوراً. هل هناك أي تفاصيل إضافية؟`;
-  };
 
   const handleSendMessage = useCallback(async () => {
     if (!inputMessage.trim() || isLoading) return;
@@ -173,14 +139,18 @@ export function GroupChatView({
     const mentionedAgents = mentions.map((m) => m.substring(1));
     const agentsToRespond =
       mentionedAgents.length > 0
-        ? mentionedAgents.filter((a) => activeParticipants.includes(a))
-        : activeParticipants;
+        ? mentionedAgents.filter((a) =>
+            Object.keys(AGENT_PERSONAS).some((p) => p.toLowerCase() === a.toLowerCase())
+          )
+        : activeParticipants.length > 2
+          ? activeParticipants.slice(0, 2)
+          : activeParticipants;
 
     if (agentsToRespond.length === 0) {
       addMessage({
         sender_type: 'system',
         sender_name: 'System',
-        content: '⚠️ لا يوجد وكلاء نشطون حالياً. يرجى تفعيل وكيل واحد على الأقل.',
+        content: '⚠️ لم يتم تحديد أي وكيل متاح. يرجى تفعيل وكيل من القائمة أعلاه.',
       });
       return;
     }
@@ -221,104 +191,87 @@ export function GroupChatView({
   }
 
   return (
-    <div className="bg-[#111] rounded-2xl shadow-2xl flex flex-col h-[500px] border border-white/10">
+    <div className="bg-[#111] rounded-2xl shadow-2xl flex flex-col h-[520px] border border-white/10">
       <div className="p-4 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
             <Users className="w-5 h-5 text-blue-400" />
           </div>
           <div>
-            <h3 className="font-bold text-white">المحادثة الجماعية</h3>
-            <p className="text-sm text-white/40">
-              {activeParticipants.join(' + ')} + أنت
+            <h3 className="font-bold text-white">المحادثة الجماعية الذكية</h3>
+            <p className="text-xs text-white/40">
+              {activeParticipants.join(' • ')} + أنت
             </p>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="text-white/40 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-lg"
-        >
-          ✕
-        </button>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="text-white/40 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-lg"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
-      <div className="px-4 py-2 bg-white/5 border-b border-white/10 flex items-center gap-2">
-        <span className="text-xs text-white/40">المشاركين:</span>
-        {participants.map((participant) => (
-          <button
-            key={participant}
-            onClick={() => toggleParticipant(participant)}
-            className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-              participant === 'You'
-                ? 'bg-blue-500/20 text-blue-300'
-                : activeParticipants.includes(participant)
-                ? participant === 'PRIME'
-                  ? 'bg-purple-500/20 text-purple-300'
-                  : 'bg-emerald-500/20 text-emerald-300'
-                : 'bg-white/5 text-white/30 line-through'
-            }`}
-          >
-            {participant === 'PRIME' && '🧠 '}
-            {participant === 'Vanguard' && '💼 '}
-            {participant}
-          </button>
+      <div className="px-4 py-2 bg-white/5 border-b border-white/10 flex items-center gap-2 flex-wrap">
+        <span className="text-xs text-white/40">المشاركون النشطون:</span>
+        {Object.keys(AGENT_PERSONAS).map((key) => {
+          const isActive = activeParticipants.some((p) => p.toLowerCase() === key.toLowerCase());
+          return (
+            <button
+              key={key}
+              onClick={() => toggleParticipant(key)}
+              className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
+                isActive
+                  ? 'bg-[#C5A059] text-black font-bold'
+                  : 'bg-white/10 text-white/50 hover:bg-white/15'
+              }`}
+            >
+              {key}
+            </button>
+          );
+        })}
+      </div>
+
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((message) => (
+          <MessageBubble key={message.id} message={message} />
         ))}
       </div>
 
       {error && (
-        <div className="mx-4 mt-2 p-2 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-xs text-center">
-          {error}
+        <div className="px-4 py-2 bg-red-500/10 border-t border-red-500/20 text-red-400 text-xs flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="text-white/40 hover:text-white">
+            ✕
+          </button>
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
-        ))}
-        {isLoading && (
-          <div className="flex items-center gap-2 text-white/30 text-xs px-2">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            <span>الوكلاء يفكرون...</span>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div className="p-4 border-t border-white/10">
+      <div className="p-3 border-t border-white/10 bg-white/[0.02]">
         <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-              placeholder="اكتب رسالة... استخدم @PRIME أو @Vanguard"
-              className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 transition-colors"
-              disabled={isLoading}
-            />
-            <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-          </div>
+          <input
+            type="text"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }}
+            placeholder="اكتب رسالتك للوكلاء... (مثال: @PRIME صمم لي طاولة خشبية)"
+            disabled={isLoading}
+            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#C5A059]/50"
+          />
           <button
             onClick={handleSendMessage}
-            disabled={!inputMessage.trim() || isLoading}
-            className="p-3 bg-purple-600 text-white rounded-xl hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            disabled={isLoading || !inputMessage.trim()}
+            className="p-2.5 bg-[#C5A059] text-black font-bold rounded-xl hover:bg-[#E5C170] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 px-4 text-sm"
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-          </button>
-        </div>
-
-        <div className="flex gap-2 mt-2">
-          <button
-            onClick={() => setInputMessage((prev) => prev + '@PRIME ')}
-            className="text-xs px-2 py-1 bg-purple-500/10 text-purple-300 rounded hover:bg-purple-500/20 transition-colors"
-          >
-            @PRIME
-          </button>
-          <button
-            onClick={() => setInputMessage((prev) => prev + '@Vanguard ')}
-            className="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-300 rounded hover:bg-emerald-500/20 transition-colors"
-          >
-            @Vanguard
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            إرسال
           </button>
         </div>
       </div>
@@ -329,42 +282,64 @@ export function GroupChatView({
 function MessageBubble({ message }: { message: Message }) {
   const isUser = message.sender_type === 'user';
   const isSystem = message.sender_type === 'system';
-  const isPRIME = message.sender_name === 'PRIME';
 
   if (isSystem) {
     return (
-      <div className="text-center">
-        <span className="text-xs text-white/40 bg-white/5 px-3 py-1 rounded-full">
+      <div className="text-center my-2">
+        <span className="text-xs bg-white/5 text-white/50 px-3 py-1 rounded-full border border-white/10 inline-block max-w-lg">
           {message.content}
         </span>
       </div>
     );
   }
 
+  const persona = AGENT_PERSONAS[message.sender_name] || {
+    color: 'purple',
+    role: 'وكيل ذكي',
+  };
+
+  const bubbleColors: Record<string, string> = {
+    purple: 'bg-purple-500/10 text-purple-100 border-purple-500/20',
+    emerald: 'bg-emerald-500/10 text-emerald-100 border-emerald-500/20',
+    blue: 'bg-blue-500/10 text-blue-100 border-blue-500/20',
+    cyan: 'bg-cyan-500/10 text-cyan-100 border-cyan-500/20',
+    yellow: 'bg-yellow-500/10 text-yellow-100 border-yellow-500/20',
+    red: 'bg-red-500/10 text-red-100 border-red-500/20',
+    indigo: 'bg-indigo-500/10 text-indigo-100 border-indigo-500/20',
+  };
+
+  const badgeColors: Record<string, string> = {
+    purple: 'text-purple-400',
+    emerald: 'text-emerald-400',
+    blue: 'text-blue-400',
+    cyan: 'text-cyan-400',
+    yellow: 'text-yellow-400',
+    red: 'text-red-400',
+    indigo: 'text-indigo-400',
+  };
+
+  const agentColor = persona.color || 'purple';
+
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
       <div
         className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
           isUser
-            ? 'bg-blue-500 text-white'
-            : isPRIME
-            ? 'bg-purple-500/20 text-purple-400'
-            : 'bg-emerald-500/20 text-emerald-400'
+            ? 'bg-[#C5A059] text-black font-bold'
+            : 'bg-white/10 text-white'
         }`}
       >
         {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
       </div>
-      <div className={`max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
-        <div className={`text-xs mb-1 ${isUser ? 'text-blue-400' : isPRIME ? 'text-purple-400' : 'text-emerald-400'}`}>
+      <div className={`max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
+        <div className={`text-xs mb-1 font-semibold ${isUser ? 'text-[#C5A059]' : badgeColors[agentColor] || 'text-white/60'}`}>
           {message.sender_name}
         </div>
         <div
-          className={`rounded-2xl px-4 py-2.5 ${
+          className={`rounded-2xl px-4 py-2.5 border ${
             isUser
-              ? 'bg-blue-600 text-white rounded-tr-md'
-              : isPRIME
-              ? 'bg-purple-500/10 text-purple-100 border border-purple-500/20 rounded-tl-md'
-              : 'bg-emerald-500/10 text-emerald-100 border border-emerald-500/20 rounded-tl-md'
+              ? 'bg-[#C5A059]/20 text-white border-[#C5A059]/30 rounded-tr-md'
+              : `${bubbleColors[agentColor] || 'bg-white/10 text-white'} rounded-tl-md`
           }`}
         >
           {message.isTyping ? (

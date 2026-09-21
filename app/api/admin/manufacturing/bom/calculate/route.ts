@@ -1,208 +1,280 @@
 /**
- * Manufacturing API - BOM Calculation
- * POST /api/admin/manufacturing/bom/calculate
- * Calculate Bill of Materials for a design
+ * Calculate a bill of materials from the quantities recorded on a design.
+ *
+ * This endpoint deliberately does not invent wood, hardware, labour, prices,
+ * or weights. A BOM is useful only when every figure can be traced to a
+ * design specification or an inventory record.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/dal/unified-supabase';
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdminApi } from "@/lib/admin-api-guard";
+import { resolveAdminCompanyId } from "@/lib/admin-company";
+import { supabaseServer } from "@/lib/dal/unified-supabase";
+
+type JsonRecord = Record<string, unknown>;
+
+type DesignMaterial = {
+  name: string;
+  quantity: number;
+  unit?: string;
+  wastePercentage: number;
+};
+
+type CalculatedBomItem = {
+  inventory_item_id: string | null;
+  item_name: string;
+  quantity: number;
+  unit: string | null;
+  unit_cost: number | null;
+  total_cost: number | null;
+  waste_amount: number;
+  waste_percentage: number;
+  availability: "available" | "insufficient" | "not_registered";
+  available_quantity: number | null;
+};
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function asFiniteNumber(value: unknown): number | null {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function readMaterialList(specifications: JsonRecord): DesignMaterial[] {
+  const rawMaterials = specifications.bom_items
+    ?? specifications.materials
+    ?? specifications.materials_selected;
+
+  if (!Array.isArray(rawMaterials)) return [];
+
+  return rawMaterials.flatMap((value) => {
+    if (!isRecord(value)) return [];
+
+    const name = value.material_name ?? value.name ?? value.material;
+    const quantity = asFiniteNumber(value.quantity);
+    const wastePercentage = asFiniteNumber(
+      value.wastage_percent ?? value.waste_percentage ?? value.wastePercent
+    ) ?? 0;
+
+    if (
+      typeof name !== "string"
+      || !name.trim()
+      || quantity === null
+      || quantity <= 0
+      || wastePercentage < 0
+    ) {
+      return [];
+    }
+
+    return [{
+      name: name.trim(),
+      quantity,
+      unit: typeof value.unit === "string" ? value.unit : undefined,
+      wastePercentage,
+    }];
+  });
+}
+
+async function calculateBom(
+  companyId: string,
+  materials: DesignMaterial[],
+  orderQuantity: number,
+  includeWaste: boolean
+) {
+  const items: CalculatedBomItem[] = [];
+  let pricedMaterialsCost = 0;
+  let hasUnpricedItem = false;
+
+  for (const material of materials) {
+    const appliedWaste = includeWaste ? material.wastePercentage : 0;
+    const requiredQuantity = material.quantity * orderQuantity * (1 + appliedWaste / 100);
+
+    const { data: matches, error } = await supabaseServer
+      .from("inventory_items")
+      .select("id, name, current_quantity, unit, unit_of_measure, unit_cost")
+      .eq("company_id", companyId)
+      .eq("is_active", true)
+      .ilike("name", `%${material.name}%`)
+      .limit(1);
+
+    if (error) throw error;
+
+    const inventory = Array.isArray(matches) ? matches[0] : null;
+    const unitCost = asFiniteNumber(inventory?.unit_cost);
+    const totalCost = unitCost === null ? null : unitCost * requiredQuantity;
+    const availableQuantity = asFiniteNumber(inventory?.current_quantity);
+
+    if (totalCost === null) hasUnpricedItem = true;
+    else pricedMaterialsCost += totalCost;
+
+    items.push({
+      inventory_item_id: typeof inventory?.id === "string" ? inventory.id : null,
+      item_name: material.name,
+      quantity: Number(requiredQuantity.toFixed(3)),
+      unit: material.unit
+        ?? (typeof inventory?.unit === "string" ? inventory.unit : null)
+        ?? (typeof inventory?.unit_of_measure === "string" ? inventory.unit_of_measure : null),
+      unit_cost: unitCost,
+      total_cost: totalCost === null ? null : Number(totalCost.toFixed(2)),
+      waste_amount: Number((requiredQuantity - material.quantity * orderQuantity).toFixed(3)),
+      waste_percentage: appliedWaste,
+      availability: !inventory
+        ? "not_registered"
+        : availableQuantity !== null && availableQuantity >= requiredQuantity
+          ? "available"
+          : "insufficient",
+      available_quantity: availableQuantity,
+    });
+  }
+
+  return {
+    items,
+    total_materials_cost: hasUnpricedItem ? null : Number(pricedMaterialsCost.toFixed(2)),
+    priced_materials_cost: Number(pricedMaterialsCost.toFixed(2)),
+    unpriced_items_count: items.filter((item) => item.total_cost === null).length,
+    total_weight: null,
+    estimated_labor_hours: null,
+    waste_included: includeWaste,
+  };
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const {
-      company_id,
-      design_version_id,
-      sales_order_item_id,
-      quantity = 1,
-      include_waste = true
-    } = body;
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
 
-    if (!company_id || (!design_version_id && !sales_order_item_id)) {
+    const body = await request.json();
+    const designVersionId = typeof body.design_version_id === "string"
+      ? body.design_version_id
+      : null;
+    const requestedSalesOrderItemId = typeof body.sales_order_item_id === "string"
+      ? body.sales_order_item_id
+      : null;
+    const quantity = asFiniteNumber(body.quantity) ?? 1;
+    const includeWaste = body.include_waste !== false;
+
+    if (!designVersionId) {
       return NextResponse.json(
-        { success: false, error: 'company_id and (design_version_id or sales_order_item_id) required' },
+        { success: false, error: "اختر معرّف نسخة تصميم لحساب قائمة المواد." },
         { status: 400 }
       );
     }
 
-    // Get design specifications
-    let specifications: any = {};
-    
-    if (design_version_id) {
-      const { data: design } = await supabaseServer
-        .from('design_versions')
-        .select('design_data')
-        .eq('id', design_version_id)
-        .single();
-      
-      if (design?.design_data) {
-        specifications = design.design_data;
-      }
+    if (quantity <= 0 || quantity > 10000) {
+      return NextResponse.json(
+        { success: false, error: "الكمية يجب أن تكون رقمًا موجبًا ومقبولًا." },
+        { status: 400 }
+      );
     }
 
-    // Calculate BOM based on item type and specs
-    const calculatedBOM = await calculateBOM(
-      company_id,
-      specifications,
-      quantity,
-      include_waste
-    );
+    const companyId = await resolveAdminCompanyId();
+    if (!companyId) {
+      return NextResponse.json(
+        { success: false, error: "لا توجد شركة مهيأة لحساب قائمة المواد." },
+        { status: 422 }
+      );
+    }
 
-    // Save BOM if requested
-    if (body.save && sales_order_item_id) {
-      const { data: bomHeader, error: headerError } = await supabaseServer
-        .from('bom_headers')
+    const { data: design, error: designError } = await supabaseServer
+      .from("design_versions")
+      .select("id, sales_order_item_id, specifications, design_data")
+      .eq("id", designVersionId)
+      .maybeSingle();
+
+    if (designError) throw designError;
+    if (!design) {
+      return NextResponse.json({ success: false, error: "نسخة التصميم غير موجودة." }, { status: 404 });
+    }
+
+    const salesOrderItemId = typeof design.sales_order_item_id === "string"
+      ? design.sales_order_item_id
+      : null;
+    if (requestedSalesOrderItemId && requestedSalesOrderItemId !== salesOrderItemId) {
+      return NextResponse.json(
+        { success: false, error: "عنصر أمر البيع لا يطابق نسخة التصميم المحددة." },
+        { status: 400 }
+      );
+    }
+
+    const specifications = isRecord(design.specifications)
+      ? design.specifications
+      : isRecord(design.design_data)
+        ? design.design_data
+        : null;
+    const materials = specifications ? readMaterialList(specifications) : [];
+
+    if (materials.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "لا تحتوي نسخة التصميم على مواد ذات كميات مسجلة. أضف bom_items أو materials بصيغة الاسم والكمية أولاً.",
+        },
+        { status: 422 }
+      );
+    }
+
+    const calculatedBom = await calculateBom(companyId, materials, quantity, includeWaste);
+
+    if (body.save === true) {
+      if (!salesOrderItemId) {
+        return NextResponse.json(
+          { success: false, error: "لا يمكن حفظ قائمة المواد قبل ربط التصميم بعنصر أمر بيع." },
+          { status: 422 }
+        );
+      }
+
+      if (calculatedBom.unpriced_items_count > 0 || calculatedBom.total_materials_cost === null) {
+        return NextResponse.json(
+          { success: false, error: "أضف أسعار المواد الناقصة في المخزون قبل حفظ قائمة المواد." },
+          { status: 422 }
+        );
+      }
+
+      const { data: header, error: headerError } = await supabaseServer
+        .from("bom_headers")
         .insert({
-          company_id,
-          sales_order_item_id,
-          design_version_id,
-          name: `BOM for Item ${sales_order_item_id.slice(0, 8)}`,
-          total_cost: calculatedBOM.total_materials_cost,
-          total_weight: calculatedBOM.total_weight
+          design_version_id: designVersionId,
+          version_number: 1,
+          total_material_cost: calculatedBom.total_materials_cost,
+          total_cost: calculatedBom.total_materials_cost,
+          notes: `Calculated for ${quantity} unit(s) from design ${designVersionId}.`,
         })
-        .select()
+        .select("id")
         .single();
 
-      if (!headerError && bomHeader) {
-        // Insert BOM items
-        const bomItems = calculatedBOM.items.map((item, index) => ({
-          bom_header_id: bomHeader.id,
-          inventory_item_id: item.inventory_item_id,
-          item_name: item.item_name,
+      if (headerError || !header) throw headerError ?? new Error("Could not create BOM header");
+
+      const { error: itemsError } = await supabaseServer.from("bom_items").insert(
+        calculatedBom.items.map((item) => ({
+          bom_header_id: header.id,
+          material_name: item.item_name,
           quantity: item.quantity,
           unit: item.unit,
           unit_cost: item.unit_cost,
           total_cost: item.total_cost,
-          waste_percentage: include_waste ? 10 : 0,
-          sequence_order: index
-        }));
+          wastage_percent: item.waste_percentage,
+        }))
+      );
 
-        await supabaseServer.from('bom_items').insert(bomItems);
-      }
+      if (itemsError) throw itemsError;
     }
 
     return NextResponse.json({
       success: true,
-      data: calculatedBOM
+      data: {
+        ...calculatedBom,
+        design_version_id: designVersionId,
+        sales_order_item_id: salesOrderItemId,
+      },
+      message: body.save === true ? "تم حفظ قائمة المواد." : undefined,
     });
   } catch (error) {
-    console.error('BOM calculation error:', error);
+    console.error("BOM calculation error:", error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: "تعذر حساب قائمة المواد من البيانات المسجلة." },
       { status: 500 }
     );
   }
-}
-
-// Calculate BOM based on specifications
-async function calculateBOM(
-  companyId: string,
-  specs: any,
-  quantity: number,
-  includeWaste: boolean
-) {
-  const items: any[] = [];
-  let totalCost = 0;
-  let totalWeight = 0;
-
-  // Get materials from design specs
-  const materials = specs.materials || specs.materials_selected || [];
-  const dimensions = specs.measurements || specs.dimensions || {};
-
-  // Calculate wood/material needs
-  if (dimensions.length && dimensions.width && dimensions.height) {
-    const volume = (dimensions.length * dimensions.width * dimensions.height) / 1000000; // Convert to cubic meters
-    const wasteFactor = includeWaste ? 1.15 : 1; // 15% waste
-
-    // Primary wood material
-    const woodNeeded = volume * quantity * wasteFactor;
-    const woodCost = woodNeeded * 3500; // Approximate cost per cubic meter
-
-    items.push({
-      inventory_item_id: null,
-      item_name: 'خشب أساسي (زان أو سنديان)',
-      quantity: Math.ceil(woodNeeded * 1000), // Convert to liters for display
-      unit: 'لتر',
-      unit_cost: 3.5,
-      total_cost: woodCost,
-      waste_amount: includeWaste ? woodNeeded * 0.15 : 0,
-      in_stock: false,
-      available_quantity: 0
-    });
-
-    totalCost += woodCost;
-    totalWeight += woodNeeded * 600; // Wood density approx 600 kg/m3
-  }
-
-  // Add selected materials
-  for (const material of materials) {
-    const materialName = typeof material === 'string' ? material : material.name;
-    const materialQty = typeof material === 'string' ? quantity : (material.quantity || quantity);
-
-    // Check inventory
-    const { data: inventoryItem } = await supabaseServer
-      .from('inventory_items')
-      .select('*')
-      .eq('company_id', companyId)
-      .ilike('name', `%${materialName}%`)
-      .single();
-
-    const unitCost = inventoryItem?.unit_cost || 50; // Default price
-    const itemCost = materialQty * unitCost;
-
-    items.push({
-      inventory_item_id: inventoryItem?.id || null,
-      item_name: materialName,
-      quantity: materialQty,
-      unit: inventoryItem?.unit_of_measure || 'piece',
-      unit_cost: unitCost,
-      total_cost: itemCost,
-      waste_amount: 0,
-      in_stock: inventoryItem ? inventoryItem.current_quantity >= materialQty : false,
-      available_quantity: inventoryItem?.current_quantity || 0
-    });
-
-    totalCost += itemCost;
-  }
-
-  // Add hardware (screws, hinges, etc.)
-  const hardwareCost = quantity * 150; // Approximate
-  items.push({
-    inventory_item_id: null,
-    item_name: 'قطع معدنية ومسامير ومفصلات',
-    quantity: quantity,
-    unit: 'set',
-    unit_cost: 150,
-    total_cost: hardwareCost,
-    waste_amount: 0,
-    in_stock: true,
-    available_quantity: 1000
-  });
-  totalCost += hardwareCost;
-
-  // Add finish materials (paint, varnish)
-  const finishCost = quantity * 200;
-  items.push({
-    inventory_item_id: null,
-    item_name: 'ورنيش ومواد تشطيب',
-    quantity: quantity * 0.5,
-    unit: 'liter',
-    unit_cost: 400,
-    total_cost: finishCost,
-    waste_amount: 0,
-    in_stock: true,
-    available_quantity: 50
-  });
-  totalCost += finishCost;
-
-  // Calculate labor hours (estimate)
-  const laborHours = quantity * 8; // 8 hours per piece average
-
-  return {
-    items,
-    total_materials_cost: totalCost,
-    total_weight: Math.round(totalWeight * 100) / 100,
-    estimated_labor_hours: laborHours,
-    waste_included: includeWaste
-  };
 }

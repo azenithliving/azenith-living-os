@@ -1,58 +1,97 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin as supabase } from "@/lib/supabase-server";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
-  try {
-    if (!supabase) {
-      return NextResponse.json({ success: false, error: "Database not initialized" }, { status: 500 });
-    }
+import { requireAdminApi } from "@/lib/admin-api-guard";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
-    // Get total count
-    const { count: totalCount, error: countError } = await supabase
+type ImageRow = { room_type?: string | null; style?: string | null };
+
+type DistributionEntry = {
+  room_type: string;
+  style: string;
+  active_count: number;
+};
+
+async function loadImageRows(): Promise<{ rows: ImageRow[]; error?: string }> {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return { rows: [], error: "قاعدة البيانات غير مهيأة." };
+
+  const rows: ImageRow[] = [];
+  const pageSize = 1_000;
+  let offset = 0;
+
+  // Supabase applies a default response cap. Page through the table so the
+  // aggregate represents actual rows rather than the first response only.
+  while (true) {
+    const { data, error } = await supabase
       .from("curated_images")
-      .select("*", { count: "exact", head: true })
-      .eq("is_active", true);
+      .select("room_type, style")
+      .eq("is_active", true)
+      .range(offset, offset + pageSize - 1);
 
-    if (countError) throw countError;
+    if (error) return { rows: [], error: error.message };
+    const page = (data ?? []) as ImageRow[];
+    rows.push(...page);
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
 
-    // Get distribution by room
-    const { data: roomStats, error: roomError } = await supabase
-      .rpc("get_curated_image_stats");
+  return { rows };
+}
 
-    if (roomError) throw roomError;
+export async function GET() {
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
 
-    // Get recent harvest logs
-    const { data: refreshLogs, error: logsError } = await supabase
-      .from("refresh_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    // Get API usage stats (if tracked)
-    const { data: apiUsage } = await supabase
-      .from("api_usage_log")
-      .select("*")
-      .order("date", { ascending: false })
-      .limit(7);
-
-    return NextResponse.json({
-      success: true,
-      stats: {
-        total: totalCount || 0,
-        target: 15000,
-        percentage: Math.round(((totalCount || 0) / 15000) * 100),
-        distribution: roomStats || [],
-      },
-      recentRefreshes: refreshLogs || [],
-      apiUsage: apiUsage || [],
-      lastUpdated: new Date().toISOString(),
-    });
-
-  } catch (error) {
-    console.error("[Image Stats API] Error:", error);
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
     return NextResponse.json(
-      { success: false, error: "Failed to fetch stats" },
+      { success: false, error: "قاعدة البيانات غير مهيأة." },
+      { status: 503 }
+    );
+  }
+
+  const [images, refreshLogs] = await Promise.all([
+    loadImageRows(),
+    supabase
+      .from("refresh_logs")
+      .select("id, status, duration_minutes, images_before, images_after, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
+
+  if (images.error) {
+    return NextResponse.json(
+      { success: false, error: `تعذر قراءة مكتبة الصور: ${images.error}` },
       { status: 500 }
     );
   }
+
+  const distribution = new Map<string, DistributionEntry>();
+  for (const image of images.rows) {
+    const roomType = typeof image.room_type === "string" && image.room_type.trim()
+      ? image.room_type.trim()
+      : "غير مصنف";
+    const style = typeof image.style === "string" && image.style.trim()
+      ? image.style.trim()
+      : "غير مصنف";
+    const key = `${roomType}\u0000${style}`;
+    const existing = distribution.get(key);
+    if (existing) existing.active_count += 1;
+    else distribution.set(key, { room_type: roomType, style, active_count: 1 });
+  }
+
+  const warnings = refreshLogs.error
+    ? [`تعذر قراءة سجل التحديث: ${refreshLogs.error.message}`]
+    : [];
+
+  return NextResponse.json({
+    success: true,
+    stats: {
+      total: images.rows.length,
+      distribution: [...distribution.values()].sort((a, b) => b.active_count - a.active_count),
+    },
+    recentRefreshes: refreshLogs.data ?? [],
+    warnings,
+    retrievedAt: new Date().toISOString(),
+  });
 }

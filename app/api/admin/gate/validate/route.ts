@@ -56,15 +56,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
     const normalizedEmail = normalizeAdminEmail(email);
+
+    // This is an administration gate, not a general account-login endpoint.
+    // Never allow another authenticated Supabase user to pass it merely by
+    // having their own password.
+    if (!isAdminGateConfigured() || !validateAdminGateCredentials(normalizedEmail, password)) {
+      return NextResponse.json(
+        { success: false, error: "البريد الإلكتروني أو كلمة المرور غير صحيحة" },
+        { status: 401 }
+      );
+    }
+
+    const supabase = await createClient();
 
     let { error: authError } = await supabase.auth.signInWithPassword({
       email: normalizedEmail,
       password,
     });
 
-    if (authError && isAdminGateConfigured()) {
+    if (authError) {
       const provisioned = await ensurePrimaryAdminAuthUser(normalizedEmail, password);
       if (provisioned.success) {
         const retry = await supabase.auth.signInWithPassword({

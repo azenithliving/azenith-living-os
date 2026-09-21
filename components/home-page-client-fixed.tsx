@@ -31,8 +31,6 @@ type HomePageClientProps = {
 const imageCache: Record<string, Record<string, string>> = {};
 
 export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }: HomePageClientProps) {
-  console.log("[CLIENT] HomePageClient mounted, isHydrated:", useSessionStore.getState().isHydrated, "initialImages:", Object.keys(initialRoomImages).length);
-  
   const router = useRouter();
   const intent = useSessionStore((state) => state.intent);
   const updateProfile = useSessionStore((state) => state.updateProfile);
@@ -52,7 +50,6 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
   // Use server-fetched images as initial state to eliminate loading flash
   const [roomImages, setRoomImages] = useState<Record<string, string>>(initialRoomImages);
   const [loading, setLoading] = useState(Object.keys(initialRoomImages).length === 0);
-  console.log("[CLIENT] Initial loading state:", Object.keys(initialRoomImages).length === 0);
   // Local state for immediate UI feedback - synced to store
   const [styleSwitchCount, setStyleSwitchCount] = useState(styleSwitches);
   const styleSwitchRef = useRef(styleSwitches);
@@ -60,7 +57,6 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
 
   // Hydration guard - show loading state or default during hydration
   const displayStyle = isHydrated ? selectedStyle : "modern";
-  console.log("[CLIENT] displayStyle:", displayStyle, "isHydrated:", isHydrated);
 
   // Sync local ref with store when hydrated
   useEffect(() => {
@@ -189,7 +185,11 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
             }
           }
         } catch (cmsError) {
-          console.warn('[CMS] Failed to fetch CMS images, falling back to Pexels:', cmsError);
+          // React Strict Mode aborts the first development-only request while
+          // remounting the component. That is expected, not a CMS failure.
+          if (!controller.signal.aborted) {
+            console.warn('[CMS] Failed to fetch CMS images, falling back to Pexels:', cmsError);
+          }
         }
 
         // Step 2: For rooms without CMS images, fetch from Pexels API
@@ -228,8 +228,11 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
           imageCache[displayStyle] = finalImages; // Save to cache
         }
       } finally {
-        // ALWAYS clear loading state, even if aborted
-        setLoading(false);
+        // A superseded request must not overwrite the loading state of the
+        // newer style request.
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -337,7 +340,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
                 >
                   {isRTL ? "ابدأ رحلة التصميم" : "Start Design Journey"}
                 </Link>
-                <span className="mt-6 text-[10px] font-medium text-white/40">{isRTL ? "عقد تنفيذ مضمون" : "Guaranteed Execution Contract"}</span>
+                <span className="mt-6 text-[10px] font-medium text-white/40">{isRTL ? "تفاصيل التنفيذ حسب نطاق العمل" : "Execution details follow the agreed scope"}</span>
               </div>
             </div>
 

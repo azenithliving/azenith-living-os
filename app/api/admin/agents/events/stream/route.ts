@@ -4,75 +4,59 @@
  * Real-time event stream for agent notifications
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from "next/server";
 
-export const runtime = 'edge';
-export const dynamic = 'force-dynamic';
+import { requireAdminApi } from "@/lib/admin-api-guard";
+import { resolveAdminCompanyId } from "@/lib/admin-company";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const companyId = searchParams.get('company_id');
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
 
+  // The server, rather than the caller, determines the company scope.
+  const companyId = await resolveAdminCompanyId();
   if (!companyId) {
-    return NextResponse.json(
-      { success: false, error: 'company_id required' },
-      { status: 400 }
-    );
+    return new Response("event: error\ndata: {\"message\":\"No company is configured\"}\n\n", {
+      status: 503,
+      headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
+    });
   }
 
-  // Create a new ReadableStream for SSE
+  let closeStream = () => undefined;
   const stream = new ReadableStream({
     start(controller) {
       const encoder = new TextEncoder();
+      let closed = false;
 
-      // Send initial connection message
       controller.enqueue(
-        encoder.encode(`event: connected\ndata: ${JSON.stringify({ company_id: companyId, timestamp: new Date().toISOString() })}\n\n`)
+        encoder.encode(`event: connected\ndata: ${JSON.stringify({ company_id: companyId, mode: "heartbeat_only", timestamp: new Date().toISOString() })}\n\n`)
       );
 
-      // Keep connection alive with heartbeat
       const heartbeatInterval = setInterval(() => {
-        try {
-          controller.enqueue(encoder.encode(`event: heartbeat\ndata: ${Date.now()}\n\n`));
-        } catch {
-          clearInterval(heartbeatInterval);
-        }
+        if (closed) return;
+        controller.enqueue(encoder.encode(`event: heartbeat\ndata: ${Date.now()}\n\n`));
       }, 30000);
 
-      // Simulate event push (in production, this would come from Supabase realtime or Redis)
-      const eventInterval = setInterval(() => {
-        try {
-          const mockEvent = {
-            type: ['task_completed', 'device_online', 'approval_needed', 'task_stuck'][Math.floor(Math.random() * 4)],
-            timestamp: new Date().toISOString(),
-            data: {
-              company_id: companyId,
-              message: 'New event from agent system'
-            }
-          };
-          controller.enqueue(
-            encoder.encode(`event: agent_event\ndata: ${JSON.stringify(mockEvent)}\n\n`)
-          );
-        } catch {
-          clearInterval(eventInterval);
-          clearInterval(heartbeatInterval);
-        }
-      }, 10000);
-
-      // Cleanup on close
-      request.signal.addEventListener('abort', () => {
+      closeStream = () => {
+        if (closed) return;
+        closed = true;
         clearInterval(heartbeatInterval);
-        clearInterval(eventInterval);
-        controller.close();
-      });
-    }
+        try { controller.close(); } catch { /* already closed */ }
+      };
+      request.signal.addEventListener("abort", closeStream, { once: true });
+    },
+    cancel() {
+      closeStream();
+    },
   });
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
     },
   });
 }

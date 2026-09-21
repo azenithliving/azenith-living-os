@@ -7,10 +7,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
+import { requireAdminApi } from '@/lib/admin-api-guard';
 
 // GET - Check emergency stop status
 export async function GET(request: NextRequest) {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const { searchParams } = new URL(request.url);
     const companyId = await resolveAdminCompanyId(searchParams.get('company_id'));
 
@@ -80,12 +84,19 @@ export async function GET(request: NextRequest) {
 // POST - Trigger or release emergency stop
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { company_id, action, reason, triggered_by, released_by } = body;
+    const { user, unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!company_id || !action) {
+    const body = await request.json();
+    const { action, reason } = body;
+    const companyId = await resolveAdminCompanyId(body.company_id);
+
+    if (!companyId || !action) {
       return NextResponse.json(
-        { success: false, error: 'company_id and action required' },
+        { success: false, error: 'A configured company and action are required' },
         { status: 400 }
       );
     }
@@ -101,7 +112,7 @@ export async function POST(request: NextRequest) {
           updated_at: timestamp,
           error_message: 'Cancelled by emergency stop'
         })
-        .eq('company_id', company_id)
+        .eq('company_id', companyId)
         .in('status', ['running', 'queued', 'pending']);
 
       if (cancelError) {
@@ -115,7 +126,7 @@ export async function POST(request: NextRequest) {
           released_at: timestamp
         })
         .is('released_at', null)
-        .eq('company_id', company_id);
+        .eq('company_id', companyId);
 
       if (unlockError) {
         console.error('Error releasing locks:', unlockError);
@@ -125,9 +136,9 @@ export async function POST(request: NextRequest) {
       const { data, error } = await supabaseServer
         .from('emergency_stop_state')
         .insert({
-          company_id,
+          company_id: companyId,
           is_active: true,
-          triggered_by: triggered_by || 'system',
+          triggered_by: user.id,
           triggered_at: timestamp,
           reason: reason || 'Manual emergency stop'
         })
@@ -144,11 +155,11 @@ export async function POST(request: NextRequest) {
 
       // Create alert event
       await supabaseServer.from('agent_events').insert({
-        company_id,
+        company_id: companyId,
         event_type: 'emergency_stop',
         severity: 'critical',
         message: `Emergency stop triggered: ${reason}`,
-        metadata: { triggered_by, timestamp }
+        metadata: { triggered_by: user.id, timestamp }
       });
 
       return NextResponse.json({
@@ -163,10 +174,10 @@ export async function POST(request: NextRequest) {
         .from('emergency_stop_state')
         .update({
           is_active: false,
-          released_by: released_by || 'system',
+          released_by: user.id,
           released_at: timestamp
         })
-        .eq('company_id', company_id)
+        .eq('company_id', companyId)
         .eq('is_active', true)
         .select()
         .single();
@@ -181,11 +192,11 @@ export async function POST(request: NextRequest) {
 
       // Create release event
       await supabaseServer.from('agent_events').insert({
-        company_id,
+        company_id: companyId,
         event_type: 'system_alert',
         severity: 'info',
         message: 'Emergency stop released. Agents can resume.',
-        metadata: { released_by, timestamp }
+        metadata: { released_by: user.id, timestamp }
       });
 
       return NextResponse.json({

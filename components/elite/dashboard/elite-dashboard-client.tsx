@@ -310,7 +310,7 @@ export function EliteDashboardClient({ data, activeTab, onLogout }: EliteDashboa
                       )}
 
                       <Link
-                        href="/contact"
+                        href="/request"
                         className="group flex items-center justify-between p-6 bg-[#1A1A1B] border border-white/10 rounded-2xl hover:border-[#C5A059]/30 transition-all"
                       >
                         <div className="flex items-center gap-4">
@@ -444,7 +444,15 @@ export function EliteDashboardClient({ data, activeTab, onLogout }: EliteDashboa
                     <h2 className="text-2xl font-bold text-white mb-6">المستندات</h2>
                     <div className="text-center py-12">
                       <FileText className="h-12 w-12 text-white/20 mx-auto mb-4" />
-                      <p className="text-white/40">المستندات ستكون متاحة قريباً</p>
+                      <p className="text-white/40 mb-5">
+                        لا توجد مستندات مشتركة في مساحة مشروعك حاليًا.
+                      </p>
+                      <Link
+                        href="/request"
+                        className="inline-flex items-center justify-center rounded-xl border border-[#C5A059]/40 px-6 py-3 font-medium text-[#E5C170] transition-colors hover:bg-[#C5A059]/10"
+                      >
+                        اطلب مستندات مشروعك من الفريق
+                      </Link>
                     </div>
                   </motion.div>
                 )}
@@ -461,9 +469,12 @@ export function EliteDashboardClient({ data, activeTab, onLogout }: EliteDashboa
                     <div className="text-center py-12">
                       <Calendar className="h-12 w-12 text-white/20 mx-auto mb-4" />
                       <p className="text-white/40 mb-4">لا توجد اجتماعات مجدولة</p>
-                      <button className="px-6 py-3 bg-[#C5A059] text-black rounded-xl font-medium hover:bg-[#E5C170] transition-colors">
+                      <Link
+                        href="/request"
+                        className="inline-flex rounded-xl bg-[#C5A059] px-6 py-3 font-medium text-black transition-colors hover:bg-[#E5C170]"
+                      >
                         جدولة اجتماع جديد
-                      </button>
+                      </Link>
                     </div>
                   </motion.div>
                 )}
@@ -479,7 +490,7 @@ export function EliteDashboardClient({ data, activeTab, onLogout }: EliteDashboa
                     <h2 className="text-2xl font-bold text-white mb-6">الدعم</h2>
                     <div className="space-y-4">
                       <Link 
-                        href="/contact"
+                        href="/request"
                         className="flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center gap-4">

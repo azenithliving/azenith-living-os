@@ -42,7 +42,7 @@ export function GlobalAssistantDock() {
     },
   ]);
   const seenAlerts = useRef<Set<string>>(new Set());
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const hidden = pathname?.startsWith("/gate") || pathname?.includes("/login");
   const latestAssistant = useMemo(
@@ -118,7 +118,12 @@ export function GlobalAssistantDock() {
   useEffect(() => {
     if (open) {
       setUnread(0);
-      scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+      if (messagesContainerRef.current) {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }
     }
   }, [messages, open]);
 
@@ -217,7 +222,7 @@ export function GlobalAssistantDock() {
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3 text-xs">
+          <div ref={messagesContainerRef} className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3 text-xs">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -244,7 +249,6 @@ export function GlobalAssistantDock() {
                 )}
               </div>
             ))}
-            <div ref={scrollRef} />
           </div>
 
           <form

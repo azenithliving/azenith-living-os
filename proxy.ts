@@ -8,6 +8,7 @@ import {
   checkRateLimit,
 } from "@/lib/rate-limit";
 import { isValidRoomSlug } from "@/lib/rooms-catalog";
+import { isAuthorizedAdminEmail } from "@/lib/admin-access";
 
 /**
  * SOVEREIGN PROXY ENGINE v1.0
@@ -22,7 +23,8 @@ export async function proxy(request: NextRequest) {
   const isAdminLoginApi =
     pathname === "/api/admin/verify-2fa" ||
     pathname === "/api/admin/gate/validate" ||
-    pathname === "/api/admin/gate/health";
+    pathname === "/api/admin/gate/health" ||
+    pathname === "/api/admin/gate/reset-2fa";
 
   const applyResponseHeaders = (response: NextResponse) => {
     if (!rateLimitHeaders) return response;
@@ -148,16 +150,22 @@ export async function proxy(request: NextRequest) {
   // every matched request, so doing network-backed auth for public assets/pages
   // can make local development appear to hang.
   const { supabaseResponse, user } = await updateSession(request);
+  const isAuthorizedAdmin = isAuthorizedAdminEmail(user?.email);
+  const hasValidInternalKey = Boolean(
+    process.env.INTERNAL_API_KEY &&
+    request.headers.get("x-internal-key") === process.env.INTERNAL_API_KEY
+  );
 
   // Admin API Protection
-  const isGenesisApi = pathname === "/api/admin/eternal/genesis";
-  const isWhatsAppApi = pathname.startsWith("/api/admin/whatsapp");
-  const isLocalhost = request.headers.get("host")?.includes("localhost");
-
-  if (pathname.startsWith("/api/admin") && !isAdminLoginApi && !user && !((isGenesisApi || isWhatsAppApi) && isLocalhost)) {
+  if (
+    pathname.startsWith("/api/admin") &&
+    !isAdminLoginApi &&
+    !isAuthorizedAdmin &&
+    !hasValidInternalKey
+  ) {
     return applyResponseHeaders(new NextResponse(
-      JSON.stringify({ success: false, error: "Unauthorized" }),
-      { status: 401, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ success: false, error: user ? "Forbidden" : "Unauthorized" }),
+      { status: user ? 403 : 401, headers: { "Content-Type": "application/json" } }
     ));
   }
 
@@ -166,7 +174,7 @@ export async function proxy(request: NextRequest) {
     (pathname.startsWith("/admin-gate") || pathname.startsWith("/admin")) &&
     !pathname.startsWith("/admin-gate/login") &&
     !pathname.startsWith("/admin/verify-2fa") &&
-    !user
+    !isAuthorizedAdmin
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/gate/login";
@@ -178,7 +186,7 @@ export async function proxy(request: NextRequest) {
     return applyResponseHeaders(redirectResponse);
   }
 
-  if ((pathname.startsWith("/gate/login") || pathname.startsWith("/admin-gate/login")) && user) {
+  if ((pathname.startsWith("/gate/login") || pathname.startsWith("/admin-gate/login")) && isAuthorizedAdmin) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
     const redirectResponse = NextResponse.redirect(url);
@@ -189,7 +197,7 @@ export async function proxy(request: NextRequest) {
     return applyResponseHeaders(redirectResponse);
   }
 
-  if (pathname.startsWith("/api/admin") && user) {
+  if (pathname.startsWith("/api/admin") && user && isAuthorizedAdmin) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-admin-user-id", user.id);
     if (user.email) requestHeaders.set("x-admin-user-email", user.email);

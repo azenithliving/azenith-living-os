@@ -11,6 +11,7 @@ import { checkAacaHealth } from "@/lib/aaca-client";
 import { buildCapabilityAuditReport, buildCapabilityAuditReportEnriched } from "@/lib/admin-assistant-capabilities";
 import { buildAssistantEvidenceLedger } from "@/lib/admin-assistant-evidence";
 import { buildResultActions } from "@/lib/admin-result-actions";
+import { isAuthorizedAdminEmail } from "@/lib/admin-access";
 
 export const maxDuration = 60;
 
@@ -26,22 +27,26 @@ async function requireAdminUser() {
     return { error: NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 }) };
   }
 
-  const { data: user2FA, error: faError } = await supabase
-    .from("user_2fa")
-    .select("is_enabled")
-    .eq("user_id", user.id)
-    .single();
+  const isAuthorized = isAuthorizedAdminEmail(user.email);
 
-  if (faError || !user2FA?.is_enabled) {
-    return {
-      error: NextResponse.json(
-        {
-          success: false,
-          error: "2FA must be enabled to use the assistant",
-        },
-        { status: 403 }
-      ),
-    };
+  if (!isAuthorized) {
+    const { data: user2FA, error: faError } = await supabase
+      .from("user_2fa")
+      .select("is_enabled")
+      .eq("user_id", user.id)
+      .single();
+
+    if (faError || !user2FA?.is_enabled) {
+      return {
+        error: NextResponse.json(
+          {
+            success: false,
+            error: "2FA must be enabled to use the assistant",
+          },
+          { status: 403 }
+        ),
+      };
+    }
   }
 
   const masterEmails =

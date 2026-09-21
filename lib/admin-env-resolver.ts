@@ -7,7 +7,7 @@
  * المتغيرات التي يحلّها:
  *   - MASTER_ADMIN_EMAILS   → أول user بدور admin/owner في جدول users
  *   - MASTER_COMPANY_ID     → أول company_id في جدول companies
- *   - CRON_SECRET           → مشتق من INTERNAL_API_KEY
+ *   - CRON_SECRET           → من البيئة فقط؛ لا يُشتق سر بديل
  *   - NEXT_PUBLIC_SITE_URL  → من PRIMARY_DOMAIN أو site_settings
  */
 
@@ -99,16 +99,10 @@ export async function resolveMasterCompanyId(): Promise<string | null> {
 }
 
 /**
- * يُعيد CRON_SECRET — من .env أو مشتق من INTERNAL_API_KEY
+ * يُعيد CRON_SECRET من البيئة فقط. لا يُشتق سر يمكن تخمينه.
  */
 export function resolveCronSecret(): string {
-  const envVal = process.env.CRON_SECRET;
-  if (envVal?.trim()) return envVal.trim();
-
-  // اشتق من INTERNAL_API_KEY (موجود دائماً)
-  const base = process.env.INTERNAL_API_KEY || process.env.NEXT_PUBLIC_INTERNAL_API_KEY || "fallback-secret";
-  // خذ أول 32 حرف وأضف prefix للتمييز
-  return `cron-${base.slice(0, 28)}`;
+  return process.env.CRON_SECRET?.trim() || "";
 }
 
 /**
@@ -198,9 +192,6 @@ export async function initializeAdminEnv(): Promise<{
   }
   if (companyId && !process.env.MASTER_COMPANY_ID) {
     process.env.MASTER_COMPANY_ID = companyId;
-  }
-  if (!process.env.CRON_SECRET) {
-    process.env.CRON_SECRET = resolveCronSecret();
   }
 
   _resolvedOnce = true;

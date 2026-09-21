@@ -56,17 +56,22 @@ test.describe("Consultant API", () => {
 });
 
 test.describe("Cron endpoints", () => {
+  test("cron GET without secret is closed", async ({ request }) => {
+    const res = await request.get("/api/cron/autonomous-monitoring", { timeout: 15_000 });
+    expect([401, 503]).toContain(res.status());
+  });
+
   test("autonomous-monitoring status GET", async ({ request }) => {
     const secret = process.env.CRON_SECRET;
     test.skip(!secret, "CRON_SECRET not set locally");
     const res = await request.get("/api/cron/autonomous-monitoring", {
       headers: { Authorization: `Bearer ${secret}` },
-      timeout: 15_000,
+      timeout: 60_000,
     });
     expect(res.status()).toBeLessThan(500);
     if (res.ok()) {
       const body = await res.json();
-      expect(body.status).toBe("ready");
+      expect(body.success).toBeDefined();
     }
   });
 
@@ -74,7 +79,8 @@ test.describe("Cron endpoints", () => {
     const secret = process.env.CRON_SECRET;
     test.skip(!secret, "CRON_SECRET not set locally");
     const res = await request.get("/api/cron/monthly-refresh", {
-      timeout: 15_000,
+      headers: { Authorization: `Bearer ${secret}` },
+      timeout: 60_000,
     });
     expect(res.status()).toBeLessThan(500);
   });

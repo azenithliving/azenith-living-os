@@ -1,43 +1,18 @@
+import { NextResponse } from "next/server";
+import { requireAdminApi } from "@/lib/admin-api-guard";
+
 /**
- * API Route: /api/test-harvest
- * Test endpoint for AI Orchestrator - Groq API validation
+ * Diagnostic Groq ping. Previously public and advertised key status.
  */
+export async function GET() {
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
 
-import { NextRequest, NextResponse } from "next/server";
-import { aiOrchestrator } from "@/lib/ai-orchestrator";
-
-export async function GET(request: NextRequest) {
-  console.log("\n🔥 AI Orchestrator Test API triggered");
-
-  try {
-    // Check API key status
-    const keyStatus = await aiOrchestrator.getKeyStatus();
-
-    // Test Groq API with a simple prompt
-    const testPrompt = "Say 'Azenith Living AI is active' and list 3 luxury interior design keywords.";
-    const groqResult = await aiOrchestrator.fastText(testPrompt);
-
-    return NextResponse.json({
-      success: groqResult.success,
-      keyStatus: {
-        groq: keyStatus.groqConfigured,
-        openRouter: keyStatus.openRouterConfigured,
-        mistral: keyStatus.mistralConfigured,
-      },
-      groqTest: {
-        success: groqResult.success,
-        content: groqResult.content,
-        error: groqResult.error,
-      },
-      timestamp: new Date().toISOString(),
-      diagnostic: !groqResult.success,
-    }, { status: 200 });
-  } catch (error) {
-    console.error("❌ AI Orchestrator test failed:", error);
-    return NextResponse.json({
+  return NextResponse.json(
+    {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-      timestamp: new Date().toISOString(),
-    }, { status: 500 });
-  }
+      error: "مسار الاختبار العام أُغلق. افحص مفاتيح الذكاء من لوحة الإدارة المهيأة.",
+    },
+    { status: 410 },
+  );
 }

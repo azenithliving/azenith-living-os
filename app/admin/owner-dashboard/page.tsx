@@ -19,6 +19,7 @@ interface DashboardData {
     id: string;
     type: string;
     title: string;
+    description?: string;
     requested_by: string;
     amount?: number;
   }>;
@@ -43,40 +44,48 @@ export default function OwnerDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedApproval, setExpandedApproval] = useState<string | null>(null);
+  const [approvalAction, setApprovalAction] = useState<string | null>(null);
+  const [approvalError, setApprovalError] = useState<string | null>(null);
 
   async function fetchDashboardData() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/admin/owner/dashboard?company_id=demo');
+      const response = await fetch('/api/admin/owner/dashboard', { cache: 'no-store' });
       if (!response.ok) throw new Error('Failed to fetch dashboard data');
       const result = await response.json();
       
       if (result.success) {
+        const dashboard = result.data || {};
         setData({
           orders_summary: {
-            pending_orders: result.data.today?.orders_pending || 0,
-            in_production: result.data.today?.orders_in_production || 0,
-            ready_for_delivery: result.data.today?.orders_ready || 0,
-            delivered_this_month: result.data.this_month?.completed_orders || 0,
+            pending_orders: dashboard.today?.orders_pending || 0,
+            in_production: dashboard.today?.orders_in_production || 0,
+            ready_for_delivery: dashboard.today?.orders_ready || 0,
+            delivered_this_month: dashboard.this_month?.completed_orders || 0,
           },
           production_status: {
-            active_jobs: result.data.today?.orders_in_production || 0,
-            completed_today: 0,
-            delayed_jobs: result.data.alerts?.filter((a: any) => a.severity === 'high').length || 0,
+            active_jobs: dashboard.today?.orders_in_production || 0,
+            completed_today: dashboard.this_month?.completed_orders || 0,
+            delayed_jobs: dashboard.alerts?.filter((alert: { severity?: string }) => alert.severity === 'critical' || alert.severity === 'high').length || 0,
           },
-          pending_approvals: result.data.approvals?.pending || [],
+          pending_approvals: dashboard.pending_decisions || [],
           revenue_stats: {
-            this_month_revenue: result.data.this_month?.total_revenue || 0,
-            this_month_profit: result.data.this_month?.estimated_profit || 0,
-            pending_payments: result.data.revenue?.pending_payments || 0,
+            this_month_revenue: dashboard.this_month?.total_revenue || 0,
+            this_month_profit: dashboard.this_month?.estimated_profit || 0,
+            pending_payments: dashboard.today?.payments_due || 0,
           },
           agent_stats: {
-            prime_tasks_completed: result.data.agents?.prime?.completed_tasks || 0,
-            vanguard_tasks_completed: result.data.agents?.vanguard?.completed_tasks || 0,
-            active_conversations: result.data.agents?.active_conversations || 0,
+            prime_tasks_completed: dashboard.agent_performance?.prime?.completed_tasks || 0,
+            vanguard_tasks_completed: dashboard.agent_performance?.vanguard?.completed_tasks || 0,
+            active_conversations: dashboard.agent_performance?.active_devices || 0,
           },
-          alerts: result.data.alerts || [],
+          alerts: (dashboard.alerts || []).map((alert: { event_type?: string; message?: string; severity?: string }) => ({
+            type: alert.event_type || 'system',
+            message: alert.message || 'تنبيه نظام بدون وصف',
+            severity: alert.severity === 'high' ? 'critical' : alert.severity === 'critical' ? 'critical' : alert.severity === 'warning' ? 'warning' : 'info',
+          })),
         });
       } else {
         throw new Error(result.error || 'Unknown error');
@@ -88,6 +97,35 @@ export default function OwnerDashboardPage() {
       setLoading(false);
     }
   }
+
+  async function decideApproval(approvalId: string, decision: 'approved' | 'rejected') {
+    setApprovalAction(`${approvalId}:${decision}`);
+    setApprovalError(null);
+
+    try {
+      const response = await fetch('/api/admin/owner/approval/decision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approval_id: approvalId, decision }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'تعذر تسجيل القرار.');
+      }
+      setExpandedApproval(null);
+      await fetchDashboardData();
+    } catch (decisionError) {
+      setApprovalError(decisionError instanceof Error ? decisionError.message : 'تعذر تسجيل القرار.');
+    } finally {
+      setApprovalAction(null);
+    }
+  }
+
+  const workflowTotal =
+    (data?.orders_summary.pending_orders || 0) +
+    (data?.orders_summary.in_production || 0) +
+    (data?.orders_summary.ready_for_delivery || 0) +
+    (data?.orders_summary.delivered_this_month || 0);
 
   useEffect(() => {
     fetchDashboardData();
@@ -155,7 +193,7 @@ export default function OwnerDashboardPage() {
           color="gold"
         />
         <MetricCard
-          title="الطلبات الجديدة"
+          title="الطلبات المعلّقة"
           value={data?.orders_summary.pending_orders || 0}
           icon="📦"
           color="blue"
@@ -191,7 +229,7 @@ export default function OwnerDashboardPage() {
               </div>
               <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl text-center group-hover:border-emerald-500/20 transition-all">
                 <p className="text-4xl font-black text-emerald-400 mb-1">{data?.production_status.completed_today || 0}</p>
-                <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">منجز اليوم</p>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">منجز الشهر</p>
               </div>
               <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl text-center group-hover:border-rose-500/20 transition-all">
                 <p className="text-4xl font-black text-rose-400 mb-1">{data?.production_status.delayed_jobs || 0}</p>
@@ -207,10 +245,10 @@ export default function OwnerDashboardPage() {
               التدفق التشغيلي (Operational Flow)
             </h2>
             <div className="space-y-4">
-              <OrderStatusRow label="قيد المراجعة" count={data?.orders_summary.pending_orders || 0} color="gold" progress={30} />
-              <OrderStatusRow label="خط الإنتاج" count={data?.orders_summary.in_production || 0} color="blue" progress={65} />
-              <OrderStatusRow label="الجاهزية للشحن" count={data?.orders_summary.ready_for_delivery || 0} color="emerald" progress={90} />
-              <OrderStatusRow label="اكتمال الدورة" count={data?.orders_summary.delivered_this_month || 0} color="purple" progress={100} />
+              <OrderStatusRow label="قيد المراجعة" count={data?.orders_summary.pending_orders || 0} color="gold" progress={workflowTotal ? Math.round(((data?.orders_summary.pending_orders || 0) / workflowTotal) * 100) : 0} />
+              <OrderStatusRow label="خط الإنتاج" count={data?.orders_summary.in_production || 0} color="blue" progress={workflowTotal ? Math.round(((data?.orders_summary.in_production || 0) / workflowTotal) * 100) : 0} />
+              <OrderStatusRow label="الجاهزية للشحن" count={data?.orders_summary.ready_for_delivery || 0} color="emerald" progress={workflowTotal ? Math.round(((data?.orders_summary.ready_for_delivery || 0) / workflowTotal) * 100) : 0} />
+              <OrderStatusRow label="منجز هذا الشهر" count={data?.orders_summary.delivered_this_month || 0} color="purple" progress={workflowTotal ? Math.round(((data?.orders_summary.delivered_this_month || 0) / workflowTotal) * 100) : 0} />
             </div>
           </div>
         </div>
@@ -234,9 +272,40 @@ export default function OwnerDashboardPage() {
                         <span className="text-xs font-black text-[#C5A059]">{approval.amount.toLocaleString()} ج</span>
                       )}
                     </div>
-                    <button className="w-full mt-4 py-2 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-[#C5A059] hover:text-black transition-all">
-                      فحص الطلب
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setApprovalError(null);
+                        setExpandedApproval((current) => current === approval.id ? null : approval.id);
+                      }}
+                      className="w-full mt-4 py-2 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-[#C5A059] hover:text-black transition-all"
+                    >
+                      {expandedApproval === approval.id ? 'إغلاق التفاصيل' : 'فحص الطلب'}
                     </button>
+                    {expandedApproval === approval.id ? (
+                      <div className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-white/70">
+                        <p>{approval.description || 'لا توجد ملاحظات إضافية لهذا الطلب.'}</p>
+                        {approvalError ? <p className="mt-2 text-rose-300">{approvalError}</p> : null}
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => void decideApproval(approval.id, 'approved')}
+                            disabled={approvalAction !== null}
+                            className="rounded-lg bg-emerald-500/20 px-3 py-2 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/30 disabled:opacity-50"
+                          >
+                            {approvalAction === `${approval.id}:approved` ? 'جارٍ الاعتماد…' : 'اعتماد'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void decideApproval(approval.id, 'rejected')}
+                            disabled={approvalAction !== null}
+                            className="rounded-lg bg-rose-500/20 px-3 py-2 text-[10px] font-bold text-rose-300 hover:bg-rose-500/30 disabled:opacity-50"
+                          >
+                            {approvalAction === `${approval.id}:rejected` ? 'جارٍ الرفض…' : 'رفض'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -257,7 +326,7 @@ export default function OwnerDashboardPage() {
             <div className="space-y-4">
               <AgentMetric label="PRIME CORE" count={data?.agent_stats.prime_tasks_completed || 0} icon="🧠" color="gold" />
               <AgentMetric label="VANGUARD AI" count={data?.agent_stats.vanguard_tasks_completed || 0} icon="💼" color="emerald" />
-              <AgentMetric label="ACTIVE COMMS" count={data?.agent_stats.active_conversations || 0} icon="💬" color="blue" />
+              <AgentMetric label="ACTIVE DEVICES" count={data?.agent_stats.active_conversations || 0} icon="💻" color="blue" />
             </div>
           </div>
 
@@ -389,4 +458,3 @@ function EmergencyStopButton() {
     </button>
   );
 }
-

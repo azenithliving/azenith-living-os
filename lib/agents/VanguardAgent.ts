@@ -3,8 +3,9 @@
  * Specializes in: customer communication, sales management, CRM, follow-ups, project management
  */
 
-import { askGroqMessages, askMistral } from "@/lib/ai-orchestrator";
+import { askGroqMessages, askMistral, askOpenRouter, askGoogle, askGoogleMessages } from "@/lib/ai-orchestrator";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { resolveAdminCompanyId } from "@/lib/admin-company";
 
 export interface VanguardTask {
   id: string;
@@ -152,6 +153,16 @@ ${message}
       return result.content;
     }
 
+    const google = await askGoogleMessages(messages, { temperature: 0.8 });
+    if (google.success && google.content) {
+      return google.content;
+    }
+
+    const openRouter = await askOpenRouter(prompt, VANGUARD_SYSTEM_PROMPT);
+    if (openRouter.success && openRouter.content) {
+      return openRouter.content;
+    }
+
     const fallback = await askMistral(prompt, { temperature: 0.8, maxTokens: 2048 });
     if (fallback.success && fallback.content) {
       return fallback.content;
@@ -247,17 +258,37 @@ ${message}
       const supabase = getSupabaseAdminClient();
       if (!supabase) return;
 
+      const resolvedCompanyId = await resolveAdminCompanyId(task.context?.company_id);
+      if (!resolvedCompanyId) return;
+
       const { data: agentProfile } = await supabase
         .from("agent_profiles")
         .select("id")
         .eq("agent_key", "vanguard")
-        .single();
+        .eq("company_id", resolvedCompanyId)
+        .maybeSingle();
 
-      if (!agentProfile) return;
+      let profileId = agentProfile?.id;
+      if (!profileId) {
+        const { data: created } = await supabase
+          .from("agent_profiles")
+          .insert({
+            company_id: resolvedCompanyId,
+            agent_key: "vanguard",
+            name: "Vanguard",
+            description: "مدير العمليات والمبيعات",
+            is_active: true,
+          })
+          .select("id")
+          .single();
+        profileId = created?.id;
+      }
+
+      if (!profileId) return;
 
       await supabase.from("agent_tasks").insert({
-        company_id: "00000000-0000-0000-0000-000000000000",
-        agent_profile_id: agentProfile.id,
+        company_id: resolvedCompanyId,
+        agent_profile_id: profileId,
         task_type: task.type,
         title: task.title,
         description: task.description,

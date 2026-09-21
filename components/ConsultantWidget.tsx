@@ -19,6 +19,15 @@ interface ConsultantResponse {
   queued?: boolean;
 }
 
+interface ClientLocation {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+  label?: string;
+  source: "browser";
+  capturedAt: string;
+}
+
 interface SessionData {
   sessionId: string;
   messages: Message[];
@@ -36,20 +45,14 @@ const HUMAN_WELCOME_RETURNING = (name: string, topic: string, isRTL: boolean) =>
     ? `أهلًا بعودتك ${name}. هل ما زلت مهتمًا بـ ${topic}؟`
     : `Welcome back ${name}. Are you still interested in ${topic}?`;
 
-const HUMAN_WELCOME_QUANTUM = (isRTL: boolean) =>
-  isRTL
-    ? "لاحظت اهتمامك بالعرض الحالي. خليني أساعدك تختار المساحة الأنسب ونحدد الخطوة العملية التالية. أي غرفة أو مشروع تفكر فيه؟"
-    : "I noticed your interest in the current offer. Let me help you choose the right space and next step. Which room or project are you considering?";
+// Precise location is requested only when a visitor explicitly asks for a
+// location-based answer.  Opening a chat must never trigger a browser
+// permission prompt or send location data unnecessarily.
+const LOCATION_REQUEST_RE = /(انا فين|أنا فين|موقعي|موقعى|فين حاليا|فين حاليًا|مكانى|مكاني|مطعم|مطاعم|كافيه|قهوة|غدا|غداء|عشا|عشاء|فطار|فطور|بيتزا|برجر|سوشي|current location|where am i|my location|restaurant|restaurants|cafe|coffee|food|eat|dinner|lunch|breakfast)/i;
 
-const HUMAN_WELCOME_THUNDER = (isRTL: boolean) =>
-  isRTL
-    ? "أهلًا بك. أقدر أساعدك بسرعة في فهم أنسب اتجاه للتصميم أو التشطيب حسب المساحة. ما نوع مشروعك؟"
-    : "Welcome. I can quickly help you understand the best design or finishing direction for your space. What is your project type?";
-
-const HUMAN_WELCOME_CONTEXTUAL = (isRTL: boolean) =>
-  isRTL
-    ? "أهلًا بك في أزينث. احكِ لي عن المساحة التي لفتت نظرك، وسأقترح عليك بداية مناسبة."
-    : "Welcome to Azenith. Tell me which space caught your eye, and I will suggest a suitable starting point.";
+function needsLocation(content: string): boolean {
+  return LOCATION_REQUEST_RE.test(content);
+}
 
 function extractHumanLastTopic(msgs: Message[]): string {
   const roomKeywords = ["غرفة", "صالة", "مطبخ", "حمام", "مكتب", "غرفة نوم", "غرفة أطفال", "دريسنج", "فيلا"];
@@ -79,6 +82,7 @@ export default function ConsultantWidget() {
   const [userName, setUserName] = useState<string | null>(null);
   const [hasLoadedSession, setHasLoadedSession] = useState(false);
   const [takeoverActive, setTakeoverActive] = useState(false);
+  const [clientLocation, setClientLocation] = useState<ClientLocation | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -87,6 +91,7 @@ export default function ConsultantWidget() {
     const storedSessionId = localStorage.getItem("azenith_session_id");
     const storedMessages = localStorage.getItem("azenith_consultant_messages");
     const storedName = localStorage.getItem("azenith_consultant_name");
+    const storedLocation = localStorage.getItem("azenith_consultant_location");
     const lastUpdate = localStorage.getItem("azenith_consultant_last_update");
 
     // Auto-expire session after 24 hours of inactivity
@@ -95,10 +100,12 @@ export default function ConsultantWidget() {
       localStorage.removeItem("azenith_session_id");
       localStorage.removeItem("azenith_consultant_messages");
       localStorage.removeItem("azenith_consultant_name");
+      localStorage.removeItem("azenith_consultant_location");
       localStorage.removeItem("azenith_consultant_last_update");
       setSessionId(null);
       setMessages([]);
       setUserName(null);
+      setClientLocation(null);
       return;
     }
 
@@ -117,6 +124,17 @@ export default function ConsultantWidget() {
 
     if (storedName) {
       setUserName(storedName);
+    }
+
+    if (storedLocation) {
+      try {
+        const parsed = JSON.parse(storedLocation) as ClientLocation;
+        if (typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
+          setClientLocation(parsed);
+        }
+      } catch {
+        localStorage.removeItem("azenith_consultant_location");
+      }
     }
   }, []);
 
@@ -141,6 +159,34 @@ export default function ConsultantWidget() {
       localStorage.setItem("azenith_consultant_name", userName);
     }
   }, [userName]);
+
+  const captureLocation = useCallback(async (): Promise<ClientLocation | null> => {
+    if (clientLocation && Date.now() - new Date(clientLocation.capturedAt).getTime() < 10 * 60 * 1000) {
+      return clientLocation;
+    }
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      return clientLocation;
+    }
+
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const nextLocation: ClientLocation = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            source: "browser",
+            capturedAt: new Date().toISOString(),
+          };
+          setClientLocation(nextLocation);
+          localStorage.setItem("azenith_consultant_location", JSON.stringify(nextLocation));
+          resolve(nextLocation);
+        },
+        () => resolve(clientLocation),
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 5 * 60 * 1000 }
+      );
+    });
+  }, [clientLocation]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -181,18 +227,6 @@ export default function ConsultantWidget() {
     return null;
   }, []);
 
-  // Fetch the latest global fate action to build contextual welcome
-  const fetchLatestFateAction = useCallback(async (): Promise<string | null> => {
-    try {
-      const res = await fetch("/api/admin/fate/latest");
-      if (res.ok) {
-        const data = await res.json();
-        return data.action || null;
-      }
-    } catch { /* silent */ }
-    return null;
-  }, []);
-
   // Send welcome message on first open
   const handleOpen = useCallback(async () => {
     setIsOpen(true);
@@ -220,21 +254,16 @@ export default function ConsultantWidget() {
       }
     }
 
-    // New user - check for active Fate Actions and build contextual greeting
+    // New user receives the same honest welcome regardless of internal admin
+    // activity. Sales operations must not fabricate urgency in the visitor UI.
     if (messages.length === 0) {
-      const latestAction = await fetchLatestFateAction();
-      let welcomeContent = HUMAN_WELCOME_NEW(isRTL);
-      if (latestAction === "QUANTUM_OFFER") welcomeContent = HUMAN_WELCOME_QUANTUM(isRTL);
-      else if (latestAction === "THUNDER") welcomeContent = HUMAN_WELCOME_THUNDER(isRTL);
-      else if (latestAction === "HALLUCINATION") welcomeContent = HUMAN_WELCOME_CONTEXTUAL(isRTL);
-
       setMessages([{
         role: "assistant",
-        content: welcomeContent,
+        content: HUMAN_WELCOME_NEW(isRTL),
         timestamp: new Date().toISOString(),
       }]);
     }
-  }, [hasLoadedSession, fetchSession, fetchLatestFateAction, messages.length, userName, isRTL]);
+  }, [hasLoadedSession, fetchSession, messages.length, userName, isRTL]);
 
   // Proactive trigger: Open chat after 15 seconds if first visit
   useEffect(() => {
@@ -249,47 +278,6 @@ export default function ConsultantWidget() {
       return () => clearTimeout(timer);
     }
   }, [handleOpen]);
-
-  // Listen for the Fate open-chat event from RealityUIProvider.
-  useEffect(() => {
-    const handleFateOpenChat = (e: Event) => {
-      const customEvent = e as CustomEvent<{ message: string }>;
-      const specialMessage = customEvent.detail?.message;
-
-      // Open the chat.
-      setIsOpen(true);
-      setHasLoadedSession(true);
-
-      if (specialMessage) {
-        // Add the injected message to the UI immediately.
-        setMessages((prev) => {
-          if (prev.some((m) => m.content === specialMessage)) return prev;
-          return [...prev, {
-            role: "assistant" as const,
-            content: specialMessage,
-            timestamp: new Date().toISOString(),
-          }];
-        });
-
-        // Persist it so the consultant can see the same context.
-        const sid = localStorage.getItem("azenith_session_id");
-        if (sid) {
-          fetch("/api/consultant/inject", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              sessionId: sid,
-              message: specialMessage,
-              source: "fate",
-            }),
-          }).catch(() => { /* silent */ });
-        }
-      }
-    };
-
-    window.addEventListener("fate:open_chat", handleFateOpenChat);
-    return () => window.removeEventListener("fate:open_chat", handleFateOpenChat);
-  }, []);
 
   // Poll for admin replies when chat is open (faster while takeover is active
   // so a human reply reaches the visitor promptly, without any UI hint)
@@ -377,6 +365,7 @@ export default function ConsultantWidget() {
     }
 
     try {
+      const latestLocation = needsLocation(content) ? await captureLocation() : null;
       const response = await fetch("/api/consultant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -385,6 +374,7 @@ export default function ConsultantWidget() {
           sessionId,
           userName: userName || undefined,
           language: currentLang,
+          location: latestLocation || undefined,
         }),
       });
 
@@ -492,6 +482,7 @@ export default function ConsultantWidget() {
                     localStorage.removeItem("azenith_session_id");
                     localStorage.removeItem("azenith_consultant_messages");
                     localStorage.removeItem("azenith_consultant_name");
+                    localStorage.removeItem("azenith_consultant_location");
                     setSessionId(null);
                     setMessages([{
                       role: "assistant",
@@ -499,6 +490,7 @@ export default function ConsultantWidget() {
                       timestamp: new Date().toISOString(),
                     }]);
                     setUserName(null);
+                    setClientLocation(null);
                   }}
                   title={isRTL ? "محادثة جديدة" : "New Chat"}
                   className="rounded-full p-1 text-white/80 transition-colors hover:bg-white/20"

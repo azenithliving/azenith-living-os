@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer, agentTasksDAL } from '@/lib/dal/unified-supabase';
+import { resolveAdminCompanyId } from '@/lib/admin-company';
 import { z } from 'zod';
 
 // التحقق من بيانات المهمة
@@ -24,7 +25,11 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'pending';
-    const companyId = searchParams.get('company_id') || '00000000-0000-0000-0000-000000000000';
+    const companyId = await resolveAdminCompanyId(searchParams.get('company_id'));
+    
+    if (!companyId) {
+      return NextResponse.json({ success: true, data: [] });
+    }
     
     let result;
     if (status === 'pending') {
@@ -71,27 +76,53 @@ export async function POST(request: NextRequest) {
     
     const data = parseResult.data;
     
-    // دور على الـ Agent
+    const resolvedCompanyId = await resolveAdminCompanyId(body.company_id);
+    if (!resolvedCompanyId) {
+      return NextResponse.json(
+        { success: false, error: 'لا توجد شركة مهيأة' },
+        { status: 422 }
+      );
+    }
+    
+    // دور على الـ Agent — أو أنشئه لأول مرة
+    let agentId: string | null = null;
     const { data: agent, error: agentError } = await supabaseServer
       .from('agent_profiles')
       .select('id')
       .eq('agent_key', data.agent_key)
-      .eq('company_id', body.company_id || '00000000-0000-0000-0000-000000000000')
+      .eq('company_id', resolvedCompanyId)
       .single();
     
-    if (agentError || !agent) {
-      return NextResponse.json(
-        { success: false, error: 'الـ Agent مش موجود' },
-        { status: 404 }
-      );
+    if (agent) {
+      agentId = agent.id;
+    } else {
+      // Agent profile does not exist for this company — auto-create it
+      const { data: created, error: createErr } = await supabaseServer
+        .from('agent_profiles')
+        .insert({
+          company_id: resolvedCompanyId,
+          agent_key: data.agent_key,
+          name: data.agent_key === 'prime' ? 'PRIME' : 'VANGUARD',
+          description: data.agent_key === 'prime' ? 'وكيل التصميم والتصنيع' : 'وكيل المبيعات والعمليات',
+          is_active: true,
+        })
+        .select('id')
+        .single();
+      if (createErr || !created) {
+        return NextResponse.json(
+          { success: false, error: 'تعذر إنشاء ملف الوكيل' },
+          { status: 500 }
+        );
+      }
+      agentId = created.id;
     }
     
     // أنشئ المهمة
     const { data: task, error } = await supabaseServer
       .from('agent_tasks')
       .insert({
-        company_id: body.company_id || '00000000-0000-0000-0000-000000000000',
-        agent_profile_id: agent.id,
+        company_id: resolvedCompanyId,
+        agent_profile_id: agentId,
         task_type: data.task_type,
         title: data.title,
         description: data.description,

@@ -1,17 +1,18 @@
-import { NextResponse } from 'next/server';
-import { runRecursiveOptimization } from '@/lib/recursive-engine';
+import { NextResponse } from "next/server";
 
+import { requireAdminApi } from "@/lib/admin-api-guard";
+
+/**
+ * Retired: recursive optimization previously made unreviewed changes through
+ * a side-channel.  Explicit reviewed decisions remain under /decision.
+ */
 export async function POST() {
-  try {
-    console.log("🚀 API: Starting recursive optimization...");
-    const result = await runRecursiveOptimization();
-    return NextResponse.json(result);
-  } catch (error: any) {
-    console.error("❌ API Error in evolve route:", error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message || String(error),
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    }, { status: 500 });
-  }
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
+
+  return NextResponse.json(
+    { success: false, error: "The unreviewed recursive-optimization endpoint has been retired." },
+    { status: 410 },
+  );
 }
+

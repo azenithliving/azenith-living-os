@@ -2,6 +2,7 @@
 
 export const ROOM_SLUG_ALIASES: Record<string, string> = {
   office: "home-office",
+  "kids-bedroom": "children-room",
   "kids-room": "children-room",
   bedroom: "master-bedroom",
   "youth-room": "teen-room",

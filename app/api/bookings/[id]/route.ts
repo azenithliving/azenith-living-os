@@ -3,12 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { getCurrentTenant } from "@/lib/tenant";
 import { processAutomation } from "@/lib/automation";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const tenant = await getCurrentTenant();
     if (!tenant) {
       return NextResponse.json(

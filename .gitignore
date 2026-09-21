@@ -37,3 +37,10 @@ scripts/audit-fleet.mjs
 scripts/audit-models.mjs
 scripts/_*.mjs
 scripts/_*.ts
+.temp_files/
+test-results/
+
+.wrongstack/
+.ua/
+*KEYS*.md
+clean.js

@@ -15,11 +15,13 @@ export function CommandConsole() {
   const [history, setHistory] = useState<CommandHistory[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState('prime');
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const consoleContainerRef = useRef<HTMLDivElement>(null);
   
-  // scroll to bottom when history changes
+  // scroll container to bottom when history changes without touching page window
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (consoleContainerRef.current) {
+      consoleContainerRef.current.scrollTop = consoleContainerRef.current.scrollHeight;
+    }
   }, [history]);
   
   async function executeCommand() {
@@ -111,7 +113,7 @@ export function CommandConsole() {
       </div>
       
       {/* History */}
-      <div className="h-64 overflow-y-auto p-4 space-y-1 text-sm">
+      <div ref={consoleContainerRef} className="h-64 overflow-y-auto p-4 space-y-1 text-sm">
         {history.length === 0 && (
           <p className="text-gray-500 italic">اكتب أمراً للبدء...</p>
         )}
@@ -140,8 +142,6 @@ export function CommandConsole() {
             <span className="animate-pulse">جاري التنفيذ...</span>
           </div>
         )}
-        
-        <div ref={bottomRef} />
       </div>
       
       {/* Input */}

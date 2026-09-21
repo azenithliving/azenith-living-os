@@ -20,6 +20,8 @@ import { QuickActionsPanel } from '@/components/admin/agents/QuickActionsPanel';
 import { ProactiveSuggestions } from '@/components/admin/agents/ProactiveSuggestions';
 import { AgentActionsFeed } from '@/components/admin/agents/AgentActionsFeed';
 import { AgentHealthPanel } from '@/components/admin/agents/AgentHealthPanel';
+import { EnterprisePipelineBar } from '@/components/admin/agents/EnterprisePipelineBar';
+import { EnterpriseScenarioModal } from '@/components/admin/agents/EnterpriseScenarioModal';
 
 type TabType = 'command' | 'assistant' | 'manufacturing' | 'teams';
 
@@ -66,27 +68,38 @@ function AgentStatusBar({ onStatusLoad }: { onStatusLoad?: (s: Record<string, Ag
     s === 'online' ? 'متاح' :
     s === 'busy'   ? 'مشغول' : 'غير متاح';
 
-  const agentColor = (key: string) =>
-    key === 'prime' ? { ring: 'border-purple-500/20', bg: 'bg-purple-500/10', text: 'text-purple-400' }
-                    : { ring: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-400' };
+  const agentColor = (key: string) => {
+    switch (key) {
+      case 'prime':    return { ring: 'border-purple-500/20', bg: 'bg-purple-500/10', text: 'text-purple-400' };
+      case 'vanguard': return { ring: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-400' };
+      case 'analyst':  return { ring: 'border-blue-500/20', bg: 'bg-blue-500/10', text: 'text-blue-400' };
+      case 'coder':    return { ring: 'border-cyan-500/20', bg: 'bg-cyan-500/10', text: 'text-cyan-400' };
+      case 'ops':      return { ring: 'border-yellow-500/20', bg: 'bg-yellow-500/10', text: 'text-yellow-400' };
+      case 'security': return { ring: 'border-red-500/20', bg: 'bg-red-500/10', text: 'text-red-400' };
+      case 'learner':  return { ring: 'border-indigo-500/20', bg: 'bg-indigo-500/10', text: 'text-indigo-400' };
+      default:         return { ring: 'border-white/10', bg: 'bg-white/5', text: 'text-white/60' };
+    }
+  };
+
+  const agentKeys = ['prime', 'vanguard', 'analyst', 'coder', 'ops', 'security', 'learner'];
 
   return (
-    <div className="flex items-center gap-3 flex-wrap">
+    <div className="flex items-center gap-2 flex-wrap">
       {loadingStatus
-        ? ['prime', 'vanguard'].map(k => (
-            <div key={k} className="h-9 w-36 bg-white/[0.03] border border-white/5 rounded-xl animate-pulse" />
+        ? agentKeys.slice(0, 3).map(k => (
+            <div key={k} className="h-9 w-28 bg-white/[0.03] border border-white/5 rounded-xl animate-pulse" />
           ))
-        : ['prime', 'vanguard'].map(key => {
+        : agentKeys.map(key => {
             const st  = statuses[key];
             const col = agentColor(key);
             return (
-              <div key={key} className={`px-4 py-2 ${col.bg} border ${col.ring} rounded-xl flex items-center gap-2`}>
+              <div key={key} className={`px-3 py-1.5 ${col.bg} border ${col.ring} rounded-xl flex items-center gap-2`}>
                 <div className={`w-2 h-2 rounded-full ${statusColor(st?.status ?? 'offline')}`} />
-                <span className={`text-xs font-bold ${col.text} uppercase tracking-widest`}>
+                <span className={`text-xs font-bold ${col.text} uppercase tracking-wider`}>
                   {key.toUpperCase()}
                 </span>
                 <span className="text-[10px] text-white/30">
-                  {st ? `${statusLabel(st.status)} · ${st.taskCount} مهمة` : '—'}
+                  {st ? `${statusLabel(st.status)} · ${st.taskCount}` : '—'}
                 </span>
               </div>
             );
@@ -102,8 +115,11 @@ export default function AgentsPage() {
   const [activeTab, setActiveTab]       = useState<TabType>('command');
   const [loading, setLoading]           = useState(false);
   const [showGroupChat, setShowGroupChat]     = useState(false);
+  const [activeChatAgent, setActiveChatAgent] = useState<string | null>(null);
   const [showPrimeChat, setShowPrimeChat]     = useState(false);
   const [showVanguardChat, setShowVanguardChat] = useState(false);
+  const [showScenarioModal, setShowScenarioModal] = useState(false);
+  const [chatInitialMission, setChatInitialMission] = useState<string | undefined>(undefined);
 
   // إحصائيات التيمز الحقيقية
   const [agentStatuses, setAgentStatuses] = useState<Record<string, AgentStatus>>({});
@@ -132,7 +148,7 @@ export default function AgentsPage() {
     if (activeTab !== 'manufacturing') return;
     (async () => {
       try {
-        const res  = await fetch('/api/admin/owner/dashboard?company_id=demo');
+        const res  = await fetch('/api/admin/owner/dashboard');
         const data = await res.json();
         if (data.success) setMetrics({
           total_orders:  data.data.this_month?.total_orders         || 0,
@@ -401,26 +417,59 @@ export default function AgentsPage() {
               ))}
             </div>
 
-            {/* بطاقات الوكلاء */}
+            {/* Enterprise Pipeline Bar */}
+            <EnterprisePipelineBar onOpenScenarioModal={() => setShowScenarioModal(true)} />
+
+            {/* إحصائيات سريعة حقيقية */}
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: 'إجمالي المهام المسجلة', value: teamLoading ? '…' : teamStats.totalTasks.toString(), color: 'purple' },
+                { label: 'مهام مكتملة اليوم',  value: teamLoading ? '…' : teamStats.completedToday.toString(), color: 'emerald' },
+                { label: 'معدل النجاح الإجمالي',   value: teamLoading ? '…' : `${teamStats.successRate}%`, color: 'amber' },
+              ].map(s => (
+                <div key={s.label} className={`rounded-2xl border p-5 bg-white/[0.02] ${
+                  s.color === 'purple'  ? 'border-purple-500/20'  :
+                  s.color === 'emerald' ? 'border-emerald-500/20' :
+                                          'border-amber-500/20'
+                }`}>
+                  <p className="text-xs text-white/40">{s.label}</p>
+                  <p className={`text-3xl font-black mt-1 ${
+                    s.color === 'purple'  ? 'text-purple-400'  :
+                    s.color === 'emerald' ? 'text-emerald-400' :
+                                            'text-amber-400'
+                  }`}>{s.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* بطاقات منظومة الوكلاء السبعة */}
             <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8">
-              <h2 className="text-lg font-black mb-6 flex items-center gap-2">
-                <Users className="w-5 h-5 text-[#C5A059]" />
-                فريق الوكلاء السبعة
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[
-                  { key: 'prime',    name: 'PRIME',    role: 'مهندس التصميم والتطوير', color: 'purple', icon: '🧠', canChat: true  },
-                  { key: 'vanguard', name: 'Vanguard', role: 'مدير العمليات والمبيعات', color: 'emerald', icon: '💼', canChat: true  },
-                  { key: 'analyst',  name: 'Analyst',  role: 'محلل البيانات والتقارير', color: 'blue',   icon: '📊', canChat: false },
-                  { key: 'coder',    name: 'Coder',    role: 'مطور الكود والتقنية',    color: 'cyan',   icon: '💻', canChat: false },
-                  { key: 'ops',      name: 'Ops',      role: 'مراقب العمليات والنظام',  color: 'yellow', icon: '⚙️', canChat: false },
-                  { key: 'security', name: 'Security', role: 'حارس الأمن والتدقيق',   color: 'red',    icon: '🛡️', canChat: false },
-                  { key: 'learner',  name: 'Learner',  role: 'محرك التعلم الذاتي',     color: 'indigo', icon: '🎓', canChat: false },
-                ].map(agent => {
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="text-lg font-black flex items-center gap-2">
+                    <Users className="w-5 h-5 text-[#C5A059]" />
+                    منظومة الوكلاء السبعة الميدانية (Autonomous Enterprise Operations)
+                  </h2>
+                  <p className="text-xs text-white/40 mt-1">
+                    كل وكيل يمثل منظومة متكاملة يقرأ معطياته من جداول Postgres ويصدر أوامر تنفيذية حقيقية 100%
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowGroupChat(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg self-start sm:self-auto cursor-pointer"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  محادثة جماعية مع الفريق
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {ENTERPRISE_AGENTS.map(agent => {
                   const st = agentStatuses[agent.key];
                   return (
                     <AgentTeamCard
                       key={agent.key}
+                      agentKey={agent.key}
                       name={agent.name}
                       role={agent.role}
                       color={agent.color}
@@ -428,25 +477,54 @@ export default function AgentsPage() {
                       status={st?.status}
                       taskCount={st?.taskCount}
                       recentActivity={st?.recentActivity}
-                      onChat={agent.canChat
-                        ? () => agent.key === 'prime' ? setShowPrimeChat(true) : setShowVanguardChat(true)
-                        : undefined}
+                      inputs={agent.inputs}
+                      outputs={agent.outputs}
+                      missions={agent.missions}
+                      onChat={() => {
+                        setChatInitialMission(undefined);
+                        setActiveChatAgent(agent.key);
+                      }}
+                      onMissionClick={(missionPrompt) => {
+                        setChatInitialMission(missionPrompt);
+                        setActiveChatAgent(agent.key);
+                      }}
                     />
                   );
                 })}
               </div>
             </div>
 
-            {/* محادثة مباشرة PRIME */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChatPanel agentKey="prime" agentColor="purple" />
-              <ChatPanel agentKey="vanguard" agentColor="emerald" />
+            {/* غرف العمليات المباشرة PRIME و Vanguard */}
+            <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 space-y-6">
+              <div>
+                <h3 className="text-base font-black flex items-center gap-2 text-white">
+                  <Activity className="w-5 h-5 text-[#C5A059]" />
+                  غرف العمليات الميدانية السريعة (Live Field Operations Consoles)
+                </h3>
+                <p className="text-xs text-white/40 mt-1">
+                  قنوات اتصال فوري ومباشر مع كبير الوكلاء التنفيذيين PRIME وقائد العمليات Vanguard لمتابعة المهام اللحظية دون نوافذ منبثقة
+                </p>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ChatPanel agentKey="prime" agentColor="purple" />
+                <ChatPanel agentKey="vanguard" agentColor="emerald" />
+              </div>
             </div>
           </div>
         )}
       </div>
 
       {/* Chat Neural Overlays */}
+      {activeChatAgent && (
+        <div className="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl flex items-center justify-center p-6" onClick={() => setActiveChatAgent(null)}>
+          <div className="w-full max-w-2xl bg-[#111] border border-white/20 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+            <ChatPanel 
+              agentKey={activeChatAgent} 
+              initialMessage={chatInitialMission}
+            />
+          </div>
+        </div>
+      )}
       {showPrimeChat && (
         <div className="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl flex items-center justify-center p-6" onClick={() => setShowPrimeChat(false)}>
           <div className="w-full max-w-2xl bg-[#111] border border-purple-500/30 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -468,6 +546,12 @@ export default function AgentsPage() {
           </div>
         </div>
       )}
+
+      {/* Enterprise Scenario Modal */}
+      <EnterpriseScenarioModal
+        isOpen={showScenarioModal}
+        onClose={() => setShowScenarioModal(false)}
+      />
     </div>
   );
 }
@@ -507,21 +591,137 @@ function MetricCard({
   );
 }
 
+interface EnterpriseAgentConfig {
+  key: string;
+  name: string;
+  role: string;
+  color: string;
+  icon: string;
+  inputs: string[];
+  outputs: string[];
+  missions: { label: string; prompt: string }[];
+}
+
+const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
+  {
+    key: 'prime',
+    name: 'PRIME',
+    role: 'كبير مهندسي التصميم والتصنيع الذكي',
+    color: 'purple',
+    icon: '🧠',
+    inputs: ['inventory_items', 'production_jobs', 'sales_orders'],
+    outputs: ['كشف المواد BOM', 'حساب الهدر 12%', 'أوامر تشغيل'],
+    missions: [
+      { label: 'حساب BOM لصالون إمبراطوري', prompt: 'احسب BOM لصالون إمبراطوري' },
+      { label: 'فحص مخزون خامات التصنيع', prompt: 'فحص مخزون خامات التصنيع' },
+      { label: 'أمر تشغيل جديد بالمصنع', prompt: 'إنشاء أمر تشغيل جديد بالمصنع' },
+    ],
+  },
+  {
+    key: 'vanguard',
+    name: 'Vanguard',
+    role: 'مدير العمليات التجارية ونمو المبيعات',
+    color: 'emerald',
+    icon: '💼',
+    inputs: ['leads', 'sales_orders', 'visitor_telemetry'],
+    outputs: ['تأهيل العملاء VIP', 'عقود أوامر البيع', 'تحصيل العربون'],
+    missions: [
+      { label: 'مسح وتأهيل العملاء الجدد', prompt: 'اعرض قائمة العملاء الجدد ومستويات اهتمامهم' },
+      { label: 'تحليل فرص الإيرادات المعلقة', prompt: 'حلل فرص الإيرادات المعلقة في آخر 30 يوماً' },
+      { label: 'استعراض أوامر البيع المعتمدة', prompt: 'اعرض أوامر البيع المعتمدة' },
+    ],
+  },
+  {
+    key: 'analyst',
+    name: 'Analyst',
+    role: 'كبير محللي البيانات والجدوى المالية',
+    color: 'blue',
+    icon: '📊',
+    inputs: ['sales_orders', 'inventory_items', 'payments'],
+    outputs: ['هوامش الأرباح الصافية', 'مؤشرات الأداء اللحظية', 'توقعات التدفق'],
+    missions: [
+      { label: 'تحليل هوامش الأرباح الحالية', prompt: 'تحليل هوامش الأرباح الحالية' },
+      { label: 'المؤشرات اللحظية في 24 ساعة', prompt: 'المؤشرات اللحظية في 24 ساعة' },
+      { label: 'تحليل الإيرادات التراكمية', prompt: 'تحليل الإيرادات' },
+    ],
+  },
+  {
+    key: 'coder',
+    name: 'Coder',
+    role: 'مهندس المنصة والأنظمة البرمجية',
+    color: 'cyan',
+    icon: '💻',
+    inputs: ['مسارات الـ API (182)', 'كود المنظومة', 'اتصالات DB'],
+    outputs: ['فحص صحة الـ Endpoints', 'سلامة البنية البرمجية', 'تقارير الأخطاء'],
+    missions: [
+      { label: 'فحص صحة النظام التقني', prompt: 'فحص صحة النظام التقني' },
+      { label: 'فحص مسارات الـ API الرئيسية', prompt: 'فحص مسارات الـ API' },
+      { label: 'تدقيق سرعة الاستجابة والأداء', prompt: 'تدقيق سرعة الأداء' },
+    ],
+  },
+  {
+    key: 'ops',
+    name: 'Ops',
+    role: 'مراقب العمليات والبنية التحتية',
+    color: 'yellow',
+    icon: '⚙️',
+    inputs: ['backups', 'system_telemetry', 'cloudflare/cdn'],
+    outputs: ['لقطات نسخ احتياطي مشفرة', 'تدقيق سرعة LCP', 'جاهزية 99.9%'],
+    missions: [
+      { label: 'أخذ نسخة احتياطية فورية', prompt: 'أخذ نسخة احتياطية فورية' },
+      { label: 'استعراض سجل النسخ الاحتياطية', prompt: 'استعراض سجل النسخ الاحتياطية' },
+      { label: 'تدقيق سرعة الأداء العميقة', prompt: 'تدقيق سرعة الأداء العميقة' },
+    ],
+  },
+  {
+    key: 'security',
+    name: 'Security',
+    role: 'حارس الأمن والامتثال السيبراني',
+    color: 'red',
+    icon: '🛡️',
+    inputs: ['api_keys (1240)', 'immutable_command_log', 'audit_logs'],
+    outputs: ['تدقيق صلاحيات المفاتيح', 'كشف الثغرات والـ SQLi', 'شهادة الامتثال'],
+    missions: [
+      { label: 'فحص مفاتيح الـ API وصلاحياتها', prompt: 'فحص مفاتيح الـ API' },
+      { label: 'تدقيق الأمان والامتثال الشامل', prompt: 'تدقيق الأمان والامتثال' },
+      { label: 'فحص سجل الأوامر المحصن', prompt: 'فحص سجل الأوامر المحصن' },
+    ],
+  },
+  {
+    key: 'learner',
+    name: 'Learner',
+    role: 'محرك التكيف والتعلم المعرفي الذاتي',
+    color: 'indigo',
+    icon: '🎓',
+    inputs: ['agent_memory', 'agent_cognitive_weights', 'feedback'],
+    outputs: ['معايرة أوزان اتخاذ القرار', 'توثيق الخبرات', 'رفع دقة الوكلاء'],
+    missions: [
+      { label: 'استعراض ذاكرة الوكلاء (DB)', prompt: 'استعراض ذاكرة الوكلاء' },
+      { label: 'معايرة الأوزان المعرفية للقرارات', prompt: 'معايرة الأوزان المعرفية' },
+      { label: 'تقرير دقة ومعدل نجاح المهام', prompt: 'تقرير دقة القرارات' },
+    ],
+  },
+];
+
 function AgentTeamCard({
-  name, role, color, icon, status, taskCount, recentActivity, onChat
+  agentKey, name, role, color, icon, status, taskCount, recentActivity,
+  inputs, outputs, missions, onChat, onMissionClick
 }: {
-  name: string; role: string; color: string; icon: string;
+  agentKey: string; name: string; role: string; color: string; icon: string;
   status?: string; taskCount?: number; recentActivity?: string;
+  inputs: string[]; outputs: string[];
+  missions: { label: string; prompt: string }[];
   onChat?: () => void;
+  onMissionClick?: (prompt: string) => void;
 }) {
   const colorClasses: Record<string, string> = {
-    purple: 'border-purple-500/30 hover:bg-purple-500/10',
-    emerald: 'border-emerald-500/30 hover:bg-emerald-500/10',
-    blue:    'border-blue-500/30 hover:bg-blue-500/10',
-    red:     'border-red-500/30 hover:bg-red-500/10',
-    cyan:    'border-cyan-500/30 hover:bg-cyan-500/10',
-    yellow:  'border-yellow-500/30 hover:bg-yellow-500/10',
-    indigo:  'border-indigo-500/30 hover:bg-indigo-500/10',
+    purple: 'border-purple-500/30 hover:border-purple-500/60 bg-purple-500/[0.03]',
+    emerald: 'border-emerald-500/30 hover:border-emerald-500/60 bg-emerald-500/[0.03]',
+    blue:    'border-blue-500/30 hover:border-blue-500/60 bg-blue-500/[0.03]',
+    red:     'border-red-500/30 hover:border-red-500/60 bg-red-500/[0.03]',
+    cyan:    'border-cyan-500/30 hover:border-cyan-500/60 bg-cyan-500/[0.03]',
+    yellow:  'border-amber-500/30 hover:border-amber-500/60 bg-amber-500/[0.03]',
+    indigo:  'border-indigo-500/30 hover:border-indigo-500/60 bg-indigo-500/[0.03]',
   };
 
   const dotColor =
@@ -531,39 +731,77 @@ function AgentTeamCard({
                            'bg-white/10';
 
   const statusText =
-    status === 'online'  ? 'متاح' :
-    status === 'busy'    ? 'مشغول' :
-    status === 'offline' ? 'غير متاح' : 'جاري التحقق…';
+    status === 'online'  ? 'متصل وجاهز' :
+    status === 'busy'    ? 'قيد المعالجة' :
+    status === 'offline' ? 'غير متاح' : 'نشط';
 
   return (
-    <div className={`border rounded-2xl p-5 bg-white/[0.02] ${colorClasses[color] ?? colorClasses.purple} transition-all`}>
-      <div className="flex items-start justify-between mb-3">
-        <span className="text-3xl">{icon}</span>
-        <div className="flex items-center gap-1.5">
-          <div className={`w-2 h-2 rounded-full ${dotColor}`} />
-          <span className="text-[10px] text-white/40">{statusText}</span>
+    <div className={`border rounded-[2rem] p-5 ${colorClasses[color] || colorClasses.purple} transition-all shadow-xl flex flex-col justify-between space-y-4`}>
+      <div>
+        {/* Header */}
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl p-2 rounded-2xl bg-white/5 border border-white/10">{icon}</span>
+            <div>
+              <h3 className="font-black text-base text-white">{name}</h3>
+              <p className="text-[11px] text-white/50">{role}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/5 border border-white/10">
+            <div className={`w-2 h-2 rounded-full ${dotColor}`} />
+            <span className="text-[10px] text-white/60 font-mono">{statusText}</span>
+          </div>
+        </div>
+
+        {/* Inputs & Outputs Tags */}
+        <div className="mt-3 space-y-1.5 text-[10px]">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-white/40 font-bold">المعطيات:</span>
+            {inputs.map(inp => (
+              <span key={inp} className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-white/70 font-mono">
+                {inp}
+              </span>
+            ))}
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-white/40 font-bold">المخرجات:</span>
+            {outputs.map(out => (
+              <span key={out} className="px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-medium">
+                {out}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
-      <h3 className="font-bold text-base">{name}</h3>
-      <p className="text-xs text-white/50 mt-0.5">{role}</p>
-      {taskCount !== undefined && (
-        <div className="mt-3 flex items-center gap-3 text-[10px] text-white/30">
-          <span>المهام: <strong className="text-white/60">{taskCount}</strong></span>
-          {recentActivity && recentActivity !== 'لا يوجد نشاط حديث' && recentActivity !== 'غير متاح' && (
-            <span className="truncate">
-              آخر نشاط: {new Date(recentActivity).toLocaleDateString('ar-EG')}
-            </span>
-          )}
+
+      {/* One-Click Real Missions */}
+      <div className="space-y-2 pt-3 border-t border-white/10">
+        <span className="text-[10px] text-white/40 font-bold flex items-center gap-1">
+          <span>⚡</span> مهام تنفيذية فورية (بنقرة واحدة):
+        </span>
+        <div className="space-y-1.5">
+          {missions.map((m, i) => (
+            <button
+              key={i}
+              onClick={() => onMissionClick?.(m.prompt)}
+              className="w-full text-right px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-white/80 hover:text-white transition-all flex items-center justify-between font-medium cursor-pointer group"
+            >
+              <span className="truncate">{m.label}</span>
+              <span className="text-[10px] text-white/30 group-hover:text-emerald-400 font-mono">تشغيل ➔</span>
+            </button>
+          ))}
         </div>
-      )}
-      {onChat && (
-        <button
-          onClick={onChat}
-          className="mt-3 w-full py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/50 hover:text-white/80 hover:bg-white/10 transition-all font-bold"
-        >
-          💬 تكلم
-        </button>
-      )}
+
+        {onChat && (
+          <button
+            onClick={onChat}
+            className="mt-2 w-full py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs text-white font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span>💬</span>
+            <span>محادثة وتوجيه مخصص</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

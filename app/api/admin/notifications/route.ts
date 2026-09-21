@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { z } from "zod";
 
 const notificationSchema = z.object({
@@ -83,10 +84,12 @@ export async function POST(request: NextRequest) {
 
     const data = parseResult.data;
 
+    const resolvedCompanyId = await resolveAdminCompanyId() ?? 'no-company';
+
     const { data: event, error } = await supabase
       .from("agent_events")
       .insert({
-        company_id: "00000000-0000-0000-0000-000000000000",
+        company_id: resolvedCompanyId,
         event_type: data.type,
         event_data: {
           title: data.title,

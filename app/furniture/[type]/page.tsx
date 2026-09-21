@@ -25,7 +25,9 @@ export default function FurnitureTypePage() {
 
   const clientRuntimeConfig = getClientRuntimeConfig();
 
-  const getWhatsappUrl = (msg: string) => clientRuntimeConfig ? `https://wa.me/${clientRuntimeConfig.whatsappNumber}?text=${encodeURIComponent(msg)}` : "/start";
+  const getQuoteHref = (message: string) => clientRuntimeConfig.whatsappNumber
+    ? `https://wa.me/${clientRuntimeConfig.whatsappNumber}?text=${encodeURIComponent(message)}`
+    : "/request";
 
   const titleMap: Record<string, string> = {
     sofas: "الكنب",
@@ -65,7 +67,7 @@ export default function FurnitureTypePage() {
                       <FurnitureCard 
                         key={furniture.slug}
                         furniture={furniture}
-                        whatsappUrl={getWhatsappUrl(`${room.title} - ${furniture.title}`)}
+                        quoteHref={getQuoteHref(`${room.title} - ${furniture.title}`)}
                       />
                     ))}
                   </div>

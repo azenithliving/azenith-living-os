@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseServer
       .from('sales_orders')
-      .select('id, status, total_amount, created_at')
+      .select('id, status, total_amount, created_at, customer_name, customer_id, items')
       .eq('company_id', companyId)
       .order('created_at', { ascending: false })
       .limit(50);
@@ -51,17 +51,45 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const orders = (data || []).map((order) => {
+    const missingCustomerIds = [
+      ...new Set(
+        (data || [])
+          .filter((o: any) => !o.customer_name && o.customer_id)
+          .map((o: any) => o.customer_id)
+      ),
+    ];
+
+    const userNamesById: Record<string, string> = {};
+    if (missingCustomerIds.length > 0) {
+      const { data: usersData } = await supabaseServer
+        .from('users')
+        .select('id, full_name, email')
+        .in('id', missingCustomerIds);
+
+      if (usersData) {
+        for (const u of usersData) {
+          userNamesById[u.id] = u.full_name || u.email || 'عميل';
+        }
+      }
+    }
+
+    const orders = (data || []).map((order: any) => {
       const orderStatus = order.status || 'draft';
+      const itemsList = Array.isArray(order.items) ? order.items : [];
+      const resolvedCustomer =
+        order.customer_name ||
+        (order.customer_id ? userNamesById[order.customer_id] : null) ||
+        `عميل #${order.id.slice(0, 6)}`;
+
       return {
         id: order.id,
-        customer_name: 'Unknown',
+        customer_name: resolvedCustomer,
         status: orderStatus,
         total_amount: order.total_amount || 0,
         current_stage: orderStatus,
         progress_percent: progressByStatus[orderStatus] ?? 0,
         expected_delivery: null,
-        items_count: 0,
+        items_count: itemsList.length > 0 ? itemsList.length : 1,
       };
     });
 

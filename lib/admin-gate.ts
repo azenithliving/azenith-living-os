@@ -1,15 +1,15 @@
 import "server-only";
+import {
+  getPrimaryAdminEmail,
+  isAuthorizedAdminEmail,
+  normalizeAdminEmail,
+} from "@/lib/admin-access";
 
-export function normalizeAdminEmail(email: string): string {
-  return email.trim().toLowerCase();
-}
+export { isAuthorizedAdminEmail, normalizeAdminEmail };
 
 export function getAdminGateEmail(): string {
-  const fromEnv = process.env.ADMIN_GATE_EMAIL?.trim();
-  if (fromEnv) return fromEnv.toLowerCase();
-  if (process.env.NODE_ENV === "development") {
-    return "azenithliving@gmail.com";
-  }
+  const configuredEmail = getPrimaryAdminEmail();
+  if (configuredEmail) return configuredEmail;
   throw new Error("ADMIN_GATE_EMAIL is not configured");
 }
 

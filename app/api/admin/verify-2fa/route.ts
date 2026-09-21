@@ -178,6 +178,16 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     const normalizedEmail = normalizeAdminEmail(email);
 
+    // 2FA completion is restricted to the same configured administrative
+    // account as the first login step; an arbitrary Supabase account cannot
+    // turn its own TOTP configuration into admin access.
+    if (!isPrimaryAdminCredentials(normalizedEmail, String(password))) {
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 }
+      );
+    }
+
     // Step 1: Sign in with email and password
     let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email: normalizedEmail,

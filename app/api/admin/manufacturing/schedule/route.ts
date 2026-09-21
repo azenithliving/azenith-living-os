@@ -1,226 +1,270 @@
 /**
- * Manufacturing API - Production Schedule
- * GET /api/admin/manufacturing/schedule
- * POST /api/admin/manufacturing/schedule
- * Manage production schedule and Gantt chart data
+ * Production schedule API. It exposes the dates recorded on production jobs;
+ * unscheduled jobs remain explicitly unscheduled rather than receiving a
+ * fabricated one-day slot.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/dal/unified-supabase';
-import { resolveAdminCompanyId } from '@/lib/admin-company';
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdminApi } from "@/lib/admin-api-guard";
+import { resolveAdminCompanyId } from "@/lib/admin-company";
+import { supabaseServer } from "@/lib/dal/unified-supabase";
 
-// GET - Fetch production schedule
+type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? value as JsonRecord
+    : null;
+}
+
+function asDate(value: unknown): Date | null {
+  if (typeof value !== "string" || !value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function stageFrom(value: unknown) {
+  if (Array.isArray(value)) return asRecord(value[0]);
+  return asRecord(value);
+}
+
+function progressFor(job: JsonRecord): number | null {
+  const status = typeof job.status === "string" ? job.status : "";
+  if (status === "completed") return 100;
+  if (status === "cancelled" || status === "pending" || status === "scheduled") return 0;
+
+  const start = asDate(job.actual_start) ?? asDate(job.scheduled_start);
+  const end = asDate(job.scheduled_end);
+  if (status !== "in_progress" || !start || !end || end <= start) return null;
+
+  const elapsed = (Date.now() - start.getTime()) / (end.getTime() - start.getTime());
+  return Math.max(0, Math.min(99, Math.round(elapsed * 100)));
+}
+
 export async function GET(request: NextRequest) {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const { searchParams } = new URL(request.url);
-    const companyId = await resolveAdminCompanyId(searchParams.get('company_id'));
-    const startDate = searchParams.get('start_date');
-    const endDate = searchParams.get('end_date');
-    const view = searchParams.get('view') || 'week'; // day, week, month
+    const companyId = await resolveAdminCompanyId();
+    const salesOrderId = searchParams.get("sales_order_id");
+    const requestedStart = asDate(searchParams.get("start_date"));
+    const requestedEnd = asDate(searchParams.get("end_date"));
+    const view = searchParams.get("view") || "week";
 
     if (!companyId) {
       return NextResponse.json({
         success: true,
         data: {
-          schedule: [],
-          stages: [],
-          date_range: {
-            start: new Date().toISOString(),
-            end: new Date().toISOString(),
-            view,
-          },
-          summary: {
-            total_jobs: 0,
-            in_progress: 0,
-            completed: 0,
-            delayed: 0,
-          },
+          schedule: [], stages: [],
+          date_range: { start: null, end: null, view },
+          summary: { total_jobs: 0, in_progress: 0, completed: 0, delayed: 0 },
         },
-        warnings: ['No company record is available for production schedule.'],
+        warnings: ["No company record is available for production schedule."],
       });
     }
 
-    // Calculate date range if not provided
+    let jobsQuery = supabaseServer
+      .from("production_jobs")
+      .select("id, sales_order_id, current_stage_id, status, scheduled_start, scheduled_end, actual_start, actual_end, priority, created_at, production_stages(name, color_code), sales_orders(customer_name)")
+      .eq("company_id", companyId)
+      .order("scheduled_start", { ascending: true, nullsFirst: false });
+
+    if (salesOrderId) jobsQuery = jobsQuery.eq("sales_order_id", salesOrderId);
+    const { data: jobs, error: jobsError } = await jobsQuery;
+    if (jobsError) throw jobsError;
+
     const now = new Date();
-    const start = startDate ? new Date(startDate) : new Date(now.getFullYear(), now.getMonth(), 1);
-    const end = endDate ? new Date(endDate) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const schedule = (Array.isArray(jobs) ? jobs : [])
+      .map((rawJob) => {
+        const job = asRecord(rawJob) ?? {};
+        const stage = stageFrom(job.production_stages);
+        const order = stageFrom(job.sales_orders);
+        const start = asDate(job.scheduled_start) ?? asDate(job.actual_start);
+        const end = asDate(job.scheduled_end) ?? asDate(job.actual_end);
+        const id = typeof job.id === "string" ? job.id : "";
+        return {
+          id,
+          name: id ? `مهمة إنتاج #${id.slice(0, 8)}` : "مهمة إنتاج",
+          customer: typeof order?.customer_name === "string" && order.customer_name
+            ? order.customer_name
+            : "غير مسمى",
+          stage: typeof stage?.name === "string" && stage.name ? stage.name : "غير محددة",
+          stage_color: typeof stage?.color_code === "string" ? stage.color_code : null,
+          start: start?.toISOString() ?? null,
+          end: end?.toISOString() ?? null,
+          progress: progressFor(job),
+          status: typeof job.status === "string" ? job.status : "pending",
+          priority: typeof job.priority === "number" ? job.priority : 0,
+          assigned_to: null,
+          dependencies: [],
+          order_id: typeof job.sales_order_id === "string" ? job.sales_order_id : null,
+        };
+      })
+      .filter((job) => {
+        if (!requestedStart && !requestedEnd) return true;
+        if (!job.start || !job.end) return false;
+        const start = new Date(job.start);
+        const end = new Date(job.end);
+        return (!requestedStart || end >= requestedStart) && (!requestedEnd || start <= requestedEnd);
+      });
 
-    // Fetch production jobs with stages
-    const { data: jobs, error } = await supabaseServer
-      .from('production_jobs')
-      .select('*')
-      .eq('company_id', companyId)
-      .order('created_at', { ascending: true });
+    const { data: stages, error: stagesError } = await supabaseServer
+      .from("production_stages")
+      .select("id, name, color_code, sequence_order, order_index")
+      .eq("company_id", companyId)
+      .eq("is_active", true)
+      .order("sequence_order", { ascending: true });
 
-    if (error) {
-      console.error('Schedule fetch error:', error);
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
-
-    // Format for Gantt chart
-    const schedule = jobs?.map(job => ({
-      id: job.id,
-      name: `Job ${job.id.slice(0, 8)}`,
-      customer: 'Unknown',
-      stage: job.current_stage_id || 'Unknown',
-      stage_color: '#3B82F6',
-      start: job.created_at,
-      end: new Date(new Date(job.created_at).getTime() + 24 * 60 * 60 * 1000).toISOString(),
-      progress: calculateProgress(job),
-      status: job.status,
-      priority: job.priority,
-      assigned_to: job.assigned_to,
-      dependencies: [],
-      order_id: job.sales_order_id
-    })) || [];
-
-    // Fetch production stages for timeline
-    const { data: stages } = await supabaseServer
-      .from('production_stages')
-      .select('*')
-      .eq('company_id', companyId)
-      .eq('is_active', true)
-      .order('sequence_order', { ascending: true });
+    if (stagesError) throw stagesError;
 
     return NextResponse.json({
       success: true,
       data: {
         schedule,
-        stages: stages || [],
+        stages: Array.isArray(stages) ? stages : [],
         date_range: {
-          start: start.toISOString(),
-          end: end.toISOString(),
-          view
+          start: requestedStart?.toISOString() ?? null,
+          end: requestedEnd?.toISOString() ?? null,
+          view,
         },
         summary: {
           total_jobs: schedule.length,
-          in_progress: schedule.filter(s => s.status === 'in_progress').length,
-          completed: schedule.filter(s => s.status === 'completed').length,
-          delayed: schedule.filter(s => new Date(s.end) < now && s.status !== 'completed').length
-        }
-      }
+          in_progress: schedule.filter((job) => job.status === "in_progress").length,
+          completed: schedule.filter((job) => job.status === "completed").length,
+          delayed: schedule.filter((job) => {
+            return job.end !== null
+              && new Date(job.end) < now
+              && job.status !== "completed"
+              && job.status !== "cancelled";
+          }).length,
+        },
+      },
     });
   } catch (error) {
-    console.error('Schedule GET error:', error);
+    console.error("Schedule GET error:", error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: "تعذر تحميل جدول الإنتاج." },
       { status: 500 }
     );
   }
 }
 
-// POST - Create or update schedule entry
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const {
-      company_id,
-      production_job_id,
-      stage_id,
-      scheduled_start,
-      scheduled_end,
-      resource_id,
-      notes,
-      action = 'create' // create, update, reschedule
-    } = body;
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
 
-    if (!company_id || !production_job_id) {
+    const body = await request.json();
+    const companyId = await resolveAdminCompanyId();
+    const productionJobId = typeof body.production_job_id === "string" ? body.production_job_id : null;
+    const stageId = typeof body.stage_id === "string" && body.stage_id ? body.stage_id : null;
+    const scheduledStart = asDate(body.scheduled_start);
+    const scheduledEnd = asDate(body.scheduled_end);
+    const resourceId = typeof body.resource_id === "string" && body.resource_id ? body.resource_id : null;
+    const resourceName = typeof body.resource_name === "string" && body.resource_name.trim()
+      ? body.resource_name.trim()
+      : null;
+
+    if (!companyId || !productionJobId || !scheduledStart || !scheduledEnd || scheduledEnd <= scheduledStart) {
       return NextResponse.json(
-        { success: false, error: 'company_id and production_job_id required' },
+        { success: false, error: "حدد مهمة وتاريخ بداية ونهاية صحيحين." },
         { status: 400 }
       );
     }
 
-    const timestamp = new Date().toISOString();
+    const { data: job, error: jobError } = await supabaseServer
+      .from("production_jobs")
+      .select("id")
+      .eq("id", productionJobId)
+      .eq("company_id", companyId)
+      .maybeSingle();
+    if (jobError) throw jobError;
+    if (!job) return NextResponse.json({ success: false, error: "مهمة الإنتاج غير موجودة." }, { status: 404 });
 
-    if (action === 'reschedule') {
-      // Check for conflicts
-      const { data: conflicts } = await supabaseServer
-        .from('production_schedule_entries')
-        .select('*')
-        .eq('company_id', company_id)
-        .eq('resource_id', resource_id)
-        .neq('production_job_id', production_job_id)
-        .or(`scheduled_start.lte.${scheduled_end},scheduled_end.gte.${scheduled_start}`);
+    if (stageId) {
+      const { data: stage, error: stageError } = await supabaseServer
+        .from("production_stages")
+        .select("id")
+        .eq("id", stageId)
+        .eq("company_id", companyId)
+        .maybeSingle();
+      if (stageError) throw stageError;
+      if (!stage) return NextResponse.json({ success: false, error: "مرحلة الإنتاج غير موجودة." }, { status: 404 });
+    }
 
-      if (conflicts && conflicts.length > 0) {
-        return NextResponse.json({
-          success: false,
-          error: 'Resource conflict detected',
-          conflicts
-        }, { status: 409 });
+    if (resourceId) {
+      const { data: matchingEntries, error: conflictError } = await supabaseServer
+        .from("production_schedule_entries")
+        .select("id, production_job_id")
+        .eq("resource_id", resourceId)
+        .lt("scheduled_start", scheduledEnd.toISOString())
+        .gt("scheduled_end", scheduledStart.toISOString())
+        .neq("production_job_id", productionJobId);
+      if (conflictError) throw conflictError;
+
+      const conflictingJobIds = (Array.isArray(matchingEntries) ? matchingEntries : [])
+        .map((entry) => entry.production_job_id)
+        .filter((id): id is string => typeof id === "string");
+      if (conflictingJobIds.length > 0) {
+        const { data: conflictingJobs, error: conflictingJobsError } = await supabaseServer
+          .from("production_jobs")
+          .select("id")
+          .eq("company_id", companyId)
+          .in("id", conflictingJobIds);
+        if (conflictingJobsError) throw conflictingJobsError;
+        if (Array.isArray(conflictingJobs) && conflictingJobs.length > 0) {
+          return NextResponse.json(
+            { success: false, error: "المورد المحدد محجوز في هذه الفترة." },
+            { status: 409 }
+          );
+        }
       }
     }
 
-    // Update or create schedule entry
-    const { data, error } = await supabaseServer
-      .from('production_schedule_entries')
-      .upsert({
-        company_id,
-        production_job_id,
-        stage_id,
-        scheduled_start,
-        scheduled_end,
-        resource_id,
-        notes,
-        updated_at: timestamp
-      }, {
-        onConflict: 'production_job_id,stage_id'
-      })
-      .select()
-      .single();
+    let existingQuery = supabaseServer
+      .from("production_schedule_entries")
+      .select("id")
+      .eq("production_job_id", productionJobId);
+    existingQuery = stageId ? existingQuery.eq("stage_id", stageId) : existingQuery.is("stage_id", null);
+    const { data: existingEntry, error: existingError } = await existingQuery.maybeSingle();
+    if (existingError) throw existingError;
 
-    if (error) {
-      console.error('Schedule update error:', error);
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
+    const entryData = {
+      production_job_id: productionJobId,
+      stage_id: stageId,
+      scheduled_start: scheduledStart.toISOString(),
+      scheduled_end: scheduledEnd.toISOString(),
+      resource_id: resourceId,
+      resource_name: resourceName,
+      updated_at: new Date().toISOString(),
+    };
 
-    // Update production job dates
-    await supabaseServer
-      .from('production_jobs')
-      .update({
-        scheduled_start,
-        scheduled_end,
-        current_stage_id: stage_id,
-        updated_at: timestamp
-      })
-      .eq('id', production_job_id);
+    const result = existingEntry
+      ? await supabaseServer.from("production_schedule_entries").update(entryData).eq("id", existingEntry.id).select("*").single()
+      : await supabaseServer.from("production_schedule_entries").insert(entryData).select("*").single();
+    if (result.error) throw result.error;
 
-    return NextResponse.json({
-      success: true,
-      message: `Schedule ${action === 'create' ? 'created' : 'updated'} successfully`,
-      data
-    });
+    const jobUpdate: JsonRecord = {
+      scheduled_start: scheduledStart.toISOString(),
+      scheduled_end: scheduledEnd.toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    if (stageId) jobUpdate.current_stage_id = stageId;
+    const { error: updateJobError } = await supabaseServer
+      .from("production_jobs")
+      .update(jobUpdate)
+      .eq("id", productionJobId)
+      .eq("company_id", companyId);
+    if (updateJobError) throw updateJobError;
+
+    return NextResponse.json({ success: true, data: result.data });
   } catch (error) {
-    console.error('Schedule POST error:', error);
+    console.error("Schedule POST error:", error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: "تعذر حفظ الجدولة." },
       { status: 500 }
     );
   }
-}
-
-// Calculate progress percentage
-function calculateProgress(job: any): number {
-  if (job.status === 'completed') return 100;
-  if (job.status === 'pending') return 0;
-  if (job.status === 'in_progress') {
-    // Estimate based on time elapsed
-    if (job.actual_start && job.scheduled_end) {
-      const start = new Date(job.actual_start).getTime();
-      const end = new Date(job.scheduled_end).getTime();
-      const now = Date.now();
-      const total = end - start;
-      const elapsed = now - start;
-      return Math.min(95, Math.round((elapsed / total) * 100));
-    }
-    return 25; // Default for in-progress
-  }
-  return 0;
 }

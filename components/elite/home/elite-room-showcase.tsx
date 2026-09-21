@@ -79,7 +79,7 @@ export function EliteRoomShowcase() {
               onMouseLeave={() => setHoveredIndex(null)}
             >
               <Link
-                href={`/room/${room.slug}`}
+                href={`/rooms/${room.slug}`}
                 className="group block relative aspect-[4/3] rounded-3xl overflow-hidden"
               >
                 {/* Image Background */}

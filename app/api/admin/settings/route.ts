@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,9 @@ function isMissingColumn(error: { code?: string; message?: string } | null) {
  */
 export async function GET(request: NextRequest) {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const { searchParams } = new URL(request.url);
     const key = searchParams.get("key");
 
@@ -103,6 +107,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const body = await request.json();
     const { key, value } = body;
 
@@ -164,6 +171,9 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const { searchParams } = new URL(request.url);
     const key = searchParams.get("key");
 

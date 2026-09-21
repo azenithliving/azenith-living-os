@@ -90,7 +90,7 @@ export const BASE_ROOMS: LandingRoom[] = [
     summaryEn: "Luxury comfort for your guests with a warm design suitable for all tastes.",
   },
   {
-    slug: "kids-bedroom",
+    slug: "children-room",
     eyebrow: "أحلام صغيرة",
     eyebrowEn: "Little Dreams",
     title: "غرفة الأطفال",

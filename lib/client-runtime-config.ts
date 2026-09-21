@@ -28,7 +28,7 @@ function normalizePhoneNumber(value: string | null): string | null {
 export const getClientRuntimeConfig = (): RuntimeConfig => ({
   brandName: readEnvClient("BRAND_NAME") ?? "Azenith Living",
   brandNameAr: readEnvClient("BRAND_NAME_AR") ?? "أزينث",
-  freeHookOffer: readEnvClient("FREE_HOOK_OFFER") ?? "تصميم مبدئي خلال 24 ساعة",
+  freeHookOffer: readEnvClient("FREE_HOOK_OFFER") ?? "استشارة تصميم مبدئية",
   whatsappNumber: normalizePhoneNumber(readEnvClient("WHATSAPP_DEFAULT_NUMBER")),
   logoPath: "/logo.png",
   faviconPath: "/favicon.png",

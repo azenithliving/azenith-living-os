@@ -1,265 +1,190 @@
 /**
- * Section Preview Route
- * 
- * عرض قسم حقيقي قبل نشره
- * Preview actual sections before publishing
+ * Authenticated, read-only preview for a stored site section.
+ * Publishing and editing are intentionally kept out of this route because it
+ * has no corresponding server-side workflow; showing inert controls here made
+ * the preview look functional when it was not.
  */
 
-import { createClient } from "@/utils/supabase/server";
-import { notFound } from "next/navigation";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { ArrowLeft, Eye, Layout } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Eye, 
-  CheckCircle, 
-  ArrowLeft, 
-  Settings,
-  Layout
-} from "lucide-react";
-import Link from "next/link";
+import { createClient } from "@/utils/supabase/server";
+import { isAuthorizedAdminEmail } from "@/lib/admin-access";
 
 interface PreviewPageProps {
   params: Promise<{ id: string }>;
 }
 
+type ContentRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): ContentRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as ContentRecord : {};
+}
+
+function readString(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function formatDate(value: unknown): string {
+  if (typeof value !== "string") return "—";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString("ar-EG");
+}
+
+function safeHref(value: unknown): string | null {
+  const href = readString(value);
+  if (!href) return null;
+  return href.startsWith("/") || /^https?:\/\//i.test(href) ? href : null;
+}
+
+function PreviewCta({ href, label }: { href: string; label: string }) {
+  const className = "inline-flex rounded-lg bg-[#C5A059] px-6 py-3 font-medium text-white transition hover:bg-[#d5b26a]";
+  if (/^https?:\/\//i.test(href)) {
+    return <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{label}</a>;
+  }
+  return <Link href={href} className={className}>{label}</Link>;
+}
+
 export default async function SectionPreviewPage({ params }: PreviewPageProps) {
   const { id } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // Fetch section from database
+  if (!user || !isAuthorizedAdminEmail(user.email)) redirect("/gate/login");
+
   const { data: section, error } = await supabase
     .from("site_sections")
     .select("*")
     .eq("id", id)
     .single();
 
-  if (error || !section) {
-    notFound();
-  }
+  if (error || !section) notFound();
 
-  // Render section content based on type
+  const content = asRecord(section.section_content);
+  const config = asRecord(section.section_config);
+  const title = readString(content.title) ?? readString(config.title) ?? readString(section.section_name) ?? "—";
+
   const renderSectionContent = () => {
-    const content = section.section_content as Record<string, unknown> || {};
-    const config = section.section_config as Record<string, unknown> || {};
-
     switch (section.section_type) {
-      case "hero":
+      case "hero": {
+        const subtitle = readString(content.subtitle) ?? readString(content.description);
+        const ctaLabel = readString(content.ctaText) ?? readString(content.cta_text);
+        const ctaHref = safeHref(content.ctaHref) ?? safeHref(content.cta_url);
         return (
-          <div 
-            className="relative py-20 px-8 text-center"
-            style={{
-              background: (config.background as Record<string, string>)?.type === 'gradient' 
-                ? `linear-gradient(${config.background})`
-                : (config.background as Record<string, string>)?.value || '#f8f9fa'
-            }}
-          >
-            <h1 className="text-4xl font-bold mb-4">{content.title as string || "عنوان القسم"}</h1>
-            <p className="text-xl text-gray-600 mb-8">{content.subtitle as string || ""}</p>
-            {(content.ctaText as string) && (
-              <button className="bg-[#C5A059] text-white px-6 py-3 rounded-lg hover:bg-[#d5b26a]">
-                {content.ctaText as string}
-              </button>
-            )}
-          </div>
+          <section className="space-y-6 px-8 py-20 text-center">
+            <h2 className="text-4xl font-bold">{title}</h2>
+            {subtitle && <p className="mx-auto max-w-3xl text-xl leading-8 text-gray-600">{subtitle}</p>}
+            {ctaLabel && ctaHref ? <PreviewCta href={ctaHref} label={ctaLabel} /> : null}
+            {ctaLabel && !ctaHref ? <p className="text-sm text-gray-500">يوجد نص للإجراء، لكن لا يوجد رابط مهيأ له.</p> : null}
+          </section>
         );
+      }
 
-      case "features":
+      case "features": {
+        const features = Array.isArray(content.features)
+          ? content.features.map(asRecord).filter((feature) => Object.keys(feature).length > 0)
+          : [];
         return (
-          <div className="py-16 px-8">
-            <h2 className="text-3xl font-bold text-center mb-12">{content.title as string || "المميزات"}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {((content.features as Array<Record<string, string>>) || []).map((feature, idx) => (
-                <div key={idx} className="text-center p-6 border rounded-lg">
-                  <div className="w-12 h-12 bg-[#C5A059]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Layout className="w-6 h-6 text-[#C5A059]" />
-                  </div>
-                  <h3 className="font-semibold mb-2">{feature.title || `ميزة ${idx + 1}`}</h3>
-                  <p className="text-gray-600 text-sm">{feature.description || "وصف الميزة"}</p>
-                </div>
-              ))}
-              {(!(content.features as Array<unknown>)?.length) && (
-                <>
-                  <div className="text-center p-6 border rounded-lg">
-                    <h3 className="font-semibold mb-2">ميزة 1</h3>
-                    <p className="text-gray-600 text-sm">وضع الميزة هنا</p>
-                  </div>
-                  <div className="text-center p-6 border rounded-lg">
-                    <h3 className="font-semibold mb-2">ميزة 2</h3>
-                    <p className="text-gray-600 text-sm">وضع الميزة هنا</p>
-                  </div>
-                  <div className="text-center p-6 border rounded-lg">
-                    <h3 className="font-semibold mb-2">ميزة 3</h3>
-                    <p className="text-gray-600 text-sm">وضع الميزة هنا</p>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        );
-
-      case "testimonials":
-        return (
-          <div className="py-16 px-8 bg-gray-50">
-            <h2 className="text-3xl font-bold text-center mb-12">{content.title as string || "آراء العملاء"}</h2>
-            <div className="max-w-3xl mx-auto">
-              <div className="bg-white p-8 rounded-xl shadow-lg">
-                <p className="text-lg text-gray-700 italic mb-6">
-                  &ldquo;{((content.testimonials as Array<Record<string, string>>)?.[0]?.quote) || "تجربة رائعة مع Azenith Living!"}&rdquo;
-                </p>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#C5A059] rounded-full flex items-center justify-center text-white font-semibold">
-                    {(((content.testimonials as Array<Record<string, string>>)?.[0]?.author) || "عميل")[0]}
-                  </div>
-                  <div>
-                    <p className="font-semibold">{((content.testimonials as Array<Record<string, string>>)?.[0]?.author) || "عميل سعيد"}</p>
-                    <p className="text-sm text-gray-500">{((content.testimonials as Array<Record<string, string>>)?.[0]?.role) || "عميل"}</p>
-                  </div>
-                </div>
+          <section className="space-y-10 px-8 py-16">
+            <h2 className="text-center text-3xl font-bold">{title}</h2>
+            {features.length > 0 ? (
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                {features.map((feature, index) => {
+                  const featureTitle = readString(feature.title);
+                  const description = readString(feature.description);
+                  return <div key={`${featureTitle ?? "feature"}-${index}`} className="rounded-lg border p-6 text-center">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#C5A059]/20"><Layout className="h-6 w-6 text-[#C5A059]" /></div>
+                    {featureTitle && <h3 className="mb-2 font-semibold">{featureTitle}</h3>}
+                    {description && <p className="text-sm leading-6 text-gray-600">{description}</p>}
+                  </div>;
+                })}
               </div>
-            </div>
-          </div>
+            ) : <p className="text-center text-gray-500">لا توجد ميزات مسجلة لهذا القسم.</p>}
+          </section>
         );
+      }
 
-      default:
+      case "testimonials": {
+        const testimonials = Array.isArray(content.testimonials)
+          ? content.testimonials.map(asRecord).filter((testimonial) => Object.keys(testimonial).length > 0)
+          : [];
         return (
-          <div className="py-16 px-8">
-            <h2 className="text-3xl font-bold mb-4">{content.title as string || section.section_name}</h2>
-            <p className="text-gray-600">
-              هذا قسم من نوع &ldquo;{section.section_type}&rdquo; - يمكن تخصيص محتواه من لوحة التحكم
-            </p>
-          </div>
+          <section className="space-y-10 bg-gray-50 px-8 py-16">
+            <h2 className="text-center text-3xl font-bold">{title}</h2>
+            {testimonials.length > 0 ? (
+              <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-2">
+                {testimonials.map((testimonial, index) => {
+                  const quote = readString(testimonial.quote);
+                  const author = readString(testimonial.author);
+                  const role = readString(testimonial.role);
+                  return <article key={`${author ?? "testimonial"}-${index}`} className="rounded-xl bg-white p-6 shadow-sm">
+                    {quote && <p className="text-lg leading-8 text-gray-700">&ldquo;{quote}&rdquo;</p>}
+                    {(author || role) && <p className="mt-5 text-sm text-gray-500">{[author, role].filter(Boolean).join(" — ")}</p>}
+                  </article>;
+                })}
+              </div>
+            ) : <p className="text-center text-gray-500">لا توجد شهادات عملاء مسجلة لهذا القسم.</p>}
+          </section>
         );
+      }
+
+      default: {
+        const description = readString(content.description) ?? readString(content.content) ?? readString(config.description) ?? readString(config.content);
+        return (
+          <section className="space-y-4 px-8 py-16">
+            <h2 className="text-3xl font-bold">{title}</h2>
+            {description ? <p className="whitespace-pre-wrap leading-8 text-gray-600">{description}</p> : <p className="text-gray-500">لا توجد بيانات مرئية إضافية لهذا القسم.</p>}
+          </section>
+        );
+      }
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Preview Header */}
-      <div className="bg-[#161616] text-white py-4 px-6 sticky top-0 z-50 shadow-lg">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-gray-100 pb-24" dir="rtl">
+      <header className="sticky top-0 z-50 bg-[#161616] px-6 py-4 text-white shadow-lg">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Eye className="h-5 w-5 text-[#C5A059]" />
-            <div>
-              <h1 className="font-semibold">معاينة القسم</h1>
-              <p className="text-sm text-white/60">{section.section_name}</p>
-            </div>
+            <div><h1 className="font-semibold">معاينة إدارية للقراءة فقط</h1><p className="text-sm text-white/60">{section.section_name}</p></div>
           </div>
-
           <div className="flex items-center gap-3">
-            <Badge 
-              variant={section.is_active ? "default" : "secondary"}
-              className={section.is_active ? "bg-green-500" : ""}
-            >
-              {section.is_active ? "نشط" : "معطل"}
-            </Badge>
+            <Badge variant={section.is_active ? "default" : "secondary"} className={section.is_active ? "bg-green-500" : ""}>{section.is_active ? "نشط" : "معطل"}</Badge>
             <Badge variant="outline">{section.section_type}</Badge>
-
-            <div className="border-l border-white/20 ml-3 pl-3 flex gap-2">
-              <Link href="/admin/agents">
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  رجوع
-                </Button>
-              </Link>
-
-              <Link href={`/admin/intel?action=edit-section&id=${id}`}>
-                <Button size="sm" className="bg-[#C5A059] hover:bg-[#d5b26a] text-[#161616]">
-                  <Settings className="h-4 w-4 mr-2" />
-                  تعديل
-                </Button>
-              </Link>
-
-              <Button 
-                size="sm" 
-                variant="outline"
-                className="border-green-500 text-green-500 hover:bg-green-500/10"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                نشر
-              </Button>
-            </div>
+            <Link href="/admin/agents"><Button variant="ghost" size="sm" className="text-white/80 hover:text-white"><ArrowLeft className="ml-2 h-4 w-4" />العودة للإدارة</Button></Link>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Section Info Card */}
-      <div className="max-w-7xl mx-auto mt-6 px-6">
+      <div className="mx-auto mt-6 max-w-7xl px-6">
         <Card className="mb-6">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Layout className="h-5 w-5 text-[#C5A059]" />
-              معلومات القسم
-            </CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-lg"><Layout className="h-5 w-5 text-[#C5A059]" />معلومات القسم</CardTitle></CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <p className="text-gray-500">المعرف</p>
-                <p className="font-medium">{section.id}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">النوع</p>
-                <p className="font-medium">{section.section_type}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">المكان</p>
-                <p className="font-medium">{section.page_placement || "غير محدد"}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">الترتيب</p>
-                <p className="font-medium">{section.sort_order}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">تاريخ الإنشاء</p>
-                <p className="font-medium">{new Date(section.created_at).toLocaleDateString("ar-EG")}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">آخر تحديث</p>
-                <p className="font-medium">{new Date(section.updated_at).toLocaleDateString("ar-EG")}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">الحالة</p>
-                <p className="font-medium">{section.is_visible ? "مرئي" : "مخفي"}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">الslug</p>
-                <p className="font-medium">{section.section_slug || "—"}</p>
-              </div>
+            <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
+              <div><p className="text-gray-500">المعرف</p><p className="break-all font-medium">{section.id}</p></div>
+              <div><p className="text-gray-500">النوع</p><p className="font-medium">{section.section_type}</p></div>
+              <div><p className="text-gray-500">المكان</p><p className="font-medium">{section.page_placement || "—"}</p></div>
+              <div><p className="text-gray-500">الترتيب</p><p className="font-medium">{section.sort_order ?? "—"}</p></div>
+              <div><p className="text-gray-500">تاريخ الإنشاء</p><p className="font-medium">{formatDate(section.created_at)}</p></div>
+              <div><p className="text-gray-500">آخر تحديث</p><p className="font-medium">{formatDate(section.updated_at)}</p></div>
+              <div><p className="text-gray-500">الحالة</p><p className="font-medium">{section.is_visible ? "مرئي" : "مخفي"}</p></div>
+              <div><p className="text-gray-500">المعرّف النصي</p><p className="font-medium">{section.section_slug || "—"}</p></div>
             </div>
           </CardContent>
         </Card>
+
+        <Card className="overflow-hidden"><div className="bg-white">{renderSectionContent()}</div></Card>
       </div>
 
-      {/* Section Preview */}
-      <div className="max-w-7xl mx-auto px-6 pb-12">
-        <Card className="overflow-hidden">
-          <div className="bg-white">
-            {renderSectionContent()}
-          </div>
-        </Card>
-      </div>
-
-      {/* Preview Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t py-4 px-6 shadow-lg">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            هذه معاينة فقط. القسم لن يظهر للزوار حتى يتم نشره.
-          </p>
-          <div className="flex gap-3">
-            <Link href="/admin/agents">
-              <Button variant="outline">إلغاء</Button>
-            </Link>
-            <Button className="bg-[#C5A059] hover:bg-[#d5b26a] text-[#161616]">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              نشر القسم
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Spacer for fixed footer */}
-      <div className="h-20" />
+      <footer className="fixed bottom-0 left-0 right-0 border-t bg-white px-6 py-4 shadow-lg">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4"><p className="text-sm text-gray-500">هذه المعاينة لا تغيّر حالة القسم أو تنشره.</p><Link href="/admin/agents"><Button variant="outline">عودة</Button></Link></div>
+      </footer>
     </div>
   );
 }

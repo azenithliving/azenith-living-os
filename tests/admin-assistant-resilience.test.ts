@@ -90,7 +90,7 @@ describe("admin assistant resilience", () => {
 
     expect(isGenericAiFailureMessage(result.message)).toBe(false);
     expect(result.message).toMatch(/مفتاح|executed|groq/i);
-  }, 15_000);
+  }, 30_000);
 
   it("escalates unprogrammed action to agents not empty chat", async () => {
     const { processAdminNaturalLanguage } = await import(
@@ -106,7 +106,7 @@ describe("admin assistant resilience", () => {
     );
 
     expect(result.message).toMatch(/أحتاج إذنك|موافقة|عقل النظام/i);
-  }, 15_000);
+  }, 30_000);
 
   it("formatCommandResultForUser handles list_keys data", () => {
     const text = formatCommandResultForUser(

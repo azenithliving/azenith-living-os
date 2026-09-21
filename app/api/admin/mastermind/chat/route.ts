@@ -3,6 +3,7 @@ import { processIntelligentMessage } from "@/lib/mastermind-ai";
 import { hasPendingSuggestion, executePendingSuggestion } from "@/lib/command-executor";
 import { createClient } from "@/utils/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { isAuthorizedAdminEmail } from "@/lib/admin-access";
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,17 +28,21 @@ export async function POST(req: NextRequest) {
       process.env.MASTER_ADMIN_EMAILS?.split(",").map((e) => e.trim()) || [];
     const isOwner = !!(user.email && masterEmails.includes(user.email));
 
-    const { data: user2FA, error: faError } = await supabase
-      .from("user_2fa")
-      .select("is_enabled")
-      .eq("user_id", user.id)
-      .single();
+    const isAuthorized = isAuthorizedAdminEmail(user.email);
 
-    if (faError || !user2FA?.is_enabled) {
-      return NextResponse.json(
-        { success: false, error: "2FA must be enabled to use Mastermind" },
-        { status: 403 }
-      );
+    if (!isAuthorized) {
+      const { data: user2FA, error: faError } = await supabase
+        .from("user_2fa")
+        .select("is_enabled")
+        .eq("user_id", user.id)
+        .single();
+
+      if (faError || !user2FA?.is_enabled) {
+        return NextResponse.json(
+          { success: false, error: "2FA must be enabled to use Mastermind" },
+          { status: 403 }
+        );
+      }
     }
 
     let bypassAuth = false;

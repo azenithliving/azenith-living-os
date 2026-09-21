@@ -123,7 +123,7 @@ export function UnifiedAssistant() {
   const [loading, setLoading]   = useState(false);
   const [activitySteps, setActivitySteps] = useState<ActivityStep[]>([]);
   const [browserAutoOpenSignal, setBrowserAutoOpenSignal] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // context state
   const [capabilityAudit,  setCapabilityAudit]  = useState<CapabilityAudit | null>(null);
@@ -169,7 +169,14 @@ export function UnifiedAssistant() {
   }, []);
 
   useEffect(() => { loadContext(); }, [loadContext]);
-  useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages, loading]);
 
   // ── load team statuses ────────────────────────────────────────────────────
   useEffect(() => {
@@ -353,7 +360,7 @@ export function UnifiedAssistant() {
         {/* ════════ TAB: CHAT ════════ */}
         {activeTab === "chat" && (
           <div className="flex flex-col h-[calc(100vh-160px)]">
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
                   <div className={`p-2 rounded-lg shrink-0 ${msg.role === "user" ? "bg-[#C5A059] text-[#1a1a1a]" : "bg-white/10"}`}>
@@ -414,7 +421,6 @@ export function UnifiedAssistant() {
                   جاري التفكير والتنفيذ…
                 </div>
               )}
-              <div ref={scrollRef} />
             </div>
 
             <form

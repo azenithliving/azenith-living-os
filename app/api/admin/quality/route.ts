@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
+import { resolveAdminCompanyId } from '@/lib/admin-company';
 import { z } from 'zod';
 
 const qualityCheckSchema = z.object({
@@ -69,6 +70,8 @@ export async function POST(request: NextRequest) {
 
     const data = parseResult.data;
 
+    const resolvedCompanyId = await resolveAdminCompanyId(data.company_id) ?? 'no-company';
+
     const insertData = {
       production_job_id: data.production_job_id || null,
       job_title: data.job_title,
@@ -79,7 +82,7 @@ export async function POST(request: NextRequest) {
       photos: data.photos || [],
       checked_by: 'system',
       checked_at: new Date().toISOString(),
-      company_id: data.company_id || '00000000-0000-0000-0000-000000000000',
+      company_id: resolvedCompanyId,
       created_at: new Date().toISOString(),
     };
 

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import AdminLayoutClient from "./layout-client";
+import { isAuthorizedAdminEmail } from "@/lib/admin-gate";
 import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default async function AdminLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!user || !isAuthorizedAdminEmail(user.email)) {
     redirect("/gate/login");
   }
 

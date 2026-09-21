@@ -60,6 +60,7 @@ const navCategories = [
     items: [
       { href: "/admin/work", label: "مركز العمل", icon: "TrendingUp" },
       { href: "/admin/sales", label: "المبيعات", icon: "MessageSquare" },
+      { href: "/admin/elite", label: "دعوات النخبة", icon: "Crown" },
     ],
   },
   {
@@ -73,6 +74,7 @@ const navCategories = [
     items: [
       { href: "/admin/system", label: "مركز النظام", icon: "Settings" },
       { href: "/admin/settings", label: "الإعدادات", icon: "Database" },
+      { href: "/admin/database", label: "حالة قاعدة البيانات", icon: "Activity" },
     ],
   },
 ];
@@ -197,23 +199,12 @@ export default function AdminLayoutClient({
           ))}
         </nav>
 
-        {/* Sidebar Footer with System Stats */}
+        {/* Sidebar Footer */}
         <div className="p-4 border-t border-white/5 space-y-4">
-          <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Cpu className="w-3.5 h-3.5 text-[#C5A059]" />
-                <span className="text-[10px] text-white/60">نظام الأوركيسترا</span>
-              </div>
-              <span className="text-[10px] text-emerald-400">نشط</span>
-            </div>
-            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-[#C5A059] w-[85%] rounded-full animate-pulse" />
-            </div>
-          </div>
-          <p className="text-[10px] text-white/20 text-center uppercase tracking-widest font-bold">
-            Sovereign OS v2.1
-          </p>
+          <Link href="/admin/database" className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-white/60 transition hover:border-[#C5A059]/40 hover:text-white">
+            <Activity className="h-4 w-4 text-[#C5A059]" />
+            <span className="text-xs">افتح حالة النظام الفعلية</span>
+          </Link>
         </div>
       </aside>
 

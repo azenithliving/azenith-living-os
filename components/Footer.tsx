@@ -38,9 +38,9 @@ type FooterProps = {
 export default function Footer({ contactEmail, contactPhone, businessAddress }: FooterProps) {
   const currentLang = useSessionStore((state) => state.language);
   const isRTL = currentLang === "ar";
-  const email = contactEmail ?? "azenithliving@gmail.com";
-  const phone = contactPhone ?? "201090819584";
-  const officeAddress = businessAddress ?? "السلام، القاهرة، مصر";
+  const email = contactEmail ?? null;
+  const phone = contactPhone ?? null;
+  const officeAddress = businessAddress ?? null;
 
   return (
     <footer className="relative z-20 border-t border-[#1A1A1A] bg-black">
@@ -62,10 +62,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
                 className="h-auto w-24 object-contain"
                 style={{ height: 'auto' }}
               />
-              <p className="mt-6 text-sm font-light italic leading-relaxed text-gray-400">{isRTL ? "راحة وفخامة تدوم إلى الأبد" : "Comfort and luxury that lasts forever"}</p>
-              <p className="mt-3 text-[10px] font-mono uppercase tracking-wider text-gray-600">
-                Azenith OS: Autonomous Manufacturing System
-              </p>
+              <p className="mt-6 text-sm font-light italic leading-relaxed text-gray-400">{isRTL ? "تصميم داخلي يبدأ بفهم المساحة" : "Interior design that starts with understanding the space"}</p>
             </motion.div>
           </motion.div>
 
@@ -93,21 +90,32 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
           <motion.div variants={columnVariants} className="space-y-8">
             <h4 className="text-xs font-light uppercase tracking-widest text-gray-500">{isRTL ? "تواصل مباشر" : "Direct Contact"}</h4>
             <ul className="space-y-4">
-              <li className="text-sm font-light text-gray-300">
-                <span className="text-gray-600">{isRTL ? "البريد:" : "Email:"}</span>{" "}
-                <a href={`mailto:${email}`} className="transition-all duration-300 hover:text-[#C5A059]">
-                  {email}
-                </a>
-              </li>
-              <li className="text-sm font-light text-gray-300">
-                <span className="text-gray-600">{isRTL ? "الهاتف:" : "Phone:"}</span>{" "}
-                <a href={`tel:${phone}`} className="transition-all duration-300 hover:text-[#C5A059]">
-                  {phone}
-                </a>
-              </li>
-              <li className="text-sm font-light text-gray-300">
-                <span className="text-gray-600">{isRTL ? "العنوان:" : "Address:"}</span> <span>{officeAddress}</span>
-              </li>
+              {email ? (
+                <li className="text-sm font-light text-gray-300">
+                  <span className="text-gray-600">{isRTL ? "البريد:" : "Email:"}</span>{" "}
+                  <a href={`mailto:${email}`} className="transition-all duration-300 hover:text-[#C5A059]">
+                    {email}
+                  </a>
+                </li>
+              ) : null}
+              {phone ? (
+                <li className="text-sm font-light text-gray-300">
+                  <span className="text-gray-600">{isRTL ? "الهاتف:" : "Phone:"}</span>{" "}
+                  <a href={`tel:${phone}`} className="transition-all duration-300 hover:text-[#C5A059]">
+                    {phone}
+                  </a>
+                </li>
+              ) : null}
+              {officeAddress ? (
+                <li className="text-sm font-light text-gray-300">
+                  <span className="text-gray-600">{isRTL ? "العنوان:" : "Address:"}</span> <span>{officeAddress}</span>
+                </li>
+              ) : null}
+              {!email && !phone && !officeAddress ? (
+                <li className="text-sm font-light text-gray-400">
+                  {isRTL ? "استخدم نموذج الطلب للتواصل مع الفريق." : "Use the request form to contact the team."}
+                </li>
+              ) : null}
             </ul>
           </motion.div>
         </div>
@@ -117,10 +125,6 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
         <div className="mx-auto max-w-7xl px-6 py-6 md:px-12 lg:px-16">
           <div className="flex flex-col items-center justify-between gap-4 text-[10px] font-mono tracking-widest md:flex-row">
             <span className="text-gray-600">© {new Date().getFullYear()} AZENITH LIVING // ALL RIGHTS RESERVED</span>
-            <span className="text-gray-600">
-              SYSTEM_STATUS: OPERATIONAL // BY:{" "}
-              <span className="text-[#C5A059] drop-shadow-[0_0_8px_rgba(197,160,89,0.5)]">ALAA_AZIZ</span>
-            </span>
           </div>
         </div>
       </div>

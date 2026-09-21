@@ -113,7 +113,7 @@ test.describe("Public APIs", () => {
     test(`GET ${path}`, async ({ request }) => {
       const response = await request.get(path);
       expect(response.status()).toBeLessThan(500);
-      expect([200, 400, 401, 405]).toContain(response.status());
+      expect([200, 400, 401, 403, 405, 410]).toContain(response.status());
     });
   }
 });

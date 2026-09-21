@@ -1,72 +1,53 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { NextResponse } from "next/server";
+
+import { requireAdminApi } from "@/lib/admin-api-guard";
 import { resolvePrimaryCompanyId } from "@/lib/company-resolver";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 type AdminClient = NonNullable<ReturnType<typeof getSupabaseAdminClient>>;
 
-function apiSuccess(data: Record<string, unknown>) {
-  return NextResponse.json({
-    success: true,
-    ...data,
-  });
-}
-
-function apiError(error: string, status: number) {
-  return NextResponse.json({ success: false, error }, { status });
-}
+const SUCCESS_STATUSES = new Set(["executed", "completed", "success", "done"]);
+const FAILED_STATUSES = new Set(["failed", "error"]);
 
 /**
- * GET /api/admin/mastermind/stats
- * Returns comprehensive statistics for Mastermind system
+ * Read-only statistics used by the admin overview.  The route deliberately
+ * reports only records that exist in the database; it never invents agents,
+ * 2FA state, or activity when the underlying tables are empty.
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
+  const { user, unauthorized } = await requireAdminApi();
+  if (unauthorized || !user) return unauthorized!;
+
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    return NextResponse.json(
+      { success: false, error: "Supabase admin client unavailable" },
+      { status: 503 },
+    );
+  }
+
   try {
-    const userId = request.headers.get("x-admin-user-id");
     const companyId = await resolvePrimaryCompanyId();
+    const stats = await gatherMastermindStats(supabase, user.id, companyId);
 
-    if (!userId) {
-      return apiError("Unauthorized", 401);
-    }
-
-    const supabase = getSupabaseAdminClient();
-
-    if (!supabase) {
-      return apiError("Supabase admin client unavailable", 500);
-    }
-
-    // We get the user's email from the auth system if possible, 
-    // but here we just check if 2FA is enabled or if it's a known admin.
-    const { data: user2FA } = await supabase
-      .from("user_2fa")
-      .select("is_enabled")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    // Relaxed check: only block if explicitly disabled and not a sovereign bypass
-    // For now, if no row exists, we allow (as it might be first time setup)
-    if (user2FA?.is_enabled === false) {
-      return apiError("2FA required", 403);
-    }
-
-    // Fetch stats from multiple sources
-    const stats = await gatherMastermindStats(supabase, userId, companyId);
-
-    return apiSuccess({
-      message: "Mastermind stats fetched",
-      data: stats,
-      meta: { actorId: userId, companyId },
+    return NextResponse.json({
+      success: true,
+      ...stats,
+      meta: { actorId: user.id, companyId },
     });
-
   } catch (error) {
-    console.error("Mastermind Stats Error:", error);
-    return apiError("Failed to fetch stats", 500);
+    console.error("[AdminStats] Failed to collect dashboard statistics:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch dashboard statistics" },
+      { status: 500 },
+    );
   }
 }
 
 async function gatherMastermindStats(supabase: AdminClient, userId: string, companyId: string) {
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  const [commandLogsRes, apiKeysRes, failedAttemptsRes, agentTasksRes, agentProfilesRes] = await Promise.all([
+  const [commandLogsRes, apiKeysRes, failedAttemptsRes, agentTasksRes, agentProfilesRes, user2FARes] = await Promise.all([
     supabase
       .from("immutable_command_log")
       .select("id, status, executed_at, command_text")
@@ -89,80 +70,95 @@ async function gatherMastermindStats(supabase: AdminClient, userId: string, comp
       .limit(200),
     supabase
       .from("agent_profiles")
-      .select("id, agent_key, name"),
+      .select("id, agent_key"),
+    supabase
+      .from("user_2fa")
+      .select("is_enabled")
+      .eq("user_id", userId)
+      .maybeSingle(),
   ]);
 
-  const commandLogs = commandLogsRes.data || [];
-  const apiKeys = apiKeysRes.data || [];
-  const failedAttempts = failedAttemptsRes.data || [];
-  const agentTasks = agentTasksRes.data || [];
-  const agentProfiles = agentProfilesRes.data || [];
+  const rawErrors: Array<[string, { message: string } | null | undefined]> = [
+    ["immutable_command_log", commandLogsRes.error],
+    ["api_keys", apiKeysRes.error],
+    ["failed_login_attempts", failedAttemptsRes.error],
+    ["agent_tasks", agentTasksRes.error],
+    ["agent_profiles", agentProfilesRes.error],
+    ["user_2fa", user2FARes.error],
+  ];
+
+  const warnings = rawErrors
+    .filter((entry): entry is [string, { message: string }] => Boolean(entry[1]))
+    .map(([table, error]) => `${table}: ${error.message}`);
+
+  const commandLogs = commandLogsRes.data ?? [];
+  const apiKeys = apiKeysRes.data ?? [];
+  const failedAttempts = failedAttemptsRes.data ?? [];
+  const agentTasks = agentTasksRes.data ?? [];
+  const agentProfiles = agentProfilesRes.data ?? [];
 
   const agentKeyById = new Map<string, string>();
-  agentProfiles.forEach((p: { id: string; agent_key: string }) => {
-    agentKeyById.set(p.id, p.agent_key);
-  });
-
-  const totalCommands = commandLogs.length;
-  const successfulCommands = commandLogs.filter((c: { status: string }) => c.status === "executed").length;
-  const failedCommands = commandLogs.filter((c: { status: string }) => c.status === "failed").length;
-  const pendingCommands = commandLogs.filter((c: { status: string }) => c.status === "pending").length;
-
-  const modelUsage: Record<string, number> = {};
-  commandLogs.forEach((log: { command_text: string }) => {
-    const modelMatch = log.command_text.match(/model[="']?([^"',\s]+)/i);
-    if (modelMatch) {
-      const model = modelMatch[1];
-      modelUsage[model] = (modelUsage[model] || 0) + 1;
-    }
-  });
+  for (const profile of agentProfiles) {
+    if (profile.id && profile.agent_key) agentKeyById.set(profile.id, profile.agent_key);
+  }
 
   const agentPerformance: Record<string, { tasks: number; completed: number; failed: number; avgTime: number; successRate: number }> = {};
+  for (const task of agentTasks) {
+    const agentKey = task.agent_profile_id ? agentKeyById.get(task.agent_profile_id) ?? "unassigned" : "unassigned";
+    const agent = agentPerformance[agentKey] ?? {
+      tasks: 0,
+      completed: 0,
+      failed: 0,
+      avgTime: 0,
+      successRate: 0,
+    };
 
-  agentTasks.forEach((task: { agent_profile_id: string | null; status: string; started_at: string | null; completed_at: string | null }) => {
-    const agentKey = task.agent_profile_id ? agentKeyById.get(task.agent_profile_id) || 'unknown' : 'unknown';
-
-    if (!agentPerformance[agentKey]) {
-      agentPerformance[agentKey] = { tasks: 0, completed: 0, failed: 0, avgTime: 0, successRate: 0 };
-    }
-
-    agentPerformance[agentKey].tasks++;
-
-    if (task.status === "completed") {
-      agentPerformance[agentKey].completed++;
+    agent.tasks += 1;
+    const normalizedStatus = String(task.status ?? "").toLowerCase();
+    if (SUCCESS_STATUSES.has(normalizedStatus)) {
+      agent.completed += 1;
       if (task.started_at && task.completed_at) {
         const duration = new Date(task.completed_at).getTime() - new Date(task.started_at).getTime();
-        const prevAvg = agentPerformance[agentKey].avgTime;
-        const count = agentPerformance[agentKey].completed;
-        agentPerformance[agentKey].avgTime = prevAvg + (duration - prevAvg) / count;
+        if (Number.isFinite(duration) && duration >= 0) {
+          agent.avgTime += (duration - agent.avgTime) / agent.completed;
+        }
       }
-    } else if (task.status === "failed") {
-      agentPerformance[agentKey].failed++;
+    } else if (FAILED_STATUSES.has(normalizedStatus)) {
+      agent.failed += 1;
     }
-  });
 
-  Object.keys(agentPerformance).forEach((key) => {
-    const agent = agentPerformance[key];
-    agent.successRate = agent.tasks > 0 ? Math.round((agent.completed / agent.tasks) * 100) : 0;
+    agentPerformance[agentKey] = agent;
+  }
+
+  for (const agent of Object.values(agentPerformance)) {
     agent.avgTime = Math.round(agent.avgTime);
-  });
+    agent.successRate = agent.tasks ? Math.round((agent.completed / agent.tasks) * 100) : 0;
+  }
 
-  if (Object.keys(agentPerformance).length === 0) {
-    agentPerformance["prime"] = { tasks: 0, completed: 0, failed: 0, avgTime: 0, successRate: 0 };
-    agentPerformance["vanguard"] = { tasks: 0, completed: 0, failed: 0, avgTime: 0, successRate: 0 };
+  const commandStatus = (command: { status: string | null }) => String(command.status ?? "").toLowerCase();
+  const successfulCommands = commandLogs.filter((command) => SUCCESS_STATUSES.has(commandStatus(command))).length;
+  const failedCommands = commandLogs.filter((command) => FAILED_STATUSES.has(commandStatus(command))).length;
+  const pendingCommands = commandLogs.filter((command) => {
+    const status = commandStatus(command);
+    return status && !SUCCESS_STATUSES.has(status) && !FAILED_STATUSES.has(status);
+  }).length;
+
+  const modelUsage: Record<string, number> = {};
+  for (const log of commandLogs) {
+    const match = log.command_text?.match(/model[="']?([^",'\s]+)/i);
+    if (match?.[1]) modelUsage[match[1]] = (modelUsage[match[1]] ?? 0) + 1;
   }
 
   return {
     timestamp: new Date().toISOString(),
+    warnings,
     commands: {
-      total: totalCommands,
+      total: commandLogs.length,
       successful: successfulCommands,
       failed: failedCommands,
       pending: pendingCommands,
-      successRate: totalCommands > 0 ? Math.round((successfulCommands / totalCommands) * 100) : 0,
-      last24h: commandLogs.filter((c: { executed_at: string }) =>
-        new Date(c.executed_at) > new Date(oneDayAgo)
-      ).length,
+      successRate: commandLogs.length ? Math.round((successfulCommands / commandLogs.length) * 100) : 0,
+      last24h: commandLogs.filter((command) => command.executed_at && new Date(command.executed_at) > new Date(oneDayAgo)).length,
     },
     models: {
       usage: modelUsage,
@@ -170,23 +166,18 @@ async function gatherMastermindStats(supabase: AdminClient, userId: string, comp
     },
     agents: agentPerformance,
     apiKeys: {
-      total: apiKeys.length,
-      active: apiKeys.filter((k: { last_used_at: string | null }) => k.last_used_at).length,
-      providers: Array.from(new Set(apiKeys.map((k: { provider: string }) => k.provider))),
+      enabled: apiKeys.length,
+      recentlyUsed: apiKeys.filter((key) => Boolean(key.last_used_at)).length,
+      providers: [...new Set(apiKeys.map((key) => key.provider).filter(Boolean))],
     },
     security: {
       failedAttempts24h: failedAttempts.length,
-      has2FA: true,
-      lastCommand: commandLogs[0]?.executed_at || null,
+      has2FA: user2FARes.data?.is_enabled === true,
+      lastCommand: commandLogs[0]?.executed_at ?? null,
     },
-    recentCommands: commandLogs.slice(0, 20).map((log: {
-      id: string;
-      command_text: string;
-      status: string;
-      executed_at: string;
-    }) => ({
+    recentCommands: commandLogs.slice(0, 20).map((log) => ({
       id: log.id,
-      command: log.command_text.slice(0, 100),
+      command: (log.command_text ?? "").slice(0, 100),
       status: log.status,
       executedAt: log.executed_at,
     })),

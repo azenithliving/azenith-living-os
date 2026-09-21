@@ -1,31 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { assertCronAuthorized } from "@/lib/cron-auth";
 
 /**
- * Monthly Refresh Cron API
- * Called by Vercel Cron or external scheduler every 30 days
- * 
- * POST /api/cron/monthly-refresh
- * Headers: { "Authorization": "Bearer CRON_SECRET" }
+ * Monthly image/content refresh. Vercel Cron invokes GET
+ * (vercel.json: 0 0 1 * *) with Authorization: Bearer $CRON_SECRET.
  */
 
-const CRON_SECRET = process.env.CRON_SECRET;
+async function run(request: NextRequest) {
+  const unauthorized = assertCronAuthorized(request);
+  if (unauthorized) return unauthorized;
 
-export async function POST(request: NextRequest) {
   try {
-    // Verify cron secret
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.includes(CRON_SECRET || "")) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // Import and run refresh script
     const { runMonthlyRefresh, logRefreshRun, shouldRunRefresh } = await import("@/scripts/monthly-refresh");
-    
-    // Check if we should run (30 days passed)
+
     const shouldRun = await shouldRunRefresh();
     if (!shouldRun) {
       return NextResponse.json({
@@ -35,10 +22,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Run the refresh
     const report = await runMonthlyRefresh();
-    
-    // Log to database
     await logRefreshRun(report);
 
     return NextResponse.json({
@@ -47,37 +31,23 @@ export async function POST(request: NextRequest) {
       run: true,
       report,
     });
-
   } catch (error) {
     console.error("[Monthly Refresh API] Error:", error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: "Refresh failed",
-        details: (error as Error).message 
+        details: (error as Error).message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-// GET for status check (fail-open for smoke tests / cron dashboards)
-export async function GET() {
-  try {
-    const { shouldRunRefresh } = await import("@/scripts/monthly-refresh");
-    const shouldRun = await shouldRunRefresh();
-    return NextResponse.json({
-      shouldRun,
-      nextRun: shouldRun ? "now" : "in ~30 days",
-    });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        shouldRun: false,
-        degraded: true,
-        error: error instanceof Error ? error.message : "Status check failed",
-      },
-      { status: 200 }
-    );
-  }
+export async function GET(request: NextRequest) {
+  return run(request);
+}
+
+export async function POST(request: NextRequest) {
+  return run(request);
 }

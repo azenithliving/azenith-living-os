@@ -1,38 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
-import { searchWeb, formatSearchResults } from "@/lib/web-tools";
+import { NextResponse } from "next/server";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
-export async function GET(req: NextRequest) {
-  try {
-    const query = req.nextUrl.searchParams.get("q") || "test";
+/**
+ * Open web-search probe. Previously public and executed live queries.
+ */
+export async function GET() {
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
 
-    console.log("[TestSearch] Testing search with query:", query);
-
-    const results = await searchWeb(query);
-
-    // Check if first result is an error message
-    const firstResult = results[0] || "";
-    const isError = firstResult.startsWith("❌") || firstResult.startsWith("لا توجد نتائج");
-
-    if (isError) {
-      return NextResponse.json({
-        success: false,
-        error: firstResult,
-        query,
-        diagnostic: true,
-      }, { status: 200 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      query,
-      results_count: results.length,
-      results: results,
-    });
-  } catch (error) {
-    console.error("[TestSearch] Error:", error);
-    return NextResponse.json({
+  return NextResponse.json(
+    {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }, { status: 500 });
-  }
+      error: "مسار البحث التجريبي أُغلق. استخدم أدوات الإدارة المصرّح بها.",
+    },
+    { status: 410 },
+  );
 }

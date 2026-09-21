@@ -62,6 +62,8 @@ export const SLOW_OR_SPECIAL_API_PATHS = new Set([
   "/api/admin/eternal/genesis",
   "/api/cron/autonomous-monitoring",
   "/api/cron/monthly-refresh",
+  "/api/cron/admin-daily-report",
+  "/api/cron/admin-sovereign-mind",
   "/api/admin/verify-2fa",
   "/api/admin/gate/validate",
 ]);

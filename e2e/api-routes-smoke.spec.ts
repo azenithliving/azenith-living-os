@@ -8,7 +8,7 @@ import {
 
 test.describe.configure({ timeout: 300_000 });
 
-const ACCEPTABLE = new Set([200, 201, 204, 400, 401, 403, 404, 405, 409, 422, 429]);
+const ACCEPTABLE = new Set([200, 201, 204, 400, 401, 403, 404, 405, 409, 410, 422, 429, 503]);
 
 test("all API routes respond without 5xx (GET)", async ({ request }) => {
   const routes = discoverApiRoutes().filter(

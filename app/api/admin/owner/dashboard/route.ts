@@ -6,16 +6,21 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
+import { resolveAdminCompanyId } from '@/lib/admin-company';
+import { requireAdminApi } from '@/lib/admin-api-guard';
 
 export async function GET(request: NextRequest) {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const { searchParams } = new URL(request.url);
-    const companyId = searchParams.get('company_id');
+    const companyId = await resolveAdminCompanyId(searchParams.get('company_id'));
 
     if (!companyId) {
       return NextResponse.json(
-        { success: false, error: 'company_id required' },
-        { status: 400 }
+        { success: false, error: 'No company is configured for the owner dashboard' },
+        { status: 404 }
       );
     }
 
@@ -42,7 +47,7 @@ export async function GET(request: NextRequest) {
       // Low stock items
       getLowStockItems(companyId),
       // Agent stats
-      getAgentStats(companyId, startOfMonth),
+      getAgentStats(companyId, startOfMonth, startOfToday),
       // Revenue this month
       getRevenueStats(companyId, startOfMonth),
       // System alerts
@@ -53,6 +58,7 @@ export async function GET(request: NextRequest) {
       // Today's snapshot
       today: {
         date: now.toISOString().split('T')[0],
+        orders_pending: ordersResult.pending,
         orders_in_production: productionResult.inProduction,
         orders_ready: productionResult.ready,
         pending_approvals: approvalsResult.count,
@@ -117,13 +123,14 @@ async function getOrdersSummary(companyId: string, startOfMonth: string) {
 
   if (error) {
     console.error('Orders summary error:', error);
-    return { total: 0, completed: 0 };
+    return { total: 0, completed: 0, pending: 0 };
   }
 
   const total = data?.length || 0;
   const completed = data?.filter(o => o.status === 'completed').length || 0;
+  const pending = data?.filter(o => ['new', 'draft', 'pending'].includes(o.status)).length || 0;
 
-  return { total, completed };
+  return { total, completed, pending };
 }
 
 // Get production status
@@ -135,7 +142,7 @@ async function getProductionStatus(companyId: string) {
 
   if (error) {
     console.error('Production status error:', error);
-    return { inProduction: 0, ready: 0, pipeline: [], onTimeRate: 0 };
+    return { inProduction: 0, ready: 0, pipeline: [], onTimeRate: null };
   }
 
   const inProduction = data?.filter(j => j.status === 'in_progress').length || 0;
@@ -156,7 +163,8 @@ async function getProductionStatus(companyId: string) {
     inProduction,
     ready,
     pipeline: Array.from(pipelineMap.values()),
-    onTimeRate: 85 // Placeholder - would calculate from actual vs scheduled dates
+    // Delivery dates are not available on every installation, so do not invent a rate.
+    onTimeRate: null,
   };
 }
 
@@ -196,16 +204,18 @@ async function getLowStockItems(companyId: string) {
     .select('*')
     .eq('company_id', companyId)
     .eq('is_active', true)
-    .lte('current_quantity', 'min_stock_level')
     .order('current_quantity', { ascending: true })
-    .limit(10);
+    .limit(200);
 
   if (error) {
     console.error('Low stock error:', error);
     return { lowStockCount: 0, items: [] };
   }
 
-  const items = data?.map(item => ({
+  const items = data
+    ?.filter((item) => Number(item.current_quantity) <= Number(item.min_stock_level))
+    .slice(0, 10)
+    .map(item => ({
     id: item.id,
     name: item.name,
     sku: item.sku,
@@ -218,7 +228,7 @@ async function getLowStockItems(companyId: string) {
 }
 
 // Get agent stats
-async function getAgentStats(companyId: string, startOfMonth: string) {
+async function getAgentStats(companyId: string, startOfMonth: string, startOfToday: string) {
   // Get PRIME stats
   const { data: primeProfile } = await supabaseServer
     .from('agent_profiles')
@@ -237,21 +247,20 @@ async function getAgentStats(companyId: string, startOfMonth: string) {
   // Get tasks stats
   const { data: tasksData } = await supabaseServer
     .from('agent_tasks')
-    .select('agent_profile_id, status')
+    .select('agent_profile_id, status, created_at')
     .eq('company_id', companyId)
     .gte('created_at', startOfMonth);
 
   const primeTasks = tasksData?.filter(t => t.agent_profile_id === primeProfile?.id) || [];
   const vanguardTasks = tasksData?.filter(t => t.agent_profile_id === vanguardProfile?.id) || [];
-  const primeTasksToday = primeTasks.filter((t: any) => t.created_at >= startOfMonth).length;
-  const vanguardTasksToday = vanguardTasks.filter((t: any) => t.created_at >= startOfMonth).length;
+  const primeTasksToday = primeTasks.filter((t: any) => t.created_at >= startOfToday).length;
+  const vanguardTasksToday = vanguardTasks.filter((t: any) => t.created_at >= startOfToday).length;
 
   return {
     prime: {
       tasks_today: primeTasksToday,
       tasks_this_month: primeTasks.length,
       completed_tasks: primeTasks.filter(t => t.status === 'completed').length,
-      rating: 5 // Placeholder
     },
     vanguard: {
       tasks_today: vanguardTasksToday,
@@ -259,7 +268,7 @@ async function getAgentStats(companyId: string, startOfMonth: string) {
       completed_tasks: vanguardTasks.filter(t => t.status === 'completed').length,
       deals_closed: vanguardTasks.filter(t => t.status === 'completed').length
     },
-    active_devices: 0
+    active_devices: null,
   };
 }
 
@@ -274,12 +283,14 @@ async function getRevenueStats(companyId: string, startOfMonth: string) {
 
   if (error) {
     console.error('Revenue stats error:', error);
-    return { total: 0, profit: 0, avgOrderValue: 0, paymentsDue: 0 };
+    return { total: 0, profit: null, avgOrderValue: 0, paymentsDue: 0 };
   }
 
   const total = data?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0;
   const avgOrderValue = data?.length ? total / data.length : 0;
-  const profit = total * 0.25; // Assume 25% margin
+  // Cost data is not stored with every order, so profit must remain unavailable
+  // rather than being presented as a fabricated percentage.
+  const profit = null;
 
   // Calculate pending payments
   const unpaid = data?.filter(o => !o.deposit_paid).length || 0;

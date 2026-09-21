@@ -15,35 +15,36 @@ export default function AboutAzenith() {
         <div className="grid items-start gap-16 lg:grid-cols-2">
           <div className="space-y-8">
             <h2 className="text-4xl font-serif font-bold leading-tight tracking-tight text-white md:text-5xl lg:text-6xl">
-              {isRTL ? "أزينث ليفينج: كيان تأسس على خبرة نصف قرن." : "Azenith Living: Built on Half a Century of Expertise."}
+              {isRTL ? "أزينث ليفينج: تصميم يبدأ بفهم مساحتك." : "Azenith Living: Design that starts with understanding your space."}
             </h2>
             <p className="max-w-2xl text-lg leading-relaxed text-white/80 md:text-xl">
-              {isRTL ? "تأسست أزينث ليفينج عام 2012 برؤية تمزج بين دقة التخطيط المؤسسي وإرث عائلي في صناعة الأثاث يمتد لأكثر من 50 عامًا. نحن نحول المخططات إلى واقع متماسك بخامات منضبطة وتنفيذ محسوب وضمان واضح." : "Founded in 2012, Azenith Living blends precise corporate planning with a family legacy in furniture making that spans over 50 years. We turn blueprints into cohesive reality with disciplined materials, calculated execution, and clear warranties."}
+              {isRTL ? "نساعدك على تنظيم احتياجات المساحة والطابع والميزانية قبل الانتقال إلى التفاصيل. يراجع فريق التصميم طلبك لتحديد نطاق عمل واضح وخطوات تواصل مناسبة." : "We help organize your space, style, and budget requirements before moving into the details. The design team reviews each request to define a clear scope and the appropriate next steps."}
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6">
             <div className="rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent p-8 backdrop-blur-sm">
               <div className="flex items-baseline gap-3">
-                <span className="text-5xl font-black text-[#C5A059] md:text-6xl">50</span>
-                <span className="text-2xl font-bold text-[#C5A059]">{isRTL ? "عامًا" : "Years"}</span>
+                <span className="text-3xl font-black text-[#C5A059] md:text-4xl">01</span>
+                <span className="text-2xl font-bold text-[#C5A059]">{isRTL ? "فهم المساحة" : "Understand"}</span>
               </div>
-              <p className="mt-3 text-lg text-white/70">{isRTL ? "من الشغف والخبرة في ورش الأثاث الفاخر." : "Of passion and expertise in luxury furniture workshops."}</p>
+              <p className="mt-3 text-lg text-white/70">{isRTL ? "نبدأ بتجميع احتياجاتك وما يهمك في المشروع." : "We start by collecting the needs that matter for your project."}</p>
             </div>
 
             <div className="rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent p-8 backdrop-blur-sm">
               <div className="flex items-baseline gap-3">
-                <span className="text-5xl font-black text-[#C5A059] md:text-6xl">2012</span>
+                <span className="text-3xl font-black text-[#C5A059] md:text-4xl">02</span>
+                <span className="text-2xl font-bold text-[#C5A059]">{isRTL ? "تحديد الاتجاه" : "Define"}</span>
               </div>
-              <p className="mt-3 text-lg text-white/70">{isRTL ? "عام التأسيس والانطلاق المؤسسي للعلامة." : "The founding year of the brand's corporate journey."}</p>
+              <p className="mt-3 text-lg text-white/70">{isRTL ? "نوضح اتجاه التصميم ونطاق العمل قبل أي التزام." : "We clarify the design direction and scope before any commitment."}</p>
             </div>
 
             <div className="rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent p-8 backdrop-blur-sm">
               <div className="flex items-baseline gap-3">
-                <span className="text-5xl font-black text-[#C5A059] md:text-6xl">3</span>
-                <span className="text-2xl font-bold text-[#C5A059]">{isRTL ? "سنوات" : "Years"}</span>
+                <span className="text-3xl font-black text-[#C5A059] md:text-4xl">03</span>
+                <span className="text-2xl font-bold text-[#C5A059]">{isRTL ? "خطوة تالية" : "Continue"}</span>
               </div>
-              <p className="mt-3 text-lg text-white/70">{isRTL ? "ضمان ذهبي يعكس التزام ما بعد البيع." : "Golden warranty reflecting our after-sales commitment."}</p>
+              <p className="mt-3 text-lg text-white/70">{isRTL ? "تتحدد تفاصيل التنفيذ والمتابعة وفق الاتفاق المكتوب." : "Execution and follow-up details are set by the written agreement."}</p>
             </div>
           </div>
         </div>

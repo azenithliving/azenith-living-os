@@ -96,8 +96,8 @@ function EliteBriefContent() {
             Design Your Vision
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-white/60">
-            Complete this brief and our consultants will craft a personalized concept
-            portfolio based on your Style DNA
+            Complete this brief so the design team can review your space, budget,
+            and preferences.
           </p>
         </motion.div>
 
@@ -110,11 +110,7 @@ function EliteBriefContent() {
             <div className="mb-4 text-6xl">✨</div>
             <h2 className="text-2xl font-semibold text-white">Brief Submitted Successfully</h2>
             <p className="mt-4 text-white/70">
-              Our consultants are analyzing your Style DNA and preparing your
-              personalized concept portfolio.
-            </p>
-            <p className="mt-4 text-sm text-amber-300/80">
-              You will receive your "Azenith Design Concepts" PDF within 24 hours.
+              Your brief has been saved for the design team to review.
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <a
@@ -151,9 +147,9 @@ function EliteBriefContent() {
                 className="mx-auto mb-8 max-w-2xl rounded-xl border border-amber-400/20 bg-amber-500/5 p-4"
               >
                 <p className="text-sm text-amber-300/80">
-                  <span className="font-semibold">📸 Style DNA Source:</span> You viewed{" "}
-                  {viewedImages.length} design images. Our AI will analyze your
-                  preferences to generate personalized recommendations.
+                  <span className="font-semibold">📸 Saved inspiration:</span> You viewed{" "}
+                  {viewedImages.length} design images. These choices will be attached
+                  to your brief for the design team to review.
                 </p>
               </motion.div>
             )}

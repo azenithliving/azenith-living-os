@@ -19,8 +19,8 @@ interface SiteConfig {
 const getConfig = (isRTL: boolean): SiteConfig => ({
   heroTitle: isRTL ? "ابدأ رحلة التصميم الذكي." : "Start Your Smart Design Journey.",
   heroSubtitle: isRTL 
-    ? "أربع اختيارات فقط تكفي لبناء ملف العميل، تقدير مبدئي، ورسالة واتساب جاهزة للفريق التجاري."
-    : "Just four choices are enough to build your profile, an initial estimate, and a ready WhatsApp message for our commercial team.",
+    ? "أربع اختيارات فقط تساعدنا على تنظيم طلبك وفهم المساحة والخدمة التي تبحث عنها."
+    : "Four choices help us organize your request and understand the space and service you need.",
   budgetOptions: [
     "2,500 - 5,500 EGP",
     "5,500 - 12,000 EGP",

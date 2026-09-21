@@ -123,7 +123,9 @@ export async function monitorDatabaseHealth(error?: Error): Promise<SystemAlert 
       proposedFix: isConnectionError
         ? "Retry with exponential backoff, alert admin if persists > 2 minutes"
         : "Analyze query pattern, add index if needed, or optimize query structure",
-      autoFixable: !isConnectionError, // Connection issues need admin attention
+      // A database issue needs investigation by an operator.  Marking it resolved
+      // after a log statement would hide a real outage.
+      autoFixable: false,
       status: "pending",
       errorLog: error.stack,
     };
@@ -300,9 +302,11 @@ export async function confirmAndApplyFix(alertId: string): Promise<boolean> {
     // Apply the proposed fix
     switch (alert.category) {
       case "database":
-        // Would trigger connection pool reset, index creation, etc.
-        console.log(`[Sentinel] Admin confirmed database fix: ${alert.proposedFix}`);
-        break;
+        // There is no safe generic database repair to run here.  Keep the alert
+        // pending so the operator can investigate or explicitly dismiss it.
+        alert.status = "pending";
+        alertStore.set(alertId, alert);
+        return false;
         
       default:
         await applyAutoFix(alertId);

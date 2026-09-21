@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { getCurrentTenant } from "@/lib/tenant";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
 export type BookingRequest = {
   sessionId: string;
@@ -17,6 +18,23 @@ export type BookingRequest = {
   notes?: string;
 };
 
+function hasRequiredBookingFields(value: unknown): value is BookingRequest {
+  if (!value || typeof value !== "object") return false;
+
+  const booking = value as Record<string, unknown>;
+  return [
+    "sessionId",
+    "fullName",
+    "phone",
+    "preferredDate",
+    "preferredTime",
+    "roomType",
+    "budget",
+    "style",
+    "serviceType",
+  ].every((field) => typeof booking[field] === "string" && booking[field].trim().length > 0);
+}
+
 export async function POST(request: Request) {
   try {
     const tenant = await getCurrentTenant();
@@ -27,7 +45,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const body: BookingRequest = await request.json();
+    const body: unknown = await request.json();
+    if (!hasRequiredBookingFields(body)) {
+      return NextResponse.json(
+        { ok: false, message: "Missing required booking details" },
+        { status: 400 }
+      );
+    }
     const supabase = getSupabaseAdminClient();
     if (!supabase) throw new Error('Supabase not initialized');
 
@@ -126,6 +150,9 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const tenant = await getCurrentTenant();
     if (!tenant) {
       return NextResponse.json(

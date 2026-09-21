@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   TrendingUp,
   MessageSquare,
-  Phone,
+  Monitor,
 } from "lucide-react";
 
 const workLinks = [
@@ -13,16 +13,16 @@ const workLinks = [
     icon: TrendingUp,
   },
   {
-    href: "/admin/whatsapp",
-    label: "واتساب",
-    desc: "محادثات واتساب للأعمال",
+    href: "/admin/sales",
+    label: "متابعة العملاء",
+    desc: "الطلبات والأسئلة المعلّقة في مركز المبيعات",
     icon: MessageSquare,
   },
   {
-    href: "/admin/phone",
-    label: "الهاتف",
-    desc: "المكالمات والرد الآلي",
-    icon: Phone,
+    href: "/admin/browser",
+    label: "جلسة المتصفح",
+    desc: "عرض جلسة متصفح مُهيأة عندما تكون متاحة",
+    icon: Monitor,
   },
 ];
 
@@ -38,7 +38,7 @@ export default function AdminWorkPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {workLinks.map((item) => (
           <Link
-            key={item.href}
+            key={item.label}
             href={item.href}
             className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 hover:border-[#C5A059]/40 transition"
           >

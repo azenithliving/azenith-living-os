@@ -21,9 +21,9 @@ const links = [
     icon: Globe,
   },
   {
-    href: "/admin/sandbox",
-    label: "بيئة الاختبار",
-    desc: "تجارب آمنة",
+    href: "/admin/agents?tab=teams",
+    label: "سجل التنفيذ",
+    desc: "عرض مهام الوكلاء المسجلة ونتائجها",
     icon: Code,
   },
   {

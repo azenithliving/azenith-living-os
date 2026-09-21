@@ -56,7 +56,7 @@ export const roomDefinitions: RoomDefinition[] = [
     summaryEn: "A calm space with hotel details, layered lighting, and long-lasting materials.",
     outcomeEn: "A design that transforms the room from mere furnishing to a comfortable and cohesive daily experience.",
     bulletsEn: ["Clear movement distribution","Hidden storage solutions","Warm materials palette","Harmony between bed and dressing"],
-    summary: "مساحة هادئة بتفاصيل فندقية وإضاءة طبقية وخامات تعيش سنوات طويلة.",
+    summary: "مساحة هادئة بتفاصيل فندقية وإضاءة طبقية وخامات تُختار حسب الاستخدام اليومي.",
     outcome: "تصميم ينقل الغرفة من مجرد فرش إلى تجربة يومية مريحة ومتماسكة.",
     bullets: ["توزيع حركة واضح", "حلول تخزين مخفية", "لوحة خامات دافئة", "تناغم بين السرير والدريسينج"],
     furniture: [
@@ -404,7 +404,7 @@ export const roomDefinitions: RoomDefinition[] = [
     outcomeEn: "A tranquil sanctuary for daily rejuvenation with moisture-resistant materials.",
     bulletsEn: ["Marble & porcelain cladding", "Concealed plumbing fixtures", "Anti-fog illuminated mirrors", "Rain shower & freestanding tub design"],
     summary: "تصميم حمامات فاخرة تجمع بين الوظيفة والاسترخاء بأجواء السبا الفندقي.",
-    outcome: "ملاذ يومي للانتعاش بخامات عزل ورخام يقاوم الرطوبة وسنوات الاستخدام.",
+    outcome: "ملاذ يومي للانتعاش بخامات عزل ورخام تُناقش حسب مساحة الحمام.",
     bullets: ["تكسيات رخام وبورسلين فاخرة", "خلاطات ومدفونات حديثة", "مرايا مضاءة مانعة للبخار", "شور ورخام حر مستدام"],
     furniture: [
       {
@@ -544,7 +544,7 @@ export const packageLadder = [
 ];
 
 export const trustPoints = [
-  "تصميم مبدئي خلال 24 ساعة",
+  "استشارة تصميم مبدئية حسب تفاصيل الطلب",
   "عربي أولًا مع تجربة واضحة وسريعة",
   "توصيات قابلة للتنفيذ وليست moodboard فقط",
   "تركيز على المساحات السكنية الراقية في مصر",
@@ -573,7 +573,7 @@ export const executionTimeline = [
   {
     step: "01",
     title: "تأهيل سريع",
-    detail: "نحدد نوع المساحة، الميزانية، والطابع المطلوب في أقل من دقيقتين.",
+    detail: "نحدد نوع المساحة، الميزانية، والطابع المطلوب من بيانات الطلب.",
   },
   {
     step: "02",
@@ -596,12 +596,12 @@ export const executionTimeline = [
 export const aboutData: AboutData = {
   title: "نبذة عنا",
   titleEn: "About Us",
-  story: "نحن متخصصون في تصميم داخلي فاخر يركز على المساحات السكنية. خبرتنا تمتد لسنوات في خلق بيئات تعيش مع العائلة وتنمو مع احتياجاتها. نؤمن بأن التصميم ليس مجرد شكل، بل وظيفة تجعل الحياة أفضل.",
-  storyEn: "We specialize in luxury interior design focusing on residential spaces. Our experience spans years of creating environments that live with the family and grow with their needs. We believe design is not just form, but function that makes life better.",
-  values: ["جودة تدوم", "تخصيص كامل", "تنفيذ مضمون"],
-  valuesEn: ["Lasting Quality", "Full Customization", "Guaranteed Execution"],
-  team: "فريق من المهندسين والمصممين ذوي الخبرة العالية.",
-  teamEn: "A team of highly experienced engineers and designers."
+  story: "نحن متخصصون في تصميم داخلي فاخر يركز على المساحات السكنية. نبدأ بفهم احتياجات العائلة ونطاق العمل قبل أي تنفيذ. نؤمن بأن التصميم ليس مجرد شكل، بل وظيفة تجعل الحياة أفضل.",
+  storyEn: "We specialize in luxury interior design focusing on residential spaces. We start by understanding family needs and the scope of work before any execution. We believe design is not just form, but function that makes life better.",
+  values: ["جودة تدوم", "تخصيص كامل", "تنفيذ وفق نطاق العمل"],
+  valuesEn: ["Lasting Quality", "Full Customization", "Execution by agreed scope"],
+  team: "فريق من المهندسين والمصممين يراجع كل طلب لتحديد نطاق العمل.",
+  teamEn: "A team of engineers and designers reviews each request to define the scope of work."
 };
 
 export function getRoomDefinition(slug: string) {

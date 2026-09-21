@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 
 import { leadSubmissionSchema, persistLeadSubmission } from "@/lib/leads";
 import { normalizeHost } from "@/lib/tenant";
-import { analyzeStyleDNA, generateLeadPDF, LeadDossier } from "@/lib/pdf-generator";
+import { analyzeStyleDNA } from "@/lib/pdf-generator";
 import { processAutomation } from "@/lib/automation";
 import { z } from "zod";
 
 /**
  * Elite Intelligence Lead Submission API
- * Handles Style DNA analysis, PDF generation, and Diamond Lead routing
+ * Handles lead persistence, optional style analysis, and Diamond Lead routing.
  */
 
 const eliteSubmissionSchema = leadSubmissionSchema.extend({
@@ -108,27 +108,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Step 3: Generate PDF if images were viewed
-    let pdfResult: { success: boolean; html?: string; concepts?: unknown[] } = { success: false };
-    if (styleDNA) {
-      const dossier: LeadDossier = {
-        scope: parsed.data.roomType,
-        budget: parsed.data.budget,
-        timeline: parsed.data.serviceType, // Using serviceType as timeline placeholder
-        blueprintAvailable: parsed.data.blueprintAvailable || false,
-        specialRequests: parsed.data.specialRequests || "",
-        styleDNA,
-        viewedImages: parsed.data.viewedImages,
-        userId: result.userId,
-        fullName: parsed.data.fullName,
-        phone: parsed.data.phone,
-        email: parsed.data.email,
-      };
-
-      pdfResult = await generateLeadPDF(dossier);
-    }
-
-    // Step 4: Trigger Diamond Lead automation if applicable
+    // Step 3: Trigger Diamond Lead automation if applicable.
     if (parsed.data.qualification.isDiamond) {
       await processAutomation({
         type: "lead_created",
@@ -140,7 +120,6 @@ export async function POST(request: Request) {
           scope: parsed.data.roomType,
           budget: parsed.data.budget,
           styleDNA,
-          pdfGenerated: pdfResult.success,
           isDiamond: true,
           // Creative Visionary Suite data
           language: parsed.data.language,
@@ -158,8 +137,6 @@ export async function POST(request: Request) {
       companyId: result.companyId,
       qualification: parsed.data.qualification,
       styleDNA,
-      pdfGenerated: pdfResult.success,
-      concepts: pdfResult.concepts,
       language: parsed.data.language,
       investmentTier: parsed.data.investmentTier,
       aestheticAdvice: parsed.data.aestheticAdvice,

@@ -1,5 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
+import { isAuthorizedAdminEmail } from "@/lib/admin-gate";
 import { createClient } from "@/utils/supabase/server";
 
 export interface AdminAuthResult {
@@ -19,12 +20,12 @@ export async function requireAdminApi(): Promise<AdminAuthResult> {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (!user || !isAuthorizedAdminEmail(user.email)) {
       return {
         user: null,
         unauthorized: NextResponse.json(
-          { success: false, error: "Unauthorized" },
-          { status: 401 }
+          { success: false, error: "Forbidden" },
+          { status: user ? 403 : 401 }
         ),
       };
     }

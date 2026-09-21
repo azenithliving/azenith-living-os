@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
+import { requireAdminApi } from '@/lib/admin-api-guard';
 
 const DEFAULT_NAVIGATION = {
   items: [
     { id: '1', label: 'الرئيسية', href: '/', enabled: true },
     { id: '2', label: 'الغرف', href: '/rooms', enabled: true },
-    { id: '3', label: 'الحجوزات', href: '/bookings', enabled: true },
-    { id: '4', label: 'اتصل بنا', href: '/contact', enabled: true },
+    { id: '3', label: 'اطلب استشارة', href: '/request', enabled: true },
+    { id: '4', label: 'اتصل بنا', href: '/request', enabled: true },
   ],
 };
 
@@ -63,6 +64,9 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const supabase = getSupabaseAdminClient();
     if (!supabase) throw new Error('Supabase not initialized');
     const { searchParams } = new URL(request.url);

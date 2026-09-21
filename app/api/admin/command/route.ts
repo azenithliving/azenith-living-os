@@ -8,8 +8,6 @@ import crypto from "crypto";
 const ALLOWED_COMMANDS = [
   "test",
   "get_keys",
-  "add_key",
-  "rate_limit_update",
   "system_status",
   "ping",
   "health_check",
@@ -144,9 +142,8 @@ export async function POST(request: NextRequest) {
     }
 
     // التحقق من أن الأمر مسموح به
-    const isAllowed = ALLOWED_COMMANDS.some(
-      allowed => command.toLowerCase().startsWith(allowed.toLowerCase())
-    );
+    const normalizedCommand = command.trim().toLowerCase();
+    const isAllowed = ALLOWED_COMMANDS.includes(normalizedCommand);
 
     if (!isAllowed) {
       await logFailedCommand(
@@ -196,7 +193,7 @@ export async function POST(request: NextRequest) {
     let resultSummary = "";
 
     try {
-      result = await executeCommand(supabase, command, parameters, user);
+      result = await executeCommand(supabase, normalizedCommand, parameters, user);
       resultSummary = JSON.stringify(result).substring(0, 500); // limit length
     } catch (execError) {
       status = "failed";
@@ -255,10 +252,10 @@ export async function POST(request: NextRequest) {
 async function executeCommand(
   supabase: any,
   command: string,
-  parameters: Record<string, unknown>,
+  _parameters: Record<string, unknown>,
   user: any
 ) {
-  switch (command.toLowerCase()) {
+  switch (command) {
     case "test":
       return { 
         message: "Command execution test successful",
@@ -273,11 +270,17 @@ async function executeCommand(
       };
 
     case "system_status":
+    case "health_check": {
+      const { count, error } = await supabase
+        .from("companies")
+        .select("id", { count: "exact", head: true });
       return {
-        status: "operational",
-        timestamp: new Date().toISOString(),
-        user: user.email,
+        database: error ? "unavailable" : "reachable",
+        companyRecords: error ? null : count ?? 0,
+        checkedAt: new Date().toISOString(),
+        ...(error ? { error: error.message } : {}),
       };
+    }
 
     case "get_keys":
       // جلب معلومات المفاتيح العامة (بدون السرية)
@@ -306,12 +309,12 @@ async function executeCommand(
     case "get_stats":
       const { count: totalCommands } = await supabase
         .from("immutable_command_log")
-        .select("*", { count: "exact" })
+        .select("id", { count: "exact", head: true })
         .eq("user_id", user.id);
       
       const { count: failedCommands } = await supabase
         .from("immutable_command_log")
-        .select("*", { count: "exact" })
+        .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
         .eq("status", "failed");
       
@@ -323,103 +326,8 @@ async function executeCommand(
           : "N/A",
       };
 
-    case "rate_limit_update":
-      // تحديث حدود المعدل (mock implementation)
-      return {
-        updated: true,
-        newLimit: parameters.limit || 1000,
-        window: parameters.window || "1h",
-      };
-
-    // Phase 2: Mastermind Commands
-    case "analyze_user_behavior":
-      // Trigger analyst agent for user behavior analysis
-      return {
-        success: true,
-        message: "User behavior analysis initiated via Mastermind",
-        agent: "analyst",
-        taskId: `analysis-${Date.now()}`,
-      };
-
-    case "optimize_keys":
-      // Trigger ops agent for key optimization
-      return {
-        success: true,
-        message: "API key redistribution initiated via Mastermind",
-        agent: "ops",
-        optimized: true,
-        providers: ["groq", "openrouter", "mistral"],
-      };
-
-    case "run_security_audit":
-      // Trigger security agent for comprehensive audit
-      return {
-        success: true,
-        message: "Security audit initiated via Mastermind",
-        agent: "security",
-        auditId: `audit-${Date.now()}`,
-        scope: ["authentication", "authorization", "data_protection", "api_security"],
-      };
-
-    case "mastermind_process":
-      // Full mastermind workflow execution
-      const { azenithMastermind } = await import("@/lib/mastermind-core");
-      const mastermindCommand = parameters.command as string || "general task";
-      const signature = parameters.signature as string || "test-sig";
-      
-      // Get user's public key
-      const { data: userKey } = await supabase
-        .from("user_public_keys")
-        .select("public_key")
-        .eq("user_id", user.id)
-        .single();
-      
-      if (!userKey?.public_key) {
-        return {
-          success: false,
-          error: "No public key found. Please setup digital signatures first.",
-        };
-      }
-      
-      const result = await azenithMastermind.processCommand(
-        mastermindCommand,
-        signature,
-        userKey.public_key,
-        user.id
-      );
-      
-      return result;
-
-    case "quick_command":
-      // Quick command using crew directly
-      const crewModule = await import("@/lib/crew-factory");
-      const quickCommand = parameters.command as string || "quick task";
-      type ValidAgent = "coder" | "security" | "analyst" | "ops";
-      const validAgentTypes: ValidAgent[] = ["coder", "security", "analyst", "ops"];
-      const requestedAgents = (parameters.agents as string[]) || ["analyst"];
-      const agentTypes: ValidAgent[] = requestedAgents.filter((a): a is ValidAgent => 
-        validAgentTypes.includes(a as ValidAgent)
-      );
-      if (agentTypes.length === 0) agentTypes.push("analyst");
-      
-      const crew = crewModule.crewFactory.createTaskForce(agentTypes, quickCommand);
-      const tasks = agentTypes.map((type, i) => ({
-        id: `quick-${i}`,
-        agentType: type,
-        description: quickCommand,
-      }));
-      
-      const crewResults = await crew.execute(tasks);
-      
-      return {
-        success: true,
-        results: crewResults,
-        command: quickCommand,
-        agents: agentTypes,
-      };
-
     default:
-      throw new Error(`Command '${command}' not implemented`);
+      throw new Error(`Command '${command}' is not allowed`);
   }
 }
 

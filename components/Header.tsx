@@ -1,20 +1,15 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import useSessionStore from "@/stores/useSessionStore";
-
-const SOVEREIGN_ACCESS_KEY = "sovereign_access";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [clickCount, setClickCount] = useState(0);
-  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
-  const pathname = usePathname();
 
   // Use session store for language state
   const currentLang = useSessionStore((state) => state.language);
@@ -30,34 +25,10 @@ export default function Header() {
 
   useEffect(() => {
     setMounted(true);
-    return () => {
-      if (clickTimerRef.current) {
-        clearTimeout(clickTimerRef.current);
-      }
-    };
   }, []);
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
-  };
-
-  const handleLogoClick = () => {
-    const newCount = clickCount + 1;
-    setClickCount(newCount);
-
-    if (newCount === 5) {
-      sessionStorage.setItem(SOVEREIGN_ACCESS_KEY, "granted");
-      router.push("/gate/login");
-      return;
-    }
-
-    if (clickTimerRef.current) {
-      clearTimeout(clickTimerRef.current);
-    }
-
-    clickTimerRef.current = setTimeout(() => {
-      setClickCount(0);
-    }, 1500);
   };
 
   return (
@@ -107,9 +78,9 @@ export default function Header() {
         </button>
 
         <div className="flex h-full items-center">
-          <button
-            type="button"
-            onClick={handleLogoClick}
+          <Link
+            href="/"
+            aria-label={mounted && currentLang === "en" ? "Azenith Living home" : "الصفحة الرئيسية لأزينث ليفينج"}
             className="relative h-16 w-32 cursor-pointer select-none transition-transform duration-500 hover:scale-105 md:h-32 md:w-64"
           >
             <Image
@@ -120,7 +91,7 @@ export default function Header() {
               sizes="(max-width: 768px) 48px, 64px"
               priority
             />
-          </button>
+          </Link>
         </div>
       </motion.header>
 

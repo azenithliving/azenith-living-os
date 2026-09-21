@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { agentOrchestrator } from "@/lib/agents/AgentOrchestrator";
+import { agentOrchestrator, AgentType } from "@/lib/agents/AgentOrchestrator";
 import { z } from "zod";
 
 const chatSchema = z.object({
-  agent_key: z.enum(["prime", "vanguard", "auto"]),
+  agent_key: z.enum([
+    "prime",
+    "vanguard",
+    "analyst",
+    "coder",
+    "ops",
+    "security",
+    "learner",
+    "auto",
+  ]),
   message: z.string().min(1).max(4000),
   context: z.record(z.string(), z.any()).optional(),
   session_id: z.string().optional(),
@@ -23,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     const { agent_key, message, context, session_id } = parseResult.data;
 
-    const result = await agentOrchestrator.chat(agent_key, message, {
+    const result = await agentOrchestrator.chat(agent_key as AgentType, message, {
       ...context,
       session_id,
     });
@@ -58,16 +67,26 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const [primeStatus, vanguardStatus] = await Promise.all([
+    const [prime, vanguard, analyst, coder, ops, security, learner] = await Promise.all([
       agentOrchestrator.getAgentStatus("prime"),
       agentOrchestrator.getAgentStatus("vanguard"),
+      agentOrchestrator.getAgentStatus("analyst"),
+      agentOrchestrator.getAgentStatus("coder"),
+      agentOrchestrator.getAgentStatus("ops"),
+      agentOrchestrator.getAgentStatus("security"),
+      agentOrchestrator.getAgentStatus("learner"),
     ]);
 
     return NextResponse.json({
       success: true,
       data: {
-        prime: primeStatus,
-        vanguard: vanguardStatus,
+        prime,
+        vanguard,
+        analyst,
+        coder,
+        ops,
+        security,
+        learner,
         timestamp: new Date().toISOString(),
       },
     });

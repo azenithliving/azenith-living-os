@@ -852,9 +852,7 @@ export default function RoomPageClient({
             </p>
             
             <a
-              href="https://wa.me/966500000000?text=مرحباً،%20أرغب%20في%20معرفة%20أسعار%20التصميم%20الداخلي"
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`/request?room=${encodeURIComponent(room.id)}&style=${encodeURIComponent(currentStyle)}`}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 py-3 font-bold text-white transition-all hover:bg-green-600"
             >
               <MessageCircle className="h-5 w-5" />

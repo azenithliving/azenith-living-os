@@ -1,47 +1,36 @@
 "use client";
 
-/**
- * ELITE LEGACY SECTION
- * Premium corporate identity section for Elite Homepage
- * 
- * CLASSIFICATION: EXTEND
- * Extends existing corporate section with:
- * - Premium visual hierarchy
- * - Elite-specific messaging
- * - Enhanced trust indicators
- */
-
 import { motion } from "framer-motion";
 import { Award, Clock, Shield, Gem } from "lucide-react";
 
 const pillars = [
   {
     icon: Clock,
-    value: "50",
-    unit: "عاماً",
-    label: "إرث عائلي",
-    description: "من الخبرة في صناعة الأثاث الفاخر",
+    value: "01",
+    unit: "",
+    label: "شارك المتطلبات",
+    description: "أرسل ما تعرفه عن المساحة والأولويات.",
   },
   {
     icon: Award,
-    value: "2012",
+    value: "02",
     unit: "",
-    label: "التأسيس",
-    description: "بناءً على أسس مؤسسية راسخة",
+    label: "راجع الخيارات",
+    description: "ناقش الاتجاهات والخامات التي تهمك.",
   },
   {
     icon: Shield,
-    value: "3",
-    unit: "سنوات",
-    label: "ضمان ذهبي",
-    description: "على جميع منتجاتنا وخدماتنا",
+    value: "03",
+    unit: "",
+    label: "حدد نطاق العمل",
+    description: "تتضح الخطوات المتاحة بعد مراجعة الطلب.",
   },
   {
     icon: Gem,
-    value: "∞",
+    value: "04",
     unit: "",
-    label: "التميز",
-    description: "معيار لا يتنازل عنه",
+    label: "اعرف الخطوة التالية",
+    description: "يتواصل الفريق عند توفر تحديث مناسب للطلب.",
   },
 ];
 
@@ -64,11 +53,10 @@ export function EliteLegacySection() {
           className="text-center mb-20"
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-white font-bold mb-6 leading-tight">
-            إرثٌ من <span className="text-[#C5A059]">التميز</span>
+            مسار <span className="text-[#C5A059]">الاستشارة</span>
           </h2>
           <p className="text-white/60 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-            تأسست أزينث ليفينج عام 2012 برؤيةٍ تدمج بين دقة التخطيط المؤسسي وإرثٍ عائلي 
-            في صناعة الأثاب يمتد لأكثر من 50 عاماً
+            يوضح هذا المسار ما يحتاجه طلبك قبل الانتقال إلى أي اتفاق أو تنفيذ.
           </p>
         </motion.div>
 
@@ -125,13 +113,12 @@ export function EliteLegacySection() {
           <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#C5A059]/10 border border-[#C5A059]/20 mb-6">
             <Gem className="h-5 w-5 text-[#C5A059]" />
             <span className="text-[#E5C170] font-medium">
-              برنامج النخبة - تجربة عميل مميزة
+              مساحة عميل خاصة بالطلبات المصرّح لها
             </span>
           </div>
           <p className="text-white/70 text-lg leading-relaxed">
-            نحن لا ننظر إلى الأثاث كقطعة خشب، بل كمعادلة هندسية تبدأ من اختيار المواد الخام 
-            وفق معايير عالمية، وتمر عبر نظامنا التشغيلي (Azenith OS) لضمان تنفيذٍ يطابق 
-            التصورات بدقةٍ متناهية
+            نبدأ بالمعلومات التي تشاركها، ثم نراجع الخيارات ونوضح نطاق العمل والخطوة التالية
+            بحسب حالة طلبك الفعلية.
           </p>
         </motion.div>
       </div>

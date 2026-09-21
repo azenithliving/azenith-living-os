@@ -115,7 +115,8 @@ export default function AdminPage() {
 
         const analytics: AnalyticsData = analyticsRes.ok ? await analyticsRes.json() : { metrics: {} };
         const health: SystemHealthData = healthRes.ok ? await healthRes.json() : { health: {}, pendingAlerts: [] };
-        const mastermind: MastermindStatsData = mastermindRes.ok ? await mastermindRes.json() : { commands: {}, security: {}, recentCommands: [] };
+        const mastermindResponse = mastermindRes.ok ? await mastermindRes.json() : null;
+        const mastermind: MastermindStatsData = mastermindResponse?.data ?? mastermindResponse ?? { commands: {}, security: {}, recentCommands: [] };
         setMastermindData(mastermind);
 
         // Map real data to metrics
@@ -214,17 +215,6 @@ export default function AdminPage() {
           });
         }
 
-        // Default alert if none exist
-        if (realAlerts.length === 0) {
-            realAlerts.push({
-              icon: CheckCircle,
-              color: "emerald" as const,
-              text: "النظام يعمل بكفاءة",
-              subtext: "لا توجد مشاكل أو تنبيهات حالية",
-              link: "/admin",
-            });
-        }
-
         setAlerts(realAlerts);
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
@@ -310,9 +300,9 @@ export default function AdminPage() {
               <p className="text-white/50">نظرة شاملة على أداء النظام</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30">
-            <Zap className="w-4 h-4 text-emerald-400" />
-            <span className="text-sm text-emerald-400">النظام يعمل بكفاءة</span>
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 bg-white/[0.03]">
+            <Zap className="w-4 h-4 text-[#C5A059]" />
+            <span className="text-sm text-white/70">بيانات تشغيل مباشرة</span>
           </div>
         </div>
 
@@ -350,14 +340,14 @@ export default function AdminPage() {
                 <Brain className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-sm">مفاتيح AI (16 مزود)</h3>
+                <h3 className="text-white font-bold text-sm">مفاتيح الذكاء الاصطناعي</h3>
                 <p className="text-[10px] text-white/40 group-hover:text-white/60 transition-colors">إدارة مفاتيح الذكاء الاصطناعي</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-indigo-400" />
               <span className="text-xs font-bold text-indigo-400">
-                Hot-Reload
+                الإعدادات
               </span>
             </div>
           </div>
@@ -368,9 +358,9 @@ export default function AdminPage() {
                 <Activity className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-sm">نظام الوكلاء (7 وكلاء)</h3>
+                <h3 className="text-white font-bold text-sm">نظام الوكلاء</h3>
                 <p className="text-[10px] text-white/40">
-                  {systemStatus.aacaLabel || "يعمل من الموقع المنشور — بدون جهازك"}
+                  {systemStatus.aacaLabel || "لا توجد حالة منشورة من خدمة الوكلاء"}
                 </p>
               </div>
             </div>
@@ -392,24 +382,23 @@ export default function AdminPage() {
               <Bot className="w-5 h-5 text-blue-400" />
               حالة الوكلاء الذكية
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <AgentStatusCard
-                agentKey="prime"
-                agentName="PRIME"
-                agentRole="مهندس التصميم والتطوير"
-                color="purple"
-                icon="🧠"
-                mastermindData={mastermindData}
-              />
-              <AgentStatusCard
-                agentKey="vanguard"
-                agentName="Vanguard"
-                agentRole="مدير العمليات والمبيعات"
-                color="emerald"
-                icon="💼"
-                mastermindData={mastermindData}
-              />
-            </div>
+            {Object.keys(mastermindData?.agents ?? {}).length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.keys(mastermindData.agents).map((agentKey, index) => (
+                  <AgentStatusCard
+                    key={agentKey}
+                    agentKey={agentKey}
+                    agentName={agentKey}
+                    agentRole="سجل المهام الفعلي"
+                    color={index % 2 === 0 ? "purple" : "emerald"}
+                    icon={index % 2 === 0 ? "🧠" : "💼"}
+                    mastermindData={mastermindData}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/50">لا توجد مهام وكلاء مسجلة بعد.</p>
+            )}
           </section>
         )}
 
@@ -502,7 +491,7 @@ export default function AdminPage() {
 
         {/* Quick Navigation */}
         <section>
-          <h2 className="text-lg font-semibold text-white mb-4">مراكز القوى</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">الوصول السريع</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Link href="/admin/agents" className="group rounded-2xl border-2 border-[#C5A059]/40 bg-[#C5A059]/10 p-6 transition-all hover:border-[#C5A059] hover:bg-[#C5A059]/15">
               <div className="rounded-xl bg-[#C5A059]/30 p-3 w-fit mb-4">
@@ -525,7 +514,7 @@ export default function AdminPage() {
                 <Activity className="w-6 h-6 text-[#C5A059]" />
               </div>
               <h3 className="text-lg font-bold text-white group-hover:text-[#C5A059] transition-colors">مركز العمل</h3>
-              <p className="text-sm text-white/50 mt-2">المبيعات، واتساب، الهاتف</p>
+              <p className="text-sm text-white/50 mt-2">المبيعات، متابعة العملاء، وجلسة المتصفح</p>
             </Link>
           </div>
         </section>
@@ -538,7 +527,7 @@ export default function AdminPage() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">نظام الصور الذكي</h2>
-              <p className="text-sm text-white/60">15,000 صورة ذكية | تجديد شهري تلقائي</p>
+              <p className="text-sm text-white/60">بيانات مكتبة الصور الحالية وسجل الحصاد المهيأ</p>
             </div>
           </div>
           <ImageHarvestDashboard />
@@ -570,8 +559,8 @@ export default function AdminPage() {
         {/* Footer */}
         <div className="pt-8 border-t border-white/10">
           <div className="flex items-center justify-between text-sm text-white/40">
-            <p>أزينث ليفينج © 2025</p>
-            <p>النظام البيئي السيادي v2.0</p>
+            <p>أزينث ليفينج © {new Date().getFullYear()}</p>
+            <p>لوحة الإدارة</p>
           </div>
         </div>
       </div>

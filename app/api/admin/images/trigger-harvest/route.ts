@@ -1,105 +1,101 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+
+import { requireAdminApi } from "@/lib/admin-api-guard";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+
+function getHarvestConfiguration() {
+  const token = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim() || null;
+  const repository = process.env.IMAGE_HARVEST_REPOSITORY?.trim() || null;
+  const workflow = process.env.IMAGE_HARVEST_WORKFLOW?.trim() || null;
+  const ref = process.env.IMAGE_HARVEST_REF?.trim() || "main";
+
+  if (!token || !repository || !workflow) return null;
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) return null;
+
+  return { token, repository, workflow, ref };
+}
 
 /**
- * Admin API: Manual Trigger for Image Harvesting
- * POST /api/admin/images/trigger-harvest
- * Body: { force?: boolean, targetCount?: number }
+ * Starts a configured GitHub Actions harvester. No repository, target count,
+ * or completion state is invented by this route: without explicit deployment
+ * configuration it reports that the feature is unavailable.
  */
+export async function POST() {
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
 
-export async function POST(request: NextRequest) {
+  const config = getHarvestConfiguration();
+  if (!config) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "لم تُهيأ خدمة حصاد الصور. اضبط IMAGE_HARVEST_REPOSITORY وIMAGE_HARVEST_WORKFLOW ومفتاح GitHub أولًا.",
+      },
+      { status: 503 }
+    );
+  }
+
   try {
-    const body = await request.json();
-    const { force = false, targetCount = 15000 } = body;
-
-    const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-    const REPO_OWNER = "azenithliving";
-    const REPO_NAME = "azenith-living-os";
-    const WORKFLOW_ID = "run-harvester.yml";
-
-    if (!GITHUB_TOKEN) {
-      console.error("[Trigger Harvest] GITHUB_TOKEN is missing in env vars");
-      return NextResponse.json(
-        { success: false, error: "GitHub configuration missing" },
-        { status: 500 }
-      );
-    }
-
-    // Trigger GitHub Action via workflow_dispatch
-    console.log(`[Admin Harvest] Attempting to trigger GitHub: ${REPO_OWNER}/${REPO_NAME}/${WORKFLOW_ID}`);
-    
-    const ghResponse = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/${WORKFLOW_ID}/dispatches`,
+    const response = await fetch(
+      `https://api.github.com/repos/${config.repository}/actions/workflows/${encodeURIComponent(config.workflow)}/dispatches`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${GITHUB_TOKEN}`,
-          Accept: "application/vnd.github.v3+json",
+          Authorization: `Bearer ${config.token}`,
+          Accept: "application/vnd.github+json",
           "Content-Type": "application/json",
-          "User-Agent": "Azenith-Living-OS",
+          "User-Agent": "Azenith-Living",
         },
-        body: JSON.stringify({
-          ref: "main",
-        }),
+        body: JSON.stringify({ ref: config.ref }),
       }
     );
 
-    if (!ghResponse.ok) {
-      const errorText = await ghResponse.text();
-      console.error(`[Admin Harvest] GitHub API Failure: ${ghResponse.status}`, errorText);
+    if (!response.ok) {
+      console.error("[Image harvest] GitHub dispatch failed:", response.status);
       return NextResponse.json(
-        { success: false, error: `GitHub API error: ${ghResponse.status}`, details: errorText },
-        { status: ghResponse.status }
+        { success: false, error: `فشل تشغيل سير العمل على GitHub (HTTP ${response.status}).` },
+        { status: 502 }
       );
     }
 
-    console.log(`[Admin Harvest] GitHub Workflow Triggered successfully (Status: ${ghResponse.status})`);
-    
-    return NextResponse.json({
-      success: true,
-      message: "Harvest triggered on GitHub Actions",
-      details: {
-        status: "queued",
-        repo: `${REPO_OWNER}/${REPO_NAME}`,
-      },
-    });
-
-  } catch (error: any) {
-    console.error("[Trigger Harvest API] Critical Error:", error);
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to trigger harvest" },
-      { status: 500 }
+      {
+        success: true,
+        message: "تم قبول طلب التشغيل من GitHub. راقب سجل الحصاد لتأكيد النتيجة.",
+        repository: config.repository,
+      },
+      { status: 202 }
+    );
+  } catch (error) {
+    console.error("[Image harvest] Dispatch request failed:", error);
+    return NextResponse.json(
+      { success: false, error: "تعذر الاتصال بخدمة تشغيل الحصاد." },
+      { status: 502 }
     );
   }
 }
 
-// GET harvest status
-export async function GET(request: NextRequest) {
-  try {
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+/** Returns actual library count; a workflow queue cannot be inferred safely. */
+export async function GET() {
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
 
-    const { count } = await supabase
-      .from("curated_images")
-      .select("*", { count: "exact", head: true })
-      .eq("is_active", true);
-
-    return NextResponse.json({
-      success: true,
-      status: {
-        currentCount: count || 0,
-        targetCount: 15000,
-        progress: Math.round(((count || 0) / 15000) * 100),
-        isRunning: false, // Would check background job status in production
-      },
-    });
-
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: "Status check failed" },
-      { status: 500 }
-    );
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    return NextResponse.json({ success: false, error: "قاعدة البيانات غير مهيأة." }, { status: 503 });
   }
+
+  const { count, error } = await supabase
+    .from("curated_images")
+    .select("id", { count: "exact", head: true })
+    .eq("is_active", true);
+
+  if (error) {
+    return NextResponse.json({ success: false, error: "تعذر قراءة حالة مكتبة الصور." }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    success: true,
+    status: { currentCount: count ?? 0, workflowConfigured: Boolean(getHarvestConfiguration()) },
+  });
 }

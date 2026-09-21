@@ -12,20 +12,18 @@ interface FurnitureCardProps {
     features: string[];
     variations: string[];
   };
-  whatsappUrl: string;
+  quoteHref: string;
   isWishlisted?: boolean;
   onWishlistToggle?: () => void;
 }
 
-export default function FurnitureCard({ furniture, whatsappUrl, isWishlisted = false, onWishlistToggle }: FurnitureCardProps) {
+export default function FurnitureCard({ furniture, quoteHref, isWishlisted = false, onWishlistToggle }: FurnitureCardProps) {
   const firstImage = furniture.images[0]?.startsWith("/images/")
     ? "/images/furniture-placeholder.jpg"
     : furniture.images[0] || "/images/furniture-placeholder.jpg";
   const canPreviewVideo = Boolean(furniture.video && !furniture.video.startsWith("/videos/"));
 
-  const toggleWishlist = () => {
-    onWishlistToggle?.();
-  };
+  const isExternalQuote = /^https?:\/\//i.test(quoteHref);
 
   return (
     <article data-telemetry={`أثاث: ${furniture.title}`} className="group rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-6 overflow-hidden hover:border-brand-primary/50 transition-all hover:scale-[1.02] hover:shadow-2xl backdrop-blur-sm">
@@ -71,22 +69,24 @@ export default function FurnitureCard({ furniture, whatsappUrl, isWishlisted = f
               ))}
             </div>
           </div>
-          <button 
-            onClick={toggleWishlist}
-            className={`p-2 rounded-full transition-all ${isWishlisted ? 'bg-brand-primary text-brand-accent shadow-lg' : 'bg-white/10 text-white/60 hover:bg-brand-primary/20 hover:text-brand-primary'}`}
-            title={isWishlisted ? 'إزالة من الرغبات' : 'إضافة للرغبات'}
-          >
-            <svg fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              {isWishlisted && <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>}
-            </svg>
-          </button>
+          {onWishlistToggle && (
+            <button 
+              onClick={onWishlistToggle}
+              className={`p-2 rounded-full transition-all ${isWishlisted ? 'bg-brand-primary text-brand-accent shadow-lg' : 'bg-white/10 text-white/60 hover:bg-brand-primary/20 hover:text-brand-primary'}`}
+              title={isWishlisted ? 'إزالة من الرغبات' : 'إضافة للرغبات'}
+              aria-label={isWishlisted ? 'إزالة من قائمة الرغبات' : 'إضافة إلى قائمة الرغبات'}
+            >
+              <svg fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </button>
+          )}
         </div>
         
         <Link 
-          href={whatsappUrl.replace('استفسار عن الأثاث', `${furniture.title} - استفسار`)} 
-          target="_blank" 
-          rel="noopener noreferrer"
+          href={quoteHref}
+          target={isExternalQuote ? "_blank" : undefined}
+          rel={isExternalQuote ? "noopener noreferrer" : undefined}
           className="mt-4 w-full block rounded-full bg-gradient-to-r from-brand-primary to-[#d8b56d] text-brand-accent px-6 py-3 text-center font-semibold shadow-lg hover:shadow-2xl hover:translate-y-[-2px] transition-all"
         >
           اطلب عرض سعر فوري

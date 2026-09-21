@@ -1,10 +1,9 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, BrainCircuit } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { slides } from "./AzenithLegacy";
-import { useAsiLogic } from "@/hooks/use-asi-logic";
 
 interface ManifestoState {
   pillar: string;
@@ -67,24 +66,6 @@ export default function Hero() {
     };
   }, []);
 
-  const { patches } = useAsiLogic();
-  
-  // Apply ASI Overrides
-  useEffect(() => {
-    if (patches.length > 0 && manifestoState) {
-      const activePatch = patches[0].value; // Get latest patch
-      
-      if (activePatch.hero_title || activePatch.primary_cta) {
-        setManifestoState(prev => prev ? ({
-          ...prev,
-          poeticTitle: activePatch.hero_title || prev.poeticTitle,
-          cta: activePatch.primary_cta || prev.cta,
-          subtitle: activePatch.reasoning ? activePatch.reasoning.substring(0, 150) + "..." : prev.subtitle
-        }) : null);
-      }
-    }
-  }, [patches, currentIndex]); // Re-apply whenever slide changes or patch arrives
-
   useEffect(() => {
     if (isMobile) return;
 
@@ -121,11 +102,7 @@ export default function Hero() {
       return "/start";
     }
 
-    if (manifestoState.pillar === "HERITAGE" || manifestoState.pillar === "COMMITMENT") {
-      return "/about";
-    }
-
-    if (manifestoState.pillar === "TRUST" || manifestoState.pillar === "QUALITY") {
+    if (manifestoState.pillar === "MATERIALS" || manifestoState.pillar === "SPACES") {
       return "/rooms";
     }
 
@@ -249,7 +226,7 @@ export default function Hero() {
                 className="mx-auto flex min-h-[48px] items-center gap-3 rounded-full border border-brand-primary/30 bg-brand-primary/10 px-8 py-4 font-bold text-white backdrop-blur-md transition-all duration-300 hover:bg-brand-primary/20"
                 aria-label={`اتخاذ إجراء: ${manifestoState.cta}`}
               >
-                {patches.length > 0 ? <BrainCircuit className="h-5 w-5 text-brand-primary animate-pulse" /> : <MessageCircle className="h-5 w-5" />}
+                <MessageCircle className="h-5 w-5" />
                 {manifestoState.cta}
               </Link>
             </motion.div>

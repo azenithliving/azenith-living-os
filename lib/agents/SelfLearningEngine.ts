@@ -4,6 +4,7 @@
  */
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { resolveAdminCompanyId } from "@/lib/admin-company";
 
 export interface InteractionFeedback {
   interactionId: string;
@@ -31,8 +32,11 @@ export class SelfLearningEngine {
       const supabase = getSupabaseAdminClient();
       if (!supabase) return false;
 
+      const resolvedCompanyId = await resolveAdminCompanyId();
+      if (!resolvedCompanyId) return false;
+
       await supabase.from("agent_learnings").insert({
-        company_id: "00000000-0000-0000-0000-000000000000",
+        company_id: resolvedCompanyId,
         agent_profile_id: null,
         lesson_type: feedback.rating === "positive" ? "success_pattern" : feedback.rating === "negative" ? "failure_avoidance" : "optimization",
         context: `User: ${feedback.userMessage.slice(0, 200)} | Agent: ${feedback.agentResponse.slice(0, 200)}`,

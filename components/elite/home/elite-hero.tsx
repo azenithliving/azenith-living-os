@@ -64,7 +64,7 @@ export function EliteHero({
       case "schedule_meeting":
         return "/elite/dashboard?tab=meetings";
       case "contact_support":
-        return "/contact";
+        return "/request";
       default:
         return "/elite/dashboard";
     }

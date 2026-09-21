@@ -6,7 +6,7 @@
  * يعرض كل إجراء مع: الوكيل، نوع الإجراء، النتيجة، الوقت
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Activity, CheckCircle, XCircle, Clock, RefreshCw, Loader2 } from 'lucide-react';
 
 interface FeedItem {
@@ -71,7 +71,7 @@ export function AgentActionsFeed() {
   const [loading, setLoading]     = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [filter, setFilter]       = useState<'all' | 'completed' | 'failed' | 'running'>('all');
-  const isFirstLoad               = useRef(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const fetchFeed = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -96,10 +96,10 @@ export function AgentActionsFeed() {
       }
     } catch { /* صامت */ }
     finally {
-      if (!silent || isFirstLoad.current) {
+      if (!silent) {
         setLoading(false);
-        isFirstLoad.current = false;
       }
+      setHasLoaded(true);
     }
   }, []);
 
@@ -166,7 +166,7 @@ export function AgentActionsFeed() {
       )}
 
       {/* Feed */}
-      {loading && isFirstLoad.current ? (
+      {loading && !hasLoaded ? (
         <div className="flex items-center justify-center py-10">
           <Loader2 className="w-7 h-7 text-[#C5A059] animate-spin" />
         </div>

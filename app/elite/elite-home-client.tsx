@@ -39,14 +39,15 @@ export default function EliteHomeClient({ initialData, isAuthenticated }: EliteH
     await logoutEliteUser();
   };
 
-  // Default data if none provided
+  // A data-loading failure is shown as an unavailable account state rather than
+  // inventing a membership offer for a visitor who has no Elite access.
   const data: EliteHomeData = initialData || {
-    isAuthenticated: false,
-    greeting: "أهلاً بك في النخبة",
+    isAuthenticated: true,
+    greeting: "بيانات الحساب غير متاحة الآن",
     primaryCTA: {
       type: "continue_project",
-      label: "انضم إلى النخبة",
-      description: "جرب تجربة العملاء المميزين",
+      label: "فتح لوحة المشروع",
+      description: "حاول فتح لوحة المشروع أو تواصل مع الفريق عند استمرار المشكلة.",
       priority: 100,
       urgency: false,
     },
@@ -71,8 +72,8 @@ export default function EliteHomeClient({ initialData, isAuthenticated }: EliteH
         greeting={data.greeting || "أهلاً بك في النخبة"}
         primaryCTA={data.primaryCTA || {
           type: "continue_project",
-          label: "انضم إلى النخبة",
-          description: "جرب تجربة العملاء المميزين",
+          label: "فتح لوحة المشروع",
+          description: "اعرض البيانات المتاحة لحسابك.",
           priority: 100,
           urgency: false,
         }}

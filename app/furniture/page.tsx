@@ -12,7 +12,9 @@ export default function FurniturePage() {
 
   const clientRuntimeConfig = getClientRuntimeConfig();
 
-  const getWhatsappUrl = (msg: string) => clientRuntimeConfig ? `https://wa.me/${clientRuntimeConfig.whatsappNumber}?text=${encodeURIComponent(msg)}` : "/start";
+  const getQuoteHref = (message: string) => clientRuntimeConfig.whatsappNumber
+    ? `https://wa.me/${clientRuntimeConfig.whatsappNumber}?text=${encodeURIComponent(message)}`
+    : "/request";
 
   return (
     <main className="px-6 py-12 md:px-10 lg:px-16">
@@ -41,7 +43,7 @@ export default function FurniturePage() {
                     <FurnitureCard 
                       key={furniture.slug}
                       furniture={furniture}
-                      whatsappUrl={getWhatsappUrl(`${room.title} - ${furniture.title}`)}
+                      quoteHref={getQuoteHref(`${room.title} - ${furniture.title}`)}
                     />
                   ))}
                 </div>
@@ -52,7 +54,7 @@ export default function FurniturePage() {
 
         {allFurniture.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-2xl text-white/60">قريباً: كتالوج كامل للأثاث</p>
+            <p className="text-2xl text-white/60">لا توجد قطع أثاث مسجلة حاليًا.</p>
           </div>
         )}
       </div>

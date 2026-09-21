@@ -31,10 +31,13 @@ export default async function ElitePage({ searchParams }: ElitePageProps) {
   
   // Check existing session
   const session = await getEliteSession();
+  if (!session) {
+    redirect("/elite/login");
+  }
   
-  // Get home data (authenticated or default)
+  // Get home data for the authenticated client only.
   const { getEliteHomeData } = await import("./actions/elite-actions");
-  const homeData = await getEliteHomeData(session?.clientAccessId || null);
+  const homeData = await getEliteHomeData(session.clientAccessId);
   
-  return <EliteHomeClient initialData={homeData} isAuthenticated={!!session} />;
+  return <EliteHomeClient initialData={homeData} isAuthenticated />;
 }

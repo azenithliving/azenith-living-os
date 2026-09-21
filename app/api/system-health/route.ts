@@ -6,6 +6,7 @@ import {
   dismissAlert,
   type SystemAlert,
 } from "@/lib/sentinel";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
 /**
  * System Health API
@@ -14,6 +15,9 @@ import {
 
 export async function GET(): Promise<NextResponse> {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const [health, pendingAlerts] = await Promise.all([
       getSystemHealth(),
       getPendingAlerts(),
@@ -44,6 +48,9 @@ export async function GET(): Promise<NextResponse> {
  */
 export async function POST(request: Request): Promise<NextResponse> {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const body = await request.json();
     const { action, alertId } = body;
 

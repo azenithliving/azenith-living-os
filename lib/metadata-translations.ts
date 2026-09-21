@@ -14,14 +14,14 @@ export const SITE_METADATA: Record<Language, {
 }> = {
   ar: {
     title: "أزينث ليفينج | تصميم داخلي فاخر",
-    description: "تصميم مبدئي خلال 24 ساعة مع تجربة عربية أولًا ومسار تحويل واضح من الاستكشاف حتى التواصل.",
+    description: "استشارة تصميم مبدئية وتجربة عربية أولًا ومسار واضح من الاستكشاف حتى التواصل.",
     keywords: "تصميم داخلي, ديكور فاخر, أثاث مصري, تصميم غرف, مطابخ فاخرة, غرف نوم, التصميم الداخلي",
     ogTitle: "أزينث ليفينج - عالم من الفخامة",
     ogDescription: "اكتشف مساحات فاخرة مصممة خصيصًا لأسلوب حياتك",
   },
   en: {
     title: "Azenith Living | Luxury Interior Design",
-    description: "Initial design within 24 hours with Arabic-first experience and a clear conversion path from exploration to contact.",
+    description: "An initial design consultation with an Arabic-first experience and a clear path from exploration to contact.",
     keywords: "interior design, luxury decor, Egyptian furniture, room design, luxury kitchens, bedrooms, interior design",
     ogTitle: "Azenith Living - A World of Luxury",
     ogDescription: "Discover luxurious spaces designed exclusively for your lifestyle",
@@ -35,11 +35,11 @@ export const PAGE_METADATA: Record<string, Record<Language, {
   home: {
     ar: {
       title: "الرئيسية | أزينث ليفينج",
-      description: "تصميم مبدئي خلال 24 ساعة. اكتشف المساحات الفاخرة وصمم منزلك الأحلام.",
+      description: "استكشف المساحات الفاخرة وابدأ استشارة تصميم تناسب منزلك.",
     },
     en: {
       title: "Home | Azenith Living",
-      description: "Initial design within 24 hours. Discover luxury spaces and design your dream home.",
+      description: "Explore luxury spaces and start a design consultation for your home.",
     },
   },
   rooms: {
@@ -75,11 +75,11 @@ export const PAGE_METADATA: Record<string, Record<Language, {
   elite: {
     ar: {
       title: "استشارة تصميم | أزينث ليفينج",
-      description: "احصل على تصميم مبدئي مخصص خلال 24 ساعة. صمم رؤيتك الفريدة.",
+      description: "شارك تفاصيل رؤيتك لبدء استشارة تصميم مخصصة.",
     },
     en: {
       title: "Design Consultation | Azenith Living",
-      description: "Get a custom initial design within 24 hours. Design your unique vision.",
+      description: "Share your vision to begin a personalized design consultation.",
     },
   },
 };

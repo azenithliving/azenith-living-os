@@ -8,6 +8,17 @@ import { sendTelegramMessage, broadcastTelegramMessage } from "@/lib/telegram-co
 import { storeMemory, storeUserPreference, getUserPreferences } from "@/lib/ultimate-agent/memory-store";
 import { LearningEngine } from "@/lib/ultimate-agent/learning-engine";
 import { tryFastResponse, classifyIntent } from "@/lib/specialized-providers";
+import {
+  buildLocationReply,
+  buildNearbyFoodReply,
+  findNearbyFoodPlaces,
+  formatLocationContext,
+  isCurrentLocationRequest,
+  isFoodNearbyRequest,
+  isValidClientLocation,
+  reverseGeocodeLocation,
+  type ClientLocation,
+} from "@/lib/location-services";
 
 interface GroqMessage {
   role: "system" | "user" | "assistant";
@@ -40,6 +51,7 @@ interface ConsultantRequest {
   userName?: string;
   userEmail?: string;
   language?: string;
+  location?: ClientLocation;
 }
 
 interface ConsultantLearning {
@@ -66,6 +78,7 @@ interface Insights {
   concerns?: string;
   lastTopic?: string;
   summary?: string;
+  gpsLocation?: string;
   [key: string]: string | undefined;
 }
 
@@ -429,6 +442,7 @@ export async function POST(
   try {
     const body: ConsultantRequest = await request.json();
     const { message, sessionId: providedSessionId, userName, userEmail, language } = body;
+    const clientLocation = isValidClientLocation(body.location) ? body.location : undefined;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -509,10 +523,15 @@ export async function POST(
     // This prevents race condition where admin enables takeover between fetch and check
     let takeoverActive = false;
     let freshSession = existingSession;
-    if (supabase) {
-      const { data: sessionRow, error: sessionErr } = await supabase
+    // Use the same service-role client as getSession/saveSession.  The old
+    // module-level client can be an anonymous or placeholder client, which
+    // meant a just-enabled human takeover was sometimes missed and the AI
+    // replied over the human consultant.
+    const freshSessionClient = getSupabaseAdminClient();
+    if (freshSessionClient) {
+      const { data: sessionRow, error: sessionErr } = await freshSessionClient
         .from("consultant_sessions")
-        .select("ui_state, messages")
+        .select("ui_state, messages, insights")
         .eq("session_id", sessionId)
         .single();
       
@@ -538,9 +557,17 @@ export async function POST(
     };
     conversationHistory.push(userMessage);
 
+    const nextInsights: Insights = {
+      ...(freshSession?.insights || {}),
+    };
+    if (clientLocation) {
+      nextInsights.location = clientLocation.label || clientLocation.address || nextInsights.location;
+      nextInsights.gpsLocation = formatLocationContext(clientLocation);
+    }
+
     // Save user message to DB IMMEDIATELY (before takeover check)
     // This ensures message is persisted even if takeover is active
-    await saveSession(sessionId, conversationHistory, freshSession?.insights);
+    await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : freshSession?.insights);
 
     // ── SEAMLESS ADMIN TAKEOVER MODE ──
     // While an admin is manually driving the chat (ui_state.takeover_active), the AI
@@ -556,6 +583,64 @@ export async function POST(
         sessionId,
         queued: true,
       });
+    }
+
+    if ((isCurrentLocationRequest(message) || isFoodNearbyRequest(message)) && !clientLocation) {
+      const noLocationReply = language === "en"
+        ? "I cannot access your live location yet. Please allow location permission in the browser, then send the request again so I can use your real GPS position."
+        : "مش قادر أوصل لموقعك الحي لسه. فعّل إذن الموقع من المتصفح وابعت الطلب تاني، وساعتها هستخدم GPS الحقيقي بدل التخمين.";
+      conversationHistory.push({
+        role: "assistant",
+        content: noLocationReply,
+        timestamp: new Date().toISOString(),
+      });
+      await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : freshSession?.insights);
+      return NextResponse.json({ reply: noLocationReply, sessionId });
+    }
+
+    if (clientLocation && isCurrentLocationRequest(message)) {
+      let address: string | null = null;
+      try {
+        address = await reverseGeocodeLocation(clientLocation);
+      } catch (geoErr) {
+        console.warn("[Consultant] Reverse geocoding failed:", geoErr);
+      }
+      const locationReply = buildLocationReply(clientLocation, address, language);
+      nextInsights.location = address || clientLocation.label || clientLocation.address || nextInsights.location;
+      nextInsights.gpsLocation = formatLocationContext({ ...clientLocation, address: address || clientLocation.address });
+      conversationHistory.push({
+        role: "assistant",
+        content: locationReply,
+        timestamp: new Date().toISOString(),
+      });
+      await saveSession(sessionId, conversationHistory, nextInsights);
+      return NextResponse.json({ reply: locationReply, sessionId });
+    }
+
+    if (clientLocation && isFoodNearbyRequest(message)) {
+      try {
+        const places = await findNearbyFoodPlaces(clientLocation);
+        const foodReply = buildNearbyFoodReply(places, clientLocation, language);
+        conversationHistory.push({
+          role: "assistant",
+          content: foodReply,
+          timestamp: new Date().toISOString(),
+        });
+        await saveSession(sessionId, conversationHistory, nextInsights);
+        return NextResponse.json({ reply: foodReply, sessionId });
+      } catch (nearbyErr) {
+        console.warn("[Consultant] Nearby food lookup failed:", nearbyErr);
+        const failureReply = language === "en"
+          ? "I received your location, but the live map provider failed right now, so I will not invent nearby restaurants. Please try again in a moment."
+          : "وصلني موقعك، لكن مزود الخرائط المباشر فشل الآن، لذلك لن أخترع أسماء مطاعم. جرّب تاني بعد لحظات.";
+        conversationHistory.push({
+          role: "assistant",
+          content: failureReply,
+          timestamp: new Date().toISOString(),
+        });
+        await saveSession(sessionId, conversationHistory, nextInsights);
+        return NextResponse.json({ reply: failureReply, sessionId });
+      }
     }
 
     // --- L0-L3 SEMANTIC NEURAL CACHE ---
@@ -580,24 +665,11 @@ export async function POST(
     // Fetch all learnings and build enhanced system prompt
     const learnings = await getLearnings();
     
-    // Fetch active reality mutations (Fate Actions) to sync AI with UI
-    console.log(`[Consultant] Fetching active mutations for session: ${sessionId}`);
     const { data: learningData, error: learningError } = await supabase
       .from('site_settings')
       .select('value')
       .eq('key', 'asi_logic')
       .single();
-    const { data: mutations, error: mutError } = await supabase
-      .from("reality_mutations")
-      .select("*")
-      .eq("session_id", sessionId)
-      .eq("active", true)
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    if (mutError) {
-      console.warn("[Consultant] Error fetching mutations:", mutError.message);
-    }
 
     // Merge global ASI logic with granular learnings
     const allLearnings = [...learnings];
@@ -654,8 +726,7 @@ export async function POST(
       conversationHistory, 
       userName || existingSession?.insights?.userName, 
       allLearnings, 
-      existingSession?.insights,
-      mutations || [],
+      Object.keys(nextInsights).length ? nextInsights : existingSession?.insights,
       language,
       weatherDateTime
     );
@@ -907,25 +978,25 @@ export async function POST(
 
     console.log(`[Consultant] Session ${sessionId}: ${conversationHistory.length} messages`);
 
-    // --- SAA vInfinity CRO FEEDBACK LOOP ---
-    // Record every UI action impression for performance monitoring
-    if (guarded.uiAction && supabase) {
+    // Persist only explicit, non-deceptive theme preferences. The visitor sees
+    // the same preference locally immediately; the record lets a refreshed
+    // session recover it without injecting sales pressure.
+    const safeThemeAction = guarded.uiAction === "theme_dark" || guarded.uiAction === "theme_classic"
+      ? guarded.uiAction
+      : null;
+    if (safeThemeAction && supabase) {
       Promise.resolve().then(async () => {
         try {
           await supabase.from("reality_mutations").insert({
             session_id: sessionId,
-            mutation_type: guarded.uiAction,
+            type: "UI_THEME",
+            action: safeThemeAction,
             active: true,
-            triggered_by: "advisor_cro",
-            context: {
-              hesitation: hesitationDetected,
-              messageCount: conversationHistory.length,
-              timestamp: new Date().toISOString()
-            }
+            payload: { source: "consultant", timestamp: new Date().toISOString() },
           });
-          console.log(`[SAA-CRO] UI action '${guarded.uiAction}' impression recorded for session ${sessionId}`);
+          console.log(`[Consultant] Theme preference '${safeThemeAction}' recorded for session ${sessionId}`);
         } catch (croErr) {
-          console.warn("[SAA-CRO] CRO impression logging failed:", croErr);
+          console.warn("[Consultant] Theme preference logging failed:", croErr);
         }
       });
     }
@@ -1047,7 +1118,6 @@ function buildGroqMessages(
   userName?: string,
   learnings: string[] = [],
   insights?: Insights,
-  activeMutations: any[] = [],
   language?: string,
   weatherDateTime?: any
 ): GroqMessage[] {
@@ -1097,17 +1167,6 @@ Use this information naturally in conversation:
 - Greet the user correctly based on the time of day (e.g. morning vs. afternoon/evening/night).
 - Refer to the time of day or the weather/season naturally if it fits (e.g. if they are planning a Sahel chalet in summer/hot weather, or if it is late/early, adjust your tone to be extremely supportive and reassuring).
 `;
-  }
-  
-  // Add active reality mutations (Fate Actions) to context
-  if (activeMutations.length > 0) {
-    systemContent += "\n\n[Live UI context: visual changes may already be active for this visitor. Keep the conversation honest and do not invent discounts or false scarcity.]";
-    activeMutations.forEach(m => {
-      if (m.action === "THUNDER") systemContent += "\n- A high-attention visual offer state is active.";
-      if (m.action === "HALLUCINATION") systemContent += "\n- A social-proof visual state is active; do not claim exact visitor counts.";
-      if (m.action === "FREEZE") systemContent += "\n- A focus visual state is active; keep the reply calm and reassuring.";
-      if (m.action === "QUANTUM_OFFER") systemContent += "\n- An offer visual state is active; refer to it only if the visitor asks.";
-    });
   }
   
   // Add context from insights to prevent repetitive questions
@@ -1364,4 +1423,3 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
-

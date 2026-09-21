@@ -4,7 +4,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 /**
  * GET /api/reality/check?sessionId=xxx
  * يسأله متصفح الزائر كل 3 ثوانٍ للتحقق من وجود أوامر جديدة.
- * يُعيد أحدث mutation غير منفذة ثم يضعها كـ "consumed".
+ * يعيد تفضيل مظهر آمنًا فقط ثم يضعه كـ "consumed".
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const sessionId = request.nextUrl.searchParams.get("sessionId");
@@ -13,7 +13,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const supabase = getSupabaseAdminClient();
   if (!supabase) return NextResponse.json({ mutation: null });
 
-  // جلب أحدث mutation لم يُنفَّذ بعد (في آخر 5 دقائق)
+  // جلب أحدث تفضيل مظهر لم يُنفَّذ بعد (في آخر 5 دقائق). لا يمرر هذا
+  // المسار أوامر العروض الوهمية أو أي نوع آخر من التلاعب بالواجهة.
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
 
   const { data, error } = await supabase
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     .select("*")
     .eq("session_id", sessionId)
     .eq("active", true)
+    .in("action", ["theme_dark", "theme_classic"])
     .gte("created_at", fiveMinutesAgo)
     .order("created_at", { ascending: false })
     .limit(1)

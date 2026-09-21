@@ -317,8 +317,8 @@ function EliteIntelligenceContent() {
               </h2>
               <p className="mt-4 text-white/70">
                 {language === "ar" 
-                  ? "فريقنا يقوم بتحليل DNA الأسلوب وإعداد باقة التصاميم المخصصة لك"
-                  : "Our team is analyzing your Style DNA and preparing your personalized concept portfolio"
+                  ? "تم حفظ التفاصيل التي أدخلتها لتكون مرجعًا لفريق التصميم عند المراجعة."
+                  : "Your submitted details have been saved for the design team to review."
                 }
               </p>
               

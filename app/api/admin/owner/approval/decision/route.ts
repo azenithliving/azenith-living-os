@@ -6,22 +6,29 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
+import { resolveAdminCompanyId } from '@/lib/admin-company';
+import { requireAdminApi } from '@/lib/admin-api-guard';
 
 export async function POST(request: NextRequest) {
   try {
+    const { user, unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const {
       approval_id,
-      company_id,
       decision, // 'approved' | 'rejected'
-      decided_by,
       notes
     } = body;
+    const companyId = await resolveAdminCompanyId(body.company_id);
 
     // Validation
-    if (!approval_id || !company_id || !decision || !decided_by) {
+    if (!approval_id || !companyId || !decision) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields: approval_id, company_id, decision, decided_by' },
+        { success: false, error: 'Missing required fields: approval_id and decision' },
         { status: 400 }
       );
     }
@@ -40,7 +47,7 @@ export async function POST(request: NextRequest) {
       .from('approval_requests')
       .select('*')
       .eq('id', approval_id)
-      .eq('company_id', company_id)
+      .eq('company_id', companyId)
       .single();
 
     if (fetchError || !approvalRequest) {
@@ -62,7 +69,7 @@ export async function POST(request: NextRequest) {
       .from('approval_requests')
       .update({
         status: decision,
-        decided_by,
+        decided_by: user.id,
         decided_at: timestamp,
         notes: notes || null,
         updated_at: timestamp
@@ -81,14 +88,14 @@ export async function POST(request: NextRequest) {
 
     // Create approval event
     await supabaseServer.from('agent_events').insert({
-      company_id,
+      company_id: companyId,
       event_type: decision === 'approved' ? 'approval_granted' : 'approval_rejected',
       severity: 'info',
       message: `Approval request #${approval_id.slice(0, 8)} ${decision}`,
       metadata: {
         approval_id,
         decision,
-        decided_by,
+        decided_by: user.id,
         request_type: approvalRequest.request_type,
         amount: approvalRequest.amount
       }
@@ -96,7 +103,7 @@ export async function POST(request: NextRequest) {
 
     // Trigger downstream actions based on approval type
     if (decision === 'approved') {
-      await handleApprovalActions(approvalRequest, company_id);
+      await handleApprovalActions(approvalRequest, companyId);
     }
 
     return NextResponse.json({

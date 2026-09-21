@@ -44,18 +44,18 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
   const brandName = tenant?.name ?? readEnv("BRAND_NAME") ?? "Azenith Living";
   const whatsappNumber = tenant?.whatsapp
     ? normalizePhoneNumber(tenant.whatsapp)
-    : normalizePhoneNumber(readEnv("WHATSAPP_DEFAULT_NUMBER")) ?? "201090819584";
+    : normalizePhoneNumber(readEnv("WHATSAPP_DEFAULT_NUMBER"));
   const primaryColor = tenant?.primary_color ?? "#C5A059";
 
   return {
     brandName,
     brandNameAr: readEnv("BRAND_NAME_AR") ?? "أزينث",
-    freeHookOffer: readEnv("FREE_HOOK_OFFER") ?? "تصميم مبدئي خلال 24 ساعة",
+    freeHookOffer: readEnv("FREE_HOOK_OFFER") ?? "استشارة تصميم مبدئية",
     whatsappNumber,
     primaryDomain: readEnv("PRIMARY_DOMAIN"),
-    contactEmail: readEnv("CONTACT_EMAIL") ?? "azenithliving@gmail.com",
-    contactPhone: normalizePhoneNumber(readEnv("CONTACT_PHONE")) ?? "201090819584",
-    businessAddress: readEnv("BUSINESS_ADDRESS") ?? "السلام، القاهرة، مصر",
+    contactEmail: readEnv("CONTACT_EMAIL"),
+    contactPhone: normalizePhoneNumber(readEnv("CONTACT_PHONE")),
+    businessAddress: readEnv("BUSINESS_ADDRESS"),
     logoPath: tenant?.logo ?? "/logo.png",
     faviconPath: "/favicon.png",
     primaryColor,

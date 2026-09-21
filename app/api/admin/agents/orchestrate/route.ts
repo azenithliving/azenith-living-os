@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { delegateToAaca, shouldDelegateToAaca } from "@/lib/aaca-client";
 import { executeTool } from "@/lib/agent-tools/tool-registry";
+import { resolveAdminCompanyId } from "@/lib/admin-company";
 
 export const maxDuration = 60;
 
@@ -26,9 +27,10 @@ export async function POST(request: NextRequest) {
     if (body.tool) {
       const toolName = body.tool as string;
       const params   = (body.params || {}) as Record<string, unknown>;
+      const resolvedCompanyId = await resolveAdminCompanyId() ?? 'no-company';
       const context  = {
         actorUserId: user.email,
-        companyId:   '00000000-0000-0000-0000-000000000000',
+        companyId:   resolvedCompanyId,
         executionId: crypto.randomUUID(),
       };
 

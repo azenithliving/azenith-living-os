@@ -1,23 +1,21 @@
-import { NextResponse } from 'next/server';
-import { SovereignArchitect } from '@/lib/sovereign-architect';
+import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  try {
-    const { intent } = await req.json();
-    
-    if (!intent) {
-      return NextResponse.json({ success: false, error: "Intent is required" }, { status: 400 });
-    }
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
-    const architect = SovereignArchitect.getInstance();
-    const result = await architect.manifest(intent);
-    
-    return NextResponse.json(result);
-  } catch (error: any) {
-    console.error("❌ Genesis API Error:", error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message || String(error) 
-    }, { status: 500 });
-  }
+/**
+ * Retired: this endpoint previously attempted to rewrite application code from
+ * a chat prompt.  That behavior was neither reviewable nor safe to expose.
+ */
+export async function POST() {
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
+
+  return NextResponse.json(
+    {
+      success: false,
+      error: "The legacy self-modifying tool has been retired. Use the reviewed admin assistant workflow instead.",
+    },
+    { status: 410 },
+  );
 }
+
