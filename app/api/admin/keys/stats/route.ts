@@ -1,139 +1,42 @@
-/**
- * API Keys Statistics API
- * Returns usage statistics for all API keys by provider
- */
-
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { AdminApiAuthError, requireAdminApiAccess } from "@/lib/admin-api-auth";
 
 export const dynamic = "force-dynamic";
 
-interface KeyStats {
-  provider: string;
-  total_keys: number;
-  active_keys: number;
-  in_cooldown: number;
-  total_requests: number;
-  avg_requests_per_key: number;
-  last_hour_requests: number;
-  last_24h_requests: number;
-}
-
-/**
- * GET /api/admin/keys/stats
- * Returns aggregated key usage statistics
- */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    await requireAdminApiAccess(request);
     const supabase = await createClient();
-
-    // Get all keys with their stats
-    const { data: keys, error } = await supabase
-      .from("api_keys")
-      .select("provider, is_active, cooldown_until, total_requests, last_used_at")
-      .order("provider");
-
-    if (error) {
-      console.error("[Keys Stats API] Error fetching stats:", error);
-      return NextResponse.json(
-        { success: false, error: "Failed to fetch key statistics" },
-        { status: 500 }
-      );
-    }
-
+    const { data: keys, error } = await supabase.from("api_keys").select("provider, is_active, cooldown_until, total_requests, last_used_at").order("provider");
+    if (error) return NextResponse.json({ success: false, error: "Failed to fetch key statistics" }, { status: 500 });
     const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
-    // Aggregate stats by provider
-    const stats: Record<string, KeyStats> = {};
-    const providers = ["groq", "openrouter", "mistral", "pexels"];
-
-    for (const provider of providers) {
-      const providerKeys = keys.filter((k) => k.provider === provider);
-
-      const totalRequests = providerKeys.reduce((sum, k) => sum + (k.total_requests || 0), 0);
-
-      const lastHourRequests = providerKeys.filter(
-        (k) => k.last_used_at && new Date(k.last_used_at) > oneHourAgo
-      ).length;
-
-      const last24hRequests = providerKeys.filter(
-        (k) => k.last_used_at && new Date(k.last_used_at) > oneDayAgo
-      ).length;
-
-      stats[provider] = {
-        provider,
-        total_keys: providerKeys.length,
-        active_keys: providerKeys.filter((k) => k.is_active).length,
-        in_cooldown: providerKeys.filter(
-          (k) => k.cooldown_until && new Date(k.cooldown_until) > now
-        ).length,
-        total_requests: totalRequests,
-        avg_requests_per_key: providerKeys.length > 0 ? Math.round(totalRequests / providerKeys.length) : 0,
-        last_hour_requests: lastHourRequests,
-        last_24h_requests: last24hRequests,
-      };
-    }
-
-    // Calculate overall stats
-    const overall = {
-      total_keys: keys.length,
-      active_keys: keys.filter((k) => k.is_active).length,
-      in_cooldown: keys.filter((k) => k.cooldown_until && new Date(k.cooldown_until) > now).length,
-      total_requests: keys.reduce((sum, k) => sum + (k.total_requests || 0), 0),
-    };
-
-    return NextResponse.json({
-      success: true,
-      providers: stats,
-      overall,
-      timestamp: now.toISOString(),
-    });
+    const hour = new Date(now.getTime() - 60 * 60 * 1000);
+    const day = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const providers = [...new Set((keys || []).map((key) => key.provider))];
+    const stats = Object.fromEntries(providers.map((provider) => {
+      const rows = (keys || []).filter((key) => key.provider === provider);
+      const totalRequests = rows.reduce((sum, key) => sum + (key.total_requests || 0), 0);
+      return [provider, { provider, total_keys: rows.length, active_keys: rows.filter((key) => key.is_active).length, in_cooldown: rows.filter((key) => key.cooldown_until && new Date(key.cooldown_until) > now).length, total_requests: totalRequests, avg_requests_per_key: rows.length ? Math.round(totalRequests / rows.length) : 0, last_hour_requests: rows.filter((key) => key.last_used_at && new Date(key.last_used_at) > hour).length, last_24h_requests: rows.filter((key) => key.last_used_at && new Date(key.last_used_at) > day).length }];
+    }));
+    return NextResponse.json({ success: true, providers: stats, overall: { total_keys: keys?.length || 0, active_keys: (keys || []).filter((key) => key.is_active).length, in_cooldown: (keys || []).filter((key) => key.cooldown_until && new Date(key.cooldown_until) > now).length, total_requests: (keys || []).reduce((sum, key) => sum + (key.total_requests || 0), 0) }, timestamp: now.toISOString() });
   } catch (error) {
+    if (error instanceof AdminApiAuthError) return NextResponse.json({ success: false, error: error.message }, { status: error.status });
     console.error("[Keys Stats API] Error:", error);
-    return NextResponse.json(
-      { success: false, error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
 
-/**
- * POST /api/admin/keys/stats
- * Refresh or update key statistics (manual sync trigger)
- */
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    await requireAdminApiAccess(request);
     const supabase = await createClient();
-
-    // Reset any stale cooldowns (cooldowns older than 1 hour)
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-
-    const { data, error } = await supabase
-      .from("api_keys")
-      .update({ cooldown_until: null })
-      .lt("cooldown_until", oneHourAgo)
-      .select("id");
-
-    if (error) {
-      console.error("[Keys Stats API] Error resetting stale cooldowns:", error);
-      return NextResponse.json(
-        { success: false, error: "Failed to sync key stats" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: `Synced key statistics. Reset ${data?.length || 0} stale cooldowns.`,
-      reset_count: data?.length || 0,
-    });
+    const cutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { data, error } = await supabase.from("api_keys").update({ cooldown_until: null }).lt("cooldown_until", cutoff).select("id");
+    if (error) return NextResponse.json({ success: false, error: "Failed to sync key stats" }, { status: 500 });
+    return NextResponse.json({ success: true, reset_count: data?.length || 0 });
   } catch (error) {
-    console.error("[Keys Stats API] Error:", error);
-    return NextResponse.json(
-      { success: false, error: "Internal server error" },
-      { status: 500 }
-    );
+    if (error instanceof AdminApiAuthError) return NextResponse.json({ success: false, error: error.message }, { status: error.status });
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
