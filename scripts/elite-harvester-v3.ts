@@ -266,7 +266,7 @@ function generateSearchQueries(category: string, style: string): string[] {
 // PEXELS FETCHING WITH THROTTLING
 // ============================================
 
-async function fetchFromPexels(query: string, perPage: number = 80): Promise<any[]> {
+async function fetchFromPexels(query: string, perPage: number = 80, page: number = 1): Promise<any[]> {
   if (!usageTracker.checkPexelsLimit()) {
     console.log(`[Pexels] Daily limit reached, cooling down...`);
     await sleep(CONFIG.THROTTLING.COOLDOWN_DURATION);
@@ -281,7 +281,7 @@ async function fetchFromPexels(query: string, perPage: number = 80): Promise<any
   
   try {
     const response = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${perPage}&orientation=landscape`,
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${perPage}&page=${page}&orientation=landscape`,
       {
         headers: { Authorization: key },
         signal: AbortSignal.timeout(30000), // 30s timeout
@@ -409,7 +409,24 @@ function markAsDuplicate(photo: any): void {
 // ============================================
 
 async function insertEliteImages(images: any[], category: string, style: string): Promise<number> {
-  const records = images.map(photo => ({
+  if (images.length === 0) return 0;
+
+  // Pre-filter: check which IDs already exist in the DB
+  const allIds = images.map(p => p.id);
+  const { data: existingRows } = await supabase
+    .from("curated_images")
+    .select("id")
+    .in("id", allIds);
+  
+  const existingIds = new Set((existingRows || []).map((r: { id: number }) => r.id));
+  const newImages = images.filter(p => !existingIds.has(p.id));
+  
+  if (newImages.length === 0) {
+    console.log(`  [DB] All ${images.length} images already exist, skipping`);
+    return 0;
+  }
+
+  const records = newImages.map(photo => ({
     id: photo.id,
     url: photo.src?.[CONFIG.STORAGE.DISPLAY_SIZE] || photo.src?.medium || photo.url,
     thumbnail_url: photo.src?.[CONFIG.STORAGE.THUMBNAIL_SIZE] || photo.src?.small,
@@ -428,11 +445,10 @@ async function insertEliteImages(images: any[], category: string, style: string)
       harvested_at: new Date().toISOString(),
     },
     is_active: true,
-    display_order: Math.floor(Math.random() * 1000), // For random display
+    display_order: Math.floor(Math.random() * 1000),
   }));
   
   try {
-    // Batch insert in chunks
     let inserted = 0;
     for (let i = 0; i < records.length; i += CONFIG.DB_BATCH_SIZE) {
       const batch = records.slice(i, i + CONFIG.DB_BATCH_SIZE);
@@ -451,6 +467,7 @@ async function insertEliteImages(images: any[], category: string, style: string)
       }
     }
     
+    console.log(`  [DB] Inserted ${inserted} NEW images (${existingIds.size} already existed)`);
     return inserted;
   } catch (error) {
     console.error(`[Database] Exception:`, error);
@@ -518,58 +535,63 @@ async function harvestCategory(category: string, style: string): Promise<number>
     // Check API limits
     if (usageTracker.shouldCooldown()) {
       console.log(`[Harvest] API usage high, cooling for 15 minutes...`);
-      await sleep(900000); // Reduce cooldown to 15m for faster progress
+      await sleep(900000);
     }
     
     const query = queries[queryIndex++];
     console.log(`  Query ${queryIndex}/${queries.length}: ${query}`);
     
-    // Fetch from Pexels
-    const photos = await fetchFromPexels(query, CONFIG.PEXELS_BATCH_SIZE);
-    await sleep(200); // Faster Pexels fetching
-    
-    if (photos.length === 0) {
-      // If we run out of images for a query, add more variations dynamically
-      if (queryIndex === queries.length && harvestedCount < needed) {
-        console.log(`  💡 Generating additional query variations...`);
-        queries.push(
-          `high-end ${style} ${category} inspiration`,
-          `exclusive ${category} ${style} furniture`,
-          `${style} ${category} architecture photography`
-        );
+    // Paginate through Pexels results (up to 5 pages per query)
+    for (let page = 1; page <= 5 && harvestedCount < needed; page++) {
+      const photos = await fetchFromPexels(query, CONFIG.PEXELS_BATCH_SIZE, page);
+      await sleep(200);
+      
+      if (photos.length === 0) {
+        if (page === 1 && queryIndex === queries.length && harvestedCount < needed) {
+          console.log(`  💡 Generating additional query variations...`);
+          queries.push(
+            `high-end ${style} ${category} inspiration`,
+            `exclusive ${category} ${style} furniture`,
+            `${style} ${category} architecture photography`
+          );
+        }
+        break; // No more results for this query
       }
-      continue;
-    }
-    
-    // Filter duplicates
-    const uniquePhotos = photos.filter(p => !isDuplicate(p));
-    if (uniquePhotos.length === 0) continue;
-    
-    // Filter with Gemini
-    const evaluatedPhotos = await filterWithGemini(uniquePhotos, category, style);
-    
-    if (evaluatedPhotos.length === 0) continue;
-    
-    // Mark as duplicates
-    evaluatedPhotos.forEach(markAsDuplicate);
-    
-    // Separate elite (exact match) and comprehensive (recycled)
-    const exactMatches = evaluatedPhotos.filter(p => !p.isComprehensive);
-    const comprehensiveMatches = evaluatedPhotos.filter(p => p.isComprehensive);
-    
-    // Insert exact matches to their target category
-    if (exactMatches.length > 0) {
-      const toInsertExact = exactMatches.slice(0, needed - harvestedCount);
-      const insertedExact = await insertEliteImages(toInsertExact, category, style);
-      harvestedCount += insertedExact;
-      console.log(`  ✓ Inserted Exact: ${insertedExact} | Progress: ${currentCount + harvestedCount}/${CONFIG.IMAGES_PER_COMBINATION}`);
-    }
-    
-    // Insert comprehensive matches to the comprehensive category
-    if (comprehensiveMatches.length > 0) {
-      // Using 'comprehensive-interior' as the category for the general interior design card
-      const insertedComp = await insertEliteImages(comprehensiveMatches, "comprehensive-interior", style);
-      console.log(`  ♻️  Recycled: ${insertedComp} gorgeous images to Comprehensive Interior Design`);
+      
+      // Filter duplicates (in-memory)
+      const uniquePhotos = photos.filter(p => !isDuplicate(p));
+      if (uniquePhotos.length === 0) {
+        console.log(`  Page ${page}: all ${photos.length} photos are duplicates, trying next page...`);
+        continue;
+      }
+      
+      console.log(`  Page ${page}: ${uniquePhotos.length} unique out of ${photos.length}`);
+      
+      // Filter with Gemini
+      const evaluatedPhotos = await filterWithGemini(uniquePhotos, category, style);
+      
+      if (evaluatedPhotos.length === 0) continue;
+      
+      // Mark as duplicates
+      evaluatedPhotos.forEach(markAsDuplicate);
+      
+      // Separate elite (exact match) and comprehensive (recycled)
+      const exactMatches = evaluatedPhotos.filter(p => !p.isComprehensive);
+      const comprehensiveMatches = evaluatedPhotos.filter(p => p.isComprehensive);
+      
+      // Insert exact matches to their target category
+      if (exactMatches.length > 0) {
+        const toInsertExact = exactMatches.slice(0, needed - harvestedCount);
+        const insertedExact = await insertEliteImages(toInsertExact, category, style);
+        harvestedCount += insertedExact;
+        console.log(`  ✓ Inserted Exact: ${insertedExact} | Progress: ${currentCount + harvestedCount}/${CONFIG.IMAGES_PER_COMBINATION}`);
+      }
+      
+      // Insert comprehensive matches to the comprehensive category
+      if (comprehensiveMatches.length > 0) {
+        const insertedComp = await insertEliteImages(comprehensiveMatches, "comprehensive-interior", style);
+        console.log(`  ♻️  Recycled: ${insertedComp} gorgeous images to Comprehensive Interior Design`);
+      }
     }
   }
   
@@ -628,7 +650,25 @@ async function runEliteHarvesterV3() {
   
   // Check current state
   const totalCount = await getCurrentImageCount();
-  console.log(`💾 Current Database: ${totalCount.toLocaleString()}/${CONFIG.TARGET_FILTERED_IMAGES.toLocaleString()} images\n`);
+  console.log(`💾 Current Database: ${totalCount.toLocaleString()}/${CONFIG.TARGET_FILTERED_IMAGES.toLocaleString()} images`);
+  
+  // Pre-load existing IDs into dedup set to skip Gemini calls for known photos
+  console.log(`🔄 Pre-loading existing image IDs for deduplication...`);
+  let offset = 0;
+  const pageSize = 1000;
+  while (true) {
+    const { data: existingIds } = await supabase
+      .from("curated_images")
+      .select("id")
+      .range(offset, offset + pageSize - 1);
+    if (!existingIds || existingIds.length === 0) break;
+    for (const row of existingIds) {
+      CONFIG.ID_DEDUP_SET.add(row.id);
+    }
+    offset += existingIds.length;
+    if (existingIds.length < pageSize) break;
+  }
+  console.log(`✅ Pre-loaded ${CONFIG.ID_DEDUP_SET.size} existing IDs into dedup set\n`);
   
   if (totalCount >= CONFIG.TARGET_FILTERED_IMAGES) {
     console.log(`✅ Target already reached! Running maintenance check...\n`);
@@ -637,20 +677,34 @@ async function runEliteHarvesterV3() {
   let totalHarvested = 0;
   const startTime = Date.now();
   
-  // Harvest each combination
+  // Calculate deficit and prioritize combinations that need images the most
+  const combinations: { category: string; style: string; needed: number; current: number }[] = [];
   for (const category of CONFIG.TARGET_CATEGORIES) {
     for (const style of CONFIG.STYLES) {
-      const count = await harvestCategory(category, style);
-      totalHarvested += count;
-      
-      // Progress report
-      const progress = ((totalHarvested / CONFIG.TARGET_FILTERED_IMAGES) * 100).toFixed(1);
-      console.log(`\n📈 Total Progress: ${totalHarvested.toLocaleString()}/${CONFIG.TARGET_FILTERED_IMAGES.toLocaleString()} (${progress}%)`);
-      
-      // Save checkpoint every 1000 images
-      if (totalHarvested % CONFIG.CHECKPOINT_INTERVAL === 0) {
-        console.log(`💾 Checkpoint saved at ${totalHarvested.toLocaleString()} images`);
-      }
+      const current = await getCombinationCount(category, style);
+      const needed = Math.max(0, CONFIG.IMAGES_PER_COMBINATION - current);
+      combinations.push({ category, style, needed, current });
+    }
+  }
+
+  // Sort by needed descending (empty categories like kitchen, home-office, lounge first!)
+  combinations.sort((a, b) => b.needed - a.needed);
+  console.log(`📋 Prioritized harvest plan: ${combinations.filter(c => c.needed > 0).length} combinations need images.`);
+
+  // Harvest each combination in priority order
+  for (const { category, style, needed } of combinations) {
+    if (needed <= 0) continue;
+
+    const count = await harvestCategory(category, style);
+    totalHarvested += count;
+    
+    // Progress report
+    const progress = ((totalHarvested / CONFIG.TARGET_FILTERED_IMAGES) * 100).toFixed(1);
+    console.log(`\n📈 Total Progress: ${totalHarvested.toLocaleString()}/${CONFIG.TARGET_FILTERED_IMAGES.toLocaleString()} (${progress}%)`);
+    
+    // Save checkpoint every 1000 images
+    if (totalHarvested % CONFIG.CHECKPOINT_INTERVAL === 0) {
+      console.log(`💾 Checkpoint saved at ${totalHarvested.toLocaleString()} images`);
     }
   }
   
