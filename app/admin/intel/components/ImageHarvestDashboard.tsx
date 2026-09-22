@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertCircle, CheckCircle2, Database, Image, Loader2, Play, RefreshCw } from "lucide-react";
+import { AlertCircle, CheckCircle2, Database, Image, Loader2, Play, RefreshCw, Key, X, ExternalLink, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,14 +43,31 @@ export function ImageHarvestDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
+  // GitHub Actions workflow configuration state
+  const [workflowStatus, setWorkflowStatus] = useState<{ workflowConfigured: boolean; repository: string; workflow: string } | null>(null);
+  const [showTokenModal, setShowTokenModal] = useState(false);
+  const [inputToken, setInputToken] = useState("");
+  const [saveTokenPermanently, setSaveTokenPermanently] = useState(true);
+
   const fetchStats = useCallback(async () => {
     setRefreshing(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/images/stats", { cache: "no-store" });
-      const result = await response.json() as DashboardData & { error?: string };
-      if (!response.ok || !result.success) throw new Error(result.error || "تعذر تحميل مكتبة الصور.");
+      const [statsRes, harvestRes] = await Promise.all([
+        fetch("/api/admin/images/stats", { cache: "no-store" }),
+        fetch("/api/admin/images/trigger-harvest", { cache: "no-store" }),
+      ]);
+
+      const result = (await statsRes.json()) as DashboardData & { error?: string };
+      if (!statsRes.ok || !result.success) throw new Error(result.error || "تعذر تحميل مكتبة الصور.");
       setData(result);
+
+      if (harvestRes.ok) {
+        const hJson = await harvestRes.json();
+        if (hJson.status) {
+          setWorkflowStatus(hJson.status);
+        }
+      }
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "تعذر تحميل مكتبة الصور.");
     } finally {
@@ -63,15 +80,36 @@ export function ImageHarvestDashboard() {
     void fetchStats();
   }, [fetchStats]);
 
-  async function triggerHarvest() {
+  async function triggerHarvest(tokenToUse?: string) {
+    // If not configured and no token passed, open configuration dialog
+    if (!workflowStatus?.workflowConfigured && !tokenToUse) {
+      setShowTokenModal(true);
+      return;
+    }
+
     setTriggering(true);
     setError(null);
     setNotice(null);
     try {
-      const response = await fetch("/api/admin/images/trigger-harvest", { method: "POST" });
-      const result = await response.json() as { success?: boolean; message?: string; error?: string };
-      if (!response.ok || !result.success) throw new Error(result.error || "تعذر طلب تشغيل الحصاد.");
+      const response = await fetch("/api/admin/images/trigger-harvest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: tokenToUse,
+          saveToken: saveTokenPermanently,
+        }),
+      });
+      const result = (await response.json()) as { success?: boolean; message?: string; error?: string; needsToken?: boolean };
+      if (!response.ok || !result.success) {
+        if (result.needsToken) {
+          setShowTokenModal(true);
+        }
+        throw new Error(result.error || "تعذر طلب تشغيل الحصاد.");
+      }
       setNotice(result.message || "تم قبول طلب التشغيل.");
+      setShowTokenModal(false);
+      setInputToken("");
+      setWorkflowStatus((prev) => prev ? { ...prev, workflowConfigured: true } : { workflowConfigured: true, repository: "azenithliving/azenith-living-os", workflow: "run-harvester.yml" });
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "تعذر طلب تشغيل الحصاد.");
     } finally {
@@ -110,8 +148,14 @@ export function ImageHarvestDashboard() {
           <Button variant="outline" size="sm" onClick={() => void fetchStats()} disabled={refreshing}>
             {refreshing ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />} تحديث
           </Button>
-          <Button size="sm" onClick={() => void triggerHarvest()} disabled={triggering}>
-            {triggering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Play className="ml-2 h-4 w-4" />} طلب تشغيل الحصاد
+          <Button
+            size="sm"
+            onClick={() => void triggerHarvest()}
+            disabled={triggering}
+            className={workflowStatus?.workflowConfigured ? "bg-emerald-600 hover:bg-emerald-700 text-white font-medium" : "bg-amber-600 hover:bg-amber-700 text-white font-medium"}
+          >
+            {triggering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Play className="ml-2 h-4 w-4" />}
+            {workflowStatus?.workflowConfigured ? "تشغيل الحصاد السحابي (GitHub)" : "تهيئة وتشغيل الحصاد (GitHub)"}
           </Button>
         </div>
       </div>
@@ -147,6 +191,93 @@ export function ImageHarvestDashboard() {
       </Card>
 
       <p className="text-left text-xs text-muted-foreground">آخر قراءة: {data?.retrievedAt ? formatDate(data.retrievedAt) : "—"}</p>
+
+      {/* GitHub Actions Token Setup Modal */}
+      {showTokenModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-white/15 bg-slate-900 p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-amber-500/20 p-2.5 text-amber-400">
+                  <Key className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">تهيئة مفتاح GitHub للحصاد السحابي</h3>
+                  <p className="text-xs text-white/60">تشغيل سير العمل (run-harvester.yml) عن بُعد</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowTokenModal(false)}
+                className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-white/70 leading-relaxed">
+              يقوم روبوت الحصاد بالعمل على خوادم <b>GitHub Actions</b> المستقلة لجمع مئات الصور وفحصها بالذكاء الاصطناعي دون إجهاد سيرفر الموقع أو استهلاك وقته. لإصدار أمر التشغيل التلقائي، أدخل رمز وصول <b>GitHub Personal Access Token</b> بصلاحية <code>workflow</code> و <code>repo</code>.
+            </p>
+
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-white/80 block">
+                رمز الوصول (GitHub Token):
+              </label>
+              <input
+                type="password"
+                value={inputToken}
+                onChange={(e) => setInputToken(e.target.value)}
+                placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder-white/30 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 font-mono"
+                dir="ltr"
+              />
+              <div className="flex items-center justify-between pt-1">
+                <a
+                  href="https://github.com/settings/tokens/new?scopes=repo,workflow&description=Azenith+Harvester+Trigger"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] text-amber-400 hover:underline"
+                >
+                  <span>توليد التوكن في ثوانٍ من GitHub</span>
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+
+            <label className="flex items-center gap-2.5 cursor-pointer pt-1">
+              <input
+                type="checkbox"
+                checked={saveTokenPermanently}
+                onChange={(e) => setSaveTokenPermanently(e.target.checked)}
+                className="rounded border-white/20 bg-white/5 text-amber-500 focus:ring-0 w-4 h-4"
+              />
+              <span className="text-xs text-white/80 flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                حفظ التوكن في قاعدة البيانات (api_keys) للاستخدام المستمر بنقرة واحدة
+              </span>
+            </label>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowTokenModal(false)}
+                className="text-xs border-white/15 text-white/70 hover:bg-white/10"
+              >
+                إلغاء
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => void triggerHarvest(inputToken)}
+                disabled={triggering || !inputToken.trim()}
+                className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs"
+              >
+                {triggering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Play className="ml-2 h-4 w-4" />}
+                حفظ وبدء الحصاد الآن
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
