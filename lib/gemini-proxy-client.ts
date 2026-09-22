@@ -1,6 +1,6 @@
 /**
  * THE ULTIMATE ARSENAL: Multi-Provider AI Engine (131 Keys)
- * Powered by Gemini 2.5 Flash & Gemini 2.5 Flash-Lite
+ * Powered by Gemini 2.5 Flash & Gemini 2.5 Flash-Lite (Fixed Schema)
  */
 
 const GOOGLE_AI_KEYS = (process.env.GOOGLE_AI_KEYS || "").split(",").filter(Boolean);
@@ -31,45 +31,60 @@ CRITICAL TASK: Evaluate this image.
 - If it is a gorgeous luxury interior shot, but it DOES NOT match the specific room or style (e.g. it's a living room instead of a bedroom), return 50.
 Return ONLY the integer number. No words, no symbols, nothing else.`;
 
-  // Models to try in order of priority
   const geminiModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
 
-  // 1. --- GEMINI ARMY (35 Keys with Auto-Failover to 2.5) ---
+  // 1. --- GEMINI ARMY (35 Keys with correct inlineData schema) ---
   if (SHUFFLED_GEMINI.length > 0) {
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const key = SHUFFLED_GEMINI[geminiIdx++ % SHUFFLED_GEMINI.length];
-      
-      for (const model of geminiModels) {
-        try {
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{
-                parts: [
-                  { text: strictPrompt },
-                  { inline_data: { mime_type: "image/jpeg", data: await getBase64(imageUrl) } }
-                ]
-              }]
-            })
-          });
+    let base64Data = "";
+    try {
+      base64Data = await getBase64(imageUrl);
+    } catch (imgErr) {
+      console.warn(`[Image Fetch] Failed downloading ${imageUrl}:`, imgErr);
+    }
 
-          const data = await response.json();
-          if (data.error) {
+    if (base64Data) {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const key = SHUFFLED_GEMINI[geminiIdx++ % SHUFFLED_GEMINI.length];
+        
+        for (const model of geminiModels) {
+          try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: strictPrompt },
+                    {
+                      inlineData: {
+                        mimeType: "image/jpeg",
+                        data: base64Data
+                      }
+                    }
+                  ]
+                }]
+              })
+            });
+
+            const data = await response.json();
+            if (data.error) {
+              console.warn(`[Gemini - ${model}] API Error:`, data.error.message || data.error);
+              continue;
+            }
+
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            const match = text.match(/\d+/);
+            if (match) {
+              const score = parseInt(match[0]);
+              if (score >= 85) console.log(`[Gemini-Strike] Strict Approved | Score: ${score}`);
+              else if (score === 50) console.log(`[Gemini-Strike] Redirected to Comprehensive | Score: 50`);
+              else console.log(`[Gemini-Strike] REJECTED (Strict) | Score: ${score}`);
+              return { score: Math.min(100, Math.max(0, score)) };
+            }
+          } catch (netErr) {
+            console.warn(`[Gemini Network Error]:`, netErr);
             continue;
           }
-
-          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-          const match = text.match(/\d+/);
-          if (match) {
-            const score = parseInt(match[0]);
-            if (score >= 85) console.log(`[Gemini-Strike] Strict Approved | Score: ${score}`);
-            else if (score === 50) console.log(`[Gemini-Strike] Redirected to Comprehensive | Score: 50`);
-            else console.log(`[Gemini-Strike] REJECTED (Strict) | Score: ${score}`);
-            return { score: Math.min(100, Math.max(0, score)) };
-          }
-        } catch (_) {
-          continue;
         }
       }
     }
@@ -114,7 +129,8 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
 }
 
 async function getBase64(url: string): Promise<string> {
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const buffer = await response.arrayBuffer();
   return Buffer.from(buffer).toString("base64");
 }
