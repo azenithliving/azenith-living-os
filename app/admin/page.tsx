@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image, MessageSquare, Activity, Cpu, Bell, RefreshCw } from "lucide-react";
 import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-components";
@@ -99,136 +99,157 @@ export default function AdminPage() {
   const [telegramPanelOpen, setTelegramPanelOpen] = useState(false);
   const [aiKeysPanelOpen, setAiKeysPanelOpen] = useState(false);
 
-  // Fetch real data from APIs
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
+  // Fetch real data from APIs with background refresh and resilient fallbacks
+  const fetchDashboardData = useCallback(async (isInitial = false) => {
+    try {
+      if (isInitial) {
         setLoading(true);
-        setError(null);
+      }
+      setError(null);
 
-        // Fetch all APIs in parallel
-        const [analyticsRes, healthRes, mastermindRes] = await Promise.all([
-          fetch("/api/analytics?period=30days"),
-          fetch("/api/system-health", { cache: "no-store" }),
-          fetch("/api/admin/mastermind/stats", { cache: "no-store" }),
-        ]);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-        const analytics: AnalyticsData = analyticsRes.ok ? await analyticsRes.json() : { metrics: {} };
-        const health: SystemHealthData = healthRes.ok ? await healthRes.json() : { health: {}, pendingAlerts: [] };
-        const mastermindResponse = mastermindRes.ok ? await mastermindRes.json() : null;
-        const mastermind: MastermindStatsData = mastermindResponse?.data ?? mastermindResponse ?? { commands: {}, security: {}, recentCommands: [] };
-        setMastermindData(mastermind);
+      // Fetch all APIs in parallel using allSettled so one slow route never stalls the dashboard
+      const [analyticsRes, healthRes, mastermindRes] = await Promise.allSettled([
+        fetch("/api/analytics?period=30days", { signal: controller.signal }),
+        fetch("/api/system-health", { cache: "no-store", signal: controller.signal }),
+        fetch("/api/admin/mastermind/stats", { cache: "no-store", signal: controller.signal }),
+      ]);
+      clearTimeout(timeoutId);
 
-        // Map real data to metrics
-        const realMetrics = [
-          {
-            title: "العملاء المحتملين",
-            value: analytics.metrics?.totalLeads || 0,
-            subtitle: analytics.metrics?.totalLeads ? "عميل نشط" : "لا توجد بيانات",
-            icon: <Users className="h-6 w-6" />,
-            color: "gold" as const,
-            href: "/admin/sales",
+      let analytics: AnalyticsData = { metrics: { totalLeads: 0, conversionRate: 0, totalRequests: 0, totalBookings: 0, whatsappClicks: 0, uniqueVisitors: 0, averageLeadScore: 0 } };
+      if (analyticsRes.status === "fulfilled" && analyticsRes.value.ok) {
+        try { analytics = await analyticsRes.value.json(); } catch (_) {}
+      }
+
+      let health: SystemHealthData = { health: { status: "unknown", uptime: "", memoryUsage: 0, cpuUsage: 0 }, pendingAlerts: [] };
+      if (healthRes.status === "fulfilled" && healthRes.value.ok) {
+        try { health = await healthRes.value.json(); } catch (_) {}
+      }
+
+      let mastermind: MastermindStatsData = { commands: { total: 0, successful: 0, failed: 0, last24h: 0 }, security: { failedAttempts24h: 0, has2FA: false }, recentCommands: [] };
+      if (mastermindRes.status === "fulfilled" && mastermindRes.value.ok) {
+        try {
+          const mJson = await mastermindRes.value.json();
+          mastermind = mJson?.data ?? mJson ?? mastermind;
+          setMastermindData(mastermind);
+        } catch (_) {}
+      }
+
+      // Map real data to metrics
+      const realMetrics = [
+        {
+          title: "العملاء المحتملين",
+          value: analytics.metrics?.totalLeads || 0,
+          subtitle: analytics.metrics?.totalLeads ? "عميل نشط" : "لا توجد بيانات",
+          icon: <Users className="h-6 w-6" />,
+          color: "gold" as const,
+          href: "/admin/sales",
+        },
+        {
+          title: "نسبة التحويل",
+          value: (analytics.metrics?.conversionRate || 0) + "%",
+          subtitle: "معدل التحويل الإجمالي",
+          icon: <TrendingUp className="h-6 w-6" />,
+          color: "green" as const,
+          trend: {
+            value: Math.round(analytics.metrics?.conversionRate || 0),
+            isPositive: (analytics.metrics?.conversionRate || 0) > 5,
           },
-          {
-            title: "نسبة التحويل",
-            value: (analytics.metrics?.conversionRate || 0) + "%",
-            subtitle: "معدل التحويل الإجمالي",
-            icon: <TrendingUp className="h-6 w-6" />,
-            color: "green" as const,
-            trend: {
-              value: Math.round(analytics.metrics?.conversionRate || 0),
-              isPositive: (analytics.metrics?.conversionRate || 0) > 5,
-            },
-            href: "/admin/sales",
-          },
-          {
-            title: "حالة النظام",
-            value: health.health?.status === "optimal" ? "ممتازة" : health.health?.status === "stable" ? "مستقرة" : "غير معروفة",
-            subtitle: health.health?.uptime ? `${health.health.uptime} uptime` : "غير متاح",
-            icon: <Shield className="h-6 w-6" />,
-            color: health.health?.status === "optimal" ? "blue" : "blue" as const,
-            href: "/admin/agents",
-          },
-          {
-            title: "تفاعلات AI",
-            value: mastermind.commands?.total || 0,
-            subtitle: mastermind.commands?.last24h ? `${mastermind.commands.last24h} في آخر 24 ساعة` : "هذا الشهر",
-            icon: <Brain className="h-6 w-6" />,
-            color: "purple" as const,
-            href: "/admin/agents",
-          },
-          {
-            title: "نظام الوكلاء",
-            value: analytics.metrics?.totalRequests || 0,
-            subtitle: analytics.metrics?.totalBookings ? `${analytics.metrics.totalBookings} حجز مؤكد` : "قيد الانتظار",
-            icon: <Bot className="h-6 w-6" />,
-            color: "blue" as const,
-            href: "/admin/agents",
-          },
-          {
-            title: "نشاط المنصة",
-            value: analytics.metrics?.uniqueVisitors || 0,
-            subtitle: "هذا الشهر",
-            icon: <Clock className="h-6 w-6" />,
-            color: "gold" as const,
-            href: "/admin",
-          },
-        ];
+          href: "/admin/sales",
+        },
+        {
+          title: "حالة النظام",
+          value: health.health?.status === "optimal" ? "ممتازة" : health.health?.status === "stable" ? "مستقرة" : "غير معروفة",
+          subtitle: health.health?.uptime ? `${health.health.uptime} uptime` : "غير متاح",
+          icon: <Shield className="h-6 w-6" />,
+          color: health.health?.status === "optimal" ? "blue" : "blue" as const,
+          href: "/admin/agents",
+        },
+        {
+          title: "تفاعلات AI",
+          value: mastermind.commands?.total || 0,
+          subtitle: mastermind.commands?.last24h ? `${mastermind.commands.last24h} في آخر 24 ساعة` : "هذا الشهر",
+          icon: <Brain className="h-6 w-6" />,
+          color: "purple" as const,
+          href: "/admin/agents",
+        },
+        {
+          title: "نظام الوكلاء",
+          value: analytics.metrics?.totalRequests || 0,
+          subtitle: analytics.metrics?.totalBookings ? `${analytics.metrics.totalBookings} حجز مؤكد` : "قيد الانتظار",
+          icon: <Bot className="h-6 w-6" />,
+          color: "blue" as const,
+          href: "/admin/agents",
+        },
+        {
+          title: "نشاط المنصة",
+          value: analytics.metrics?.uniqueVisitors || 0,
+          subtitle: "هذا الشهر",
+          icon: <Clock className="h-6 w-6" />,
+          color: "gold" as const,
+          href: "/admin",
+        },
+      ];
 
-        setMetrics(realMetrics);
+      setMetrics(realMetrics);
 
-        // Generate real activities: display genuine commands as "command" type with accurate status
-        const realActivities = mastermind.recentCommands?.slice(0, 5).map((cmd, index) => ({
-          id: cmd.id || `cmd-${index}`,
-          type: "command" as const,
-          tenantName: cmd.status === "executed" ? "أمر تنفيذي (نجح)" : cmd.status === "failed" ? "أمر تنفيذي (فشل)" : "أمر وحدة تحكم",
-          description: cmd.command?.slice(0, 60) + (cmd.command?.length > 60 ? "..." : "") || "أمر طرفية النظام",
-          timestamp: cmd.executedAt || new Date().toISOString(),
-        })) || [];
+      // Generate real activities: display genuine commands as "command" type with accurate status
+      const realActivities = mastermind.recentCommands?.slice(0, 5).map((cmd, index) => ({
+        id: cmd.id || `cmd-${index}`,
+        type: "command" as const,
+        tenantName: cmd.status === "executed" ? "أمر تنفيذي (نجح)" : cmd.status === "failed" ? "أمر تنفيذي (فشل)" : "أمر وحدة تحكم",
+        description: cmd.command?.slice(0, 60) + (cmd.command?.length > 60 ? "..." : "") || "أمر طرفية النظام",
+        timestamp: cmd.executedAt || new Date().toISOString(),
+      })) || [];
 
-        setActivities(realActivities.length > 0 ? realActivities : []);
+      setActivities(realActivities.length > 0 ? realActivities : []);
 
-        // Generate alerts from system health
-        const realAlerts = [];
-        
-        // Add security alert if there are failed attempts
-        if (mastermind.security?.failedAttempts24h > 0) {
+      // Generate alerts from system health
+      const realAlerts = [];
+      
+      // Add security alert if there are failed attempts
+      if (mastermind.security?.failedAttempts24h > 0) {
+        realAlerts.push({
+          icon: AlertTriangle,
+          color: "rose" as const,
+          text: `${mastermind.security.failedAttempts24h} محاولة دخول فاشلة`,
+          subtext: "في آخر 24 ساعة - تحقق من الأمان",
+          link: "/admin/agents",
+        });
+      }
+
+      // Add system health alerts
+      if (health.pendingAlerts && health.pendingAlerts.length > 0) {
+        health.pendingAlerts.slice(0, 2).forEach((alert) => {
           realAlerts.push({
-            icon: AlertTriangle,
-            color: "rose" as const,
-            text: `${mastermind.security.failedAttempts24h} محاولة دخول فاشلة`,
-            subtext: "في آخر 24 ساعة - تحقق من الأمان",
+            icon: alert.severity === "critical" ? AlertTriangle : CheckCircle,
+            color: alert.severity === "critical" ? "rose" : alert.severity === "warning" ? "amber" : "emerald" as const,
+            text: alert.title,
+            subtext: alert.description,
             link: "/admin/agents",
           });
-        }
-
-        // Add system health alerts
-        if (health.pendingAlerts && health.pendingAlerts.length > 0) {
-          health.pendingAlerts.slice(0, 2).forEach((alert) => {
-            realAlerts.push({
-              icon: alert.severity === "critical" ? AlertTriangle : CheckCircle,
-              color: alert.severity === "critical" ? "rose" : alert.severity === "warning" ? "amber" : "emerald" as const,
-              text: alert.title,
-              subtext: alert.description,
-              link: "/admin/agents",
-            });
-          });
-        }
-
-        setAlerts(realAlerts);
-      } catch (err) {
-        console.error("Error fetching dashboard data:", err);
-        setError("فشل في تحميل البيانات. يرجى تحديث الصفحة.");
-      } finally {
-        setLoading(false);
+        });
       }
-    };
 
-    fetchDashboardData();
+      setAlerts(realAlerts);
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+      setError("فشل في تحميل البيانات. يرجى تحديث الصفحة.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    const refreshInterval = setInterval(fetchDashboardData, 60000);
+  useEffect(() => {
+    fetchDashboardData(true);
+    const refreshInterval = setInterval(() => fetchDashboardData(false), 60000);
+    return () => clearInterval(refreshInterval);
+  }, [fetchDashboardData]);
 
-    // Fetch system health (Telegram & AACA)
+  // Fetch system health (Telegram & AACA)
+  useEffect(() => {
     const checkSystems = async () => {
       try {
         let aacaJson: { status?: string; mode?: string; label?: string } = {
@@ -267,8 +288,6 @@ export default function AdminPage() {
       }
     };
     checkSystems();
-
-    return () => clearInterval(refreshInterval);
   }, []);
 
   const colorClasses: Record<string, string> = {
@@ -409,21 +428,29 @@ export default function AdminPage() {
             المؤشرات الرئيسية
           </h2>
           
-          {/* Loading State */}
-          {loading && (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-[#C5A059] animate-spin" />
-              <span className="mr-3 text-white/60">جاري تحميل البيانات...</span>
+          {/* Loading Skeletons on initial load */}
+          {loading && !metrics && (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 animate-pulse">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="h-4 w-24 bg-white/10 rounded" />
+                    <div className="h-8 w-8 bg-white/10 rounded-xl" />
+                  </div>
+                  <div className="h-8 w-16 bg-white/20 rounded mb-2" />
+                  <div className="h-3 w-32 bg-white/10 rounded" />
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Error State */}
-          {error && !loading && (
+          {/* Error State if initial load failed */}
+          {error && !metrics && !loading && (
             <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-6 text-center">
               <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-2" />
               <p className="text-rose-400">{error}</p>
               <button 
-                onClick={() => window.location.reload()}
+                onClick={() => fetchDashboardData(true)}
                 className="mt-4 px-4 py-2 bg-[#C5A059] text-[#1a1a1a] rounded-lg hover:bg-[#d8b56d]"
               >
                 إعادة المحاولة
@@ -432,7 +459,7 @@ export default function AdminPage() {
           )}
 
           {/* Metrics Grid */}
-          {!loading && !error && metrics && (
+          {metrics && (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {metrics.map((metric, idx) => (
                 <Link key={idx} href={metric.href} className="block">
@@ -451,7 +478,7 @@ export default function AdminPage() {
         </section>
 
         {/* Activities & Alerts */}
-        {!loading && !error && (
+        {(activities || alerts || !loading) && (
           <div className="grid gap-6 md:grid-cols-2">
             {/* Recent Activities */}
             <ActivityFeed activities={activities || []} />
