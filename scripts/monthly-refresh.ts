@@ -155,15 +155,64 @@ async function deleteOldestImages(): Promise<number> {
 
 async function removeBrokenImages(): Promise<number> {
   console.log("[Cleanup] Checking for broken image URLs...");
-  
-  // In a real implementation, this would:
-  // 1. Sample random images
-  // 2. Check if URLs are accessible
-  // 3. Mark broken ones as inactive
-  
-  // For now, placeholder
-  console.log("[Cleanup] Skipping (would check URLs in production)");
-  return 0;
+
+  try {
+    const { data: sampleImages, error } = await supabase
+      .from("curated_images")
+      .select("id, url, metadata")
+      .eq("is_active", true)
+      .limit(100);
+
+    if (error || !sampleImages || sampleImages.length === 0) {
+      return 0;
+    }
+
+    const brokenIds: number[] = [];
+
+    for (let i = 0; i < sampleImages.length; i += 10) {
+      const chunk = sampleImages.slice(i, i + 10);
+      await Promise.all(
+        chunk.map(async (img) => {
+          if (!img.url) {
+            brokenIds.push(img.id);
+            return;
+          }
+          try {
+            const res = await fetch(img.url, {
+              method: "HEAD",
+              signal: AbortSignal.timeout(6000),
+            });
+            if (res.status === 404 || res.status === 410 || res.status >= 500) {
+              brokenIds.push(img.id);
+            }
+          } catch (_) {
+            brokenIds.push(img.id);
+          }
+        })
+      );
+    }
+
+    if (brokenIds.length > 0) {
+      console.log(`[Cleanup] Found ${brokenIds.length} broken images, marking inactive...`);
+      await supabase
+        .from("curated_images")
+        .update({
+          is_active: false,
+          metadata: {
+            deleted_at: new Date().toISOString(),
+            delete_reason: "broken_url",
+          },
+        })
+        .in("id", brokenIds);
+      return brokenIds.length;
+    }
+
+    console.log("[Cleanup] All sampled image URLs are healthy!");
+    return 0;
+  } catch (err) {
+    console.error("[Cleanup] Error during broken image check:", err);
+    return 0;
+  }
 }
 
 // ============================================

@@ -140,6 +140,8 @@ export async function POST(request: Request) {
         success: true,
         message: "🚀 تم إطلاق مهمة الحصاد السحابي على GitHub Actions بنجاح! سيتم فحص وتجميع الصور في الخلفية وتحديث المكتبة.",
         repository: config.repository,
+        workflowUrl: `https://github.com/${config.repository}/actions/workflows/${config.workflow}`,
+        runsUrl: `https://github.com/${config.repository}/actions`,
       },
       { status: 202 }
     );
@@ -180,6 +182,8 @@ export async function GET() {
       workflowConfigured: Boolean(config),
       repository: config?.repository ?? "azenithliving/azenith-living-os",
       workflow: config?.workflow ?? "run-harvester.yml",
+      workflowUrl: config ? `https://github.com/${config.repository}/actions/workflows/${config.workflow}` : null,
+      runsUrl: config ? `https://github.com/${config.repository}/actions` : null,
     },
   });
 }

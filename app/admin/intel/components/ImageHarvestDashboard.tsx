@@ -44,7 +44,13 @@ export function ImageHarvestDashboard() {
   const [notice, setNotice] = useState<string | null>(null);
 
   // GitHub Actions workflow configuration state
-  const [workflowStatus, setWorkflowStatus] = useState<{ workflowConfigured: boolean; repository: string; workflow: string } | null>(null);
+  const [workflowStatus, setWorkflowStatus] = useState<{
+    workflowConfigured: boolean;
+    repository: string;
+    workflow: string;
+    workflowUrl?: string | null;
+    runsUrl?: string | null;
+  } | null>(null);
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [inputToken, setInputToken] = useState("");
   const [saveTokenPermanently, setSaveTokenPermanently] = useState(true);
@@ -99,7 +105,14 @@ export function ImageHarvestDashboard() {
           saveToken: saveTokenPermanently,
         }),
       });
-      const result = (await response.json()) as { success?: boolean; message?: string; error?: string; needsToken?: boolean };
+      const result = (await response.json()) as {
+        success?: boolean;
+        message?: string;
+        error?: string;
+        needsToken?: boolean;
+        runsUrl?: string;
+        workflowUrl?: string;
+      };
       if (!response.ok || !result.success) {
         if (result.needsToken) {
           setShowTokenModal(true);
@@ -109,7 +122,17 @@ export function ImageHarvestDashboard() {
       setNotice(result.message || "تم قبول طلب التشغيل.");
       setShowTokenModal(false);
       setInputToken("");
-      setWorkflowStatus((prev) => prev ? { ...prev, workflowConfigured: true } : { workflowConfigured: true, repository: "azenithliving/azenith-living-os", workflow: "run-harvester.yml" });
+      setWorkflowStatus((prev) =>
+        prev
+          ? { ...prev, workflowConfigured: true, runsUrl: result.runsUrl || prev.runsUrl }
+          : {
+              workflowConfigured: true,
+              repository: "azenithliving/azenith-living-os",
+              workflow: "run-harvester.yml",
+              runsUrl: result.runsUrl,
+              workflowUrl: result.workflowUrl,
+            }
+      );
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "تعذر طلب تشغيل الحصاد.");
     } finally {
@@ -145,6 +168,17 @@ export function ImageHarvestDashboard() {
           <p className="mt-1 text-sm text-muted-foreground">تعرض هذه اللوحة الصفوف النشطة الموجودة حاليًا في قاعدة البيانات فقط.</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {workflowStatus?.runsUrl && (
+            <a
+              href={workflowStatus.runsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white transition"
+            >
+              <span>سجلات GitHub Actions</span>
+              <ExternalLink className="h-3.5 w-3.5 text-white/50" />
+            </a>
+          )}
           <Button variant="outline" size="sm" onClick={() => void fetchStats()} disabled={refreshing}>
             {refreshing ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />} تحديث
           </Button>
@@ -161,7 +195,22 @@ export function ImageHarvestDashboard() {
       </div>
 
       {error && <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-800 dark:text-red-200">{error}</div>}
-      {notice && <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-800 dark:text-green-200">{notice}</div>}
+      {notice && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-800 dark:text-green-200">
+          <span>{notice}</span>
+          {workflowStatus?.runsUrl && (
+            <a
+              href={workflowStatus.runsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 rounded-md bg-emerald-600/20 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 transition"
+            >
+              <span>متابعة سير العمل على GitHub</span>
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          )}
+        </div>
+      )}
       {(data?.warnings ?? []).map((warning) => <div key={warning} className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">{warning}</div>)}
 
       <div className="grid gap-4 md:grid-cols-2">

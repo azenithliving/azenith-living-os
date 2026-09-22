@@ -340,8 +340,8 @@ async function filterWithGemini(photos: any[], category: string, style: string):
         
         const { score, error } = await analyzeImageWithProxy(
           prompt,
-          photo.src?.large || photo.src?.original || photo.url,
-          geminiKeyIndex % CONFIG.GEMINI_KEYS.length,
+          photo.src?.medium || photo.src?.small || photo.src?.large || photo.url,
+          geminiKeyIndex % (CONFIG.GEMINI_KEYS.length || 1),
           category,
           style
         );
@@ -587,6 +587,33 @@ async function runEliteHarvesterV3() {
   console.log("║  CDN-Optimized for Millions of Visitors                ║");
   console.log("╚════════════════════════════════════════════════════════╝\n");
   
+  // Ensure keys are loaded from database if not present in environment
+  if (CONFIG.PEXELS_KEYS.length === 0 || CONFIG.GEMINI_KEYS.length === 0) {
+    try {
+      const { data: dbKeys } = await supabase
+        .from("api_keys")
+        .select("provider, key")
+        .eq("is_active", true);
+
+      if (dbKeys && dbKeys.length > 0) {
+        if (CONFIG.PEXELS_KEYS.length === 0) {
+          CONFIG.PEXELS_KEYS = dbKeys
+            .filter((k) => k.provider === "pexels")
+            .map((k) => k.key.trim())
+            .filter(Boolean);
+        }
+        if (CONFIG.GEMINI_KEYS.length === 0) {
+          CONFIG.GEMINI_KEYS = dbKeys
+            .filter((k) => k.provider === "gemini" || k.provider === "google")
+            .map((k) => k.key.trim())
+            .filter(Boolean);
+        }
+      }
+    } catch (e) {
+      console.warn("[Harvester] Could not load extra keys from database:", e);
+    }
+  }
+
   // Stats
   console.log(`📊 CONFIGURATION ARSENAL:`);
   console.log(`   Target Elite: ${CONFIG.TARGET_FILTERED_IMAGES.toLocaleString()} images`);

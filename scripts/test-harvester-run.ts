@@ -20,7 +20,7 @@ dotenv.config({ path: ".env.local" });
 const CONFIG = {
   // API Keys (Round-robin rotation)
   PEXELS_KEYS: (process.env.PEXELS_KEYS || "").split(",").filter(Boolean),
-  GEMINI_KEYS: (process.env.GOOGLE_AI_KEYS || "").split(",").filter(Boolean),
+  GEMINI_KEYS: (process.env.GOOGLE_AI_KEYS || "").split(",").map(k => k.trim()).filter(k => k.startsWith("AIzaSy")),
 
   // Test Run: Only living-room category, 4 styles
   TARGET_CATEGORIES: ["living-room"],
@@ -194,15 +194,15 @@ async function analyzePhotoWithGeminiSDK(photo: any, category: string, style: st
   const startTime = Date.now();
 
   try {
-    // Initialize SDK with API key - use v1 API version (not v1beta)
+    // Initialize SDK with API key
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel(
-      { model: "gemini-flash-lite-latest" },
-      { apiVersion: "v1" }
+      { model: "gemini-3.6-flash" },
+      { apiVersion: "v1beta" }
     );
 
-    // Fetch image as base64
-    const imageUrl = photo.src?.large || photo.src?.medium || photo.src?.original;
+    // Fetch image as base64 (medium size is fast and bandwidth-friendly)
+    const imageUrl = photo.src?.medium || photo.src?.large || photo.src?.original;
     if (!imageUrl) {
       console.warn(`[Gemini SDK] No image URL for photo ${photo.id}`);
       return null;
