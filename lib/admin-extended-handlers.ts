@@ -526,50 +526,12 @@ export async function executeManufacturingInventory(
   params: Record<string, unknown>,
   context: ToolExecutionContext
 ): Promise<ToolExecutionResult> {
-  const supabase = getServiceSupabase();
-  if (!supabase) {
-    return { success: false, message: "قاعدة البيانات غير متاحة", executionId: context.executionId };
-  }
-  const companyId =
-    (params.companyId as string) || context.companyId || process.env.MASTER_COMPANY_ID;
-  if (!companyId) {
-    return { success: false, message: "companyId مطلوب", executionId: context.executionId };
-  }
-
-  try {
-    let q = supabase
-      .from("inventory_items")
-      .select("id, name, sku, current_quantity, min_stock_level, category")
-      .eq("company_id", companyId)
-      .eq("is_active", true)
-      .order("name")
-      .limit(40);
-    const { data, error } = await q;
-    if (error) throw error;
-    let items = data || [];
-    if (params.lowStockOnly === true) {
-      items = items.filter(
-        (i: { current_quantity?: number; min_stock_level?: number }) =>
-          (i.current_quantity ?? 0) <= (i.min_stock_level ?? 0)
-      );
-    }
-    const low = items.filter(
-      (i: { current_quantity?: number; min_stock_level?: number }) =>
-        (i.current_quantity ?? 0) <= (i.min_stock_level ?? 0)
-    );
-    return {
-      success: true,
-      message: `${items.length} صنف مخزون — ${low.length} منخفض`,
-      data: { items, lowStock: low },
-      executionId: context.executionId,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : "فشل مخزون التصنيع",
-      executionId: context.executionId,
-    };
-  }
+  const { listManufacturingInventory } = await import("@/lib/manufacturing-ops");
+  const result = await listManufacturingInventory(
+    (params.companyId as string) || context.companyId,
+    params.lowStockOnly === true
+  );
+  return { ...result, executionId: context.executionId };
 }
 
 export async function executeManufacturingStockAdjust(

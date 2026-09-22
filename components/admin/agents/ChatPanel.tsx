@@ -162,6 +162,8 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
       }
     } catch (err) {
       console.error('Error fetching messages:', err);
+    } finally {
+      setLoading(false);
     }
   }, [agentKey, isTyping]);
 
@@ -511,15 +513,17 @@ function StructuredToolCard({ toolName, toolData }: { toolName: string; toolData
 
   if (!toolData && !toolName) return null;
 
-  const isArray = Array.isArray(toolData);
-  const isObject = toolData && typeof toolData === 'object' && !isArray;
+  const nestedItems = Array.isArray(toolData?.items) ? toolData.items : null;
+  const isArray = Array.isArray(toolData) || (nestedItems && nestedItems.length > 0);
+  const tableRows = Array.isArray(toolData) ? toolData : nestedItems;
+  const isObject = toolData && typeof toolData === 'object' && !Array.isArray(toolData);
 
   return (
     <div className="mt-3 pt-3 border-t border-white/10 space-y-2">
       <div className="flex items-center justify-between text-[11px]">
         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-mono font-bold">
           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-          تم التنفيذ الفعلي: {toolName}
+          {toolData?.success === false ? 'فشل التنفيذ' : 'تم التنفيذ الفعلي'}: {toolName}
         </span>
         {toolData && (
           <button
@@ -533,20 +537,20 @@ function StructuredToolCard({ toolName, toolData }: { toolName: string; toolData
       </div>
 
       {/* عرض مصفوفة جداول */}
-      {isArray && toolData.length > 0 && (
+      {isArray && tableRows && tableRows.length > 0 && (
         <div className="max-h-48 overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-2 text-xs">
           <table className="w-full text-right text-[11px]">
             <thead>
               <tr className="border-b border-white/10 text-white/40">
-                {Object.keys(toolData[0]).slice(0, 4).map((k) => (
+                {Object.keys(tableRows[0]).slice(0, 4).map((k) => (
                   <th key={k} className="p-1 font-medium">{k}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {toolData.slice(0, 5).map((row: any, i: number) => (
+              {tableRows.slice(0, 5).map((row: any, i: number) => (
                 <tr key={i} className="border-b border-white/5 hover:bg-white/5">
-                  {Object.keys(toolData[0]).slice(0, 4).map((k) => (
+                  {Object.keys(tableRows[0]).slice(0, 4).map((k) => (
                     <td key={k} className="p-1 text-white/80 truncate max-w-[120px]">
                       {typeof row[k] === 'object' ? JSON.stringify(row[k]) : String(row[k] ?? '—')}
                     </td>
@@ -555,9 +559,9 @@ function StructuredToolCard({ toolName, toolData }: { toolName: string; toolData
               ))}
             </tbody>
           </table>
-          {toolData.length > 5 && (
+          {tableRows.length > 5 && (
             <p className="text-[10px] text-white/30 text-center mt-1">
-              +{toolData.length - 5} سجلات إضافية في قاعدة البيانات
+              +{tableRows.length - 5} سجلات إضافية في قاعدة البيانات
             </p>
           )}
         </div>

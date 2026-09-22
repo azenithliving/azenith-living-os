@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
+import { resolveMasterCompanyId } from '@/lib/admin-env-resolver';
 import { z } from 'zod';
 
 const messageSchema = z.object({
@@ -26,15 +27,16 @@ export async function GET(request: NextRequest) {
     let resolvedConvId = conversationId;
 
     if (!resolvedConvId && agentKey) {
-      // دور على المحادثة الأخيرة لهذا الوكيل سواء بالـ participants أو بالـ title
       const normKey = agentKey.toLowerCase();
-      const { data: conv } = await supabaseServer
+      const companyId = (await resolveAdminCompanyId()) || (await resolveMasterCompanyId());
+      let convQuery = supabaseServer
         .from('agent_conversations')
         .select('id')
         .or(`participants.cs.{${normKey}},title.ilike.%${normKey}%`)
         .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
+      if (companyId) convQuery = convQuery.eq('company_id', companyId);
+      const { data: conv } = await convQuery.maybeSingle();
 
       if (conv) {
         resolvedConvId = conv.id;
@@ -118,7 +120,7 @@ export async function POST(request: NextRequest) {
         conversationId = existingConv.id;
       } else {
         // أنشئ محادثة جديدة
-        const resolvedCompanyId = await resolveAdminCompanyId();
+        const resolvedCompanyId = (await resolveAdminCompanyId()) || (await resolveMasterCompanyId());
         const insertPayload: Record<string, any> = {
           title: `محادثة مع ${data.agent_key}`,
           conversation_type: 'direct',

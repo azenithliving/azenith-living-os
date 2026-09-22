@@ -7,6 +7,7 @@ import { PRIMEAgent, primeAgent, PRIMETask } from "./PRIMEAgent";
 import { VanguardAgent, vanguardAgent, VanguardTask } from "./VanguardAgent";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 import { askGroqMessages, askGoogle, askGoogleMessages, askOpenRouter, askMistral } from "@/lib/ai-orchestrator";
 import { runUltimateTool, inferUltimateTool } from "@/lib/admin-tool-bridge";
 
@@ -108,7 +109,9 @@ export class AgentOrchestrator {
     const supabase = getSupabaseAdminClient();
 
     try {
-      const resolvedCompanyId = await resolveAdminCompanyId(context?.company_id);
+      const resolvedCompanyId =
+        (await resolveAdminCompanyId(context?.company_id)) ||
+        (await resolveMasterCompanyId());
 
       // ── 1. أوجد أو أنشئ محادثة لهذا الوكيل ──────────────────────
       let conversationId: string | null = null;
@@ -165,8 +168,10 @@ export class AgentOrchestrator {
             userId: "admin",
             companyId: resolvedCompanyId || undefined,
           });
-          if (toolResult && toolResult.success) {
-            toolContextStr = `\n[ملاحظة للنظام: تم تنفيذ الأداة الحقيقية (${inferredTool.toolName}) بنجاح. البيانات المستخرجة: ${JSON.stringify(toolResult.data || toolResult.message)}. اعتمد على هذه البيانات الميدانية في ردك].`;
+          if (toolResult?.success) {
+            toolContextStr = `\n[ملاحظة للنظام: تم تنفيذ الأداة الحقيقية (${inferredTool.toolName}) بنجاح. البيانات المستخرجة: ${JSON.stringify(toolResult.data || toolResult.message)}. اعتمد على هذه البيانات الميدانية في ردك ولا تخترع أرقاماً غير موجودة فيها].`;
+          } else if (toolResult) {
+            toolContextStr = `\n[ملاحظة للنظام: محاولة تشغيل الأداة (${inferredTool.toolName}) فشلت: ${toolResult.message}. أخبر المستخدم بالحقيقة ولا تخترع نتيجة ناجحة].`;
           }
         } catch (toolErr) {
           console.warn(`[AgentOrchestrator] Tool execution error:`, toolErr);
@@ -217,7 +222,9 @@ export class AgentOrchestrator {
         }
       }
 
-      // ── 4. احفظ رد الوكيل ─────────────────────────────────────────
+      if (toolResult?.message) {
+        response = `${toolResult.message}\n\n${response}`;
+      }
       if (supabase && conversationId) {
         await supabase.from("agent_messages").insert({
           conversation_id: conversationId,

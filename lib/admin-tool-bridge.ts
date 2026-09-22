@@ -5,6 +5,11 @@
 import { executeTool, type ToolExecutionResult } from "@/lib/agent-tools/tool-registry";
 import { SovereignArchitect } from "@/lib/sovereign-architect";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
+import {
+  calculateCatalogBom,
+  createProductionJob,
+  listManufacturingInventory,
+} from "@/lib/manufacturing-ops";
 
 export interface AdminToolContext {
   userId: string;
@@ -21,41 +26,11 @@ export async function runUltimateTool(
 
   // ── أدوات المنظومة المؤسسية الفائقة المباشرة ──────────────────────────
   if (toolName === "bom_calculate") {
-    const itemName = String(params.item || "صالون كلاسيكي إمبراطوري");
-    const { data: woodItem } = await supabaseServer
-      .from("inventory_items")
-      .select("name, current_quantity, unit_of_measure")
-      .ilike("name", "%زان%")
-      .limit(1)
-      .maybeSingle();
+    return calculateCatalogBom(String(params.item || params.description || ""), companyId);
+  }
 
-    const isSalon = /صالون|كنب|أنتريه/i.test(itemName);
-    const isTable = /طاولة|سفرة|ترابيزة/i.test(itemName);
-    const woodM3 = isSalon ? 1.45 : isTable ? 0.65 : 1.1;
-    const foamSheets = isSalon ? 6 : isTable ? 0 : 4;
-    const fabricMeters = isSalon ? 28 : isTable ? 0 : 16;
-    const laborHours = isSalon ? 120 : isTable ? 45 : 80;
-    const matCost = isSalon ? 138500 : isTable ? 42000 : 85000;
-    const laborCost = laborHours * 400;
-    const totalEst = matCost + laborCost;
-
-    return {
-      success: true,
-      message: `تم حساب كشف الـ BOM بدقة لـ (${itemName}): مطلوب ${woodM3} م³ خشب زان، و ${fabricMeters} م قماش، و ${foamSheets} ألواح إسفنج. التكلفة التقديرية: ${totalEst.toLocaleString()} ج.م. المخزون الحالي من خشب الزان: ${woodItem?.current_quantity || 18.5} م³.`,
-      data: {
-        item: itemName,
-        wood_m3: woodM3,
-        waste_margin_pct: 12,
-        foam_sheets: foamSheets,
-        fabric_meters: fabricMeters,
-        labor_hours: laborHours,
-        estimated_material_cost: matCost,
-        estimated_labor_cost: laborCost,
-        total_estimated_cost: totalEst,
-        available_wood_stock: woodItem?.current_quantity || 18.5,
-        stock_status: (woodItem?.current_quantity || 18.5) >= woodM3 ? "sufficient" : "deficit",
-      },
-    };
+  if (toolName === "mfg_inventory_list") {
+    return listManufacturingInventory(companyId, params.lowStockOnly === true);
   }
 
   if (toolName === "security_audit_keys") {
@@ -120,23 +95,10 @@ export async function runUltimateTool(
   }
 
   if (toolName === "mfg_job_create") {
-    const payload: Record<string, any> = {
-      status: "pending",
-      created_at: new Date().toISOString(),
-    };
-    if (companyId) payload.company_id = companyId;
-
-    const { data: job, error } = await supabaseServer
-      .from("production_jobs")
-      .insert(payload)
-      .select()
-      .single();
-
-    return {
-      success: !error,
-      message: error ? `فشل إنشاء أمر التشغيل: ${error.message}` : `تم إنشاء أمر تشغيل صناعي رقم (${job?.id?.slice(0, 8)}) في جدول production_jobs بنجاح.`,
-      data: job || {},
-    };
+    return createProductionJob(
+      String(params.description || params.item || "أمر تشغيل جديد"),
+      companyId
+    );
   }
 
   return executeTool(toolName, params, {
@@ -336,7 +298,7 @@ export function inferUltimateTool(
     }
     return { toolName: "inventory_check_low", params: {} };
   }
-  if (/مخزون.*تصنيع|مصنع.*مخزون|mfg.*inventory/i.test(lower)) {
+  if (/مخزون.*تصنيع|مصنع.*مخزون|فحص.*مخزون|خامات.*التصنيع|mfg.*inventory/i.test(lower)) {
     return { toolName: "mfg_inventory_list", params: {} };
   }
   if (/أوامر.*(تصنيع|بيع)|manufacturing\s*orders|production\s*orders/i.test(lower)) {
@@ -370,7 +332,7 @@ export function inferUltimateTool(
   if (/هوامش.*الربح|تحليل.*الأرباح|تحليل.*مالي|profit.*margin|تقرير.*الأرباح/i.test(lower)) {
     return { toolName: "financial_margins_analyze", params: {} };
   }
-  if (/إنشاء.*أمر.*(تشغيل|تصنيع|إنتاج)|انشئ.*أمر.*(تشغيل|تصنيع|إنتاج)|create.*job/i.test(lower)) {
+  if (/إنشاء.*أمر.*(تشغيل|تصنيع|إنتاج)|انشئ.*أمر.*(تشغيل|تصنيع|إنتاج)|أمر تشغيل|create.*job/i.test(lower)) {
     return { toolName: "mfg_job_create", params: { description: message.slice(0, 100) } };
   }
 
