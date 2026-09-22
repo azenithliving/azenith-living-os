@@ -125,14 +125,7 @@ async function deleteOldestImages(): Promise<number> {
     
     const { error: updateError } = await supabase
       .from("curated_images")
-      .update({ 
-        is_active: false,
-        metadata: {
-          ...oldImages[0]?.metadata,
-          deleted_at: new Date().toISOString(),
-          delete_reason: "monthly_refresh"
-        }
-      })
+      .update({ is_active: false })
       .in("id", ids);
     
     if (updateError) {

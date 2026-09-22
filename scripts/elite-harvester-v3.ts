@@ -27,7 +27,7 @@ dotenv.config({ path: ".env.local" });
 const CONFIG = {
   // API Keys (Round-robin rotation)
   PEXELS_KEYS: (process.env.PEXELS_KEYS || "").split(",").filter(Boolean),
-  GEMINI_KEYS: (process.env.GOOGLE_AI_KEYS || "").split(",").filter(Boolean),
+  GEMINI_KEYS: (process.env.GOOGLE_AI_KEYS || "").split(",").map(k => k.trim()).filter(k => k.startsWith("AIzaSy")),
   GROQ_KEYS: (process.env.GROQ_KEYS || "").split(",").filter(Boolean),
   
   // === MEGA SCALE TARGETS ===
@@ -330,7 +330,7 @@ async function filterWithGemini(photos: any[], category: string, style: string):
     let attempts = 0;
     let success = false;
 
-    while (attempts < 2 && !success) {
+    while (attempts < 3 && !success) {
       try {
         const prompt = `
           Analyze this interior design for a ${category} in ${style} style.
@@ -347,10 +347,10 @@ async function filterWithGemini(photos: any[], category: string, style: string):
         );
         
         if (error) {
-          console.warn(`[Gemini] Attempt ${attempts+1} failed, rotating: ${error.substring(0, 50)}...`);
+          console.warn(`[Gemini] Attempt ${attempts+1} failed (${error}), rotating key and cooling 1s...`);
           geminiKeyIndex++; // Rotate key immediately on error
           attempts++;
-          await sleep(500);
+          await sleep(1000);
           continue;
         }
         
@@ -368,7 +368,7 @@ async function filterWithGemini(photos: any[], category: string, style: string):
         success = true;
         usageTracker.incrementGemini();
         // Dynamic delay based on proxy health
-        await sleep(proxyHealth.ok ? 400 : 1000);
+        await sleep(proxyHealth.ok ? 300 : 800);
         
       } catch (error) {
         geminiKeyIndex++;
@@ -587,8 +587,8 @@ async function runEliteHarvesterV3() {
   console.log("║  CDN-Optimized for Millions of Visitors                ║");
   console.log("╚════════════════════════════════════════════════════════╝\n");
   
-  // Ensure keys are loaded from database if not present in environment
-  if (CONFIG.PEXELS_KEYS.length === 0 || CONFIG.GEMINI_KEYS.length === 0) {
+  // Ensure keys are loaded from database if not present or limited in environment
+  if (CONFIG.PEXELS_KEYS.length === 0 || CONFIG.GEMINI_KEYS.length < 10) {
     try {
       const { data: dbKeys } = await supabase
         .from("api_keys")
@@ -602,11 +602,12 @@ async function runEliteHarvesterV3() {
             .map((k) => k.key.trim())
             .filter(Boolean);
         }
-        if (CONFIG.GEMINI_KEYS.length === 0) {
-          CONFIG.GEMINI_KEYS = dbKeys
-            .filter((k) => k.provider === "gemini" || k.provider === "google")
-            .map((k) => k.key.trim())
-            .filter(Boolean);
+        const dbGemini = dbKeys
+          .filter((k) => k.provider === "gemini" || k.provider === "google")
+          .map((k) => k.key.trim())
+          .filter((k) => k.startsWith("AIzaSy"));
+        if (dbGemini.length > 0) {
+          CONFIG.GEMINI_KEYS = Array.from(new Set([...CONFIG.GEMINI_KEYS, ...dbGemini]));
         }
       }
     } catch (e) {

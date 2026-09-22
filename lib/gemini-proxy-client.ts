@@ -21,6 +21,7 @@ function getEnvKeys(name: string): string[] {
 let cachedGeminiKeys: string[] = [];
 let cachedOpenRouterKeys: string[] = [];
 let lastKeyFetchTime = 0;
+const keyCooldowns = new Map<string, number>();
 
 async function loadActiveKeys(): Promise<{ gemini: string[]; openrouter: string[] }> {
   const now = Date.now();
@@ -32,49 +33,50 @@ async function loadActiveKeys(): Promise<{ gemini: string[]; openrouter: string[
   let gemini = getEnvKeys("GOOGLE_AI_KEYS").filter((k) => k.startsWith("AIzaSy"));
   let openrouter = getEnvKeys("OPENROUTER_KEYS");
 
-  // 2. If env keys are limited, pull from Supabase database
-  if (gemini.length < 5 || openrouter.length < 5) {
-    try {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      if (url && serviceRoleKey && serviceRoleKey !== "placeholder-service-key") {
-        const supabase = createClient(url, serviceRoleKey, {
-          auth: { autoRefreshToken: false, persistSession: false },
-        });
+  // 2. Load from Supabase database to ensure maximum key arsenal
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (url && serviceRoleKey && serviceRoleKey !== "placeholder-service-key") {
+      const supabase = createClient(url, serviceRoleKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
 
-        const { data: dbKeys } = await supabase
-          .from("api_keys")
-          .select("provider, key")
-          .eq("is_active", true);
+      const { data: dbKeys, error } = await supabase
+        .from("api_keys")
+        .select("provider, key")
+        .eq("is_active", true);
 
-        if (dbKeys && dbKeys.length > 0) {
-          const dbGemini = dbKeys
-            .filter((r) => r.provider === "gemini" || r.provider === "google")
-            .map((r) => r.key.trim())
-            .filter((k) => k.startsWith("AIzaSy"));
+      if (dbKeys && dbKeys.length > 0) {
+        const dbGemini = dbKeys
+          .filter((r) => r.provider === "gemini" || r.provider === "google")
+          .map((r) => r.key.trim())
+          .filter((k) => k.startsWith("AIzaSy"));
 
-          const dbOR = dbKeys
-            .filter((r) => r.provider === "openrouter")
-            .map((r) => r.key.trim())
-            .filter(Boolean);
+        const dbOR = dbKeys
+          .filter((r) => r.provider === "openrouter")
+          .map((r) => r.key.trim())
+          .filter(Boolean);
 
-          if (dbGemini.length > 0) {
-            gemini = Array.from(new Set([...gemini, ...dbGemini]));
-          }
-          if (dbOR.length > 0) {
-            openrouter = Array.from(new Set([...openrouter, ...dbOR]));
-          }
+        if (dbGemini.length > 0) {
+          gemini = Array.from(new Set([...gemini, ...dbGemini]));
         }
+        if (dbOR.length > 0) {
+          openrouter = Array.from(new Set([...openrouter, ...dbOR]));
+        }
+      } else if (error) {
+        console.warn("[Arsenal] Supabase key fetch warning:", error.message);
       }
-    } catch (_) {
-      // Ignore db fetch error and use env
     }
+  } catch (err: any) {
+    console.warn("[Arsenal] DB key load exception:", err.message);
   }
 
   cachedGeminiKeys = gemini;
   cachedOpenRouterKeys = openrouter;
   lastKeyFetchTime = now;
 
+  console.log(`[Arsenal Loaded] Active AIzaSy Gemini: ${gemini.length} | OpenRouter: ${openrouter.length}`);
   return { gemini, openrouter };
 }
 
@@ -118,68 +120,102 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
   const base64Data = await getBase64(imageUrl);
   if (!base64Data) {
     console.warn(`[Image Analyzer] Could not fetch image data for ${imageUrl.slice(0, 50)}...`);
-    return { score: 0 };
+    return { score: 0, error: "FETCH_IMAGE_FAILED" };
   }
 
-  // Try up to 6 key attempts across active keys
-  for (let attempt = 0; attempt < 6; attempt++) {
-    // --- 1. GEMINI DIRECT ---
-    if (gemini.length > 0) {
-      const key = gemini[geminiIdx++ % gemini.length];
-      const models = ["gemini-3.6-flash", "gemini-3.5-flash-lite"];
-      for (const model of models) {
-        try {
-          const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              signal: AbortSignal.timeout(8000),
-              body: JSON.stringify({
-                contents: [
-                  {
-                    parts: [
-                      { text: strictPrompt },
-                      { inline_data: { mime_type: "image/jpeg", data: base64Data } },
-                    ],
-                  },
-                ],
-                generationConfig: {
-                  temperature: 0.1,
-                  maxOutputTokens: 250,
-                  thinkingConfig: {
-                    thinkingBudget: 0,
-                  },
-                },
-              }),
-            }
-          );
+  // Gemini model cascade (fastest & most stable first)
+  const geminiModels = [
+    "gemini-3.1-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-3-flash-preview",
+  ];
 
-          if (!response.ok) continue;
+  // Try up to 15 key attempts across active Gemini keys
+  const maxGeminiAttempts = Math.min(20, gemini.length);
+  for (let attempt = 0; attempt < maxGeminiAttempts; attempt++) {
+    if (gemini.length === 0) break;
 
-          const data = await response.json();
-          if (data.error) continue;
+    const now = Date.now();
+    const key = gemini[geminiIdx++ % gemini.length];
 
-          // Extract candidate text across all parts
-          const parts = data.candidates?.[0]?.content?.parts ?? [];
-          const text = parts.map((p: { text?: string }) => p.text).filter(Boolean).join(" ");
-          const match = text.match(/\d+/);
-          if (match) {
-            const score = parseInt(match[0], 10);
-            if (score >= 85) console.log(`[Gemini (${model})] Strict Approved | Score: ${score}`);
-            else if (score === 50) console.log(`[Gemini (${model})] Redirected to Comprehensive | Score: 50`);
-            else console.log(`[Gemini (${model})] REJECTED | Score: ${score}`);
-            return { score: Math.min(100, Math.max(0, score)) };
-          }
-        } catch (_) {
-          // Try next model or key
-        }
-      }
+    // Skip key if cooling down from recent 429
+    if ((keyCooldowns.get(key) || 0) > now) {
+      continue;
     }
 
-    // --- 2. OPENROUTER VISION FALLBACK ---
-    if (openrouter.length > 0) {
-      const key = openrouter[orIdx++ % openrouter.length];
+    for (const model of geminiModels) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            signal: AbortSignal.timeout(10000),
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    { text: strictPrompt },
+                    { inline_data: { mime_type: "image/jpeg", data: base64Data } },
+                  ],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.1,
+                maxOutputTokens: 150,
+              },
+            }),
+          }
+        );
+
+        if (response.status === 429) {
+          // Rate limit: cool down key for 45 seconds
+          keyCooldowns.set(key, Date.now() + 45000);
+          break; // Stop trying other models on this rate-limited key
+        }
+
+        if (response.status === 503) {
+          // Model high demand spike: cool key slightly and try next model
+          keyCooldowns.set(key, Date.now() + 15000);
+          continue;
+        }
+
+        if (!response.ok) continue;
+
+        const data = await response.json();
+        if (data.error) continue;
+
+        const parts = data.candidates?.[0]?.content?.parts ?? [];
+        const text = parts.map((p: { text?: string }) => p.text).filter(Boolean).join(" ");
+        const match = text.match(/\d+/);
+        if (match) {
+          const score = parseInt(match[0], 10);
+          if (score >= 85) console.log(`[Gemini (${model})] Strict Approved | Score: ${score}`);
+          else if (score === 50) console.log(`[Gemini (${model})] Redirected to Comprehensive | Score: 50`);
+          else console.log(`[Gemini (${model})] REJECTED | Score: ${score}`);
+          return { score: Math.min(100, Math.max(0, score)) };
+        }
+      } catch (_) {
+        // Timeout or network error, try next
+      }
+    }
+  }
+
+  // --- 2. OPENROUTER VISION FALLBACK ---
+  const orModels = [
+    "google/gemma-4-31b-it:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "nex-agi/nex-n2.5-pro:free",
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+  ];
+
+  const maxOrAttempts = Math.min(10, openrouter.length);
+  for (let attempt = 0; attempt < maxOrAttempts; attempt++) {
+    if (openrouter.length === 0) break;
+
+    const key = openrouter[orIdx++ % openrouter.length];
+    for (const model of orModels) {
       try {
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
@@ -189,9 +225,9 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
             "HTTP-Referer": "https://azenith-living.vercel.app",
             "X-Title": "Azenith Living Harvester",
           },
-          signal: AbortSignal.timeout(15000),
+          signal: AbortSignal.timeout(12000),
           body: JSON.stringify({
-            model: "google/gemma-4-26b-a4b-it:free",
+            model,
             max_tokens: 20,
             messages: [
               {
@@ -211,9 +247,9 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
           const match = text.match(/\d+/);
           if (match) {
             const score = parseInt(match[0], 10);
-            if (score >= 85) console.log(`[OpenRouter] Strict Approved | Score: ${score}`);
-            else if (score === 50) console.log(`[OpenRouter] Redirected to Comprehensive | Score: 50`);
-            else console.log(`[OpenRouter] REJECTED | Score: ${score}`);
+            if (score >= 85) console.log(`[OpenRouter (${model})] Strict Approved | Score: ${score}`);
+            else if (score === 50) console.log(`[OpenRouter (${model})] Redirected to Comprehensive | Score: 50`);
+            else console.log(`[OpenRouter (${model})] REJECTED | Score: ${score}`);
             return { score: Math.min(100, Math.max(0, score)) };
           }
         }
@@ -224,7 +260,7 @@ Return ONLY the integer number. No words, no symbols, nothing else.`;
   }
 
   console.log(`🚫 API FAILED: All providers exhausted without valid response.`);
-  return { score: 0 };
+  return { score: 0, error: "ALL_PROVIDERS_EXHAUSTED" };
 }
 
 export async function analyzeImageWithProxy(
