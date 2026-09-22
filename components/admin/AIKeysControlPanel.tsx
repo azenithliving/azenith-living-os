@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2, Power, PowerOff, RefreshCw, Check, AlertCircle, Info, Key, Shield, Activity, Clock, Menu } from "lucide-react";
+import { X, Plus, Trash2, Power, PowerOff, RefreshCw, Check, AlertCircle, Info, Key, Shield, Activity, Clock, Menu, Skull } from "lucide-react";
 
 interface ApiKey {
   id: number;
@@ -79,7 +79,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
     testKey: true,
   });
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error" | "warning"; text: string } | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "backup" | "cooldown" | "dead" | "inactive">("all");
   const [selectCount, setSelectCount] = useState<string>("");
@@ -137,7 +137,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
     }
   };
 
-  const showMessage = (type: "success" | "error", text: string) => {
+  const showMessage = (type: "success" | "error" | "warning", text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 5000);
   };
@@ -296,6 +296,29 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
     }
   };
 
+  const toggleDead = async (id: number, isDead: boolean) => {
+    try {
+      setActionLoading(`dead-${id}`);
+      const res = await fetch(`/api/admin/keys/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(isDead ? { clearDead: true, isActive: true } : { markDead: true }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMessage("success", isDead ? "تمت استعادة المفتاح وتفعيله بنجاح" : "تم نقل المفتاح إلى حالة ميت بنجاح");
+        await reloadKeys();
+        await loadKeys();
+      } else {
+        showMessage("error", data.error || "فشلت العملية");
+      }
+    } catch (error) {
+      showMessage("error", "خطأ في الشبكة");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const reloadKeys = async () => {
     try {
       setActionLoading("reload");
@@ -377,6 +400,7 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
         updates.isActive = true;
         updates.isBackup = false;
         updates.clearCooldown = true;
+        updates.clearDead = true;
       } else if (target === "inactive") {
         updates.isActive = false;
         updates.isBackup = false;
@@ -385,17 +409,28 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
         updates.isActive = false;
       } else if (target === "cooldown") {
         updates.cooldownUntil = new Date(Date.now() + 3600000).toISOString(); // 1 hour
+      } else if (target === "dead") {
+        updates.markDead = true;
       }
 
-      await Promise.all(
-        Array.from(selectedKeys).map((id) =>
-          fetch(`/api/admin/keys/${id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updates),
-          })
-        )
+      const results = await Promise.all(
+        Array.from(selectedKeys).map(async (id) => {
+          try {
+            const res = await fetch(`/api/admin/keys/${id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(updates),
+            });
+            const d = await res.json();
+            return { ok: res.ok && d.success };
+          } catch {
+            return { ok: false };
+          }
+        })
       );
+
+      const passed = results.filter((r) => r.ok).length;
+      const failed = results.length - passed;
 
       const targetNames: Record<string, string> = {
         active: "نشط",
@@ -405,7 +440,14 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
         dead: "ميت"
       };
 
-      showMessage("success", `تم نقل ${selectedKeys.size} مفتاح إلى "${targetNames[target]}"`);
+      if (failed > 0 && passed === 0) {
+        showMessage("error", `فشل نقل المفاتيح المحددة بالكامل (${failed})`);
+      } else if (failed > 0) {
+        showMessage("warning", `تم نقل ${passed} مفتاح إلى "${targetNames[target]}"، وفشل ${failed} مفتاح`);
+      } else {
+        showMessage("success", `تم نقل ${passed} مفتاح إلى "${targetNames[target]}" بنجاح`);
+      }
+
       setSelectedKeys(new Set());
       await reloadKeys();
       await loadKeys();
@@ -552,10 +594,18 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
         {message && (
           <div
             className={`px-4 md:px-6 py-3 ${
-              message.type === "success" ? "bg-green-500/20 text-green-300" : "bg-red-500/20 text-red-300"
+              message.type === "success"
+                ? "bg-green-500/20 text-green-300"
+                : message.type === "warning"
+                ? "bg-amber-500/20 text-amber-300"
+                : "bg-red-500/20 text-red-300"
             } flex items-center gap-2 text-sm flex-shrink-0`}
           >
-            {message.type === "success" ? <Check className="w-4 h-4 md:w-5 md:h-5" /> : <AlertCircle className="w-4 h-4 md:w-5 md:h-5" />}
+            {message.type === "success" ? (
+              <Check className="w-4 h-4 md:w-5 md:h-5" />
+            ) : (
+              <AlertCircle className="w-4 h-4 md:w-5 md:h-5" />
+            )}
             {message.text}
           </div>
         )}
@@ -1129,15 +1179,26 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                             </div>
                             <div className="flex items-center gap-2">
                               {isDead ? (
-                                <button
-                                  onClick={() => deleteKey(key.id)}
-                                  disabled={actionLoading === `delete-${key.id}`}
-                                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded transition flex items-center gap-1"
-                                  title="احذف نهائياً"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  احذف
-                                </button>
+                                <>
+                                  <button
+                                    onClick={() => toggleDead(key.id, true)}
+                                    disabled={actionLoading === `dead-${key.id}`}
+                                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded text-xs transition flex items-center gap-1"
+                                    title="استعادة وتفعيل المفتاح"
+                                  >
+                                    <RefreshCw className="w-3.5 h-3.5" />
+                                    استعادة
+                                  </button>
+                                  <button
+                                    onClick={() => deleteKey(key.id)}
+                                    disabled={actionLoading === `delete-${key.id}`}
+                                    className="bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white px-2.5 py-1.5 rounded text-xs transition flex items-center gap-1"
+                                    title="احذف نهائياً"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    حذف
+                                  </button>
+                                </>
                               ) : (
                                 <>
                                   {inCooldown && (
@@ -1150,6 +1211,14 @@ export default function AIKeysControlPanel({ isOpen, onClose }: AIKeysControlPan
                                       <RefreshCw className="w-4 h-4" />
                                     </button>
                                   )}
+                                  <button
+                                    onClick={() => toggleDead(key.id, false)}
+                                    disabled={actionLoading === `dead-${key.id}`}
+                                    className="text-red-400/60 hover:text-red-400 p-2 transition"
+                                    title="تعليم كميت / محظور"
+                                  >
+                                    <Skull className="w-4 h-4" />
+                                  </button>
                                   <button
                                     onClick={() => toggleKeyActive(key.id, key.isActive)}
                                     disabled={actionLoading === `toggle-${key.id}`}

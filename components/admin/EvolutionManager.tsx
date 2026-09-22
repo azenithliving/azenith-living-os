@@ -81,7 +81,7 @@ export function EvolutionManager() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success(status === 'approved' ? 'تم اعتماد التحسين وحقنه في نواة النظام بنجاح ✅' : 'تم تجاهل المقترح');
+        toast.success(status === 'approved' ? 'تم اعتماد التحسين وتحديث الإعدادات بنجاح ✅' : 'تم تجاهل المقترح');
         // Real-time subscription will handle the UI update
         // But we also do it locally for instant feedback
         if (status === 'approved') {
@@ -107,9 +107,9 @@ export function EvolutionManager() {
         <div>
           <h3 className="flex items-center gap-2 text-lg font-bold text-white">
             <GitBranch className="h-5 w-5 text-blue-400" />
-            قرارات التطور السيادي
+            قرارات التطور والتحسينات
           </h3>
-          <p className="text-xs text-white/50">اعتماد ومراقبة تحسينات الذكاء الاصطناعي</p>
+          <p className="text-xs text-white/50">اعتماد ومراقبة تحسينات الإعدادات في قاعدة البيانات</p>
         </div>
         <div className="flex gap-2 bg-black/50 p-1 rounded-lg border border-white/5">
           <button 
@@ -122,7 +122,7 @@ export function EvolutionManager() {
             onClick={() => setActiveTab('approved')}
             className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'approved' ? 'bg-emerald-500/20 text-emerald-400' : 'text-white/40 hover:text-white/80'}`}
           >
-            المنفذة ({approvedLogs.length})
+            المعتمدة ({approvedLogs.length})
           </button>
         </div>
       </div>

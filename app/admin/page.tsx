@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image, MessageSquare, Activity, Cpu, Bell } from "lucide-react";
+import { Crown, Zap, Shield, Brain, Bot, TrendingUp, Users, Clock, AlertTriangle, CheckCircle, Loader2, Image, MessageSquare, Activity, Cpu, Bell, RefreshCw } from "lucide-react";
 import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-components";
 import { ImageHarvestDashboard } from "./intel/components/ImageHarvestDashboard";
 import { AdminProactiveStrip } from "@/components/admin/AdminProactiveStrip";
@@ -70,7 +70,7 @@ export default function AdminPage() {
 
   const [activities, setActivities] = useState<Array<{
     id: string;
-    type: "lead" | "booking" | "request" | "subscriber";
+    type: "lead" | "booking" | "request" | "subscriber" | "command" | "system";
     tenantName: string;
     description: string;
     timestamp: string;
@@ -177,12 +177,12 @@ export default function AdminPage() {
 
         setMetrics(realMetrics);
 
-        // Generate activities from recent commands or fallback to empty
+        // Generate real activities: display genuine commands as "command" type with accurate status
         const realActivities = mastermind.recentCommands?.slice(0, 5).map((cmd, index) => ({
           id: cmd.id || `cmd-${index}`,
-          type: (cmd.status === "executed" ? "booking" : cmd.status === "failed" ? "request" : "lead") as "lead" | "booking" | "request" | "subscriber",
-          tenantName: cmd.command?.split(" ")[0] || "نظام",
-          description: cmd.command?.slice(0, 50) + (cmd.command?.length > 50 ? "..." : "") || "أمر تم تنفيذه",
+          type: "command" as const,
+          tenantName: cmd.status === "executed" ? "أمر تنفيذي (نجح)" : cmd.status === "failed" ? "أمر تنفيذي (فشل)" : "أمر وحدة تحكم",
+          description: cmd.command?.slice(0, 60) + (cmd.command?.length > 60 ? "..." : "") || "أمر طرفية النظام",
           timestamp: cmd.executedAt || new Date().toISOString(),
         })) || [];
 
@@ -301,8 +301,8 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 bg-white/[0.03]">
-            <Zap className="w-4 h-4 text-[#C5A059]" />
-            <span className="text-sm text-white/70">بيانات تشغيل مباشرة</span>
+            <RefreshCw className="w-3.5 h-3.5 text-[#C5A059]" />
+            <span className="text-xs text-white/70">تحديث دوري (كل 60 ثانية)</span>
           </div>
         </div>
 

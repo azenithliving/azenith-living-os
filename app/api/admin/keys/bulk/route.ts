@@ -20,13 +20,29 @@ export async function POST(request: NextRequest) {
     await requireAdminApiAccess(request);
     const body = await request.json();
     const provider = String(body.provider || "").trim().toLowerCase();
-    const keys = [...new Set((Array.isArray(body.keys) ? body.keys : []).map((value: unknown) => String(value).trim()).filter(Boolean))];
+    const rawKeys: string[] = Array.isArray(body.keys)
+      ? body.keys.map((value: unknown) => String(value).trim()).filter(Boolean)
+      : [];
+    const keys: string[] = Array.from(new Set(rawKeys));
     const notes = String(body.notes || "").trim() || null;
     if (!provider || !keys.length) return NextResponse.json({ success: false, error: "provider و keys[] مطلوبان" }, { status: 400 });
     const supabase = getSupabaseAdminClient();
     if (!supabase) return NextResponse.json({ success: false, error: "Database not available" }, { status: 503 });
 
-    const results = body.testKeys === false ? keys.map((key) => ({ key, valid: true })) : await Promise.all(keys.map(async (key) => ({ key, ...(await smartTestKey(provider, key)) })));
+    interface TestedKeyResult {
+      key: string;
+      valid: boolean;
+      error?: string;
+    }
+
+    const results: TestedKeyResult[] = body.testKeys === false
+      ? keys.map((key) => ({ key, valid: true }))
+      : await Promise.all(
+          keys.map(async (key) => {
+            const test = await smartTestKey(provider, key);
+            return { key, valid: test.valid, error: test.error };
+          })
+        );
     const passed = results.filter((result) => result.valid);
     const failed = results.filter((result) => !result.valid);
     const [passResult, failResult] = await Promise.all([

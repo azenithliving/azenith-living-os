@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, TrendingUp, Users, Mail, Phone, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Building2, TrendingUp, Users, Mail, Phone, Clock, ArrowUpRight, ArrowDownRight, Terminal, Shield } from "lucide-react";
 
 interface MetricCardProps {
   title: string;
@@ -150,7 +150,7 @@ export function TenantTable({ tenants, onSelectTenant, selectedTenantId }: Tenan
 interface ActivityFeedProps {
   activities: Array<{
     id: string;
-    type: "lead" | "request" | "booking" | "subscriber";
+    type: "lead" | "request" | "booking" | "subscriber" | "command" | "system";
     tenantName: string;
     description: string;
     timestamp: string;
@@ -163,6 +163,8 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
     request: { icon: TrendingUp, color: "text-purple-400", bg: "bg-purple-500/10" },
     booking: { icon: Clock, color: "text-emerald-400", bg: "bg-emerald-500/10" },
     subscriber: { icon: Mail, color: "text-amber-400", bg: "bg-amber-500/10" },
+    command: { icon: Terminal, color: "text-indigo-400", bg: "bg-indigo-500/10" },
+    system: { icon: Shield, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   };
 
   return (

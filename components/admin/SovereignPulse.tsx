@@ -44,12 +44,16 @@ export function SovereignPulse() {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      const { data } = await supabase
-        .from('sovereign_event_horizon')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-      if (data) setEvents(data);
+      try {
+        const { data, error } = await supabase
+          .from('sovereign_event_horizon')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20);
+        if (data && !error) setEvents(data);
+      } catch (err) {
+        console.error('Failed to fetch sovereign events:', err);
+      }
     };
 
     fetchEvents();
@@ -83,13 +87,13 @@ export function SovereignPulse() {
             )}
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white tracking-tight">نبض الإمبراطورية (Sovereign Pulse)</h3>
-            <p className="text-[10px] text-white/40 uppercase tracking-widest">Unified Event Horizon • Real-time</p>
+            <h3 className="text-sm font-bold text-white tracking-tight">سجل أحداث النظام اللحظي (Event Stream)</h3>
+            <p className="text-[10px] text-white/40 uppercase tracking-widest">PostgreSQL Event Horizon • Real-time</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
            <span className="text-[10px] text-white/30 px-2 py-1 rounded-full border border-white/10">
-             {events.length} نشاط مؤخراً
+             {events.length} نشاط مسجل
            </span>
         </div>
       </div>
@@ -98,6 +102,9 @@ export function SovereignPulse() {
         {events.map((event, idx) => {
           const style = CATEGORY_STYLES[event.event_category] || DEFAULT_STYLE;
           const Icon = style.icon;
+          const rawScore = typeof event.impact_score === 'number' ? event.impact_score : 0;
+          const normalizedScore = Math.min(Math.max(rawScore > 1 ? rawScore / 100 : rawScore, -1), 1);
+          const displayPercentage = Math.round(normalizedScore * 100);
           
           return (
             <div 
@@ -129,16 +136,16 @@ export function SovereignPulse() {
                   {event.description}
                 </p>
 
-                {event.impact_score !== 0 && (
+                {displayPercentage !== 0 && (
                   <div className="mt-2 flex items-center gap-2">
                     <div className="h-1 flex-1 bg-white/5 rounded-full overflow-hidden">
                       <div 
-                        className={`h-full ${event.impact_score > 0 ? 'bg-emerald-500' : 'bg-rose-500'}`} 
-                        style={{ width: `${Math.abs(event.impact_score) * 100}%` }}
+                        className={`h-full ${displayPercentage > 0 ? 'bg-emerald-500' : 'bg-rose-500'}`} 
+                        style={{ width: `${Math.min(Math.abs(displayPercentage), 100)}%` }}
                       />
                     </div>
-                    <span className={`text-[9px] font-bold ${event.impact_score > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                      {event.impact_score > 0 ? '+' : ''}{Math.round(event.impact_score * 100)}%
+                    <span className={`text-[9px] font-bold ${displayPercentage > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {displayPercentage > 0 ? '+' : ''}{displayPercentage}%
                     </span>
                   </div>
                 )}
@@ -148,9 +155,9 @@ export function SovereignPulse() {
         })}
 
         {events.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full py-20 opacity-20">
-            <Brain className="h-12 w-12 mb-4 animate-pulse" />
-            <p className="text-sm">في انتظار أول نبضة من النواة...</p>
+          <div className="flex flex-col items-center justify-center h-full py-20 opacity-30">
+            <Activity className="h-12 w-12 mb-4 animate-pulse text-white/30" />
+            <p className="text-sm text-white/50">لا توجد أحداث مسجلة في جدول الأحداث حالياً</p>
           </div>
         )}
       </div>

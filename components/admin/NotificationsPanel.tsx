@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   Bell,
   CheckCircle,
@@ -10,6 +11,7 @@ import {
   Bot,
   Check,
   Loader2,
+  ExternalLink,
 } from 'lucide-react';
 
 interface Notification {
@@ -73,20 +75,27 @@ export function NotificationsPanel() {
   }, [fetchNotifications]);
 
   async function markAsRead(ids: string[]) {
+    if (!ids.length) return;
     setMarking(true);
     try {
-      await fetch('/api/admin/notifications', {
+      const res = await fetch('/api/admin/notifications', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notification_ids: ids, action: 'mark_read' }),
       });
-      setNotifications((prev) =>
-        prev.map((n) => (ids.includes(n.id) ? { ...n, read: true } : n))
-      );
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setNotifications((prev) =>
+          prev.map((n) => (ids.includes(n.id) ? { ...n, read: true } : n))
+        );
+      } else {
+        console.error('Error marking notifications on server:', data.error);
+      }
     } catch (err) {
       console.error('Error marking notifications:', err);
+    } finally {
+      setMarking(false);
     }
-    setMarking(false);
   }
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -158,6 +167,15 @@ export function NotificationsPanel() {
                       <div className={`w-1.5 h-1.5 rounded-full ${severityDots[notification.severity]}`} />
                     </div>
                     <p className="text-[11px] text-white/40 mt-0.5 line-clamp-2">{notification.message}</p>
+                    {notification.link && (
+                      <Link
+                        href={notification.link}
+                        className="inline-flex items-center gap-1 text-[10px] text-blue-400 hover:text-blue-300 mt-1.5 font-medium transition-colors"
+                      >
+                        الانتقال إلى الحدث
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </Link>
+                    )}
                     <p className="text-[9px] text-white/20 mt-1">
                       {new Date(notification.timestamp).toLocaleTimeString('ar-EG', {
                         hour: '2-digit',

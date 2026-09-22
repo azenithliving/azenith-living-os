@@ -168,12 +168,13 @@ async function getAutomationRules(
         }));
     }
 
+    console.warn("[Automation] No active custom rules in 'automation_rules' table. Using built-in default rules.");
     const defaults = await getDefaultAutomationRules();
     return defaults.filter(
       (rule) => rule.trigger === triggerType && rule.enabled
     );
   } catch (err) {
-    console.error("Unexpected error loading automation rules:", err);
+    console.error("[Automation] Database error loading automation rules. Using safety defaults:", err);
     const defaults = await getDefaultAutomationRules();
     return defaults.filter(
       (rule) => rule.trigger === triggerType && rule.enabled

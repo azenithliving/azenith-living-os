@@ -1,8 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
+import { AdminApiAuthError, requireAdminApiAccess } from '@/lib/admin-api-auth';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    await requireAdminApiAccess(req);
     const body = await req.json();
     const { id, status } = body;
 
@@ -11,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     if (!supabaseServer) {
-      return NextResponse.json({ success: false, error: "Database client not initialized" }, { status: 500 });
+      return NextResponse.json({ success: false, error: "Database client not initialized" }, { status: 503 });
     }
 
     const { data, error } = await supabaseServer
@@ -70,6 +72,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
+    if (error instanceof AdminApiAuthError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status });
+    }
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

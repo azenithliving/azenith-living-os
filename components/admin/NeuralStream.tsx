@@ -19,15 +19,24 @@ const defaultStyle = { icon: Activity, color: "text-white/60", bg: "border-white
 
 export function NeuralStream() {
   const [thoughts, setThoughts] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchThoughts = async () => {
-      const { data } = await supabase
-        .from('neural_stream')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(15);
-      if (data) setThoughts(data);
+      try {
+        const { data, error: err } = await supabase
+          .from('neural_stream')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(15);
+        if (err) {
+          setError(err.message);
+        } else if (data) {
+          setThoughts(data);
+        }
+      } catch (e: any) {
+        setError(e.message || 'خطأ في الاتصال');
+      }
     };
 
     fetchThoughts();
@@ -51,9 +60,9 @@ export function NeuralStream() {
         <div>
           <h3 className="flex items-center gap-2 text-lg font-bold text-white">
             <Activity className="h-5 w-5 text-[#C5A059] animate-pulse" />
-            تيار الوعي الرقمي
+            سجل استدلال وعمليات الوكلاء (Agent Reasoning Stream)
           </h3>
-          <p className="text-xs text-white/50">ما يدور في عقل النظام الآن — كل وكيل يظهر بلونه الخاص</p>
+          <p className="text-xs text-white/50">تدفق عمليات التفكير والأوامر الميدانية المسجلة في جدول neural_stream</p>
         </div>
       </div>
 

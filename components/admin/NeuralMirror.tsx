@@ -108,7 +108,7 @@ export function NeuralMirror({ activeProposal }: { activeProposal: any }) {
       
       <div className="absolute bottom-4 left-6 right-6">
         <p className="text-[10px] text-center text-white/20 font-mono">
-          NEURAL_CONSCIOUSNESS_MAPPING_v1.0.4 // REALTIME_REASONING_CHAIN
+          PROPOSAL_ARCHITECTURE_DIAGRAM // SYSTEM_RELATIONSHIP_MAPPING
         </p>
       </div>
     </div>

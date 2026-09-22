@@ -142,6 +142,7 @@ export async function generateSEOContent(roomType: string, style: string, locati
   title: string;
   description: string;
   keywords: string[];
+  source: "ai" | "template";
 }> {
   const prompt = `Generate SEO metadata in Arabic for luxury interior design.
 Room: ${roomType}. Style: ${style}. Location: ${location || "Egypt"}.
@@ -156,6 +157,7 @@ Return JSON only: {"title":"","description":"","keywords":[]}`;
           title: parsed.title,
           description: parsed.description,
           keywords: parsed.keywords,
+          source: "ai",
         };
       }
     }
@@ -175,5 +177,6 @@ Return JSON only: {"title":"","description":"","keywords":[]}`;
     title: `تصميم ${roomType} ${style} - حلول تصميم احترافية`,
     description: `احصل على تصميم ${roomType} متقن بأسلوب ${style}. فريقنا المتخصص يقدم حلولاً مبتكرة وبجودة عالية.`,
     keywords,
+    source: "template",
   };
 }
