@@ -7,7 +7,7 @@ import { GroupChatView } from './GroupChatView';
 
 export function FloatingAgentButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'prime' | 'vanguard' | 'group'>('prime');
+  const [activeTab, setActiveTab] = useState<'qayyim-core' | 'vanguard' | 'group'>('qayyim-core');
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
@@ -65,15 +65,15 @@ export function FloatingAgentButton() {
           {/* Panel Header */}
           <div className="flex items-center border-b border-gray-200">
             <button
-              onClick={() => setActiveTab('prime')}
+              onClick={() => setActiveTab('qayyim-core')}
               className={`flex-1 py-3 px-4 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
-                activeTab === 'prime'
-                  ? 'bg-purple-50 text-purple-700 border-b-2 border-purple-500'
+                activeTab === 'qayyim-core'
+                  ? 'bg-amber-50 text-amber-700 border-b-2 border-amber-500'
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               <Brain className="w-4 h-4" />
-              PRIME
+              قيّم الدار
             </button>
             <button
               onClick={() => setActiveTab('vanguard')}
@@ -101,15 +101,15 @@ export function FloatingAgentButton() {
 
           {/* Panel Content */}
           <div className="h-[400px]">
-            {activeTab === 'prime' && (
-              <ChatPanel agentKey="prime" />
+            {activeTab === 'qayyim-core' && (
+              <ChatPanel agentKey="qayyim-core" agentName="قيّم الدار — القائد" agentColor="amber" />
             )}
             {activeTab === 'vanguard' && (
               <ChatPanel agentKey="vanguard" />
             )}
             {activeTab === 'group' && (
               <GroupChatView
-                participants={['PRIME', 'Vanguard', 'You']}
+                participants={['QAYYIM-CORE', 'Vanguard', 'You']}
                 onClose={() => setIsOpen(false)}
               />
             )}

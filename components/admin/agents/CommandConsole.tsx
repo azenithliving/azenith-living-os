@@ -14,7 +14,7 @@ export function CommandConsole() {
   const [command, setCommand] = useState('');
   const [history, setHistory] = useState<CommandHistory[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState('prime');
+  const [selectedAgent, setSelectedAgent] = useState('qayyim-core');
   const consoleContainerRef = useRef<HTMLDivElement>(null);
   
   // scroll container to bottom when history changes without touching page window
@@ -100,7 +100,7 @@ export function CommandConsole() {
             onChange={(e) => setSelectedAgent(e.target.value)}
             className="bg-gray-700 text-white text-xs rounded px-2 py-1 border-none"
           >
-            <option value="prime">PRIME (المهندس)</option>
+            <option value="qayyim-core">قيّم الدار — القائد</option>
             <option value="vanguard">Vanguard (المبيعات)</option>
           </select>
         </div>

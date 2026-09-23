@@ -4,6 +4,8 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { createQayyimDraft } from "@/lib/qayyim-ops";
+import { supabaseServer } from "@/lib/dal/unified-supabase";
 
 const QAYYIM_VIS_SYSTEM_PROMPT = `أنت قيّم الدار - المرئي والصور.
 
@@ -72,31 +74,57 @@ export class QayyimVisualAgent extends QayyimAgentBase {
   readonly systemPrompt = QAYYIM_VIS_SYSTEM_PROMPT;
 
   /**
-   * Curate gallery for a page/room
+   * Curate gallery — يقرأ صور حقيقية من curated_images ثم يُحكّم AI فيها
    */
   async curateGallery(params: {
     pagePath: string;
     roomSlug?: string;
     style?: 'modern' | 'classic' | 'industrial' | 'scandinavian';
-    count?: number; // default 30
+    count?: number;
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `gallery_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
+
+    // 1. اجلب صور حقيقية من DB
+    let dbImages: Array<{ id: string; url: string; alt_text?: string; room_id?: string; tags?: string[] }> = [];
+    try {
+      let query = supabaseServer
+        .from("curated_images")
+        .select("id, url, alt_text, room_id, tags")
+        .limit(params.count ?? 50);
+      if (params.roomSlug) query = query.ilike("tags::text", `%${params.roomSlug}%`);
+      const { data } = await query;
+      dbImages = data ?? [];
+    } catch { /* fallback to AI-only */ }
+
     const task: QayyimTask = {
       id: taskId,
       type: "curate_gallery",
-      title: `انتقاء معرض لـ ${params.pagePath}${params.roomSlug ? ` (${params.roomSlug})` : ''}`,
-      description: `اختر ${params.count || 30} صورة فاخرة بأسلوب ${params.style || 'modern'} لـ ${params.pagePath}`,
-      context: { ...params.context, ...params, action: "curate" },
+      title: `انتقاء معرض لـ ${params.pagePath}${params.roomSlug ? ` (${params.roomSlug})` : ""}`,
+      description: `اختر ${params.count ?? 30} صورة فاخرة بأسلوب ${params.style ?? "modern"} لـ ${params.pagePath}. الصور المتاحة من DB: ${dbImages.length}`,
+      context: {
+        ...params.context, ...params,
+        action: "curate",
+        db_images: dbImages.slice(0, 30), // أرسل للـ AI أول 30
+      },
       priority: "high",
     };
 
-    return this.process(task);
+    const aiResult = await this.process(task);
+
+    // 2. ادمج صور DB مع انتقاء AI
+    return {
+      ...aiResult,
+      data: {
+        ...aiResult.data,
+        db_images_count: dbImages.length,
+        db_images_sample: dbImages.slice(0, 10),
+      },
+    };
   }
 
   /**
-   * Select hero image with ranked alternatives
+   * Select hero image — يقرأ صور الـ room من DB ثم يختار أفضلها
    */
   async selectHeroImage(params: {
     pagePath: string;
@@ -105,17 +133,63 @@ export class QayyimVisualAgent extends QayyimAgentBase {
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `hero_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
+
+    // 1. جلب الصور الحقيقية
+    let candidates: Array<{ id: string; url: string; alt_text?: string }> = [];
+    try {
+      let q = supabaseServer.from("curated_images").select("id, url, alt_text").limit(20);
+      if (params.roomSlug) q = q.ilike("tags::text", `%${params.roomSlug}%`);
+      const { data } = await q;
+      candidates = data ?? [];
+
+      // fallback: جرب media_assets
+      if (candidates.length === 0) {
+        const { data: media } = await supabaseServer
+          .from("media_assets")
+          .select("id, url, alt_text")
+          .limit(20);
+        candidates = media ?? [];
+      }
+    } catch { /* fallback */ }
+
     const task: QayyimTask = {
       id: taskId,
       type: "select_hero_image",
       title: `اختيار صورة هيرو لـ ${params.pagePath}`,
-      description: `حدد أفضل صورة هيرو مع 3 بدائل مرتبة لـ ${params.pagePath}`,
-      context: { ...params.context, ...params, action: "select_hero" },
+      description: `حدد أفضل صورة هيرو مع 3 بدائل مرتبة لـ ${params.pagePath}. ${candidates.length} مرشحة من DB`,
+      context: {
+        ...params.context, ...params,
+        action: "select_hero",
+        candidates,
+      },
       priority: "high",
     };
 
-    return this.process(task);
+    const aiResult = await this.process(task);
+
+    // 2. احفظ اختيار الهيرو كمسودة في qayyim_drafts
+    if (aiResult.success && params.roomSlug) {
+      const selectedImage = aiResult.data?.images?.[0] ?? candidates[0];
+      if (selectedImage) {
+        await createQayyimDraft({
+          targetTable: "room_sections",
+          targetId:    params.roomSlug,
+          targetPath:  params.pagePath,
+          proposed:    { image_url: selectedImage.url ?? selectedImage, hero_selected: true },
+          draftType:   "image_selection",
+          createdBy:   this.agentKey,
+          companyId:   params.context?.company_id ?? this.companyId,
+        });
+      }
+    }
+
+    return {
+      ...aiResult,
+      data: {
+        ...aiResult.data,
+        db_candidates: candidates,
+      },
+    };
   }
 
   /**

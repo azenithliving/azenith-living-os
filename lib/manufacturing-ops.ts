@@ -1,5 +1,5 @@
 /**
- * Real manufacturing operations for PRIME chat: BOM, inventory, production jobs.
+ * Real manufacturing operations for Qayyim swarm chat: BOM, inventory, production jobs.
  * All figures come from Postgres. Nothing is invented in JavaScript.
  */
 
@@ -459,7 +459,7 @@ export async function createProductionJob(
   await ensureSchema();
 
   const title = /تشغيل|تصنيع|إنتاج|job/i.test(description)
-    ? description.replace(/إنشاء|انشئ|جديد|create/gi, "").trim().slice(0, 120) || "أمر تشغيل PRIME"
+    ? description.replace(/إنشاء|انشئ|جديد|create/gi, "").trim().slice(0, 120) || "أمر تشغيل قيّم الدار"
     : `أمر تشغيل: ${description.slice(0, 80)}`;
 
   const { data: job, error } = await insertAdaptive<{
@@ -490,8 +490,8 @@ export async function createProductionJob(
   await insertAdaptive("production_job_events", {
     production_job_id: job.id,
     event_type: "created",
-    reason: "أنشئ من محادثة PRIME",
-    metadata: { source: "prime_chat", description },
+    reason: "أنشئ من محادثة قيّم الدار",
+    metadata: { source: "qayyim_chat", description },
   });
 
   return {

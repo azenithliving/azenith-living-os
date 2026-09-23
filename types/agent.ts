@@ -1,6 +1,6 @@
 /**
  * Agent Ecosystem Type Definitions
- * Complete types for PRIME and Vanguard agents
+ * Complete types for Qayyim Swarm and Vanguard agents
  */
 
 // ===========================================
@@ -10,7 +10,7 @@
 export interface AgentProfile {
   id: string;
   company_id: string;
-  agent_key: 'prime' | 'vanguard' | string;
+  agent_key: 'qayyim-core' | 'qayyim-cont' | 'qayyim-vis' | 'qayyim-seo' | 'qayyim-ux' | 'qayyim-ana' | 'qayyim-dev' | 'qayyim-qa' | 'prime' | 'vanguard' | string;
   name: string;
   description?: string;
   avatar_url?: string;

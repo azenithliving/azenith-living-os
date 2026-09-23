@@ -6,6 +6,7 @@
 import { askOrchestratorMessages } from "@/lib/ai-orchestrator";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
+import { runUltimateTool, inferUltimateTool } from "@/lib/admin-tool-bridge";
 
 export interface QayyimTask {
   id: string;
@@ -146,6 +147,15 @@ export abstract class QayyimAgentBase {
       // Resolve company context
       this.companyId = await this.resolveCompanyId(task.context?.company_id);
 
+      // ── 0. محاولة تنفيذ أداة حقيقية إن كانت المهمة تُشير لأداة مباشرة ──
+      const toolResult = await this.tryDispatchTool(task);
+      if (toolResult) {
+        const result = this.parseResult(task.id, toolResult.message ?? JSON.stringify(toolResult.data));
+        result.data = { ...result.data, toolResult: toolResult.data, toolSuccess: toolResult.success };
+        await this.logTask(task, result, Date.now() - startTime);
+        return result;
+      }
+
       // Build prompt with constitutional context
       const prompt = this.buildPrompt(task);
       
@@ -172,6 +182,60 @@ export abstract class QayyimAgentBase {
       };
       await this.logTask(task, errorResult, Date.now() - startTime);
       return errorResult;
+    }
+  }
+
+  /**
+   * Try to dispatch a real tool based on task type and context.
+   * Returns tool result if a matching allowed tool exists, null otherwise.
+   */
+  protected async tryDispatchTool(task: QayyimTask): Promise<{ success: boolean; message?: string; data?: any } | null> {
+    // Map task types to tool names
+    const TASK_TO_TOOL: Record<string, string> = {
+      // UX / Telemetry
+      behavior_analysis:     "metrics_realtime",
+      exit_rate_alert:       "metrics_realtime",
+      scroll_depth_analysis: "metrics_realtime",
+      goal_create:           "goal_create",
+      goal_check_progress:   "goal_check_progress",
+      // SEO
+      seo_audit:             "seo_analyze",
+      seo_fix:               "seo_fix_issues",
+      // Visual
+      curate_gallery:        "curated_images",
+      select_hero_image:     "curated_images",
+      // Analytics
+      revenue_correlation:   "revenue_analyze",
+      luxury_score:          "financial_margins_analyze",
+      // Content
+      draft_luxury_copy:     "qayyim_draft_room",
+      tone_unification:      "section_update",
+      identity_fix:          "content_update",
+      // Core
+      full_site_audit:       "qayyim_audit",
+    };
+
+    const toolName = TASK_TO_TOOL[task.type];
+    if (!toolName) return null;
+
+    // Only dispatch if tool is in agent's allowedTools
+    if (!this.canUseTool(toolName)) return null;
+
+    try {
+      const result = await runUltimateTool(toolName, {
+        ...(task.context ?? {}),
+        task_type:   task.type,
+        description: task.description,
+        agent_key:   this.agentKey,
+      }, {
+        userId:    "qayyim",
+        companyId: this.companyId ?? undefined,
+      });
+      return result;
+    } catch (err: any) {
+      // Tool failed — fall through to AI
+      console.warn(`[${this.agentKey}] Tool dispatch failed for ${toolName}:`, err.message);
+      return null;
     }
   }
 

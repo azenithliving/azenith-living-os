@@ -2,7 +2,7 @@
 
 /**
  * AgentHealthPanel — لوحة صحة النظام
- * يجلب من /api/admin/agents/chat (حالة PRIME/Vanguard)
+ * يجلب من /api/admin/agents/chat (حالة قيّم الدار / Vanguard)
  * و /api/admin/agents/tasks (إحصائيات التنفيذ)
  * يعرض: حالة كل API key pool، معدل النجاح/الفشل، عدد المهام
  */

@@ -8,7 +8,12 @@ import { z } from 'zod';
 
 // التحقق من بيانات المهمة
 const taskSchema = z.object({
-  agent_key: z.enum(['prime', 'vanguard']),
+  agent_key: z.enum([
+    'qayyim-core', 'qayyim-cont', 'qayyim-vis', 'qayyim-seo',
+    'qayyim-ux', 'qayyim-ana', 'qayyim-dev', 'qayyim-qa',
+    'prime',    // deprecated alias — kept for backward compat
+    'vanguard',
+  ]),
   task_type: z.string().min(1),
   title: z.string().min(3),
   description: z.string().optional(),
@@ -102,8 +107,16 @@ export async function POST(request: NextRequest) {
         .insert({
           company_id: resolvedCompanyId,
           agent_key: data.agent_key,
-          name: data.agent_key === 'prime' ? 'PRIME' : 'VANGUARD',
-          description: data.agent_key === 'prime' ? 'وكيل التصميم والتصنيع' : 'وكيل المبيعات والعمليات',
+          name: (data.agent_key === 'prime' || data.agent_key === 'qayyim-core')
+            ? 'قيّم الدار — القائد'
+            : data.agent_key.startsWith('qayyim-')
+              ? `قيّم الدار — ${data.agent_key.replace('qayyim-', '')}`
+              : 'VANGUARD',
+          description: (data.agent_key === 'prime' || data.agent_key === 'qayyim-core')
+            ? 'قائد سرب قيّم الدار — إطلالة الموقع'
+            : data.agent_key.startsWith('qayyim-')
+              ? 'وكيل سرب قيّم الدار'
+              : 'وكيل المبيعات والعمليات',
           is_active: true,
         })
         .select('id')

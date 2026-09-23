@@ -1,6 +1,6 @@
 /**
  * Agents Index - Qayyim Swarm only
- * PRIMEAgent completely replaced by Qayyim Swarm
+ * PRIMEAgent completely replaced by Qayyim Swarm — qayyim-core is the new leader
  */
 
 export { CoderAgent, coderAgent } from "./CoderAgent";

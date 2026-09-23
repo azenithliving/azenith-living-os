@@ -661,15 +661,15 @@ export function UnifiedAssistant() {
                 فريق الوكلاء — تكلم مع أي وكيل مباشرة
               </h2>
               <p className="text-xs text-white/40">
-                PRIME وVanguard هما جزء من المساعد الموحّد. يمكنك توجيه مهام متخصصة لكل منهما من هنا.
+                قيّم الدار وVanguard هما جزء من المساعد الموحّد. يمكنك توجيه مهام متخصصة لكل منهما من هنا.
               </p>
             </div>
 
             {/* agent status cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { key: "prime",    name: "PRIME",    role: "مهندس التصميم والتطوير",  color: "purple"  as const },
-                { key: "vanguard", name: "Vanguard", role: "مدير العمليات والمبيعات", color: "emerald" as const },
+                { key: "qayyim-core", name: "قيّم الدار", role: "قائد سرب القيّم — إطلالة الموقع", color: "amber"   as const },
+                { key: "vanguard",    name: "Vanguard",   role: "مدير العمليات والمبيعات",          color: "emerald" as const },
               ].map((agent) => {
                 const st = agentStatuses[agent.key];
                 const dotColor =
@@ -680,16 +680,16 @@ export function UnifiedAssistant() {
                   st?.status === "online"  ? "متاح" :
                   st?.status === "busy"    ? "مشغول" :
                   st?.status === "offline" ? "غير متاح" : "جاري التحقق…";
-                const borderColor = agent.color === "purple" ? "border-purple-500/25" : "border-emerald-500/25";
+                const borderColor = agent.color === "amber" ? "border-amber-500/25" : "border-emerald-500/25";
 
                 return (
                   <div key={agent.key} className={`rounded-2xl border ${borderColor} bg-white/[0.02] overflow-hidden`}>
                     {/* agent header */}
                     <div className={`flex items-center justify-between gap-3 px-4 py-3 ${
-                      agent.color === "purple" ? "bg-purple-500/10" : "bg-emerald-500/10"
+                      agent.color === "amber" ? "bg-amber-500/10" : "bg-emerald-500/10"
                     }`}>
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{agent.key === "prime" ? "🧠" : "💼"}</span>
+                        <span className="text-2xl">{agent.key === "qayyim-core" ? "👑" : "💼"}</span>
                         <div>
                           <p className="font-bold text-sm">{agent.name}</p>
                           <p className="text-[10px] text-white/40">{agent.role}</p>

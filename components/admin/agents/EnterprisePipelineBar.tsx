@@ -80,7 +80,7 @@ export function EnterprisePipelineBar({ onOpenScenarioModal, lastUpdated }: Ente
       value: loading ? '…' : `${metrics.inventoryCount} صنف خامات`,
       icon: Layers,
       color: 'from-purple-600/20 to-indigo-600/10 border-purple-500/30 text-purple-400',
-      badge: 'PRIME',
+      badge: 'قيّم',
     },
     {
       id: 'production',
@@ -89,7 +89,7 @@ export function EnterprisePipelineBar({ onOpenScenarioModal, lastUpdated }: Ente
       value: loading ? '…' : metrics.jobsCount.toString(),
       icon: Factory,
       color: 'from-amber-600/20 to-orange-600/10 border-amber-500/30 text-amber-400',
-      badge: 'Ops & PRIME',
+      badge: 'Ops & قيّم',
     },
     {
       id: 'revenue',

@@ -59,3 +59,27 @@ export type { Experiment, CreateExperimentInput, ExperimentStats } from "./ab-te
 // Quality Benchmarks
 export { BENCHMARKS, runBenchmark, runAllBenchmarks, listBenchmarks } from "./benchmarks";
 export type { BenchmarkResult, BenchmarkDefinition, BenchmarkSample } from "./benchmarks";
+
+// Red Team Engine
+export type { RedTeamAttack, RedTeamResult, QayyimAgentMap } from "./RedTeamEngine";
+export { redTeamAttacks } from "./RedTeamEngine";
+
+// Orchestrator utilities (Task Decomposer, Agent Router, Result Aggregator)
+export { TaskDecomposer, taskDecomposer } from "./orchestrator/TaskDecomposer";
+export type { DecomposedSubTask, DecompositionResult } from "./orchestrator/TaskDecomposer";
+
+export { AgentRouter } from "./orchestrator/AgentRouter";
+export type { RoutableTask, RouteDecision } from "./orchestrator/AgentRouter";
+
+export { ResultAggregator, resultAggregator } from "./orchestrator/ResultAggregator";
+export type { AggregatedSection, AggregatedDraft, AggregationInput } from "./orchestrator/ResultAggregator";
+
+// Specialized graphs
+export { runAuditGraph } from "./orchestrator/graphs/audit.graph";
+export type { AuditGraphInput, AuditGraphOutput } from "./orchestrator/graphs/audit.graph";
+
+export { runDraftGraph } from "./orchestrator/graphs/draft.graph";
+export type { DraftGraphInput, DraftGraphOutput } from "./orchestrator/graphs/draft.graph";
+
+export { runPublishGraph } from "./orchestrator/graphs/publish.graph";
+export type { PublishGraphInput, PublishGraphOutput } from "./orchestrator/graphs/publish.graph";

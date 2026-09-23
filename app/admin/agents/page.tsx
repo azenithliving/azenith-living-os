@@ -62,7 +62,8 @@ function AgentStatusBar({ onStatusLoad }: { onStatusLoad?: (s: Record<string, Ag
 
   const agentColor = (key: string) => {
     switch (key) {
-      case 'prime':    return { ring: 'border-purple-500/20', bg: 'bg-purple-500/10', text: 'text-purple-400' };
+      case 'prime':
+      case 'qayyim-core': return { ring: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-400' };
       case 'vanguard': return { ring: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-400' };
       case 'analyst':  return { ring: 'border-blue-500/20', bg: 'bg-blue-500/10', text: 'text-blue-400' };
       case 'coder':    return { ring: 'border-cyan-500/20', bg: 'bg-cyan-500/10', text: 'text-cyan-400' };
@@ -73,7 +74,7 @@ function AgentStatusBar({ onStatusLoad }: { onStatusLoad?: (s: Record<string, Ag
     }
   };
 
-  const agentKeys = ['prime', 'vanguard', 'analyst', 'coder', 'ops', 'security', 'learner'];
+  const agentKeys = ['qayyim-core', 'vanguard', 'analyst', 'coder', 'ops', 'security', 'learner'];
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -295,71 +296,112 @@ export default function AgentsPage() {
               ))}
             </div>
 
-            {/* بطاقات منظومة الوكلاء السبعة */}
+            {/* بطاقات منظومة الوكلاء */}
             <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                   <h2 className="text-lg font-black flex items-center gap-2">
                     <Users className="w-5 h-5 text-[#C5A059]" />
-                    منظومة الوكلاء السبعة الميدانية (Autonomous Enterprise Operations)
+                    سرب قيّم الدار + الوكلاء الميدانيون
                   </h2>
                   <p className="text-xs text-white/40 mt-1">
-                    كل وكيل يمثل منظومة متكاملة يقرأ معطياته من جداول Postgres ويصدر أوامر تنفيذية حقيقية 100%
+                    8 وكلاء قيّم لإطلالة الموقع + 6 وكلاء ميدانيين — يقرأون معطياتهم من Postgres ويصدرون أوامر حقيقية
                   </p>
                 </div>
-                <button
-                  onClick={() => setShowGroupChat(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg self-start sm:self-auto cursor-pointer"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  محادثة جماعية مع الفريق
-                </button>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <a
+                    href="/admin/qayyim"
+                    className="px-4 py-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    استوديو القيّم
+                  </a>
+                  <button
+                    onClick={() => setShowGroupChat(true)}
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg cursor-pointer"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    محادثة جماعية
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {ENTERPRISE_AGENTS.map(agent => {
-                  const st = agentStatuses[agent.key];
-                  return (
-                    <AgentTeamCard
-                      key={agent.key}
-                      agentKey={agent.key}
-                      name={agent.name}
-                      role={agent.role}
-                      color={agent.color}
-                      icon={agent.icon}
-                      status={st?.status}
-                      taskCount={st?.taskCount}
-                      recentActivity={st?.recentActivity}
-                      inputs={agent.inputs}
-                      outputs={agent.outputs}
-                      missions={agent.missions}
-                      onChat={() => {
-                        setChatInitialMission(undefined);
-                        setActiveChatAgent(agent.key);
-                      }}
-                      onMissionClick={(missionPrompt) => {
-                        setChatInitialMission(missionPrompt);
-                        setActiveChatAgent(agent.key);
-                      }}
-                    />
-                  );
-                })}
+              {/* سرب القيّم — 8 وكلاء */}
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-bold text-amber-400">👑 سرب قيّم الدار</span>
+                  <span className="text-[10px] text-white/30 font-mono bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">8 وكلاء · إطلالة الموقع</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {ENTERPRISE_AGENTS.filter(a => a.key.startsWith('qayyim-')).map(agent => {
+                    const st = agentStatuses[agent.key];
+                    return (
+                      <AgentTeamCard
+                        key={agent.key}
+                        agentKey={agent.key}
+                        name={agent.name}
+                        role={agent.role}
+                        color={agent.color}
+                        icon={agent.icon}
+                        status={st?.status}
+                        taskCount={st?.taskCount}
+                        recentActivity={st?.recentActivity}
+                        inputs={agent.inputs}
+                        outputs={agent.outputs}
+                        missions={agent.missions}
+                        onChat={() => { setChatInitialMission(undefined); setActiveChatAgent(agent.key); }}
+                        onMissionClick={(p) => { setChatInitialMission(p); setActiveChatAgent(agent.key); }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* الوكلاء الميدانيون */}
+              <div>
+                <div className="flex items-center gap-2 mb-3 pt-4 border-t border-white/5">
+                  <span className="text-xs font-bold text-white/60">⚙️ الوكلاء الميدانيون</span>
+                  <span className="text-[10px] text-white/30 font-mono bg-white/5 px-2 py-0.5 rounded-full border border-white/10">6 وكلاء · عمليات ومبيعات وأمان</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {ENTERPRISE_AGENTS.filter(a => !a.key.startsWith('qayyim-')).map(agent => {
+                    const st = agentStatuses[agent.key];
+                    return (
+                      <AgentTeamCard
+                        key={agent.key}
+                        agentKey={agent.key}
+                        name={agent.name}
+                        role={agent.role}
+                        color={agent.color}
+                        icon={agent.icon}
+                        status={st?.status}
+                        taskCount={st?.taskCount}
+                        recentActivity={st?.recentActivity}
+                        inputs={agent.inputs}
+                        outputs={agent.outputs}
+                        missions={agent.missions}
+                        onChat={() => { setChatInitialMission(undefined); setActiveChatAgent(agent.key); }}
+                        onMissionClick={(p) => { setChatInitialMission(p); setActiveChatAgent(agent.key); }}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
-            {/* غرف العمليات المباشرة PRIME و Vanguard */}
+            {/* غرف العمليات المباشرة — قيّم الدار و Vanguard */}
             <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 space-y-6">
               <div>
                 <h3 className="text-base font-black flex items-center gap-2 text-white">
                   <Activity className="w-5 h-5 text-[#C5A059]" />
-                  غرف العمليات الميدانية السريعة (Live Field Operations Consoles)
+                  غرف العمليات الميدانية السريعة
                 </h3>
                 <p className="text-xs text-white/40 mt-1">
-                  قنوات اتصال فوري ومباشر مع كبير الوكلاء التنفيذيين PRIME وقائد العمليات Vanguard لمتابعة المهام اللحظية دون نوافذ منبثقة
+                  قناة اتصال فوري مع قائد سرب القيّم ووكيل العمليات Vanguard — تنفيذ مهام لحظية بلا نوافذ منبثقة
                 </p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ChatPanel agentKey="prime" agentName="قيّم الدار" agentColor="purple" />
+                <ChatPanel agentKey="qayyim-core" agentName="قيّم الدار — القائد" agentColor="amber" />
                 <ChatPanel agentKey="vanguard" agentColor="emerald" />
               </div>
             </div>
@@ -373,7 +415,7 @@ export default function AgentsPage() {
           <div className="w-full max-w-2xl bg-[#111] border border-white/20 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
             <ChatPanel 
               agentKey={activeChatAgent} 
-              agentName={activeChatAgent === 'prime' ? 'قيّم الدار' : undefined}
+              agentName={activeChatAgent === 'qayyim-core' || activeChatAgent === 'prime' ? 'قيّم الدار — القائد' : undefined}
               initialMessage={chatInitialMission}
             />
           </div>
@@ -381,8 +423,8 @@ export default function AgentsPage() {
       )}
       {showPrimeChat && (
         <div className="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl flex items-center justify-center p-6" onClick={() => setShowPrimeChat(false)}>
-          <div className="w-full max-w-2xl bg-[#111] border border-purple-500/30 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-            <ChatPanel agentKey="prime" agentName="قيّم الدار" />
+          <div className="w-full max-w-2xl bg-[#111] border border-amber-500/30 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+            <ChatPanel agentKey="qayyim-core" agentName="قيّم الدار — القائد" agentColor="amber" />
           </div>
         </div>
       )}
@@ -416,20 +458,124 @@ interface EnterpriseAgentConfig {
 }
 
 const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
+  // ════════════════════════════════════════════════════════════
+  // سرب قيّم الدار — 8 وكلاء إطلالة الموقع
+  // ════════════════════════════════════════════════════════════
   {
-    key: 'prime',
-    name: 'قيّم الدار',
-    role: 'قيّم إطلالة أزينث على الموقع',
-    color: 'purple',
-    icon: '🧠',
-    inputs: ['site_sections', 'products', 'صفحات الزائر'],
-    outputs: ['فحص الواجهة', 'قائمة المنتجات الظاهرة', 'تحليل ظهور البحث'],
+    key: 'qayyim-core',
+    name: 'قيّم الدار — القائد',
+    role: 'قائد السرب: تنسيق، تدقيق شامل، نشر/تراجع، بوابة جودة',
+    color: 'amber',
+    icon: '👑',
+    inputs: ['room_sections', 'products', 'qayyim_drafts', 'visitor_telemetry'],
+    outputs: ['تقرير تدقيق شامل', 'مسودات منسقة', 'نشر/تراجع بموافقة'],
     missions: [
-      { label: 'افحص صحة محتوى الرئيسية', prompt: 'افحص صحة محتوى الصفحة الرئيسية' },
-      { label: 'اعرض منتجات الموقع', prompt: 'اعرض المنتجات' },
-      { label: 'حلّل ظهور الموقع في البحث', prompt: 'حلّل SEO للموقع' },
+      { label: 'افحص الموقع كله شاملاً',     prompt: 'افحص الموقع كله شاملاً وأعطني تقريراً تنفيذياً' },
+      { label: 'نسّق السرب للرئيسية',         prompt: 'نسّق السرب لتحسين الصفحة الرئيسية كاملاً' },
+      { label: 'اعرض المسودات المعلقة',       prompt: 'اعرض المسودات المعلقة للمراجعة والنشر' },
     ],
   },
+  {
+    key: 'qayyim-cont',
+    name: 'قيّم الدار — المحتوى',
+    role: 'كتابة فاخرة، توحيد نبرة، قانون هوية، صقل نصوص',
+    color: 'rose',
+    icon: '✍️',
+    inputs: ['room_sections', 'products', 'site_sections'],
+    outputs: ['نصوص عربية فاخرة', 'توحيد نبرة', 'تقرير مخالفات هوية'],
+    missions: [
+      { label: 'افحص هوية النصوص',            prompt: 'افحص هوية النصوص على جميع صفحات الموقع' },
+      { label: 'صغ نصاً فاخراً للهيرو',      prompt: 'صغ نصاً فاخراً يعكس هوية أزينث للهيرو' },
+      { label: 'وحّد نبرة الأقسام',           prompt: 'وحّد نبرة الكتابة في جميع أقسام الموقع' },
+    ],
+  },
+  {
+    key: 'qayyim-vis',
+    name: 'قيّم الدار — المرئيات',
+    role: 'انتقاء صور، هيرو، alt text، اتساق علامة تجارية',
+    color: 'violet',
+    icon: '🖼️',
+    inputs: ['curated_images', 'products', 'room_sections'],
+    outputs: ['معرض منتقى', 'صورة هيرو مختارة', 'alt text غني'],
+    missions: [
+      { label: 'فحص صور المنتجات',           prompt: 'افحص صور المنتجات وقيّم جودتها واتساقها' },
+      { label: 'اقترح صورة هيرو',            prompt: 'اقترح صورة هيرو تعكس فخامة أزينث' },
+      { label: 'أنشئ alt text للصور',        prompt: 'أنشئ alt text احترافي لجميع صور الموقع' },
+    ],
+  },
+  {
+    key: 'qayyim-seo',
+    name: 'قيّم الدار — الظهور',
+    role: 'تدقيق SEO تقني، Schema.org، فجوات محتوى، منافسين',
+    color: 'sky',
+    icon: '🔍',
+    inputs: ['products', 'room_sections', 'site_sections'],
+    outputs: ['تقرير SEO تقني', 'Schema.org مُصلح', 'تحليل فجوات'],
+    missions: [
+      { label: 'تدقيق SEO للموقع',           prompt: 'قم بتدقيق SEO شامل وتقني للموقع' },
+      { label: 'أصلح Schema.org',             prompt: 'أصلح Schema.org للمنتجات والصفحات' },
+      { label: 'تحليل فجوات المحتوى',        prompt: 'حلل فجوات المحتوى مقارنة بالمنافسين' },
+    ],
+  },
+  {
+    key: 'qayyim-ux',
+    name: 'قيّم الدار — التجربة',
+    role: 'سلوك زوار، معدل تحويل، A/B testing، تحليل خروج',
+    color: 'emerald',
+    icon: '🎯',
+    inputs: ['qayyim_telemetry_events', 'visitor_telemetry', 'qayyim_experiments'],
+    outputs: ['تقرير سلوك زوار', 'اقتراحات A/B', 'تحليل معدل خروج'],
+    missions: [
+      { label: 'تحليل سلوك الزوار',          prompt: 'حلل سلوك الزوار ومعدلات الخروج من الصفحات' },
+      { label: 'اقترح A/B test للهيرو',      prompt: 'اقترح A/B test محدد لتحسين هيرو الصفحة الرئيسية' },
+      { label: 'فحص معدل التحويل',           prompt: 'افحص معدل التحويل الحالي وحدد نقاط الضعف' },
+    ],
+  },
+  {
+    key: 'qayyim-ana',
+    name: 'قيّم الدار — التحليلات',
+    role: 'ربط تحويل بإيرادات، Luxury Score، تنبؤ، تقسيم عملاء',
+    color: 'cyan',
+    icon: '📈',
+    inputs: ['visitor_telemetry', 'qayyim_telemetry_events', 'qayyim_experiments'],
+    outputs: ['Luxury Score', 'تنبؤ تحويل', 'تقرير أعمال أسبوعي'],
+    missions: [
+      { label: 'احسب Luxury Score',           prompt: 'احسب Luxury Score الحالي للموقع' },
+      { label: 'ربط التحويل بالإيرادات',     prompt: 'حلل العلاقة بين معدل التحويل والإيرادات' },
+      { label: 'تقرير أداء الأعمال',         prompt: 'أعطني تقرير أداء الأعمال للأسبوع الماضي' },
+    ],
+  },
+  {
+    key: 'qayyim-dev',
+    name: 'قيّم الدار — التطوير',
+    role: 'Core Web Vitals، bundle، جودة كود، dependency check',
+    color: 'orange',
+    icon: '⚡',
+    inputs: ['كود المنظومة', 'bundle stats', 'npm dependencies'],
+    outputs: ['تقرير Core Web Vitals', 'تحليل bundle', 'code quality gate'],
+    missions: [
+      { label: 'تدقيق Core Web Vitals',      prompt: 'تدقيق Core Web Vitals والأداء' },
+      { label: 'فحص bundle size',            prompt: 'فحص bundle size وتحديد الملفات الكبيرة' },
+      { label: 'مراجعة جودة الكود',          prompt: 'مراجعة جودة الكود وبوابة الجودة' },
+    ],
+  },
+  {
+    key: 'qayyim-qa',
+    name: 'قيّم الدار — الجودة',
+    role: 'E2E smoke tests، visual regression، a11y، load test',
+    color: 'lime',
+    icon: '🧪',
+    inputs: ['صفحات الموقع', 'staging environment'],
+    outputs: ['تقرير E2E', 'visual regression', 'تقرير إمكانية الوصول'],
+    missions: [
+      { label: 'تشغيل E2E smoke tests',      prompt: 'تشغيل E2E smoke tests على الصفحات الرئيسية' },
+      { label: 'فحص إمكانية الوصول',         prompt: 'فحص إمكانية الوصول WCAG 2.1 للموقع' },
+      { label: 'visual regression',           prompt: 'تشغيل visual regression للصفحة الرئيسية' },
+    ],
+  },
+  // ════════════════════════════════════════════════════════════
+  // وكلاء العمليات الميدانية
+  // ════════════════════════════════════════════════════════════
   {
     key: 'vanguard',
     name: 'Vanguard',
@@ -439,9 +585,9 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     inputs: ['leads', 'sales_orders', 'visitor_telemetry'],
     outputs: ['تأهيل العملاء VIP', 'عقود أوامر البيع', 'تحصيل العربون'],
     missions: [
-      { label: 'مسح وتأهيل العملاء الجدد', prompt: 'اعرض قائمة العملاء الجدد ومستويات اهتمامهم' },
-      { label: 'تحليل فرص الإيرادات المعلقة', prompt: 'حلل فرص الإيرادات المعلقة في آخر 30 يوماً' },
-      { label: 'استعراض أوامر البيع المعتمدة', prompt: 'اعرض أوامر البيع المعتمدة' },
+      { label: 'مسح وتأهيل العملاء الجدد',   prompt: 'اعرض قائمة العملاء الجدد ومستويات اهتمامهم' },
+      { label: 'تحليل فرص الإيرادات',        prompt: 'حلل فرص الإيرادات المعلقة في آخر 30 يوماً' },
+      { label: 'أوامر البيع المعتمدة',       prompt: 'اعرض أوامر البيع المعتمدة' },
     ],
   },
   {
@@ -453,9 +599,9 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     inputs: ['sales_orders', 'payments', 'visitor_telemetry'],
     outputs: ['هوامش الأرباح الصافية', 'مؤشرات الأداء اللحظية', 'توقعات التدفق'],
     missions: [
-      { label: 'تحليل هوامش الأرباح الحالية', prompt: 'تحليل هوامش الأرباح الحالية' },
-      { label: 'المؤشرات اللحظية في 24 ساعة', prompt: 'المؤشرات اللحظية في 24 ساعة' },
-      { label: 'تحليل الإيرادات التراكمية', prompt: 'تحليل الإيرادات' },
+      { label: 'تحليل هوامش الأرباح',        prompt: 'تحليل هوامش الأرباح الحالية' },
+      { label: 'المؤشرات اللحظية',            prompt: 'المؤشرات اللحظية في 24 ساعة' },
+      { label: 'تحليل الإيرادات',            prompt: 'تحليل الإيرادات' },
     ],
   },
   {
@@ -464,12 +610,12 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     role: 'مهندس المنصة والأنظمة البرمجية',
     color: 'cyan',
     icon: '💻',
-    inputs: ['مسارات الـ API (182)', 'كود المنظومة', 'اتصالات DB'],
+    inputs: ['مسارات الـ API', 'كود المنظومة', 'اتصالات DB'],
     outputs: ['فحص صحة الـ Endpoints', 'سلامة البنية البرمجية', 'تقارير الأخطاء'],
     missions: [
-      { label: 'فحص صحة النظام التقني', prompt: 'فحص صحة النظام التقني' },
-      { label: 'فحص مسارات الـ API الرئيسية', prompt: 'فحص مسارات الـ API' },
-      { label: 'تدقيق سرعة الاستجابة والأداء', prompt: 'تدقيق سرعة الأداء' },
+      { label: 'فحص صحة النظام التقني',      prompt: 'فحص صحة النظام التقني' },
+      { label: 'فحص مسارات الـ API',         prompt: 'فحص مسارات الـ API' },
+      { label: 'تدقيق سرعة الاستجابة',       prompt: 'تدقيق سرعة الأداء' },
     ],
   },
   {
@@ -479,11 +625,11 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     color: 'yellow',
     icon: '⚙️',
     inputs: ['backups', 'system_telemetry', 'cloudflare/cdn'],
-    outputs: ['لقطات نسخ احتياطي مشفرة', 'تدقيق سرعة LCP', 'جاهزية 99.9%'],
+    outputs: ['لقطات نسخ احتياطي', 'تدقيق LCP', 'جاهزية 99.9%'],
     missions: [
-      { label: 'أخذ نسخة احتياطية فورية', prompt: 'أخذ نسخة احتياطية فورية' },
-      { label: 'استعراض سجل النسخ الاحتياطية', prompt: 'استعراض سجل النسخ الاحتياطية' },
-      { label: 'تدقيق سرعة الأداء العميقة', prompt: 'تدقيق سرعة الأداء العميقة' },
+      { label: 'أخذ نسخة احتياطية فورية',    prompt: 'أخذ نسخة احتياطية فورية' },
+      { label: 'سجل النسخ الاحتياطية',       prompt: 'استعراض سجل النسخ الاحتياطية' },
+      { label: 'تدقيق سرعة الأداء',          prompt: 'تدقيق سرعة الأداء العميقة' },
     ],
   },
   {
@@ -492,12 +638,12 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     role: 'حارس الأمن والامتثال السيبراني',
     color: 'red',
     icon: '🛡️',
-    inputs: ['api_keys (1240)', 'immutable_command_log', 'audit_logs'],
-    outputs: ['تدقيق صلاحيات المفاتيح', 'كشف الثغرات والـ SQLi', 'شهادة الامتثال'],
+    inputs: ['api_keys', 'immutable_command_log', 'audit_logs'],
+    outputs: ['تدقيق صلاحيات المفاتيح', 'كشف الثغرات', 'شهادة الامتثال'],
     missions: [
-      { label: 'فحص مفاتيح الـ API وصلاحياتها', prompt: 'فحص مفاتيح الـ API' },
-      { label: 'تدقيق الأمان والامتثال الشامل', prompt: 'تدقيق الأمان والامتثال' },
-      { label: 'فحص سجل الأوامر المحصن', prompt: 'فحص سجل الأوامر المحصن' },
+      { label: 'فحص مفاتيح الـ API',         prompt: 'فحص مفاتيح الـ API' },
+      { label: 'تدقيق الأمان والامتثال',     prompt: 'تدقيق الأمان والامتثال' },
+      { label: 'فحص سجل الأوامر المحصن',    prompt: 'فحص سجل الأوامر المحصن' },
     ],
   },
   {
@@ -509,9 +655,9 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     inputs: ['agent_memory', 'agent_cognitive_weights', 'feedback'],
     outputs: ['معايرة أوزان اتخاذ القرار', 'توثيق الخبرات', 'رفع دقة الوكلاء'],
     missions: [
-      { label: 'استعراض ذاكرة الوكلاء (DB)', prompt: 'استعراض ذاكرة الوكلاء' },
-      { label: 'معايرة الأوزان المعرفية للقرارات', prompt: 'معايرة الأوزان المعرفية' },
-      { label: 'تقرير دقة ومعدل نجاح المهام', prompt: 'تقرير دقة القرارات' },
+      { label: 'استعراض ذاكرة الوكلاء',      prompt: 'استعراض ذاكرة الوكلاء' },
+      { label: 'معايرة الأوزان المعرفية',     prompt: 'معايرة الأوزان المعرفية' },
+      { label: 'تقرير دقة القرارات',          prompt: 'تقرير دقة القرارات' },
     ],
   },
 ];
@@ -528,13 +674,19 @@ function AgentTeamCard({
   onMissionClick?: (prompt: string) => void;
 }) {
   const colorClasses: Record<string, string> = {
-    purple: 'border-purple-500/30 hover:border-purple-500/60 bg-purple-500/[0.03]',
+    purple:  'border-purple-500/30 hover:border-purple-500/60 bg-purple-500/[0.03]',
     emerald: 'border-emerald-500/30 hover:border-emerald-500/60 bg-emerald-500/[0.03]',
     blue:    'border-blue-500/30 hover:border-blue-500/60 bg-blue-500/[0.03]',
     red:     'border-red-500/30 hover:border-red-500/60 bg-red-500/[0.03]',
     cyan:    'border-cyan-500/30 hover:border-cyan-500/60 bg-cyan-500/[0.03]',
     yellow:  'border-amber-500/30 hover:border-amber-500/60 bg-amber-500/[0.03]',
+    amber:   'border-amber-500/30 hover:border-amber-500/60 bg-amber-500/[0.03]',
     indigo:  'border-indigo-500/30 hover:border-indigo-500/60 bg-indigo-500/[0.03]',
+    rose:    'border-rose-500/30 hover:border-rose-500/60 bg-rose-500/[0.03]',
+    violet:  'border-violet-500/30 hover:border-violet-500/60 bg-violet-500/[0.03]',
+    sky:     'border-sky-500/30 hover:border-sky-500/60 bg-sky-500/[0.03]',
+    orange:  'border-orange-500/30 hover:border-orange-500/60 bg-orange-500/[0.03]',
+    lime:    'border-lime-500/30 hover:border-lime-500/60 bg-lime-500/[0.03]',
   };
 
   const dotColor =

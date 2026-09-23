@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const agentKey = searchParams.get("agent_key") || "prime";
+    const agentKey = searchParams.get("agent_key") || "qayyim-core";
     const action = searchParams.get("action") || "patterns";
 
     switch (action) {

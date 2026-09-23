@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         record: { table: "sales_orders", id: orderData?.id, details: orderPayload },
       });
 
-      // ── Step 3: PRIME يحسب كشف الـ BOM ويفحص المخزون ──────────────────
+      // ── Step 3: قيّم الدار يحسب كشف الـ BOM ويفحص المخزون ──────────────────
       // التأكد من وجود خامة خشب الزان في المخزون
       const { data: woodItem } = await supabaseServer
         .from("inventory_items")
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
         estimated_labor_cost: 48000,
       };
 
-      // ── Step 4: PRIME ينشئ أمر تشغيل صناعي في production_jobs ─────────
+      // ── Step 4: قيّم الدار ينشئ أمر تشغيل صناعي في production_jobs ─────────
       const jobPayload: Record<string, any> = {
         order_id: orderData?.id || null,
         status: "in_progress",
@@ -192,11 +192,11 @@ export async function POST(request: NextRequest) {
       if (jobErr) console.warn("[Scenario] Job insert warn:", jobErr.message);
 
       steps.push({
-        agentKey: "prime",
-        agentName: "PRIME",
+        agentKey: "qayyim-core",
+        agentName: "قيّم الدار — القائد",
         role: "كبير مهندسي التصميم والتصنيع",
-        icon: "🧠",
-        color: "purple",
+        icon: "👑",
+        color: "amber",
         action: "توليد كشف المواد الهندسي (BOM) وإصدار أمر التشغيل",
         result: `تم تفكيك التصميم: مطلوب 1.45 م³ خشب زان مبخر (متاح بالمخزون: ${woodItem?.current_quantity || 18.5} م³)، و 28 م قماش مخمل، و 14 دفتر ورق ذهب. تم إدراج أمر تشغيل الإنتاج في (production_jobs).`,
         record: {
@@ -278,11 +278,11 @@ export async function POST(request: NextRequest) {
       });
 
       steps.push({
-        agentKey: "prime",
-        agentName: "PRIME",
+        agentKey: "qayyim-core",
+        agentName: "قيّم الدار — القائد",
         role: "كبير المهندسين",
-        icon: "🧠",
-        color: "purple",
+        icon: "👑",
+        color: "amber",
         action: "تقييم الأوامر المتأثرة واقتراح دفعة توريد عاجلة",
         result: "يوجد 3 أوامر تصنيع قيد الانتظار تتطلب 4.8 م³. تم إعداد مواصفات التوريد الفوري لخشب زان روماني مجفف آلياً.",
       });

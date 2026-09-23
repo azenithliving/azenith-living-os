@@ -57,7 +57,7 @@ export function DesignStudio() {
   
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-bold mb-4">استوديو التصميم بالذكاء الاصطناعي (PRIME)</h2>
+      <h2 className="text-xl font-bold mb-4">استوديو التصميم بالذكاء الاصطناعي (قيّم الدار)</h2>
       
       {/* Controls Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -192,7 +192,7 @@ export function DesignStudio() {
           {/* AI Suggestions */}
           {result.improvements.length > 0 && (
             <div className="bg-blue-50 p-3 rounded-lg">
-              <p className="font-semibold text-sm mb-2">💡 اقتراحات PRIME للتحسين:</p>
+              <p className="font-semibold text-sm mb-2">💡 اقتراحات قيّم الدار للتحسين:</p>
               <ul className="text-sm list-disc list-inside space-y-1">
                 {result.improvements.map((imp, i) => (
                   <li key={i}>{imp}</li>

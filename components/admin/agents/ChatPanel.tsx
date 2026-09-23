@@ -32,7 +32,18 @@ interface ChatPanelProps {
 }
 
 const AGENT_METADATA: Record<string, { name: string; role: string; icon: string; color: string }> = {
+  // ── سرب قيّم الدار (8 وكلاء) ───────────────────────────────────
+  'qayyim-core': { name: 'قيّم الدار — القائد',     role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع',   icon: '👑', color: 'amber' },
+  'qayyim-cont': { name: 'قيّم الدار — المحتوى',    role: 'كتابة فاخرة، توحيد نبرة، قانون هوية',  icon: '✍️', color: 'rose' },
+  'qayyim-vis':  { name: 'قيّم الدار — المرئيات',   role: 'انتقاء صور، هيرو، alt text، علامة',    icon: '🖼️', color: 'violet' },
+  'qayyim-seo':  { name: 'قيّم الدار — الظهور',     role: 'تدقيق SEO، Schema، فجوات، منافسين',   icon: '🔍', color: 'sky' },
+  'qayyim-ux':   { name: 'قيّم الدار — التجربة',    role: 'سلوك زائر، تحويل، A/B testing',       icon: '🎯', color: 'emerald' },
+  'qayyim-ana':  { name: 'قيّم الدار — التحليلات',  role: 'إيرادات، تنبؤ تحويل، Luxury Score',   icon: '📈', color: 'cyan' },
+  'qayyim-dev':  { name: 'قيّم الدار — التطوير',    role: 'أداء، bundle، code quality gate',      icon: '⚡', color: 'orange' },
+  'qayyim-qa':   { name: 'قيّم الدار — الجودة',     role: 'E2E، visual regression، a11y',        icon: '🧪', color: 'lime' },
+  // ── alias للتوافق مع القديم ─────────────────────────────────────
   prime:    { name: 'قيّم الدار', role: 'قيّم إطلالة أزينث على الموقع', icon: '🧠', color: 'purple' },
+  // ── وكلاء العمليات ──────────────────────────────────────────────
   vanguard: { name: 'Vanguard', role: 'مدير العمليات والمبيعات', icon: '💼', color: 'emerald' },
   analyst:  { name: 'Analyst',  role: 'محلل البيانات والتقارير', icon: '📊', color: 'blue' },
   coder:    { name: 'Coder',    role: 'مطور الكود والتقنية',    icon: '💻', color: 'cyan' },
@@ -293,7 +304,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {agentKey.toLowerCase() === 'prime' && (
+          {(agentKey.toLowerCase() === 'prime' || agentKey.toLowerCase().startsWith('qayyim-')) && (
             <a
               href="/admin/qayyim"
               title="فتح استوديو سرب قيّم الدار"

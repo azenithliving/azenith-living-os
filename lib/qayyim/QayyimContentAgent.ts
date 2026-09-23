@@ -4,6 +4,7 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { createQayyimDraft } from "@/lib/qayyim-ops";
 
 const QAYYIM_CONT_SYSTEM_PROMPT = `أنت قيّم الدار - المحتوى والعربية الفاخرة.
 
@@ -74,33 +75,75 @@ export class QayyimContentAgent extends QayyimAgentBase {
   readonly systemPrompt = QAYYIM_CONT_SYSTEM_PROMPT;
 
   /**
-   * Draft luxury copy for a page section
+   * Draft luxury copy — يولّد النص بالـ AI ثم يحفظ مسودة حقيقية في qayyim_drafts
    */
   async draftCopy(params: {
-    pagePath: string;           // '/', '/rooms/living-room', '/furniture'
-    sectionKey: string;         // 'hero', 'rooms-grid', 'trust-section', 'product-card:master-bed'
+    pagePath: string;
+    sectionKey: string;
     draftType: 'hero_text' | 'section_reorder' | 'product_card' | 'tone_unification' | 'identity_fix' | 'storytelling';
-    currentContent?: any;       // Current content (auto-fetched if not provided)
-    instructions: string;       // User instructions in Arabic
+    currentContent?: any;
+    instructions: string;
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `draft_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
+
     const task: QayyimTask = {
       id: taskId,
       type: params.draftType,
       title: `مسودة ${this.getDraftTypeLabel(params.draftType)} لـ ${params.sectionKey}`,
       description: params.instructions,
-      context: { 
-        ...params.context, 
-        pagePath: params.pagePath,
-        sectionKey: params.sectionKey,
+      context: {
+        ...params.context,
+        pagePath:       params.pagePath,
+        sectionKey:     params.sectionKey,
         currentContent: params.currentContent,
       },
       priority: "high",
     };
 
-    return this.process(task);
+    // 1. اطلب النص من AI
+    const aiResult = await this.process(task);
+
+    // 2. إذا نجح، احفظ مسودة حقيقية في qayyim_drafts
+    if (aiResult.success && !aiResult.data?.draft_id) {
+      const saveResult = await createQayyimDraft({
+        targetTable: 'site_sections',
+        targetId:    params.sectionKey,
+        targetPath:  `${params.pagePath}#${params.sectionKey}`,
+        proposed: {
+          draft_type:    params.draftType,
+          instructions:  params.instructions,
+          ai_text:       aiResult.data?.draftContent ?? aiResult.output,
+          section_key:   params.sectionKey,
+          page_path:     params.pagePath,
+          agent:         this.agentKey,
+        },
+        draftType: params.draftType,
+        createdBy: this.agentKey,
+        companyId: params.context?.company_id ?? this.companyId,
+        metadata: {
+          verdict:         aiResult.data?.verdict,
+          violations:      aiResult.data?.violations ?? [],
+          evidence_urls:   aiResult.evidenceUrls ?? [],
+          confidence:      aiResult.confidence,
+        },
+      });
+
+      if (saveResult.success) {
+        return {
+          ...aiResult,
+          data: {
+            ...aiResult.data,
+            draft_id:      saveResult.data?.draft_id,
+            preview_token: saveResult.data?.preview_token,
+            preview_url:   saveResult.data?.preview_url,
+            version:       saveResult.data?.version,
+          },
+        };
+      }
+    }
+
+    return aiResult;
   }
 
   /**

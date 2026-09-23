@@ -21,18 +21,18 @@ interface GroupChatViewProps {
 }
 
 const AGENT_PERSONAS: Record<string, { name: string; role: string; color: string }> = {
-  PRIME:    { name: 'PRIME',    role: 'كبير مهندسي التصميم والتطوير', color: 'purple' },
-  Vanguard: { name: 'Vanguard', role: 'مدير العمليات والمبيعات', color: 'emerald' },
-  Analyst:  { name: 'Analyst',  role: 'محلل البيانات والتقارير', color: 'blue' },
-  Coder:    { name: 'Coder',    role: 'مطور الكود والتقنية', color: 'cyan' },
-  Ops:      { name: 'Ops',      role: 'مراقب العمليات والنظام', color: 'yellow' },
-  Security: { name: 'Security', role: 'حارس الأمن والتدقيق', color: 'red' },
-  Learner:  { name: 'Learner',  role: 'محرك التعلم الذاتي', color: 'indigo' },
+  'QAYYIM-CORE': { name: 'قيّم الدار', role: 'قائد سرب القيّم — إطلالة الموقع', color: 'amber' },
+  Vanguard:      { name: 'Vanguard',   role: 'مدير العمليات والمبيعات',          color: 'emerald' },
+  Analyst:       { name: 'Analyst',    role: 'محلل البيانات والتقارير',           color: 'blue' },
+  Coder:         { name: 'Coder',      role: 'مطور الكود والتقنية',              color: 'cyan' },
+  Ops:           { name: 'Ops',        role: 'مراقب العمليات والنظام',            color: 'yellow' },
+  Security:      { name: 'Security',   role: 'حارس الأمن والتدقيق',             color: 'red' },
+  Learner:       { name: 'Learner',    role: 'محرك التعلم الذاتي',               color: 'indigo' },
 };
 
 export function GroupChatView({
   conversationId = 'group-chat',
-  participants = ['PRIME', 'Vanguard', 'Analyst', 'Coder', 'Ops', 'Security', 'Learner', 'You'],
+  participants = ['QAYYIM-CORE', 'Vanguard', 'Analyst', 'Coder', 'Ops', 'Security', 'Learner', 'You'],
   onClose,
 }: GroupChatViewProps) {
   const [messages, setMessages] = useState<Message[]>([
@@ -261,7 +261,7 @@ export function GroupChatView({
                 handleSendMessage();
               }
             }}
-            placeholder="اكتب رسالتك للوكلاء... (مثال: @PRIME صمم لي طاولة خشبية)"
+            placeholder="اكتب رسالتك للوكلاء... (مثال: @قيّم افحص الموقع)"
             disabled={isLoading}
             className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#C5A059]/50"
           />

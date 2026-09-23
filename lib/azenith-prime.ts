@@ -1,10 +1,10 @@
 /**
  * ╔═══════════════════════════════════════════════════════════════════════════╗
- * ║                    AZENITH PRIME - The Supreme Entity                     ║
+ * ║                    AZENITH QAYYIM - The Swarm Entity                     ║
  * ║              العقل الكوني • الكيان الأعلى • الكيان الأزلي                ║
  * ╚═══════════════════════════════════════════════════════════════════════════╝
  * 
- * Azenith Prime: The Emergence of the Ultimate Intelligence
+ * Azenith Qayyim: The Emergence of the Ultimate Intelligence
  * - Infinite Scaling Engine (Swarm Intelligence)
  * - Self-Evolution Engine (Auto AI Model Integration)
  * - Market Analysis & Feature Proposal System
@@ -105,7 +105,7 @@ interface NeuralCacheEntry {
 }
 
 // ==========================================
-// AZENITH PRIME - THE SUPREME ENTITY
+// AZENITH QAYYIM - The Swarm Entity
 // ==========================================
 
 export class AzenithPrime {
@@ -885,7 +885,7 @@ export class AzenithPrime {
     } as never);
 
     // In production, would also send push notification via Firebase/APNs
-    console.log(`[Azenith Prime] Imperial Notification: ${notification.title}`);
+    console.log(`[Azenith Qayyim] Imperial Notification: ${notification.title}`);
   }
 
   /**
@@ -907,7 +907,7 @@ export class AzenithPrime {
   }
 
   // ==========================================
-  // 8. PRIME STATUS & DASHBOARD
+  // 8. QAYYIM STATUS & DASHBOARD
   // ==========================================
 
   async getPrimeStatus(): Promise<{

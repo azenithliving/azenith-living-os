@@ -4,6 +4,7 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { createQayyimDraft } from "@/lib/qayyim-ops";
 
 const QAYYIM_SEO_SYSTEM_PROMPT = `أنت قيّم الدار - الظهور والبحث.
 
@@ -94,33 +95,61 @@ export class QayyimSeoAgent extends QayyimAgentBase {
   }
 
   /**
-   * Fix discovered SEO issues
+   * Fix discovered SEO issues — يُصلح ويحفظ مسودة schema في qayyim_drafts
    */
   async fixSEOIssues(params: {
     analysisId?: string;
     url: string;
-    issueCodes?: string[]; // Specific issues to fix
+    issueCodes?: string[];
     autoFixAll?: boolean;
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `seo_fix_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
+
     const task: QayyimTask = {
       id: taskId,
       type: "seo_fix",
       title: `إصلاح مشاكل SEO لـ ${params.url}`,
-      description: params.autoFixAll 
+      description: params.autoFixAll
         ? `أصلح كل المشاكل المكتشفة تلقائياً`
-        : `أصلح المشاكل: ${params.issueCodes?.join(', ') || 'الحرجة فقط'}`,
+        : `أصلح المشاكل: ${params.issueCodes?.join(", ") || "الحرجة فقط"}`,
       context: { ...params.context, ...params, action: "fix" },
       priority: "critical",
     };
 
-    return this.process(task);
+    const aiResult = await this.process(task);
+
+    // حفظ الإصلاحات كمسودة في qayyim_drafts
+    if (aiResult.success) {
+      const schema = aiResult.data?.schema;
+      const fixes  = aiResult.data?.issues ?? aiResult.suggestions ?? [];
+
+      await createQayyimDraft({
+        targetTable: "site_sections",
+        targetId:    "seo_fixes",
+        targetPath:  params.url,
+        proposed: {
+          seo_fixes:  fixes,
+          schema_jsonld: schema ?? null,
+          url:        params.url,
+          agent:      this.agentKey,
+          auto_fix:   params.autoFixAll ?? false,
+        },
+        draftType: "seo_fix",
+        createdBy: this.agentKey,
+        companyId: params.context?.company_id ?? this.companyId,
+        metadata: {
+          evidence_urls: aiResult.evidenceUrls ?? [],
+          issues_count:  Array.isArray(fixes) ? fixes.length : 0,
+        },
+      });
+    }
+
+    return aiResult;
   }
 
   /**
-   * Generate Schema.org structured data
+   * Generate Schema.org — يحفظ JSON-LD في qayyim_drafts
    */
   async generateSchema(params: {
     pageType: 'Service' | 'Product' | 'Article' | 'FAQPage' | 'BreadcrumbList' | 'Organization' | 'LocalBusiness';
@@ -129,7 +158,7 @@ export class QayyimSeoAgent extends QayyimAgentBase {
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `schema_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
+
     const task: QayyimTask = {
       id: taskId,
       type: "schema_generate",
@@ -139,7 +168,27 @@ export class QayyimSeoAgent extends QayyimAgentBase {
       priority: "high",
     };
 
-    return this.process(task);
+    const aiResult = await this.process(task);
+
+    // احفظ الـ schema كمسودة
+    if (aiResult.success) {
+      const schemaData = aiResult.data?.schema ?? aiResult.output;
+      await createQayyimDraft({
+        targetTable: "site_sections",
+        targetId:    `schema_${params.pageType.toLowerCase()}`,
+        targetPath:  params.pagePath,
+        proposed: {
+          schema_type:  params.pageType,
+          schema_jsonld: schemaData,
+          page_path:    params.pagePath,
+        },
+        draftType: "schema_generate",
+        createdBy: this.agentKey,
+        companyId: params.context?.company_id ?? this.companyId,
+      });
+    }
+
+    return aiResult;
   }
 
   /**
