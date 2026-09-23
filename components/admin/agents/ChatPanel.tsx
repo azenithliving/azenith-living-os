@@ -293,6 +293,16 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {agentKey.toLowerCase() === 'prime' && (
+            <a
+              href="/admin/qayyim"
+              title="فتح استوديو سرب قيّم الدار"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-semibold hover:bg-amber-500/25 transition-colors"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              الاستوديو
+            </a>
+          )}
           <Sparkles className={`w-4 h-4 ${colors.text}`} />
           <span className={`w-2 h-2 rounded-full ${isTyping ? `${colors.accent} animate-pulse` : 'bg-white/20'}`} />
         </div>

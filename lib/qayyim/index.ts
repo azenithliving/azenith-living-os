@@ -40,3 +40,22 @@ export type { SyncEvent, SyncEventType, SyncSubscription, AdvisoryLock } from ".
 
 export { SwarmLearnings, swarmLearnings } from "./memory/SwarmLearnings";
 export type { SwarmLearning, LearningSearchOptions, LearningApplication, LearningStats } from "./memory/SwarmLearnings";
+
+// A/B Testing Engine
+export {
+  createExperiment,
+  startExperiment,
+  pauseExperiment,
+  getExperiment,
+  listExperiments,
+  resolveActiveExperiment,
+  recordEvent,
+  getExperimentStats,
+  concludeExperiment,
+  assignArm,
+} from "./ab-testing";
+export type { Experiment, CreateExperimentInput, ExperimentStats } from "./ab-testing";
+
+// Quality Benchmarks
+export { BENCHMARKS, runBenchmark, runAllBenchmarks, listBenchmarks } from "./benchmarks";
+export type { BenchmarkResult, BenchmarkDefinition, BenchmarkSample } from "./benchmarks";

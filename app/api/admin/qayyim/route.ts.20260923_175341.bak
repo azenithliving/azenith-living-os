@@ -615,29 +615,6 @@ async function handleStats(body: any) {
   });
 }
 
-async function handleListDrafts(body: any) {
-  const companyId = await getCompanyId(body.company_id);
-  const status = body.status as string | undefined;
-
-  const { supabaseServer } = await import('@/lib/dal/unified-supabase');
-  let query = supabaseServer
-    .from('qayyim_drafts')
-    .select('id, created_by, target_path, target_table, target_id, draft_type, status, version, proposed, previous, preview_token, created_at')
-    .order('created_at', { ascending: false })
-    .limit(100);
-
-  if (companyId) query = query.eq('company_id', companyId);
-  if (status) query = query.eq('status', status);
-
-  const { data, error } = await query;
-
-  if (error) {
-    return NextResponse.json({ success: true, drafts: [], warning: error.message });
-  }
-
-  return NextResponse.json({ success: true, drafts: data || [] });
-}
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get('action');

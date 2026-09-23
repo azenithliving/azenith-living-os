@@ -528,6 +528,14 @@ export default function AdminPage() {
               <p className="text-sm text-white/60 mt-2">كل الوكلاء والمهام والتصنيع في مكان واحد</p>
             </Link>
 
+            <Link href="/admin/qayyim" className="group rounded-2xl border-2 border-amber-500/40 bg-amber-500/10 p-6 transition-all hover:border-amber-400 hover:bg-amber-500/15">
+              <div className="rounded-xl bg-amber-500/30 p-3 w-fit mb-4">
+                <Brain className="w-6 h-6 text-amber-300" />
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-amber-300 transition-colors">قيّم الدار — استوديو السرب</h3>
+              <p className="text-sm text-white/60 mt-2">8 وكلاء متخصصون: تدقيق، مسودات، تجارب A/B، جودة ومراقبة</p>
+            </Link>
+
             <Link href="/admin/sales" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
               <div className="rounded-xl bg-[#C5A059]/20 p-3 w-fit mb-4">
                 <TrendingUp className="w-6 h-6 text-[#C5A059]" />

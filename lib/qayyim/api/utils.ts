@@ -165,6 +165,111 @@ export const SyncSubscribeSchema = z.object({
   filter: z.record(z.string(), z.any()).optional(),
 });
 
+export const TelemetrySchema = z.object({
+  action: z.enum(['analyze_behavior', 'exit_rate_report', 'create_goal', 'get_goals']).default('analyze_behavior'),
+  page_path: z.string().optional(),
+  section_key: z.string().optional(),
+  time_range: z.enum(['1h', '24h', '7d', '30d']).optional(),
+  metrics: z.array(z.enum(['exit_rate', 'scroll_depth', 'time_on_section', 'hover_duration', 'click_through', 'conversion_rate'])).optional(),
+  threshold: z.number().optional(),
+  goal: z.object({
+    name: z.string(),
+    target_metric: z.enum(['exit_rate', 'scroll_depth', 'conversion_rate', 'time_on_section']),
+    target_value: z.number(),
+    deadline_days: z.number().optional(),
+  }).optional(),
+  company_id: z.string().optional(),
+});
+
+export const ABTestSchema = z.object({
+  action: z.enum(['design', 'predict_impact']).default('design'),
+  hypothesis: z.string().optional(),
+  page_path: z.string(),
+  section_key: z.string(),
+  control_version: z.any().optional(),
+  variant_version: z.any().optional(),
+  success_metric: z.enum(['exit_rate', 'scroll_depth', 'conversion_rate', 'time_on_section']).optional(),
+  minimum_detectable_effect: z.number().optional(),
+  duration_days: z.number().optional(),
+  proposed_change: z.string().optional(),
+  historical_patterns: z.array(z.string()).optional(),
+  company_id: z.string().optional(),
+});
+
+export const QaSchema = z.object({
+  action: z.enum(['full_suite', 'e2e_smoke', 'visual_regression', 'accessibility', 'load_test', 'security_scan', 'cross_browser']).default('full_suite'),
+  staging_url: z.string().optional(),
+  suites: z.array(z.enum(['e2e', 'visual', 'a11y', 'load', 'security'])).optional(),
+  test_paths: z.array(z.string()).optional(),
+  base_url: z.string().optional(),
+  headed: z.boolean().optional(),
+  pages: z.array(z.object({
+    path: z.string(),
+    name: z.string(),
+    viewport: z.enum(['mobile', 'tablet', 'desktop']).optional(),
+  })).optional(),
+  pages_simple: z.array(z.string()).optional(),
+  threshold: z.number().optional(),
+  update_baselines: z.boolean().optional(),
+  standard: z.enum(['WCAG21AA', 'WCAG21AAA', 'Section508']).optional(),
+  include_best_practices: z.boolean().optional(),
+  scenarios: z.array(z.object({
+    name: z.string(),
+    path: z.string(),
+    method: z.enum(['GET', 'POST']),
+    body: z.any().optional(),
+  })).optional(),
+  stages: z.array(z.object({
+    duration: z.string(),
+    users: z.number(),
+  })).optional(),
+  thresholds: z.object({
+    p95: z.number().optional(),
+    p99: z.number().optional(),
+    errorRate: z.number().optional(),
+  }).optional(),
+  target_url: z.string().optional(),
+  checks: z.array(z.enum(['headers', 'csp', 'cookies', 'rate_limit', 'ssl', 'cors'])).optional(),
+  browsers: z.array(z.enum(['chromium', 'firefox', 'webkit'])).optional(),
+  devices: z.array(z.enum(['mobile', 'tablet', 'desktop'])).optional(),
+  company_id: z.string().optional(),
+});
+
+export const PerfSchema = z.object({
+  action: z.enum(['performance_budgets', 'bundle_analysis', 'dependency_audit', 'code_review', 'security_code_scan', 'luxury_score', 'revenue_correlation', 'weekly_report']).default('performance_budgets'),
+  budgets: z.object({
+    lcp: z.number().optional(),
+    tbt: z.number().optional(),
+    cls: z.number().optional(),
+    fid: z.number().optional(),
+    fcp: z.number().optional(),
+  }).optional(),
+  page_path: z.string().optional(),
+  include_chunks: z.boolean().optional(),
+  threshold_kb: z.number().optional(),
+  check_vulnerabilities: z.boolean().optional(),
+  check_outdated: z.boolean().optional(),
+  check_unused: z.boolean().optional(),
+  check_licenses: z.boolean().optional(),
+  scope: z.enum(['full', 'changed_files', 'specific_paths']).optional(),
+  paths: z.array(z.string()).optional(),
+  check_xss: z.boolean().optional(),
+  check_injection: z.boolean().optional(),
+  check_secrets: z.boolean().optional(),
+  check_csp: z.boolean().optional(),
+  luxury_scope: z.enum(['full_site', 'page', 'section']).optional(),
+  weights: z.object({
+    identity: z.number().optional(),
+    behavior: z.number().optional(),
+    conversion: z.number().optional(),
+    revenue: z.number().optional(),
+  }).optional(),
+  time_range: z.enum(['7d', '30d', '90d']).optional(),
+  segment_by: z.enum(['page', 'section', 'draft_version', 'traffic_source']).optional(),
+  week_start: z.string().optional(),
+  company_id: z.string().optional(),
+});
+
 // ============================================
 // Helper Functions
 // ============================================
