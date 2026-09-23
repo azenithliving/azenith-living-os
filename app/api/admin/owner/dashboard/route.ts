@@ -252,7 +252,7 @@ async function getAgentStats(companyId: string, startOfMonth: string, startOfTod
     .select('id')
     .eq('company_id', companyId)
     .eq('agent_key', 'vanguard')
-    .single();
+    .maybeSingle();
 
   // Get tasks stats
   const { data: tasksData } = await supabaseServer

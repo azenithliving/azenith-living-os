@@ -318,22 +318,23 @@ export default function AgentsPage() {
                   </a>
                   <button
                     onClick={() => setShowGroupChat(true)}
-                    className="px-4 py-2 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg cursor-pointer"
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg cursor-pointer"
                   >
                     <MessageSquare className="w-4 h-4" />
-                    محادثة القائد
+                    محادثة جماعية
                   </button>
                 </div>
               </div>
 
-              {/* سرب القيّم — 8 وكلاء */}
+              {/* سرب القيّم — القائد فقط، الباقون يعملون في الخلفية */}
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-xs font-bold text-amber-400">👑 سرب قيّم الدار</span>
-                  <span className="text-[10px] text-white/30 font-mono bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">8 وكلاء · إطلالة الموقع</span>
+                  <span className="text-[10px] text-white/30 font-mono bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">8 وكلاء يعملون خفياً · القائد هو واجهتك الوحيدة</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {ENTERPRISE_AGENTS.filter(a => a.key.startsWith('qayyim-')).map(agent => {
+                {/* القائد — البطاقة الرئيسية */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {ENTERPRISE_AGENTS.filter(a => a.key === 'qayyim-core').map(agent => {
                     const st = agentStatuses[agent.key];
                     return (
                       <AgentTeamCard
@@ -354,12 +355,37 @@ export default function AgentsPage() {
                       />
                     );
                   })}
+                  {/* بطاقة السرب الكامل */}
+                  <div className="border rounded-[2rem] p-5 border-amber-500/20 bg-amber-500/[0.03] flex flex-col justify-between space-y-4">
+                    <div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-2xl p-2 rounded-2xl bg-white/5 border border-white/10">🧠</span>
+                        <div>
+                          <h3 className="font-black text-base text-white">السرب الكامل</h3>
+                          <p className="text-[11px] text-white/50">7 وكلاء متخصصين خلف القائد</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {ENTERPRISE_AGENTS.filter(a => a.key.startsWith('qayyim-') && a.key !== 'qayyim-core').map(a => (
+                          <span key={a.key} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
+                            {a.icon} {a.name.replace('قيّم الدار — ', '')}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowGroupChat(true)}
+                      className="w-full py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/25 text-xs text-amber-300 font-bold transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <span>💬</span> تحدث مع القائد
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* الوكلاء الميدانيون */}
               <div>
-              <div className="flex items-center gap-2 mb-3 pt-4 border-t border-white/5">
+                <div className="flex items-center gap-2 mb-3 pt-4 border-t border-white/5">
                   <span className="text-xs font-bold text-white/60">⚙️ الوكلاء الميدانيون</span>
                   <span className="text-[10px] text-white/30 font-mono bg-white/5 px-2 py-0.5 rounded-full border border-white/10">6 وكلاء · عمليات ومبيعات وأمان</span>
                 </div>
@@ -437,7 +463,7 @@ export default function AgentsPage() {
       )}
       {showGroupChat && (
         <div className="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl flex items-center justify-center p-6" onClick={() => setShowGroupChat(false)}>
-          <div className="w-full max-w-2xl bg-[#111] border border-amber-500/20 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-4xl bg-[#111] border border-[#C5A059]/30 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
             <GroupChatView onClose={() => setShowGroupChat(false)} />
           </div>
         </div>

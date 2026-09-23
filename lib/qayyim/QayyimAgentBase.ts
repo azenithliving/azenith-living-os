@@ -6,7 +6,6 @@
 import { askOrchestratorMessages } from "@/lib/ai-orchestrator";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
-import { runUltimateTool, inferUltimateTool } from "@/lib/admin-tool-bridge";
 
 export interface QayyimTask {
   id: string;
@@ -222,6 +221,7 @@ export abstract class QayyimAgentBase {
     if (!this.canUseTool(toolName)) return null;
 
     try {
+      const { runUltimateTool } = await import("@/lib/admin-tool-bridge");
       const result = await runUltimateTool(toolName, {
         ...(task.context ?? {}),
         task_type:   task.type,

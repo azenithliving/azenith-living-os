@@ -798,4 +798,16 @@ export class MasterOrchestrator {
   }
 }
 
-export const masterOrchestrator = new MasterOrchestrator();
+// ── Lazy singleton — لا يُنشأ عند import بل عند أول استدعاء فعلي ──────
+let _masterOrchestrator: MasterOrchestrator | null = null;
+
+export const masterOrchestrator = {
+  execute: (...args: Parameters<MasterOrchestrator["execute"]>) => {
+    if (!_masterOrchestrator) _masterOrchestrator = new MasterOrchestrator();
+    return _masterOrchestrator.execute(...args);
+  },
+  streamExecute: (...args: Parameters<MasterOrchestrator["streamExecute"]>) => {
+    if (!_masterOrchestrator) _masterOrchestrator = new MasterOrchestrator();
+    return _masterOrchestrator.streamExecute(...args);
+  },
+};

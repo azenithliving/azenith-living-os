@@ -403,14 +403,16 @@ export default function AdminPage() {
             </h2>
             {Object.keys(mastermindData?.agents ?? {}).length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.keys(mastermindData.agents).map((agentKey, index) => (
+                {Object.keys(mastermindData.agents)
+                  .filter(k => !['prime'].includes(k)) // قيّم-كور بدل prime
+                  .map((agentKey, index) => (
                   <AgentStatusCard
                     key={agentKey}
-                    agentKey={agentKey}
-                    agentName={agentKey}
+                    agentKey={agentKey === 'prime' ? 'qayyim-core' : agentKey}
+                    agentName={agentKey === 'prime' ? 'قيّم الدار' : agentKey === 'qayyim-core' ? 'قيّم الدار' : agentKey}
                     agentRole="سجل المهام الفعلي"
                     color={index % 2 === 0 ? "purple" : "emerald"}
-                    icon={index % 2 === 0 ? "🧠" : "💼"}
+                    icon={agentKey === 'qayyim-core' || agentKey === 'prime' ? "👑" : "💼"}
                     mastermindData={mastermindData}
                   />
                 ))}
