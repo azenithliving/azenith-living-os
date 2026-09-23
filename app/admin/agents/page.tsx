@@ -318,10 +318,10 @@ export default function AgentsPage() {
                   </a>
                   <button
                     onClick={() => setShowGroupChat(true)}
-                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg cursor-pointer"
+                    className="px-4 py-2 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg cursor-pointer"
                   >
                     <MessageSquare className="w-4 h-4" />
-                    محادثة جماعية
+                    محادثة القائد
                   </button>
                 </div>
               </div>
@@ -359,7 +359,7 @@ export default function AgentsPage() {
 
               {/* الوكلاء الميدانيون */}
               <div>
-                <div className="flex items-center gap-2 mb-3 pt-4 border-t border-white/5">
+              <div className="flex items-center gap-2 mb-3 pt-4 border-t border-white/5">
                   <span className="text-xs font-bold text-white/60">⚙️ الوكلاء الميدانيون</span>
                   <span className="text-[10px] text-white/30 font-mono bg-white/5 px-2 py-0.5 rounded-full border border-white/10">6 وكلاء · عمليات ومبيعات وأمان</span>
                 </div>
@@ -437,7 +437,7 @@ export default function AgentsPage() {
       )}
       {showGroupChat && (
         <div className="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl flex items-center justify-center p-6" onClick={() => setShowGroupChat(false)}>
-          <div className="w-full max-w-4xl bg-[#111] border border-[#C5A059]/30 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-2xl bg-[#111] border border-amber-500/20 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
             <GroupChatView onClose={() => setShowGroupChat(false)} />
           </div>
         </div>

@@ -294,23 +294,54 @@ export class AgentOrchestrator {
 
       const promptWithToolContext = toolContextStr ? `${message}\n${toolContextStr}` : message;
 
-      // Qayyim Swarm agents - use their native chat method
-      const qayyimAgents = [
-        "qayyim-core", "qayyim-cont", "qayyim-vis", "qayyim-seo",
-        "qayyim-ux", "qayyim-ana", "qayyim-dev", "qayyim-qa"
-      ];
+      // ══════════════════════════════════════════════════════════════
+      // قيّم-كور: ينسق السرب الكامل عبر MasterOrchestrator
+      // المستخدم يتكلم مع القائد فقط — السرب يعمل خفياً في الخلفية
+      // ══════════════════════════════════════════════════════════════
+      if (selectedAgent === "qayyim-core") {
+        try {
+          const swarmResult = await masterOrchestrator.execute(promptWithToolContext, {
+            company_id:  resolvedCompanyId,
+            source:      context?.source ?? "chat",
+            orchestrate: true,
+          });
 
-      if (qayyimAgents.includes(selectedAgent)) {
+          if (swarmResult.success) {
+            response = swarmResult.response;
+            // أضف أسماء الوكلاء الذين عملوا خفية في الـ metadata
+            const swarmAgents = swarmResult.draft?.sections?.map((s: any) => s.agentKey) ?? [];
+            metadata.actionItems = swarmResult.evidenceUrls;
+            (metadata as any).swarmAgents    = [...new Set(swarmAgents)];
+            (metadata as any).taskId         = swarmResult.taskId;
+            (metadata as any).version        = swarmResult.version;
+            (metadata as any).draft          = swarmResult.draft ?? null;
+          } else {
+            // السرب فشل — fallback لقيّم-كور مباشرة
+            const agentInstance = this.agents["qayyim-core"];
+            response = agentInstance
+              ? await agentInstance.chat(promptWithToolContext, context)
+              : `⚠️ السرب غير متاح حالياً: ${swarmResult.response}`;
+          }
+        } catch (swarmErr: any) {
+          console.warn("[AgentOrchestrator] Swarm failed, falling back to core:", swarmErr?.message);
+          const agentInstance = this.agents["qayyim-core"];
+          response = agentInstance
+            ? await agentInstance.chat(promptWithToolContext, context)
+            : `⚠️ خطأ في السرب: ${swarmErr.message}`;
+        }
+      }
+      // ══════════════════════════════════════════════════════════════
+      // وكلاء قيّم الآخرون — يُستدعَون مباشرة (للمحادثات الفردية)
+      // ══════════════════════════════════════════════════════════════
+      else if (["qayyim-cont","qayyim-vis","qayyim-seo","qayyim-ux","qayyim-ana","qayyim-dev","qayyim-qa"].includes(selectedAgent)) {
         const agentInstance = this.agents[selectedAgent];
         if (agentInstance && typeof agentInstance.chat === 'function') {
           response = await agentInstance.chat(promptWithToolContext, context);
         } else {
-          // Fallback to AI
-          const persona = AGENT_PERSONAS[selectedAgent];
-          const systemPrompt = persona?.prompt || AGENT_PERSONAS["qayyim-core"].prompt;
+          const persona = AGENT_PERSONAS[selectedAgent] ?? AGENT_PERSONAS["qayyim-core"];
           const messages = [
-            { role: "system" as const, content: systemPrompt },
-            { role: "user" as const, content: promptWithToolContext },
+            { role: "system" as const, content: persona.prompt },
+            { role: "user"   as const, content: promptWithToolContext },
           ];
           response = await this.callAI(messages);
         }
