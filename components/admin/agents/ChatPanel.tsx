@@ -32,7 +32,7 @@ interface ChatPanelProps {
 }
 
 const AGENT_METADATA: Record<string, { name: string; role: string; icon: string; color: string }> = {
-  prime:    { name: 'PRIME',    role: 'مهندس التصميم والتطوير', icon: '🧠', color: 'purple' },
+  prime:    { name: 'قيّم الدار', role: 'قيّم إطلالة أزينث على الموقع', icon: '🧠', color: 'purple' },
   vanguard: { name: 'Vanguard', role: 'مدير العمليات والمبيعات', icon: '💼', color: 'emerald' },
   analyst:  { name: 'Analyst',  role: 'محلل البيانات والتقارير', icon: '📊', color: 'blue' },
   coder:    { name: 'Coder',    role: 'مطور الكود والتقنية',    icon: '💻', color: 'cyan' },
@@ -43,9 +43,9 @@ const AGENT_METADATA: Record<string, { name: string; role: string; icon: string;
 
 const AGENT_MISSIONS: Record<string, string[]> = {
   prime: [
-    'احسب BOM لصالون إمبراطوري',
-    'فحص مخزون خامات التصنيع',
-    'إنشاء أمر تشغيل جديد',
+    'افحص صحة محتوى الصفحة الرئيسية',
+    'اعرض المنتجات',
+    'حلّل SEO للموقع',
   ],
   vanguard: [
     'اعرض قائمة العملاء',

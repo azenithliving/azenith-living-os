@@ -4,6 +4,14 @@ import { z } from "zod";
 
 const chatSchema = z.object({
   agent_key: z.enum([
+    "qayyim-core",
+    "qayyim-cont",
+    "qayyim-vis",
+    "qayyim-seo",
+    "qayyim-ux",
+    "qayyim-ana",
+    "qayyim-dev",
+    "qayyim-qa",
     "prime",
     "vanguard",
     "analyst",
@@ -67,8 +75,15 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const [prime, vanguard, analyst, coder, ops, security, learner] = await Promise.all([
-      agentOrchestrator.getAgentStatus("prime"),
+    const [core, cont, vis, seo, ux, ana, dev, qa, vanguard, analyst, coder, ops, security, learner] = await Promise.all([
+      agentOrchestrator.getAgentStatus("qayyim-core"),
+      agentOrchestrator.getAgentStatus("qayyim-cont"),
+      agentOrchestrator.getAgentStatus("qayyim-vis"),
+      agentOrchestrator.getAgentStatus("qayyim-seo"),
+      agentOrchestrator.getAgentStatus("qayyim-ux"),
+      agentOrchestrator.getAgentStatus("qayyim-ana"),
+      agentOrchestrator.getAgentStatus("qayyim-dev"),
+      agentOrchestrator.getAgentStatus("qayyim-qa"),
       agentOrchestrator.getAgentStatus("vanguard"),
       agentOrchestrator.getAgentStatus("analyst"),
       agentOrchestrator.getAgentStatus("coder"),
@@ -80,7 +95,14 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: {
-        prime,
+        "qayyim-core": core,
+        "qayyim-cont": cont,
+        "qayyim-vis": vis,
+        "qayyim-seo": seo,
+        "qayyim-ux": ux,
+        "qayyim-ana": ana,
+        "qayyim-dev": dev,
+        "qayyim-qa": qa,
         vanguard,
         analyst,
         coder,

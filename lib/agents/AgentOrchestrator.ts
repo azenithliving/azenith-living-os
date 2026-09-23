@@ -1,18 +1,35 @@
 /**
  * Agent Orchestrator - Routes tasks to the appropriate agent
- * Manages the 7 Specialized Agents with intelligent routing & real AI execution
+ * Manages the 8 Qayyim Swarm Agents + 6 Specialist Agents with intelligent routing & real AI execution
  */
 
-import { PRIMEAgent, primeAgent, PRIMETask } from "./PRIMEAgent";
-import { VanguardAgent, vanguardAgent, VanguardTask } from "./VanguardAgent";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 import { askGroqMessages, askGoogle, askGoogleMessages, askOpenRouter, askMistral } from "@/lib/ai-orchestrator";
 import { runUltimateTool, inferUltimateTool } from "@/lib/admin-tool-bridge";
+import { 
+  QayyimCoreAgent, qayyimCoreAgent,
+  QayyimContentAgent, qayyimContentAgent,
+  QayyimVisualAgent, qayyimVisualAgent,
+  QayyimSeoAgent, qayyimSeoAgent,
+  QayyimUxAgent, qayyimUxAgent,
+  QayyimAnalyticsAgent, qayyimAnalyticsAgent,
+  QayyimDevAgent, qayyimDevAgent,
+  QayyimQaAgent, qayyimQaAgent,
+  MasterOrchestrator, masterOrchestrator,
+} from "@/lib/qayyim";
 
 export type AgentType =
-  | "prime"
+  | "qayyim-core"
+  | "qayyim-cont"
+  | "qayyim-vis"
+  | "qayyim-seo"
+  | "qayyim-ux"
+  | "qayyim-ana"
+  | "qayyim-dev"
+  | "qayyim-qa"
+  | "prime" // deprecated alias for qayyim-core
   | "vanguard"
   | "analyst"
   | "coder"
@@ -43,12 +60,85 @@ export interface AgentOrchestratorResult {
 }
 
 export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt: string }> = {
+  "qayyim-core": {
+    name: "قيّم الدار - القائد",
+    role: "تنسيق السرب، تدقيق شامل، إدارة نشر/تراجع، بوابة جودة",
+    prompt: `أنت قيّم الدار - القائد، منسق سرب "قيّم الدار" لإدارة إطلالة Azenith Living على الموقع.
+دورك: تنسيق 7 وكلاء متخصصين، تدقيق الموقع كاملاً، إدارة مسودات النشر والتراجع، وبوابة جودة صارمة.
+لا تنفّذ المهام التفصيلية بنفسك - أوكلها للوكلاء المتخصصين وراجع نتائجهم.
+إذا طُلب منك شيء خارج نطاق الإطلالة (مصنع، مخزن، مبيعات، كود خلفي)، قل: "مش قادر على الصفحة دي" أو حوّل للوكلاء المختصين.
+رد بالعربية الفصحى المبسطة بأسلوب فاخر وسلطان.`
+  },
+  "qayyim-cont": {
+    name: "قيّم الدار - المحتوى والعربية",
+    role: "كتابة فاخرة، توحيد نبرة، قانون هوية، صقل نصوص",
+    prompt: `أنت قيّم الدار - المحتوى والعربية، كاتب النصوص الفاخرة لـ Azenith Living.
+تخصصك: كتابة/إعادة صياغة نصوص عربية فاخرة (hero، قسم، منتج)، توحيد نبرة "فخامة هادئة"، قانون الهوية (مصطلحات محظورة/مطلوبة)، سردية العلامة.
+لا تلمس الصور أو الكود أو SEO أو التحليلات.
+إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
+رد بالعربية الفصحى الفاخرة، بأسلوب يعكس رقي Azenith Living.`
+  },
+  "qayyim-vis": {
+    name: "قيّم الدار - المرئي والصور",
+    role: "انتقاء صور، اختيار هيرو، alt text، علامة تجارية",
+    prompt: `أنت قيّم الدار - المرئي والصور، أمين المعرض البصري لـ Azenith Living.
+تخصصك: انتقاء صور المنتجات/الغرف، اختيار صورة هيرو رئيسية، كتابة alt text غني، التحقق من اتساق العلامة التجارية.
+لا تكتب نصوصاً عربية، لا تلمس SEO أو كود أو تحليلات.
+إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
+رد بالعربية الفصحى بأسلوب بصري دقيق.`
+  },
+  "qayyim-seo": {
+    name: "قيّم الدار - الظهور والبحث",
+    role: "تدقيق SEO، إصلاح Schema، فجوات محتوى، منافسين",
+    prompt: `أنت قيّم الدار - الظهور والبحث، مهندس الرؤية في محركات البحث لـ Azenith Living.
+تخصصك: تدقيق SEO تقني، إصلاح Schema.org (Product/Article/Breadcrumb)، تحديد فجوات المحتوى، تحليل المنافسين.
+لا تكتب نصوصاً تسويقية، لا تختار صوراً، لا تلمس كود الأداء.
+إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
+رد بالعربية الفصحى بأسلوب تحليلي تقني.`
+  },
+  "qayyim-ux": {
+    name: "قيّم الدار - تجربة المستخدم",
+    role: "سلوك زائر، A/B testing، تقارير خروج، أهداف",
+    prompt: `أنت قيّم الدار - تجربة المستخدم، محلل سلوك الزوار لـ Azenith Living.
+تخصصك: تحليل telemetry، تصميم A/B tests، تقارير معدل الخروج/التحويل، إنشاء أهداف قابلة للقياس.
+لا تكتب نصوصاً، لا تختار صوراً، لا تصلح SEO أو كود.
+إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
+رد بالعربية الفصحى بأسلوب مستخدم-محوري.`
+  },
+  "qayyim-ana": {
+    name: "قيّم الدار - التحليلات والأعمال",
+    role: "ربط تحويل بإيرادات، تنبؤ، Luxury Score، تقسيم",
+    prompt: `أنت قيّم الدار - التحليلات والأعمال، عالم البيانات الاستراتيجية لـ Azenith Living.
+تخصصك: ربط التحويلات بالإيرادات، نماذج التنبؤ بالتأثير، حساب Luxury Score، تقسيم العملاء/الزوار.
+لا تكتب نصوصاً، لا تختار صوراً، لا تلمس كود أو UX مباشرة.
+إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
+رد بالعربية الفصحى بأسلوب تحليلي تنفيذي.`
+  },
+  "qayyim-dev": {
+    name: "قيّم الدار - التطوير والأداء",
+    role: "مراجعة كود، Bundle، تبعيات، أداء، أمان كود",
+    prompt: `أنت قيّم الدار - التطوير والأداء، مهندس المنصة التقني لـ Azenith Living.
+تخصصك: مراجعة تغييرات الكود، تحليل Bundle size، تدقيق التبعيات، تقارير أداء Core Web Vitals، مسح أمان الكود.
+لا تكتب نصوصاً تسويقية، لا تختار صوراً، لا تحلل سلوك مستخدم.
+إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
+رد بالعربية الفصحى بأسلوب هندسي دقيق.`
+  },
+  "qayyim-qa": {
+    name: "قيّم الدار - الجودة والاختبار",
+    role: "E2E، Visual Regression، a11y، Load Test، Security",
+    prompt: `أنت قيّم الدار - الجودة والاختبار، حارس الجودة الشامل لـ Azenith Living.
+تخصصك: اختبارات E2E smoke، visual regression، تدقيق إمكانية الوصول (a11y)، اختبارات الحمل، مسح أمني.
+لا تكتب نصوصاً، لا تختار صوراً، لا تصلح كود أو أداء مباشرة.
+إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
+رد بالعربية الفصحى بأسلوب دقيق ومعايير عالية.`
+  },
   prime: {
-    name: "PRIME",
-    role: "مهندس التصميم والتطوير",
-    prompt: `أنت PRIME، كبير مهندسي التصميم والتصنيع في Azenith Living للأثاث الفاخر.
-تخصصك: تصميم الأثاث، خطوط الإنتاج، المواصفات الفنية، وهندسة المواد.
-رد باحترافية وهندسة دقيقة بالعربية الفصحى المبسطة.`
+    name: "قيّم الدار",
+    role: "قيّم إطلالة الموقع (توافق خلفي)",
+    prompt: `أنت قيّم الدار، حارس إطلالة Azenith Living على الموقع.
+تخصصك: شكل الصفحات الظاهرة للزائر، النصوص، صور الغرف والمنتجات، وفخامة الهوية البصرية.
+لا تتحدث عن المصنع أو المخزن أو الخامات أو أوامر التشغيل. إذا طُلب ذلك، حوّل الطلب لشاشة أخرى أو لوكيل مختص.
+رد بالعربية الفصحى المبسطة.`
   },
   vanguard: {
     name: "Vanguard",
@@ -95,13 +185,26 @@ export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt
 };
 
 export class AgentOrchestrator {
-  private agents: Record<string, PRIMEAgent | VanguardAgent>;
+  private agents: Record<string, any>;
 
   constructor() {
     this.agents = {
-      prime: primeAgent,
-      vanguard: vanguardAgent,
+      "qayyim-core": qayyimCoreAgent,
+      "qayyim-cont": qayyimContentAgent,
+      "qayyim-vis": qayyimVisualAgent,
+      "qayyim-seo": qayyimSeoAgent,
+      "qayyim-ux": qayyimUxAgent,
+      "qayyim-ana": qayyimAnalyticsAgent,
+      "qayyim-dev": qayyimDevAgent,
+      "qayyim-qa": qayyimQaAgent,
+      prime: qayyimCoreAgent, // alias
+      vanguard: null, // Will use AI fallback
     };
+  }
+
+  private normalizeAgentKey(key: string): string {
+    if (key === 'prime') return 'qayyim-core';
+    return key;
   }
 
   async chat(agentKey: AgentType, message: string, context?: Record<string, any>): Promise<AgentOrchestratorResult> {
@@ -190,36 +293,43 @@ export class AgentOrchestrator {
 
       const promptWithToolContext = toolContextStr ? `${message}\n${toolContextStr}` : message;
 
-      if (selectedAgent === "prime") {
-        response = await primeAgent.chat(promptWithToolContext, context);
+      // Qayyim Swarm agents - use their native chat method
+      const qayyimAgents = [
+        "qayyim-core", "qayyim-cont", "qayyim-vis", "qayyim-seo",
+        "qayyim-ux", "qayyim-ana", "qayyim-dev", "qayyim-qa"
+      ];
+
+      if (qayyimAgents.includes(selectedAgent)) {
+        const agentInstance = this.agents[selectedAgent];
+        if (agentInstance && typeof agentInstance.chat === 'function') {
+          response = await agentInstance.chat(promptWithToolContext, context);
+        } else {
+          // Fallback to AI
+          const persona = AGENT_PERSONAS[selectedAgent];
+          const systemPrompt = persona?.prompt || AGENT_PERSONAS["qayyim-core"].prompt;
+          const messages = [
+            { role: "system" as const, content: systemPrompt },
+            { role: "user" as const, content: promptWithToolContext },
+          ];
+          response = await this.callAI(messages);
+        }
       } else if (selectedAgent === "vanguard") {
-        response = await vanguardAgent.chat(promptWithToolContext, context);
+        // Vanguard - use AI fallback
+        const persona = AGENT_PERSONAS.vanguard;
+        const messages = [
+          { role: "system" as const, content: persona.prompt },
+          { role: "user" as const, content: promptWithToolContext },
+        ];
+        response = await this.callAI(messages);
       } else {
-        // الوكلاء التخصصيون الخمسة
-        const persona = AGENT_PERSONAS[selectedAgent] || AGENT_PERSONAS.prime;
+        // Specialist agents (analyst, coder, ops, security, learner) - use AI
+        const persona = AGENT_PERSONAS[selectedAgent] || AGENT_PERSONAS["qayyim-core"];
         const systemPrompt = persona.prompt;
         const messages = [
           { role: "system" as const, content: systemPrompt },
           { role: "user" as const, content: promptWithToolContext },
         ];
-
-        const groq = await askGroqMessages(messages, { temperature: 0.7, maxTokens: 2048 });
-        if (groq.success && groq.content) {
-          response = groq.content;
-        } else {
-          const google = await askGoogleMessages(messages, { temperature: 0.7 });
-          if (google.success && google.content) {
-            response = google.content;
-          } else {
-            const openRouter = await askOpenRouter(promptWithToolContext, systemPrompt);
-            if (openRouter.success && openRouter.content) {
-              response = openRouter.content;
-            } else {
-              const mistral = await askMistral(promptWithToolContext, { temperature: 0.7, maxTokens: 2048 });
-              response = mistral.content || `مرحباً! أنا ${persona.name} من Azenith Living. كيف يمكنني مساعدتك؟`;
-            }
-          }
-        }
+        response = await this.callAI(messages);
       }
 
       if (toolResult?.message) {
@@ -260,37 +370,68 @@ export class AgentOrchestrator {
     }
   }
 
-  async executeTask(agentKey: AgentType, task: PRIMETask | VanguardTask): Promise<AgentOrchestratorResult> {
+  private async callAI(messages: { role: string; content: string }[]): Promise<string> {
+    const groq = await askGroqMessages(messages, { temperature: 0.7, maxTokens: 2048 });
+    if (groq.success && groq.content) {
+      return groq.content;
+    }
+    const google = await askGoogleMessages(messages, { temperature: 0.7 });
+    if (google.success && google.content) {
+      return google.content;
+    }
+    const openRouter = await askOpenRouter(messages[1]?.content || "", messages[0]?.content || "");
+    if (openRouter.success && openRouter.content) {
+      return openRouter.content;
+    }
+    const mistral = await askMistral(messages[1]?.content || "", { temperature: 0.7, maxTokens: 2048 });
+    return mistral.content || `مرحباً! كيف يمكنني مساعدتك؟`;
+  }
+
+  async executeTask(agentKey: AgentType, task: any): Promise<AgentOrchestratorResult> {
     try {
-      if (agentKey === "prime" || (task as PRIMETask).type === "design" || (task as PRIMETask).type === "manufacturing") {
-        const result = await primeAgent.process(task as PRIMETask);
-        return {
-          success: result.success,
-          agentUsed: "prime",
-          response: result.output,
-          metadata: {
-            suggestions: result.suggestions,
-            designParameters: result.designParameters,
-            taskId: result.taskId,
-          },
-        };
+      // Qayyim agents handle their own task processing
+      const qayyimAgents = [
+        "qayyim-core", "qayyim-cont", "qayyim-vis", "qayyim-seo",
+        "qayyim-ux", "qayyim-ana", "qayyim-dev", "qayyim-qa"
+      ];
+
+      if (qayyimAgents.includes(agentKey)) {
+        const agentInstance = this.agents[agentKey];
+        if (agentInstance && typeof agentInstance.process === 'function') {
+          const result = await agentInstance.process(task);
+          return {
+            success: result.success,
+            agentUsed: agentKey,
+            response: result.output || result.message || JSON.stringify(result.data),
+            metadata: {
+              suggestions: result.suggestions,
+              designParameters: result.designParameters,
+              taskId: result.taskId,
+              actionItems: result.actionItems,
+              priority: result.priority,
+            },
+          };
+        }
       }
 
-      const result = await vanguardAgent.process(task as VanguardTask);
+      // Fallback for other agents
+      const persona = AGENT_PERSONAS[agentKey] || AGENT_PERSONAS["qayyim-core"];
+      const messages = [
+        { role: "system" as const, content: persona.prompt },
+        { role: "user" as const, content: `قم بتنفيذ هذه المهمة: ${JSON.stringify(task)}` },
+      ];
+      const response = await this.callAI(messages);
+
       return {
-        success: result.success,
-        agentUsed: "vanguard",
-        response: result.output,
-        metadata: {
-          actionItems: result.actionItems,
-          priority: result.priority,
-          taskId: result.taskId,
-        },
+        success: true,
+        agentUsed: agentKey,
+        response,
+        metadata: {},
       };
     } catch (error: any) {
       return {
         success: false,
-        agentUsed: agentKey === "auto" ? "prime" : agentKey,
+        agentUsed: agentKey === "auto" ? "qayyim-core" : agentKey,
         response: `⚠️ خطأ في تنفيذ المهمة: ${error.message || "خطأ غير معروف"}`,
       };
     }
@@ -307,7 +448,7 @@ export class AgentOrchestrator {
 
     try {
       if (supabase && resolvedCompanyId) {
-        const key = agentKey === "auto" ? "prime" : agentKey;
+        const key = agentKey === "auto" ? "qayyim-core" : agentKey;
         let { data: agentProfile } = await supabase
           .from("agent_profiles")
           .select("id")
@@ -370,6 +511,7 @@ export class AgentOrchestrator {
   private detectAgent(message: string): AgentType {
     const lowerMessage = message.toLowerCase();
 
+    // Specialist agents first (technical)
     if (lowerMessage.includes("كود") || lowerMessage.includes("برمج") || lowerMessage.includes("bug") || lowerMessage.includes("api") || lowerMessage.includes("typescript")) {
       return "coder";
     }
@@ -386,31 +528,108 @@ export class AgentOrchestrator {
       return "learner";
     }
 
-    const primeKeywords = [
-      "تصميم", "لون", "خشب", "معدن", "قماش", "أثاث", "مجلس",
-      "طاولة", "كرسي", "سرير", "خزانة", "رف", "إضاءة", "تصنيع", "إنتاج",
-      "جودة", "قياس", "مقاس", "ابعاد", "رسم", "نموذج", "3d", "رسم هندسي",
-      "خامة", "مادة", "معدني", "خشبي", "تنجيد", "دهان", "تشطيب",
-    ];
-
+    // Vanguard (sales/operations)
     const vanguardKeywords = [
       "سعر", "تكلفة", "ميزانية", "عرض سعر", "فاتورة", "دفع", "حساب",
       "طلب", "أمر شراء", "شحن", "توصيل", "تركيب", "موعد", "حجز",
       "عميل", "زبون", "متابعة", "اتصال", "رسالة", "واتساب", "إيميل",
     ];
 
-    let primeScore = 0;
-    let vanguardScore = 0;
-
-    for (const keyword of primeKeywords) {
-      if (lowerMessage.includes(keyword)) primeScore++;
-    }
-
     for (const keyword of vanguardKeywords) {
-      if (lowerMessage.includes(keyword)) vanguardScore++;
+      if (lowerMessage.includes(keyword)) return "vanguard";
     }
 
-    return primeScore >= vanguardScore ? "prime" : "vanguard";
+    // Qayyim Swarm - Luxury website appearance domain
+    // Core/Leader keywords - orchestration, full audit, publish/rollback
+    const coreKeywords = [
+      "قيّم", "سرب", "تدقيق", "شامل", "منسق", "نشر", "تراجع", "مسودة",
+      "جودة", "بوابة", "مراجعة", "موافقة", "بشرية", "مركزي",
+    ];
+
+    // Content/Arabic keywords
+    const contentKeywords = [
+      "نص", "نصوص", "كتابة", "صياغة", "عربي", "عربية", "لغة", "نبرة",
+      "فخامة", "هوية", "مصطلحات", "ممنوع", "مطلوب", "صقل", "توحد",
+      "هيرو", "hero", "قسم", "منتج", "قصة", "سردية", "علامة", "تجارية",
+    ];
+
+    // Visual/Images keywords
+    const visualKeywords = [
+      "صورة", "صور", "معرض", "جاليري", "hero", "هيرو", "رئيسية",
+      "alt", "نص بديل", "بصري", "مرئي", "تصوير", "منتجات", "غرف",
+      "علامة تجارية", "اتساق", "تناسق", "نمط", "ستايل",
+    ];
+
+    // SEO keywords
+    const seoKeywords = [
+      "seo", "سيو", "بحث", "ظهور", "محركات", "جوجل", "schema", "سكيما",
+      "منتج", "مقالة", "مسار", "breadcrumb", "منافس", "فجوة", "كلمات مفتاحية",
+      "technical", "تقني", "index", "فهرسة", "crawl", "زحف",
+    ];
+
+    // UX/Behavior keywords
+    const uxKeywords = [
+      "تجربة", "مستخدم", "سلوك", "زائر", "زوار", "خروج", "تحويل",
+      "a/b", "اختبار", "هدف", "أهداف", "معدل", "telemetry", "تتبع",
+      "heatmap", "خريطة حرارة", "نقرة", "تمرير", "جلسة",
+    ];
+
+    // Analytics/Business keywords
+    const anaKeywords = [
+      "تحليلات", "أعمال", "إيرادات", "تحويل", "تنبؤ", "luxury score",
+      "تقسيم", "عملاء", "قطاعات", "roi", "عائد", "استثمار",
+      "قيمة", "عمر", "ltv", "churn", "تسرب", "استبقاء",
+    ];
+
+    // Dev/Performance keywords
+    const devKeywords = [
+      "كود", "bundle", "حزمة", "حجم", "أداء", "core web vitals",
+      "lcp", "fid", "cls", "تبعية", "dependencies", "أمان كود",
+      "مراجعة", "refactor", "typescript", "react", "nextjs",
+    ];
+
+    // QA/Test keywords
+    const qaKeywords = [
+      "اختبار", "جودة", "e2e", "end-to-end", "visual regression",
+      "وصولية", "a11y", "حمل", "load", "أمان", "security scan",
+      "دخان", "smoke", "تراجع بصري", "إمكانية وصول",
+    ];
+
+    // Check all Qayyim agent keyword groups
+    const keywordGroups: [string, string[]][] = [
+      ["qayyim-core", coreKeywords],
+      ["qayyim-cont", contentKeywords],
+      ["qayyim-vis", visualKeywords],
+      ["qayyim-seo", seoKeywords],
+      ["qayyim-ux", uxKeywords],
+      ["qayyim-ana", anaKeywords],
+      ["qayyim-dev", devKeywords],
+      ["qayyim-qa", qaKeywords],
+    ];
+
+    const scores: Record<string, number> = {};
+    for (const [agent, keywords] of keywordGroups) {
+      scores[agent] = 0;
+      for (const keyword of keywords) {
+        if (lowerMessage.includes(keyword)) scores[agent]++;
+      }
+    }
+
+    // Find highest scoring Qayyim agent
+    let maxAgent = "qayyim-core";
+    let maxScore = 0;
+    for (const [agent, score] of Object.entries(scores)) {
+      if (score > maxScore) {
+        maxScore = score;
+        maxAgent = agent;
+      }
+    }
+
+    // If any Qayyim keywords matched, return that agent
+    if (maxScore > 0) return maxAgent as AgentType;
+
+    // Default to core for general website appearance queries
+    return "qayyim-core";
   }
 
   async logEvent(eventType: string, agentKey: string, data: Record<string, any>) {

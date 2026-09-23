@@ -12,9 +12,16 @@
  * - Contextual learning
  */
 
-import { executeTool, TOOL_DEFINITIONS, ToolName } from "@/lib/real-tool-executor";
+import { executeTool, TOOL_REGISTRY, ToolName } from "@/lib/agent-tools/tool-registry";
 import { routeRequest, getBestModelForTask } from "@/lib/openrouter-service";
 import { storeMemory, getRecentMemories } from "./memory-store";
+
+// Legacy compatibility: expose TOOL_DEFINITIONS from registry
+const TOOL_DEFINITIONS = Object.values(TOOL_REGISTRY).map((t) => ({
+  name: t.name,
+  description: t.description,
+  parameters: t.parameters,
+}));
 
 export interface CommandResult {
   success: boolean;
@@ -121,7 +128,7 @@ export async function processCommand(
           toolResult: toolResult.data,
         },
         requiresApproval: toolResult.requiresApproval,
-        approvalRequestId: toolResult.approvalRequestId,
+        approvalRequestId: (toolResult as any).approvalId || (toolResult as any).approvalRequestId,
       };
     }
     

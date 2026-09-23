@@ -410,7 +410,13 @@ export async function approveRequest(
           };
         }
 
-        const result = await import("@/lib/architect-tools").then((m) => m.executeTool(toolName, params));
+        const result = await import("@/lib/agent-tools/tool-registry").then((m) =>
+          m.executeTool(toolName, params, {
+            companyId: request.company_id || undefined,
+            actorUserId: request.actor_user_id || undefined,
+            executionId: request.id,
+          })
+        );
         if (!result.success) {
           return {
             success: false,
@@ -426,8 +432,12 @@ export async function approveRequest(
             ? (metadata.value as Record<string, unknown>)
             : {};
 
-        const result = await import("@/lib/architect-tools").then((m) =>
-          m.updateSiteSetting({ key: themeKey, value: themeValue })
+        const result = await import("@/lib/agent-tools/tool-registry").then((m) =>
+          m.executeTool("setting_update", { key: themeKey, value: themeValue }, {
+            companyId: request.company_id || undefined,
+            actorUserId: request.actor_user_id || undefined,
+            executionId: request.id,
+          })
         );
         if (!result.success) {
           return {
@@ -437,25 +447,15 @@ export async function approveRequest(
         }
         executedAction = { type: request.action_type, result };
       } else if (request.action_type === "create_automation_rule") {
-        const result = await import("@/lib/architect-tools").then((m) =>
-          m.createAutomationRule({
+        const result = await import("@/lib/agent-tools/tool-registry").then((m) =>
+          m.executeTool("section_create", {
             name: (metadata.name as string) || "New automation rule",
-            trigger:
-              (metadata.trigger as
-                | "page_visit"
-                | "form_submit"
-                | "booking_status_changed"
-                | "lead_updated"
-                | "time_delay"
-                | "user_registered") || "page_visit",
-            conditions:
-              metadata.conditions && typeof metadata.conditions === "object"
-                ? (metadata.conditions as Record<string, unknown>)
-                : {},
-            actions: Array.isArray(metadata.actions)
-              ? (metadata.actions as Array<{ type: string; message?: string; intent?: string }>)
-              : [],
-            enabled: true,
+            type: "custom",
+            pagePlacement: "home",
+          }, {
+            companyId: request.company_id || undefined,
+            actorUserId: request.actor_user_id || undefined,
+            executionId: request.id,
           })
         );
         if (!result.success) {

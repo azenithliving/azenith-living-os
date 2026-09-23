@@ -8,22 +8,14 @@ import { ApprovalGate } from '@/components/admin/agents/ApprovalGate';
 import { ChatPanel } from '@/components/admin/agents/ChatPanel';
 import { GroupChatView } from '@/components/admin/agents/GroupChatView';
 import { UnifiedAssistant } from '@/components/admin/UnifiedAssistant';
-import { ManufacturingDashboard } from '@/components/admin/agents/ManufacturingDashboard';
-import { OrderPipeline } from '@/components/admin/agents/OrderPipeline';
-import { ProjectGantt } from '@/components/admin/agents/ProjectGantt';
-import { QualityCheckPanel } from '@/components/admin/agents/QualityCheckPanel';
-import { InventoryManager } from '@/components/admin/agents/InventoryManager';
-import { BOMTable } from '@/components/admin/agents/BOMTable';
 
-import { Brain, MessageSquare, ShieldAlert, Activity, Terminal, Sparkles, Factory, Users, Zap, Box, CheckCircle, Calendar, RefreshCw } from 'lucide-react';
+import { Brain, MessageSquare, ShieldAlert, Activity, Terminal, Sparkles, Users, Zap, RefreshCw } from 'lucide-react';
 import { QuickActionsPanel } from '@/components/admin/agents/QuickActionsPanel';
 import { ProactiveSuggestions } from '@/components/admin/agents/ProactiveSuggestions';
 import { AgentActionsFeed } from '@/components/admin/agents/AgentActionsFeed';
 import { AgentHealthPanel } from '@/components/admin/agents/AgentHealthPanel';
-import { EnterprisePipelineBar } from '@/components/admin/agents/EnterprisePipelineBar';
-import { EnterpriseScenarioModal } from '@/components/admin/agents/EnterpriseScenarioModal';
 
-type TabType = 'command' | 'assistant' | 'manufacturing' | 'teams';
+type TabType = 'command' | 'assistant' | 'teams';
 
 // ── نوع حالة الوكيل من API ────────────────────────────────────────────
 interface AgentStatus {
@@ -113,12 +105,10 @@ export default function AgentsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab]       = useState<TabType>('command');
-  const [loading, setLoading]           = useState(false);
   const [showGroupChat, setShowGroupChat]     = useState(false);
   const [activeChatAgent, setActiveChatAgent] = useState<string | null>(null);
   const [showPrimeChat, setShowPrimeChat]     = useState(false);
   const [showVanguardChat, setShowVanguardChat] = useState(false);
-  const [showScenarioModal, setShowScenarioModal] = useState(false);
   const [chatInitialMission, setChatInitialMission] = useState<string | undefined>(undefined);
 
   // إحصائيات التيمز الحقيقية
@@ -128,39 +118,17 @@ export default function AgentsPage() {
   });
   const [teamLoading, setTeamLoading] = useState(false);
 
-  // Manufacturing sub-tabs
-  const [mfgTab, setMfgTab] = useState<'overview' | 'schedule' | 'inventory' | 'quality'>('overview');
-  const [metrics, setMetrics] = useState({
-    total_orders: 0, in_production: 0, ready: 0,
-    delivered: 0,    revenue: 0,       profit: 0,
-  });
-
   // ── قراءة tab من URL ────────────────────────────────────────────────
   useEffect(() => {
-    const tab = searchParams?.get('tab') as TabType;
-    if (tab && ['command', 'assistant', 'manufacturing', 'teams'].includes(tab)) {
+    const tab = searchParams?.get('tab') as TabType | 'manufacturing';
+    if (tab === 'manufacturing') {
+      setActiveTab('teams');
+      return;
+    }
+    if (tab && ['command', 'assistant', 'teams'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
-
-  // ── إحصائيات التصنيع ───────────────────────────────────────────────
-  useEffect(() => {
-    if (activeTab !== 'manufacturing') return;
-    (async () => {
-      try {
-        const res  = await fetch('/api/admin/owner/dashboard');
-        const data = await res.json();
-        if (data.success) setMetrics({
-          total_orders:  data.data.this_month?.total_orders         || 0,
-          in_production: data.data.today?.orders_in_production      || 0,
-          ready:         data.data.today?.orders_ready              || 0,
-          delivered:     data.data.this_month?.completed_orders     || 0,
-          revenue:       data.data.this_month?.total_revenue        || 0,
-          profit:        data.data.this_month?.estimated_profit     || 0,
-        });
-      } catch { /* صامت */ }
-    })();
-  }, [activeTab]);
 
   // ── إحصائيات Teams من DB ───────────────────────────────────────────
   useEffect(() => {
@@ -201,7 +169,7 @@ export default function AgentsPage() {
             <h1 className="text-3xl font-black tracking-tight">مركز الوكلاء الموحّد</h1>
             <p className="text-white/40 mt-1 flex items-center gap-2">
               <Activity className="w-3 h-3 text-emerald-500" />
-              كل الوكلاء والمهام والتصنيع في مكان واحد
+              كل الوكلاء والمهام في مكان واحد
             </p>
           </div>
         </div>
@@ -211,7 +179,7 @@ export default function AgentsPage() {
 
       {/* Main Navigation Tabs */}
       <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-2">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => setActiveTab('command')}
             className={`flex items-center justify-center gap-3 px-6 py-4 rounded-[1.5rem] font-bold transition-all ${
@@ -234,18 +202,6 @@ export default function AgentsPage() {
           >
             <Sparkles className="w-5 h-5" />
             <span>المساعد الموحّد</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('manufacturing')}
-            className={`flex items-center justify-center gap-3 px-6 py-4 rounded-[1.5rem] font-bold transition-all ${
-              activeTab === 'manufacturing'
-                ? 'bg-gradient-to-br from-blue-600 to-cyan-700 text-white shadow-lg scale-[1.02]'
-                : 'bg-white/[0.03] text-white/60 hover:bg-white/[0.05] hover:text-white/80'
-            }`}
-          >
-            <Factory className="w-5 h-5" />
-            <span>التصنيع</span>
           </button>
 
           <button
@@ -314,84 +270,6 @@ export default function AgentsPage() {
           </div>
         )}
 
-        {/* Manufacturing Tab */}
-        {activeTab === 'manufacturing' && (
-          <div className="space-y-6">
-            {/* Manufacturing Sub-Tabs */}
-            <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-2">
-              <div className="flex gap-2">
-                {[
-                  { id: 'overview', label: 'نظرة عامة', icon: Zap },
-                  { id: 'schedule', label: 'الجدولة', icon: Calendar },
-                  { id: 'inventory', label: 'المخزون', icon: Box },
-                  { id: 'quality', label: 'فحص الجودة', icon: CheckCircle }
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setMfgTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-4 py-3 rounded-[1.2rem] font-bold text-sm transition-all ${
-                      mfgTab === tab.id
-                        ? 'bg-blue-600 text-white shadow-lg'
-                        : 'bg-white/[0.03] text-white/60 hover:bg-white/[0.05] hover:text-white/80'
-                    }`}
-                  >
-                    <tab.icon className="w-4 h-4" />
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Manufacturing Content */}
-            {mfgTab === 'overview' && (
-              <div className="space-y-6">
-                {/* Metrics Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  <MetricCard title="إجمالي الأوردرات" value={metrics.total_orders.toString()} color="blue" loading={loading} />
-                  <MetricCard title="في الإنتاج" value={metrics.in_production.toString()} color="yellow" loading={loading} />
-                  <MetricCard title="جاهز للتوصيل" value={metrics.ready.toString()} color="green" loading={loading} />
-                  <MetricCard title="تم التسليم" value={metrics.delivered.toString()} color="purple" loading={loading} />
-                  <MetricCard title="الإيرادات" value={`${(metrics.revenue / 1000).toFixed(1)}K`} color="indigo" loading={loading} />
-                  <MetricCard title="الربح المتوقع" value={`${(metrics.profit / 1000).toFixed(1)}K`} color="teal" loading={loading} />
-                </div>
-
-                {/* Main Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-6">
-                    <ManufacturingDashboard />
-                  </div>
-                  <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-6">
-                    <OrderPipeline />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {mfgTab === 'schedule' && (
-              <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-6">
-                <ProjectGantt />
-              </div>
-            )}
-
-            {mfgTab === 'inventory' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-6">
-                  <InventoryManager />
-                </div>
-                <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-6">
-                  <BOMTable />
-                </div>
-              </div>
-            )}
-
-            {mfgTab === 'quality' && (
-              <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-6">
-                <QualityCheckPanel />
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Teams Tab */}
         {activeTab === 'teams' && (
           <div className="space-y-6">
@@ -401,31 +279,6 @@ export default function AgentsPage() {
                 { label: 'إجمالي المهام', value: teamLoading ? '…' : teamStats.totalTasks.toString(), color: 'purple' },
                 { label: 'مكتملة اليوم',  value: teamLoading ? '…' : teamStats.completedToday.toString(), color: 'emerald' },
                 { label: 'معدل النجاح',   value: teamLoading ? '…' : `${teamStats.successRate}%`, color: 'amber' },
-              ].map(s => (
-                <div key={s.label} className={`rounded-2xl border p-5 bg-white/[0.02] ${
-                  s.color === 'purple'  ? 'border-purple-500/20'  :
-                  s.color === 'emerald' ? 'border-emerald-500/20' :
-                                          'border-amber-500/20'
-                }`}>
-                  <p className="text-xs text-white/40">{s.label}</p>
-                  <p className={`text-3xl font-black mt-1 ${
-                    s.color === 'purple'  ? 'text-purple-400'  :
-                    s.color === 'emerald' ? 'text-emerald-400' :
-                                            'text-amber-400'
-                  }`}>{s.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Enterprise Pipeline Bar */}
-            <EnterprisePipelineBar onOpenScenarioModal={() => setShowScenarioModal(true)} />
-
-            {/* إحصائيات سريعة حقيقية */}
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { label: 'إجمالي المهام المسجلة', value: teamLoading ? '…' : teamStats.totalTasks.toString(), color: 'purple' },
-                { label: 'مهام مكتملة اليوم',  value: teamLoading ? '…' : teamStats.completedToday.toString(), color: 'emerald' },
-                { label: 'معدل النجاح الإجمالي',   value: teamLoading ? '…' : `${teamStats.successRate}%`, color: 'amber' },
               ].map(s => (
                 <div key={s.label} className={`rounded-2xl border p-5 bg-white/[0.02] ${
                   s.color === 'purple'  ? 'border-purple-500/20'  :
@@ -506,7 +359,7 @@ export default function AgentsPage() {
                 </p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ChatPanel agentKey="prime" agentColor="purple" />
+                <ChatPanel agentKey="prime" agentName="قيّم الدار" agentColor="purple" />
                 <ChatPanel agentKey="vanguard" agentColor="emerald" />
               </div>
             </div>
@@ -520,6 +373,7 @@ export default function AgentsPage() {
           <div className="w-full max-w-2xl bg-[#111] border border-white/20 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
             <ChatPanel 
               agentKey={activeChatAgent} 
+              agentName={activeChatAgent === 'prime' ? 'قيّم الدار' : undefined}
               initialMessage={chatInitialMission}
             />
           </div>
@@ -528,7 +382,7 @@ export default function AgentsPage() {
       {showPrimeChat && (
         <div className="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl flex items-center justify-center p-6" onClick={() => setShowPrimeChat(false)}>
           <div className="w-full max-w-2xl bg-[#111] border border-purple-500/30 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-            <ChatPanel agentKey="prime" />
+            <ChatPanel agentKey="prime" agentName="قيّم الدار" />
           </div>
         </div>
       )}
@@ -546,47 +400,6 @@ export default function AgentsPage() {
           </div>
         </div>
       )}
-
-      {/* Enterprise Scenario Modal */}
-      <EnterpriseScenarioModal
-        isOpen={showScenarioModal}
-        onClose={() => setShowScenarioModal(false)}
-      />
-    </div>
-  );
-}
-
-function MetricCard({
-  title,
-  value,
-  color,
-  loading
-}: {
-  title: string;
-  value: string;
-  color: 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'indigo' | 'teal';
-  loading: boolean;
-}) {
-  const colorClasses = {
-    blue: 'bg-blue-500/10 border-blue-500/20 text-blue-400',
-    green: 'bg-green-500/10 border-green-500/20 text-green-400',
-    yellow: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400',
-    red: 'bg-red-500/10 border-red-500/20 text-red-400',
-    purple: 'bg-purple-500/10 border-purple-500/20 text-purple-400',
-    indigo: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400',
-    teal: 'bg-teal-500/10 border-teal-500/20 text-teal-400'
-  };
-
-  return (
-    <div className={`rounded-2xl border p-4 ${colorClasses[color]}`}>
-      <p className="text-xs opacity-80">{title}</p>
-      <p className="text-2xl font-bold mt-1">
-        {loading ? (
-          <span className="animate-pulse">--</span>
-        ) : (
-          value
-        )}
-      </p>
     </div>
   );
 }
@@ -605,16 +418,16 @@ interface EnterpriseAgentConfig {
 const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   {
     key: 'prime',
-    name: 'PRIME',
-    role: 'كبير مهندسي التصميم والتصنيع الذكي',
+    name: 'قيّم الدار',
+    role: 'قيّم إطلالة أزينث على الموقع',
     color: 'purple',
     icon: '🧠',
-    inputs: ['inventory_items', 'production_jobs', 'sales_orders'],
-    outputs: ['كشف المواد BOM', 'حساب الهدر 12%', 'أوامر تشغيل'],
+    inputs: ['site_sections', 'products', 'صفحات الزائر'],
+    outputs: ['فحص الواجهة', 'قائمة المنتجات الظاهرة', 'تحليل ظهور البحث'],
     missions: [
-      { label: 'حساب BOM لصالون إمبراطوري', prompt: 'احسب BOM لصالون إمبراطوري' },
-      { label: 'فحص مخزون خامات التصنيع', prompt: 'فحص مخزون خامات التصنيع' },
-      { label: 'أمر تشغيل جديد بالمصنع', prompt: 'إنشاء أمر تشغيل جديد بالمصنع' },
+      { label: 'افحص صحة محتوى الرئيسية', prompt: 'افحص صحة محتوى الصفحة الرئيسية' },
+      { label: 'اعرض منتجات الموقع', prompt: 'اعرض المنتجات' },
+      { label: 'حلّل ظهور الموقع في البحث', prompt: 'حلّل SEO للموقع' },
     ],
   },
   {
@@ -637,7 +450,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     role: 'كبير محللي البيانات والجدوى المالية',
     color: 'blue',
     icon: '📊',
-    inputs: ['sales_orders', 'inventory_items', 'payments'],
+    inputs: ['sales_orders', 'payments', 'visitor_telemetry'],
     outputs: ['هوامش الأرباح الصافية', 'مؤشرات الأداء اللحظية', 'توقعات التدفق'],
     missions: [
       { label: 'تحليل هوامش الأرباح الحالية', prompt: 'تحليل هوامش الأرباح الحالية' },
