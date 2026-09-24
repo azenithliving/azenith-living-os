@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertCronAuthorized } from "@/lib/cron-auth";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { auditVisitorExperience } from "@/lib/qayyim-ops";
@@ -6,20 +7,9 @@ import { auditVisitorExperience } from "@/lib/qayyim-ops";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-// Runs every 6 hours via vercel.json cron
 export async function GET(request: NextRequest) {
-  // Allow Vercel cron or internal key, otherwise require admin in dev
-  const authHeader = request.headers.get("authorization");
-  const vercelCron = request.headers.get("x-vercel-cron");
-  const isVercelCron = !!vercelCron;
-  const isDev = process.env.NODE_ENV === "development";
-  if (!isVercelCron && !isDev && !authHeader) {
-    // In production, require cron secret if set
-    const cronSecret = process.env.CRON_SECRET;
-    if (cronSecret && request.nextUrl.searchParams.get("secret") !== cronSecret) {
-      // Allow but log — don't block completely for now
-    }
-  }
+  const unauthorized = assertCronAuthorized(request);
+  if (unauthorized) return unauthorized;
 
   const supabase = getSupabaseAdminClient();
   if (!supabase) return NextResponse.json({ success: false, error: "Supabase unavailable" }, { status: 503 });

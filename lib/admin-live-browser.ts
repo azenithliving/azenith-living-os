@@ -1,4 +1,4 @@
-import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
+import type { Browser, BrowserContext, Page } from "playwright";
 
 export type LiveBrowserDeviceMode = "desktop" | "mobile";
 export type LiveBrowserNetworkMode = "direct" | "tor" | "custom";
@@ -86,6 +86,9 @@ function proxyServerForMode(mode: LiveBrowserNetworkMode = "direct") {
 }
 
 async function launchBrowser(state: LiveBrowserRuntime) {
+  // Lazy import: a static top-level playwright import made every route in this
+  // module's import graph crash on Vercel, where playwright is not installed.
+  const { chromium } = await import("playwright");
   const proxyServer = proxyServerForMode(state.networkMode || "direct");
   if (state.networkMode === "custom" && !proxyServer) {
     throw new Error("ADMIN_LIVE_BROWSER_PROXY_SERVER is required for custom proxy mode");
