@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import { 
   Send, Bot, User, Loader2, Sparkles, ThumbsUp, ThumbsDown, 
   Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers
@@ -30,6 +31,7 @@ interface ChatPanelProps {
   agentName?: string;
   agentColor?: string;
   initialMessage?: string;
+  fullScreen?: boolean;
 }
 
 const AGENT_METADATA: Record<string, { name: string; role: string; icon: string; color: string }> = {
@@ -153,6 +155,18 @@ function MarkdownContent({ content }: { content: string }) {
   const lines = content.split('\n');
   const elements: any[] = [];
   let tableRows: string[][] = [];
+  // P5-M2: any site path or URL inside prose becomes a real clickable link
+  const INLINE_LINK = /(https?:\/\/[^\s)>\]"'،]+|(?<![\w/])\/[A-Za-z0-9\-_./%]+[A-Za-z0-9\-_/])/g;
+  const renderInline = (text: string) => {
+    const parts = text.split(INLINE_LINK);
+    return parts.map((part, i) =>
+      part && /^(https?:\/\/|\/[A-Za-z])/.test(part) ? (
+        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-sky-300 hover:underline" dir="ltr">{part}</a>
+      ) : (
+        <span key={i}>{part}</span>
+      )
+    );
+  };
   const flushTable = () => {
     if (tableRows.length > 0) {
       const header = tableRows[0];
@@ -175,16 +189,16 @@ function MarkdownContent({ content }: { content: string }) {
     } else {
       flushTable();
       if (line.trim() === '') elements.push(<div key={`br-${elements.length}`} className="h-2" />);
-      else if (line.trim().startsWith('#')) elements.push(<div key={`h-${elements.length}`} className="font-bold text-white mt-2">{line.replace(/^#+\s*/, '')}</div>);
-      else if (line.trim().startsWith('- ') || line.trim().startsWith('•')) elements.push(<div key={`li-${elements.length}`} className="mr-3">• {line.replace(/^[-•]\s*/, '')}</div>);
-      else elements.push(<div key={`p-${elements.length}`} className="whitespace-pre-wrap">{line}</div>);
+      else if (line.trim().startsWith('#')) elements.push(<div key={`h-${elements.length}`} className="font-bold text-white mt-2">{renderInline(line.replace(/^#+\s*/, ''))}</div>);
+      else if (line.trim().startsWith('- ') || line.trim().startsWith('•')) elements.push(<div key={`li-${elements.length}`} className="mr-3">• {renderInline(line.replace(/^[-•]\s*/, ''))}</div>);
+      else elements.push(<div key={`p-${elements.length}`} className="whitespace-pre-wrap">{renderInline(line)}</div>);
     }
   });
   flushTable();
   return <div className="space-y-1">{elements}</div>;
 }
 
-export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: ChatPanelProps) {
+export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, fullScreen }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -198,6 +212,10 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const firstUnreadRef = useRef<HTMLDivElement>(null);
+  const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
+  const unreadLocatedRef = useRef(false);
+  const scrolledToUnreadRef = useRef(false);
+  const lastReadKey = `qayyim_last_read_${agentKey}`;
 
   // expose for suggestion buttons
   useEffect(() => {
@@ -238,13 +256,21 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
     if (!messagesContainerRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
     isNearBottomRef.current = scrollHeight - scrollTop - clientHeight < 100;
-  }, []);
+    if (isNearBottomRef.current) {
+      try { localStorage.setItem(lastReadKey, String(Date.now())); } catch {}
+    }
+  }, [lastReadKey]);
 
   useEffect(() => {
+    if (firstUnreadId && !scrolledToUnreadRef.current && messages.some((m) => m.id === firstUnreadId)) {
+      scrolledToUnreadRef.current = true;
+      firstUnreadRef.current?.scrollIntoView({ block: 'start' });
+      return;
+    }
     if (isNearBottomRef.current) {
       scrollToBottom(false);
     }
-  }, [messages, scrollToBottom]);
+  }, [messages, firstUnreadId, scrollToBottom]);
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -265,6 +291,23 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
               actionItems: m.context.result ? [m.context.result] : [],
             } : undefined,
           }));
+
+          // P5-M2 WhatsApp-style: locate the first agent message after the
+          // last time this admin was reading this thread (once per mount).
+          if (!unreadLocatedRef.current) {
+            unreadLocatedRef.current = true;
+            try {
+              const lastRead = Number(localStorage.getItem(lastReadKey) || 0);
+              if (!lastRead) {
+                localStorage.setItem(lastReadKey, String(Date.now()));
+              } else {
+                const firstUnread = formatted.find(
+                  (m: any) => m.sender_type === 'agent' && new Date(m.created_at).getTime() > lastRead
+                );
+                if (firstUnread) setFirstUnreadId(firstUnread.id);
+              }
+            } catch {}
+          }
 
           if (isTyping) {
             const serverIds = new Set(data.data.map((m: any) => m.id));
@@ -394,10 +437,13 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
   const missions = AGENT_ROLES[agentKey.toLowerCase()] || AGENT_MISSIONS[agentKey.toLowerCase()] || [];
 
   return (
-    <div className={`bg-white/[0.02] border ${colors.border} rounded-[2rem] flex flex-col h-[520px] overflow-hidden shadow-2xl relative`}>
+    <div className={`bg-white/[0.02] border ${colors.border} ${fullScreen ? 'h-full rounded-none border-0' : 'rounded-[2rem] h-[520px]'} flex flex-col overflow-hidden shadow-2xl relative`}>
       {/* Header */}
       <div className={`p-4 border-b ${colors.border} flex items-center justify-between ${colors.bg}`}>
         <div className="flex items-center gap-3">
+          {fullScreen && (
+            <Link href="/admin/v2/agents" title="رجوع لمركز القيادة" className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white text-lg">→</Link>
+          )}
           <div className={`w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-white font-bold shadow-lg text-lg`}>
             {meta.icon}
           </div>
@@ -510,12 +556,20 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
           </div>
         ) : (
           messages.map((msg) => (
-            <MessageBubble 
-              key={msg.id} 
-              message={msg} 
-              agentColor={activeColorKey} 
-              onFeedback={handleFeedback} 
-            />
+            <div key={msg.id}>
+              {msg.id === firstUnreadId && (
+                <div ref={firstUnreadRef} className="flex items-center gap-2 py-2">
+                  <div className="flex-1 h-px bg-amber-500/40" />
+                  <span className="text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-full px-2.5 py-0.5">رسائل جديدة ↑</span>
+                  <div className="flex-1 h-px bg-amber-500/40" />
+                </div>
+              )}
+              <MessageBubble
+                message={msg}
+                agentColor={activeColorKey}
+                onFeedback={handleFeedback}
+              />
+            </div>
           ))
         )}
 
