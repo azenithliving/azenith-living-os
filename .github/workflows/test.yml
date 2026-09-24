@@ -31,6 +31,10 @@ jobs:
       
     - name: Run tests
       run: npm run test:ci
+      env:
+        ADMIN_GATE_EMAIL: 'azenithliving@gmail.com'
+        ADMIN_GATE_PASSWORD: 'test-password-for-ci'
+        ADMIN_GATE_2FA_SECRET: 'test-2fa-secret'
       
     - name: Upload test results
       if: always()
