@@ -338,6 +338,19 @@ export class MasterOrchestrator {
       const updatedSubtasks = subtasks.map(st => 
         st.id === currentSubtask.id ? { ...st, status: 'failed' as const } : st
       );
+      // P3: exception path is a task failure too — surface it on the event bus
+      try {
+        const { syncLayer } = await import('@/lib/qayyim/memory/SyncLayer');
+        await syncLayer.initialize(companyId || '');
+        await syncLayer.publishTaskStatus(
+          currentSubtask.agentKey,
+          currentSubtask.id,
+          'failed',
+          { summary: String(error?.message ?? error).slice(0, 200) }
+        );
+      } catch (e) {
+        console.warn('[MasterOrchestrator] SyncLayer publish failed:', e);
+      }
       return {
         subtasks: updatedSubtasks,
         failedSubtasks: [...state.failedSubtasks, currentSubtask.id],
