@@ -42,7 +42,10 @@ async function main() {
     console.log(`  → Visiting ${url}`);
 
     try {
-      await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
+      // domcontentloaded, not networkidle/load: the homepage streams a hero
+      // video, so neither 'load' nor idle ever fires on a perfectly healthy site.
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
       console.log(`    ✓ Loaded successfully`);
     } catch (e) {
       console.error(`    ✗ Failed to load: ${e.message}`);

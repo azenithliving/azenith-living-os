@@ -293,6 +293,7 @@ export default function AvatarButton({ onClick, isOpen }: AvatarButtonProps) {
 
                 {/* Eyebrows */}
                 <motion.path
+                  d={leftEyebrowPath}
                   animate={{ d: leftEyebrowPath }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                   stroke="#C5A059"
@@ -301,6 +302,7 @@ export default function AvatarButton({ onClick, isOpen }: AvatarButtonProps) {
                   fill="none"
                 />
                 <motion.path
+                  d={rightEyebrowPath}
                   animate={{ d: rightEyebrowPath }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                   stroke="#C5A059"
@@ -357,6 +359,7 @@ export default function AvatarButton({ onClick, isOpen }: AvatarButtonProps) {
 
                 {/* Mouth */}
                 <motion.path
+                  d={mouthPath}
                   animate={{ d: mouthPath }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                   stroke="#C5A059"
