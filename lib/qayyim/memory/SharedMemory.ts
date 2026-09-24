@@ -3,6 +3,7 @@
  * Uses PostgreSQL + pgvector for semantic memory, cross-agent learning
  */
 
+import { getNextAvailableKey, setKeyCooldown, incrementKeyUsage } from "@/lib/api-keys-service";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 
@@ -12,7 +13,7 @@ export interface MemoryItem {
   agent_key: string;
   memory_type: 'fact' | 'preference' | 'conversation' | 'task_result' | 'pattern' | 'rule';
   content: string;
-  embedding?: number[]; // 1536 dimensions for text-embedding-3-small
+  embedding?: number[]; // 768 dimensions for Gemini gemini-embedding-001
   tags: string[];
   related_entities: Record<string, any>;
   importance_score: number; // 0-1
@@ -53,7 +54,8 @@ export class SharedMemory {
   private supabase: any;
   private companyId: string | null = null;
   private embeddingCache: Map<string, number[]> = new Map();
-  private readonly EMBEDDING_DIM = 1536; // text-embedding-3-small
+  private readonly EMBEDDING_MODEL = "gemini-embedding-001"; // 768 dims via outputDimensionality
+  private readonly EMBEDDING_DIMS = 768;
 
   constructor() {
     this.supabase = getSupabaseAdminClient();
@@ -70,53 +72,66 @@ export class SharedMemory {
   }
 
   /**
-   * Generate embedding for text using AI orchestrator
-   * Falls back to simple hash-based embedding if AI unavailable
+   * Generate a real embedding via Gemini gemini-embedding-001 (truncated to 768 dims
+   * via outputDimensionality — the same MRL prefix the model trains with).
+   * Keys come from the same DB pool the chat orchestrator uses (provider "google").
+   * THROWS on failure — no fake-vector fallbacks are allowed.
    */
-  async generateEmbedding(text: string): Promise<number[]> {
-    // Check cache first
-    const cacheKey = this.hashText(text);
+  async generateEmbedding(
+    text: string,
+    taskType: "RETRIEVAL_DOCUMENT" | "RETRIEVAL_QUERY" = "RETRIEVAL_DOCUMENT"
+  ): Promise<number[]> {
+    const cacheKey = `${taskType}:${this.hashText(text)}`;
     if (this.embeddingCache.has(cacheKey)) {
       return this.embeddingCache.get(cacheKey)!;
     }
 
-    try {
-      // Try to use AI orchestrator for real embeddings
-      // For now, use deterministic hash-based embedding
-      // In production, replace with actual embedding model
-      const embedding = this.hashToEmbedding(text);
-      this.embeddingCache.set(cacheKey, embedding);
-      return embedding;
-    } catch (e) {
-      console.warn('[SharedMemory] Embedding generation failed, using fallback:', e);
-      return this.hashToEmbedding(text);
-    }
-  }
+    const MAX_ATTEMPTS = 3;
+    let lastError: unknown = null;
 
-  /**
-   * Simple hash-based embedding (deterministic, no AI needed)
-   * In production, replace with real embedding model
-   */
-  private hashToEmbedding(text: string): number[] {
-    const embedding = new Array(this.EMBEDDING_DIM).fill(0);
-    let hash = 0;
-    
-    for (let i = 0; i < text.length; i++) {
-      const char = text.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      const keyData = await getNextAvailableKey("google");
+      if (!keyData) {
+        throw new Error('SharedMemory: no Google API keys available for embeddings');
+      }
+
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${this.EMBEDDING_MODEL}:embedContent?key=${keyData.key}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: { parts: [{ text }], role: "user" },
+              taskType,
+              outputDimensionality: this.EMBEDDING_DIMS,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const body = await response.text().catch(() => "");
+          throw new Error(`Gemini embedding HTTP ${response.status}: ${body.slice(0, 200)}`);
+        }
+
+        const json = await response.json();
+        const values: number[] | undefined = json?.embedding?.values;
+        if (!values || values.length === 0) {
+          throw new Error('Gemini returned an empty embedding');
+        }
+        if (values.length !== this.EMBEDDING_DIMS) {
+          throw new Error(`Gemini returned ${values.length} dims, expected ${this.EMBEDDING_DIMS}`);
+        }
+        await incrementKeyUsage("google", keyData.key);
+        this.embeddingCache.set(cacheKey, values);
+        return values;
+      } catch (e) {
+        lastError = e;
+        await setKeyCooldown("google", keyData.key, 30_000);
+      }
     }
 
-    // Use hash to generate pseudo-random but deterministic values
-    let seed = Math.abs(hash);
-    for (let i = 0; i < this.EMBEDDING_DIM; i++) {
-      seed = (seed * 1664525 + 1013904223) % 4294967296; // LCG
-      embedding[i] = (seed / 4294967296) * 2 - 1; // Normalize to [-1, 1]
-    }
-
-    // Normalize to unit vector
-    const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
-    return magnitude > 0 ? embedding.map(v => v / magnitude) : embedding;
+    throw lastError instanceof Error ? lastError : new Error(String(lastError));
   }
 
   private hashText(text: string): string {
@@ -176,7 +191,7 @@ export class SharedMemory {
   ): Promise<SearchResult[]> {
     if (!this.companyId) await this.initialize();
 
-    const queryEmbedding = await this.generateEmbedding(query);
+    const queryEmbedding = await this.generateEmbedding(query, "RETRIEVAL_QUERY");
     const limit = options.limit || 10;
     const minSimilarity = options.minSimilarity || 0.7;
 

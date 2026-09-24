@@ -72,6 +72,123 @@ export class QayyimVisualAgent extends QayyimAgentBase {
 
   readonly systemPrompt = QAYYIM_VIS_SYSTEM_PROMPT;
 
+  private extractRoomSlugFromPath(pagePath?: string): string | undefined {
+    if (!pagePath) return undefined;
+    const fragment = pagePath.match(/#([a-z0-9-]+)/i)?.[1];
+    if (fragment) return fragment;
+    const segment = pagePath.split("?")[0].split("/").filter(Boolean).pop();
+    if (segment && /^[a-z0-9-]+$/i.test(segment)) return segment;
+    return undefined;
+  }
+
+  /**
+   * Load real image candidates from the same sources curated-images trusts:
+   * Supabase Storage bucket "images" (curated/{room}/{style}), with the
+   * verified static fallback library as last resort.
+   */
+  private async loadCandidateImages(params: {
+    pagePath?: string;
+    roomSlug?: string;
+    style?: string;
+  }): Promise<Array<{ url: string; alt: string; source: string }>> {
+    const candidates: Array<{ url: string; alt: string; source: string }> = [];
+    const seen = new Set<string>();
+    const push = (url: string, alt: string, source: string) => {
+      if (!url || seen.has(url)) return;
+      seen.add(url);
+      candidates.push({ url, alt, source });
+    };
+
+    const roomSlug = params.roomSlug || this.extractRoomSlugFromPath(params.pagePath);
+
+    try {
+      const { supabaseServer } = await import("@/lib/dal/unified-supabase");
+      const storage = supabaseServer.storage.from("images");
+
+      const startPrefix = roomSlug
+        ? params.style
+          ? `curated/${roomSlug}/${params.style}`
+          : `curated/${roomSlug}`
+        : "curated";
+
+      const collect = async (prefix: string, depth: number): Promise<void> => {
+        if (candidates.length >= 60 || depth > 3) return;
+        const { data: entries } = await storage.list(prefix, { limit: 100 });
+        for (const entry of entries || []) {
+          if (candidates.length >= 60) break;
+          const childPath = `${prefix}/${entry.name}`;
+          if (entry.id) {
+            await collect(childPath, depth + 1);
+          } else if (entry.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
+            const { data: urlData } = storage.getPublicUrl(childPath);
+            push(urlData.publicUrl, `${roomSlug || "page"} ${params.style || ""} curated`.trim(), "storage");
+          }
+        }
+      };
+
+      await collect(startPrefix, 0);
+    } catch (e) {
+      console.warn("[QAYYIM-VIS] candidate load from storage failed:", e);
+    }
+
+    if (candidates.length === 0 && roomSlug) {
+      try {
+        const { getRoomFallbackImages } = await import("@/lib/room-image-fallback");
+        for (const photo of getRoomFallbackImages(roomSlug, params.style || "modern")) {
+          push(photo.url, photo.alt || "", "static_fallback");
+        }
+      } catch (e) {
+        console.warn("[QAYYIM-VIS] static fallback load failed:", e);
+      }
+    }
+
+    return candidates.slice(0, 60);
+  }
+
+  /**
+   * Post-filter: keep only images/violations whose URL pathname matches a
+   * verified candidate. Dropped count lands in data.filteredAsUnverified.
+   */
+  private filterToVerifiedCandidates(
+    result: QayyimResult,
+    candidates: Array<{ url: string; alt: string; source: string }>
+  ): QayyimResult {
+    if (!result.data) return result;
+
+    const verifiedPaths = new Set<string>();
+    for (const c of candidates) {
+      try {
+        verifiedPaths.add(new URL(c.url).pathname);
+      } catch {
+        // مرشح بمسار غير صالح — يُتجاهل
+      }
+    }
+    const isVerified = (url: unknown): boolean => {
+      if (!url) return false;
+      try {
+        return verifiedPaths.has(new URL(String(url)).pathname);
+      } catch {
+        return false;
+      }
+    };
+
+    let dropped = 0;
+    if (Array.isArray(result.data.images)) {
+      const kept = result.data.images.filter((img: any) => isVerified(img?.url));
+      dropped += result.data.images.length - kept.length;
+      result.data.images = kept;
+    }
+    if (Array.isArray(result.data.violations)) {
+      const kept = result.data.violations.filter((v: any) => isVerified(v?.imageUrl));
+      dropped += result.data.violations.length - kept.length;
+      result.data.violations = kept;
+    }
+    if (dropped > 0) {
+      result.data.filteredAsUnverified = dropped;
+    }
+    return result;
+  }
+
   /**
    * Curate gallery for a page/room
    */
@@ -83,17 +200,24 @@ export class QayyimVisualAgent extends QayyimAgentBase {
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `gallery_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
+
+    const candidateImages = await this.loadCandidateImages({
+      pagePath: params.pagePath,
+      roomSlug: params.roomSlug,
+      style: params.style,
+    });
+
     const task: QayyimTask = {
       id: taskId,
       type: "curate_gallery",
       title: `انتقاء معرض لـ ${params.pagePath}${params.roomSlug ? ` (${params.roomSlug})` : ''}`,
       description: `اختر ${params.count || 30} صورة فاخرة بأسلوب ${params.style || 'modern'} لـ ${params.pagePath}`,
-      context: { ...params.context, ...params, action: "curate" },
+      context: { ...params.context, ...params, action: "curate", candidateImages },
       priority: "high",
     };
 
     const aiResult = await this.process(task);
+    this.filterToVerifiedCandidates(aiResult, candidateImages);
     if (aiResult.success && (aiResult.data?.images?.length || aiResult.output)) {
       try {
         const { supabaseServer } = await import('@/lib/dal/unified-supabase');
@@ -179,17 +303,23 @@ export class QayyimVisualAgent extends QayyimAgentBase {
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `brand_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
+
+    const candidateImages = await this.loadCandidateImages({
+      pagePath: params.pagePath,
+      roomSlug: params.roomSlug,
+    });
+
     const task: QayyimTask = {
       id: taskId,
       type: "brand_consistency_check",
       title: "فحص اتساق العلامة البصرية",
       description: `افحص الصور في ${params.pagePath || params.roomSlug || 'الموقع'} ضد معايير: ذهبي/أسود، أثاث حقيقي، لا placeholder`,
-      context: { ...params.context, ...params, action: "brand_check" },
+      context: { ...params.context, ...params, action: "brand_check", candidateImages },
       priority: "high",
     };
 
-    return this.process(task);
+    const result = await this.process(task);
+    return this.filterToVerifiedCandidates(result, candidateImages);
   }
 
   /**
