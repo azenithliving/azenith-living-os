@@ -216,6 +216,42 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   const unreadLocatedRef = useRef(false);
   const scrolledToUnreadRef = useRef(false);
   const lastReadKey = `qayyim_last_read_${agentKey}`;
+  const [isListening, setIsListening] = useState(false);
+  const [ttsOn, setTtsOn] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  // P5-M4: speak agent replies when the speaker toggle is on (Web Speech, $0)
+  const speak = useCallback((text: string) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text.replace(/[*#`>|_-]/g, '').slice(0, 500));
+      utter.lang = 'ar-EG';
+      const arabicVoice = window.speechSynthesis.getVoices().find(v => v.lang?.toLowerCase().startsWith('ar'));
+      if (arabicVoice) utter.voice = arabicVoice;
+      window.speechSynthesis.speak(utter);
+    } catch {}
+  }, []);
+
+  const toggleMic = useCallback(() => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { setError('التعرف الصوتي غير مدعوم في هذا المتصفح'); return; }
+    if (isListening) { recognitionRef.current?.stop(); setIsListening(false); return; }
+    const rec = new SR();
+    rec.lang = 'ar-EG';
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.onresult = (ev: any) => {
+      const text = Array.from(ev.results).map((r: any) => r[0].transcript).join('');
+      setInput(text);
+      if (ev.results[ev.results.length - 1].isFinal) { setIsListening(false); }
+    };
+    rec.onerror = () => setIsListening(false);
+    rec.onend = () => setIsListening(false);
+    recognitionRef.current = rec;
+    rec.start();
+    setIsListening(true);
+  }, [isListening]);
 
   // expose for suggestion buttons
   useEffect(() => {
@@ -383,6 +419,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           metadata: data.data.metadata,
         };
         setMessages((prev) => [...prev, agentMsg]);
+        if (ttsOn) speak(data.data.message || '');
       } else {
         throw new Error(data.error || 'Failed to get response');
       }
@@ -600,11 +637,43 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           const file = e.target.files?.[0];
           if (!file) return;
           const reader = new FileReader();
-          reader.onload = () => {
-            const base64 = reader.result as string;
-            sendMessage(`[صورة مرفقة: ${file.name}] — حلل هذه الصورة وحدد موقعها في الموقع واقترح تحسيناً`);
-            // Also upload to storage for vision
-            fetch('/api/admin/qayyim/images', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent: agentKey, page_path: '/', section_key: 'chat-upload', draft_type: 'brand_consistency_check', instructions: `حلل الصورة المرفقة: ${base64.slice(0,200)}...`, context: { image_base64: base64.slice(0,5000) } }) }).catch(()=>{});
+          reader.onload = async () => {
+            const dataUrl = String(reader.result || '');
+            setMessages(prev => [...prev, {
+              id: `temp-img-${Date.now()}`, sender_type: 'user', sender_name: 'أنت',
+              content: `📷 ${file.name}`, created_at: new Date().toISOString(),
+            }]);
+            setIsTyping(true);
+            try {
+              // P5-M4: real vision — full image to Gemini, then the agent acts on the analysis
+              const res = await fetch('/api/admin/qayyim/vision', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: dataUrl }),
+              });
+              const j = await res.json();
+              setIsTyping(false);
+              if (j.success && j.analysis) {
+                setMessages(prev => [...prev, {
+                  id: `vision-${Date.now()}`, sender_type: 'agent',
+                  sender_name: agentName || 'القيّم',
+                  content: `🔎 تحليل الصورة:\n${j.analysis}`,
+                  created_at: new Date().toISOString(),
+                }]);
+                if (ttsOn) speak(j.analysis);
+                sendMessage(`أرفقت صورة، وهذا تحليلي المبدئي لها:\n${String(j.analysis).slice(0, 900)}\n\nحدّد موقعها في الموقع واقترح تحسيناً في مسودة.`);
+              } else {
+                setMessages(prev => [...prev, {
+                  id: `vision-err-${Date.now()}`, sender_type: 'system', sender_name: 'النظام',
+                  content: `⚠️ ${j.error || 'تعذر تحليل الصورة'}`, created_at: new Date().toISOString(),
+                }]);
+              }
+            } catch {
+              setIsTyping(false);
+              setMessages(prev => [...prev, {
+                id: `vision-err-${Date.now()}`, sender_type: 'system', sender_name: 'النظام',
+                content: '⚠️ فشل الاتصال بمحرك الرؤية', created_at: new Date().toISOString(),
+              }]);
+            }
           };
           reader.readAsDataURL(file);
           e.target.value = '';
@@ -627,10 +696,25 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isTyping}
-            title="إرسال صورة"
+            title="إرسال صورة (تحليل رؤية حقيقي)"
             className="px-3 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/60 hover:text-white disabled:opacity-30 flex items-center justify-center"
           >
             📷
+          </button>
+          <button
+            onClick={toggleMic}
+            disabled={isTyping}
+            title={isListening ? 'إيقاف الاستماع' : 'تكلّم بالعامية (ar-EG)'}
+            className={`px-3 py-2.5 border rounded-xl flex items-center justify-center disabled:opacity-30 ${isListening ? 'bg-rose-600/30 border-rose-500/50 text-rose-200 animate-pulse' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'}`}
+          >
+            🎙️
+          </button>
+          <button
+            onClick={() => setTtsOn(v => !v)}
+            title={ttsOn ? 'إيقاف نطق الردود' : 'انطق الردود بالعربي'}
+            className={`px-3 py-2.5 border rounded-xl flex items-center justify-center ${ttsOn ? 'bg-amber-500/25 border-amber-500/40 text-amber-200' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'}`}
+          >
+            {ttsOn ? '🔊' : '🔇'}
           </button>
           <input
             type="text"

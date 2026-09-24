@@ -442,8 +442,33 @@ export async function askGoogle(prompt: string, options?: any) {
   return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
 }
 
-export async function askGoogleMessages(messages: Array<{ role: string; content: string }>, options?: any) {
+/**
+ * P5-M4: vision analysis on a base64 image via Gemini inlineData.
+ * imageBase64 must be raw base64 (no data: prefix).
+ */
+export async function askGoogleVision(
+  prompt: string,
+  imageBase64: string,
+  mimeType: string = "image/png",
+  options?: { model?: string; maxTokens?: number }
+): Promise<{ success: boolean; content: string; error?: string }> {
   const model = options?.model || CONFIG.GOOGLE_MODEL;
+  const result = await fetchWithRetry(
+    "google",
+    (key) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: imageBase64 } }] }],
+        generationConfig: { temperature: 0.4, maxOutputTokens: options?.maxTokens ?? 1500 },
+      }),
+    }),
+    (data) => data.candidates?.[0]?.content?.parts?.[0]?.text || ""
+  );
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+export async function askGoogleMessages(messages: Array<{ role: string; content: string }>, options?: any) {  const model = options?.model || CONFIG.GOOGLE_MODEL;
   
   // Format messages for Google API
   const formattedContents = messages.map(msg => ({
