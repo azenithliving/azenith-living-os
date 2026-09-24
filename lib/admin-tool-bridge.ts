@@ -101,6 +101,61 @@ export async function runUltimateTool(
     );
   }
 
+  // ── P5: Qayyim measured probes — real numbers from realChecks/QA agents ──
+  if (toolName === "qa_load_probe") {
+    const { qayyimQaAgent } = await import("@/lib/qayyim");
+    const res = await qayyimQaAgent.loadTest({
+      scenarios: [
+        { name: "الرئيسية", path: "/", method: "GET" },
+        { name: "الغرف", path: "/rooms", method: "GET" },
+        { name: "الأثاث", path: "/furniture", method: "GET" },
+      ],
+      stages: [],
+      thresholds: { p95: 1500, errorRate: 0.05 },
+    });
+    return {
+      success: res.success,
+      message: res.output,
+      data: { ...(res.data || {}), metrics: (res.data as any)?.metrics },
+    };
+  }
+  if (toolName === "qa_security_headers") {
+    const { qayyimQaAgent } = await import("@/lib/qayyim");
+    const res = await qayyimQaAgent.securityScan({ targetUrl: String(params.url || siteUrl()) });
+    return { success: res.success, message: res.output, data: res.data || {} };
+  }
+  if (toolName === "qa_accessibility") {
+    const { qayyimQaAgent } = await import("@/lib/qayyim");
+    const res = await qayyimQaAgent.accessibilityAudit({ pages: ["/", "/rooms", "/furniture"] });
+    return { success: res.success, message: res.output, data: res.data || {} };
+  }
+  if (toolName === "qayyim_luxury_score") {
+    const { qayyimAnalyticsAgent } = await import("@/lib/qayyim");
+    const res = await qayyimAnalyticsAgent.calculateLuxuryScore({ scope: "full_site" });
+    return { success: res.success, message: res.output, data: res.data || {} };
+  }
+  if (toolName === "qayyim_goals_risk") {
+    const { getSupabaseAdminClient } = await import("@/lib/supabase-admin");
+    const supabase = companyId ? getSupabaseAdminClient() : null;
+    if (!supabase) return { success: false, message: "لا يوجد اتصال بقاعدة البيانات لفحص الأهداف." };
+    const { data: goals } = await supabase
+      .from("qayyim_goals")
+      .select("id,title,progress_percentage,target_date,status")
+      .eq("company_id", companyId)
+      .eq("status", "active");
+    const now = Date.now();
+    const atRisk = (goals || []).filter(
+      (g: any) => (g.target_date && new Date(g.target_date).getTime() < now) || (g.progress_percentage ?? 0) < 25
+    );
+    return {
+      success: true,
+      message: atRisk.length
+        ? `لديك ${atRisk.length} هدف مهدد من ${(goals || []).length} هدف نشط:\n${atRisk.map((g: any) => `• ${g.title} — تقدم ${g.progress_percentage ?? 0}%${g.target_date ? ` — ميعاد ${g.target_date}` : ""}`).join("\n")}`
+        : `لا أهداف مهددة — ${(goals || []).length} هدف نشط كلها في المسار.`,
+      data: { total: (goals || []).length, atRisk },
+    };
+  }
+
   return executeTool(toolName, params, {
     actorUserId: ctx.userId,
     companyId,
@@ -134,6 +189,24 @@ export function inferUltimateTool(
   }
   if (/seo|تحسين.*بحث|محركات|meta\s*tags/i.test(lower) && !/fix|صلح/i.test(lower)) {
     return { toolName: "seo_analyze", params: { url } };
+  }
+
+  // ── P5: Qayyim real measurement tools — must precede the legacy
+  // security/goal heuristics below (which route to prose or fabricated numbers)
+  if (/اختبار.*حمل|load\s*test/i.test(lower)) {
+    return { toolName: "qa_load_probe", params: {} };
+  }
+  if (/إمكانية.*الوصول|accessib|a11y/i.test(lower)) {
+    return { toolName: "qa_accessibility", params: {} };
+  }
+  if (/رؤوس.*أمان|رؤوس.*الامان|security.*header|افحص.*الأمان|فحص.*الأمان|فحص.*أمان|تدقيق.*الأمان/i.test(lower)) {
+    return { toolName: "qa_security_headers", params: { url } };
+  }
+  if (/luxury\s*score|مؤشر.*الفخامة|الفخامة/i.test(lower)) {
+    return { toolName: "qayyim_luxury_score", params: {} };
+  }
+  if (/الأهداف.*المهددة|مهددة.*أهداف|أهداف.*مهددة|risk.*goals?/i.test(lower)) {
+    return { toolName: "qayyim_goals_risk", params: {} };
   }
 
   if (/صحة.*محتوى|content\s*health|فحص.*محتوى/i.test(lower)) {

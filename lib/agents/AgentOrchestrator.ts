@@ -8,6 +8,7 @@ import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 import { askGroqMessages, askGoogle, askGoogleMessages, askOpenRouter, askMistral } from "@/lib/ai-orchestrator";
 import { runUltimateTool, inferUltimateTool } from "@/lib/admin-tool-bridge";
+import { recallMemory, finalizeReply } from "@/lib/qayyim/chat-brain";
 import { 
   QayyimCoreAgent, qayyimCoreAgent,
   QayyimContentAgent, qayyimContentAgent,
@@ -292,7 +293,11 @@ export class AgentOrchestrator {
         (metadata as any).toolSuccess = toolResult.success;
       }
 
-      const promptWithToolContext = toolContextStr ? `${message}\n${toolContextStr}` : message;
+      let promptWithToolContext = toolContextStr ? `${message}\n${toolContextStr}` : message;
+
+      // P5-M1: inject real semantic memories (pgvector) — never blocks the reply
+      const memoryCtx = await recallMemory(message, resolvedCompanyId);
+      if (memoryCtx) promptWithToolContext = `${memoryCtx}\n\n${promptWithToolContext}`;
 
       // ══════════════════════════════════════════════════════════════
       // قيّم-كور: ينسق السرب الكامل عبر MasterOrchestrator
@@ -319,6 +324,11 @@ export class AgentOrchestrator {
           }
         }
         // إذا لم يكن طلب تدقيق أو فشل المباشر، استخدم السرب
+        // P5-M1: a successful measured tool already answers the request —
+        // don't burn a full swarm run behind it.
+        if (!response && toolResult?.success && toolResult.message) {
+          response = toolResult.message;
+        }
         if (!response) {
           try {
             const swarmResult = await masterOrchestrator.execute(promptWithToolContext, {
@@ -389,9 +399,18 @@ export class AgentOrchestrator {
         response = await this.callAI(messages);
       }
 
-      if (toolResult?.message) {
+      if (toolResult?.message && response && !response.includes(toolResult.message)) {
         response = `${toolResult.message}\n\n${response}`;
       }
+
+      // P5-M1: every admin-visible reply passes the truth layer —
+      // unverified site paths are neutralized, imperative quotes become buttons.
+      const brain = finalizeReply(response || "", process.env.NEXT_PUBLIC_SITE_URL);
+      response = brain.reply;
+      if (brain.actions.length && !((metadata as any).suggestions?.length || (metadata as any).nextActions?.length)) {
+        (metadata as any).suggestions = brain.actions;
+      }
+
       if (supabase && conversationId) {
         await supabase.from("agent_messages").insert({
           conversation_id: conversationId,

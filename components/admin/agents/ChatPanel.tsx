@@ -5,6 +5,7 @@ import {
   Send, Bot, User, Loader2, Sparkles, ThumbsUp, ThumbsDown, 
   Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers
 } from 'lucide-react';
+import { AGENT_ROLES } from '@/lib/qayyim/agent-roles';
 
 export interface Message {
   id: string;
@@ -390,7 +391,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
   };
 
   const colors = colorClasses[activeColorKey] || colorClasses.purple;
-  const missions = AGENT_MISSIONS[agentKey.toLowerCase()] || [];
+  const missions = AGENT_ROLES[agentKey.toLowerCase()] || AGENT_MISSIONS[agentKey.toLowerCase()] || [];
 
   return (
     <div className={`bg-white/[0.02] border ${colors.border} rounded-[2rem] flex flex-col h-[520px] overflow-hidden shadow-2xl relative`}>
@@ -446,9 +447,8 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
             <button onClick={() => setShowRoles(false)} className="text-white/30 hover:text-white">✕</button>
           </div>
           <div className="grid grid-cols-2 gap-1.5">
-            {(AGENT_METADATA[agentKey.toLowerCase()] ? [AGENT_METADATA[agentKey.toLowerCase()]] : []).concat([]).length > 0 ? (
-              // Show missions as role buttons
-              (AGENT_MISSIONS[agentKey.toLowerCase()] || ['افحص', 'حسّن', 'اعرض المسودات']).map((m, i) => (
+            {missions.length > 0 ? (
+              missions.map((m, i) => (
                 <button key={i} onClick={() => { setShowRoles(false); sendMessage(m); }} className="text-right px-2.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] text-white/70 hover:text-white">
                   • {m}
                 </button>

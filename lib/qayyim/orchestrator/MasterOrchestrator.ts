@@ -20,6 +20,7 @@ import {
   qayyimQaAgent,
   QayyimAgentBase 
 } from "../index";
+import { keepRealEvidenceUrls } from "../url-manifest";
 
 // ============================================
 // State Definition (LangGraph Annotation)
@@ -205,9 +206,22 @@ export class MasterOrchestrator {
       status: 'pending',
     }));
 
+    // LLM-authored dependsOn rarely matches the generated `sub_*` ids; a bogus
+    // dependency blocks its subtask forever → "No running subtask found".
+    const validIds = new Set(subtasks.map((st) => st.id));
+    const idByIndex = new Map(subtasks.map((st, i) => [String(i), st.id]));
+    const sanitizedSubtasks = subtasks.map((st) => ({
+      ...st,
+      dependsOn: [...new Set(
+        (Array.isArray(st.dependsOn) ? st.dependsOn : [])
+          .map((dep: string) => (validIds.has(dep) ? dep : idByIndex.get(String(dep))))
+          .filter((dep): dep is string => !!dep && dep !== st.id)
+      )],
+    }));
+
     return {
       taskId: `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      subtasks,
+      subtasks: sanitizedSubtasks,
       currentSubtaskIndex: 0,
       agentResults: new Map(),
       completedSubtasks: [],
@@ -675,15 +689,21 @@ export class MasterOrchestrator {
 
   private shouldContinue(state: SwarmStateType): "execute" | "aggregate" | "error" {
     if (state.error) return "error";
-    
+
     const { subtasks, completedSubtasks, failedSubtasks } = state;
-    const pending = subtasks.filter(st => st.status === 'pending');
     const running = subtasks.filter(st => st.status === 'running');
-    
     if (running.length > 0) return "execute";
-    if (pending.length > 0) return "execute";
-    if (subtasks.length === completedSubtasks.length + failedSubtasks.length) return "aggregate";
-    return "execute";
+
+    // Mirror routeNode's runnability check exactly: pending subtasks blocked by
+    // unmet/failed dependencies must NOT be sent to execute — aggregate with
+    // partial results instead of dying with "No running subtask found".
+    const runnable = subtasks.filter(st =>
+      st.status === 'pending' &&
+      st.dependsOn.every(dep => completedSubtasks.includes(dep)) &&
+      !failedSubtasks.includes(st.id)
+    );
+    if (runnable.length > 0) return "execute";
+    return "aggregate";
   }
 
   private gateDecision(state: SwarmStateType): "pass" | "fail" | "error" {
@@ -692,7 +712,9 @@ export class MasterOrchestrator {
   }
 
   private formatSuccessResponse(draft: AggregatedDraft, agentResults: Map<string, QayyimResult>, evidenceUrls: string[], version: number): string {
-    const realUrls = evidenceUrls.filter(u => u.startsWith('/#') || u.startsWith('/products') || u.startsWith('/api/admin/qayyim/preview/'));
+    // P5: evidence must exist on the real route manifest — no hardcoded
+    // "/products" allowance (that path has never existed in this app).
+    const realUrls = keepRealEvidenceUrls(evidenceUrls);
     if (draft.sections.length === 0) {
       return `✅ فحصت ${evidenceUrls.length ? 'الواجهة' : 'الطلب'} — لا مسودة جديدة مطلوبة.\n${realUrls.length ? `روابط موثقة:\n${realUrls.slice(0,3).map(u => `- ${u}`).join('\n')}` : ''}\n\nقل "أنشئ مسودة للهيرو" وسأنشئها فوراً.`;
     }
