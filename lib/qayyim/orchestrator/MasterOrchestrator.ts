@@ -291,6 +291,21 @@ export class MasterOrchestrator {
       // Execute on agent
       const result = await agent.process(task);
       
+      // P3: Publish task completion event via SyncLayer
+      try {
+        const { syncLayer } = await import('@/lib/qayyim/memory/SyncLayer');
+        await syncLayer.initialize(state.companyId || '');
+        const summary = (result.output || '').slice(0, 200);
+        await syncLayer.publishTaskStatus(
+          currentSubtask.agentKey,
+          task.id,
+          result.success ? 'completed' : 'failed',
+          { summary }
+        );
+      } catch (e) {
+        console.warn('[MasterOrchestrator] SyncLayer publish failed:', e);
+      }
+      
       // Update state
       const newAgentResults = new Map(agentResults);
       newAgentResults.set(currentSubtask.id, result);

@@ -169,6 +169,7 @@ export function QayyimStudio() {
             <div className="space-y-4">
               <QayyimObservabilityDashboard />
               <QayyimTelemetryPanel />
+              <LiveEventsPanel />
             </div>
           )}
         </div>
@@ -192,6 +193,81 @@ function StatCard({ label, value, icon: Icon, tone }: { label: string; value: st
         <Icon className="w-4 h-4 opacity-70" />
       </div>
       <div className="text-xl font-bold text-white">{value}</div>
+    </div>
+  );
+}
+
+
+/**
+ * Live Events Panel — P3 Proactivity
+ * Real-time stream from /api/admin/agents/events/stream
+ */
+function LiveEventsPanel() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const eventSource = new EventSource('/api/admin/agents/events/stream');
+
+    eventSource.onopen = () => {
+      setIsConnected(true);
+    };
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setEvents(prev => [data, ...prev].slice(0, 30)); // keep latest 30
+      } catch {
+        // heartbeat or malformed
+      }
+    };
+
+    eventSource.onerror = () => {
+      setIsConnected(false);
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-black/30 backdrop-blur-sm p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4 text-emerald-400" />
+          <h3 className="text-sm font-semibold text-white">Live Events</h3>
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+        </div>
+        <span className="text-xs text-white/40">{events.length} events</span>
+      </div>
+
+      <div className="space-y-2 max-h-96 overflow-y-auto">
+        {events.length === 0 && (
+          <div className="text-xs text-white/40 text-center py-8">
+            {isConnected ? 'Waiting for events...' : 'Disconnected'}
+          </div>
+        )}
+
+        {events.map((event, idx) => (
+          <div key={idx} className="text-xs p-2 rounded bg-white/5 border border-white/5">
+            <div className="flex items-center justify-between mb-1">
+              <span className="font-mono text-amber-400">{event.event_type}</span>
+              <span className="text-white/40">
+                {event.created_at ? new Date(event.created_at).toLocaleTimeString('ar-EG') : ''}
+              </span>
+            </div>
+            <div className="text-white/60">
+              من: <span className="text-sky-400">{event.source_agent}</span>
+            </div>
+            {event.payload && Object.keys(event.payload).length > 0 && (
+              <div className="mt-1 text-white/40 truncate">
+                {JSON.stringify(event.payload).slice(0, 100)}...
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -8,9 +8,6 @@ export type { MemoryItem, SearchResult, LearningSearchResult } from "./SharedMem
 export { VectorStore, vectorStore } from "./VectorStore";
 export type { VectorSearchOptions, VectorStoreStats } from "./VectorStore";
 
-export { KnowledgeGraph, knowledgeGraph } from "./KnowledgeGraph";
-export type { GraphNode, GraphEdge, GraphPath, Subgraph } from "./KnowledgeGraph";
-
 export { SyncLayer, syncLayer } from "./SyncLayer";
 export type { SyncEvent, SyncEventType, SyncSubscription, AdvisoryLock } from "./SyncLayer";
 

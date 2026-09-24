@@ -7,10 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { masterOrchestrator } from "@/lib/qayyim";
 import { constitutionEngine } from "@/lib/qayyim/governance/ConstitutionEngine";
-import { opaEngine } from "@/lib/qayyim/governance/OPAEngine";
-import { syncLayer } from "@/lib/qayyim/memory/SyncLayer";
 import { swarmLearnings } from "@/lib/qayyim/memory/SwarmLearnings";
-import { sharedMemory, VectorStore } from "@/lib/qayyim/memory";
+import { sharedMemory } from "@/lib/qayyim/memory";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 
 export const dynamic = "force-dynamic";
@@ -403,31 +401,27 @@ async function handleConstitutionCheck(body: any) {
     targetSection: input.targetSection,
   });
 
-  // Also run OPA for Rego policies
-  const opaInput = {
-    agent_key: input.agentKey,
-    action: input.actionType,
-    resource: {
-      type: input.targetSection || 'page',
-      id: input.targetPage,
-      data: input.proposedChanges || input.content,
-    },
-    context: {
-      company_id: companyId,
-      evidence_urls: input.evidenceUrls,
-      human_approval: input.humanApproval,
-      approved_by: input.approvedBy,
-    },
-    timestamp: new Date().toISOString(),
-  };
-
-  const opaDecision = await opaEngine.evaluate(opaInput);
+  // P3: Publish quality gate event
+  try {
+    const { syncLayer } = await import('@/lib/qayyim/memory/SyncLayer');
+    await syncLayer.initialize(companyId);
+    const passed = report.overallPassed;
+    const blockingResults = report.results.filter((r: any) => !r.passed && r.enforcement === 'hard_block');
+    const draftId = (input as any).draft_id || 'constitution_check';
+    await syncLayer.publishQualityGate(
+      'qayyim-core',
+      draftId,
+      passed,
+      blockingResults
+    );
+  } catch (e) {
+    console.warn('[Constitution Check] SyncLayer publish failed:', e);
+  }
 
   return NextResponse.json({
     success: true,
     constitution_report: report,
-    opa_decision: opaDecision,
-    overall_allowed: report.overallPassed && opaDecision.allow,
+    overall_allowed: report.overallPassed,
   });
 }
 
@@ -599,18 +593,12 @@ async function handleStats(body: any) {
   await vectorStore.initialize(companyId);
   const vectorStats = await vectorStore.getStats();
 
-  const { KnowledgeGraph } = await import('@/lib/qayyim/memory/KnowledgeGraph');
-  const kg = new KnowledgeGraph();
-  await kg.initialize(companyId);
-  const graphStats = await kg.getStats();
-
   return NextResponse.json({
     success: true,
     stats: {
       memory: memoryStats,
       learnings: learningStats,
       vectors: vectorStats,
-      knowledge_graph: graphStats,
     },
   });
 }

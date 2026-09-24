@@ -21,8 +21,6 @@ export { MasterOrchestrator, masterOrchestrator } from "./orchestrator/MasterOrc
 // Governance
 export { ConstitutionEngine, constitutionEngine } from "./governance/ConstitutionEngine";
 export type { ConstitutionRule, ConstitutionCheckInput, ConstitutionCheckResult, ConstitutionViolation, ConstitutionWarning, ConstitutionReport } from "./governance/ConstitutionEngine";
-export { OPAEngine, opaEngine } from "./governance/OPAEngine";
-export type { OPAInput, OPADecision, OPAViolation, OPAWarning, RegoPolicy } from "./governance/OPAEngine";
 
 // Memory
 export { SharedMemory, sharedMemory } from "./memory/SharedMemory";
@@ -31,9 +29,6 @@ export type { SwarmLearning as SharedSwarmLearning } from "./memory/SharedMemory
 
 export { VectorStore, vectorStore } from "./memory/VectorStore";
 export type { VectorSearchOptions, VectorStoreStats } from "./memory/VectorStore";
-
-export { KnowledgeGraph, knowledgeGraph } from "./memory/KnowledgeGraph";
-export type { GraphNode, GraphEdge, GraphPath, Subgraph } from "./memory/KnowledgeGraph";
 
 export { SyncLayer, syncLayer } from "./memory/SyncLayer";
 export type { SyncEvent, SyncEventType, SyncSubscription, AdvisoryLock } from "./memory/SyncLayer";
@@ -59,27 +54,3 @@ export type { Experiment, CreateExperimentInput, ExperimentStats } from "./ab-te
 // Quality Benchmarks
 export { BENCHMARKS, runBenchmark, runAllBenchmarks, listBenchmarks } from "./benchmarks";
 export type { BenchmarkResult, BenchmarkDefinition, BenchmarkSample } from "./benchmarks";
-
-// Red Team Engine
-export type { RedTeamAttack, RedTeamResult, QayyimAgentMap } from "./RedTeamEngine";
-export { redTeamAttacks } from "./RedTeamEngine";
-
-// Orchestrator utilities (Task Decomposer, Agent Router, Result Aggregator)
-export { TaskDecomposer, taskDecomposer } from "./orchestrator/TaskDecomposer";
-export type { DecomposedSubTask, DecompositionResult } from "./orchestrator/TaskDecomposer";
-
-export { AgentRouter } from "./orchestrator/AgentRouter";
-export type { RoutableTask, RouteDecision } from "./orchestrator/AgentRouter";
-
-export { ResultAggregator, resultAggregator } from "./orchestrator/ResultAggregator";
-export type { AggregatedSection, AggregatedDraft, AggregationInput } from "./orchestrator/ResultAggregator";
-
-// Specialized graphs
-export { runAuditGraph } from "./orchestrator/graphs/audit.graph";
-export type { AuditGraphInput, AuditGraphOutput } from "./orchestrator/graphs/audit.graph";
-
-export { runDraftGraph } from "./orchestrator/graphs/draft.graph";
-export type { DraftGraphInput, DraftGraphOutput } from "./orchestrator/graphs/draft.graph";
-
-export { runPublishGraph } from "./orchestrator/graphs/publish.graph";
-export type { PublishGraphInput, PublishGraphOutput } from "./orchestrator/graphs/publish.graph";

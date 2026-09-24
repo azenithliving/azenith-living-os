@@ -6,6 +6,7 @@
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
+import { runLoadProbe, runSecurityHeaderChecks, runA11yChecks } from "./qa/realChecks";
 
 const QAYYIM_QA_SYSTEM_PROMPT = `أنت قيّم الدار - الجودة والاختبار.
 
@@ -22,6 +23,9 @@ const QAYYIM_QA_SYSTEM_PROMPT = `أنت قيّم الدار - الجودة وا�
 
 ## قاعدتك الذهبية:
 **لا نشر بلا QA Pass**. القيّم-القائد يستأذن، أنت تقرر pass/fail مع أدلة.
+
+## قاعدة حاسمة للقياسات الحقيقية:
+ستجد في السياق قياسات حقيقية (measured). لخصها فقط. ممنوع اختراع أي رقم غير موجود في measured.
 
 ## أدواتك المسموحة:
 deploy_trigger (staging فقط), qayyim_out_of_scope
@@ -173,7 +177,7 @@ export class QayyimQaAgent extends QayyimAgentBase {
   }
 
   /**
-   * Accessibility audit
+   * Accessibility audit — P2: fetch real pages and run static checks
    */
   async accessibilityAudit(params: {
     pages: string[];
@@ -182,21 +186,88 @@ export class QayyimQaAgent extends QayyimAgentBase {
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `a11y_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!siteUrl) {
+      return {
+        success: false,
+        taskId,
+        output: 'SITE_URL not configured',
+        data: { error: 'SITE_URL not configured' },
+        confidence: 0,
+      };
+    }
+
+    const siteOrigin = new URL(siteUrl).origin;
+
+    // Fetch pages with bounded parallelism (≤5) and timeouts
+    const violationsByPage: Record<string, any> = {};
+    const concurrency = 5;
+    const queue = [...params.pages];
+    let index = 0;
+
+    const workers = Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
+      while (index < queue.length) {
+        const pagePath = queue[index++];
+        let pageUrl: string;
+        try {
+          const url = new URL(pagePath, siteUrl);
+          if (url.origin !== siteOrigin) {
+            violationsByPage[pagePath] = { error: 'URL outside site' };
+            continue;
+          }
+          pageUrl = url.toString();
+        } catch {
+          violationsByPage[pagePath] = { error: 'Invalid URL' };
+          continue;
+        }
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+
+        try {
+          const response = await fetch(pageUrl, { signal: controller.signal });
+          if (!response.ok) {
+            violationsByPage[pagePath] = { error: `HTTP ${response.status}` };
+            continue;
+          }
+
+          const html = await response.text();
+          const result = await runA11yChecks(html, pageUrl);
+          violationsByPage[pagePath] = result;
+        } catch (e: any) {
+          violationsByPage[pagePath] = { error: e.name === 'AbortError' ? 'Timeout' : e.message };
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+    });
+
+    await Promise.all(workers);
+
     const task: QayyimTask = {
       id: taskId,
       type: "accessibility_audit",
       title: `فحص إمكانية الوصول (${params.standard || 'WCAG21AA'})`,
       description: `افحص ${params.pages.length} صفحات ضد ${params.standard || 'WCAG21AA'}`,
-      context: { ...params.context, ...params, action: "a11y_audit" },
+      context: {
+        ...params.context,
+        ...params,
+        action: "a11y_audit",
+        measured: { violationsByPage },
+      },
       priority: "high",
     };
 
-    return this.process(task);
+    // LLM summarizes the measured data
+    const aiResult = await this.process(task);
+    aiResult.data = { ...(aiResult.data || {}), violationsByPage };
+
+    return aiResult;
   }
 
   /**
-   * Load testing
+   * Load testing — P2: real requests with measured latencies
    */
   async loadTest(params: {
     scenarios: Array<{ name: string; path: string; method: 'GET' | 'POST'; body?: any }>;
@@ -205,21 +276,47 @@ export class QayyimQaAgent extends QayyimAgentBase {
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `load_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!siteUrl) {
+      return {
+        success: false,
+        taskId,
+        output: 'SITE_URL not configured',
+        data: { error: 'SITE_URL not configured' },
+        confidence: 0,
+      };
+    }
+
+    // Run real load probe (capped at 200 requests, ≤10 concurrency)
+    const metrics = await runLoadProbe(siteUrl, params.scenarios, {
+      concurrency: 10,
+      totalRequests: 200,
+    });
+
     const task: QayyimTask = {
       id: taskId,
       type: "load_test",
       title: "اختبار الحمل",
       description: `شغّل load test: ${params.scenarios.length} سيناريوهات، ${params.stages.length} مراحل، thresholds: ${JSON.stringify(params.thresholds || {})}`,
-      context: { ...params.context, ...params, action: "load_test" },
+      context: {
+        ...params.context,
+        ...params,
+        action: "load_test",
+        measured: { metrics },
+      },
       priority: "high",
     };
 
-    return this.process(task);
+    // LLM summarizes the real numbers
+    const aiResult = await this.process(task);
+    aiResult.data = { ...(aiResult.data || {}), metrics };
+
+    return aiResult;
   }
 
   /**
-   * Security scan
+   * Security scan — P2: real header checks
    */
   async securityScan(params: {
     targetUrl: string;
@@ -227,17 +324,40 @@ export class QayyimQaAgent extends QayyimAgentBase {
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `secscan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
+
+    // Run real security header checks
+    let headerChecks: any;
+    try {
+      headerChecks = await runSecurityHeaderChecks(params.targetUrl);
+    } catch (e: any) {
+      return {
+        success: false,
+        taskId,
+        output: `Security scan failed: ${e.message}`,
+        data: { error: e.message },
+        confidence: 0,
+      };
+    }
+
     const task: QayyimTask = {
       id: taskId,
       type: "security_scan",
       title: "فحص الأمان",
       description: `افحص ${params.targetUrl}: ${params.checks?.join('، ') || 'headers, csp, cookies, rate_limit, ssl, cors'}`,
-      context: { ...params.context, ...params, action: "security_scan" },
+      context: {
+        ...params.context,
+        ...params,
+        action: "security_scan",
+        measured: { headerChecks },
+      },
       priority: "critical",
     };
 
-    return this.process(task);
+    // LLM summarizes the checks
+    const aiResult = await this.process(task);
+    aiResult.data = { ...(aiResult.data || {}), headerChecks };
+
+    return aiResult;
   }
 
   /**
