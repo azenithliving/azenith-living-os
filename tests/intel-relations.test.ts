@@ -123,6 +123,16 @@ describe("Smart Agent API Contract", () => {
   }, 15000);
 
   it("returns unified success contract in fallback mode", async () => {
+    // Mock admin natural brain
+    vi.doMock("@/lib/admin-natural-brain", () => ({
+      processAdminNaturalLanguageReply: vi.fn(async () => ({
+        success: true,
+        reply: "تم التنفيذ بنجاح",
+        executed: false,
+        data: null,
+      })),
+    }));
+
     const fetchSpy = vi.spyOn(global, "fetch").mockRejectedValueOnce(new Error("network down"));
     const { POST } = await import("../app/api/admin/agent/smart/route");
     const response = await POST(
