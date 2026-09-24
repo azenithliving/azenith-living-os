@@ -29,7 +29,10 @@ async function main() {
   });
 
   page.on('requestfailed', request => {
-    failedRequests.push(request.url());
+    const failure = request.failure();
+    // Navigating away tears down in-flight requests (video/XHR) — not a page defect.
+    if (failure && failure.errorText.includes('ERR_ABORTED')) return;
+    failedRequests.push(`${request.url()} (${failure ? failure.errorText : 'unknown'})`);
   });
 
   let hasErrors = false;

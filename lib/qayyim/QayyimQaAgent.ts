@@ -325,10 +325,44 @@ export class QayyimQaAgent extends QayyimAgentBase {
   }): Promise<QayyimResult> {
     const taskId = `secscan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!siteUrl) {
+      return {
+        success: false,
+        taskId,
+        output: 'SITE_URL not configured',
+        data: { error: 'SITE_URL not configured' },
+        confidence: 0,
+      };
+    }
+
+    let normalizedTarget: string;
+    try {
+      const target = new URL(params.targetUrl);
+      if (target.origin !== new URL(siteUrl).origin) {
+        return {
+          success: false,
+          taskId,
+          output: 'target_url outside site origin',
+          data: { error: 'target_url outside site origin', targetUrl: params.targetUrl },
+          confidence: 0,
+        };
+      }
+      normalizedTarget = target.toString();
+    } catch {
+      return {
+        success: false,
+        taskId,
+        output: 'Invalid target_url',
+        data: { error: 'Invalid target_url', targetUrl: params.targetUrl },
+        confidence: 0,
+      };
+    }
+
     // Run real security header checks
     let headerChecks: any;
     try {
-      headerChecks = await runSecurityHeaderChecks(params.targetUrl);
+      headerChecks = await runSecurityHeaderChecks(normalizedTarget);
     } catch (e: any) {
       return {
         success: false,

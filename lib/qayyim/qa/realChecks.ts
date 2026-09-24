@@ -173,10 +173,39 @@ export async function runSecurityHeaderChecks(url: string): Promise<SecurityHead
 
   const cookies = headers['set-cookie'] || '';
 
-  return { checks: evaluateHeaders(headers, cookies) };
+  // CORS probe: a second request carrying a foreign Origin header, so the
+  // server echoes its real cross-origin policy instead of hiding it.
+  const corsProbeHeaders = await fetchCorsProbeHeaders(url);
+
+  return { checks: evaluateHeaders(headers, cookies, corsProbeHeaders) };
 }
 
-export function evaluateHeaders(headers: Record<string, string>, cookies: string): SecurityCheck[] {
+async function fetchCorsProbeHeaders(url: string): Promise<Record<string, string>> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const probe = await fetch(url, {
+      redirect: 'manual',
+      headers: { Origin: 'https://example.invalid' },
+      signal: controller.signal,
+    });
+    const probeHeaders: Record<string, string> = {};
+    probe.headers.forEach((value, key) => {
+      probeHeaders[key.toLowerCase()] = value;
+    });
+    return probeHeaders;
+  } catch {
+    return {}; // probe failed → evaluator falls back to the main response headers
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export function evaluateHeaders(
+  headers: Record<string, string>,
+  cookies: string,
+  corsProbeHeaders: Record<string, string> = {}
+): SecurityCheck[] {
   const checks: SecurityCheck[] = [];
 
   // 1. HSTS
@@ -245,21 +274,23 @@ export function evaluateHeaders(headers: Record<string, string>, cookies: string
     });
   }
 
-  // 6. CORS wildcard with credentials (dangerous pattern)
-  const acao = headers['access-control-allow-origin'];
-  const acac = headers['access-control-allow-credentials'];
+  // 6. CORS wildcard with credentials (dangerous pattern) — prefer the
+  // cross-origin probe response, fall back to the plain request headers.
+  const acao = corsProbeHeaders['access-control-allow-origin'] ?? headers['access-control-allow-origin'];
+  const acac = corsProbeHeaders['access-control-allow-credentials'] ?? headers['access-control-allow-credentials'];
+  const probed = Object.keys(corsProbeHeaders).length > 0;
   if (acao === '*' && acac === 'true') {
     checks.push({
       id: 'cors-wildcard-credentials',
       pass: false,
-      detail: 'Dangerous: ACAO=* with credentials=true',
+      detail: 'Dangerous: ACAO=* with credentials=true' + (probed ? ' (cross-origin probe)' : ''),
       headerValue: `${acao} + credentials`,
     });
   } else {
     checks.push({
       id: 'cors-wildcard-credentials',
       pass: true,
-      detail: 'No dangerous CORS wildcard pattern',
+      detail: 'No dangerous CORS wildcard pattern' + (probed ? ' (cross-origin probe)' : ''),
     });
   }
 

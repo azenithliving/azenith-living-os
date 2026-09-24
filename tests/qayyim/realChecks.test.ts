@@ -150,6 +150,29 @@ describe('Security Header Checks (pure evaluator)', () => {
     expect(corsCheck?.pass).toBe(true);
   });
 
+  it('should fail when cross-origin probe echoes wildcard with credentials', () => {
+    const checks = evaluateHeaders({}, '', {
+      'access-control-allow-origin': '*',
+      'access-control-allow-credentials': 'true',
+    });
+
+    const corsCheck = checks.find(c => c.id === 'cors-wildcard-credentials');
+    expect(corsCheck?.pass).toBe(false);
+    expect(corsCheck?.detail).toContain('cross-origin probe');
+  });
+
+  it('should prefer probe headers over plain response headers', () => {
+    // Plain response looks safe, but probe reveals the wildcard policy
+    const checks = evaluateHeaders(
+      { 'access-control-allow-origin': 'https://trusted.com' },
+      '',
+      { 'access-control-allow-origin': '*', 'access-control-allow-credentials': 'true' }
+    );
+
+    const corsCheck = checks.find(c => c.id === 'cors-wildcard-credentials');
+    expect(corsCheck?.pass).toBe(false);
+  });
+
   it('should check cookie flags', () => {
     const headers = {};
     const cookies = 'sessionid=abc123; Secure; HttpOnly; SameSite=Strict';
