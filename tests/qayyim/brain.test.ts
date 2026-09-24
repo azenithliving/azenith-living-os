@@ -8,6 +8,25 @@
 import { describe, it, expect } from 'vitest';
 import { isRealPath, toPath, verifyResponseLinks, keepRealEvidenceUrls, suggestProductLink } from '@/lib/qayyim/url-manifest';
 import { deriveActions, finalizeReply } from '@/lib/qayyim/chat-brain';
+import { isCriticVerdictOk, shouldDebate } from '@/lib/qayyim/debate';
+
+describe('debate — critic verdict parsing', () => {
+  it('treats OK/short verdicts as pass', () => {
+    expect(isCriticVerdictOk('OK')).toBe(true);
+    expect(isCriticVerdictOk('ok — الرد سليم')).toBe(true);
+    expect(isCriticVerdictOk('تمام')).toBe(true);
+  });
+
+  it('treats real critiques as fail', () => {
+    expect(isCriticVerdictOk('الرابط المذكور غير موجود في الموقع، احذفه')).toBe(false);
+  });
+
+  it('only debates long actionable answers', () => {
+    expect(shouldDebate('تم ✅')).toBe(false);
+    expect(shouldDebate('كلام عادي قصير')).toBe(false);
+    expect(shouldDebate('س'.repeat(250) + ' أنشئ مسودة للهيرو')).toBe(true);
+  });
+});
 
 describe('url-manifest — the site route truth', () => {
   it('accepts real static routes', () => {

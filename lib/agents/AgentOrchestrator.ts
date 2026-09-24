@@ -9,6 +9,7 @@ import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 import { askGroqMessages, askGoogle, askGoogleMessages, askOpenRouter, askMistral } from "@/lib/ai-orchestrator";
 import { runUltimateTool, inferUltimateTool } from "@/lib/admin-tool-bridge";
 import { recallMemory, finalizeReply } from "@/lib/qayyim/chat-brain";
+import { critiqueAndPolish, shouldDebate } from "@/lib/qayyim/debate";
 import { 
   QayyimCoreAgent, qayyimCoreAgent,
   QayyimContentAgent, qayyimContentAgent,
@@ -299,6 +300,15 @@ export class AgentOrchestrator {
       const memoryCtx = await recallMemory(message, resolvedCompanyId);
       if (memoryCtx) promptWithToolContext = `${memoryCtx}\n\n${promptWithToolContext}`;
 
+      // P5-M5: closed learning loop — feed thumbs-up/down lessons back into the prompt
+      try {
+        const { selfLearningEngine } = await import("@/lib/agents/SelfLearningEngine");
+        const lessons = await selfLearningEngine.getImprovementSuggestions(selectedAgent);
+        if (lessons?.length) {
+          promptWithToolContext = `[دروس تعلمتها من تقييماتك السابقة — التزم بها:\n${lessons.slice(0, 3).map((l: string) => `- ${l}`).join("\n")}]\n\n${promptWithToolContext}`;
+        }
+      } catch {}
+
       // ══════════════════════════════════════════════════════════════
       // قيّم-كور: ينسق السرب الكامل عبر MasterOrchestrator
       // المستخدم يتكلم مع القائد فقط — السرب يعمل خفياً في الخلفية
@@ -397,6 +407,13 @@ export class AgentOrchestrator {
           { role: "user" as const, content: promptWithToolContext },
         ];
         response = await this.callAI(messages);
+      }
+
+      // P5-M5: friendly war — a critic pass polices the leader's actionable
+      // answers before the owner ever sees them (short replies skip it).
+      if (selectedAgent === "qayyim-core" && response && shouldDebate(response)) {
+        const polished = await critiqueAndPolish(message, response);
+        response = polished.reply;
       }
 
       if (toolResult?.message && response && !response.includes(toolResult.message)) {
