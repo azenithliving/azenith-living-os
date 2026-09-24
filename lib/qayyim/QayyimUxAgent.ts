@@ -4,6 +4,7 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { createQayyimDraft } from "@/lib/qayyim-ops";
 
 const QAYYIM_UX_SYSTEM_PROMPT = `أنت قيّم الدار - تجربة المستخدم.
 
@@ -118,7 +119,38 @@ export class QayyimUxAgent extends QayyimAgentBase {
       priority: "high",
     };
 
-    return this.process(task);
+    const aiResult = await this.process(task);
+    // Persist as real experiment — 100% real
+    if (aiResult.success) {
+      try {
+        const { getSupabaseAdminClient } = await import('@/lib/supabase-admin');
+        const { resolveAdminCompanyId } = await import('@/lib/admin-company');
+        const supabase = getSupabaseAdminClient();
+        const companyId = await resolveAdminCompanyId(params.context?.company_id) ?? this.companyId;
+        if (supabase) {
+          const expKey = `exp_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+          const { data, error } = await supabase.from('qayyim_experiments').insert({
+            company_id: companyId,
+            experiment_key: expKey,
+            hypothesis: params.hypothesis,
+            page_path: params.pagePath,
+            section_key: params.sectionKey,
+            control_version: params.controlVersion ?? {},
+            variant_version: params.variantVersion ?? {},
+            success_metric: params.successMetric,
+            minimum_detectable_effect: params.minimumDetectableEffect ?? 10,
+            duration_days: params.durationDays ?? 14,
+            status: 'draft',
+            created_by: this.agentKey,
+          }).select('id').single();
+          if (!error && data && aiResult.data) {
+            aiResult.data.experimentId = data.id;
+            aiResult.data.experimentKey = expKey;
+          }
+        }
+      } catch (e) { console.warn('[QAYYIM-UX] experiment persist failed', e); }
+    }
+    return aiResult;
   }
 
   /**

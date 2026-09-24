@@ -5,7 +5,7 @@
  */
 
 import { BaseAction, ActionContext, ActionConfig, ActionResult, ActionRegistry } from './base_action';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/utils/supabase/client';
 
 // Send WhatsApp Message Action
 export class SendWhatsAppMessageAction extends BaseAction {

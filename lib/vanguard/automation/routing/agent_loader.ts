@@ -5,7 +5,7 @@
  * Loads agent data from database and keeps it synchronized
  */
 
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/utils/supabase/client';
 import { SmartRouter, Agent, AgentAvailability } from './smart_router';
 
 export class AgentLoader {

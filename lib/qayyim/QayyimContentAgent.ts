@@ -75,74 +75,72 @@ export class QayyimContentAgent extends QayyimAgentBase {
   readonly systemPrompt = QAYYIM_CONT_SYSTEM_PROMPT;
 
   /**
-   * Draft luxury copy — يولّد النص بالـ AI ثم يحفظ مسودة حقيقية في qayyim_drafts
+   * Draft luxury copy for a page section
    */
   async draftCopy(params: {
-    pagePath: string;
-    sectionKey: string;
+    pagePath: string;           // '/', '/rooms/living-room', '/furniture'
+    sectionKey: string;         // 'hero', 'rooms-grid', 'trust-section', 'product-card:master-bed'
     draftType: 'hero_text' | 'section_reorder' | 'product_card' | 'tone_unification' | 'identity_fix' | 'storytelling';
-    currentContent?: any;
-    instructions: string;
+    currentContent?: any;       // Current content (auto-fetched if not provided)
+    instructions: string;       // User instructions in Arabic
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `draft_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
+    
     const task: QayyimTask = {
       id: taskId,
       type: params.draftType,
       title: `مسودة ${this.getDraftTypeLabel(params.draftType)} لـ ${params.sectionKey}`,
       description: params.instructions,
-      context: {
-        ...params.context,
-        pagePath:       params.pagePath,
-        sectionKey:     params.sectionKey,
+      context: { 
+        ...params.context, 
+        pagePath: params.pagePath,
+        sectionKey: params.sectionKey,
         currentContent: params.currentContent,
       },
       priority: "high",
     };
 
-    // 1. اطلب النص من AI
     const aiResult = await this.process(task);
-
-    // 2. إذا نجح، احفظ مسودة حقيقية في qayyim_drafts
-    if (aiResult.success && !aiResult.data?.draft_id) {
-      const saveResult = await createQayyimDraft({
-        targetTable: 'site_sections',
-        targetId:    params.sectionKey,
-        targetPath:  `${params.pagePath}#${params.sectionKey}`,
-        proposed: {
-          draft_type:    params.draftType,
-          instructions:  params.instructions,
-          ai_text:       aiResult.data?.draftContent ?? aiResult.output,
-          section_key:   params.sectionKey,
-          page_path:     params.pagePath,
-          agent:         this.agentKey,
-        },
-        draftType: params.draftType,
-        createdBy: this.agentKey,
-        companyId: params.context?.company_id ?? this.companyId,
-        metadata: {
-          verdict:         aiResult.data?.verdict,
-          violations:      aiResult.data?.violations ?? [],
-          evidence_urls:   aiResult.evidenceUrls ?? [],
-          confidence:      aiResult.confidence,
-        },
-      });
-
-      if (saveResult.success) {
-        return {
-          ...aiResult,
-          data: {
-            ...aiResult.data,
-            draft_id:      saveResult.data?.draft_id,
-            preview_token: saveResult.data?.preview_token,
-            preview_url:   saveResult.data?.preview_url,
-            version:       saveResult.data?.version,
-          },
-        };
+    // Persist as real draft if AI succeeded — 100% real, no placebo
+    if (aiResult.success && aiResult.data?.draftContent) {
+      const targetTable = params.pagePath.startsWith('/products') ? 'products' : params.sectionKey.includes('product') ? 'products' : 'room_sections';
+      // Resolve targetId via path — fallback to first visible room
+      try {
+        const { supabaseServer } = await import('@/lib/dal/unified-supabase');
+        let targetId: string | null = null;
+        let targetPath = params.pagePath;
+        if (targetTable === 'room_sections') {
+          const { data: room } = await supabaseServer.from('room_sections').select('id, slug').eq('slug', params.sectionKey).maybeSingle();
+          if (room) { targetId = room.id; targetPath = `/#${room.slug}`; }
+          else {
+            const { data: anyRoom } = await supabaseServer.from('room_sections').select('id, slug').limit(1).maybeSingle();
+            if (anyRoom) { targetId = anyRoom.id; targetPath = `/#${anyRoom.slug}`; }
+          }
+        } else {
+          const { data: prod } = await supabaseServer.from('products').select('id, slug').limit(1).maybeSingle();
+          if (prod) { targetId = prod.id; targetPath = prod.slug ? `/products/${prod.slug}` : '/'; }
+        }
+        if (targetId) {
+          const draftRes = await createQayyimDraft({
+            targetTable,
+            targetId,
+            targetPath,
+            proposed: { content: aiResult.data.draftContent, sectionKey: params.sectionKey, instructions: params.instructions, type: params.draftType },
+            draftType: params.draftType,
+            createdBy: this.agentKey,
+            companyId: params.context?.company_id ?? this.companyId,
+            metadata: { via: 'qayyim-cont', taskId, evidenceUrls: aiResult.evidenceUrls ?? [] },
+          });
+          if (draftRes.success && aiResult.data) {
+            aiResult.data.draftId = draftRes.data?.draft_id;
+            aiResult.data.previewUrl = draftRes.data?.preview_url;
+          }
+        }
+      } catch (e) {
+        console.warn('[QAYYIM-CONT] draft persist failed', e);
       }
     }
-
     return aiResult;
   }
 

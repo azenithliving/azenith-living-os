@@ -5,7 +5,6 @@
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
 import { createQayyimDraft } from "@/lib/qayyim-ops";
-import { supabaseServer } from "@/lib/dal/unified-supabase";
 
 const QAYYIM_VIS_SYSTEM_PROMPT = `أنت قيّم الدار - المرئي والصور.
 
@@ -74,57 +73,59 @@ export class QayyimVisualAgent extends QayyimAgentBase {
   readonly systemPrompt = QAYYIM_VIS_SYSTEM_PROMPT;
 
   /**
-   * Curate gallery — يقرأ صور حقيقية من curated_images ثم يُحكّم AI فيها
+   * Curate gallery for a page/room
    */
   async curateGallery(params: {
     pagePath: string;
     roomSlug?: string;
     style?: 'modern' | 'classic' | 'industrial' | 'scandinavian';
-    count?: number;
+    count?: number; // default 30
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `gallery_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
-    // 1. اجلب صور حقيقية من DB
-    let dbImages: Array<{ id: string; url: string; alt_text?: string; room_id?: string; tags?: string[] }> = [];
-    try {
-      let query = supabaseServer
-        .from("curated_images")
-        .select("id, url, alt_text, room_id, tags")
-        .limit(params.count ?? 50);
-      if (params.roomSlug) query = query.ilike("tags::text", `%${params.roomSlug}%`);
-      const { data } = await query;
-      dbImages = data ?? [];
-    } catch { /* fallback to AI-only */ }
-
+    
     const task: QayyimTask = {
       id: taskId,
       type: "curate_gallery",
-      title: `انتقاء معرض لـ ${params.pagePath}${params.roomSlug ? ` (${params.roomSlug})` : ""}`,
-      description: `اختر ${params.count ?? 30} صورة فاخرة بأسلوب ${params.style ?? "modern"} لـ ${params.pagePath}. الصور المتاحة من DB: ${dbImages.length}`,
-      context: {
-        ...params.context, ...params,
-        action: "curate",
-        db_images: dbImages.slice(0, 30), // أرسل للـ AI أول 30
-      },
+      title: `انتقاء معرض لـ ${params.pagePath}${params.roomSlug ? ` (${params.roomSlug})` : ''}`,
+      description: `اختر ${params.count || 30} صورة فاخرة بأسلوب ${params.style || 'modern'} لـ ${params.pagePath}`,
+      context: { ...params.context, ...params, action: "curate" },
       priority: "high",
     };
 
     const aiResult = await this.process(task);
-
-    // 2. ادمج صور DB مع انتقاء AI
-    return {
-      ...aiResult,
-      data: {
-        ...aiResult.data,
-        db_images_count: dbImages.length,
-        db_images_sample: dbImages.slice(0, 10),
-      },
-    };
+    if (aiResult.success && (aiResult.data?.images?.length || aiResult.output)) {
+      try {
+        const { supabaseServer } = await import('@/lib/dal/unified-supabase');
+        let targetId: string | null = null;
+        let targetTable = 'room_sections';
+        let targetPath = params.pagePath;
+        if (params.roomSlug) {
+          const { data: room } = await supabaseServer.from('room_sections').select('id').eq('slug', params.roomSlug).maybeSingle();
+          if (room) targetId = room.id;
+        }
+        if (!targetId) {
+          const { data: anyRoom } = await supabaseServer.from('room_sections').select('id, slug').limit(1).maybeSingle();
+          if (anyRoom) { targetId = anyRoom.id; targetPath = `/#${anyRoom.slug}`; }
+        }
+        if (targetId) {
+          const draftRes = await createQayyimDraft({
+            targetTable, targetId, targetPath,
+            proposed: { images: aiResult.data?.images ?? [], output: aiResult.output, style: params.style, count: params.count },
+            draftType: 'curate_gallery',
+            createdBy: this.agentKey,
+            companyId: params.context?.company_id ?? this.companyId,
+            metadata: { via: 'qayyim-vis', taskId, evidenceUrls: aiResult.evidenceUrls ?? [] },
+          });
+          if (draftRes.success && aiResult.data) { aiResult.data.draftId = draftRes.data?.draft_id; aiResult.data.previewUrl = draftRes.data?.preview_url; }
+        }
+      } catch (e) { console.warn('[QAYYIM-VIS] draft persist failed', e); }
+    }
+    return aiResult;
   }
 
   /**
-   * Select hero image — يقرأ صور الـ room من DB ثم يختار أفضلها
+   * Select hero image with ranked alternatives
    */
   async selectHeroImage(params: {
     pagePath: string;
@@ -133,63 +134,17 @@ export class QayyimVisualAgent extends QayyimAgentBase {
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
     const taskId = `hero_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
-    // 1. جلب الصور الحقيقية
-    let candidates: Array<{ id: string; url: string; alt_text?: string }> = [];
-    try {
-      let q = supabaseServer.from("curated_images").select("id, url, alt_text").limit(20);
-      if (params.roomSlug) q = q.ilike("tags::text", `%${params.roomSlug}%`);
-      const { data } = await q;
-      candidates = data ?? [];
-
-      // fallback: جرب media_assets
-      if (candidates.length === 0) {
-        const { data: media } = await supabaseServer
-          .from("media_assets")
-          .select("id, url, alt_text")
-          .limit(20);
-        candidates = media ?? [];
-      }
-    } catch { /* fallback */ }
-
+    
     const task: QayyimTask = {
       id: taskId,
       type: "select_hero_image",
       title: `اختيار صورة هيرو لـ ${params.pagePath}`,
-      description: `حدد أفضل صورة هيرو مع 3 بدائل مرتبة لـ ${params.pagePath}. ${candidates.length} مرشحة من DB`,
-      context: {
-        ...params.context, ...params,
-        action: "select_hero",
-        candidates,
-      },
+      description: `حدد أفضل صورة هيرو مع 3 بدائل مرتبة لـ ${params.pagePath}`,
+      context: { ...params.context, ...params, action: "select_hero" },
       priority: "high",
     };
 
-    const aiResult = await this.process(task);
-
-    // 2. احفظ اختيار الهيرو كمسودة في qayyim_drafts
-    if (aiResult.success && params.roomSlug) {
-      const selectedImage = aiResult.data?.images?.[0] ?? candidates[0];
-      if (selectedImage) {
-        await createQayyimDraft({
-          targetTable: "room_sections",
-          targetId:    params.roomSlug,
-          targetPath:  params.pagePath,
-          proposed:    { image_url: selectedImage.url ?? selectedImage, hero_selected: true },
-          draftType:   "image_selection",
-          createdBy:   this.agentKey,
-          companyId:   params.context?.company_id ?? this.companyId,
-        });
-      }
-    }
-
-    return {
-      ...aiResult,
-      data: {
-        ...aiResult.data,
-        db_candidates: candidates,
-      },
-    };
+    return this.process(task);
   }
 
   /**

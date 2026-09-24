@@ -47,37 +47,15 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
 };
 
-const navCategories = [
-  {
-    title: "الرئيسية",
-    items: [
-      { href: "/admin", label: "نظرة عامة", icon: "Home" },
-      { href: "/admin/owner-dashboard", label: "لوحة المالك", icon: "Crown" },
-    ],
-  },
-  {
-    title: "العمل",
-    items: [
-      { href: "/admin/work", label: "مركز العمل", icon: "TrendingUp" },
-      { href: "/admin/sales", label: "المبيعات", icon: "MessageSquare" },
-      { href: "/admin/elite", label: "دعوات النخبة", icon: "Crown" },
-    ],
-  },
-  {
-    title: "الوكلاء الذكية",
-    items: [
-      { href: "/admin/agents", label: "مركز قيادة الوكلاء", icon: "Cpu" },
-    ],
-  },
-  {
-    title: "النظام",
-    items: [
-      { href: "/admin/system", label: "مركز النظام", icon: "Settings" },
-      { href: "/admin/settings", label: "الإعدادات", icon: "Database" },
-      { href: "/admin/database", label: "حالة قاعدة البيانات", icon: "Activity" },
-    ],
-  },
-];
+import { LEGACY_NAV, V2_NAV } from "@/lib/admin-nav";
+
+// يختار القائمة حسب المسار — v2 هو البيت الجديد النضيف، القديم يبقى للمرجع فقط
+function useNavCategories(pathname: string | null) {
+  const isV2 = pathname?.startsWith("/admin/v2");
+  return isV2 ? V2_NAV : LEGACY_NAV;
+}
+
+const navCategories = LEGACY_NAV; // fallback for legacy direct import
 
 export default function AdminLayoutClient({
   children,
@@ -87,14 +65,17 @@ export default function AdminLayoutClient({
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const activeCategories = useNavCategories(pathname);
 
-  const filteredNav = navCategories.map(cat => ({
+  const filteredNav = activeCategories.map(cat => ({
     ...cat,
     items: cat.items.filter(item => 
       item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
       cat.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
   })).filter(cat => cat.items.length > 0);
+
+  const isV2 = pathname?.startsWith("/admin/v2");
 
   // Close sidebar on path change (mobile)
   useEffect(() => {
@@ -215,7 +196,7 @@ export default function AdminLayoutClient({
         </div>
       </main>
 
-      <GlobalAssistantDock />
+      {!isV2 && <GlobalAssistantDock />}
     </div>
   );
 }

@@ -156,9 +156,12 @@ export async function proxy(request: NextRequest) {
     request.headers.get("x-internal-key") === process.env.INTERNAL_API_KEY
   );
 
+  // Preview is token-based — allow without admin session
+  const isPublicPreview = pathname.startsWith("/api/admin/qayyim/preview/");
   // Admin API Protection
   if (
     pathname.startsWith("/api/admin") &&
+    !isPublicPreview &&
     !isAdminLoginApi &&
     !isAuthorizedAdmin &&
     !hasValidInternalKey

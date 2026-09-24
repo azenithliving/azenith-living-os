@@ -6,7 +6,7 @@
  */
 
 import { EventBus } from '../event_bus';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/utils/supabase/client';
 
 // ============================================================================
 // Types

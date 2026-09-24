@@ -401,25 +401,41 @@ export default function AdminPage() {
               <Bot className="w-5 h-5 text-blue-400" />
               حالة الوكلاء الذكية
             </h2>
-            {Object.keys(mastermindData?.agents ?? {}).length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.keys(mastermindData.agents)
-                  .filter(k => !['prime'].includes(k)) // قيّم-كور بدل prime
-                  .map((agentKey, index) => (
-                  <AgentStatusCard
-                    key={agentKey}
-                    agentKey={agentKey === 'prime' ? 'qayyim-core' : agentKey}
-                    agentName={agentKey === 'prime' ? 'قيّم الدار' : agentKey === 'qayyim-core' ? 'قيّم الدار' : agentKey}
-                    agentRole="سجل المهام الفعلي"
-                    color={index % 2 === 0 ? "purple" : "emerald"}
-                    icon={agentKey === 'qayyim-core' || agentKey === 'prime' ? "👑" : "💼"}
-                    mastermindData={mastermindData}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/50">لا توجد مهام وكلاء مسجلة بعد.</p>
-            )}
+            {(() => {
+              const raw = mastermindData?.agents ?? {};
+              // دمج prime القديم في qayyim-core (Enterprise Moode) — لا تكرار
+              const merged: Record<string, any> = { ...raw };
+              if (merged['prime']) {
+                const p = merged['prime'];
+                const q = merged['qayyim-core'] ?? { tasks: 0, completed: 0, failed: 0, avgTime: 0, successRate: 0 };
+                merged['qayyim-core'] = {
+                  tasks: (q.tasks ?? 0) + (p.tasks ?? 0),
+                  completed: (q.completed ?? 0) + (p.completed ?? 0),
+                  failed: (q.failed ?? 0) + (p.failed ?? 0),
+                  avgTime: q.avgTime ?? p.avgTime ?? 0,
+                  successRate: Math.round((((q.completed ?? 0)+(p.completed ?? 0)) / Math.max(1, (q.tasks ?? 0)+(p.tasks ?? 0))) * 100),
+                };
+                delete merged['prime'];
+              }
+              const keys = Object.keys(merged);
+              return keys.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {keys.map((agentKey, index) => (
+                    <AgentStatusCard
+                      key={agentKey}
+                      agentKey={agentKey}
+                      agentName={agentKey === 'qayyim-core' ? 'قيّم الدار' : agentKey === 'qayyim' ? 'قيّم الدار' : agentKey}
+                      agentRole={agentKey === 'qayyim-core' ? 'واجهة موحدة — 7 خفيين' : 'سجل المهام الفعلي'}
+                      color={agentKey === 'qayyim-core' ? 'purple' : index % 2 === 0 ? 'emerald' : 'purple' as any}
+                      icon={agentKey === 'qayyim-core' ? "👑" : "💼"}
+                      mastermindData={{ ...mastermindData, agents: merged }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/50">لا توجد مهام وكلاء مسجلة بعد.</p>
+              );
+            })()}
           </section>
         )}
 

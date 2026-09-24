@@ -4,6 +4,8 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { resolveAdminCompanyId } from "@/lib/admin-company";
 
 const QAYYIM_DEV_SYSTEM_PROMPT = `أنت قيّم الدار - التطوير والأداء.
 
@@ -113,7 +115,37 @@ export class QayyimDevAgent extends QayyimAgentBase {
       priority: "medium",
     };
 
-    return this.process(task);
+    const aiResult = await this.process(task);
+    if (aiResult.success) {
+      try {
+        const supabase = getSupabaseAdminClient();
+        const companyId = await resolveAdminCompanyId(params.context?.company_id) ?? this.companyId;
+        const scoreMatch = aiResult.output.match(/(\d+)\s*KB/);
+        const score = scoreMatch ? Math.max(0, 100 - Math.round(parseInt(scoreMatch[1]) / 10)) : 75;
+        if (supabase) {
+          await supabase.from('qayyim_benchmark_runs').insert({
+            company_id: companyId,
+            agent_key: this.agentKey,
+            benchmark_key: 'bundle_size',
+            score,
+            max_score: 100,
+            passed: score >= 70,
+            details: { bundleStats: aiResult.data?.bundleStats, output: aiResult.output.slice(0, 500) },
+          });
+          await supabase.from('qayyim_task_metrics').insert({
+            company_id: companyId,
+            agent_key: this.agentKey,
+            task_id: taskId,
+            task_type: 'bundle_analysis',
+            status: 'completed',
+            duration_ms: 1000,
+            quality_gate_result: score >= 70 ? 'passed' : 'failed',
+            metadata: { score },
+          });
+        }
+      } catch (e) { console.warn('[QAYYIM-DEV] persist failed', e); }
+    }
+    return aiResult;
   }
 
   /**

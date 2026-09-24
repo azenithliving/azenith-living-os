@@ -8,37 +8,23 @@ import { auditVisitorExperience, publishQayyimDraft, rollbackQayyimDraft } from 
 import { constitutionEngine } from "./governance/ConstitutionEngine";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 
-const QAYYIM_CORE_SYSTEM_PROMPT = `أنت قيّم الدار - القائد الأعلى لسرب أزينث.
+const QAYYIM_CORE_SYSTEM_PROMPT = `أنت قيّم الدار - القائد. مهمتك: تعطي المفيد بسرعة، بلا رغي.
 
-## دورك:
-أنت لا تكتب المحتوى بنفسك، ولا تختار الصور، ولا تفحص السيو. دورك: **التنسيق والإشراف**.
-1) تفكيك طلب المستخدم لمهام فرعية دقيقة
-2) توجيه كل مهمة للوكيل المختص (content, visual, seo, ux, analytics, dev, qa)
-3) جمع النتائج وتوحيدها في مسودة واحدة متماسكة
-4) عرض المسودة للموافقة مع evidenceUrls لكل تغيير
-5) تنفيذ النشر أو التراجع بعد الموافقة
-
-## قوانينك المطلقة (غير قابلة للكسر):
-- **لا تلمس**: API، سيرفر، مخزن، عملاء، أرباح، مفاتيح، تعلم وكلاء آخرين
-- **لا تنشر** بلا موافقة بشرية صريحة (approved_by != null)
-- **كل ملاحظة** يجب أن تحتوي evidenceUrl يفتح الصفحة على العيب
-- **لا أرقام** من خيالك، لا إدعاءات بلا مصدر
-- إذا طُلب منك ما خارج اختصاصك: وجه الطلب للوكلاء المختصين صراحة
-- إذا لم تستطع التنفيذ: قل "مش قادر على الصفحة دي" مش تخترع
+## قوانينك:
+- تتكلم مصري مبسط فصيح، مختصر جداً — 5 أسطر كحد أقصى + جدول
+- كل ملاحظة = سطر واحد: [النوع] الهدف — الرابط — إجراء واحد
+- لا تنشئ كلاماً إنشائياً، لا مقدمات طويلة، لا خواتيم
+- إذا طُلب تدقيق: اعط 3-5 مشاكل موثقة فقط، كل واحدة برابط يفتح العيب
+- إذا طُلب إنشاء: اعط مسودة جاهزة للنسخ، لا تشرح نظرياً
+- لا أرقام وهمية، لا وعود — فقط ما رأيته في DB
+- إذا لم تستطع: قل "مش قادر على الصفحة دي" بصراحة
 
 ## الوكلاء تحت إمرتك:
-- **qayyim-cont**: المحتوى والعربية الفاخرة (يكتب، يوحد نبرة، يفرض هوية)
-- **qayyim-vis**: المرئي والصور (يختار صور، يتحقق علامة تجارية)
-- **qayyim-seo**: الظهور والبحث (يفحص تقني، يصلح schema، فجوات محتوى)
-- **qayyim-ux**: تجربة المستخدم (يقيس خروج، يحلل أنفاق، يقترح A/B)
-- **qayyim-ana**: التحليلات والأعمال (يربط تحويل بإيرادات، يتنبأ)
-- **qayyim-dev**: التطوير والأداء (يراجع كود، يفحص bundle، بوابة جودة)
-- **qayyim-qa**: الجودة والاختبار (E2E، visual regression، accessibility)
+qayyim-cont (يكتب) | qayyim-vis (صور) | qayyim-seo (ظهور) | qayyim-ux (سلوك) | qayyim-ana (أرقام) | qayyim-dev (كود) | qayyim-qa (جودة)
 
 ## أسلوبك:
-- عربي فصحى مبسطة، فاخرة، حاسمة، موثوقة
-- لا تعتذر، لا تشرح كثيراً، تنفذ وتبلغ النتيجة
-- في الشات: مختصر، في التقارير: مفصل مع evidenceUrls`;
+- مصري مبسط، مباشر، عملي — كأنك مدير تنفيذي يعطي أوامر واضحة
+- في الشات: جدول + 3 أزرار جاهزة — لا تقرير 5 صفحات`;
 
 export class QayyimCoreAgent extends QayyimAgentBase {
   readonly agentKey = "qayyim-core";
@@ -110,29 +96,60 @@ export class QayyimCoreAgent extends QayyimAgentBase {
     const issues = (rawAudit.data?.issues || []) as any[];
     const evidenceUrls = issues.map((i) => i.path).filter(Boolean);
 
-    // 2. Synthesize findings into authoritative luxury report
+    // 2. Ask AI for ultra-concise actionable summary (5 lines max)
+    if (issues.length === 0) {
+      return {
+        success: true,
+        taskId,
+        output: `✅ **الموقع نضيف — لا ملاحظات حرجة**\n- غرف ظاهرة: ${rawAudit.data?.visible_rooms || 0}/${rawAudit.data?.total_rooms || 0}\n- منتجات ظاهرة: ${rawAudit.data?.visible_products || 0}/${rawAudit.data?.total_products || 0}\n\n**التالي:** اطلب "حسّن الهيرو" أو "وحّد النبرة" وسأنفذ فوراً.`,
+        evidenceUrls,
+        data: { rawAudit: rawAudit.data, issues, issuesCount: 0 },
+        suggestions: ["حسّن هيرو الرئيسية", "وحّد نبرة الأقسام", "اقترح صور غرف"],
+      };
+    }
+
     const task: QayyimTask = {
       id: taskId,
       type: "full_site_audit",
-      title: "تدقيق شامل للموقع",
-      description: `افحص المعطيات الميدانية التالية وصغ تقريراً تنفيذياً فاخراً مع evidenceUrls:
-عدد الغرف الظاهرة: ${rawAudit.data?.visible_rooms || 0}/${rawAudit.data?.total_rooms || 0}
-عدد المنتجات الظاهرة: ${rawAudit.data?.visible_products || 0}/${rawAudit.data?.total_products || 0}
-الملاحظات المكتشفة (${issues.length}):
-${issues.slice(0, 10).map((iss, idx) => `${idx + 1}. [${iss.kind}] ${iss.target}: ${iss.detail} (رابط: ${iss.path})`).join('\n')}`,
-      context: { ...context, rawAudit: rawAudit.data },
+      title: "تقرير تنفيذي مختصر",
+      description: `أمامك بيانات حقيقية من DB — صغ تقريراً مصري مبسط فصيح، مختصر جداً (5 أسطر + جدول):
+
+غرف: ${rawAudit.data?.visible_rooms || 0}/${rawAudit.data?.total_rooms || 0} ظاهرة
+منتجات: ${rawAudit.data?.visible_products || 0}/${rawAudit.data?.total_products || 0} ظاهرة
+${issues.slice(0, 5).map((iss, idx) => `${idx + 1}. ${iss.detail} — ${iss.target} — ${iss.path}`).join('\n')}
+
+المطلوب:
+- سطر افتتاحي واحد: "فحصت X غرفة و Y منتج"
+- جدول 3-5 صفوف: | # | المشكلة | الرابط | ماذا أفعل؟ |
+- 3 اقتراحات سريعة قابلة للضغط: "أصلح وصف [الغرفة]" / "أضف صورة [الغرفة]" / "وحّد النبرة"
+- لا مقدمات إنشائية، لا شعر، لا تقرير 5 فقرات
+- كل رابط يفتح العيب فعلاً`,
+      context: { ...context, rawAudit: rawAudit.data, issues: issues.slice(0,5) },
       priority: "high",
     };
 
     const aiResult = await this.process(task);
+    // Force concise fallback if AI was verbose — truncate and append structured table
+    const structuredTable = `\n\n**الجدول التنفيذي:**\n| # | المشكلة | الهدف | الرابط |\n|---|---|---|---|\n${issues.slice(0,5).map((iss, idx) => `| ${idx+1} | ${iss.detail} | ${iss.target} | ${iss.path} |`).join('\n')}\n\n**3 خطوات جاهزة:**\n- اكتب لي "أصلح وصف ${issues[0]?.target || 'الغرفة'}" وسأنشئ مسودة فوراً\n- اكتب "اقترح صورة" وسأختار هيرو فاخر\n- اكتب "انشر المسودة" بعد المعاينة`;
+    const conciseOutput = aiResult.output.length > 1200 ? aiResult.output.slice(0, 800) + '...\n' + structuredTable : aiResult.output + structuredTable;
+
     return {
-      ...aiResult,
+      success: true,
+      taskId,
+      output: conciseOutput,
       evidenceUrls: Array.from(new Set([...evidenceUrls, ...(aiResult.evidenceUrls || [])])),
       data: {
         ...aiResult.data,
         rawAudit: rawAudit.data,
+        issues,
         issuesCount: issues.length,
       },
+      suggestions: [
+        `أصلح وصف ${issues[0]?.target || 'الغرفة'}`,
+        `أضف صورة لـ ${issues.find(i=>i.kind.includes('image'))?.target || issues[0]?.target}`,
+        `وحّد نبرة الموقع`,
+      ],
+      nextActions: issues.slice(0,3).map(i => `إنشاء مسودة لـ ${i.target} (${i.path})`),
     };
   }
 

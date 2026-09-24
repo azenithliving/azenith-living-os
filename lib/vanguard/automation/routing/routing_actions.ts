@@ -6,7 +6,7 @@
 
 import { BaseAction, ActionContext, ActionConfig, ActionResult, ActionRegistry } from '../actions/base_action';
 import { SmartRouter, RoutingRequest } from './smart_router';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/utils/supabase/client';
 
 // Route Lead Action
 export class RouteLeadAction extends BaseAction {

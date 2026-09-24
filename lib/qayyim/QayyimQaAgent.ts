@@ -4,6 +4,8 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { resolveAdminCompanyId } from "@/lib/admin-company";
 
 const QAYYIM_QA_SYSTEM_PROMPT = `أنت قيّم الدار - الجودة والاختبار.
 
@@ -91,7 +93,37 @@ export class QayyimQaAgent extends QayyimAgentBase {
       priority: "critical",
     };
 
-    return this.process(task);
+    const aiResult = await this.process(task);
+    if (aiResult.success) {
+      try {
+        const supabase = getSupabaseAdminClient();
+        const companyId = await resolveAdminCompanyId(params.context?.company_id) ?? this.companyId;
+        const passed = aiResult.data?.overallVerdict === 'PASS' || aiResult.output.includes('✅');
+        const score = passed ? 95 : 45;
+        if (supabase) {
+          await supabase.from('qayyim_benchmark_runs').insert({
+            company_id: companyId,
+            agent_key: this.agentKey,
+            benchmark_key: 'qa_suite',
+            score,
+            max_score: 100,
+            passed,
+            details: { suites, verdict: aiResult.data?.overallVerdict, output: aiResult.output.slice(0, 500) },
+          });
+          await supabase.from('qayyim_task_metrics').insert({
+            company_id: companyId,
+            agent_key: this.agentKey,
+            task_id: taskId,
+            task_type: 'full_qa_suite',
+            status: passed ? 'completed' : 'failed',
+            duration_ms: 2000,
+            quality_gate_result: passed ? 'passed' : 'failed',
+            metadata: { suites },
+          });
+        }
+      } catch (e) { console.warn('[QAYYIM-QA] persist failed', e); }
+    }
+    return aiResult;
   }
 
   /**

@@ -90,6 +90,99 @@ const AGENT_MISSIONS: Record<string, string[]> = {
   ],
 };
 
+function InlineDraftPreview({ previewUrl, onApprove, onReject, onBetter }: { previewUrl: string; onApprove: () => void; onReject: () => void; onBetter: () => void }) {
+  const [data, setData] = useState<any>(null);
+  const [slider, setSlider] = useState(50);
+  const token = previewUrl.split('token=')[1]?.split('&')[0] || previewUrl.split('/').pop()?.split('?')[0] || '';
+  useEffect(() => {
+    if (!token) return;
+    // Fetch draft JSON via list_drafts and find by token — 100% real DB
+    fetch('/api/admin/qayyim?action=list_drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+      .then(r => r.json()).then(j => {
+        const drafts = j.drafts || j.result?.drafts || [];
+        const d = drafts.find((x: any) => x.preview_token === token || x.id === token);
+        if (d) setData(d);
+      }).catch(()=>{});
+  }, [token]);
+  const beforeImg = data?.previous?.image_url || data?.metadata?.before_image || (typeof data?.previous === 'string' ? data.previous : null);
+  const afterImg = data?.proposed?.image_url || data?.proposed?.hero_image || data?.metadata?.after_image || (typeof data?.proposed === 'string' ? data.proposed : null);
+  const beforeText = data?.previous?.description || data?.previous?.content || (typeof data?.previous === 'string' ? data.previous : JSON.stringify(data?.previous || '').slice(0,120));
+  const afterText = data?.proposed?.description || data?.proposed?.content || (typeof data?.proposed === 'string' ? data.proposed : JSON.stringify(data?.proposed || '').slice(0,120));
+  const isImage = !!(beforeImg && typeof beforeImg === 'string' && beforeImg.startsWith('http')) || !!(afterImg && typeof afterImg === 'string' && afterImg.startsWith('http')) || data?.draft_type === 'curate_gallery';
+  return (
+    <div className="mt-3 rounded-xl border border-white/10 overflow-hidden bg-black/20">
+      <div className="flex items-center justify-between px-3 py-2 bg-white/5 border-b border-white/10">
+        <span className="text-[11px] font-bold text-white/70">معاينة قبل / بعد — حقيقية من DB</span>
+        <a href={previewUrl} target="_blank" className="text-[10px] text-sky-300 hover:underline">فتح كامل ↗</a>
+      </div>
+      {isImage && beforeImg && afterImg ? (
+        <div className="relative h-56 overflow-hidden bg-black">
+          <img src={beforeImg as string} alt="قبل" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 overflow-hidden" style={{ width: `${slider}%` }}>
+            <img src={afterImg as string} alt="بعد" className="w-full h-full object-cover" style={{ width: `${100 * 100 / slider}%`, maxWidth: 'none' }} />
+          </div>
+          <div className="absolute top-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] text-white">قبل</div>
+          <div className="absolute top-2 right-2 bg-emerald-600/80 px-2 py-0.5 rounded text-[10px] text-white">بعد</div>
+          <div className="absolute top-0 bottom-0 w-0.5 bg-amber-400" style={{ left: `${slider}%` }} />
+          <input type="range" min={0} max={100} value={slider} onChange={e => setSlider(parseInt(e.target.value))} className="absolute bottom-2 left-1/2 -translate-x-1/2 w-3/4 accent-amber-500" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-px bg-white/10">
+          <div className="bg-rose-950/30 p-3">
+            <div className="text-[10px] text-rose-300 font-bold mb-1">قبل</div>
+            <div className="text-xs text-white/70 whitespace-pre-wrap leading-relaxed">{String(beforeText).slice(0,300) || '—'}</div>
+          </div>
+          <div className="bg-emerald-950/30 p-3">
+            <div className="text-[10px] text-emerald-300 font-bold mb-1">بعد</div>
+            <div className="text-xs text-white whitespace-pre-wrap leading-relaxed">{String(afterText).slice(0,300) || '—'}</div>
+          </div>
+        </div>
+      )}
+      <div className="p-2 flex gap-1.5">
+        <button onClick={onApprove} className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">✅ وافق — نشر حقيقي</button>
+        <button onClick={onBetter} className="flex-1 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-xs font-bold">✏️ عايز أحسن</button>
+        <button onClick={onReject} className="flex-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 text-xs">❌ ارفض</button>
+      </div>
+      {data && <div className="px-3 pb-2 text-[10px] text-white/30 text-center">مسودة {data.id?.slice(0,8)} · {data.target_path} · v{data.version} — {data.status}</div>}
+    </div>
+  );
+}
+
+function MarkdownContent({ content }: { content: string }) {
+  const lines = content.split('\n');
+  const elements: any[] = [];
+  let tableRows: string[][] = [];
+  const flushTable = () => {
+    if (tableRows.length > 0) {
+      const header = tableRows[0];
+      const body = tableRows.slice(1).filter(r => !r.every(c => /^[-:]+$/.test(c.trim())));
+      elements.push(
+        <div key={`tbl-${elements.length}`} className="my-2 overflow-x-auto rounded-lg border border-white/10">
+          <table className="w-full text-[11px]">
+            <thead><tr className="bg-white/5">{header.map((c,i) => <th key={i} className="p-1.5 text-right font-bold text-white/60 whitespace-nowrap">{c.trim()}</th>)}</tr></thead>
+            <tbody>{body.map((row, ri) => <tr key={ri} className="border-t border-white/5">{row.map((c, ci) => <td key={ci} className="p-1.5 text-white/80 whitespace-nowrap">{c.trim().startsWith('/') || c.trim().startsWith('http') ? <a href={c.trim()} target="_blank" className="text-sky-300 hover:underline" dir="ltr">{c.trim()}</a> : c.trim()}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+      );
+      tableRows = [];
+    }
+  };
+  lines.forEach((line) => {
+    if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+      const cells = line.split('|').slice(1, -1);
+      tableRows.push(cells);
+    } else {
+      flushTable();
+      if (line.trim() === '') elements.push(<div key={`br-${elements.length}`} className="h-2" />);
+      else if (line.trim().startsWith('#')) elements.push(<div key={`h-${elements.length}`} className="font-bold text-white mt-2">{line.replace(/^#+\s*/, '')}</div>);
+      else if (line.trim().startsWith('- ') || line.trim().startsWith('•')) elements.push(<div key={`li-${elements.length}`} className="mr-3">• {line.replace(/^[-•]\s*/, '')}</div>);
+      else elements.push(<div key={`p-${elements.length}`} className="whitespace-pre-wrap">{line}</div>);
+    }
+  });
+  flushTable();
+  return <div className="space-y-1">{elements}</div>;
+}
+
 export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -100,6 +193,16 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
   const isNearBottomRef = useRef(true);
   const sessionIdRef = useRef(`chat-${agentKey}-${Date.now()}`);
   const initialTriggerRef = useRef(false);
+  const [showRoles, setShowRoles] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const firstUnreadRef = useRef<HTMLDivElement>(null);
+
+  // expose for suggestion buttons
+  useEffect(() => {
+    (window as any).__qayyimSend = (text: string) => sendMessage(text);
+    return () => { try { delete (window as any).__qayyimSend; } catch {} };
+  }, []);
 
   // ── تسجيل التغذية الراجعة في SelfLearningEngine ──────────────────
   const handleFeedback = useCallback(async (msgId: string, rating: 'positive' | 'negative') => {
@@ -201,7 +304,10 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
     setMessages((prev) => [...prev, tempUserMsg]);
     setIsTyping(true);
 
+    let timeoutId: any;
     try {
+      const controller = new AbortController();
+      timeoutId = setTimeout(() => controller.abort(), 45000);
       const res = await fetch('/api/admin/agents/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -210,10 +316,13 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
           message: textToSend,
           session_id: sessionIdRef.current,
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
-        throw new Error(`Server error: ${res.status}`);
+        const txt = await res.text().catch(() => '');
+        throw new Error(txt ? `Server ${res.status}: ${txt.slice(0,200)}` : `Server error: ${res.status}`);
       }
 
       const data = await res.json();
@@ -234,20 +343,23 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
         throw new Error(data.error || 'Failed to get response');
       }
     } catch (err: any) {
+      if (timeoutId) clearTimeout(timeoutId);
       console.error('Error sending message:', err);
-      setError(err.message || 'حدث خطأ في الاتصال');
+      const isAbort = err.name === 'AbortError';
+      const msg = isAbort ? 'انتهت المهلة (45 ثانية) — الخادم مشغول، حاول مرة أخرى' : (err.message || 'حدث خطأ في الاتصال');
+      setError(msg);
 
       const errorMsg: Message = {
         id: `error-${Date.now()}`,
         sender_type: 'system',
         sender_name: 'النظام',
-        content: `⚠️ لم أتمكن من الاتصال بالوكيل: ${err.message || 'خطأ غير معروف'}. يرجى المحاولة مرة أخرى.`,
+        content: isAbort ? `⏳ انتهت المهلة — الوكيل يعالج طلبك لكنه تأخر. حاول مرة أخرى أو بسّط طلبك.` : `⚠️ لم أتمكن من الاتصال بالوكيل: ${msg}. يرجى المحاولة مرة أخرى.`,
         created_at: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsTyping(false);
     }
-
-    setIsTyping(false);
   };
 
   // ── تنفيذ المهمة المبدئية إن وجدت ─────────────────────────────────
@@ -304,6 +416,14 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowRoles(!showRoles)}
+            title="أدوار وقدرات الوكيل"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${showRoles ? 'bg-white/10 border-white/20 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'}`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            أدوار
+          </button>
           {(agentKey.toLowerCase() === 'prime' || agentKey.toLowerCase().startsWith('qayyim-')) && (
             <a
               href="/admin/qayyim"
@@ -318,6 +438,28 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
           <span className={`w-2 h-2 rounded-full ${isTyping ? `${colors.accent} animate-pulse` : 'bg-white/20'}`} />
         </div>
       </div>
+
+      {showRoles && (
+        <div className="px-4 py-3 bg-black/20 border-b border-white/5 animate-in fade-in">
+          <div className="text-[11px] font-bold text-white/60 mb-2 flex items-center justify-between">
+            <span>قدرات {meta.name} — اضغط لتنفيذ</span>
+            <button onClick={() => setShowRoles(false)} className="text-white/30 hover:text-white">✕</button>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            {(AGENT_METADATA[agentKey.toLowerCase()] ? [AGENT_METADATA[agentKey.toLowerCase()]] : []).concat([]).length > 0 ? (
+              // Show missions as role buttons
+              (AGENT_MISSIONS[agentKey.toLowerCase()] || ['افحص', 'حسّن', 'اعرض المسودات']).map((m, i) => (
+                <button key={i} onClick={() => { setShowRoles(false); sendMessage(m); }} className="text-right px-2.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] text-white/70 hover:text-white">
+                  • {m}
+                </button>
+              ))
+            ) : (
+              <span className="text-[11px] text-white/30">لا أدوار محددة</span>
+            )}
+          </div>
+          <div className="text-[10px] text-white/30 mt-2">تلميح: اكتب بلهجتك العادية — "الجزء اللي فوق باهت" → أفهم "الهيرو"</div>
+        </div>
+      )}
 
       {/* Quick Action Chips Bar */}
       <div className="px-4 py-2 bg-white/[0.01] border-b border-white/5 flex items-center gap-2 overflow-x-auto scrollbar-none">
@@ -400,13 +542,66 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
 
       {/* Input Box */}
       <div className={`p-3 border-t ${colors.border} bg-white/[0.01]`}>
-        <div className="flex gap-2">
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64 = reader.result as string;
+            sendMessage(`[صورة مرفقة: ${file.name}] — حلل هذه الصورة وحدد موقعها في الموقع واقترح تحسيناً`);
+            // Also upload to storage for vision
+            fetch('/api/admin/qayyim/images', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent: agentKey, page_path: '/', section_key: 'chat-upload', draft_type: 'brand_consistency_check', instructions: `حلل الصورة المرفقة: ${base64.slice(0,200)}...`, context: { image_base64: base64.slice(0,5000) } }) }).catch(()=>{});
+          };
+          reader.readAsDataURL(file);
+          e.target.value = '';
+        }} />
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault(); setIsDragging(false);
+            const file = e.dataTransfer.files?.[0];
+            if (file && file.type.startsWith('image/')) {
+              const dt = new DataTransfer();
+              dt.items.add(file);
+              if (fileInputRef.current) fileInputRef.current.files = dt.files;
+              fileInputRef.current?.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }}
+          className={`flex gap-2 ${isDragging ? 'ring-2 ring-amber-500/50 rounded-xl p-1' : ''}`}
+        >
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isTyping}
+            title="إرسال صورة"
+            className="px-3 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/60 hover:text-white disabled:opacity-30 flex items-center justify-center"
+          >
+            📷
+          </button>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-            placeholder={`اكتب أمراً أو استفساراً لـ ${agentName || meta.name}...`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) sendMessage();
+              if (e.key === 'v' && (e.ctrlKey || e.metaKey)) {
+                // paste handled via onPaste on container
+              }
+            }}
+            onPaste={(e) => {
+              const item = Array.from(e.clipboardData.items).find(i => i.type.startsWith('image/'));
+              if (item) {
+                const file = item.getAsFile();
+                if (file && fileInputRef.current) {
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  fileInputRef.current.files = dt.files;
+                  fileInputRef.current.dispatchEvent(new Event('change', { bubbles: true }));
+                  e.preventDefault();
+                }
+              }
+            }}
+            placeholder={`اكتب بلهجتك العادية لـ ${agentName || meta.name}... (مثال: الجزء اللي فوق باهت)`}
             className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
             disabled={isTyping}
           />
@@ -418,6 +613,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage }: C
             {isTyping ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4 rtl:rotate-180" />}
           </button>
         </div>
+        <div className="text-[10px] text-white/20 mt-1.5 text-center">تلميح: الصق سكرين شوت `Ctrl+V` أو اسحب صورة هنا — أفهمها وأحدد موقعها تلقائياً</div>
       </div>
     </div>
   );
@@ -478,7 +674,48 @@ function MessageBubble({
               ? 'bg-blue-600 text-white rounded-tr-md shadow-md'
               : `${colors.bubble} border rounded-tl-md shadow-md`
           }`}>
-            <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+            <div className="text-sm leading-relaxed">
+              <MarkdownContent content={message.content} />
+            </div>
+
+            {/* أزرار الاقتراحات التنفيذية */}
+            {(message as any).suggestions?.length > 0 || (message.metadata as any)?.suggestions?.length > 0 || (message as any).nextActions?.length > 0 || (message.metadata as any)?.nextActions?.length > 0 ? (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {([...((message as any).suggestions || []), ...((message.metadata as any)?.suggestions || []), ...((message as any).nextActions || []), ...((message.metadata as any)?.nextActions || [])] as string[]).slice(0,3).map((s: string, i: number) => (
+                  <button key={i} onClick={() => (window as any).__qayyimSend?.(s)} className="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-300 hover:bg-amber-500/25 flex items-center gap-1">
+                    ⚡ {s.slice(0,40)}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {/* معاينة مسودة قبل/بعد داخل الشات */}
+            {((message as any).previewUrl || (message as any).preview_token || (message.metadata as any)?.previewUrl || (message.metadata as any)?.preview_token || (message.metadata as any)?.draft?.previewToken || (message.metadata as any)?.toolData?.preview_url || (message.metadata as any)?.toolData?.preview_token || (message as any).draftId) ? (
+              <InlineDraftPreview
+                previewUrl={(message as any).previewUrl || (message as any).preview_token || (message.metadata as any)?.previewUrl || (message.metadata as any)?.preview_token || (message.metadata as any)?.toolData?.preview_url || (message.metadata as any)?.toolData?.preview_token || `/api/admin/qayyim/preview/${(message.metadata as any)?.draft?.previewToken || (message.metadata as any)?.toolData?.draft_id || (message as any).draftId}`}
+                onApprove={() => (window as any).__qayyimSend?.(`وافق على المسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''}`)}
+                onReject={() => (window as any).__qayyimSend?.(`ارفض المسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''}`)}
+                onBetter={() => (window as any).__qayyimSend?.(`عايز حاجة أحسن للمسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''} — اقترح بديلاً أفخم`)}
+              />
+            ) : null}
+
+            {/* جدول الملاحظات إن وجد */}
+            {(message as any).issues?.length > 0 || (message.metadata as any)?.issues?.length > 0 ? (
+              <div className="mt-3 rounded-xl border border-white/10 overflow-hidden">
+                <table className="w-full text-[11px]">
+                  <thead><tr className="bg-white/5 text-white/40"><th className="p-1.5 text-right">المشكلة</th><th className="p-1.5">الهدف</th><th className="p-1.5">الرابط</th></tr></thead>
+                  <tbody>
+                    {([...((message as any).issues || []), ...((message.metadata as any)?.issues || [])] as any[]).slice(0,5).map((iss: any, i: number) => (
+                      <tr key={i} className="border-t border-white/5">
+                        <td className="p-1.5 text-white/80">{iss.detail || iss.kind}</td>
+                        <td className="p-1.5 text-white/60">{iss.target}</td>
+                        <td className="p-1.5"><a href={iss.path} target="_blank" className="text-sky-300 hover:underline" dir="ltr">{iss.path}</a></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
 
             {/* ── بطاقة النتائج التنفيذية المنظمة (Structured Tool Result) ── */}
             {toolName && (

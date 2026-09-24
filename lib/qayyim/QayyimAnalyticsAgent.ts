@@ -137,7 +137,29 @@ export class QayyimAnalyticsAgent extends QayyimAgentBase {
       priority: "high",
     };
 
-    return this.process(task);
+    const aiResult = await this.process(task);
+    // Persist as real benchmark run — 100% real
+    if (aiResult.success) {
+      try {
+        const { getSupabaseAdminClient } = await import('@/lib/supabase-admin');
+        const { resolveAdminCompanyId } = await import('@/lib/admin-company');
+        const supabase = getSupabaseAdminClient();
+        const companyId = await resolveAdminCompanyId(params.context?.company_id) ?? this.companyId;
+        const score = aiResult.data?.luxuryScore?.total ?? aiResult.data?.luxuryScore ?? 0;
+        if (supabase && typeof score === 'number') {
+          await supabase.from('qayyim_benchmark_runs').insert({
+            company_id: companyId,
+            agent_key: this.agentKey,
+            benchmark_key: 'luxury_score',
+            score: Math.round(score),
+            max_score: 100,
+            passed: score >= 70,
+            details: { scope: params.scope, weights, luxuryScore: aiResult.data?.luxuryScore, output: aiResult.output.slice(0, 500) },
+          });
+        }
+      } catch (e) { console.warn('[QAYYIM-ANA] benchmark persist failed', e); }
+    }
+    return aiResult;
   }
 
   /**

@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       // ملخص موحد
       summary: swarmResult?.success
         ? swarmResult.response
-        : (coreAudit as any).output ?? (coreAudit as any).message ?? "",
+        : coreAudit.output ?? ((coreAudit as unknown) as Record<string, unknown>).message as string ?? null,
       evidenceUrls: [
         ...(coreAudit.evidenceUrls ?? []),
         ...(swarmResult?.evidenceUrls ?? []),

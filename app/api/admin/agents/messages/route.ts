@@ -22,6 +22,8 @@ export async function GET(request: NextRequest) {
     const agentKey       = searchParams.get('agent_key');
     const conversationId = searchParams.get('conversation_id');
     const limit          = parseInt(searchParams.get('limit') || '50');
+    const unreadOnly     = searchParams.get('unread') === 'true';
+    const markRead       = searchParams.get('mark_read') === 'true';
 
     // ── حل agent_key → conversation_id ──────────────────────────────
     let resolvedConvId = conversationId;
@@ -56,8 +58,24 @@ export async function GET(request: NextRequest) {
     if (resolvedConvId) {
       query = query.eq('conversation_id', resolvedConvId);
     }
+    if (unreadOnly) {
+      query = query.eq('sender_type', 'agent').eq('is_read', false);
+    }
 
     const { data: messages, error } = await query;
+
+    // Mark as read if requested (when user opens chat)
+    if (markRead && resolvedConvId && messages && messages.length > 0) {
+      const unreadIds = messages.filter((m: any) => m.sender_type === 'agent' && !m.is_read).map((m: any) => m.id);
+      if (unreadIds.length > 0) {
+        await supabaseServer.from('agent_messages').update({ is_read: true }).in('id', unreadIds);
+      }
+    }
+
+    // If unreadOnly requested, return count only
+    if (unreadOnly) {
+      return NextResponse.json({ success: true, count: messages?.length || 0, data: messages });
+    }
 
     if (error) {
       if (error.code === 'PGRST205' || error.code === '42703') {

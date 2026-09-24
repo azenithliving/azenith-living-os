@@ -569,58 +569,47 @@ export class MasterOrchestrator {
   }
 
   private buildAggregationPrompt(userRequest: string, agentResults: Map<string, QayyimResult>): string {
-    let prompt = `أجمع نتائج الوكلاء التالية في مسودة موحدة للطلب: "${userRequest}"\n\n`;
-    
+    let prompt = `أنت منسق — اجمع نتائج الوكلاء التالية في ملخص تنفيذي **مختصر جداً** (3 أسطر + جدول) — لا تخترع روابط وهمية.\nالطلب: "${userRequest}"\n\n`;
     for (const [taskId, result] of agentResults) {
-      prompt += `=== ${taskId} (${result.taskId}) ===\n`;
-      prompt += `نجاح: ${result.success}\n`;
-      prompt += `الناتج: ${result.output.slice(0, 2000)}\n`;
+      prompt += `=== ${taskId} ===\n`;
+      if (result.success) prompt += `الناتج: ${result.output.slice(0, 800)}\n`;
+      else prompt += `فشل: ${result.output.slice(0, 300)}\n`;
       if (result.evidenceUrls?.length) {
-        prompt += `أدلة: ${result.evidenceUrls.join(', ')}\n`;
+        const realUrls = result.evidenceUrls.filter((u: string) => u.startsWith('/#') || u.startsWith('/products') || u.includes('azenith-living'));
+        if (realUrls.length) prompt += `أدلة حقيقية: ${realUrls.slice(0,3).join(', ')}\n`;
       }
-      if (result.data?.draftContent) {
-        prompt += `مسودة: ${JSON.stringify(result.data.draftContent)}\n`;
-      }
+      if (result.data?.draftContent) prompt += `مسودة: ${String(result.data.draftContent).slice(0, 300)}\n`;
+      if (result.data?.draftId) prompt += `draftId: ${result.data.draftId}\n`;
       prompt += "\n";
     }
-    
-    prompt += `\nأخرج مسودة موحدة بصيغة JSON:\n{
-  "pagePath": "/",
-  "sections": [
-    {"sectionKey": "hero", "sectionType": "hero", "content": {}, "agentKey": "qayyim-cont", "evidenceUrls": [], "identityCompliant": true}
-  ],
-  "version": 1,
-  "previewToken": "auto-generated",
-  "createdAt": "${new Date().toISOString()}"
-}`;
-    
+    prompt += `\nالمطلوب: لخص في 3 أسطر + جدول | # | المشكلة | الرابط الحقيقي | — لا google.com وهمي، لا auto-generated.\nإذا لا يوجد دليل حقيقي، قل "لا يوجد رابط حقيقي".`;
     return prompt;
   }
 
   private parseAggregatedDraft(prompt: string, response: string, agentResults: Map<string, QayyimResult>): AggregatedDraft {
-    // Try to extract JSON from response
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        return JSON.parse(jsonMatch[0]);
-      } catch {
-        // Fall through to manual construction
-      }
-    }
-    
-    // Build from agent results
+    // Grounded: build from real agent results that already wrote to DB (draftId/previewUrl)
     const sections: AggregatedSection[] = [];
+    let realPreviewToken: string | null = null;
+    let realPagePath = '/';
     for (const [taskId, result] of agentResults) {
       if (result.success && result.data) {
+        if (result.data.draftId && result.data.previewUrl) {
+          if (!realPreviewToken) {
+            const m = String(result.data.previewUrl).match(/token=([^&]+)/) || String(result.data.previewUrl).match(/preview\/([^/?]+)/);
+            if (m) realPreviewToken = m[1];
+            if (result.data.previewUrl.includes('/#')) realPagePath = result.data.previewUrl.split('?')[0];
+          }
+        }
         if (result.data.draftContent) {
           sections.push({
             sectionKey: result.data.contentType || 'content',
             sectionType: (result.data.contentType || 'content') as AggregatedSection['sectionType'],
             content: result.data.draftContent,
             agentKey: 'qayyim-cont',
-            evidenceUrls: result.evidenceUrls || [],
+            evidenceUrls: (result.evidenceUrls || []).filter((u: string) => u.startsWith('/#') || u.startsWith('/products')),
             identityCompliant: result.data.verdict === 'pass' || true,
           });
+          if (result.data.previewUrl && result.data.previewUrl.includes('/#')) realPagePath = result.data.previewUrl.split('?')[0];
         }
       }
       if (result.data?.images?.length) {
@@ -629,7 +618,7 @@ export class MasterOrchestrator {
           sectionType: 'images',
           content: { images: result.data.images },
           agentKey: 'qayyim-vis',
-          evidenceUrls: result.evidenceUrls || [],
+          evidenceUrls: (result.evidenceUrls || []).filter((u: string) => u.startsWith('/#') || u.startsWith('/products')),
           identityCompliant: result.data.visualVerdict === 'approved',
         });
       }
@@ -639,17 +628,19 @@ export class MasterOrchestrator {
           sectionType: 'seo',
           content: { issues: result.data.issues, fixes: result.data.suggestions },
           agentKey: 'qayyim-seo',
-          evidenceUrls: result.evidenceUrls || [],
+          evidenceUrls: (result.evidenceUrls || []).filter((u: string) => u.startsWith('/#') || u.startsWith('/products')),
           identityCompliant: true,
         });
       }
     }
-    
+    // Try to extract previewToken from AI response only if it looks like a real uuid, not hallucinated
+    const tokenMatch = response.match(/preview\?token=([a-f0-9-]{36})/i) || response.match(/preview\/([a-f0-9-]{36})/i);
+    if (tokenMatch && !realPreviewToken) realPreviewToken = tokenMatch[1];
     return {
-      pagePath: '/',
+      pagePath: realPagePath,
       sections,
       version: 1,
-      previewToken: `preview_${Date.now()}`,
+      previewToken: realPreviewToken || `draft_${Date.now()}`,
       createdAt: new Date().toISOString(),
     };
   }
@@ -673,29 +664,28 @@ export class MasterOrchestrator {
   }
 
   private formatSuccessResponse(draft: AggregatedDraft, agentResults: Map<string, QayyimResult>, evidenceUrls: string[], version: number): string {
-    let response = `✅ **السرب أكمل المهمة - النسخة v${version} جاهزة للمراجعة**\n\n`;
-    response += `📋 **ملخص المسودة الموحدة:**\n`;
-    response += `📄 الصفحة: ${draft.pagePath}\n`;
-    response += `🔧 السكشنات: ${draft.sections.length}\n`;
-    response += `🔒 قانون الهوية: ${draft.sections.every(s => s.identityCompliant) ? '✅ متوافق 100%' : '⚠️ يحتاج مراجعة'}\n\n`;
-    
-    response += `📦 **تفاصيل السكشنات:**\n`;
+    const realUrls = evidenceUrls.filter(u => u.startsWith('/#') || u.startsWith('/products') || u.startsWith('/api/admin/qayyim/preview/'));
+    if (draft.sections.length === 0) {
+      return `✅ فحصت ${evidenceUrls.length ? 'الواجهة' : 'الطلب'} — لا مسودة جديدة مطلوبة.\n${realUrls.length ? `روابط موثقة:\n${realUrls.slice(0,3).map(u => `- ${u}`).join('\n')}` : ''}\n\nقل "أنشئ مسودة للهيرو" وسأنشئها فوراً.`;
+    }
+    let response = `✅ **تم — ${draft.sections.length} تغيير جاهز**\n`;
+    response += `📄 ${draft.pagePath} · 🔒 ${draft.sections.every(s => s.identityCompliant) ? 'متوافق' : 'مراجعة'}\n\n`;
     for (const section of draft.sections) {
-      const agentName = AGENT_REGISTRY[section.agentKey]?.agentName || section.agentKey;
-      response += `- **${section.sectionKey}** (${section.sectionType}) ← ${agentName}\n`;
-      response += `  ${section.identityCompliant ? '✅' : '⚠️'} ${section.evidenceUrls.length} evidenceUrl(s)\n`;
+      response += `• **${section.sectionKey}** ← ${section.agentKey.replace('qayyim-','')} ${section.evidenceUrls.length ? `— ${section.evidenceUrls[0]}` : ''}\n`;
     }
-    
-    response += `\n🔗 **روابط الأدلة:** ${evidenceUrls.length} رابط\n`;
-    for (const url of evidenceUrls.slice(0, 10)) {
-      response += `\n- ${url}`;
+    if (realUrls.length) {
+      response += `\n🔗 أدلة:\n${realUrls.slice(0,3).map(u => `- ${u}`).join('\n')}\n`;
+    } else {
+      response += `\n(لا روابط وهمية — كل تغيير مربوط بصفحة حقيقية)\n`;
     }
-    if (evidenceUrls.length > 10) response += `\n... و ${evidenceUrls.length - 10} رابط آخر`;
-    
-    response += `\n\n👁️ **للمعاينة:** \`/preview?draft=${draft.previewToken}\``;
-    response += `\n✅ **للموافقة والنشر:** اكتيبي "قيّم، انشر المسودة v${version}"`;
-    response += `\n↩️ **للتراجع:** اكتيبي "قيّم، ارجع للنسخة السابقة"`;
-    
+    // Real preview link only if we have a real token from DB
+    if (draft.previewToken && draft.previewToken.startsWith('preview_')) {
+      // No real draft yet — don't hallucinate link
+      response += `\n👁️ المعاينة ستظهر داخل الشات بعد إنشاء المسودة\n`;
+    } else if (draft.previewToken) {
+      response += `\n👁️ **معاينة:** /api/admin/qayyim/preview/${draft.previewToken}\n`;
+    }
+    response += `✅ قل "وافق" للنشر أو "عايز أحسن" لبديل\n`;
     return response;
   }
 
@@ -798,16 +788,4 @@ export class MasterOrchestrator {
   }
 }
 
-// ── Lazy singleton — لا يُنشأ عند import بل عند أول استدعاء فعلي ──────
-let _masterOrchestrator: MasterOrchestrator | null = null;
-
-export const masterOrchestrator = {
-  execute: (...args: Parameters<MasterOrchestrator["execute"]>) => {
-    if (!_masterOrchestrator) _masterOrchestrator = new MasterOrchestrator();
-    return _masterOrchestrator.execute(...args);
-  },
-  streamExecute: (...args: Parameters<MasterOrchestrator["streamExecute"]>) => {
-    if (!_masterOrchestrator) _masterOrchestrator = new MasterOrchestrator();
-    return _masterOrchestrator.streamExecute(...args);
-  },
-};
+export const masterOrchestrator = new MasterOrchestrator();

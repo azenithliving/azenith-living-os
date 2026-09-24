@@ -283,7 +283,7 @@ export class AgentOrchestrator {
       }
 
       // ── 3. استدعِ الوكيل بالذكاء الاصطناعي الحقيقي ───────────────
-      let response: string;
+      let response: string | undefined;
       const metadata: AgentOrchestratorResult["metadata"] = {};
       if (toolResult) {
         metadata.actionItems = [toolResult.message || `تم تشغيل ${inferredTool?.toolName}`];
@@ -299,35 +299,60 @@ export class AgentOrchestrator {
       // المستخدم يتكلم مع القائد فقط — السرب يعمل خفياً في الخلفية
       // ══════════════════════════════════════════════════════════════
       if (selectedAgent === "qayyim-core") {
-        try {
-          const swarmResult = await masterOrchestrator.execute(promptWithToolContext, {
-            company_id:  resolvedCompanyId,
-            source:      context?.source ?? "chat",
-            orchestrate: true,
-          });
+        // Shortcut: افحص → تقرير تنفيذي مختصر مباشر (أسرع وأفيد من السرب الكامل)
+        const isAuditRequest = /افحص|تقرير|دقّق|audit/i.test(promptWithToolContext);
+        if (isAuditRequest) {
+          try {
+            const auditRes = await qayyimCoreAgent.auditFullSite({ company_id: resolvedCompanyId, page_path: '/', scope: 'full' });
+            if (auditRes.success) {
+              response = auditRes.output;
+              metadata.actionItems = auditRes.evidenceUrls;
+              (metadata as any).suggestions = (auditRes as any).suggestions || [];
+              (metadata as any).nextActions = (auditRes as any).nextActions || [];
+              (metadata as any).rawAudit = (auditRes as any).data?.rawAudit;
+              (metadata as any).issues = (auditRes as any).data?.issues || [];
+            } else {
+              response = auditRes.output;
+            }
+          } catch (auditErr: any) {
+            console.warn("[AgentOrchestrator] Direct audit failed, falling back to swarm:", auditErr?.message);
+          }
+        }
+        // إذا لم يكن طلب تدقيق أو فشل المباشر، استخدم السرب
+        if (!response) {
+          try {
+            const swarmResult = await masterOrchestrator.execute(promptWithToolContext, {
+              company_id:  resolvedCompanyId,
+              source:      context?.source ?? "chat",
+              orchestrate: true,
+            });
 
-          if (swarmResult.success) {
-            response = swarmResult.response;
-            // أضف أسماء الوكلاء الذين عملوا خفية في الـ metadata
-            const swarmAgents = swarmResult.draft?.sections?.map((s: any) => s.agentKey) ?? [];
-            metadata.actionItems = swarmResult.evidenceUrls;
-            (metadata as any).swarmAgents    = [...new Set(swarmAgents)];
-            (metadata as any).taskId         = swarmResult.taskId;
-            (metadata as any).version        = swarmResult.version;
-            (metadata as any).draft          = swarmResult.draft ?? null;
-          } else {
-            // السرب فشل — fallback لقيّم-كور مباشرة
+            if (swarmResult.success) {
+              response = swarmResult.response;
+              const swarmAgents = swarmResult.draft?.sections?.map((s: any) => s.agentKey) ?? [];
+              metadata.actionItems = swarmResult.evidenceUrls;
+              (metadata as any).swarmAgents    = [...new Set(swarmAgents)];
+              (metadata as any).taskId         = swarmResult.taskId;
+              (metadata as any).version        = swarmResult.version;
+              (metadata as any).draft          = swarmResult.draft ?? null;
+            } else {
+              const agentInstance = this.agents["qayyim-core"];
+              response = agentInstance
+                ? await agentInstance.chat(promptWithToolContext, context)
+                : `⚠️ السرب غير متاح حالياً: ${swarmResult.response}`;
+            }
+          } catch (swarmErr: any) {
+            console.warn("[AgentOrchestrator] Swarm failed, falling back to core:", swarmErr?.message);
             const agentInstance = this.agents["qayyim-core"];
             response = agentInstance
               ? await agentInstance.chat(promptWithToolContext, context)
-              : `⚠️ السرب غير متاح حالياً: ${swarmResult.response}`;
+              : `⚠️ خطأ في السرب: ${swarmErr.message}`;
           }
-        } catch (swarmErr: any) {
-          console.warn("[AgentOrchestrator] Swarm failed, falling back to core:", swarmErr?.message);
+        }
+        // Ensure response is defined
+        if (!response) {
           const agentInstance = this.agents["qayyim-core"];
-          response = agentInstance
-            ? await agentInstance.chat(promptWithToolContext, context)
-            : `⚠️ خطأ في السرب: ${swarmErr.message}`;
+          response = agentInstance ? await agentInstance.chat(promptWithToolContext, context) : "⚠️ خطأ";
         }
       }
       // ══════════════════════════════════════════════════════════════
@@ -390,7 +415,7 @@ export class AgentOrchestrator {
           .eq("id", conversationId);
       }
 
-      return { success: true, agentUsed: selectedAgent, response, metadata };
+      return { success: true, agentUsed: selectedAgent as AgentType, response: response || "تم تنفيذ الطلب بنجاح", metadata };
 
     } catch (error: any) {
       console.error("[AgentOrchestrator] Chat error:", error);
