@@ -36,6 +36,43 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: [] });
     }
     
+    if (status === 'all') {
+      // كل الحالات مع عدّادات حقيقية لنفس نطاق الشركة
+      const limitParam = parseInt(searchParams.get('limit') || '50', 10);
+      const limit = Math.min(Math.max(Number.isFinite(limitParam) ? limitParam : 50, 1), 500);
+
+      const [tasksRes, statusesRes] = await Promise.all([
+        supabaseServer
+          .from('agent_tasks')
+          .select('*, agent_profiles(agent_key)')
+          .eq('company_id', companyId)
+          .order('created_at', { ascending: false })
+          .limit(limit),
+        supabaseServer
+          .from('agent_tasks')
+          .select('status')
+          .eq('company_id', companyId),
+      ]);
+
+      if (tasksRes.error) throw tasksRes.error;
+      if (statusesRes.error) throw statusesRes.error;
+
+      const statuses = (statusesRes.data || []).map((r: any) => r.status);
+      const counts = {
+        pending: statuses.filter((s: string) => s === 'pending').length,
+        running: statuses.filter((s: string) => s === 'running').length,
+        completed: statuses.filter((s: string) => s === 'completed').length,
+        failed: statuses.filter((s: string) => s === 'failed').length,
+        total: statuses.length,
+      };
+
+      return NextResponse.json({
+        success: true,
+        tasks: tasksRes.data,
+        counts,
+      });
+    }
+
     let result;
     if (status === 'pending') {
       result = await agentTasksDAL.getPending(companyId);
@@ -48,12 +85,12 @@ export async function GET(request: NextRequest) {
         .eq('status', status)
         .order('created_at', { ascending: false });
     }
-    
+
     if (result.error) throw result.error;
-    
-    return NextResponse.json({ 
-      success: true, 
-      data: result.data 
+
+    return NextResponse.json({
+      success: true,
+      data: result.data
     });
     
   } catch (error: any) {

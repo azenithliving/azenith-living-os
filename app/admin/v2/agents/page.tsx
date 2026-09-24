@@ -38,19 +38,23 @@ export default function V2AgentsPage() {
     setTeamLoading(true);
     (async () => {
       try {
-        const [tasksRes, draftsRes] = await Promise.allSettled([
-          fetch('/api/admin/agents/tasks?limit=200').then(r=>r.json()),
+        const [tasksRes, draftsRes, luxRes] = await Promise.allSettled([
+          fetch('/api/admin/agents/tasks?status=all&limit=200').then(r=>r.json()),
           fetch('/api/admin/qayyim?action=list_drafts', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({}) }).then(r=>r.json()),
+          fetch('/api/admin/qayyim/perf', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'luxury_score', luxury_scope:'full_site' }) }).then(r=>r.json()),
         ]);
-        const tasks: any[] = tasksRes.status==='fulfilled' && Array.isArray(tasksRes.value.data) ? tasksRes.value.data : [];
+        const tasks: any[] = tasksRes.status==='fulfilled' && Array.isArray(tasksRes.value.tasks) ? tasksRes.value.tasks : [];
+        const counts = tasksRes.status==='fulfilled' && tasksRes.value.counts ? tasksRes.value.counts : null;
         const today = new Date().toDateString();
         const completedToday = tasks.filter(t => t.status==='completed' && new Date(t.completed_at||t.created_at).toDateString()===today).length;
-        const completed = tasks.filter(t=>t.status==='completed').length;
-        const successRate = tasks.length>0?Math.round((completed/tasks.length)*100):0;
-        setTeamStats({ totalTasks: tasks.length, completedToday, successRate });
+        const completed = counts?.completed ?? tasks.filter(t=>t.status==='completed').length;
+        const failed = counts?.failed ?? tasks.filter(t=>t.status==='failed').length;
+        const successRate = (completed+failed)>0?Math.round((completed/(completed+failed))*100):0;
+        setTeamStats({ totalTasks: counts?.total ?? tasks.length, completedToday, successRate });
         const drafts = draftsRes.status==='fulfilled' && draftsRes.value?.success ? (draftsRes.value.drafts||draftsRes.value.result?.drafts||[]) : [];
         const activeDrafts = drafts.filter((d:any)=>d.status==='draft'||d.status==='previewing').length;
-        setQayyimStats({ drafts: activeDrafts, luxuryScore: null, lastAudit: tasks.find((t:any)=>t.task_type?.includes('audit'))?.created_at||null });
+        const luxuryScore = luxRes.status==='fulfilled' && luxRes.value?.success ? luxRes.value.result?.data?.luxury_score ?? null : null;
+        setQayyimStats({ drafts: activeDrafts, luxuryScore, lastAudit: tasks.find((t:any)=>t.task_type?.includes('audit'))?.created_at||null });
       } catch {}
       finally{ setTeamLoading(false); }
     })();

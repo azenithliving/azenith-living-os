@@ -34,6 +34,14 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // حارس الإنتاج: المحاكاة تكتب بيانات وهمية — ممنوعة على البروduction إلا بموافقة صريحة
+    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_AGENT_SIMULATIONS !== 'true') {
+      return NextResponse.json(
+        { success: false, error: 'Simulations disabled in production' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const scenarioKey = body.scenarioKey || "vip_custom_order";
     const companyId = await resolveAdminCompanyId();
@@ -53,7 +61,7 @@ export async function POST(request: NextRequest) {
     if (scenarioKey === "vip_custom_order") {
       // ── Step 1: Vanguard يستقبل العميل VIP ويؤهله ──────────────────────
       const leadPayload: Record<string, any> = {
-        name: `السيد طارق الدسوقي (VIP - فيلا ميفيدا)`,
+        name: `[SIM] السيد طارق الدسوقي (VIP - فيلا ميفيدا)`,
         email: `tarek.eldessouky.${Date.now().toString().slice(-4)}@azenith-vip.com`,
         phone: "+20 100 234 5678",
         message: "طلب تفصيل صالون إمبراطوري ملكي 4 قطع + 2 طاولة رخام كلاكتا مع حفر يدوي وتذهيب إيطالي عيار 24",
@@ -64,6 +72,7 @@ export async function POST(request: NextRequest) {
           room_type: "صالون رئيسي",
           timeline_days: 45,
           decision_maker: true,
+          simulated: true,
         },
         created_at: timestamp,
       };
@@ -95,6 +104,7 @@ export async function POST(request: NextRequest) {
         total_amount: 350000,
         deposit_amount: 150000,
         deposit_paid: true,
+        notes: "[SIM] أمر بيع وهمي من سيناريو المحاكاة",
         items: [
           {
             name: "صالون إمبراطوري كلاسيكي مذهب (كنبة 3 مقاعد + 2 فوتيه + بوف)",
@@ -147,11 +157,12 @@ export async function POST(request: NextRequest) {
       let woodInventoryId = woodItem?.id;
       if (!woodItem) {
         const newWood: Record<string, any> = {
-          name: "خشب زان روماني أحمر مبخر (درجة أولى)",
+          name: "[SIM] خشب زان روماني أحمر مبخر (درجة أولى)",
           sku: "WD-BEECH-ROM-01",
           current_quantity: 18.5,
           min_stock_level: 5.0,
           unit_of_measure: "م³",
+          description: "[SIM] صنف مخزون وهمي من سيناريو المحاكاة",
           is_active: true,
         };
         if (companyId) newWood.company_id = companyId;
@@ -179,6 +190,7 @@ export async function POST(request: NextRequest) {
       const jobPayload: Record<string, any> = {
         order_id: orderData?.id || null,
         status: "in_progress",
+        notes: "[SIM] أمر تشغيل وهمي من سيناريو المحاكاة",
         created_at: timestamp,
       };
       if (companyId) jobPayload.company_id = companyId;
@@ -249,7 +261,7 @@ export async function POST(request: NextRequest) {
         type: "vip_salon_workflow",
         content: `تم إنجاز دورة كاملة بنجاح لصالون ملكي VIP: العميل ${leadPayload.name} - أمر بيع بقيمة ${revenue} ج.م - هامش ربح ${profitMarginPct}%`,
         priority: 10,
-        context: { orderId: orderData?.id, leadId: leadData?.id, profitMargin: profitMarginPct },
+        context: { orderId: orderData?.id, leadId: leadData?.id, profitMargin: profitMarginPct, simulated: true },
         created_at: timestamp,
       };
 
@@ -329,7 +341,7 @@ export async function POST(request: NextRequest) {
         status: "completed",
         size_bytes: 485200,
         tables_included: ["site_settings", "site_sections", "sales_orders", "leads"],
-        backup_data: { snapshot_type: "enterprise_sweep", created_by: "Ops & Security Autonomous Agents" },
+        backup_data: { snapshot_type: "enterprise_sweep", created_by: "Ops & Security Autonomous Agents", simulated: true },
         created_at: timestamp,
       };
 

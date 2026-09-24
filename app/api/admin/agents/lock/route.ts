@@ -52,18 +52,40 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // قفل المورد عن طريق تحديث المهمة
+    // قفل المورد عن طريق تحديث المهمة — مع الحفاظ على باقي context الموجود
     const expiresAt = new Date(Date.now() + data.lock_duration_seconds * 1000).toISOString();
-    
+
+    const { data: existingTask } = await supabaseServer
+      .from('agent_tasks')
+      .select('context')
+      .eq('id', data.task_id)
+      .eq('agent_profile_id', data.agent_id)
+      .maybeSingle();
+
+    let mergedContext: Record<string, unknown>;
+    if (existingTask) {
+      mergedContext = {
+        ...(existingTask.context || {}),
+        locked_resource_type: data.resource_type,
+        locked_resource_id: data.resource_id,
+        lock_expires_at: expiresAt,
+        lock_acquired_at: new Date().toISOString()
+      };
+    } else {
+      // fallback: المهمة مش موجودة — بنحافظ على السلوك القديم (استبدال كامل)
+      console.warn(`[lock] task ${data.task_id} not found during merge; falling back to replace`);
+      mergedContext = {
+        locked_resource_type: data.resource_type,
+        locked_resource_id: data.resource_id,
+        lock_expires_at: expiresAt,
+        lock_acquired_at: new Date().toISOString()
+      };
+    }
+
     const { data: task, error } = await supabaseServer
       .from('agent_tasks')
       .update({
-        context: {
-          locked_resource_type: data.resource_type,
-          locked_resource_id: data.resource_id,
-          lock_expires_at: expiresAt,
-          lock_acquired_at: new Date().toISOString()
-        },
+        context: mergedContext,
         updated_at: new Date().toISOString()
       })
       .eq('id', data.task_id)

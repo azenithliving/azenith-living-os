@@ -17,6 +17,9 @@ import { QayyimExperimentsPanel } from './QayyimExperimentsPanel';
 import { QayyimBenchmarksPanel } from './QayyimBenchmarksPanel';
 import { QayyimObservabilityDashboard } from './QayyimObservabilityDashboard';
 import { QayyimProactiveSuggestions } from './QayyimProactiveSuggestions';
+import { QayyimTelemetryPanel } from './QayyimTelemetryPanel';
+import { QayyimGoalsPanel } from './QayyimGoalsPanel';
+import { QayyimQualityGate } from './QayyimQualityGate';
 
 export type QayyimTab = 'overview' | 'audit' | 'drafts' | 'experiments' | 'benchmarks' | 'observability';
 
@@ -147,14 +150,27 @@ export function QayyimStudio() {
 
               {/* Proactive suggestions feed */}
               <QayyimProactiveSuggestions />
+
+              {/* Conversion goals managed by QAYYIM-UX */}
+              <QayyimGoalsPanel />
             </div>
           )}
 
           {activeTab === 'audit' && <QayyimAuditReport />}
-          {activeTab === 'drafts' && <QayyimDraftPreview />}
+          {activeTab === 'drafts' && (
+            <div className="space-y-4">
+              <QayyimQualityGate result={null} />
+              <QayyimDraftPreview />
+            </div>
+          )}
           {activeTab === 'experiments' && <QayyimExperimentsPanel />}
           {activeTab === 'benchmarks' && <QayyimBenchmarksPanel />}
-          {activeTab === 'observability' && <QayyimObservabilityDashboard />}
+          {activeTab === 'observability' && (
+            <div className="space-y-4">
+              <QayyimObservabilityDashboard />
+              <QayyimTelemetryPanel />
+            </div>
+          )}
         </div>
       </div>
     </div>
