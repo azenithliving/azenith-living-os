@@ -3,7 +3,6 @@
  */
 
 export { QayyimStudio } from './QayyimStudio';
-export { QayyimSwarmSidebar } from './QayyimSwarmSidebar';
 export { QayyimAuditReport } from './QayyimAuditReport';
 export { QayyimDraftPreview } from './QayyimDraftPreview';
 export { QayyimExperimentsPanel } from './QayyimExperimentsPanel';

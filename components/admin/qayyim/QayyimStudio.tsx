@@ -1,16 +1,15 @@
 'use client';
 
 /**
- * QayyimStudio — الاستوديو الرئيسي لسرب قيّم الدار
- * لوحة موحدة: نظرة عامة، تدقيق، مسودات، تجارب A/B، جودة، مراقبة.
+ * QayyimStudio — الاستوديو الرئيسي لسرب قيّم الدار (P5-M3)
+ * 8 كروت وكلاء كمدخل أوحد للمحادثات، وتابات موحّدة:
+ * نظرة عامة / العمليات / التحسين / المراقبة.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Brain, ShieldCheck, FileText, FlaskConical, Gauge,
-  Activity, Sparkles, RefreshCw, Loader2
+  Brain, ShieldCheck, FlaskConical, Gauge, Activity, Sparkles, RefreshCw, Loader2, MessageSquare
 } from 'lucide-react';
-import { QayyimSwarmSidebar } from './QayyimSwarmSidebar';
 import { QayyimAuditReport } from './QayyimAuditReport';
 import { QayyimDraftPreview } from './QayyimDraftPreview';
 import { QayyimExperimentsPanel } from './QayyimExperimentsPanel';
@@ -20,20 +19,41 @@ import { QayyimProactiveSuggestions } from './QayyimProactiveSuggestions';
 import { QayyimTelemetryPanel } from './QayyimTelemetryPanel';
 import { QayyimGoalsPanel } from './QayyimGoalsPanel';
 import { QayyimQualityGate } from './QayyimQualityGate';
+import { ChatPanel } from '@/components/admin/agents/ChatPanel';
+import { AGENT_ROLES } from '@/lib/qayyim/agent-roles';
 
-export type QayyimTab = 'overview' | 'audit' | 'drafts' | 'experiments' | 'benchmarks' | 'observability';
+export type QayyimTab = 'overview' | 'operations' | 'improvement' | 'monitoring';
 
-const TABS: Array<{ key: QayyimTab; label: string; icon: any }> = [
-  { key: 'overview',       label: 'نظرة عامة',    icon: Brain },
-  { key: 'audit',          label: 'التدقيق',      icon: ShieldCheck },
-  { key: 'drafts',         label: 'المسودات',     icon: FileText },
-  { key: 'experiments',    label: 'التجارب A/B',  icon: FlaskConical },
-  { key: 'benchmarks',     label: 'معايير الجودة', icon: Gauge },
-  { key: 'observability',  label: 'المراقبة',     icon: Activity },
+const TABS: Array<{ key: QayyimTab; label: string; icon: any; hint: string }> = [
+  { key: 'overview',    label: 'نظرة عامة', icon: Brain,      hint: 'صحة السرب الآن: كروت الوكلاء، الأرقام الحية، اقتراحاته المبنية على قياس، وأهدافك.' },
+  { key: 'operations',  label: 'العمليات',  icon: ShieldCheck, hint: 'دورة العمل: تقرير التدقيق الشامل ← المسودات وبوابة الجودة ← النشر بموافقتك.' },
+  { key: 'improvement', label: 'التحسين',   icon: FlaskConical, hint: 'التجارب A/B الجارية ومعايير الجودة التي تُقاس عليها.' },
+  { key: 'monitoring',  label: 'المراقبة',  icon: Activity,    hint: 'نبض النظام الحي: لوحة الرصد، تيليمتري الزوار، وأحداث السرب لحظيًا.' },
 ];
 
+const SWARM: Array<{ key: string; name: string; role: string; icon: string; color: string }> = [
+  { key: 'qayyim-core', name: 'القائد',        role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع، بوابة جودة', icon: '👑', color: 'amber' },
+  { key: 'qayyim-cont', name: 'المحتوى',       role: 'كتابة فاخرة، توحيد نبرة، قانون هوية',            icon: '✍️', color: 'rose' },
+  { key: 'qayyim-vis',  name: 'المرئيات',      role: 'انتقاء صور، هيرو، alt text، علامة مميزة',        icon: '🖼️', color: 'violet' },
+  { key: 'qayyim-seo',  name: 'الظهور (SEO)',  role: 'زحف حقيقي للصفقات، عناوين، Schema، فجوات',       icon: '🔍', color: 'sky' },
+  { key: 'qayyim-ux',   name: 'التجربة',       role: 'سلوك زائر، تحويل، تجارب A/B',                     icon: '🎯', color: 'emerald' },
+  { key: 'qayyim-ana',  name: 'التحليلات',     role: 'إيرادات، Luxury Score، أهداف مهددة',              icon: '📈', color: 'cyan' },
+  { key: 'qayyim-dev',  name: 'التطوير',       role: 'أداء، مسارات API، جودة الكود',                    icon: '⚡', color: 'orange' },
+  { key: 'qayyim-qa',   name: 'الجودة',        role: 'اختبار حمل حقيقي، رؤوس أمان، إمكانية وصول',       icon: '🧪', color: 'lime' },
+];
+
+const TONES: Record<string, string> = {
+  amber: 'border-amber-500/25 from-amber-500/10',
+  rose: 'border-rose-500/25 from-rose-500/10',
+  violet: 'border-violet-500/25 from-violet-500/10',
+  sky: 'border-sky-500/25 from-sky-500/10',
+  emerald: 'border-emerald-500/25 from-emerald-500/10',
+  cyan: 'border-cyan-500/25 from-cyan-500/10',
+  orange: 'border-orange-500/25 from-orange-500/10',
+  lime: 'border-lime-500/25 from-lime-500/10',
+};
+
 interface StudioStats {
-  agents: number;
   activeDrafts: number;
   runningExperiments: number;
   pendingSuggestions: number;
@@ -42,9 +62,15 @@ interface StudioStats {
 
 export function QayyimStudio() {
   const [activeTab, setActiveTab] = useState<QayyimTab>('overview');
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [stats, setStats] = useState<StudioStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [chatAgent, setChatAgent] = useState<string | null>(null);
+  const [chatMission, setChatMission] = useState<string | undefined>(undefined);
+
+  const openChat = (key: string, mission?: string) => {
+    setChatMission(mission);
+    setChatAgent(key);
+  };
 
   const fetchOverview = useCallback(async () => {
     setLoadingStats(true);
@@ -62,14 +88,13 @@ export function QayyimStudio() {
       const luxury = luxRes.status === 'fulfilled' && luxRes.value?.success ? luxRes.value.result?.data?.luxury_score ?? null : null;
 
       setStats({
-        agents: 8,
         activeDrafts: drafts.filter((d: any) => d.status === 'draft' || d.status === 'previewing').length,
         runningExperiments: experiments.filter((e: any) => e.status === 'running').length,
         pendingSuggestions: suggestions.filter((s: any) => s.status === 'pending').length,
-        luxuryScore: typeof luxury === 'number' ? luxury : (luxury?.total ?? null),
+        luxuryScore: typeof luxury === 'number' ? luxury : null,
       });
     } catch {
-      setStats({ agents: 8, activeDrafts: 0, runningExperiments: 0, pendingSuggestions: 0, luxuryScore: null });
+      setStats({ activeDrafts: 0, runningExperiments: 0, pendingSuggestions: 0, luxuryScore: null });
     } finally {
       setLoadingStats(false);
     }
@@ -77,110 +102,153 @@ export function QayyimStudio() {
 
   useEffect(() => { fetchOverview(); }, [fetchOverview]);
 
+  const activeMeta = SWARM.find(a => a.key === chatAgent);
+
   return (
-    <div className="flex h-full min-h-[600px] rounded-2xl border border-white/10 bg-[#0d0d12] overflow-hidden" dir="rtl">
-      {/* Swarm sidebar */}
-      <QayyimSwarmSidebar
-        selectedAgent={selectedAgent}
-        onSelectAgent={setSelectedAgent}
-      />
-
-      {/* Main panel */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-white/[0.02]">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500/30 to-amber-700/20 border border-amber-500/30 flex items-center justify-center">
-              <Brain className="w-5 h-5 text-amber-300" />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-white">قيّم الدار — استوديو السرب</h2>
-              <p className="text-[11px] text-white/50">8 وكلاء متخصصون بدستور واحد وذاكرة مشتركة</p>
-            </div>
-          </div>
-          <button
-            onClick={fetchOverview}
-            disabled={loadingStats}
-            className="p-2 rounded-lg border border-white/10 text-white/60 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-40"
-            title="تحديث"
-          >
-            {loadingStats ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-          </button>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex items-center gap-1 px-4 py-2 border-b border-white/10 overflow-x-auto">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
-                  isActive
-                    ? 'bg-amber-500/20 text-amber-200 border border-amber-500/30'
-                    : 'text-white/50 hover:text-white hover:bg-white/5 border border-transparent'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {activeTab === 'overview' && (
-            <div className="space-y-4">
-              {/* Stats grid */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                <StatCard label="وكلاء السرب" value={stats?.agents ?? '—'} icon={Brain} tone="amber" />
-                <StatCard label="مسودات نشطة" value={stats?.activeDrafts ?? '—'} icon={FileText} tone="sky" />
-                <StatCard label="تجارب جارية" value={stats?.runningExperiments ?? '—'} icon={FlaskConical} tone="violet" />
-                <StatCard label="اقتراحات معلقة" value={stats?.pendingSuggestions ?? '—'} icon={Sparkles} tone="rose" />
-                <StatCard
-                  label="Luxury Score"
-                  value={stats?.luxuryScore !== null && stats?.luxuryScore !== undefined ? `${stats.luxuryScore}` : '—'}
-                  icon={Gauge}
-                  tone="emerald"
-                />
+    <div className="space-y-4" dir="rtl">
+      <div className="flex h-full min-h-[600px] rounded-2xl border border-white/10 bg-[#0d0d12] overflow-hidden">
+        {/* Main panel */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-white/[0.02]">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500/30 to-amber-700/20 border border-amber-500/30 flex items-center justify-center">
+                <Brain className="w-5 h-5 text-amber-300" />
               </div>
-
-              {/* Proactive suggestions feed */}
-              <QayyimProactiveSuggestions />
-
-              {/* Conversion goals managed by QAYYIM-UX */}
-              <QayyimGoalsPanel />
+              <div>
+                <h2 className="text-sm font-bold text-white">قيّم الدار — استوديو السرب</h2>
+                <p className="text-[11px] text-white/50">8 وكلاء متخصصون بدستور واحد وذاكرة مشتركة</p>
+              </div>
             </div>
-          )}
+            <button
+              onClick={fetchOverview}
+              disabled={loadingStats}
+              className="p-2 rounded-lg border border-white/10 text-white/60 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-40"
+              title="تحديث"
+            >
+              {loadingStats ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+            </button>
+          </div>
 
-          {activeTab === 'audit' && <QayyimAuditReport />}
-          {activeTab === 'drafts' && (
-            <div className="space-y-4">
-              <QayyimQualityGate result={null} />
-              <QayyimDraftPreview />
-            </div>
-          )}
-          {activeTab === 'experiments' && <QayyimExperimentsPanel />}
-          {activeTab === 'benchmarks' && <QayyimBenchmarksPanel />}
-          {activeTab === 'observability' && (
-            <div className="space-y-4">
-              <QayyimObservabilityDashboard />
-              <QayyimTelemetryPanel />
-              <LiveEventsPanel />
-            </div>
-          )}
+          {/* Tabs */}
+          <div className="flex items-center gap-1 px-4 py-2 border-b border-white/10 overflow-x-auto">
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+                    isActive
+                      ? 'bg-amber-500/20 text-amber-200 border border-amber-500/30'
+                      : 'text-white/50 hover:text-white hover:bg-white/5 border border-transparent'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="px-5 py-2 text-[11px] text-white/40 border-b border-white/5 bg-white/[0.01]">
+            {TABS.find(t => t.key === activeTab)?.hint}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {activeTab === 'overview' && (
+              <div className="space-y-4">
+                {/* Agent cards — the single chat entry point */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {SWARM.map((agent) => (
+                    <div key={agent.key} className={`rounded-2xl border bg-gradient-to-br to-transparent p-4 flex flex-col ${TONES[agent.color]}`}>
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-2xl">{agent.icon}</span>
+                        <div className="min-w-0">
+                          <h3 className="text-sm font-black text-white truncate">قيّم — {agent.name}</h3>
+                          <p className="text-[10px] text-white/50 leading-snug">{agent.role}</p>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-white/35 mt-2">{(AGENT_ROLES[agent.key] || []).length} دورًا حقيقيًا جاهز</p>
+                      <div className="flex gap-1.5 mt-3">
+                        <button onClick={() => openChat(agent.key)} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] text-white/80 font-bold">
+                          <MessageSquare className="w-3 h-3" /> محادثة
+                        </button>
+                        <button onClick={() => openChat(agent.key, (AGENT_ROLES[agent.key] || [])[0])} className="flex-1 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/25 text-[11px] text-amber-300 font-bold">
+                          ⚡ مهمته الأولى
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Stats grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <StatCard label="مسودات نشطة" value={stats?.activeDrafts ?? '—'} icon={ShieldCheck} tone="sky" />
+                  <StatCard label="تجارب جارية" value={stats?.runningExperiments ?? '—'} icon={FlaskConical} tone="violet" />
+                  <StatCard label="اقتراحات معلقة" value={stats?.pendingSuggestions ?? '—'} icon={Sparkles} tone="rose" />
+                  <StatCard label="Luxury Score" value={stats?.luxuryScore ?? '—'} icon={Gauge} tone="emerald" />
+                </div>
+
+                <QayyimProactiveSuggestions />
+                <QayyimGoalsPanel />
+              </div>
+            )}
+
+            {activeTab === 'operations' && (
+              <div className="space-y-4">
+                <details className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs text-white/50" open>
+                  <summary className="cursor-pointer font-bold text-white/70">تدقيق شامل</summary>
+                  <div className="mt-3"><QayyimAuditReport /></div>
+                </details>
+                <details className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs text-white/50" open>
+                  <summary className="cursor-pointer font-bold text-white/70">المسودات وبوابة الجودة</summary>
+                  <div className="mt-3 space-y-4">
+                    <QayyimQualityGate result={null} />
+                    <QayyimDraftPreview />
+                  </div>
+                </details>
+              </div>
+            )}
+
+            {activeTab === 'improvement' && (
+              <div className="space-y-4">
+                <QayyimExperimentsPanel />
+                <QayyimBenchmarksPanel />
+              </div>
+            )}
+
+            {activeTab === 'monitoring' && (
+              <div className="space-y-4">
+                <QayyimObservabilityDashboard />
+                <QayyimTelemetryPanel />
+                <LiveEventsPanel />
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Single chat surface for every agent */}
+      {chatAgent && (
+        <div className="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl flex items-center justify-center p-4 md:p-6" onClick={() => { setChatAgent(null); setChatMission(undefined); }}>
+          <div className="w-full h-full max-w-4xl max-h-[92vh] bg-[#0f0f0f] border border-white/15 rounded-[2rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+            <ChatPanel
+              agentKey={chatAgent}
+              agentName={activeMeta ? `قيّم الدار — ${activeMeta.name}` : undefined}
+              agentColor={activeMeta?.color || 'amber'}
+              initialMessage={chatMission}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function StatCard({ label, value, icon: Icon, tone }: { label: string; value: string | number; icon: any; tone: 'amber' | 'sky' | 'violet' | 'rose' | 'emerald' }) {
+function StatCard({ label, value, icon: Icon, tone }: { label: string; value: string | number; icon: any; tone: 'sky' | 'violet' | 'rose' | 'emerald' }) {
   const tones: Record<string, string> = {
-    amber: 'from-amber-500/15 to-amber-700/5 border-amber-500/20 text-amber-300',
     sky: 'from-sky-500/15 to-sky-700/5 border-sky-500/20 text-sky-300',
     violet: 'from-violet-500/15 to-violet-700/5 border-violet-500/20 text-violet-300',
     rose: 'from-rose-500/15 to-rose-700/5 border-rose-500/20 text-rose-300',
@@ -196,7 +264,6 @@ function StatCard({ label, value, icon: Icon, tone }: { label: string; value: st
     </div>
   );
 }
-
 
 /**
  * Live Events Panel — P3 Proactivity
@@ -236,16 +303,16 @@ function LiveEventsPanel() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-emerald-400" />
-          <h3 className="text-sm font-semibold text-white">Live Events</h3>
+          <h3 className="text-sm font-semibold text-white">أحداث السرب الحية</h3>
           <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
         </div>
-        <span className="text-xs text-white/40">{events.length} events</span>
+        <span className="text-xs text-white/40">{events.length} حدث</span>
       </div>
 
       <div className="space-y-2 max-h-96 overflow-y-auto">
         {events.length === 0 && (
           <div className="text-xs text-white/40 text-center py-8">
-            {isConnected ? 'Waiting for events...' : 'Disconnected'}
+            {isConnected ? 'في انتظار الأحداث...' : 'غير متصل'}
           </div>
         )}
 
