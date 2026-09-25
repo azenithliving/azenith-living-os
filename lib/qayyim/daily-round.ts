@@ -34,6 +34,11 @@ export interface DailyRoundResults {
   anomaly?: unknown;
   anomalyDigest?: string;
   anomalyReadError?: string;
+  /** P6-M4: the morning report on Telegram — reported, never assumed. */
+  telegramSent?: boolean;
+  telegramReason?: string;
+  telegramHref?: string;
+  proposalId?: string | null;
   errors: string[];
   [k: string]: unknown;
 }
@@ -186,6 +191,7 @@ export async function executeDailyRound(): Promise<DailyRoundOutcome> {
       });
 
       results.proposalCreated = proposal.success;
+      results.proposalId = proposal.requestId ?? null;
       if (!proposal.success) results.errors.push(`Proposal creation: ${proposal.error}`);
     } catch (e: any) {
       results.errors.push(`Proposal creation: ${e.message}`);
@@ -210,6 +216,56 @@ export async function executeDailyRound(): Promise<DailyRoundOutcome> {
     } catch (e: any) {
       results.errors.push(`قياس المنافسين: ${e.message}`);
     }
+  }
+
+  // (g) P6-M4 — the morning story on the owner's phone, through the store's
+  // existing Telegram transport (no second config, no second sender). A round
+  // that ran and a round that reached him are two different facts, so the result
+  // says which one happened instead of leaving him to discover the difference.
+  try {
+    const [{ getActiveTelegramConfig, sendTelegramMessage }, { buildDailyStory, renderTelegramHtml }] = await Promise.all([
+      import("@/lib/telegram-config"),
+      import("@/lib/qayyim/daily-story"),
+    ]);
+    const cfg = await getActiveTelegramConfig();
+    const rivalRead = results.rivals as { crawled: number; failed: number; skipped: number } | null | undefined;
+    const story = buildDailyStory({
+      dateKey: new Date().toISOString().slice(0, 10),
+      luxuryScore: results.luxuryScore,
+      luxuryNote: results.luxuryNote ?? null,
+      activeGoals: results.activeGoals ?? null,
+      atRiskCount: results.atRiskGoals.length,
+      goalsSummary: results.goalsSummary ?? null,
+      anomalyDigest: results.anomalyDigest ?? null,
+      anomalyReadError: results.anomalyReadError ?? null,
+      rivals: rivalRead ? { crawled: rivalRead.crawled, failed: rivalRead.failed, skipped: rivalRead.skipped } : null,
+      errors: results.errors,
+      proposalId: results.proposalId ?? null,
+      siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    });
+    results.telegramHref = story.href;
+
+    if (!cfg.botToken) {
+      results.telegramSent = false;
+      results.telegramReason = "مفيش مفتاح بوت تليجرام مضبوط — التقرير اتكتب بس ما اتبعتش.";
+    } else if (!cfg.chatId) {
+      results.telegramSent = false;
+      results.telegramReason = "مفيش محادثة تليجرام مضبوطة — البعثة مستحيلة.";
+    } else if (!cfg.enabled) {
+      results.telegramSent = false;
+      results.telegramReason = "تنبيهات تليجرام مقفولة في الإعدادات.";
+    } else {
+      // A routine report arrives silently; the one that needs his signature makes
+      // the noise. Two alarms a day is how notifications get muted forever.
+      const ok = await sendTelegramMessage(renderTelegramHtml(story), { silent: !needsIntervention });
+      results.telegramSent = ok;
+      results.telegramReason = ok ? "التقرير اليومي وصل" : "البوت رفض البعثة — راجع المفتاح والمحادثة";
+      if (!ok) results.errors.push("Telegram: البعثة فشلت");
+    }
+  } catch (e: any) {
+    results.telegramSent = false;
+    results.telegramReason = `استثناء: ${e.message}`;
+    results.errors.push(`Telegram: ${e.message}`);
   }
 
   return { success: true, results };
