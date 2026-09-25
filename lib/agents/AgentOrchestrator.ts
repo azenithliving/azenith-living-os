@@ -13,6 +13,7 @@ import { recallMemory, finalizeReply } from "@/lib/qayyim/chat-brain";
 import { critiqueAndPolish, shouldDebate } from "@/lib/qayyim/debate";
 import { withOwnerRuleOnMessages } from "@/lib/qayyim/owner-address";
 import { explainGap } from "@/lib/qayyim/gap-contract";
+import { isStaleRunning } from "@/lib/qayyim/task-reconcile";
 import { 
   QayyimCoreAgent, qayyimCoreAgent,
   QayyimContentAgent, qayyimContentAgent,
@@ -660,11 +661,21 @@ export class AgentOrchestrator {
         }
 
         if (agentProfile) {
-          const { count } = await supabase
+          // Counted from the rows themselves, not from a bare `status='running'`
+          // count: a row left running by a dead process would otherwise keep the
+          // seed card saying «قيد المعالجة · 1 مهمة» forever (the live case was a
+          // task from 46 days ago). The daily sweep closes them in the ledger;
+          // this keeps the badge honest until it runs.
+          const { data: runningRows } = await supabase
             .from("agent_tasks")
-            .select("*", { count: "exact", head: true })
+            .select("id,status,started_at,created_at")
             .eq("agent_profile_id", agentProfile.id)
-            .eq("status", "running");
+            .eq("status", "running")
+            .limit(50);
+          const live = ((runningRows || []) as Array<{ id: string; status: string; started_at: string | null; created_at: string | null }>).filter(
+            (t) => !isStaleRunning(t),
+          );
+          const count = live.length;
 
           const { data: lastTask } = await supabase
             .from("agent_tasks")

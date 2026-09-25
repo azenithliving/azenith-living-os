@@ -218,7 +218,19 @@ export async function executeDailyRound(): Promise<DailyRoundOutcome> {
     }
   }
 
-  // (g) P6-M4 — the morning story on the owner's phone, through the store's
+  // (g) P6-M5 — close tasks that are "running" only because their process died.
+  // Without this the ledger keeps rows open for weeks and every count built on
+  // them (including the card's busy dot) reports work that stopped happening.
+  try {
+    const { reconcileStaleTasks } = await import("@/lib/qayyim/task-reconcile");
+    const sweep = await reconcileStaleTasks();
+    results.staleTasksClosed = sweep.closed;
+    if (sweep.error) results.errors.push(`إغلاق المهام المعلقة: ${sweep.error}`);
+  } catch (e: any) {
+    results.errors.push(`إغلاق المهام المعلقة: ${e.message}`);
+  }
+
+  // (h) P6-M4 — the morning story on the owner's phone, through the store's
   // existing Telegram transport (no second config, no second sender). A round
   // that ran and a round that reached him are two different facts, so the result
   // says which one happened instead of leaving him to discover the difference.
