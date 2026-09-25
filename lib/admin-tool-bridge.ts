@@ -308,13 +308,18 @@ export function inferUltimateTool(
     return { toolName: "qayyim_rivals", params: {} };
   }
   // "how many drafts are pending" must be COUNTED, never guessed by the swarm.
-  // Publish / approve / rollback wording is excluded so those actions keep
-  // their own path — `رجّ?ع` covers رجع/ارجع/رجّع, the shadda forms that broke
-  // an earlier version of this guard.
-  if (
-    /مسودات|مسودة|drafts?/i.test(lower) &&
-    !/نشر|انشر|اعتمد|موافق|رفض|رجّ?ع|استرجاع|نسخة (?:سابقة|ق?ب?لية)|rollback/i.test(lower)
-  ) {
+  // The exclusion looks for an action *commanded on* a draft (leading mutating
+  // verb, or a publish/rollback verb immediately applied to one) rather than any
+  // message that merely contains the word "نشر" — "المسودات المعلقة للمراجعة
+  // والنشر" describes the queue, and must still be counted.
+  const draftActionRequested =
+    /^(?:انشر|نشُر|نشر|اعتمد|اعتماد|وافق|موافقة|ارفض|رفض|احذف|امسح|ارجع|استرجع|رجّ?ع|rollback|publish|approve|reject|delete|restore)/i.test(
+      lower.trim()
+    ) ||
+    /(انشر|نشر|اعتمد|اعتماد|موافقة|وافق|رفض|استرجاع|رجّ?ع|rollback)\s+(?:هذه|دي|ده|اللي|المسودة|مسودة|النسخة|نسخة)/i.test(
+      lower
+    );
+  if (/مسودات|مسودة|drafts?/i.test(lower) && !draftActionRequested) {
     return { toolName: "draft_list", params: {} };
   }
   if (/اختبار.*حمل|load\s*test/i.test(lower)) {

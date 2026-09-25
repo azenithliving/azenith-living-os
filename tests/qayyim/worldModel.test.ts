@@ -27,8 +27,11 @@ describe('qayyim_world routing', () => {
 
   it('counts drafts but leaves publish wording to the publish flow', () => {
     expect(inferUltimateTool('اعرض المسودات المعلقة')?.toolName).toBe('draft_list');
+    // the phrase that failed on prod: "للنشر" describes the queue, not a command
+    expect(inferUltimateTool('اعرض المسودات المعلقة للمراجعة والنشر')?.toolName).toBe('draft_list');
     expect(inferUltimateTool('انشر المسودة دي')?.toolName).not.toBe('draft_list');
     expect(inferUltimateTool('ارجع المسودة لنسخة قبلية')?.toolName).not.toBe('draft_list');
+    expect(inferUltimateTool('اريد نشر المسودة دي')?.toolName).not.toBe('draft_list');
   });
 });
 
