@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminApi } from "@/lib/admin-api-guard";
 
@@ -149,6 +150,17 @@ export async function POST(request: NextRequest) {
         { success: false, error: "Failed to save setting" },
         { status: 500 }
       );
+    }
+
+    // `seo` and `theme` are read while rendering the site shell, and the
+    // storefront pages are cached — without this, turning ads on would look like
+    // it did nothing until the cache happened to expire.
+    if (key === "seo" || key === "theme") {
+      try {
+        revalidatePath("/", "layout");
+      } catch {
+        /* revalidating must never fail a saved setting */
+      }
     }
 
     return NextResponse.json({

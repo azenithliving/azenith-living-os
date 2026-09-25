@@ -15,6 +15,7 @@ import {
   WifiOff,
   Zap,
 } from "lucide-react";
+import AskQayyimAboutPage from "@/components/admin/browser/AskQayyimAboutPage";
 
 interface ManagedBrowserSessionSuccess {
   success: true;
@@ -574,6 +575,7 @@ export default function BrowserWorkspacePage() {
                   <ExternalLink className="h-4 w-4" />
                   Open Active Viewer
                 </button>
+                <AskQayyimAboutPage url={activeViewerUrl} />
               </div>
             </div>
 

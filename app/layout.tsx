@@ -107,6 +107,17 @@ export default async function RootLayout({
 
   const adsenseEnabled = seo.adsenseEnabled === true;
   const adsenseClient = typeof seo.adsenseClient === "string" ? seo.adsenseClient : "";
+  // Two different products, both off unless the owner turns them on and pastes
+  // a real id from their own Google account:
+  //  • AdSense  → Google shows ads on this site and the owner earns.
+  //  • gtag     → the owner's own Google Ads / Analytics measurement on this site.
+  // Ids are copied into a script URL, so anything that is not exactly the
+  // documented shape is ignored instead of being interpolated.
+  const adsenseId = /^[A-Za-z0-9._-]{8,40}$/.test(adsenseClient) ? adsenseClient : "";
+  const gtagId = typeof seo.analyticsId === "string" && /^G-[A-Z0-9]{6,12}$/.test(seo.analyticsId) ? seo.analyticsId : "";
+  const adsConversionId =
+    typeof seo.googleAdsId === "string" && /^AW-\d{7,12}$/.test(seo.googleAdsId) ? seo.googleAdsId : "";
+  const gtagIds = [gtagId, adsConversionId].filter(Boolean) as string[];
   const schemaData = getOrganizationJsonLd();
 
   return (
@@ -123,12 +134,21 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
         />
+        {gtagIds.length ? (
+          <>
+            <Script async src={`https://www.googletagmanager.com/gtag/js?id=${gtagIds[0]}`} strategy="afterInteractive" />
+            <Script id="zenith-gtag" strategy="afterInteractive">
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());` +
+                gtagIds.map((id) => `gtag('config','${id}',{send_page_view:true});`).join("")}
+            </Script>
+          </>
+        ) : null}
       </head>
       <body className="min-h-full bg-brand-secondary font-sans text-brand-accent" suppressHydrationWarning>
-        {adsenseEnabled && adsenseClient ? (
+        {adsenseEnabled && adsenseId ? (
           <Script
             async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(adsenseClient)}`}
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(adsenseId)}`}
             crossOrigin="anonymous"
             strategy="afterInteractive"
           />
