@@ -123,10 +123,13 @@ function tokens(text: string): Set<string> {
 }
 
 /**
- * 0..1 topic overlap. Containment (how much of the shorter question is present
- * in the longer) is what makes a four-word rephrasing of a ten-word FAQ match,
- * so it is scored at 0.9 — never a full 1, because partial coverage is still
- * partial coverage.
+ * 0..1 topic overlap.
+ *
+ * Containment (how much of the shorter side appears in the longer) is what makes
+ * a four-word rephrasing of a ten-word FAQ match: when every topic word the
+ * visitor used is in the approved question, they are asking about the same
+ * thing. Jaccard alone would refuse «مواعيد المعرض؟» against the long official
+ * wording, which is exactly the case the owner approved an answer for.
  */
 export function similarity(a: string, b: string): number {
   const left = tokens(a);
@@ -140,7 +143,7 @@ export function similarity(a: string, b: string): number {
   const union = left.size + right.size - inter;
   const jaccard = inter / union;
   const containment = inter / Math.min(left.size, right.size);
-  return Math.max(jaccard, 0.9 * containment);
+  return Math.max(jaccard, containment);
 }
 
 /** Only a row the owner signed and left switched on may be said in his name. */

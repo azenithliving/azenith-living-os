@@ -106,13 +106,31 @@ describe("pickFaqAnswer", () => {
     expect(pickFaqAnswer("عاين أغير لون المخمل في الوسادة", rows)).toBeNull();
   });
 
-  it("is silent when the shelf is empty", () => {
-    expect(pickFaqAnswer("مواعيد المعرض؟", [])).toBeNull();
+  it("answers a visitor's own phrasing, not only the owner's wording", () => {
+    // Caught live on production: the approved row says «مساحة المنزل» and a real
+    // visitor asked «مساحة البيت». A gate that only matches the wording it was
+    // written in answers nothing and the owner concludes the feature is broken.
+    const rows = [
+      faq({
+        id: "f4",
+        question: "هل يمكن تخصيص التصميم حسب مساحة المنزل؟",
+        answer: "نعم، يتم التعامل مع كل مشروع حسب المقاسات الفعلية.",
+        approved_by: "site-copy:p6-m4",
+      }),
+    ];
+    const hit = pickFaqAnswer("هل يمكن تخصيص التصميم حسب مساحة البيت؟", rows);
+    expect(hit).not.toBeNull();
+    expect(hit!.row.id).toBe("f4");
+    expect(hit!.score).toBeGreaterThanOrEqual(0.8);
   });
 
   it("honours a stricter threshold when asked", () => {
-    const loose = pickFaqAnswer("المواعيد؟", rows)!;
-    expect(pickFaqAnswer("المواعيد؟", rows, { threshold: 0.99 })).toBeNull();
-    expect(loose.score).toBeLessThan(0.99);
+    const question = "مواعيد المعرض والمدة بالتفصيل";
+    expect(pickFaqAnswer(question, rows, { threshold: 0.6 })).not.toBeNull();
+    expect(pickFaqAnswer(question, rows)).toBeNull();
+  });
+
+  it("is silent when the shelf is empty", () => {
+    expect(pickFaqAnswer("مواعيد المعرض؟", [])).toBeNull();
   });
 });
