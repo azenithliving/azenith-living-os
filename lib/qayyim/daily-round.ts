@@ -105,6 +105,8 @@ export async function executeDailyRound(): Promise<DailyRoundOutcome> {
         kind: "daily_round",
         luxuryScore: results.luxuryScore,
         luxuryNote: results.luxuryNote ?? null,
+        // Stored so the score can be re-checked later without re-probing.
+        luxurySignals: results.luxurySignals ?? null,
         activeGoals: results.activeGoals ?? 0,
         atRiskGoals: results.atRiskGoals,
         goalsSummary: results.goalsSummary ?? null,

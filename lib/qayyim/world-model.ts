@@ -159,7 +159,13 @@ async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel,
 
   let visitors: WorldModel["visitors"] = null;
   if (telRes?.data) {
-    const publicRows = telRes.data.filter((r) => typeof r.current_path === "string" && !r.current_path.startsWith("/admin"));
+    // Storefront traffic only: admin pages and the login gate are not visitors,
+    // and counting them inflated every "how are the visits" answer.
+    const isStorefront = (p: unknown) => {
+      const s = String(p ?? "");
+      return s.length > 0 && !s.startsWith("/admin") && !s.startsWith("/gate") && !s.startsWith("/api");
+    };
+    const publicRows = telRes.data.filter((r) => isStorefront(r.current_path));
     const adminEventsExcluded = telRes.data.length - publicRows.length;
     const in7 = publicRows.filter((r) => String(r.created_at) >= d7);
     const paths = new Map<string, number>();
@@ -174,7 +180,7 @@ async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel,
       topPaths: [...paths.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([path, count]) => ({ path, count })),
       adminEventsExcluded,
     };
-    if (adminEventsExcluded) coverage.push(`${adminEventsExcluded} حدث خلال 14 يومًا من صفحات الإدارة — مستثنى من عدّاد الزوار`);
+    if (adminEventsExcluded) coverage.push(`${adminEventsExcluded} حدث خلال 14 يومًا من صفحات الإدارة/البوابة/API — مستثنى من عدّاد الزوار`);
   }
 
   const catalog: WorldModel["catalog"] =
