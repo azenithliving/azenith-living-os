@@ -8,10 +8,11 @@ import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 import { askGroqMessages, askGoogle, askGoogleMessages, askOpenRouter, askMistral } from "@/lib/ai-orchestrator";
 import { runUltimateTool } from "@/lib/admin-tool-bridge";
-import { routeIntent } from "@/lib/agents/intent-router";
+import { routeIntent, TOOL_CATALOG } from "@/lib/agents/intent-router";
 import { recallMemory, finalizeReply } from "@/lib/qayyim/chat-brain";
 import { critiqueAndPolish, shouldDebate } from "@/lib/qayyim/debate";
 import { withOwnerRuleOnMessages } from "@/lib/qayyim/owner-address";
+import { explainGap } from "@/lib/qayyim/gap-contract";
 import { 
   QayyimCoreAgent, qayyimCoreAgent,
   QayyimContentAgent, qayyimContentAgent,
@@ -494,6 +495,15 @@ export class AgentOrchestrator {
 
       if (toolResult?.message && response && !response.includes(toolResult.message)) {
         response = `${toolResult.message}\n\n${response}`;
+      }
+
+      // P6-M4 — the refusal contract. «مش قادر» alone is a shrug; every giving-up
+      // answer is extended with the capability it is missing and the shortest
+      // path to switch it on, named from the real tool catalog. Measured answers
+      // get nothing appended (the contract only fires on a refusal).
+      if (response) {
+        const gapNote = explainGap(response, message, { tools: TOOL_CATALOG });
+        if (gapNote) response = `${response}${gapNote}`;
       }
 
       // P5-M1: every admin-visible reply passes the truth layer —

@@ -33,6 +33,10 @@ const CASES = [
   // P6-M3: a forecast is either numbers with the measured error, or a refusal
   // that says why. A confident number with no history behind it fails this.
   { id: "core-forecast", agent: "qayyim-core", msg: "توقع مبيعات الشهر الجاي", expect: (m, md) => md.tool === "qayyim_forecast" && (/الإجمالي المتوقع/.test(m) ? /خطأ|غير موسمي|مبني على/.test(m) : /مش قادر/.test(m)) },
+  // P6-M4 refusal contract. The assertion is an invariant, not a script: if the
+  // swarm gives up, the answer must name the missing capability and how to switch
+  // it on. An answer that works also passes — nothing is being forced.
+  { id: "core-gap", agent: "qayyim-core", msg: "ابعتلي رسالة نصية لما عمي يعمل طلب", expect: (m) => !/(مش قادر|ما ?قدرش|لا ?أ?ستطيع|خارج نطاق|غير متاحة)/.test(m) || /الناقص:/.test(m) },
   { id: "cont-health",  agent: "qayyim-cont", msg: "افحص صحة محتوى الصفحة الرئيسية", expect: (m, md) => md.tool === "content_health_check" || /محتوى/i.test(m) },
   { id: "seo-analyze",  agent: "qayyim-seo",  msg: "حلل SEO للصفحة الرئيسية", expect: (m, md) => /SEO|سيو|عنوان|meta/i.test(m) },
   { id: "ana-metrics",  agent: "qayyim-ana",  msg: "اعرض المؤشرات اللحظية للنظام", expect: (m, md) => md.tool === "metrics_realtime" || /مؤشر/i.test(m) },
