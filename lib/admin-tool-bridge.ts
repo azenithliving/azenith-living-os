@@ -135,6 +135,20 @@ export async function runUltimateTool(
     };
   }
 
+  // ── P6-M2: Search Console — real queries, or a refusal that names the gap.
+  // success stays true even when Google is not wired: the refusal IS the
+  // correct terminal answer. Marking it failed would hand the question to the
+  // LLM, which would answer with invented search phrases.
+  if (toolName === "gsc_queries") {
+    const { fetchSearchQueries, renderGscResult } = await import("@/lib/qayyim/gsc");
+    const r = await fetchSearchQueries();
+    return {
+      success: true,
+      message: renderGscResult(r),
+      data: { configured: r.ok, rows: r.rows?.length ?? 0, missing: r.missing ?? [], error: r.error ?? null },
+    };
+  }
+
   // ── P5: Qayyim measured probes — real numbers from realChecks/QA agents ──
   if (toolName === "qa_load_probe") {
     const { qayyimQaAgent } = await import("@/lib/qayyim");
@@ -246,6 +260,12 @@ export function inferUltimateTool(
     )
   ) {
     return { toolName: "qayyim_world", params: {} };
+  }
+  // Real search-phrase traffic, or a named refusal. Must not fall into the
+  // generic seo_analyze path, which audits the page but knows nothing about
+  // the queries that actually brought visitors.
+  if (/كلمات\s+ال?بحث|search\s*console|جوجل\s+(?:ليا|ليّا|لية|ليـا)|what\s+queries/i.test(lower)) {
+    return { toolName: "gsc_queries", params: {} };
   }
   if (/اختبار.*حمل|load\s*test/i.test(lower)) {
     return { toolName: "qa_load_probe", params: {} };
