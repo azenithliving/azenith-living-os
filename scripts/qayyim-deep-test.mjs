@@ -55,8 +55,16 @@ ok('L1 dialect: ≥4/5 صياغات وصلت لأداة سرعة/حمل', tools.
 // numerically wrong, and a correct answer written as «ثلاث» would fail a digit
 // test. Arabic word forms are read as numbers, digits are compared exactly.
 const AR_NUMS = ['صفر|لا مسودات|مفيش مسودة', 'واحدا|واحدة|واحده|وحدة', 'اتنين|اثنتين|اثنتان|ثنتين', 'ثلاث|ثلاثة|تلات|تلاتة', 'أربع|اربع|أربعة|اربعه|أربعا', 'خمس|خمسة', 'ست|ستة', 'سبع|سبعة', 'ثمان|ثماني|ثمانية', 'تسع|تسعة', 'عشر|عشرة'];
+// The commander writes the count in Arabic-Indic digits («٤») as often as in
+// ASCII ones, and both are the right answer. Read them as numbers, never as text.
+const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+const toAsciiDigits = (text) =>
+  [...text].map((ch) => {
+    const i = ARABIC_DIGITS.indexOf(ch);
+    return i === -1 ? ch : String(i);
+  }).join('');
 const statesCount = (text, n) =>
-  new RegExp(`(?<!\\d)${n}(?!\\d)`).test(text) || (AR_NUMS[n] ? new RegExp(AR_NUMS[n], 'i').test(text) : false);
+  new RegExp(`(?<!\\d)${n}(?!\\d)`).test(toAsciiDigits(text)) || (AR_NUMS[n] ? new RegExp(AR_NUMS[n], 'i').test(text) : false);
 
 const expectedDrafts = ((await qapi('list_drafts'))?.drafts || []).length;
 const m1 = await chat('qayyim-core', 'اعرض المسودات المعلقة');
