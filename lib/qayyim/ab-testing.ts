@@ -8,6 +8,8 @@
 
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 import { createHash } from "crypto";
+import { twoProportionZTest } from "@/lib/qayyim/stats";
+import { verdictForExperiment, type ExperimentVerdict } from "@/lib/qayyim/experiment-verdict";
 
 // ============================================
 // Types
@@ -62,6 +64,9 @@ export interface ExperimentStats {
   z_score: number | null;
   confidence: number | null;
   is_significant: boolean;
+  /** Arabic sentence the owner reads: who won, or how much traffic is still
+   * needed before anyone can say. */
+  verdict: ExperimentVerdict;
   recommended_action: 'keep_running' | 'declare_variant' | 'declare_control' | 'declare_inconclusive';
   days_remaining: number | null;
 }
@@ -225,14 +230,12 @@ export async function recordEvent(
 // Statistics
 // ============================================
 
-/** Standard normal CDF (Abramowitz-Stegun approximation). */
-function normalCdf(x: number): number {
-  const t = 1 / (1 + 0.2316419 * Math.abs(x));
-  const d = 0.3989422804014327 * Math.exp((-x * x) / 2);
-  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
-  return x > 0 ? 1 - p : p;
-}
-
+/**
+ * The arithmetic itself lives in `stats.ts` and the sentence in
+ * `experiment-verdict.ts`. This function only counts events and maps them —
+ * it used to compute a z-score inline with its own normal CDF, which is how a
+ * second, slightly different definition of "significant" gets into a shop.
+ */
 export async function getExperimentStats(experimentId: string): Promise<ExperimentStats> {
   const experiment = await getExperiment(experimentId);
   if (!experiment) throw new Error(`Experiment ${experimentId} not found`);
@@ -259,23 +262,12 @@ export async function getExperimentStats(experimentId: string): Promise<Experime
   const cConv = conversions.control.size;
   const vConv = conversions.variant.size;
 
-  const cRate = cImp > 0 ? cConv / cImp : 0;
-  const vRate = vImp > 0 ? vConv / vImp : 0;
-
-  let zScore: number | null = null;
-  let confidence: number | null = null;
-  let isSignificant = false;
-
-  if (cImp >= 30 && vImp >= 30) {
-    const pooled = (cConv + vConv) / (cImp + vImp);
-    const se = Math.sqrt(pooled * (1 - pooled) * (1 / cImp + 1 / vImp));
-    if (se > 0) {
-      zScore = (vRate - cRate) / se;
-      // Two-tailed → confidence that variant differs from control
-      confidence = 1 - 2 * (1 - normalCdf(Math.abs(zScore)));
-      isSignificant = confidence >= 0.95;
-    }
-  }
+  const test = twoProportionZTest(cImp, cConv, vImp, vConv);
+  const cRate = test.controlRate;
+  const vRate = test.treatmentRate;
+  const zScore = test.z;
+  const confidence = test.p === null ? null : 1 - test.p;
+  const isSignificant = test.significant;
 
   const upliftPct = cRate > 0 ? ((vRate - cRate) / cRate) * 100 : null;
 
@@ -302,6 +294,13 @@ export async function getExperimentStats(experimentId: string): Promise<Experime
     uplift_pct: upliftPct !== null ? Math.round(upliftPct * 100) / 100 : null,
     z_score: zScore !== null ? Math.round(zScore * 1000) / 1000 : null,
     confidence: confidence !== null ? Math.round(confidence * 10000) / 10000 : null,
+    verdict: verdictForExperiment({
+      controlImpressions: cImp,
+      controlConversions: cConv,
+      variantImpressions: vImp,
+      variantConversions: vConv,
+      minimumDetectableEffect: Number(experiment.minimum_detectable_effect) || 0,
+    }),
     is_significant: isSignificant,
     recommended_action: recommendedAction,
     days_remaining: daysRemaining,

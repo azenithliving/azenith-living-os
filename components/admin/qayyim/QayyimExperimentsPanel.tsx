@@ -146,6 +146,20 @@ export function QayyimExperimentsPanel() {
                   </div>
                 )}
 
+                {s?.verdict?.text && (
+                  <p
+                    className={`mt-2 text-[11px] leading-5 ${
+                      s.verdict.status === 'inconclusive'
+                        ? 'text-amber-200/80'
+                        : s.verdict.status === 'no-data'
+                          ? 'text-white/40'
+                          : 'text-emerald-200/90'
+                    }`}
+                  >
+                    {s.verdict.text}
+                  </p>
+                )}
+
                 {/* Actions */}
                 <div className="flex items-center gap-2">
                   {exp.status === 'draft' && (
