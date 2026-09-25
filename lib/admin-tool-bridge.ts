@@ -149,6 +149,13 @@ export async function runUltimateTool(
     };
   }
 
+  // ── P6-M2: competitor watch — stored measurements or an honest empty state ──
+  if (toolName === "qayyim_rivals") {
+    const { latestRivalDigest } = await import("@/lib/qayyim/rivals");
+    const digest = await latestRivalDigest(companyId ?? "");
+    return { success: true, message: digest, data: { digest: true } };
+  }
+
   // ── P5: Qayyim measured probes — real numbers from realChecks/QA agents ──
   if (toolName === "qa_load_probe") {
     const { qayyimQaAgent } = await import("@/lib/qayyim");
@@ -266,6 +273,11 @@ export function inferUltimateTool(
   // the queries that actually brought visitors.
   if (/كلمات\s+ال?بحث|search\s*console|جوجل\s+(?:ليا|ليّا|لية|ليـا)|what\s+queries/i.test(lower)) {
     return { toolName: "gsc_queries", params: {} };
+  }
+  // Competitor questions must be answered from stored measurements, not from
+  // the SEO agent's impression of the market.
+  if (/منافس|منافسين|competitor|market\s*watch|رصد\s+السوق/i.test(lower)) {
+    return { toolName: "qayyim_rivals", params: {} };
   }
   if (/اختبار.*حمل|load\s*test/i.test(lower)) {
     return { toolName: "qa_load_probe", params: {} };

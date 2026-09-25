@@ -44,7 +44,11 @@ async function executeDailyRound() {
     results.errors.push(`Luxury score: ${e.message}`);
   }
 
-  // (b) Read at-risk goals (active + past deadline or <25% progress)
+  // (b) Read at-risk goals. The table stores target_value/current_value and
+  // `deadline` — there is no progress_percentage or target_date column, so
+  // progress is derived. Reading those missing keys used to make EVERY active
+  // goal look at-risk (undefined < 25), which is exactly the fake signal P0/P6
+  // exist to remove.
   try {
     const { data: goalsData } = await supabaseServer
       .from('qayyim_goals')
@@ -56,9 +60,11 @@ async function executeDailyRound() {
     const now = new Date();
 
     results.atRiskGoals = goals.filter((g: any) => {
-      const deadline = g.target_date ? new Date(g.target_date) : null;
-      const progress = g.progress_percentage || 0;
-      return (deadline && deadline < now) || progress < 25;
+      const deadline = g.deadline ? new Date(g.deadline) : null;
+      const target = Number(g.target_value) || 0;
+      const current = Number(g.current_value) || 0;
+      const progress = target > 0 ? current / target : 0;
+      return (deadline && deadline < now) || progress < 0.25;
     });
   } catch (e: any) {
     results.errors.push(`Goals query: ${e.message}`);
@@ -76,9 +82,9 @@ async function executeDailyRound() {
         luxuryScore: results.luxuryScore,
         atRiskGoals: results.atRiskGoals.map((g: any) => ({
           id: g.id,
-          title: g.title,
-          progress: g.progress_percentage,
-          deadline: g.target_date,
+          title: g.name,
+          progress: Number(g.target_value) > 0 ? Math.round((Number(g.current_value) / Number(g.target_value)) * 100) : 0,
+          deadline: g.deadline,
         })),
       },
     });
@@ -98,7 +104,14 @@ async function executeDailyRound() {
         `• مستوى الفخامة الحالي: ${luxScore}\n` +
         `• عدد الأهداف المهددة: ${atRiskCount}\n\n` +
         (atRiskCount > 0
-          ? `الأهداف المهددة:\n${results.atRiskGoals.slice(0, 3).map((g: any) => `  - ${g.title || 'هدف'} (تقدم: ${g.progress_percentage || 0}%)`).join('\n')}\n\n`
+          ? `الأهداف المهددة:\n${results.atRiskGoals
+              .slice(0, 3)
+              .map((g: any) => {
+                const target = Number(g.target_value) || 0;
+                const pct = target > 0 ? Math.round((Number(g.current_value) / target) * 100) : 0;
+                return `  - ${g.name || 'هدف'} (تقدم: ${pct}%)`;
+              })
+              .join('\n')}\n\n`
           : '') +
         `الرجاء مراجعة لوحة قيّم الدار واتخاذ الإجراء المناسب.`;
 
@@ -120,6 +133,28 @@ async function executeDailyRound() {
       }
     } catch (e: any) {
       results.errors.push(`Proposal creation: ${e.message}`);
+    }
+  }
+
+  // (e) P6-M2 — once a week, a polite read of the competition. The platform
+  // schedule stays daily (Vercel Hobby allows one cron per day), so the
+  // weekday gate lives here instead of in vercel.json.
+  results.rivals = null;
+  if (new Date().getUTCDay() === 1) {
+    try {
+      const { runRivalsWeekly } = await import('@/lib/qayyim/rivals');
+      const r = await runRivalsWeekly(companyId, { budgetMs: 35_000 });
+      results.rivals = { crawled: r.crawled, failed: r.failed, skipped: r.skipped, errors: r.errors };
+      if (r.crawled || r.failed || r.skipped.length) {
+        await syncLayer.publish({
+          event_type: 'market_update',
+          source_agent: 'qayyim-seo',
+          target_agents: [],
+          payload: { kind: 'rivals_weekly', digest: r.digest, crawled: r.crawled, failed: r.failed, skipped: r.skipped },
+        });
+      }
+    } catch (e: any) {
+      results.errors.push(`قياس المنافسين: ${e.message}`);
     }
   }
 

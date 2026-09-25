@@ -19,6 +19,7 @@ export type SyncEventType =
   | 'agent_task_started'
   | 'agent_task_completed'
   | 'agent_task_failed'
+  | 'market_update'
   | 'quality_gate_passed'
   | 'quality_gate_failed'
   | 'identity_violation'
