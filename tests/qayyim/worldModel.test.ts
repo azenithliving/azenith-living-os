@@ -6,6 +6,25 @@ import {
   buildWorldModel,
   type WorldModel,
 } from '@/lib/qayyim/world-model';
+import { inferUltimateTool } from '@/lib/admin-tool-bridge';
+
+describe('qayyim_world routing', () => {
+  it.each([
+    'ايزاي الشغل الفترة دي',
+    'إزاي الشغل الفترة دي؟',
+    'المبيعات الفترة دي عاملة ايه',
+    'إيه اللي بيتبيع عندنا',
+    'ايه اللي بيتبيع اكتر',
+    'world model',
+  ])('sends "%s" to the world model, not to a guessed margin', (msg) => {
+    expect(inferUltimateTool(msg)?.toolName).toBe('qayyim_world');
+  });
+
+  it('does not steal identity or speed questions', () => {
+    expect(inferUltimateTool('عرف نفسك')?.toolName).toBe('qayyim_whoami');
+    expect(inferUltimateTool('وريني سرعه الموقع قد ايه دلوقتي')?.toolName).not.toBe('qayyim_world');
+  });
+});
 
 describe('summariseOrderItems', () => {
   it('reads unit_price and the bare price alias, and defaults quantity to 1', () => {
@@ -76,6 +95,20 @@ describe('renderWorldDigest', () => {
 
   it('keeps coverage honesty visible', () => {
     expect(renderWorldDigest(model)).toContain('company_id');
+  });
+
+  it('renders an unreadable sub-counter as unavailable, never as zero traffic', () => {
+    const partial: WorldModel = {
+      ...model,
+      visitors: { ...model.visitors!, eventsPrev7d: null },
+      goals: { active: 2, overdue: null },
+      catalog: { products: 1, roomSections: 15, activeSections: null },
+    };
+    const d = renderWorldDigest(partial);
+    expect(d).toContain('غير متاح');
+    expect(d).not.toContain('كان 0');
+    expect(d).toContain('2 نشط');
+    expect(d).not.toContain('(0 نشط)');
   });
 });
 

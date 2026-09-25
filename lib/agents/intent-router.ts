@@ -18,6 +18,7 @@ export interface RoutedIntent {
 
 export const TOOL_CATALOG: Array<{ name: string; desc: string }> = [
   { name: "qayyim_whoami", desc: "تقرير ذاتي حي بقدرات السرب وأدواته وحدوده وعداداته الحالية" },
+  { name: "qayyim_world", desc: "نموذج عالم الدار: مبيعات 90 يومًا والأكثر مبيعًا والكتالوج والزوار والأهداف والموسم الحالي" },
   { name: "qa_load_probe", desc: "قياس حمل/سرعة حقيقي على الصفحات العامة (p50/p95/p99)" },
   { name: "qa_security_headers", desc: "فحص رؤوس الأمان الحقيقية + CORS probe للصفحة الرئيسية أو رابط" },
   { name: "qa_accessibility", desc: "تدقيق إمكانية وصول (a11y) حقيقي على الصفحات" },

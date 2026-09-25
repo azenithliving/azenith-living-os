@@ -32,15 +32,16 @@ export interface WorldModel {
   window: { start: string; end: string };
   revenue: { total: number; orders: number; avgOrder: number | null; byStatus: Record<string, number> } | null;
   items: { lines: ItemLine[]; emptyOrders: number } | null;
-  catalog: { products: number; roomSections: number; activeSections: number; productsMissingImage?: number } | null;
+  catalog: { products: number; roomSections: number; activeSections: number | null; productsMissingImage?: number | null } | null;
   visitors: {
     events7d: number;
     sessions7d: number;
-    eventsPrev7d: number;
+    /** null = could not read, which is NOT the same as "no traffic last week". */
+    eventsPrev7d: number | null;
     topPaths: Array<{ path: string; count: number }>;
     adminEventsExcluded: number;
   } | null;
-  goals: { active: number; overdue: number } | null;
+  goals: { active: number; overdue: number | null } | null;
   openProposals: number | null;
   openSuggestions: number | null;
   customerVoice: { sessions: number; sessionsLast7d: number } | null;
@@ -166,7 +167,7 @@ async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel,
     visitors = {
       events7d: in7.length,
       sessions7d: new Set(in7.map((r) => r.session_id).filter(Boolean)).size,
-      eventsPrev7d: telPrevRes?.count ?? 0,
+      eventsPrev7d: telPrevRes ? telPrevRes.count ?? 0 : null,
       topPaths: [...paths.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([path, count]) => ({ path, count })),
       adminEventsExcluded,
     };
@@ -178,8 +179,8 @@ async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel,
       ? {
           products: prodRes.count ?? 0,
           roomSections: sectionsRes.count ?? 0,
-          activeSections: sectionsOnRes?.count ?? 0,
-          productsMissingImage: prodImgRes?.count ?? undefined,
+          activeSections: sectionsOnRes ? sectionsOnRes.count ?? 0 : null,
+          productsMissingImage: prodImgRes ? prodImgRes.count ?? 0 : null,
         }
       : null;
 
@@ -188,7 +189,7 @@ async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel,
     items,
     catalog,
     visitors,
-    goals: goalsRes ? { active: goalsRes.count ?? 0, overdue: overdueRes?.count ?? 0 } : null,
+    goals: goalsRes ? { active: goalsRes.count ?? 0, overdue: overdueRes ? overdueRes.count ?? 0 : null } : null,
     openProposals: propRes ? propRes.count ?? 0 : null,
     openSuggestions: sugRes ? sugRes.count ?? 0 : null,
     customerVoice: vsRes ? { sessions: vsRes.count ?? 0, sessionsLast7d: vs7Res?.count ?? 0 } : null,
@@ -253,14 +254,19 @@ export function renderWorldDigest(m: WorldModel): string {
     if (m.items.lines.length > 2 && worst) L.push(`• الأضعف: ${worst.name} (${money(worst.amount)})`);
   }
   if (m.catalog) {
-    const img = m.catalog.productsMissingImage ? `، ${m.catalog.productsMissingImage} بلا صورة رئيسية` : "";
-    L.push(`• الكتالوج: ${m.catalog.products} منتج · ${m.catalog.roomSections} قسم غرفة (${m.catalog.activeSections} نشط)${img}`);
+    const img = m.catalog.productsMissingImage == null ? "" : `، ${m.catalog.productsMissingImage} بلا صورة رئيسية`;
+    const act = m.catalog.activeSections == null ? "" : ` (${m.catalog.activeSections} نشط)`;
+    L.push(`• الكتالوج: ${m.catalog.products} منتج · ${m.catalog.roomSections} قسم غرفة${act}${img}`);
   }
   if (m.visitors) {
     const p = m.visitors.topPaths.map((x) => `${x.path} (${x.count})`).join("، ");
-    L.push(`• الزوار (7 أيام): ${m.visitors.events7d} حدث من ${m.visitors.sessions7d} جلسة (كان ${m.visitors.eventsPrev7d} في الـ7 السابقة) — الأكثر: ${p || "لا بيانات"}`);
+    const prev = m.visitors.eventsPrev7d === null ? "غير متاح" : `كان ${m.visitors.eventsPrev7d} في الـ7 السابقة`;
+    L.push(`• الزوار (7 أيام): ${m.visitors.events7d} حدث من ${m.visitors.sessions7d} جلسة (${prev}) — الأكثر: ${p || "لا بيانات"}`);
   }
-  if (m.goals) L.push(`• الأهداف: ${m.goals.active} نشط${m.goals.overdue ? `، ${m.goals.overdue} تجاوز موعده` : ""}`);
+  if (m.goals) {
+    const over = m.goals.overdue === null ? "" : m.goals.overdue ? `، ${m.goals.overdue} تجاوز موعده` : "";
+    L.push(`• الأهداف: ${m.goals.active} نشط${over}`);
+  }
   const waits = [m.openProposals, m.openSuggestions].filter((v): v is number => v !== null);
   if (waits.length) L.push(`• بانتظار قرارك: ${waits.reduce((a, b) => a + b, 0)} (أذونات ${m.openProposals} · اقتراحات ${m.openSuggestions})`);
   if (m.customerVoice) L.push(`• صوت العملاء: ${m.customerVoice.sessions} جلسة مستشار (${m.customerVoice.sessionsLast7d} آخر 7 أيام)`);

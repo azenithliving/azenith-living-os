@@ -117,6 +117,24 @@ export async function runUltimateTool(
     };
   }
 
+  // ── P6-M2: the store's live situation, aggregated read-only ──
+  if (toolName === "qayyim_world") {
+    const { buildWorldModel, renderWorldDigest } = await import("@/lib/qayyim/world-model");
+    const world = await buildWorldModel(companyId ?? null);
+    return {
+      success: true,
+      message: renderWorldDigest(world),
+      data: {
+        revenue: world.revenue,
+        catalog: world.catalog,
+        visitors: world.visitors,
+        season: world.season,
+        coverage: world.coverage,
+        gaps: world.gaps,
+      },
+    };
+  }
+
   // ── P5: Qayyim measured probes — real numbers from realChecks/QA agents ──
   if (toolName === "qa_load_probe") {
     const { qayyimQaAgent } = await import("@/lib/qayyim");
@@ -218,6 +236,16 @@ export function inferUltimateTool(
     )
   ) {
     return { toolName: "qayyim_whoami", params: {} };
+  }
+  // "how is the shop doing / what sells" reads the live world model. It must
+  // precede revenue_analyze below, which answers the same question with a
+  // guessed 58% COGS rather than the store's own numbers.
+  if (
+    /الشغل\s+(?:ال)?(?:فترة|فتره)|المبيعات\s+(?:ال)?(?:فترة|فتره)|(?:اللي|اللى)\s?(?:بي|بت)?(?:ت?بيع)|بيتبيع|بتبيع|حجم\s+(?:ال)?(?:مبيعات|بيع)|world\s*model/i.test(
+      lower
+    )
+  ) {
+    return { toolName: "qayyim_world", params: {} };
   }
   if (/اختبار.*حمل|load\s*test/i.test(lower)) {
     return { toolName: "qa_load_probe", params: {} };
