@@ -8,7 +8,7 @@ import { ChatPanel } from '@/components/admin/agents/ChatPanel';
  */
 export default function QayyimChatPage() {
   return (
-    <div className="fixed inset-0 bg-[#0B0B0D]" dir="rtl">
+    <div className="fixed inset-0 z-[90] bg-[#0B0B0D]" dir="rtl">
       <ChatPanel agentKey="qayyim-core" fullScreen />
     </div>
   );
