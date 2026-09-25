@@ -105,6 +105,12 @@ try {
   check('v2 settings shows the two ad switches', adsHeading > 0 && adsenseSwitch > 0 && gtagSwitch > 0,
     `heading=${adsHeading} adsense=${adsenseSwitch} gtag=${gtagSwitch}`);
 
+  // P6-M4: the sentences the consultant may say unaided are owner-controlled from
+  // the same page — if this card is missing, autonomy has no signature board.
+  const faqCard = await p.locator('text=الكلام اللي المستشار بيقوله لوحده').count();
+  const faqRows = await p.locator('text=/\\d+ سطر/').count();
+  check('v2 settings shows the approved-words card', faqCard > 0 && faqRows > 0, `card=${faqCard} rowsBadge=${faqRows}`);
+
   // The viewer page is the riskiest under a policy: it frames other sites.
   await p.goto(`${BASE}/admin/browser`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3000);
