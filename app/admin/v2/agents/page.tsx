@@ -67,19 +67,19 @@ export default function V2AgentsPage() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="font-black text-white text-lg">قيّم الدار</h2>
+              <h2 className="font-black text-white text-lg">مدير تشغيل المحتوى</h2>
               {unread > 0 && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500 text-white animate-pulse">{unread} ●</span>
               )}
             </div>
-            <p className="text-[11px] text-white/40">{statusText}{agentStatus?.taskCount ? ` · ${agentStatus.taskCount} مهمة` : ''}</p>
+            <p className="text-[11px] text-white/40">قيّم الدار · {statusText}{agentStatus?.taskCount ? ` · ${agentStatus.taskCount} مهمة` : ''}</p>
           </div>
           <span className="text-white/20 group-hover:text-amber-400 transition-colors text-xl">➜</span>
         </div>
 
         <div className="mt-5 rounded-2xl bg-black/30 border border-white/5 px-4 py-3">
           <p className="text-xs text-white/60 leading-relaxed line-clamp-2">
-            {teaser ?? 'لا رسائل جديدة — افتح المحادثة لتكليف القيّم.'}
+            {teaser ?? 'لا رسائل جديدة — افتح المحادثة لتكليف مدير تشغيل المحتوى.'}
           </p>
         </div>
       </Link>

@@ -427,7 +427,7 @@ export default function AgentsPage() {
                 </p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ChatPanel agentKey="qayyim-core" agentName="قيّم الدار — القائد" agentColor="amber" />
+                <ChatPanel agentKey="qayyim-core" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
                 <ChatPanel agentKey="vanguard" agentColor="emerald" />
               </div>
             </div>
@@ -441,7 +441,7 @@ export default function AgentsPage() {
           <div className="w-full max-w-2xl bg-[#111] border border-white/20 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
             <ChatPanel 
               agentKey={activeChatAgent} 
-              agentName={activeChatAgent === 'qayyim-core' || activeChatAgent === 'prime' ? 'قيّم الدار — القائد' : undefined}
+              agentName={activeChatAgent === 'qayyim-core' || activeChatAgent === 'prime' ? 'مدير تشغيل المحتوى — قيّم الدار' : undefined}
               initialMessage={chatInitialMission}
             />
           </div>
@@ -450,7 +450,7 @@ export default function AgentsPage() {
       {showPrimeChat && (
         <div className="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl flex items-center justify-center p-6" onClick={() => setShowPrimeChat(false)}>
           <div className="w-full max-w-2xl bg-[#111] border border-amber-500/30 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-            <ChatPanel agentKey="qayyim-core" agentName="قيّم الدار — القائد" agentColor="amber" />
+            <ChatPanel agentKey="qayyim-core" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
           </div>
         </div>
       )}
@@ -489,7 +489,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   // ════════════════════════════════════════════════════════════
   {
     key: 'qayyim-core',
-    name: 'قيّم الدار — القائد',
+    name: 'مدير تشغيل المحتوى — قيّم الدار',
     role: 'قائد السرب: تنسيق، تدقيق شامل، نشر/تراجع، بوابة جودة',
     color: 'amber',
     icon: '👑',

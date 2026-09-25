@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
           company_id: resolvedCompanyId,
           agent_key: data.agent_key,
           name: (data.agent_key === 'prime' || data.agent_key === 'qayyim-core')
-            ? 'قيّم الدار — القائد'
+            ? 'مدير تشغيل المحتوى — قيّم الدار'
             : data.agent_key.startsWith('qayyim-')
               ? `قيّم الدار — ${data.agent_key.replace('qayyim-', '')}`
               : 'VANGUARD',

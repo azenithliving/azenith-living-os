@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
 
       steps.push({
         agentKey: "qayyim-core",
-        agentName: "قيّم الدار — القائد",
+        agentName: "مدير تشغيل المحتوى — قيّم الدار",
         role: "كبير مهندسي التصميم والتصنيع",
         icon: "👑",
         color: "amber",
@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
 
       steps.push({
         agentKey: "qayyim-core",
-        agentName: "قيّم الدار — القائد",
+        agentName: "مدير تشغيل المحتوى — قيّم الدار",
         role: "كبير المهندسين",
         icon: "👑",
         color: "amber",

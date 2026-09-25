@@ -32,7 +32,7 @@ const TABS: Array<{ key: QayyimTab; label: string; icon: any; hint: string }> = 
 ];
 
 const SWARM: Array<{ key: string; name: string; role: string; icon: string; color: string }> = [
-  { key: 'qayyim-core', name: 'القائد',        role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع، بوابة جودة', icon: '👑', color: 'amber' },
+  { key: 'qayyim-core', name: 'مدير تشغيل المحتوى',        role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع، بوابة جودة', icon: '👑', color: 'amber' },
   { key: 'qayyim-cont', name: 'المحتوى',       role: 'كتابة فاخرة، توحيد نبرة، قانون هوية',            icon: '✍️', color: 'rose' },
   { key: 'qayyim-vis',  name: 'المرئيات',      role: 'انتقاء صور، هيرو، alt text، علامة مميزة',        icon: '🖼️', color: 'violet' },
   { key: 'qayyim-seo',  name: 'الظهور (SEO)',  role: 'زحف حقيقي للصفقات، عناوين، Schema، فجوات',       icon: '🔍', color: 'sky' },
@@ -116,7 +116,7 @@ export function QayyimStudio() {
                 <Brain className="w-5 h-5 text-amber-300" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-white">قيّم الدار — استوديو السرب</h2>
+                <h2 className="text-sm font-bold text-white">مدير تشغيل المحتوى — استوديو السرب</h2>
                 <p className="text-[11px] text-white/50">8 وكلاء متخصصون بدستور واحد وذاكرة مشتركة</p>
               </div>
             </div>

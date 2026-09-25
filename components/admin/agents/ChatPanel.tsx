@@ -36,7 +36,7 @@ interface ChatPanelProps {
 
 const AGENT_METADATA: Record<string, { name: string; role: string; icon: string; color: string }> = {
   // ── سرب قيّم الدار (8 وكلاء) ───────────────────────────────────
-  'qayyim-core': { name: 'قيّم الدار — القائد',     role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع',   icon: '👑', color: 'amber' },
+  'qayyim-core': { name: 'مدير تشغيل المحتوى — قيّم الدار',     role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع',   icon: '👑', color: 'amber' },
   'qayyim-cont': { name: 'قيّم الدار — المحتوى',    role: 'كتابة فاخرة، توحيد نبرة، قانون هوية',  icon: '✍️', color: 'rose' },
   'qayyim-vis':  { name: 'قيّم الدار — المرئيات',   role: 'انتقاء صور، هيرو، alt text، علامة',    icon: '🖼️', color: 'violet' },
   'qayyim-seo':  { name: 'قيّم الدار — الظهور',     role: 'تدقيق SEO، Schema، فجوات، منافسين',   icon: '🔍', color: 'sky' },

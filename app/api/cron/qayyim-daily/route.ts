@@ -105,7 +105,7 @@ async function executeDailyRound() {
       const masterEmail = process.env.MASTER_ADMIN_EMAILS?.split(',')[0]?.trim();
 
       const proposal = await createAdminProposal({
-        title: 'تقرير قيّم اليومي — يتطلب تدخل',
+        title: 'تقرير مدير تشغيل المحتوى اليومي — يتطلب تدخل',
         description,
         reasoning: 'جولة يومية مجدولة',
         userMessage: 'راجع الأهداف المهددة واقتراحات النشر',

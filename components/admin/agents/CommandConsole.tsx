@@ -100,7 +100,7 @@ export function CommandConsole() {
             onChange={(e) => setSelectedAgent(e.target.value)}
             className="bg-gray-700 text-white text-xs rounded px-2 py-1 border-none"
           >
-            <option value="qayyim-core">قيّم الدار — القائد</option>
+            <option value="qayyim-core">مدير تشغيل المحتوى — قيّم الدار</option>
             <option value="vanguard">Vanguard (المبيعات)</option>
           </select>
         </div>

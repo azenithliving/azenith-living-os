@@ -102,7 +102,7 @@ export function FloatingAgentButton() {
           {/* Panel Content */}
           <div className="h-[400px]">
             {activeTab === 'qayyim-core' && (
-              <ChatPanel agentKey="qayyim-core" agentName="قيّم الدار — القائد" agentColor="amber" />
+              <ChatPanel agentKey="qayyim-core" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
             )}
             {activeTab === 'vanguard' && (
               <ChatPanel agentKey="vanguard" />

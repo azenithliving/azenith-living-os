@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         await supabase.from("agent_messages").insert({
           conversation_id: convId,
           sender_type: "agent",
-          sender_name: "قيّم الدار — القائد",
+          sender_name: "مدير تشغيل المحتوى — قيّم الدار",
           content: `لاحظت: ${issue.detail} في **${issue.target}** (${issue.path})\nجهزت لك مسودة مقترحة — تريد أن أعرضها؟ [معاينة] [وافق]`,
           is_read: false,
           created_at: new Date().toISOString(),
