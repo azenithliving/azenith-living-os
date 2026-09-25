@@ -50,10 +50,18 @@ for (const v of variants) {
 ok('L1 dialect: ≥4/5 صياغات وصلت لأداة سرعة/حمل', tools.filter((t) => /speed|load/i.test(t)).length >= 4, tools.join(','));
 
 // ═══ L2: ذاكرة متعددة الأدوار ═══
+// The check is "did the follow-up state the REAL pending-draft count", not
+// "did it contain any digit" — an earlier version passed while the answer was
+// numerically wrong, and a correct answer written as «ثلاث» would fail a digit
+// test. Arabic word forms are read as numbers, digits are compared exactly.
+const AR_NUMS = ['صفر|لا مسودات|مفيش مسودة', 'واحدا|واحدة|واحده|وحدة', 'اتنين|اثنتين|اثنتان|ثنتين', 'ثلاث|ثلاثة|تلات|تلاتة', 'أربع|اربع|أربعة|اربعه|أربعا', 'خمس|خمسة', 'ست|ستة', 'سبع|سبعة', 'ثمان|ثماني|ثمانية', 'تسع|تسعة', 'عشر|عشرة'];
+const statesCount = (text, n) =>
+  new RegExp(`(?<!\\d)${n}(?!\\d)`).test(text) || (AR_NUMS[n] ? new RegExp(AR_NUMS[n], 'i').test(text) : false);
+
+const expectedDrafts = ((await qapi('list_drafts'))?.drafts || []).length;
 const m1 = await chat('qayyim-core', 'اعرض المسودات المعلقة');
 const m2 = await chat('qayyim-core', 'كم واحدة فيهم؟ أديني رقم بس');
-const numericAnswer = /\d/.test(m2.message);
-ok('L2 multi-turn: المتابعة «كم واحدة» فهمت السياق', numericAnswer && !/افحص|تقرير تنفيذي/.test(m2.message.slice(0, 30)), `r2="${m2.message.replace(/\s+/g, ' ').slice(0, 60)}"`);
+ok('L2 multi-turn: المتابعة «كم واحدة» أعطت العدد الحقيقي', statesCount(m2.message, expectedDrafts) && !/افحص|تقرير تنفيذي/.test(m2.message.slice(0, 30)), `expected=${expectedDrafts} r1_tool=${m1.metadata.tool || '-'} r2="${m2.message.replace(/\s+/g, ' ').slice(0, 60)}"`);
 
 // ═══ L3: منع هلوسة الروابط ═══
 const l3 = await chat('qayyim-core', 'اربطلي على صفحة الصوفا الملوكي وأقولي إيه مشاكلها');
