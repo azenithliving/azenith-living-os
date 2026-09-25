@@ -156,6 +156,34 @@ export async function runUltimateTool(
     return { success: true, message: digest, data: { digest: true } };
   }
 
+  // ── P6-M2: pending drafts counted from the table, matching the counters the
+  // commander already reports in its self-report (same status set).
+  if (toolName === "draft_list") {
+    if (!companyId) {
+      return { success: true, message: "لم تُحدَّد شركة في هذه الجلسة — لا أستطيع عدّ مسودات، ولن أخمّن.", data: { count: null } };
+    }
+    const { data, error } = await supabaseServer
+      .from("qayyim_drafts")
+      .select("target_path,draft_type,status,version,created_at")
+      .eq("company_id", companyId)
+      .in("status", ["draft", "previewing"])
+      .order("created_at", { ascending: false })
+      .limit(25);
+    if (error) return { success: true, message: `تعذّر قراءة المسودات: ${error.message} — لم أستبدلها برقم مخمّن.`, data: { count: null } };
+    const rows = data || [];
+    if (!rows.length) return { success: true, message: "لا مسودات معلقة الآن (صفر فعلي، من الجدول).", data: { count: 0 } };
+    const age = (iso: string) => {
+      const days = Math.floor((Date.now() - new Date(iso).getTime()) / 864e5);
+      return days <= 0 ? "اليوم" : days === 1 ? "أمس" : `منذ ${days} يوم`;
+    };
+    const lines = rows.map((r: any, i: number) => `• ${i + 1}) ${r.target_path || "بدون مسار"} — ${r.draft_type || "غير مصنّفة"} — v${r.version ?? "?"} — ${age(r.created_at)}`);
+    return {
+      success: true,
+      message: `المسودات المعلقة: ${rows.length}\n${lines.join("\n")}${rows.length >= 25 ? "\n(عرضت أول 25 — قد يكون هناك أكثر)" : ""}`,
+      data: { count: rows.length, paths: rows.map((r: any) => r.target_path) },
+    };
+  }
+
   // ── P5: Qayyim measured probes — real numbers from realChecks/QA agents ──
   if (toolName === "qa_load_probe") {
     const { qayyimQaAgent } = await import("@/lib/qayyim");
@@ -278,6 +306,16 @@ export function inferUltimateTool(
   // the SEO agent's impression of the market.
   if (/منافس|منافسين|competitor|market\s*watch|رصد\s+السوق/i.test(lower)) {
     return { toolName: "qayyim_rivals", params: {} };
+  }
+  // "how many drafts are pending" must be COUNTED, never guessed by the swarm.
+  // Publish / approve / rollback wording is excluded so those actions keep
+  // their own path — `رجّ?ع` covers رجع/ارجع/رجّع, the shadda forms that broke
+  // an earlier version of this guard.
+  if (
+    /مسودات|مسودة|drafts?/i.test(lower) &&
+    !/نشر|انشر|اعتمد|موافق|رفض|رجّ?ع|استرجاع|نسخة (?:سابقة|ق?ب?لية)|rollback/i.test(lower)
+  ) {
+    return { toolName: "draft_list", params: {} };
   }
   if (/اختبار.*حمل|load\s*test/i.test(lower)) {
     return { toolName: "qa_load_probe", params: {} };

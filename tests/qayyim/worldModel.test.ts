@@ -24,6 +24,12 @@ describe('qayyim_world routing', () => {
     expect(inferUltimateTool('عرف نفسك')?.toolName).toBe('qayyim_whoami');
     expect(inferUltimateTool('وريني سرعه الموقع قد ايه دلوقتي')?.toolName).not.toBe('qayyim_world');
   });
+
+  it('counts drafts but leaves publish wording to the publish flow', () => {
+    expect(inferUltimateTool('اعرض المسودات المعلقة')?.toolName).toBe('draft_list');
+    expect(inferUltimateTool('انشر المسودة دي')?.toolName).not.toBe('draft_list');
+    expect(inferUltimateTool('ارجع المسودة لنسخة قبلية')?.toolName).not.toBe('draft_list');
+  });
 });
 
 describe('summariseOrderItems', () => {

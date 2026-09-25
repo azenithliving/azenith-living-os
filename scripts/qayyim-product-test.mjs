@@ -19,7 +19,9 @@ const CASES = [
   { id: "core-a11y",    agent: "qayyim-core", msg: "شغّل تدقيق إمكانية الوصول", expect: (m, md) => md.tool === "qa_accessibility" },
   { id: "core-goals",   agent: "qayyim-core", msg: "عايز اعرف اللى بيهدد اهدافي", expect: (m, md) => md.tool === "qayyim_goals_risk" },
   { id: "core-memory",  agent: "qayyim-core", msg: "استعرض ذاكرة الوكلاء", expect: (m, md) => md.tool === "agent_memory_inspect" },
-  { id: "core-drafts",  agent: "qayyim-core", msg: "اعرض المسودات المعلقة للمراجعة والنشر", expect: (m) => /مسودة|draft|لا مسودات|3/i.test(m) },
+  // Must be COUNTED by the tool: the old assertion passed on swarm prose that
+  // reported the wrong number, which is precisely the failure P6 removes.
+  { id: "core-drafts",  agent: "qayyim-core", msg: "اعرض المسودات المعلقة للمراجعة والنشر", expect: (m, md) => md.tool === "draft_list" && /المسودات المعلقة: \d+|لا مسودات معلقة الآن/.test(m) },
   // P6-M1: identity must come from the live self-model (real tool count), not boilerplate.
   { id: "core-whoami",  agent: "qayyim-core", msg: "عرف نفسك", expect: (m, md) => md.tool === "qayyim_whoami" && /الأدوات المقاسة/.test(m) && /حدودي/.test(m) },
   // P6-M2: business answers come from the world model. Either real digits from

@@ -63,6 +63,10 @@ export const ADMIN_SCENARIO_MATRIX: ScenarioExpectation[] = [
   { message: "who are you?", kind: "ultimate_tool", toolName: "qayyim_whoami" },
   { message: "عرف نفسك", kind: "ultimate_tool", toolName: "qayyim_whoami" },
   { message: "انت بتعمل ايه؟", kind: "ultimate_tool", toolName: "qayyim_whoami" },
+  // P6-M2: pending drafts are counted from the table — the swarm used to guess
+  // this number, and guessed wrong.
+  { message: "اعرض المسودات المعلقة", kind: "ultimate_tool", toolName: "draft_list" },
+  { message: "كم مسودة مستنية دلوقتي؟", kind: "ultimate_tool", toolName: "draft_list" },
   { message: "حلّل SEO للموقع", kind: "ultimate_tool", toolName: "seo_analyze" },
   { message: "صلح مشاكل SEO", kind: "ultimate_tool", toolName: "seo_fix_issues" },
   { message: "اعمل نسخة احتياطية للإعدادات", kind: "ultimate_tool", toolName: "backup_create" },

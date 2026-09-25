@@ -338,6 +338,14 @@ export class AgentOrchestrator {
       // companyId on purpose — the identity line only names the title, the
       // agent's own roles and the live tool count, so a chat turn never pays
       // for the DB counters (the qayyim_whoami tool renders those).
+      //
+      // Short conversational follow-ups ("كم واحدة فيهم؟", "ليه؟") are answered
+      // from the replayed history. Business context must not be injected into
+      // those turns: with the world digest present, a follow-up counting drafts
+      // answered from the digest's counters instead of the thread it was
+      // actually replying to.
+      const isShortFollowUp =
+        message.length < 70 && !/أنشئ|انشئ|اعرض|نسّق|نسق|شغّل|شغل|ادرس|قارن|نشر|رجّع|draft|publish/i.test(message);
       try {
         const { buildSelfModel, renderIdentityLine } = await import("@/lib/qayyim/self-model");
         const self = await buildSelfModel(null);
@@ -348,7 +356,7 @@ export class AgentOrchestrator {
       // world model. Cached for 10 minutes inside the module, so a busy chat
       // does not re-read the shop on every turn. Core only — the specialist
       // agents get their own numbers from their own tools.
-      if (selectedAgent === "qayyim-core") {
+      if (selectedAgent === "qayyim-core" && !isShortFollowUp) {
         try {
           const { buildWorldModel, renderWorldDigest } = await import("@/lib/qayyim/world-model");
           const world = await buildWorldModel(resolvedCompanyId);
@@ -390,7 +398,7 @@ export class AgentOrchestrator {
         }
         // Short conversational follow-ups ("كم واحدة فيهم؟", "ليه؟") belong to
         // the persona chat (it has the injected history), not a fresh swarm run.
-        if (!response && message.length < 70 && !/أنشئ|انشئ|اعرض|نسّق|نسق|شغّل|شغل|ادرس|قارن|نشر|رجّع|draft|publish/i.test(message)) {
+        if (!response && isShortFollowUp) {
           const coreInstance = this.agents["qayyim-core"];
           if (coreInstance) {
             try {
