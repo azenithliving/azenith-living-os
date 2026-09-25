@@ -7,6 +7,7 @@ import {
   parseJudgeBatch,
   parseJudgeVerdict,
   pickAuditSamples,
+  safeReason,
   scoreOf,
   withDeadline,
   type AuditSample,
@@ -181,6 +182,30 @@ describe('scoreOf', () => {
   it('stays inside zero and a hundred', () => {
     expect(scoreOf({ accuracy: 0, brevity: 0, honesty: 0, note: '' })).toBe(0);
     expect(scoreOf({ accuracy: 3, brevity: 3, honesty: 3, note: '' })).toBe(100);
+  });
+});
+
+describe('safeReason — a diagnostic must not become a leak', () => {
+  // The Google endpoint carries its key in the query string, so provider errors
+  // are exactly where a secret can end up in a log line or an event payload.
+  it('redacts a key carried in a url', () => {
+    const out = safeReason('POST https://generativelanguage.googleapis.com/v1beta/models/x:generateContent?key=AIzaSyDEADBEEFdeadbeef12345 failed');
+    expect(out).not.toContain('AIzaSyDEADBEEFdeadbeef12345');
+    expect(out).toContain('key=***');
+  });
+
+  it('redacts a long opaque token sitting in bare text', () => {
+    expect(safeReason('quota exceeded for gsk_A1b2C3d4E5f6G7h8I9j0K1L2M3N4O5P6')).not.toContain('gsk_A1b2C3d4E5f6');
+  });
+
+  it('keeps the readable part of the message and caps it', () => {
+    const out = safeReason('  429   Too Many Requests  ' + 'x'.repeat(400));
+    expect(out).toContain('429 Too Many Requests');
+    expect(out.length).toBeLessThanOrEqual(140);
+  });
+
+  it('tolerates a missing reason', () => {
+    expect(safeReason(undefined)).toBe('');
   });
 });
 

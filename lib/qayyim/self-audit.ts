@@ -16,7 +16,7 @@
 
 import "server-only";
 
-import { askGoogleMessages, askGroqMessages } from "@/lib/ai-orchestrator";
+import { askGroqMessages, askOrchestratorMessages } from "@/lib/ai-orchestrator";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 
 export const SELF_AUDIT_BENCHMARK_KEY = "owner_reply_audit";
@@ -388,9 +388,26 @@ export async function runSelfAudit(
  * long, otherwise the organ fails and the reason is folklore.
  */
 export interface JudgeAttempt {
-  provider: "groq" | "google";
+  provider: string;
   ms: number;
   outcome: "ok" | "slow" | "empty" | "error";
+  /** Sanitized provider message — see `safeReason`. Absent on a clean run. */
+  detail?: string;
+}
+
+/**
+ * Provider errors are useful; they are also the one place a credential can show
+ * up in a log line, because the Google endpoint carries its key in the query
+ * string. Stripped here, and the string is capped, so a diagnostic can never
+ * become the thing the phase forbids.
+ */
+export function safeReason(text: string | null | undefined): string {
+  return (text || "")
+    .replace(/key=[A-Za-z0-9_-]+/g, "key=***")
+    .replace(/[A-Za-z0-9_-]{24,}={0,2}/g, "[سلسلة طويلة]")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 140);
 }
 
 async function askJudgeBatch(samples: AuditSample[], ms: number): Promise<{ raw: string | null; attempts: JudgeAttempt[] }> {
@@ -401,34 +418,40 @@ async function askJudgeBatch(samples: AuditSample[], ms: number): Promise<{ raw:
     { role: "user", content: judgeBatchPrompt(samples) },
   ];
 
-  const groqSlice = Math.min(GROQ_JUDGE_MS, Math.max(1, Math.floor(ms / 4)));
-  const groqStarted = Date.now();
-  try {
-    const groq = await withDeadline(askGroqMessages(messages, { temperature: 0, maxTokens: 900, jsonMode: true }), groqSlice);
-    if (groq === null) attempts.push({ provider: "groq", ms: Date.now() - groqStarted, outcome: "slow" });
-    else if (!groq.success) attempts.push({ provider: "groq", ms: Date.now() - groqStarted, outcome: "error" });
-    else if (!groq.content?.trim()) attempts.push({ provider: "groq", ms: Date.now() - groqStarted, outcome: "empty" });
-    else {
-      attempts.push({ provider: "groq", ms: Date.now() - groqStarted, outcome: "ok" });
-      return { raw: groq.content, attempts };
+  const run = async (
+    provider: string,
+    slice: number,
+    call: () => Promise<{ success: boolean; content: string; error?: string }>,
+  ): Promise<string | null> => {
+    if (slice <= 0) return null;
+    const began = Date.now();
+    try {
+      const res = await withDeadline(call(), slice);
+      const ms = Date.now() - began;
+      if (res === null) attempts.push({ provider, ms, outcome: "slow", detail: `انتهت مهلة ${slice}ms` });
+      else if (!res.success) attempts.push({ provider, ms, outcome: "error", detail: safeReason(res.error) });
+      else if (!res.content?.trim()) attempts.push({ provider, ms, outcome: "empty", detail: "رجّع فاضي" });
+      else {
+        attempts.push({ provider, ms, outcome: "ok" });
+        return res.content;
+      }
+    } catch (e: any) {
+      attempts.push({ provider, ms: Date.now() - began, outcome: "error", detail: safeReason(e?.message) });
     }
-  } catch {
-    attempts.push({ provider: "groq", ms: Date.now() - groqStarted, outcome: "error" });
-  }
+    return null;
+  };
 
-  const left = ms - groqSlice;
-  if (left <= 0) return { raw: null, attempts };
-  const googleStarted = Date.now();
-  try {
-    const google = await withDeadline(askGoogleMessages(messages, { temperature: 0 }), left);
-    if (google === null) attempts.push({ provider: "google", ms: Date.now() - googleStarted, outcome: "slow" });
-    else if (!google.success || !google.content?.trim()) attempts.push({ provider: "google", ms: Date.now() - googleStarted, outcome: "empty" });
-    else {
-      attempts.push({ provider: "google", ms: Date.now() - googleStarted, outcome: "ok" });
-      return { raw: google.content, attempts };
-    }
-  } catch {
-    attempts.push({ provider: "google", ms: Date.now() - googleStarted, outcome: "error" });
-  }
-  return { raw: null, attempts };
+  // The fast, predictable judge first; then the same multi-provider router the
+  // swarm's own answers ride, because a measurement organ that dies when one
+  // vendor has a bad minute is not an immune system.
+  const groqSlice = Math.min(GROQ_JUDGE_MS, Math.max(1, Math.floor(ms / 4)));
+  const groqRaw = await run("groq", groqSlice, () =>
+    askGroqMessages(messages, { temperature: 0, maxTokens: 900, jsonMode: true }),
+  );
+  if (groqRaw) return { raw: groqRaw, attempts };
+
+  const rest = await run("orchestrator", ms - groqSlice, () =>
+    askOrchestratorMessages(messages, { temperature: 0, maxTokens: 900, jsonMode: true }),
+  );
+  return rest ? { raw: rest, attempts } : { raw: null, attempts };
 }
