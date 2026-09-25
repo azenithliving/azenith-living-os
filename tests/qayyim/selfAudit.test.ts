@@ -6,6 +6,7 @@ import {
   pickAuditSamples,
   parseJudgeVerdict,
   scoreOf,
+  withDeadline,
   type MessageRow,
 } from '@/lib/qayyim/self-audit';
 
@@ -105,6 +106,24 @@ describe('pickAuditSamples', () => {
   it('tolerates an empty window', () => {
     expect(pickAuditSamples([])).toEqual([]);
   });
+
+  it('writes the agent technical key, not the display form', () => {
+    const rows = [
+      msg({ sender_type: 'user', content: 'اعرضلي المؤشرات اللحظية دلوقتي' }),
+      msg({ sender_name: 'QAYYIM-ANA', content: 'المؤشرات اللحظية: الطلبات اتنين والمخزون متوفر في كل الأقسام.' }),
+    ];
+    expect(pickAuditSamples(rows)[0].agentKey).toBe('qayyim-ana');
+  });
+
+  it('falls back to the swarm key when the sender is not a key', () => {
+    const rows = [
+      msg({ sender_type: 'user', content: 'اعرضلي المؤشرات اللحظية دلوقتي' }),
+      msg({ sender_name: 'مدير تشغيل المحتوى', content: 'المؤشرات اللحظية: الطلبات اتنين والمخزون متوفر في كل الأقسام.' }),
+      msg({ sender_type: 'user', content: 'وسرعة الموقع عاملة ايه' }),
+      msg({ sender_name: null, content: 'السرعة مقاسة على ثلاث صفحات والنتيجة طلعّت في الحدود الطبيعية.' }),
+    ];
+    expect(pickAuditSamples(rows).map((s) => s.agentKey)).toEqual(['qayyim-core', 'qayyim-core']);
+  });
 });
 
 describe('parseJudgeVerdict', () => {
@@ -159,6 +178,30 @@ describe('scoreOf', () => {
   it('stays inside zero and a hundred', () => {
     expect(scoreOf({ accuracy: 0, brevity: 0, honesty: 0, note: '' })).toBe(0);
     expect(scoreOf({ accuracy: 3, brevity: 3, honesty: 3, note: '' })).toBe(100);
+  });
+});
+
+describe('withDeadline — the audit cannot turn into a 504', () => {
+  it('passes a value that arrives in time', async () => {
+    expect(await withDeadline(Promise.resolve('judge'), 1000)).toBe('judge');
+  });
+
+  // Live production failure this guards: one hung model call made the whole cron
+  // function time out, so the audit lost every row it had already graded.
+  it('gives up on a call that overruns', async () => {
+    const slow = new Promise<string>((resolve) => setTimeout(() => resolve('late'), 300));
+    expect(await withDeadline(slow, 20)).toBeNull();
+  });
+
+  it('treats a thrown call as no verdict, not as a crash', async () => {
+    expect(await withDeadline(Promise.reject(new Error('boom')), 1000)).toBeNull();
+  });
+
+  it('refuses to wait on a budget that is already spent', async () => {
+    const started = Date.now();
+    const slow = new Promise<string>((r) => setTimeout(() => r('x'), 60));
+    expect(await withDeadline(slow, 0)).toBeNull();
+    expect(Date.now() - started).toBeLessThan(40);
   });
 });
 

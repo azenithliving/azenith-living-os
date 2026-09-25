@@ -18,13 +18,17 @@ import "server-only";
 
 import { askGoogleMessages, askGroqMessages } from "@/lib/ai-orchestrator";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
-import { syncLayer } from "./memory/SyncLayer";
 
 export const SELF_AUDIT_BENCHMARK_KEY = "owner_reply_audit";
 export const SELF_AUDIT_AGENT_KEY = "qayyim-core";
 
-/** One judge call per reply; the caller hands in whatever the round has left. */
-const DEFAULT_JUDGE_BUDGET_MS = 30_000;
+/**
+ * Time is the real constraint here: the function has 60 seconds and the round
+ * spends them across several organs. These three numbers are one promise —
+ * the audit never costs more than about half a round.
+ */
+const DEFAULT_JUDGE_BUDGET_MS = 20_000;
+const PER_JUDGE_CALL_MS = 6_000;
 /** A one-word ack has nothing to grade; sending it to a model would only cost time. */
 const MIN_REPLY_CHARS = 40;
 const PASS_SCORE = 80;
@@ -116,6 +120,16 @@ export function isPassing(score: number): boolean {
 }
 
 /**
+ * The ledger keys agents by their technical key (`qayyim-core`), while
+ * `agent_messages.sender_name` stores that key upper-cased. Writing the display
+ * form would split one agent's scores across two rows, so it is normalised here
+ * and anything that is not a key at all falls back to the swarm's own.
+ */
+function auditAgentKey(senderName?: string | null): string {
+  const key = (senderName || "").trim().toLowerCase();
+  return /^[a-z0-9_-]{2,60}$/.test(key) ? key : SELF_AUDIT_AGENT_KEY;
+}
+/**
  * Only an answer somebody actually asked for can be graded. Replies the daily
  * round wrote to itself are the machine talking to itself, and grading them
  * would fill the ledger with scores for prose nobody read.
@@ -141,7 +155,7 @@ export function pickAuditSamples(rows: MessageRow[], limit = 10): AuditSample[] 
     samples.push({
       messageId: row.id,
       conversationId: row.conversation_id,
-      agentKey: row.sender_name?.trim() || SELF_AUDIT_AGENT_KEY,
+      agentKey: auditAgentKey(row.sender_name),
       question,
       reply: row.content,
     });
@@ -174,12 +188,35 @@ export interface SelfAuditResult extends AuditSummary {
   eventId: string | null;
 }
 
+/**
+ * Resolves to null if the promise is slower than the deadline. The underlying
+ * call is not cancelled — a provider request already in flight cannot be
+ * un-sent — but the round stops waiting for it, which is what keeps a slow
+ * judge from turning the function into a 504 and losing the whole audit.
+ */
+export async function withDeadline<T>(work: Promise<T>, ms: number): Promise<T | null> {
+  if (!(ms > 0)) return null;
+  return new Promise<T | null>((resolve) => {
+    const timer = setTimeout(() => resolve(null), ms);
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(null);
+      },
+    );
+  });
+}
+
 /** The read + judge + write pass. Runs only from the cron, never from a page. */
 export async function runSelfAudit(
   companyId: string | null,
   opts: { limit?: number; windowRows?: number; budgetMs?: number } = {},
 ): Promise<SelfAuditResult> {
-  const limit = Math.max(1, opts.limit ?? 10);
+  const limit = Math.max(1, opts.limit ?? 6);
   const budgetMs = opts.budgetMs ?? DEFAULT_JUDGE_BUDGET_MS;
   const { data } = await supabaseServer
     .from("agent_messages")
@@ -195,12 +232,13 @@ export async function runSelfAudit(
   let timedOut = false;
 
   for (const sample of samples) {
-    if (Date.now() - startedAt > budgetMs) {
+    const left = budgetMs - (Date.now() - startedAt);
+    if (left <= 0) {
       timedOut = true;
       break;
     }
     const callStarted = Date.now();
-    const raw = await askJudge(sample.question, sample.reply);
+    const raw = await withDeadline(askJudge(sample.question, sample.reply), Math.min(PER_JUDGE_CALL_MS, left));
     const verdict = raw ? parseJudgeVerdict(raw) : null;
     if (!verdict) {
       failed++;
@@ -230,7 +268,7 @@ export async function runSelfAudit(
   }
 
   const summary = summarise(scores);
-  const skipped = samples.length - judged - (timedOut ? 0 : failed);
+  const skipped = Math.max(0, samples.length - judged - failed);
   const note = !samples.length
     ? "مفيش ردود بشر تتقاس في النافذة دي — السرب رد على نفسه بس."
     : !judged
@@ -240,29 +278,36 @@ export async function runSelfAudit(
         : `اتقاس ${judged} رد، ومتوسط الأمانة والدقة ${summary.avgScore} من 100.`;
 
   let eventId: string | null = null;
-  try {
-    await syncLayer.initialize(companyId ?? undefined);
-    eventId = await syncLayer.publish({
-      event_type: "self_audit_completed",
-      source_agent: SELF_AUDIT_AGENT_KEY,
-      target_agents: [],
-      payload: {
-        judged: summary.judged,
-        sampled: samples.length,
-        avg_score: summary.avgScore,
-        worst: summary.worst,
-        failures: summary.failures + failed,
-        skipped,
-        timed_out: timedOut,
-        benchmark_key: SELF_AUDIT_BENCHMARK_KEY,
-        note,
-      },
-    });
-  } catch {
-    // The audit is a measurement; losing the event must not lose the rows.
+  if (companyId) {
+    // Written straight to the events table instead of through SyncLayer: that
+    // client starts a 2-second polling timer on first use, and a timer that
+    // never stops is how a scheduled function misses its own deadline. The
+    // insert is the same row the rest of the swarm already reads.
+    const { data: row } = await supabaseServer
+      .from("qayyim_sync_events")
+      .insert({
+        company_id: companyId,
+        event_type: "self_audit_completed",
+        source_agent: SELF_AUDIT_AGENT_KEY,
+        target_agents: [],
+        payload: {
+          judged: summary.judged,
+          sampled: samples.length,
+          avg_score: summary.avgScore,
+          worst: summary.worst,
+          failures: summary.failures + failed,
+          skipped,
+          timed_out: timedOut,
+          benchmark_key: SELF_AUDIT_BENCHMARK_KEY,
+          note,
+        },
+      })
+      .select("id")
+      .maybeSingle();
+    eventId = row?.id != null ? String(row.id) : null;
   }
 
-  return { ...summary, sampled: samples.length, skipped: skipped + failed, note, eventId };
+  return { ...summary, sampled: samples.length, skipped, note, eventId };
 }
 
 async function askJudge(question: string, reply: string): Promise<string | null> {

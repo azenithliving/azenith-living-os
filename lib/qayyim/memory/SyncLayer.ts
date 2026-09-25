@@ -107,6 +107,10 @@ export class SyncLayer {
         this.handleReconnect();
       }
     }, 2000); // Poll every 2 seconds
+    // Serverless hosts keep an invocation open until the event loop drains. An
+    // interval that never stops turns a scheduled function into a timeout, so the
+    // timer must not be what holds the process up.
+    (this.pollInterval as any)?.unref?.();
   }
 
   private async processNewEvents() {
