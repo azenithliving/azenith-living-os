@@ -31,14 +31,14 @@ export interface Gap {
  * broken.
  */
 const CAN_NOT =
-  "(?:مش|ما)\\s?(?:ه|ب)?أ?ق[ا]?در|لا\\s?أ?ستطيع|لا\\s?أ?قدر|عجزت|خارج نطاق|عن نطاق|out of scope|غير متاحة|مش متاحة|مش عندي|تفتقر|تقتصر";
+  "(?:مش|ما)\\s?(?:ه|ب)?أ?ق[ا]?در|م[ا]?\\s?ق[ا]?درش|لا\\s?أ?ستطيع|لا\\s?أ?قدر|عجزت|خارج نطاق|عن نطاق|out of scope|غير متاحة|مش متاحة|مش عندي|تفتقر|تقتصر";
 
 /**
  * Refusals that already name their own gap. `gsc_queries` and the rival watch
  * answer like this by design («ينقصني: GSC_SITE_URL…»), so a second note from
  * here would say the same thing twice under the answer.
  */
-const ALREADY_NAMED = /ينقصني|ينقصه|الناقص|يتفعّل بـ|التفعيل:/i;
+const ALREADY_NAMED = /ينقصني|ينقصه|الناقص|يتفعّل بـ|التفعيل:|خارج إطلالة/i;
 const REFUSAL = new RegExp(`(?:${CAN_NOT})\\s*$`, "i");
 const REFUSAL_ANYWHERE = new RegExp(CAN_NOT, "i");
 
@@ -182,7 +182,12 @@ export function explainGap(
   // otherwise get only the softer refusal note. Skipped when a tool actually
   // ran — `lead_dossier_send` saying «تم الإرسال» is a report, not a fabrication,
   // and correcting it would tell the owner the opposite of the truth.
-  if (!opts.executed && OUTBOUND.test(reply) && CLAIMS_DONE.test(reply)) return outboundCorrection(message, facts);
+  // The outbound cue may live in the question instead of the answer: asked
+  // «ابعت SMS», a reply of «تنبيهات الطلبات — مفعّلة الآن» never repeats the word
+  // SMS and used to slip through on that technicality. A done-verb plus an
+  // outside channel in either half of the exchange is the same lie.
+  const claimsOutbound = (OUTBOUND.test(reply) || OUTBOUND.test(message)) && CLAIMS_DONE.test(reply);
+  if (!opts.executed && claimsOutbound) return outboundCorrection(message, facts);
 
   if (!isRefusal(reply) || ALREADY_NAMED.test(reply)) return "";
   const gap = nameGap(message, facts);

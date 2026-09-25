@@ -142,6 +142,16 @@ export function forecastFromSeries(
     };
   }
 
+  // The horizon arrives from a tool call, i.e. from a model that can ask for
+  // anything. A year projected out of a quarter is a slope compounded 365 times.
+  if (horizon > values.length) {
+    return {
+      ...base,
+      refused: true,
+      reason: `توقع ${horizon} يوم محتاج تاريخ أطول منه، والمسجل ${values.length} يوم. اطلب مدة أقصر أو استنى سجل أكتر.`,
+    };
+  }
+
   const f = holtWinters(values, { seasonLength, horizon });
   const start = startOfDayUtc(base.history.to);
   const points: ForecastPoint[] = f.forecast.map((value, i) => ({

@@ -27,16 +27,70 @@ const STATIC_PATHS = new Set([
 const DYNAMIC_PREFIXES = [
   "/furniture/", // search-type page, any query slug renders
   "/pages/", // CMS slug — validated async when DB is reachable
+  "/seo/", // SEO landing pages linked from the home footer
   "/preview/section/",
   "/api/admin/qayyim/preview/",
   "/dashboard",
-  "/admin",
 ];
+
+/**
+ * Admin sections that exist on disk. Deliberately a closed list: the previous
+ * rule was "anything under /admin", so an invented `/admin/reports/weekly-pdf`
+ * passed the link guard and was shown to the owner as a live page. A real route
+ * missing from this list fails visibly ("رابط غير موثق" on a page the swarm just
+ * linked); a hallucinated one passing fails silently. Wrong in the loud
+ * direction is the cheap direction.
+ */
+const ADMIN_SECTIONS = new Set([
+  "agents",
+  "assistant",
+  "browser",
+  "computer",
+  "database",
+  "elite",
+  "fate",
+  "intel",
+  "intelligence",
+  "manufacturing",
+  "owner-dashboard",
+  "phone",
+  "qayyim",
+  "sales",
+  "sandbox",
+  "settings",
+  "system",
+  "v2",
+  "work",
+]);
+
+/**
+ * Our own origin. Evidence links are about this shop's pages, so a full URL on
+ * somebody else's host is not a path in this manifest — a competitor's `/rooms`
+ * used to satisfy `isRealPath` and would have survived as "real evidence".
+ */
+const FALLBACK_ORIGIN = "https://azenith-living.vercel.app";
+
+function hostOf(absolute: string): string | null {
+  try {
+    return new URL(absolute).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function isOwnHost(absolute: string): boolean {
+  const host = hostOf(absolute);
+  if (!host) return false;
+  if (host === "localhost" || host === "127.0.0.1") return true;
+  const configured = (process.env.NEXT_PUBLIC_SITE_URL || "").trim() || FALLBACK_ORIGIN;
+  return host === hostOf(configured);
+}
 
 /** Normalize "/rooms/living/?x=1#y" or full URLs to a bare pathname. */
 export function toPath(input: string): string | null {
   let raw = input.trim();
   if (/^https?:\/\//i.test(raw)) {
+    if (!isOwnHost(raw)) return null;
     try {
       raw = new URL(raw).pathname;
     } catch {
@@ -54,6 +108,11 @@ export function isRealPath(candidate: string): boolean {
   const path = toPath(candidate);
   if (path === null) return false;
   if (STATIC_PATHS.has(path)) return true;
+
+  if (path === "/admin" || path.startsWith("/admin/")) {
+    const section = path.split("/")[2];
+    return !section || ADMIN_SECTIONS.has(section);
+  }
 
   const roomMatch = path.match(/^\/rooms\/([^/]+)$/);
   if (roomMatch) {

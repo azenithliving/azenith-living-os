@@ -119,6 +119,15 @@ describe("forecastFromSeries", () => {
     expect(f.points).toEqual([]);
   });
 
+  // The horizon arrives from a tool call, so a model can ask for anything.
+  it("refuses a horizon longer than the history behind it", () => {
+    const ninety = Array.from({ length: 90 }, (_, t) => 4000 + t * 10 + [0, 200, 400, 600, 900, 1500, 3000][t % 7]);
+    const f = forecastFromSeries(ninety, { horizon: 365, endDate: new Date("2026-09-25T12:00:00Z") });
+    expect(f.refused).toBe(true);
+    expect(f.reason).toContain("365");
+    expect(f.points).toEqual([]);
+  });
+
   it("keeps forecasting when the ledger is dense enough to learn from", () => {
     const f = forecastFromSeries(seasonal, { horizon: 7, endDate: new Date("2026-09-25T12:00:00Z") });
     expect(f.refused).toBe(false);

@@ -1,3 +1,5 @@
+import { isRealPath } from "@/lib/qayyim/url-manifest";
+
 export type ResultAction = {
   label: string;
   href: string;
@@ -15,8 +17,11 @@ function asString(value: unknown): string | undefined {
 function normalizeHref(href: string): string | undefined {
   if (!href.trim()) return undefined;
   if (href.startsWith("http://") || href.startsWith("https://")) return href;
-  if (href.startsWith("/")) return href;
-  return undefined;
+  if (!href.startsWith("/")) return undefined;
+  // An internal button is held to the same standard as a link inside the prose:
+  // a retired or invented admin route renders as a confident 404, which is worse
+  // for the owner than no button at all.
+  return isRealPath(href) ? href : undefined;
 }
 
 function pushUnique(actions: ResultAction[], action: ResultAction) {
@@ -71,7 +76,9 @@ export function buildResultActions(data: unknown): ResultAction[] {
     if (productId) {
       pushUnique(actions, {
         label: "افتح المنتجات",
-        href: `/admin/products?highlight=${encodeURIComponent(productId)}`,
+        // `/admin/products` never existed as a route — the button 404ed. The
+        // studio is where a product's content is actually handled.
+        href: `/admin/v2/qayyim?highlight=${encodeURIComponent(productId)}`,
         kind: "internal",
       });
     }
@@ -80,7 +87,7 @@ export function buildResultActions(data: unknown): ResultAction[] {
     if (categoryId) {
       pushUnique(actions, {
         label: "افتح الأقسام",
-        href: `/admin/categories?highlight=${encodeURIComponent(categoryId)}`,
+        href: `/admin/v2/qayyim?highlight=${encodeURIComponent(categoryId)}`,
         kind: "internal",
       });
     }

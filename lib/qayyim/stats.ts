@@ -275,7 +275,12 @@ export function holtWinters(
   const seasonLength = opts.seasonLength ?? 7;
   const values = finite(series);
 
-  if (values.length < 2 || horizon <= 0) {
+  // Never project further ahead than there is history behind you. A three-point
+  // series asked for a month is not a forecast, it is one slope compounded thirty
+  // times — the arithmetic that once handed the owner a 4.2M ج.م month built from
+  // two orders. The caller can still say "I have more days than that", here it
+  // stays honest.
+  if (values.length < 2 || horizon <= 0 || values.length < horizon) {
     return { method: "insufficient-data", forecast: [], mape: null, seasonLength: Math.max(1, seasonLength) };
   }
   if (seasonLength < 2 || values.length < 2 * seasonLength) {
