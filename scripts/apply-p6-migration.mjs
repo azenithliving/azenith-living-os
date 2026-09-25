@@ -90,7 +90,10 @@ const stampReport = async (label) => {
     `SELECT c.table_name AS t FROM information_schema.columns c
        JOIN information_schema.tables tb ON tb.table_schema=c.table_schema AND tb.table_name=c.table_name
       WHERE c.table_schema='public' AND c.column_name='company_id' AND tb.table_type='BASE TABLE'
-        AND c.table_name NOT IN ('companies','p6_store_company') ORDER BY 1`
+        AND c.table_name NOT IN ('companies','p6_store_company')
+        -- snapshots hold the pre-migration stamps by design; counting them
+        -- would report the problem as still present after a clean run
+        AND c.table_name NOT LIKE '\_p6\_backup\_%' ESCAPE '\' ORDER BY 1`
   );
   let offStore = 0;
   const worst = [];

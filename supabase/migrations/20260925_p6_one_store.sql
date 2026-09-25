@@ -98,7 +98,7 @@ DECLARE
   tables text[] := ARRAY[
     'room_sections','events','requests','products','sales_orders','qayyim_drafts',
     'qayyim_suggestions','qayyim_benchmark_runs','agent_profiles','agent_devices',
-    'agent_tasks','agent_conversations','enterprise_agents','consultant_sessions',
+    'agent_tasks','agent_conversations','consultant_sessions',
     'leads','production_jobs','users'
   ];
 BEGIN
@@ -142,10 +142,12 @@ $fn$;
 DO $$
 DECLARE
   t text;
+  -- `enterprise_agents` is intentionally absent: it is a VIEW over a table
+  -- already in this list, and Postgres rejects row triggers on views.
   tables text[] := ARRAY[
     'room_sections','events','requests','products','sales_orders','qayyim_drafts',
     'qayyim_suggestions','qayyim_benchmark_runs','agent_profiles','agent_devices',
-    'agent_tasks','agent_conversations','enterprise_agents','consultant_sessions',
+    'agent_tasks','agent_conversations','consultant_sessions',
     'leads','production_jobs','users'
   ];
 BEGIN
