@@ -11,6 +11,7 @@ import { runUltimateTool } from "@/lib/admin-tool-bridge";
 import { routeIntent } from "@/lib/agents/intent-router";
 import { recallMemory, finalizeReply } from "@/lib/qayyim/chat-brain";
 import { critiqueAndPolish, shouldDebate } from "@/lib/qayyim/debate";
+import { withOwnerRuleOnMessages } from "@/lib/qayyim/owner-address";
 import { 
   QayyimCoreAgent, qayyimCoreAgent,
   QayyimContentAgent, qayyimContentAgent,
@@ -539,19 +540,20 @@ export class AgentOrchestrator {
   }
 
   private async callAI(messages: { role: string; content: string }[]): Promise<string> {
-    const groq = await askGroqMessages(messages, { temperature: 0.7, maxTokens: 2048 });
+    const addressed = withOwnerRuleOnMessages(messages);
+    const groq = await askGroqMessages(addressed, { temperature: 0.7, maxTokens: 2048 });
     if (groq.success && groq.content) {
       return groq.content;
     }
-    const google = await askGoogleMessages(messages, { temperature: 0.7 });
+    const google = await askGoogleMessages(addressed, { temperature: 0.7 });
     if (google.success && google.content) {
       return google.content;
     }
-    const openRouter = await askOpenRouter(messages[1]?.content || "", messages[0]?.content || "");
+    const openRouter = await askOpenRouter(addressed[1]?.content || "", addressed[0]?.content || "");
     if (openRouter.success && openRouter.content) {
       return openRouter.content;
     }
-    const mistral = await askMistral(messages[1]?.content || "", { temperature: 0.7, maxTokens: 2048 });
+    const mistral = await askMistral(addressed[1]?.content || "", { temperature: 0.7, maxTokens: 2048 });
     return mistral.content || `مرحباً! كيف يمكنني مساعدتك؟`;
   }
 

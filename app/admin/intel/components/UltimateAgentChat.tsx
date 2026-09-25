@@ -210,7 +210,7 @@ export function UltimateAgentChat() {
         appendMessage({
           id: crypto.randomUUID(),
           role: "agent",
-          content: "تعذر الوصول إلى الوكيل الآن. راجعي الجلسة أو الاتصال ثم حاولي مرة أخرى.",
+          content: "تعذر الوصول إلى الوكيل الآن. راجع الجلسة أو الاتصال ثم حاول مرة أخرى.",
           timestamp: new Date(),
           type: "error",
         });

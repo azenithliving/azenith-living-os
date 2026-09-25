@@ -95,7 +95,7 @@ export default function AdsSettingsCard() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-bold text-white">الإعلانات والقياس</h2>
-          <p className="mt-1 text-xs text-white/45">كل مفتاح لوحده — ومفيش أي بيانات بتروحات لجوجل غير لما تفتحيه انتِ.</p>
+          <p className="mt-1 text-xs text-white/45">كل مفتاح لوحده — ومفيش أي بيانات بتروحات لجوجل غير لما تفتحه انت.</p>
         </div>
         <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-white/50">
           {status === "loading" ? "برضه يستنى…" : status === "saving" ? "بيحفظ…" : status === "saved" ? "اتحفظ ✓" : status === "error" ? "حصل خطأ" : "جاهز"}
@@ -115,7 +115,7 @@ export default function AdsSettingsCard() {
                 onChange={(e) => set("adsenseEnabled", e.target.checked)}
               />
               <span>
-                <span className="block text-sm font-semibold text-white">إعلانات جوجل تُعرض عندك (تكسبي)</span>
+                <span className="block text-sm font-semibold text-white">إعلانات جوجل تُعرض عندك (انت بتكسب)</span>
                 <span className="mt-0.5 block text-xs text-white/45">
                   جوجل يحط إعلانات في صفحات الموقع، والحساب بتاعك على AdSense هو اللي بيستقبل الأرباح.
                 </span>
@@ -132,9 +132,9 @@ export default function AdsSettingsCard() {
                 {gtagOn ? "✓" : ""}
               </span>
               <span>
-                <span className="block text-sm font-semibold text-white">متابعة حملتك على جوجل (انتِ بتدفعي)</span>
+                <span className="block text-sm font-semibold text-white">متابعة حملتك على جوجل (انت بتدفع لجوجل)</span>
                 <span className="mt-0.5 block text-xs text-white/45">
-                  لو عاملة إعلان مدفوع على جوجل، الكود ده يقول لهم إن اللي دخل من إعلانهم فعلاً طلب من موقعك.
+                  لو عامل إعلان مدفوع على جوجل، الكود ده يقول لهم إن اللي دخل من إعلانهم فعلاً طلب من موقعك.
                   الكود بيتعمل من لوحة Google Ads، وكل رقم تحطيه بيشتغل لوحده.
                 </span>
               </span>
@@ -160,7 +160,7 @@ export default function AdsSettingsCard() {
 
           {error ? <p className="text-xs text-rose-300">{error}</p> : null}
           <p className="text-[11px] leading-6 text-white/35">
-            بعد الحفظ، الصفحة الرئيسية بتتحدّث لوحدها. لو لسه شايفة القديم، جدد بعد ثانية — التحزين على السيرفر بيخلص
+            بعد الحفظ، الصفحة الرئيسية بتتحدّث لوحدها. لو لسه ظاهر لك القديم، جدّد بعد ثانية — التحزين على السيرفر بيخلص
             ترتيبه.
           </p>
         </div>

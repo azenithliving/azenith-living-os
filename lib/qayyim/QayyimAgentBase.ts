@@ -4,6 +4,7 @@
  */
 
 import { askOrchestratorMessages } from "@/lib/ai-orchestrator";
+import { withOwnerRuleOnMessages } from "@/lib/qayyim/owner-address";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { runUltimateTool, inferUltimateTool } from "@/lib/admin-tool-bridge";
@@ -280,7 +281,7 @@ ${message}
     ];
 
     // Use the orchestrator which has 11+ free providers with automatic fallback
-    const result = await askOrchestratorMessages(messages, { 
+    const result = await askOrchestratorMessages(withOwnerRuleOnMessages(messages), {
       temperature: 0.7, 
       maxTokens: 4096 
     });

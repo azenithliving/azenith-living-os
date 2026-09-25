@@ -691,7 +691,7 @@ export async function analyzeRevenueOpportunitiesWithInput(
   if (requests > 0 && conversions === 0) {
     opportunities.push({
       name: "قياس قيمة التحويل",
-      why: "يوجد طلبات/حجوزات لكن لا توجد تحويلات بقيمة. راجعي الربط بين الطلبات والتحويلات.",
+      why: "يوجد طلبات/حجوزات لكن لا توجد تحويلات بقيمة. راجع الربط بين الطلبات والتحويلات.",
     });
   }
 

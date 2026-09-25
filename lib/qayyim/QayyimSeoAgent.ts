@@ -67,7 +67,7 @@ export class QayyimSeoAgent extends QayyimAgentBase {
     ],
     dataSources: [
       "site_sections", "room_sections", "products", "site_settings", 
-      gscConfig().ready ? "search_console (via API)" : "search_console (غير موصول — لا تدّعي أنك تعرف كلمات البحث، وقولي ينقص GOOGLE_APPLICATION_CREDENTIALS_JSON)", "page_speed_insights (via API)"
+      gscConfig().ready ? "search_console (via API)" : "search_console (غير موصول — لا تدّعِ أنك تعرف كلمات البحث، وقول للمالك ينقص GOOGLE_APPLICATION_CREDENTIALS_JSON)", "page_speed_insights (via API)"
     ],
   };
 
