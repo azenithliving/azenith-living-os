@@ -98,10 +98,31 @@ describe("forecastFromSeries", () => {
   });
 
   it("refuses on a history too short to hold a week shape", () => {
-    const f = forecastFromSeries([1000, 200], { horizon: 7, endDate: new Date("2026-09-25T12:00:00Z") });
+    const f = forecastFromSeries([1000, 900, 1100, 950, 1050, 980, 1020, 990, 1010, 1000], {
+      horizon: 7,
+      endDate: new Date("2026-09-25T12:00:00Z"),
+    });
     expect(f.refused).toBe(false);
     expect(f.method).toBe("double-exponential");
     expect(f.caveats.join(" ")).toContain("غير موسمي");
+  });
+
+  // Real production case: two orders in ninety days. The seasonal model happily
+  // repeats a 350k day thirty times and reports 4.2M as "next month". A number
+  // like that is not a forecast, it is inflation with a decimal point.
+  it("refuses to extrapolate a shop that barely sold", () => {
+    const sparse = Array.from({ length: 90 }, (_, i) => (i === 40 || i === 71 ? 350_000 : 0));
+    const f = forecastFromSeries(sparse, { horizon: 30, endDate: new Date("2026-09-25T12:00:00Z") });
+    expect(f.refused).toBe(true);
+    expect(f.reason).toContain("يوم بيع");
+    expect(f.reason).toContain("2");
+    expect(f.points).toEqual([]);
+  });
+
+  it("keeps forecasting when the ledger is dense enough to learn from", () => {
+    const f = forecastFromSeries(seasonal, { horizon: 7, endDate: new Date("2026-09-25T12:00:00Z") });
+    expect(f.refused).toBe(false);
+    expect(f.activeDays).toBeGreaterThan(20);
   });
 
   it("does not promise a negative month", () => {

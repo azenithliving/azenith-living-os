@@ -42,12 +42,18 @@ export interface ForecastSummary {
    * spare any days — an in-sample error flatters the model that produced it. */
   backtest: { days: number; mape: number | null } | null;
   caveats: string[];
+  /** Days in the window that actually had a sale. */
+  activeDays: number;
   history: { days: number; total: number; from: string; to: string };
   horizonDays: number;
   currency: string;
 }
 
 const DAY_MS = 86_400_000;
+
+/** Selling days a window needs before a "pattern" exists to extrapolate.
+ * Anything looser and a seasonal model just repeats one good day forever. */
+const MIN_SELLING_DAYS = 6;
 
 function dateKey(ms: number): string {
   return new Date(ms).toISOString().slice(0, 10);
@@ -98,6 +104,7 @@ export function forecastFromSeries(
   const seasonLength = opts.seasonLength ?? 7;
   const horizon = Math.max(1, Math.floor(opts.horizon));
   const historyTotal = values.reduce((a, b) => a + b, 0);
+  const activeDays = values.filter((v) => v > 0).length;
   const fromKey = dateKey(opts.endDate.getTime() - (values.length - 1) * DAY_MS);
   const base: ForecastSummary = {
     refused: false,
@@ -109,6 +116,7 @@ export function forecastFromSeries(
     mape: null,
     backtest: null,
     caveats: [],
+    activeDays,
     history: { days: values.length, total: historyTotal, from: fromKey, to: dateKey(opts.endDate.getTime()) },
     horizonDays: horizon,
     currency: "ج.م",
@@ -119,6 +127,19 @@ export function forecastFromSeries(
   }
   if (historyTotal <= 0) {
     return { ...base, refused: true, reason: "مفيش أي مبيعات مسجلة في المدة دي — الرقم اللي يطلع يكون اختراع." };
+  }
+
+  // A seasonal model repeats what it learns. Teach it a window where two days
+  // out of ninety sold, and it will cheerfully forecast those two days every
+  // week and hand back a month inflated by an order of magnitude — which is the
+  // exact way a confident wrong number reaches an owner. Below this many selling
+  // days there is no shape to learn, so it says so.
+  if (activeDays < MIN_SELLING_DAYS) {
+    return {
+      ...base,
+      refused: true,
+      reason: `السجل فيه ${activeDays} يوم بيع بس من أصل ${values.length} — أقل من ${MIN_SELLING_DAYS} يوم، والنمط اللي يتبني عليه توقع مش موجود.`,
+    };
   }
 
   const f = holtWinters(values, { seasonLength, horizon });
@@ -151,7 +172,7 @@ export function forecastFromSeries(
         }
       : null;
 
-  if (backtest?.mape !== undefined && backtest?.mape !== null) {
+  if (backtest && backtest.mape !== null) {
     caveats.push(`اختبار حقيقي: توقعنا آخر ${backtest.days} يوم من اللي قبلهم، والخطأ المتوسط ${Math.round(backtest.mape * 10) / 10}%.`);
   } else if (f.mape === null) {
     caveats.push("دقة النموذج على الماضي مش مقاسة — أيام المدة كانت صفر أغلبها.");
