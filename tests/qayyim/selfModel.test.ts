@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
+import { inferUltimateTool } from '@/lib/admin-tool-bridge';
 import {
   buildSelfModel,
   renderSelfReport,
@@ -40,5 +41,25 @@ describe('self-model', () => {
     expect(m.tools.length).toBeGreaterThan(10);
     expect(m.counters).toBeUndefined();
     expect(renderSelfReport(m)).toContain('العدادات غير متاحة');
+  });
+});
+
+describe('qayyim_whoami routing', () => {
+  // Egyptian users type hamza-free as often as not — both must land.
+  it.each([
+    'انت بتعمل ايه بالظبط؟',
+    'أنت بتعمل إيه؟',
+    'عرف نفسك',
+    'بتقدر تعمل إيه',
+    'قدراتك إيه؟',
+    'who are you',
+    'what can you do',
+  ])('routes "%s" to qayyim_whoami', (msg) => {
+    expect(inferUltimateTool(msg)?.toolName).toBe('qayyim_whoami');
+  });
+
+  it('does not hijack a real measurement request', () => {
+    expect(inferUltimateTool('وريني سرعه الموقع قد ايه دلوقتي')?.toolName).not.toBe('qayyim_whoami');
+    expect(inferUltimateTool('اعرض المسودات المعلقة')?.toolName).not.toBe('qayyim_whoami');
   });
 });

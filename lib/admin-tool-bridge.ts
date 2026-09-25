@@ -101,6 +101,22 @@ export async function runUltimateTool(
     );
   }
 
+  // ── P6-M1: the swarm reports on itself from live registries + counters ──
+  if (toolName === "qayyim_whoami") {
+    const { buildSelfModel, renderSelfReport } = await import("@/lib/qayyim/self-model");
+    const model = await buildSelfModel(companyId ?? null);
+    return {
+      success: true,
+      message: renderSelfReport(model),
+      data: {
+        agents: model.agents.length,
+        tools: model.tools.length,
+        counters: model.counters ?? null,
+        dataGaps: model.dataGaps ?? [],
+      },
+    };
+  }
+
   // ── P5: Qayyim measured probes — real numbers from realChecks/QA agents ──
   if (toolName === "qa_load_probe") {
     const { qayyimQaAgent } = await import("@/lib/qayyim");
@@ -193,6 +209,16 @@ export function inferUltimateTool(
 
   // ── P5: Qayyim real measurement tools — must precede the legacy
   // security/goal heuristics below (which route to prose or fabricated numbers)
+  // "who are you / what can you do" answers from the live self-model, never
+  // boilerplate. Egyptians often type without hamza (انت/أنت، ايه/إيه), so
+  // both spellings are spelled out here rather than relying on one.
+  if (
+    /(?:أنت|انت)\s+بتعمل\s+(?:إيه|ايه|يه)|بتقدر\s+تعمل|بتعرف\s+تعمل\s+(?:إيه|ايه)|قدراتك|إمكاناتك|امكاناتك|عرف\s+نفسك|مين\s+(?:أنت|انت)|who\s+are\s+you|what\s+can\s+you\s+do/i.test(
+      lower
+    )
+  ) {
+    return { toolName: "qayyim_whoami", params: {} };
+  }
   if (/اختبار.*حمل|load\s*test/i.test(lower)) {
     return { toolName: "qa_load_probe", params: {} };
   }

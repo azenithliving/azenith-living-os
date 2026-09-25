@@ -58,6 +58,11 @@ export const ADMIN_SCENARIO_MATRIX: ScenarioExpectation[] = [
   { message: "أنشئ قاعدة أتمتة للزوار", kind: "architect" },
 
   // ── Ultimate tools ──
+  // P6-M1: identity questions were reclassified out of "greetings" — the
+  // swarm answers them from its live self-model instead of boilerplate.
+  { message: "who are you?", kind: "ultimate_tool", toolName: "qayyim_whoami" },
+  { message: "عرف نفسك", kind: "ultimate_tool", toolName: "qayyim_whoami" },
+  { message: "انت بتعمل ايه؟", kind: "ultimate_tool", toolName: "qayyim_whoami" },
   { message: "حلّل SEO للموقع", kind: "ultimate_tool", toolName: "seo_analyze" },
   { message: "صلح مشاكل SEO", kind: "ultimate_tool", toolName: "seo_fix_issues" },
   { message: "اعمل نسخة احتياطية للإعدادات", kind: "ultimate_tool", toolName: "backup_create" },
@@ -97,7 +102,6 @@ export const ADMIN_SCENARIO_MATRIX: ScenarioExpectation[] = [
   // ── Greetings (conversation) ──
   { message: "ازيك", kind: "conversation" },
   { message: "مرحبا", kind: "conversation" },
-  { message: "who are you?", kind: "conversation" },
   { message: "شكراً", kind: "conversation" },
 
   // ── Future / unprogrammed action requests → agents escalation ──
