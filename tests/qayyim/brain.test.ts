@@ -9,6 +9,24 @@ import { describe, it, expect } from 'vitest';
 import { isRealPath, toPath, verifyResponseLinks, keepRealEvidenceUrls, suggestProductLink } from '@/lib/qayyim/url-manifest';
 import { deriveActions, finalizeReply } from '@/lib/qayyim/chat-brain';
 import { isCriticVerdictOk, shouldDebate } from '@/lib/qayyim/debate';
+import { parseIntent } from '@/lib/agents/intent-router';
+
+describe('intent-router — LLM verdict parsing', () => {
+  it('accepts a whitelisted tool with params', () => {
+    const r = parseIntent('الخيار: {"toolName":"qa_security_headers","params":{"url":"https://azenith-living.vercel.app/"}}');
+    expect(r?.toolName).toBe('qa_security_headers');
+    expect(r?.params.url).toContain('azenith');
+  });
+
+  it('maps none/plain text to no tool', () => {
+    expect(parseIntent('{"toolName":"none","params":{}}')).toBeNull();
+    expect(parseIntent('مش فاهم بس تمام')).toBeNull();
+  });
+
+  it('rejects hallucinated tools outside the whitelist', () => {
+    expect(parseIntent('{"toolName":"drop_all_tables","params":{}}')).toBeNull();
+  });
+});
 
 describe('debate — critic verdict parsing', () => {
   it('treats OK/short verdicts as pass', () => {
@@ -68,6 +86,13 @@ describe('url-manifest — the site route truth', () => {
     const input = 'مصدر خارجي https://example.com/report.pdf';
     const { removed } = verifyResponseLinks(input, 'https://azenith-living.vercel.app');
     expect(removed).toHaveLength(0);
+  });
+
+  it('does not mistake scores like 93/100 for paths', () => {
+    const input = 'Score: 93/100 — ممتاز';
+    const { text, removed } = verifyResponseLinks(input, 'https://azenith-living.vercel.app');
+    expect(removed).toHaveLength(0);
+    expect(text).toBe(input);
   });
 
   it('keepRealEvidenceUrls drops the old /products whitelist hole', () => {

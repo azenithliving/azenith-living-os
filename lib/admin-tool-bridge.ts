@@ -205,7 +205,7 @@ export function inferUltimateTool(
   if (/luxury\s*score|مؤشر.*الفخامة|الفخامة/i.test(lower)) {
     return { toolName: "qayyim_luxury_score", params: {} };
   }
-  if (/الأهداف.*المهددة|مهددة.*أهداف|أهداف.*مهددة|risk.*goals?/i.test(lower)) {
+  if (/(?:أهداف|اهداف|هدف|goals?)/i.test(lower) && /يهدد|مهدد|خطر|risk|متأخر|تعطل/i.test(lower)) {
     return { toolName: "qayyim_goals_risk", params: {} };
   }
 
@@ -346,14 +346,17 @@ export function inferUltimateTool(
     if (/تقدم|progress|وين.*الهدف/i.test(lower)) {
       return { toolName: "goal_check_progress", params: { goalId: "latest" } };
     }
-    return {
-      toolName: "goal_create",
-      params: {
-        title: "هدف من الأدمن",
-        targetMetric: "conversion_rate",
-        targetValue: 5,
-      },
-    };
+    if (/أنشئ|أضف|اضف|سوي|هدف جديد|create.*goal/i.test(lower)) {
+      return {
+        toolName: "goal_create",
+        params: {
+          title: "هدف من الأدمن",
+          targetMetric: "conversion_rate",
+          targetValue: 5,
+        },
+      };
+    }
+    return { toolName: "goal_list", params: {} };
   }
   if (/إعداد|setting/i.test(lower) && /حدّ?ث|غيّر|update/i.test(lower)) {
     return {

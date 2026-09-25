@@ -76,7 +76,7 @@ export function suggestProductLink(roomSlug?: string | null): string {
   return "/furniture";
 }
 
-const LINK_IN_TEXT = /(?:https?:\/\/[^\s)>\]"'،]+|\/[A-Za-z0-9\-_./%]+(?:\?[^\s)>\]"'،]*)?)/g;
+const LINK_IN_TEXT = /(?:https?:\/\/[^\s)>\]"'،]+|(?<![\w/])\/[A-Za-z][A-Za-z0-9\-_.%]*(?:\/[A-Za-z0-9\-_.%]*)*)/g;
 
 /**
  * Scan free text (LLM replies, issue tables) and neutralize any

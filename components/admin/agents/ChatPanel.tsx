@@ -225,10 +225,22 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
     if (typeof window === 'undefined' || !window.speechSynthesis) return;
     try {
       window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text.replace(/[*#`>|_-]/g, '').slice(0, 500));
+      const clean = text
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')      // markdown links → label
+        .replace(/https?:\/\/\S+/g, 'رابط')
+        .replace(/[*#`>|]/g, '')
+        .replace(/[-—]{2,}/g, '،')
+        .replace(/\s+/g, ' ')
+        .slice(0, 500);
+      const utter = new SpeechSynthesisUtterance(clean);
       utter.lang = 'ar-EG';
-      const arabicVoice = window.speechSynthesis.getVoices().find(v => v.lang?.toLowerCase().startsWith('ar'));
-      if (arabicVoice) utter.voice = arabicVoice;
+      utter.rate = 0.95;
+      const voices = window.speechSynthesis.getVoices();
+      const voice =
+        voices.find(v => v.lang === 'ar-EG') ||
+        voices.find(v => v.lang?.startsWith('ar') && /google|microsoft|female/i.test(v.name)) ||
+        voices.find(v => v.lang?.startsWith('ar'));
+      if (voice) utter.voice = voice;
       window.speechSynthesis.speak(utter);
     } catch {}
   }, []);
@@ -244,7 +256,12 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
     rec.onresult = (ev: any) => {
       const text = Array.from(ev.results).map((r: any) => r[0].transcript).join('');
       setInput(text);
-      if (ev.results[ev.results.length - 1].isFinal) { setIsListening(false); }
+      if (ev.results[ev.results.length - 1].isFinal) {
+        setIsListening(false);
+        // P5-R3 voice-note style: once speech settles, send automatically
+        const finalText = text.trim();
+        if (finalText) setTimeout(() => (window as any).__qayyimSend?.(finalText), 150);
+      }
     };
     rec.onerror = () => setIsListening(false);
     rec.onend = () => setIsListening(false);
@@ -345,12 +362,21 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             } catch {}
           }
 
-          if (isTyping) {
-            const serverIds = new Set(data.data.map((m: any) => m.id));
-            const localPending = prev.filter(m => !serverIds.has(m.id) && m.id.startsWith('temp-'));
-            return [...formatted, ...localPending];
-          }
-          return formatted;
+          // P5-R2: merge instead of replace — local optimistic bubbles
+          // (temp user / agent reply / vision) survive the 5s poll until the
+          // server copy of the SAME content arrives, never vanish mid-chat.
+          const serverIds = new Set(formatted.map((m: any) => m.id));
+          const covered = (local: Message, server: any[]) =>
+            server.some(
+              (s) =>
+                s.sender_type === local.sender_type &&
+                String(s.content).slice(0, 120) === String(local.content).slice(0, 120)
+            );
+          const merged = [
+            ...formatted,
+            ...prev.filter((m) => !serverIds.has(m.id) && !covered(m, formatted)),
+          ].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          return merged;
         });
         setLoading(false);
       }

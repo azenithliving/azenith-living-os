@@ -7,7 +7,8 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 import { askGroqMessages, askGoogle, askGoogleMessages, askOpenRouter, askMistral } from "@/lib/ai-orchestrator";
-import { runUltimateTool, inferUltimateTool } from "@/lib/admin-tool-bridge";
+import { runUltimateTool } from "@/lib/admin-tool-bridge";
+import { routeIntent } from "@/lib/agents/intent-router";
 import { recallMemory, finalizeReply } from "@/lib/qayyim/chat-brain";
 import { critiqueAndPolish, shouldDebate } from "@/lib/qayyim/debate";
 import { 
@@ -264,7 +265,8 @@ export class AgentOrchestrator {
       }
 
       // ── فحص وتنفيذ الأدوات الحقيقية إن وجدت ───────────────────────
-      const inferredTool = inferUltimateTool(message);
+      // P5-R1: dialect-first routing (regex fast-path, then LLM intent map)
+      const inferredTool = await routeIntent(message);
       let toolResult: any = null;
       let toolContextStr = "";
 
@@ -295,6 +297,26 @@ export class AgentOrchestrator {
       }
 
       let promptWithToolContext = toolContextStr ? `${message}\n${toolContextStr}` : message;
+
+      // P5-R1: conversation memory — replay the recent thread so follow-ups
+      // ("خليه أقصر", "نفذه") resolve without restating context.
+      if (supabase && conversationId) {
+        try {
+          const { data: hist } = await supabase
+            .from("agent_messages")
+            .select("sender_type,content")
+            .eq("conversation_id", conversationId)
+            .order("created_at", { ascending: false })
+            .limit(9);
+          const prior = (hist || []).slice(1).reverse(); // drop the message we just stored
+          if (prior.length) {
+            const historyCtx = prior
+              .map((m: any) => `${m.sender_type === "agent" ? "القيّم" : "المالك"}: ${String(m.content).slice(0, 300)}`)
+              .join("\n");
+            promptWithToolContext = `[حوارك الأخير مع المالك:\n${historyCtx}]\n\n${promptWithToolContext}`;
+          }
+        } catch {}
+      }
 
       // P5-M1: inject real semantic memories (pgvector) — never blocks the reply
       const memoryCtx = await recallMemory(message, resolvedCompanyId);
