@@ -93,6 +93,26 @@ try {
   await p.waitForTimeout(1500);
   check('/admin/qayyim redirects to v2', p.url().includes('/admin/v2/qayyim'), p.url());
 
+  // 11) New dashboard: ads control, and no CSP violations while using the app
+  const cspHits = [];
+  const onConsole = (m) => { if (m.text().includes('Content Security Policy')) cspHits.push(m.text().slice(0, 90)); };
+  p.on('console', onConsole);
+  await p.goto(`${BASE}/admin/v2/settings`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.waitForTimeout(2500);
+  const adsHeading = await p.locator('text=الإعلانات والقياس').count();
+  const adsenseSwitch = await p.locator('text=إعلانات جوجل تُعرض عندك').count();
+  const gtagSwitch = await p.locator('text=متابعة حملتك على جوجل').count();
+  check('v2 settings shows the two ad switches', adsHeading > 0 && adsenseSwitch > 0 && gtagSwitch > 0,
+    `heading=${adsHeading} adsense=${adsenseSwitch} gtag=${gtagSwitch}`);
+
+  // The viewer page is the riskiest under a policy: it frames other sites.
+  await p.goto(`${BASE}/admin/browser`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.waitForTimeout(3000);
+  const askBtn = await p.locator('text=اسأل قيّم الدار عن الصفحة').count();
+  check('admin browser kept the commander button', askBtn > 0, `button=${askBtn}`);
+  p.off('console', onConsole);
+  check('no CSP violations while browsing the admin', cspHits.length === 0, cspHits.slice(0, 2).join(' | ') || 'clean');
+
   await p.screenshot({ path: 'ui-test-final.png' }).catch(() => {});
 } catch (e) {
   check('suite completed', false, String(e.message).slice(0, 160));

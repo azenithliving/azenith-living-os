@@ -3,10 +3,6 @@
 import { useEffect, useState } from "react";
 import { PostHogProvider } from "posthog-js/react";
 
-// ENVIRONMENT DEBUG: Check if Supabase URL is visible to browser
-console.log("[ENV DEBUG] Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-console.log("[ENV DEBUG] PostHog Key exists:", !!process.env.NEXT_PUBLIC_POSTHOG_KEY);
-
 type ProvidersProps = {
   children: React.ReactNode;
 };

@@ -22,6 +22,11 @@ const nextConfig: NextConfig = {
   //    scripts and the ads tags are inline; dropping it needs a nonce pass.
   //    'unsafe-eval' is deliberately NOT granted — a violation would be a
   //    finding to look at, not something to pre-allow.
+  //  • *.posthog.com is listed because the browser suite caught it blocked on
+  //    the first deploy: the policy was written from the code, and the site also
+  //    loads PostHog through app/providers.tsx. Keep this list in sync by
+  //    running `node scripts/qayyim-ui-test.mjs` — its last check fails on any
+  //    CSP violation, which is how that one was found.
   //  • frame-src https: on purpose: the admin viewer embeds other people's
   //    sites (that is the feature); frame-ancestors 'self' still stops anyone
   //    embedding THIS site.
@@ -34,12 +39,12 @@ const nextConfig: NextConfig = {
   async headers() {
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://www.googletagmanager.com https://www.google.com https://googleads.g.doubleclick.net https://securepubads.g.doubleclick.net",
+      "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://www.googletagmanager.com https://www.google.com https://googleads.g.doubleclick.net https://securepubads.g.doubleclick.net https://*.posthog.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
       "media-src 'self' data: blob: https:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://www.google.com https://analytics.google.com https://pagead2.googlesyndication.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://www.google.com https://analytics.google.com https://pagead2.googlesyndication.com https://*.posthog.com",
       "frame-src 'self' https:",
       "frame-ancestors 'self'",
       "worker-src 'self' blob:",
