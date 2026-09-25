@@ -362,6 +362,14 @@ export class AgentOrchestrator {
           const world = await buildWorldModel(resolvedCompanyId);
           promptWithToolContext = `${renderWorldDigest(world)}\n\n${promptWithToolContext}`;
         } catch {}
+
+        // Backstop for a scheduler that registers but never fires: if the last
+        // recorded round is overdue, this turn kicks one off. Deliberately not
+        // awaited — the instance may freeze once the reply is sent — so the
+        // world digest still prints the round's age rather than trusting this.
+        void import("@/lib/qayyim/daily-round")
+          .then((m) => m.ensureDailyRound(resolvedCompanyId))
+          .catch(() => {});
       }
 
       // ══════════════════════════════════════════════════════════════

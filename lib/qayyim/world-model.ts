@@ -19,6 +19,7 @@ import "server-only";
  */
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 import { currentSeason, nextSeason, type SeasonKey } from "./egypt-calendar";
+import { describeFreshness, roundFreshness } from "./round-freshness";
 
 export interface ItemLine {
   name: string;
@@ -46,6 +47,8 @@ export interface WorldModel {
   openSuggestions: number | null;
   customerVoice: { sessions: number; sessionsLast7d: number } | null;
   season: { currentKey?: SeasonKey; currentName?: string; nextName?: string; nextStart?: string };
+  /** Did the daily proactive round actually run? The scheduler is not trusted. */
+  round?: { lastAt: string | null; ageHours: number | null; overdue: boolean; unreadable: boolean };
   coverage: string[];
   gaps: string[];
 }
@@ -87,7 +90,7 @@ export function summariseOrderItems(raw: unknown): ItemLine[] {
   return [...byName.values()].sort((a, b) => b.amount - a.amount);
 }
 
-async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel, "revenue" | "items" | "catalog" | "visitors" | "goals" | "openProposals" | "openSuggestions" | "customerVoice" | "coverage" | "gaps">> {
+async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel, "revenue" | "items" | "catalog" | "visitors" | "goals" | "openProposals" | "openSuggestions" | "customerVoice" | "round" | "coverage" | "gaps">> {
   const gaps: string[] = [];
   const coverage: string[] = [];
   const sb = supabaseServer;
@@ -184,6 +187,8 @@ async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel,
         }
       : null;
 
+  const fresh = await roundFreshness(companyId);
+
   return {
     revenue,
     items,
@@ -193,6 +198,7 @@ async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel,
     openProposals: propRes ? propRes.count ?? 0 : null,
     openSuggestions: sugRes ? sugRes.count ?? 0 : null,
     customerVoice: vsRes ? { sessions: vsRes.count ?? 0, sessionsLast7d: vs7Res?.count ?? 0 } : null,
+    round: { lastAt: fresh.lastAt, ageHours: fresh.ageHours, overdue: fresh.overdue, unreadable: fresh.unreadable },
     coverage,
     gaps,
   };
@@ -270,6 +276,7 @@ export function renderWorldDigest(m: WorldModel): string {
   const waits = [m.openProposals, m.openSuggestions].filter((v): v is number => v !== null);
   if (waits.length) L.push(`• بانتظار قرارك: ${waits.reduce((a, b) => a + b, 0)} (أذونات ${m.openProposals} · اقتراحات ${m.openSuggestions})`);
   if (m.customerVoice) L.push(`• صوت العملاء: ${m.customerVoice.sessions} جلسة مستشار (${m.customerVoice.sessionsLast7d} آخر 7 أيام)`);
+  if (m.round) L.push(`• ${describeFreshness({ lastAt: m.round.lastAt, ageHours: m.round.ageHours, overdue: m.round.overdue, unreadable: m.round.unreadable })}`);
   L.push(
     `• الموسم: ${m.season.currentName ? `الآن ${m.season.currentName}` : "لا موسم تجزئة الآن"}${m.season.nextName ? ` · القادم: ${m.season.nextName} يبدأ ${m.season.nextStart}` : ""}`
   );

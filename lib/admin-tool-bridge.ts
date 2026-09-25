@@ -213,29 +213,33 @@ export async function runUltimateTool(
     return { success: res.success, message: res.output, data: res.data || {} };
   }
   if (toolName === "qayyim_luxury_score") {
-    const { qayyimAnalyticsAgent } = await import("@/lib/qayyim");
-    const res = await qayyimAnalyticsAgent.calculateLuxuryScore({ scope: "full_site" });
-    return { success: res.success, message: res.output, data: res.data || {} };
+    const { runLuxuryScore } = await import("@/lib/qayyim/luxury-v2");
+    const r = await runLuxuryScore(companyId ?? null);
+    return {
+      success: r.luxury_score !== null,
+      message: r.message,
+      data: { luxury_score: r.luxury_score, signals: r.signals, missing: r.missing },
+    };
   }
   if (toolName === "qayyim_goals_risk") {
     const { getSupabaseAdminClient } = await import("@/lib/supabase-admin");
     const supabase = companyId ? getSupabaseAdminClient() : null;
     if (!supabase) return { success: false, message: "لا يوجد اتصال بقاعدة البيانات لفحص الأهداف." };
-    const { data: goals } = await supabase
+    const { assessGoals, renderGoalRisk } = await import("@/lib/qayyim/goal-risk");
+    const { data, error } = await supabase
       .from("qayyim_goals")
-      .select("id,title,progress_percentage,target_date,status")
+      .select("id,name,target_value,current_value,deadline,status")
       .eq("company_id", companyId)
       .eq("status", "active");
-    const now = Date.now();
-    const atRisk = (goals || []).filter(
-      (g: any) => (g.target_date && new Date(g.target_date).getTime() < now) || (g.progress_percentage ?? 0) < 25
-    );
+    if (error) {
+      return { success: true, message: renderGoalRisk(null, error.message, []), data: { total: null, atRisk: [] } };
+    }
+    const goals = data || [];
+    const atRisk = assessGoals(goals);
     return {
       success: true,
-      message: atRisk.length
-        ? `لديك ${atRisk.length} هدف مهدد من ${(goals || []).length} هدف نشط:\n${atRisk.map((g: any) => `• ${g.title} — تقدم ${g.progress_percentage ?? 0}%${g.target_date ? ` — ميعاد ${g.target_date}` : ""}`).join("\n")}`
-        : `لا أهداف مهددة — ${(goals || []).length} هدف نشط كلها في المسار.`,
-      data: { total: (goals || []).length, atRisk },
+      message: renderGoalRisk(goals, null, atRisk),
+      data: { total: goals.length, atRisk },
     };
   }
 
