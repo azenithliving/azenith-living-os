@@ -30,8 +30,18 @@ export const PLAIN_ARABIC_RULE =
   "اكتب بالعربية المصرية فقط. ممنوع كلمة إنجليزية أو لاتينية في وسط الجملة العربية، وممنوع الأقواس والأسهم والشرطة المائلة بين الكلمات العربية. " +
   "أي اسم أجنبي لازم يبقى في سطر لوحده. الأرقام تكتب بالأرقام العادية زي 15 مش بالحروف.";
 
+/**
+ * Caught on a production answer: the content-health tool returned «جيد» and the
+ * agent's own prose went on to declare the page «غير مقبول». Both sentences were
+ * in the same reply the owner read. A tool result is the shop's measurement; the
+ * model's impression is not a second, louder measurement sitting next to it.
+ */
+export const TOOL_TRUTH_RULE =
+  "نتيجة الأداة هي الكلام الوحيد في الحاجة اللي اتقاست: لو الأداة قالت حالة أو رقم، ما تناقضهاش برأي تاني منك في نفس الرد. " +
+  "ممنوع إن الأداة تقول «جيد» ويجي في كلامك حكم يقول «غير مقبول».";
+
 /** Applied to the system turn of every prose-generating call. */
-const RULES = `${OWNER_ADDRESS_RULE}\n\n${PLAIN_ARABIC_RULE}`;
+const RULES = `${OWNER_ADDRESS_RULE}\n\n${PLAIN_ARABIC_RULE}\n\n${TOOL_TRUTH_RULE}`;
 
 /** Idempotent: personas wrap each other (orchestrator → base → fallback), and a
  * rule repeated twice reads like noise to a small model. */

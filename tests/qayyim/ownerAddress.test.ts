@@ -2,7 +2,7 @@
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join, relative } from "path";
 import { describe, it, expect } from "vitest";
-import { OWNER_ADDRESS_RULE, PLAIN_ARABIC_RULE, withOwnerRule, withOwnerRuleOnMessages } from "@/lib/qayyim/owner-address";
+import { OWNER_ADDRESS_RULE, PLAIN_ARABIC_RULE, TOOL_TRUTH_RULE, withOwnerRule, withOwnerRuleOnMessages } from "@/lib/qayyim/owner-address";
 
 /**
  * The owner is a man — المهندس علاء عزيز. Two separate defects earned this file:
@@ -98,6 +98,20 @@ describe("withOwnerRule", () => {
     expect(PLAIN_ARABIC_RULE).toContain("بالعربية المصرية فقط");
     expect(PLAIN_ARABIC_RULE).toContain("سطر لوحده");
     expect(withOwnerRule("أنت Ops.")).toContain(PLAIN_ARABIC_RULE);
+  });
+
+  // Caught on a production answer: the tool said «جيد» and the agent's own prose
+  // said «غير مقبول» in the same reply. The measurement outranks the impression.
+  it("forbids arguing with a tool result", () => {
+    expect(TOOL_TRUTH_RULE).toContain("نتيجة الأداة");
+    expect(withOwnerRule("أنت Ops.")).toContain(TOOL_TRUTH_RULE);
+  });
+
+  it("all three rules arrive together, exactly once", () => {
+    const out = withOwnerRule(withOwnerRule("دورك"));
+    for (const rule of [OWNER_ADDRESS_RULE, PLAIN_ARABIC_RULE, TOOL_TRUTH_RULE]) {
+      expect(out.split(rule)).toHaveLength(2);
+    }
   });
 
   it("touches only the system turn of a message list", () => {
