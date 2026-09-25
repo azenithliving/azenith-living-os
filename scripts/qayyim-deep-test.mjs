@@ -20,7 +20,8 @@ const chat = async (agent_key, message) => {
   const r = await fetch(`${BASE}/api/admin/agents/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json; charset=utf-8', 'x-internal-key': KEY },
-    body: JSON.stringify({ agent_key, message }),
+    // Automated turns must not raise the owner's unread badge (see product suite).
+    body: JSON.stringify({ agent_key, message, context: { automated: true } }),
     signal: AbortSignal.timeout(180000),
   });
   const j = await r.json().catch(() => ({}));

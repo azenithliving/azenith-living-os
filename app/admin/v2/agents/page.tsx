@@ -7,6 +7,24 @@ import { Brain } from 'lucide-react';
 type AgentStatus = { agent: string; status: 'online' | 'busy' | 'offline'; taskCount: number; recentActivity: string };
 
 /**
+ * One readable line out of an agent reply.
+ *
+ * Table rows are dropped rather than flattened: the seed card is a sentence
+ * under a name, and the previous flattening is what produced
+ * «فحصت 0 غرفة و1 منتج. | المشكلة | الرابط | ماذا أفعل؟ | | —» on a phone screen.
+ */
+export function previewLine(content: string): string {
+  const prose = content
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !l.includes('|') && !l.startsWith('#'))
+    .join(' ');
+  const clean = prose.replace(/[*`>_]/g, '').replace(/\s+/g, ' ').trim();
+  if (!clean) return '';
+  return clean.length > 130 ? `${clean.slice(0, 127).trimEnd()}…` : clean;
+}
+
+/**
  * P5-M2 — the seed card: notifications-first, nothing else.
  * Stats/missions live inside the full-screen chat now.
  */
@@ -15,8 +33,10 @@ export default function V2AgentsPage() {
   const [unread, setUnread] = useState(0);
   const [teaser, setTeaser] = useState<string | null>(null);
 
-  // NOTE: /messages?unread=true marks messages read server-side — fetch ONCE
-  // on mount so the badge survives until the admin actually opens the chat.
+  // The badge is fetched ONCE on mount and never polled: `/messages?mark_read=true`
+  // is what clears it (the chat panel does that when the admin actually opens the
+  // conversation), and polling here would either mark his inbox read behind his
+  // back or re-count the same noise.
   const fetchOnce = useCallback(async () => {
     try {
       const [statusRes, msgRes] = await Promise.all([
@@ -29,7 +49,7 @@ export default function V2AgentsPage() {
       if (msgData.success) {
         setUnread(msgData.count || 0);
         const last = (msgData.data || []).filter((m: any) => m.sender_type === 'agent').slice(-1)[0];
-        if (last) setTeaser(String(last.content || '').replace(/[#*`>]/g, '').slice(0, 120));
+        if (last) setTeaser(previewLine(String(last.content || '')));
       }
     } catch {}
   }, []);

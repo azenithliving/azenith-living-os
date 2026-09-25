@@ -327,7 +327,10 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
 
   const fetchMessages = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/agents/messages?agent_key=${agentKey}`);
+      // Opening the conversation IS the read event: without mark_read nothing was
+      // ever flagged, so the seed card's badge only ever grew — past every real
+      // message, every test run, and eventually past being believed.
+      const res = await fetch(`/api/admin/agents/messages?agent_key=${agentKey}&mark_read=true`);
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         setMessages((prev) => {

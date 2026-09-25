@@ -216,6 +216,11 @@ export class AgentOrchestrator {
   async chat(agentKey: AgentType, message: string, context?: Record<string, any>): Promise<AgentOrchestratorResult> {
     const selectedAgent = agentKey === "auto" ? this.detectAgent(message) : agentKey;
     const supabase = getSupabaseAdminClient();
+    // Automated callers (the product/deep suites) are not the owner reading the
+    // shop's inbox. Their turns used to land as unread agent messages, so the
+    // seed card's badge filled up with test noise — and a badge that lies once
+    // gets ignored forever after.
+    const automated = context?.automated === true;
 
     try {
       const resolvedCompanyId =
@@ -262,6 +267,7 @@ export class AgentOrchestrator {
             sender_name: "أنت",
             content: message,
             created_at: new Date().toISOString(),
+            is_read: automated,
           });
         }
       }
@@ -522,6 +528,7 @@ export class AgentOrchestrator {
           content: response,
           created_at: new Date().toISOString(),
           action_taken: !!toolResult,
+          is_read: automated,
           context: toolResult ? {
             tool: inferredTool?.toolName,
             result: toolResult.message,

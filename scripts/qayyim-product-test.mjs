@@ -68,7 +68,10 @@ async function chat(agent, message) {
   const res = await fetch(`${BASE}/api/admin/agents/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json; charset=utf-8", "x-internal-key": KEY },
-    body: JSON.stringify({ agent_key: agent, message }),
+    // `automated` keeps these turns out of the owner's unread badge: a test
+    // message is not news for him, and a badge that counts probes stops being
+    // read after the first time it lies.
+    body: JSON.stringify({ agent_key: agent, message, context: { automated: true } }),
     signal: AbortSignal.timeout(180_000),
   });
   const j = await res.json().catch(() => ({}));

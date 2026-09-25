@@ -49,10 +49,17 @@ export async function GET(request: NextRequest) {
     }
     // ─────────────────────────────────────────────────────────────────
 
+    // Newest N first, then reversed back to chronological order.
+    //
+    // This used to be `ascending: true` + limit, which keeps the OLDEST rows of
+    // the conversation: a long chat opened showing its first screen, the seed
+    // card's preview quoted a months-old message as if it were news («فحصت 0
+    // غرفة» from before the store was consolidated), and "mark read" marked
+    // those old rows while the real unread stayed unread forever.
     let query = supabaseServer
       .from('agent_messages')
       .select('*')
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (resolvedConvId) {
@@ -62,10 +69,14 @@ export async function GET(request: NextRequest) {
       query = query.eq('sender_type', 'agent').eq('is_read', false);
     }
 
-    const { data: messages, error } = await query;
+    const { data: rows, error } = await query;
+    // Back to oldest→newest: the window is taken newest-first so a long
+    // conversation shows its RECENT history, but every caller renders in time
+    // order.
+    const messages = (rows || []).slice().reverse();
 
     // Mark as read if requested (when user opens chat)
-    if (markRead && resolvedConvId && messages && messages.length > 0) {
+    if (markRead && resolvedConvId && messages.length > 0) {
       const unreadIds = messages.filter((m: any) => m.sender_type === 'agent' && !m.is_read).map((m: any) => m.id);
       if (unreadIds.length > 0) {
         await supabaseServer.from('agent_messages').update({ is_read: true }).in('id', unreadIds);
@@ -74,7 +85,17 @@ export async function GET(request: NextRequest) {
 
     // If unreadOnly requested, return count only
     if (unreadOnly) {
-      return NextResponse.json({ success: true, count: messages?.length || 0, data: messages });
+      // The real number, not the length of the page above: with a limit of 50 the
+      // badge used to saturate at "50" forever, which is exactly what the owner
+      // of a shop sees after any automated test run and then stops trusting.
+      let countQuery = supabaseServer
+        .from('agent_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('sender_type', 'agent')
+        .eq('is_read', false);
+      if (resolvedConvId) countQuery = countQuery.eq('conversation_id', resolvedConvId);
+      const { count } = await countQuery;
+      return NextResponse.json({ success: true, count: count ?? messages.length, data: messages });
     }
 
     if (error) {
