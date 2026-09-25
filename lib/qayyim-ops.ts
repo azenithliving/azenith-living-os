@@ -6,6 +6,7 @@
  */
 
 import { supabaseServer } from "@/lib/dal/unified-supabase";
+import { belongsToStore } from "@/lib/company-scope";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 import type { ToolExecutionResult } from "@/lib/agent-tools/tool-registry";
@@ -91,13 +92,15 @@ export function productPath(product: ProductRow) {
 }
 
 export async function loadRooms(companyId: string | null): Promise<RoomRow[]> {
-  let query = supabaseServer
+  // Deliberately not filtered in SQL: the live sections were stamped with more
+  // than one company id, and a single-id filter made the swarm report an empty
+  // shop. 15 rows, so scoping in JS with the shared answer is cheaper than a
+  // bug. See lib/company-scope.ts.
+  const { data, error } = await supabaseServer
     .from("room_sections")
-    .select("id, slug, name, name_ar, description, image_url, is_active, display_order, metadata")
+    .select("id, slug, name, name_ar, description, image_url, is_active, display_order, metadata, company_id")
     .order("display_order", { ascending: true })
     .limit(80);
-  if (companyId) query = query.eq("company_id", companyId);
-  const { data, error } = await query;
   if (error) {
     const retry = await supabaseServer
       .from("room_sections")
@@ -106,7 +109,8 @@ export async function loadRooms(companyId: string | null): Promise<RoomRow[]> {
       .limit(80);
     return (retry.data || []) as RoomRow[];
   }
-  return (data || []) as RoomRow[];
+  const rows = (data || []) as (RoomRow & { company_id?: string | null })[];
+  return rows.filter((r) => belongsToStore(r.company_id, companyId));
 }
 
 export async function loadProducts(): Promise<ProductRow[]> {
