@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { DEFAULT_COMPANY_ID } from "@/lib/company-resolver";
+import { belongsToStore } from "@/lib/company-scope";
+import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 // Public API to fetch room sections with CMS images
@@ -7,21 +8,16 @@ export async function GET() {
   try {
     const supabase = getSupabaseAdminClient();
     if (!supabase) throw new Error('Supabase not initialized');
-    
-    const masterCompanyId = process.env.MASTER_COMPANY_ID || DEFAULT_COMPANY_ID;
 
-    const { data: company } = await supabase
-      .from("companies")
-      .select("id")
-      .eq("id", masterCompanyId)
-      .maybeSingle();
-
-    const companyId = company?.id ?? masterCompanyId;
+    // The store is one business; its sections were historically stamped with
+    // more than one company id. Scoping through belongsToStore keeps this
+    // route correct both before and after the ids are consolidated, instead of
+    // pinning the public homepage to one hard-coded value.
+    const canonical = await resolveAdminCompanyId();
 
     const { data: sections, error } = await supabase
       .from("room_sections")
       .select("id, company_id, slug, name, name_ar, description, icon, display_order, is_active, image_url, metadata")
-      .eq("company_id", companyId)
       .eq("is_active", true)
       .order("display_order", { ascending: true });
 
@@ -34,7 +30,7 @@ export async function GET() {
     }
 
     // Transform sections - metadata field not available in DB
-    const transformedSections = sections?.map((section) => {
+    const transformedSections = (sections || []).filter((section) => belongsToStore(section.company_id, canonical)).map((section) => {
       return {
         slug: section.slug,
         name: section.name,
@@ -47,7 +43,7 @@ export async function GET() {
           ? section.metadata.gallery
           : [],
       };
-    }) || [];
+    });
 
     return NextResponse.json({ sections: transformedSections });
   } catch (error) {
