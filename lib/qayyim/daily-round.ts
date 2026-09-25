@@ -30,6 +30,10 @@ export interface DailyRoundResults {
   activeGoals?: number;
   proposalCreated: boolean;
   rivals: unknown;
+  /** Traffic watchdog result: { windowDays, events, hits, digest }. */
+  anomaly?: unknown;
+  anomalyDigest?: string;
+  anomalyReadError?: string;
   errors: string[];
   [k: string]: unknown;
 }
@@ -94,7 +98,26 @@ export async function executeDailyRound(): Promise<DailyRoundOutcome> {
     results.goalsReadError = e.message;
   }
 
-  // (c) Publish the round so the dashboard and the swarm see it happened.
+  // (c) P6-M3 traffic watchdog — a robust z-score over a month of daily visitor
+  // events, reported only for the recent edge so one old spike cannot generate a
+  // proposal every morning forever.
+  try {
+    const { scanTrafficAnomalies, renderAnomalyDigest } = await import("@/lib/qayyim/anomaly");
+    const scan = await scanTrafficAnomalies({ days: 28 });
+    if (scan.error) {
+      results.errors.push(`مراقبة حركة الزوار: ${scan.error}`);
+      results.anomalyReadError = scan.error;
+    } else {
+      const digest = renderAnomalyDigest(scan.hits);
+      results.anomaly = { windowDays: scan.windowDays, events: scan.totalEvents, hits: scan.hits, digest };
+      results.anomalyDigest = digest;
+    }
+  } catch (e: any) {
+    results.errors.push(`مراقبة حركة الزوار: ${e.message}`);
+    results.anomalyReadError = e.message;
+  }
+
+  // (d) Publish the round so the dashboard and the swarm see it happened.
   try {
     await syncLayer.initialize(companyId);
     await syncLayer.publish({
@@ -111,15 +134,30 @@ export async function executeDailyRound(): Promise<DailyRoundOutcome> {
         atRiskGoals: results.atRiskGoals,
         goalsSummary: results.goalsSummary ?? null,
         goalsReadError: results.goalsReadError ?? null,
+        anomalyDigest: results.anomalyDigest ?? null,
+        anomalyReadError: results.anomalyReadError ?? null,
       },
     });
+
+    const hits = (results.anomaly as { hits?: unknown[] } | null)?.hits ?? [];
+    if (hits.length) {
+      await syncLayer.publish({
+        event_type: "anomaly_detected",
+        source_agent: "qayyim-ana",
+        target_agents: [],
+        payload: { kind: "traffic_anomaly", hits, digest: results.anomalyDigest ?? null },
+      });
+    }
   } catch (e: any) {
     results.errors.push(`SyncLayer publish: ${e.message}`);
   }
 
-  // (d) One proposal, only when something actually needs the owner.
+  // (e) One proposal, only when something actually needs the owner.
+  const anomalyHits = (results.anomaly as { hits?: unknown[] } | null)?.hits ?? [];
   const needsIntervention =
-    results.atRiskGoals.length > 0 || (results.luxuryScore !== null && results.luxuryScore < 70);
+    results.atRiskGoals.length > 0 ||
+    (results.luxuryScore !== null && results.luxuryScore < 70) ||
+    anomalyHits.length > 0;
 
   if (needsIntervention) {
     try {
@@ -134,6 +172,7 @@ export async function executeDailyRound(): Promise<DailyRoundOutcome> {
               .map((g) => `  - ${g.name} (${g.progressPct === null ? "غير قابل للقياس" : `تقدم ${g.progressPct}%`} · ${g.reasons.join("، ")})`)
               .join("\n")}\n\n`
           : "") +
+        (anomalyHits.length ? `حركة الزوار فيها يوم مش طبيعي:\n${results.anomalyDigest}\n\n` : "") +
         `الرجاء مراجعة لوحة قيّم الدار واتخاذ الإجراء المناسب.`;
 
       const proposal = await createAdminProposal({
@@ -153,7 +192,7 @@ export async function executeDailyRound(): Promise<DailyRoundOutcome> {
     }
   }
 
-  // (e) Weekly competitor read. The platform schedule stays daily (Hobby limit),
+  // (f) Weekly competitor read. The platform schedule stays daily (Hobby limit),
   // so the weekday gate lives here rather than in vercel.json.
   if (new Date().getUTCDay() === 1) {
     try {

@@ -30,6 +30,9 @@ const CASES = [
   { id: "core-sells",   agent: "qayyim-core", msg: "إيه اللي بيتبيع عندنا؟", expect: (m, md) => md.tool === "qayyim_world" && (/الأكثر مبيعًا/.test(m) || /لم أضِف|لا أصناف/.test(m)) },
   { id: "core-gsc",     agent: "qayyim-core", msg: "كلمات البحث اللي جابلي زيارات", expect: (m, md) => md.tool === "gsc_queries" && (/غير موصول/.test(m) ? /GOOGLE_APPLICATION_CREDENTIALS_JSON/.test(m) : /نقرة/.test(m)) },
   { id: "core-rivals",  agent: "qayyim-core", msg: "المنافسين بيعملوا ايه", expect: (m, md) => md.tool === "qayyim_rivals" && /لم أضِف|منافس/.test(m) },
+  // P6-M3: a forecast is either numbers with the measured error, or a refusal
+  // that says why. A confident number with no history behind it fails this.
+  { id: "core-forecast", agent: "qayyim-core", msg: "توقع مبيعات الشهر الجاي", expect: (m, md) => md.tool === "qayyim_forecast" && (/الإجمالي المتوقع/.test(m) ? /خطأ|غير موسمي|مبني على/.test(m) : /مش قادر/.test(m)) },
   { id: "cont-health",  agent: "qayyim-cont", msg: "افحص صحة محتوى الصفحة الرئيسية", expect: (m, md) => md.tool === "content_health_check" || /محتوى/i.test(m) },
   { id: "seo-analyze",  agent: "qayyim-seo",  msg: "حلل SEO للصفحة الرئيسية", expect: (m, md) => /SEO|سيو|عنوان|meta/i.test(m) },
   { id: "ana-metrics",  agent: "qayyim-ana",  msg: "اعرض المؤشرات اللحظية للنظام", expect: (m, md) => md.tool === "metrics_realtime" || /مؤشر/i.test(m) },

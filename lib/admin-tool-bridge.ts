@@ -156,6 +156,26 @@ export async function runUltimateTool(
     return { success: true, message: digest, data: { digest: true } };
   }
 
+  // ── P6-M3: the forecast. Holt-Winters over the order ledger, and the error
+  // the model makes on that ledger travels with the number.
+  if (toolName === "qayyim_forecast") {
+    const { runRevenueForecast, renderForecast } = await import("@/lib/qayyim/forecast");
+    const horizonDays = Number(params.horizonDays) > 0 ? Number(params.horizonDays) : 30;
+    const f = await runRevenueForecast(companyId ?? null, { horizonDays });
+    return {
+      success: true,
+      message: renderForecast(f),
+      data: {
+        refused: f.refused,
+        method: f.method,
+        total: f.total,
+        mape: f.mape,
+        days: f.horizonDays,
+        historyDays: f.history.days,
+      },
+    };
+  }
+
   // ── P6-M2: pending drafts counted from the table, matching the counters the
   // commander already reports in its self-report (same status set).
   if (toolName === "draft_list") {
@@ -289,6 +309,16 @@ export function inferUltimateTool(
     )
   ) {
     return { toolName: "qayyim_whoami", params: {} };
+  }
+  // «توقع الشهر الجاي» asks for arithmetic, and must not be swallowed by the
+  // world-model path below just because the sentence also says «المبيعات».
+  if (
+    /توقع|توقّع|التوقعات|الشهر\s+(?:الجاي|القادم|جاى|جاي)|الأسبوع\s+الجاي|الاسبوع\s+الجاي|forecast|project(?:ion|ing|s)?|predict/i.test(
+      lower
+    )
+  ) {
+    const days = /أسبوع|اسبوع|\b7\s*أيام|\b7\s*ايام/i.test(lower) ? 7 : 30;
+    return { toolName: "qayyim_forecast", params: { horizonDays: days } };
   }
   // "how is the shop doing / what sells" reads the live world model. It must
   // precede revenue_analyze below, which answers the same question with a
