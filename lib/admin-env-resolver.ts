@@ -6,12 +6,13 @@
  *
  * المتغيرات التي يحلّها:
  *   - MASTER_ADMIN_EMAILS   → أول user بدور admin/owner في جدول users
- *   - MASTER_COMPANY_ID     → أول company_id في جدول companies
+ *   - MASTER_COMPANY_ID     → قرار «المحل الواحد» المكتوب في p6_store_company، ثم أقدم صف companies
  *   - CRON_SECRET           → من البيئة فقط؛ لا يُشتق سر بديل
  *   - NEXT_PUBLIC_SITE_URL  → من PRIMARY_DOMAIN أو site_settings
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { storeCompanyId } from "@/lib/company-scope";
 
 let _resolvedOnce = false;
 const _cache: Record<string, string> = {};
@@ -71,12 +72,21 @@ export async function resolveMasterAdminEmails(): Promise<string[]> {
 }
 
 /**
- * يُعيد MASTER_COMPANY_ID — من .env أو من DB
+ * يُعيد MASTER_COMPANY_ID — من .env أو من القرار المكتوب في القاعدة
  */
 export async function resolveMasterCompanyId(): Promise<string | null> {
   const envVal = process.env.MASTER_COMPANY_ID;
   if (envVal?.trim()) return envVal.trim();
   if (_cache.MASTER_COMPANY_ID) return _cache.MASTER_COMPANY_ID;
+
+  // The migration records the store's single owner stamp; the "oldest
+  // companies row" fallback below cannot distinguish two rows that share a
+  // name and a created_at.
+  const decided = await storeCompanyId();
+  if (decided) {
+    _cache.MASTER_COMPANY_ID = decided;
+    return decided;
+  }
 
   const sb = getServiceClient();
   if (!sb) return null;

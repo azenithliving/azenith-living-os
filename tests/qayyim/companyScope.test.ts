@@ -7,42 +7,51 @@ import {
   LEGACY_STORE_COMPANY_IDS,
 } from '@/lib/company-scope';
 
+/**
+ * After 20260925_p6_one_store.sql the database is the guarantee: one stamp for
+ * every row, plus a BEFORE trigger that normalises writes. These tests pin the
+ * read-side contract that is left over, so a future change cannot quietly
+ * re-widen it into a workaround again.
+ */
 const ADMIN = 'dbb9b420-f2ec-4dd3-88d6-4d1a9a74364d';
-const ZERO_ONE = '00000000-0000-0000-0000-000000000001';
 const FOREIGN = '11111111-2222-3333-4444-555555555555';
 
 describe('storeCompanyIds', () => {
-  it('treats the canonical id and the legacy stamps as one store', () => {
-    const ids = storeCompanyIds(ADMIN);
-    expect(ids).toContain(ADMIN);
-    for (const legacy of LEGACY_STORE_COMPANY_IDS) expect(ids).toContain(legacy);
-    expect(new Set(ids).size).toBe(ids.length); // no duplicates even if env equals a legacy id
+  it('is exactly the store id now that the data is consolidated', () => {
+    expect(storeCompanyIds(ADMIN)).toEqual([ADMIN]);
   });
 
-  it('drops a null canonical instead of putting null in an .in() list', () => {
-    expect(storeCompanyIds(null)).toEqual(LEGACY_STORE_COMPANY_IDS);
-    expect(storeCompanyIds(null)).not.toContain(null);
+  it('adds no duplicate when a retired stamp equals the canonical id', () => {
+    expect(new Set(storeCompanyIds(ADMIN)).size).toBe(storeCompanyIds(ADMIN).length);
+  });
+
+  it('never puts null into an .in() list', () => {
+    expect(storeCompanyIds(null)).toEqual([]);
+  });
+
+  it('keeps the seam empty and typed, so healing a legacy env is a one-line change', () => {
+    expect(Array.isArray(LEGACY_STORE_COMPANY_IDS)).toBe(true);
+    expect(LEGACY_STORE_COMPANY_IDS).toEqual([]);
   });
 });
 
 describe('belongsToStore', () => {
-  it('accepts rows stamped with any id belonging to the shop', () => {
+  it('accepts the store stamp', () => {
     expect(belongsToStore(ADMIN, ADMIN)).toBe(true);
-    expect(belongsToStore(ZERO_ONE, ADMIN)).toBe(true); // the live room sections
   });
 
-  it('keeps unstamped historical rows visible', () => {
+  it('rejects another tenant — the pre-consolidation leniency is retired', () => {
+    expect(belongsToStore(FOREIGN, ADMIN)).toBe(false);
+  });
+
+  it('still tolerates an unstamped row, because an un-migrated environment may have one', () => {
     expect(belongsToStore(null, ADMIN)).toBe(true);
     expect(belongsToStore(undefined, ADMIN)).toBe(true);
-  });
-
-  it('still rejects a genuinely different tenant', () => {
-    expect(belongsToStore(FOREIGN, ADMIN)).toBe(false);
   });
 
   it('filters nothing when no company is resolved, matching the old behaviour', () => {
     expect(belongsToStore(FOREIGN, null)).toBe(true);
     expect(storeIdFilter(null)).toBeNull();
-    expect(storeIdFilter(ADMIN)).toEqual(storeCompanyIds(ADMIN));
+    expect(storeIdFilter(ADMIN)).toEqual([ADMIN]);
   });
 });
