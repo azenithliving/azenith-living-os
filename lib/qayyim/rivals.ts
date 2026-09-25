@@ -273,10 +273,11 @@ export interface RivalDigestEntry {
 export function renderRivalsDigest(entries: RivalDigestEntry[]): string {
   if (!entries.length) {
     return [
-      "لم أضِف أي منافس بعد — عيونى على السوق معطّلة عملياً.",
-      "التفعيل: أضِف سطراً في جدول `qayyim_rivals` (الاسم + رابط الموقع + enabled=true)،",
-      "وأنا أقيسه كل اثنين بهدوء (احترام robots.txt و≤10 صفحات). بعدها أقارن: عدد المنتجات،",
-      "الأسعار الظاهرة، وجود واتساب، وحجم المحتوى — بالأرقام لا بالانطباع.",
+      "مضفتش أي منافس لحد دلوقتي — عيني على السوق مقفولة.",
+      "التفعيل: ضيف سطر لكل منافس فيه اسمه ورابط موقعه، في الدفتر ده:",
+      "qayyim_rivals",
+      "وأنا أقيسه كل اثنين بهدوء، باحترام قواعد الموقع وعلى 10 صفحات كحد أقصى.",
+      "بعدها أقارن بالأرقام: عدد المنتجات، والأسعار الظاهرة، ووجود واتساب، وحجم المحتوى.",
     ].join("\n");
   }
   const lines = [`مراقبة المنافسين — ${entries.length} منافس، آخر قياس ${entries[0].crawledAt.slice(0, 10)}:`];
@@ -291,7 +292,7 @@ export function renderRivalsDigest(entries: RivalDigestEntry[]): string {
     );
     if (e.changes?.length) lines.push(`   تغيّر عن الأسبوع الماضي: ${e.changes.join("، ")}`);
   }
-  lines.push("الأرقام من صفحاتهم العامة، مقروءة باحترام لـ robots.txt — لا نسخ ولا بيانات أشخاص.");
+  lines.push("الأرقام من صفحاتهم العامة، مقروءة باحترام لملف القواعد بتاعهم — لا نسخ ولا بيانات أشخاص.");
   return lines.join("\n");
 }
 

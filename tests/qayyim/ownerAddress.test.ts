@@ -2,7 +2,7 @@
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join, relative } from "path";
 import { describe, it, expect } from "vitest";
-import { OWNER_ADDRESS_RULE, withOwnerRule, withOwnerRuleOnMessages } from "@/lib/qayyim/owner-address";
+import { OWNER_ADDRESS_RULE, PLAIN_ARABIC_RULE, withOwnerRule, withOwnerRuleOnMessages } from "@/lib/qayyim/owner-address";
 
 /**
  * The owner is a man — المهندس علاء عزيز. Two separate defects earned this file:
@@ -86,6 +86,18 @@ describe("withOwnerRule", () => {
   it("names the owner and forbids the feminine", () => {
     expect(OWNER_ADDRESS_RULE).toContain("علاء");
     expect(OWNER_ADDRESS_RULE).toContain("مذكر");
+  });
+
+  /**
+   * The owner reads Arabic only. A Latin token, a bracket or an arrow inside an
+   * Arabic sentence does not merely confuse him — the bidi renderer flips the
+   * line, so it arrives physically scrambled on his phone. This is a line-shape
+   * rule, not a vocabulary rule, and the agents have to obey it too.
+   */
+  it("forbids Latin inside an Arabic sentence", () => {
+    expect(PLAIN_ARABIC_RULE).toContain("بالعربية المصرية فقط");
+    expect(PLAIN_ARABIC_RULE).toContain("سطر لوحده");
+    expect(withOwnerRule("أنت Ops.")).toContain(PLAIN_ARABIC_RULE);
   });
 
   it("touches only the system turn of a message list", () => {

@@ -65,13 +65,15 @@ export function buildDailyStory(input: StoryInput): DailyStory {
   if (input.errors.length) {
     lines.push(`• قراءات فشلت في الجولة: ${input.errors.length} — أولها: ${input.errors[0]}`);
   }
-  const link = input.proposalId
-    ? `• فيه اقتراح محتاج قرارك (${input.proposalId}): ${href}`
-    : `• الدار ماشية من غير حاجة منك: ${href}`;
-
   // The link is the part the owner acts on, so it is written first and the
   // details are trimmed to fit around it — not cut off mid-sentence at the end.
-  const budget = STORY_LIMIT - link.length - 1;
+  // It also gets a line of its own: a URL inside an Arabic sentence scrambles
+  // the whole line on screen.
+  const linkLine = input.proposalId
+    ? "• فيه اقتراح محتاج قرارك:"
+    : "• الدار ماشية من غير حاجة منك:";
+  const tail = `${linkLine}\n${href}`;
+  const budget = STORY_LIMIT - tail.length - 1;
   const kept: string[] = [];
   let used = 0;
   for (const line of lines) {
@@ -83,7 +85,7 @@ export function buildDailyStory(input: StoryInput): DailyStory {
     used += line.length + 1;
   }
 
-  const text = clamp([...kept, link].join("\n"), STORY_LIMIT);
+  const text = clamp([...kept, tail].join("\n"), STORY_LIMIT);
   return { title: `قيّم الدار — صباح ${input.dateKey}`, text, href };
 }
 

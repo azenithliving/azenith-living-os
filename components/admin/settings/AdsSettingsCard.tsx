@@ -24,9 +24,9 @@ type SeoSettings = Record<string, unknown> & {
 };
 
 const STARTERS: Array<[keyof SeoSettings & string, string, string]> = [
-  ["adsenseClient", "ca-pub-", "مثال: ca-pub-1234567890123456"],
-  ["googleAdsId", "AW-", "مثال: AW-123456789"],
-  ["analyticsId", "G-", "مثال: G-ABCDEF1234"],
+  ["adsenseClient", "ca-pub-", "مثال، انسخه زي ما هو:\nca-pub-1234567890123456"],
+  ["googleAdsId", "AW-", "مثال، انسخه زي ما هو:\nAW-123456789"],
+  ["analyticsId", "G-", "مثال، انسخه زي ما هو:\nG-ABCDEF1234"],
 ];
 
 export default function AdsSettingsCard() {
@@ -117,12 +117,12 @@ export default function AdsSettingsCard() {
               <span>
                 <span className="block text-sm font-semibold text-white">إعلانات جوجل تُعرض عندك (انت بتكسب)</span>
                 <span className="mt-0.5 block text-xs text-white/45">
-                  جوجل يحط إعلانات في صفحات الموقع، والحساب بتاعك على AdSense هو اللي بيستقبل الأرباح.
+                  جوجل يحط إعلانات في صفحات الموقع، والحساب بتاعك في برنامج إعلانات جوجل هو اللي بيستقبل الأرباح.
                 </span>
               </span>
             </label>
             <div className="mt-4">
-              {field("adsenseClient", "كود الناشر", "بيبدأ بـ ca-pub- — تلاقيه في حساب AdSense بتاعك", "ca-pub-…")}
+              {field("adsenseClient", "كود الناشر", "تلاقيه في حساب الإعلانات بتاعك، وشكله:", "ca-pub-…")}
             </div>
           </div>
 
@@ -135,13 +135,13 @@ export default function AdsSettingsCard() {
                 <span className="block text-sm font-semibold text-white">متابعة حملتك على جوجل (انت بتدفع لجوجل)</span>
                 <span className="mt-0.5 block text-xs text-white/45">
                   لو عامل إعلان مدفوع على جوجل، الكود ده يقول لهم إن اللي دخل من إعلانهم فعلاً طلب من موقعك.
-                  الكود بيتعمل من لوحة Google Ads، وكل رقم تحطيه بيشتغل لوحده.
+                  الكود بيتعمل من لوحة إعلانات جوجل، وكل رقم تحطيه بيشتغل لوحده.
                 </span>
               </span>
             </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {field("googleAdsId", "كود تحويل جوجل إعلاني", "بيبدأ بـ AW- من لوحة Google Ads", "AW-…")}
-              {field("analyticsId", "كود تحليلات جوجل", "بيبدأ بـ G- من Google Analytics", "G-…")}
+              {field("googleAdsId", "كود تحويل حملة جوجل", "تاخده من لوحة إعلانات جوجل.", "AW-…")}
+              {field("analyticsId", "كود التحليلات", "تاخده من حساب التحليلات بتاعك.", "G-…")}
             </div>
           </div>
 

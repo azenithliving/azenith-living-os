@@ -68,10 +68,10 @@ describe("isRefusal", () => {
 });
 
 describe("nameGap", () => {
-  it("names Search Console and how to switch it on", () => {
+  it("names the search-phrase gap and how to switch it on", () => {
     const gap = nameGap("كلمات البحث اللي جابلي زيارات", facts);
     expect(gap).not.toBeNull();
-    expect(gap!.capability).toContain("Search Console");
+    expect(gap!.capability).toContain("كلمات بحث");
     expect(gap!.enablePath).toContain("GOOGLE_APPLICATION_CREDENTIALS_JSON");
   });
 
@@ -109,7 +109,7 @@ describe("explainGap", () => {
   it("turns a shrug into a named missing capability", () => {
     const out = explainGap("مش قادر على الصفحة دي", "كلمات البحث الحقيقية", facts);
     expect(out).toContain("الناقص:");
-    expect(out).toContain("Search Console");
+    expect(out).toContain("كلمات بحث");
     expect(out).toContain("يتفعّل بـ");
   });
 

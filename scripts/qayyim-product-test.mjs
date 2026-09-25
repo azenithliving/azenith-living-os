@@ -28,7 +28,7 @@ const CASES = [
   // sales_orders, or an explicit "could not read" — never invented numbers.
   { id: "core-world",   agent: "qayyim-core", msg: "ايزاي الشغل الفترة دي", expect: (m, md) => md.tool === "qayyim_world" && /عالم الدار/.test(m) && (/ج\.م/.test(m) || /لم أستطع قراءة/.test(m)) },
   { id: "core-sells",   agent: "qayyim-core", msg: "إيه اللي بيتبيع عندنا؟", expect: (m, md) => md.tool === "qayyim_world" && (/الأكثر مبيعًا/.test(m) || /لم أضِف|لا أصناف/.test(m)) },
-  { id: "core-gsc",     agent: "qayyim-core", msg: "كلمات البحث اللي جابلي زيارات", expect: (m, md) => md.tool === "gsc_queries" && (/غير موصول/.test(m) ? /GOOGLE_APPLICATION_CREDENTIALS_JSON/.test(m) : /نقرة/.test(m)) },
+  { id: "core-gsc",     agent: "qayyim-core", msg: "كلمات البحث اللي جابلي زيارات", expect: (m, md) => md.tool === "gsc_queries" && (/موصولةش|موصولة/.test(m) ? /GOOGLE_APPLICATION_CREDENTIALS_JSON/.test(m) : /نقرة/.test(m)) },
   { id: "core-rivals",  agent: "qayyim-core", msg: "المنافسين بيعملوا ايه", expect: (m, md) => md.tool === "qayyim_rivals" && /لم أضِف|منافس/.test(m) },
   // P6-M3: a forecast is either numbers with the measured error, or a refusal
   // that says why. A confident number with no history behind it fails this.

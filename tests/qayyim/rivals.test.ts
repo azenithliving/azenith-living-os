@@ -140,8 +140,8 @@ describe('crawlRival politeness and caps', () => {
 describe('digest', () => {
   it('tells the owner how to add a rival when none is configured', () => {
     const d = renderRivalsDigest([]);
-    expect(d).toContain('لم أضِف');
-    expect(d).toMatch(/qayyim_rivals|أضِف/);
+    expect(d).toContain('مضفتش');
+    expect(d).toMatch(/qayyim_rivals|ضيف/);
   });
 
   it('summarises each rival with its latest change list', () => {

@@ -28,6 +28,8 @@ export interface GscResult {
   range?: { start: string; end: string };
   error?: string;
   missing?: string[];
+  /** The reason in the owner's language, when a variable exists but is unusable. */
+  note?: string;
 }
 
 interface ServiceAccount {
@@ -44,6 +46,8 @@ export function gscConfig(env: NodeJS.ProcessEnv = process.env): {
   siteUrl?: string;
   creds?: ServiceAccount;
   missing: string[];
+  /** Why, in the owner's language. The variable names stay on their own lines. */
+  note?: string;
 } {
   const siteUrl = (env.GSC_SITE_URL || "").trim();
   const rawCreds = (env.GOOGLE_APPLICATION_CREDENTIALS_JSON || "").trim();
@@ -56,10 +60,18 @@ export function gscConfig(env: NodeJS.ProcessEnv = process.env): {
   try {
     creds = JSON.parse(rawCreds) as ServiceAccount;
   } catch {
-    return { ready: false, missing: ["GOOGLE_APPLICATION_CREDENTIALS_JSON (JSON غير قابل للقراءة)"] };
+    return {
+      ready: false,
+      missing: ["GOOGLE_APPLICATION_CREDENTIALS_JSON"],
+      note: "المتغير موجود بس محتواه مش مقروء — اتأكد إن الملف منسوخ كله زي ما هو.",
+    };
   }
   if (!creds.client_email || !creds.private_key) {
-    return { ready: false, missing: ["GOOGLE_APPLICATION_CREDENTIALS_JSON (ينقصه client_email أو private_key)"] };
+    return {
+      ready: false,
+      missing: ["GOOGLE_APPLICATION_CREDENTIALS_JSON"],
+      note: "المتغير موجود بس ناقصه عنوان البريد أو المفتاح الخاص جوه الملف.",
+    };
   }
   return { ready: true, siteUrl, creds, missing: [] };
 }
@@ -117,7 +129,7 @@ export async function fetchSearchQueries(opts: {
   now?: Date;
 } = {}): Promise<GscResult> {
   const cfg = gscConfig(opts.env ?? process.env);
-  if (!cfg.ready || !cfg.siteUrl || !cfg.creds) return { ok: false, missing: cfg.missing };
+  if (!cfg.ready || !cfg.siteUrl || !cfg.creds) return { ok: false, missing: cfg.missing, note: cfg.note };
 
   const doFetch = opts.fetchImpl ?? fetch;
   const end = new Date((opts.now ?? new Date()).getTime() - 3 * 864e5); // GSC lags ~3 days
@@ -174,28 +186,42 @@ export async function fetchSearchQueries(opts: {
   }
 }
 
+/**
+ * The setup path, in the shape the owner can actually read: Arabic sentences
+ * first, and every name he has to type or search for on a line of its own.
+ * Arrows and parentheses around Latin inside an Arabic line scramble the whole
+ * line on screen, so they are not used here.
+ */
 const SETUP_STEPS = [
-  "١) Google Cloud Console ← مشروع جديد ← فعّل «Google Search Console API» (مجاني).",
-  "٢) أنشئ Service Account ونزّل مفتاح JSON (Keys ← Add Key).",
-  "٣) في Search Console: أضف بريد الـservice account «مالكًا» لعقار الدار.",
-  "٤) في Vercel: أضف GOOGLE_APPLICATION_CREDENTIALS_JSON (Secret) وGSC_SITE_URL (Config) ثم أعد النشر.",
+  "الخطوة 1: افتح منصة جوجل للمطورين، اعمل مشروع جديد، وفعّل واجهة بحث جوجل. مجانية.",
+  "الخطوة 2: اعمل حساب خدمة جديد، ونزّل منه مفتاح على شكل ملف بيانات.",
+  "الخطوة 3: في خدمة بحث جوجل، ضيف البريد بتاع حساب الخدمة ده كمالك لعقار الدار.",
+  "الخطوة 4: في منصة الاستضافة، ضيف المتغيرين دول ثم أعد النشر:",
+  "GOOGLE_APPLICATION_CREDENTIALS_JSON",
+  "GSC_SITE_URL",
 ];
 
 export function renderGscResult(r: GscResult): string {
   if (!r.ok && r.missing?.length) {
     return [
-      `Search Console غير موصول بالدّار بعد — لا أستطيع عرض كلمات بحث حقيقية، ولن أخترع واحدة.`,
-      `ينقصني: ${r.missing.join("، ")}.`,
-      `التفعيل يستغرق ~5 دقائق (مرة واحدة، وتبقى مجانية للأبد):`,
+      "خدمة بحث جوجل لسه موصولةش بالدار. مقدرش أعرض كلمات بحث حقيقية، ومش هخترع واحدة.",
+      "ينقصني:",
+      ...r.missing.map((m) => m.split(" ")[0]),
+      ...(r.note ? [r.note] : []),
+      "التفعيل بيخلص في 5 دقايق مرة واحدة، وبيفضل مجاني.",
       ...SETUP_STEPS.map((s) => `• ${s}`),
-      `بعدها أريك بالضبط: أي كلمة بحث جلبت نقرًا، وموقعك المتوسط منها.`,
+      "بعدها أوريك بالظبط: أي كلمة بحث جابت نقرة، وموقعك المتوسط منها.",
     ].join("\n");
   }
-  if (!r.ok) return `Search Console لم يُجب: ${r.error || "خطأ غير معروف"} — لم أستبدلها بتخمين.`;
-  if (!r.rows?.length) return `لا كلمات بحث مسجّلة في ${r.range?.start} → ${r.range?.end} — صفر نتائج، وهي إجابة حقيقية وليست خطأ.`;
-  const head = `كلمات البحث الحقيقية (${r.range?.start} → ${r.range?.end}) — أعلى ${r.rows.length}:`;
+  if (!r.ok) return `خدمة بحث جوجل ما ردتش: ${r.error || "خطأ غير معروف"} — ما استبدلتش الرد بتخمين.`;
+  if (!r.rows?.length)
+    return `مفيش كلمات بحث مسجّلة من ${r.range?.start} إلى ${r.range?.end}. دي صفر نتائج، وهي إجابة حقيقية مش خطأ.`;
+  const head = `كلمات البحث الحقيقية من ${r.range?.start} إلى ${r.range?.end} — أعلى ${r.rows.length}:`;
   const body = r.rows
     .slice(0, 12)
-    .map((x) => `• «${x.query}» — ${x.clicks} نقرة من ${x.impressions} ظهور (CTR ${(x.ctr * 100).toFixed(1)}%) · متوسط الموقع ${x.position.toFixed(1)}`);
+    .map(
+      (x) =>
+        `• «${x.query}» — ${x.clicks} نقرة من ${x.impressions} ظهور · نسبة النقر ${(x.ctr * 100).toFixed(1)}% · متوسط الموقع ${x.position.toFixed(1)}`,
+    );
   return [head, ...body].join("\n");
 }

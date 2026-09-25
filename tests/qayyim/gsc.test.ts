@@ -99,9 +99,9 @@ describe('fetchSearchQueries', () => {
 describe('refusal copy', () => {
   it('names the missing variables and the shortest path to enable them', () => {
     const msg = renderGscResult({ ok: false, missing: ['GSC_SITE_URL', 'GOOGLE_APPLICATION_CREDENTIALS_JSON'] });
-    expect(msg).toContain('غير موصول');
+    expect(msg).toContain('موصولةش');
     expect(msg).toContain('GSC_SITE_URL');
-    expect(msg).toContain('5 دقائق');
+    expect(msg).toContain('5 دقايق');
   });
 
   it('renders rows as numbers, not prose', () => {

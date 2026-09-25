@@ -58,17 +58,23 @@ interface Rule {
  * Known gaps, by the words that usually ask for them. Each entry names the
  * missing capability and the shortest real path to it — the paths here are the
  * ones already implemented in this codebase, not aspirations.
+ *
+ * The Arabic is deliberately clean of inline Latin: the reader is the shop's
+ * owner, and a Latin token or a bracket inside an Arabic sentence flips the
+ * rendering of the whole line. Variable and table names still appear — they are
+ * what he has to type — but each on a line of its own.
  */
 const RULES: Rule[] = [
   {
     match: /بحث|search|console|GSC|نقرة|ظهار في جوجل/i,
-    capability: "Google Search Console — كلمات بحث حقيقية بدل التخمين",
-    enablePath: "بيفتح من Google Cloud (مجاني): متغيرات GOOGLE_APPLICATION_CREDENTIALS_JSON وGSC_SITE_URL، والوسطي خمس دقايق.",
+    capability: "كلمات بحث حقيقية من جوجل بدل التخمين",
+    enablePath:
+      "بتتفعّل من منصة جوجل للمطورين، وهي مجانية وبتاخد خمس دقايق. المتغيرات المطلوبة:\nGOOGLE_APPLICATION_CREDENTIALS_JSON\nGSC_SITE_URL",
   },
   {
     match: /منافس|competitor|السوق|market/i,
     capability: "عيون على السوق — قياس المنافسين",
-    enablePath: "بيتنزّل بسطر في جدول qayyim_rivals (اسم + رابط)، والقياس بيتم لوحده يوم الاثنين.",
+    enablePath: "بيتنزّل بسطر لكل منافس: اسمه ورابطه. الدفتر المطلوب:\nqayyim_rivals\nوالقياس بيتم لوحده يوم الاثنين.",
   },
   {
     match: /نشر|انشر|اعتمد|publish|ارفع الموقع/i,
@@ -124,7 +130,9 @@ export function nameGap(message: string, facts: GapFacts): Gap | null {
   const near = nearestTool(message, facts);
   return {
     capability: `«${subject}» — مش موجود في عتاد السرب`,
-    enablePath: `أقرب أداة موجودة: ${near ? `${near.name} (${near.desc})` : "ولا واحدة"} — لو الطلب ده لازم يتنفذ، يبقى يتضاف أداة بخطة مش يتنفذ نصه.`,
+    enablePath: near
+      ? `أقرب أداة موجودة عندنا اسمها:\n${near.name}\nوهي بتعمل: ${near.desc}\nلو الطلب ده لازم يتنفذ، يبقى يتضاف أداة بخطة — مش يتنفذ نصه.`
+      : "مفيش أداة قريبة من الطلب ده أصلاً. لو لازم يتنفذ، يبقى يتضاف أداة بخطة.",
     nearestTool: near?.name ?? null,
   };
 }
