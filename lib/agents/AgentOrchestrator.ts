@@ -339,8 +339,10 @@ export class AgentOrchestrator {
       // المستخدم يتكلم مع القائد فقط — السرب يعمل خفياً في الخلفية
       // ══════════════════════════════════════════════════════════════
       if (selectedAgent === "qayyim-core") {
-        // Shortcut: افحص → تقرير تنفيذي مختصر مباشر (أسرع وأفيد من السرب الكامل)
-        const isAuditRequest = /افحص|تقرير|دقّق|audit/i.test(promptWithToolContext);
+        // Shortcut: افحص → تقرير تنفيذي مختصر مباشر (أسرع وأفيد من السرب الكامل).
+        // Tested on the RAW message — injected history must not drag old audit
+        // keywords into short follow-ups.
+        const isAuditRequest = /افحص|تقرير|دقّق|audit/i.test(message);
         if (isAuditRequest) {
           try {
             const auditRes = await qayyimCoreAgent.auditFullSite({ company_id: resolvedCompanyId, page_path: '/', scope: 'full' });
@@ -363,6 +365,16 @@ export class AgentOrchestrator {
         // don't burn a full swarm run behind it.
         if (!response && toolResult?.success && toolResult.message) {
           response = toolResult.message;
+        }
+        // Short conversational follow-ups ("كم واحدة فيهم؟", "ليه؟") belong to
+        // the persona chat (it has the injected history), not a fresh swarm run.
+        if (!response && message.length < 70 && !/أنشئ|انشئ|اعرض|نسّق|نسق|شغّل|شغل|ادرس|قارن|نشر|رجّع|draft|publish/i.test(message)) {
+          const coreInstance = this.agents["qayyim-core"];
+          if (coreInstance) {
+            try {
+              response = await coreInstance.chat(promptWithToolContext, context);
+            } catch {}
+          }
         }
         if (!response) {
           try {
