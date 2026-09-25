@@ -17,10 +17,31 @@ export interface SelfModel {
   agents: Array<{ key: string; name: string; roles: number }>;
   tools: Array<{ name: string; desc: string }>;
   limits: string[];
+  /** What runs on its own schedule. Declared here so `whoami` cannot forget it. */
+  organs: Organ[];
   counters?: { drafts?: number; goals?: number; learnings?: number; eventsToday?: number };
   /** Counters whose query failed — reported instead of silently reading as zero. */
   dataGaps?: string[];
 }
+
+export interface Organ {
+  label: string;
+  cadence: string;
+  /** The module the round actually calls. The suite greps for it, so a deleted
+   * organ fails the self-report test instead of turning the report into fiction. */
+  source: string;
+}
+
+export const AUTONOMOUS_ORGANS: Organ[] = [
+  { label: "مؤشر الفخامة المقاس", cadence: "كل يوم", source: "@/lib/qayyim/luxury-v2" },
+  { label: "الأهداف المهددة", cadence: "كل يوم", source: "@/lib/qayyim/goal-risk" },
+  { label: "مراقبة شذوذ الزوار", cadence: "كل يوم", source: "@/lib/qayyim/anomaly" },
+  { label: "كاناري الصفحات العامة", cadence: "كل يوم", source: "@/lib/qayyim/canary" },
+  { label: "قياس المنافسين", cadence: "كل اثنين", source: "@/lib/qayyim/rivals" },
+  { label: "تدقيق ردود السرب", cadence: "كل أحد", source: "@/lib/qayyim/self-audit" },
+  { label: "إغلاق المهام المعلقة", cadence: "كل يوم", source: "@/lib/qayyim/task-reconcile" },
+  { label: "تقرير الصباح على تليجرام", cadence: "كل يوم", source: "@/lib/qayyim/daily-story" },
+];
 
 const AGENT_NAMES: Record<string, string> = {
   "qayyim-core": "القائد",
@@ -63,6 +84,7 @@ export async function buildSelfModel(companyId: string | null): Promise<SelfMode
     })),
     tools: TOOL_CATALOG.map((t) => ({ name: t.name, desc: t.desc })),
     limits: LIMITS,
+    organs: AUTONOMOUS_ORGANS,
   };
   const sb = supabaseServer;
   if (!companyId || !sb) return model;
@@ -105,6 +127,7 @@ export function renderSelfReport(m: SelfModel): string {
       .join("، ")}${m.tools.length > 6 ? "…" : ""}`,
     live ? `• الآن: ${live.join(" · ")}` : "• العدادات غير متاحة (لا شركة محددة)",
     m.dataGaps?.length ? `• لم أستطع قراءة: ${m.dataGaps.join("، ")}` : "",
+    `• اللي بيحصل لوحده من غير ما تطلب: ${m.organs.map((o) => `${o.label}: ${o.cadence}`).join("، ")}`,
     `• حدودي المعلنة: ${m.limits.join("؛ ")}`,
     "لو طلبتُ خارج هذه الحدود هقولك بصراحة وسمّي الناقص.",
   ]

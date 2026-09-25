@@ -1,10 +1,13 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { inferUltimateTool } from '@/lib/admin-tool-bridge';
 import {
   buildSelfModel,
   renderSelfReport,
   renderIdentityLine,
+  AUTONOMOUS_ORGANS,
   type SelfModel,
 } from '@/lib/qayyim/self-model';
 
@@ -15,6 +18,7 @@ const fixture: SelfModel = {
   agents: [{ key: 'qayyim-core', name: 'القائد', roles: 6 }],
   tools: [{ name: 'speed_analyze', desc: 'قياس سرعة' }],
   limits: ['كرون يومي واحد (Vercel Hobby)'],
+  organs: AUTONOMOUS_ORGANS,
   counters: { drafts: 3, goals: 0, learnings: 5, eventsToday: 12 },
 };
 
@@ -26,6 +30,39 @@ describe('self-model', () => {
     expect(r).toContain('3');
     expect(r).toContain('كرون يومي واحد');
   });
+
+  // Zero surprise cuts both ways: a self-report that omits a running organ is as
+  // untrue as one that invents it.
+  it('declares what runs on its own schedule', () => {
+    const r = renderSelfReport(fixture);
+    expect(r).toContain('اللي بيحصل لوحده');
+    for (const organ of AUTONOMOUS_ORGANS) {
+      expect(r).toContain(`${organ.label}: ${organ.cadence}`);
+    }
+  });
+
+  it('keeps the schedule line in the owner’s language', () => {
+    const line = renderSelfReport(fixture).split('\n').find((l) => l.includes('اللي بيحصل لوحده'));
+    expect(line).toBeTruthy();
+    expect(line).not.toMatch(/[A-Za-z]/);
+  });
+
+  // The declaration is only honest if the round really calls each organ. This
+  // greps the round's own source: delete a step and the self-report fails here
+  // instead of the swarm quietly going on claiming a capability it lost.
+  it('every declared organ is wired into the daily round', () => {
+    const round = readFileSync(resolve(process.cwd(), 'lib/qayyim/daily-round.ts'), 'utf8');
+    for (const organ of AUTONOMOUS_ORGANS) {
+      expect(round).toContain(organ.source);
+    }
+  });
+
+  it('the weekly cadences match the weekday gates in the round', () => {
+    const round = readFileSync(resolve(process.cwd(), 'lib/qayyim/daily-round.ts'), 'utf8');
+    expect(round).toContain('getUTCDay() === 0'); // الأحد — تدقيق الردود
+    expect(round).toContain('getUTCDay() === 1'); // الاثنين — المنافسون
+  });
+
   it('identity line names the agent and its live tool count', () => {
     const line = renderIdentityLine('qayyim-core', fixture);
     expect(line).toContain('مدير تشغيل المحتوى');
