@@ -196,12 +196,11 @@ export function inferUltimateTool(
   if (/اختبار.*حمل|load\s*test/i.test(lower)) {
     return { toolName: "qa_load_probe", params: {} };
   }
-  // Egyptian dialect for "the site feels slow" → real speed analysis
-  if (/سرعة|سرعه|تقيل|تقلان|بطي[ي]|بيتأخر|بيتهنج|slow|laggy|سلا|سلس/i.test(lower)) {
+  // Egyptian dialect for "the site feels slow" → real speed analysis.
+  // Optimization asks ("حسّن السرعة") must keep flowing to the legacy
+  // speed_optimize path below.
+  if (/سرعة|سرعه|تقيل|تقلان|بطي[ي]|بيتأخر|بيتهنج|slow|laggy|سلا|سلس/i.test(lower) && !/حسّن|تحسين|حسن|طوّر|تطوير|أحسن|optimize/i.test(lower)) {
     return { toolName: "speed_analyze", params: { url } };
-  }
-  if (/صحة.*النظام|النظام.*صحة|الموقع.*عايل|حاله.*السيرفر|system.*health|فحص.*نظام/i.test(lower)) {
-    return { toolName: "system_health_check", params: {} };
   }
   if (/إمكانية.*الوصول|accessib|a11y/i.test(lower)) {
     return { toolName: "qa_accessibility", params: {} };

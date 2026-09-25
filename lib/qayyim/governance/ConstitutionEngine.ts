@@ -259,10 +259,23 @@ export class ConstitutionEngine {
     if (input.actionType === 'draft' || input.actionType === 'publish') {
       const content = input.proposedChanges || input.content;
       if (content) {
-        const contentStr = JSON.stringify(content);
-        
-        // Check for English in Arabic content
-        const englishInArabic = /[A-Za-z]{4,}/.test(contentStr) && /[\u0600-\u06FF]/.test(contentStr);
+        // Scan ONLY human-readable string values. JSON.stringify(content) made
+        // every structured draft fail identity_law because english keys
+        // ("text","versionNumber") and URLs were treated as prose.
+        const strings: string[] = [];
+        const collect = (n: unknown): void => {
+          if (typeof n === "string") strings.push(n);
+          else if (Array.isArray(n)) n.forEach(collect);
+          else if (n && typeof n === "object") Object.values(n).forEach(collect);
+        };
+        collect(content);
+        const arabicTexts = strings.filter((t) => /[\u0600-\u06FF]/.test(t));
+        const contentStr = arabicTexts.join(" ");
+
+        // Check for English in Arabic content (URLs excluded)
+        const englishInArabic = arabicTexts.some((t) =>
+          /[A-Za-z]{4,}/.test(t.replace(/https?:\/\/\S+/g, ""))
+        );
         if (englishInArabic) {
           violations.push({
             ruleId: 'identity_law',
