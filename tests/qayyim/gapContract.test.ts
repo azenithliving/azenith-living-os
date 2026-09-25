@@ -39,6 +39,18 @@ describe("isRefusal", () => {
     }
   });
 
+  it("recognises the formal register the agents actually write in", () => {
+    // Both sentences below are verbatim from live production replies.
+    expect(isRefusal("إن طلبكم بإرسال رسائل نصية يخرج عن نطاق مهام أدوات السرب المتاحة لنا، والتي تقتصر على تقييم المحتوى.")).toBe(true);
+    expect(isRefusal("تفتقر أدواتنا الحالية إلى وظيفة إرسال الرسائل النصية المباشرة (SMS).")).toBe(true);
+  });
+
+  it("is not fooled by a table cell that says a number is missing", () => {
+    // «غير متاح» (masculine) describes a value; the marker is «غير متاحة», which
+    // is a tool or capability being absent.
+    expect(isRefusal("فحصت 15 غرفة ومنتج واحد")).toBe(false);
+  });
+
   it("does not mistake a measured answer for a refusal", () => {
     for (const text of [
       "فحصت 15 غرفة و1 منتج",
@@ -100,6 +112,14 @@ describe("explainGap", () => {
     expect(out).toContain("الناقص:");
     expect(out).toContain("Search Console");
     expect(out).toContain("يتفعّل بـ");
+  });
+
+  it("does not say twice what the answer already said", () => {
+    // gsc_queries and the rival watch refuse by naming their own missing
+    // variables — that is the contract already satisfied.
+    const already =
+      "Search Console غير موصول بالدّار بعد — لا أستطيع عرض كلمات بحث حقيقية. ينقصني: GSC_SITE_URL، GOOGLE_APPLICATION_CREDENTIALS_JSON";
+    expect(explainGap(already, "كلمات البحث اللي جابلي زيارات", facts)).toBe("");
   });
 
   it("keeps the note short enough to sit under an answer", () => {

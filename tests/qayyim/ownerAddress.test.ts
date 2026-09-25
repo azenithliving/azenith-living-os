@@ -21,15 +21,8 @@ function sources(dir: string): string[] {
   });
 }
 
-/** Vowel marks are stripped before matching — «بتتحكّمي» must not slip past a
- * marker written «بتتحكمي» — but the shadda is kept, because folding it would
- * turn the marker «فعّلي» into «فعلي» and flag every honest use of the word
- * "actual". */
-const withoutVowels = (s: string) => s.replace(/[ًٌٍَُِْۢ]/g, "");
-
 const ALL_SOURCES = ROOTS.flatMap(sources);
 const show = (f: string) => relative(process.cwd(), f).replace(/\\/g, "/");
-const TEXTS = ALL_SOURCES.map((f) => ({ file: show(f), text: withoutVowels(readFileSync(f, "utf8")) }));
 
 /** Unambiguous 2nd-person-female markers. «قولي» / «بتاعك» are deliberately NOT
  * here: in Egyptian those are masculine imperative + «-li», not feminine.

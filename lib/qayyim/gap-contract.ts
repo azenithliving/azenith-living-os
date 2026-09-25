@@ -31,7 +31,14 @@ export interface Gap {
  * broken.
  */
 const CAN_NOT =
-  "(?:مش|ما)\\s?(?:ه|ب)?أ?ق[ا]?در|لا\\s?أ?ستطيع|عجزت|خارج نطاق|out of scope|غير متاحة|مش متاحة|مش عندي";
+  "(?:مش|ما)\\s?(?:ه|ب)?أ?ق[ا]?در|لا\\s?أ?ستطيع|لا\\s?أ?قدر|عجزت|خارج نطاق|عن نطاق|out of scope|غير متاحة|مش متاحة|مش عندي|تفتقر|تقتصر";
+
+/**
+ * Refusals that already name their own gap. `gsc_queries` and the rival watch
+ * answer like this by design («ينقصني: GSC_SITE_URL…»), so a second note from
+ * here would say the same thing twice under the answer.
+ */
+const ALREADY_NAMED = /ينقصني|ينقصه|الناقص|يتفعّل بـ|التفعيل:/i;
 const REFUSAL = new RegExp(`(?:${CAN_NOT})\\s*$`, "i");
 const REFUSAL_ANYWHERE = new RegExp(CAN_NOT, "i");
 
@@ -127,7 +134,7 @@ export function nameGap(message: string, facts: GapFacts): Gap | null {
  * it sits under the answer, it does not replace it.
  */
 export function explainGap(reply: string, message: string, facts: GapFacts): string {
-  if (!isRefusal(reply)) return "";
+  if (!isRefusal(reply) || ALREADY_NAMED.test(reply)) return "";
   const gap = nameGap(message, facts);
   if (!gap) return "";
   return `\n\nالناقص: ${gap.capability}\nيتفعّل بـ: ${gap.enablePath}`;

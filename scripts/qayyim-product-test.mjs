@@ -36,7 +36,7 @@ const CASES = [
   // P6-M4 refusal contract. The assertion is an invariant, not a script: if the
   // swarm gives up, the answer must name the missing capability and how to switch
   // it on. An answer that works also passes — nothing is being forced.
-  { id: "core-gap", agent: "qayyim-core", msg: "ابعتلي رسالة نصية لما عمي يعمل طلب", expect: (m) => !/(مش قادر|ما ?قدرش|لا ?أ?ستطيع|خارج نطاق|غير متاحة)/.test(m) || /الناقص:/.test(m) },
+  { id: "core-gap", agent: "qayyim-core", msg: "ابعتلي رسالة نصية لما عمي يعمل طلب", expect: (m) => !/(مش قادر|ما ?أ?قدرش|لا ?أ?قدر|لا ?أ?ستطيع|خارج نطاق|عن نطاق|تفتقر|تقتصر|غير متاحة)/.test(m) || /الناقص:|ينقصني|التفعيل:|يتفعّل بـ/.test(m) },
   { id: "cont-health",  agent: "qayyim-cont", msg: "افحص صحة محتوى الصفحة الرئيسية", expect: (m, md) => md.tool === "content_health_check" || /محتوى/i.test(m) },
   { id: "seo-analyze",  agent: "qayyim-seo",  msg: "حلل SEO للصفحة الرئيسية", expect: (m, md) => /SEO|سيو|عنوان|meta/i.test(m) },
   { id: "ana-metrics",  agent: "qayyim-ana",  msg: "اعرض المؤشرات اللحظية للنظام", expect: (m, md) => md.tool === "metrics_realtime" || /مؤشر/i.test(m) },
