@@ -77,7 +77,7 @@ const a = audit.body?.results?.selfAudit;
 record(
   "audit-runs",
   audit.status === 200 && audit.body?.success === true && !!a && typeof a.sampled === "number",
-  `status ${audit.status}, ${a ? `sampled ${a.sampled}, judged ${a.judged}, outcome ${a.judgeOutcome}, avg ${a.avgScore}` : "no selfAudit in the round results"}`,
+  `status ${audit.status}, ${a ? `sampled ${a.sampled}, judged ${a.judged}, outcome ${a.judgeOutcome}, avg ${a.avgScore}, attempts ${JSON.stringify(a.judgeAttempts ?? [])}` : "no selfAudit in the round results"}`,
 );
 // Zero graded rows are only acceptable when the audit says exactly why.
 record(

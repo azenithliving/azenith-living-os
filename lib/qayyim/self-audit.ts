@@ -28,8 +28,7 @@ export const SELF_AUDIT_AGENT_KEY = "qayyim-core";
  * first, then the patient one — and never the whole function.
  */
 const DEFAULT_JUDGE_BUDGET_MS = 40_000;
-const GROQ_JUDGE_MS = 12_000;
-const GOOGLE_JUDGE_MS = 25_000;
+const GROQ_JUDGE_MS = 10_000;
 /** A one-word ack has nothing to grade; sending it to a model would only cost time. */
 const MIN_REPLY_CHARS = 40;
 const PASS_SCORE = 80;
@@ -247,6 +246,8 @@ export interface SelfAuditResult extends AuditSummary {
    * to the owner — one is a clean sheet, the other is an organ that is not running.
    */
   judgeOutcome: JudgeOutcome;
+  /** Which judge was tried, for how long, and how it ended. */
+  judgeAttempts: JudgeAttempt[];
   note: string;
   eventId: string | null;
 }
@@ -279,7 +280,10 @@ export async function runSelfAudit(
   companyId: string | null,
   opts: { limit?: number; windowRows?: number; budgetMs?: number } = {},
 ): Promise<SelfAuditResult> {
-  const limit = Math.max(1, opts.limit ?? 6);
+  // Four is what fits the clock, not what the ledger holds: a batch is graded in
+  // one call, and a bigger prompt pushes the answer past the function's own
+  // deadline, which loses every score instead of gaining a few.
+  const limit = Math.max(1, opts.limit ?? 4);
   const budgetMs = opts.budgetMs ?? DEFAULT_JUDGE_BUDGET_MS;
   const { data } = await supabaseServer
     .from("agent_messages")
@@ -292,14 +296,16 @@ export async function runSelfAudit(
   const scores: number[] = [];
   let writeFailures = 0;
   let outcome: JudgeOutcome = samples.length ? "pending" : "no-samples";
+  let attempts: JudgeAttempt[] = [];
   let verdicts: (JudgeVerdict | null)[] = [];
 
   if (samples.length) {
-    const raw = await askJudgeBatch(samples, budgetMs - (Date.now() - startedAt));
-    if (raw === null) {
+    const call = await askJudgeBatch(samples, budgetMs - (Date.now() - startedAt));
+    attempts = call.attempts;
+    if (call.raw === null) {
       outcome = "timeout";
     } else {
-      verdicts = parseJudgeBatch(raw, samples.length);
+      verdicts = parseJudgeBatch(call.raw, samples.length);
       outcome = verdicts.some(Boolean) ? "ok" : "unreadable";
     }
   }
@@ -362,6 +368,7 @@ export async function runSelfAudit(
           failures: summary.failures + writeFailures,
           skipped,
           judge_outcome: outcome,
+          judge_attempts: attempts,
           benchmark_key: SELF_AUDIT_BENCHMARK_KEY,
           note,
         },
@@ -371,30 +378,57 @@ export async function runSelfAudit(
     eventId = row?.id != null ? String(row.id) : null;
   }
 
-  return { ...summary, sampled: samples.length, skipped, judgeOutcome: outcome, note, eventId };
+  return { ...summary, sampled: samples.length, skipped, judgeOutcome: outcome, judgeAttempts: attempts, note, eventId };
 }
 
 /**
  * One round-trip for the whole sample, first the fast judge then the patient
- * one. Each provider gets its own slice of the budget: measured on production,
- * a single un-deadlined judge call was enough to blow the function cap and lose
- * the rows the audit had already earned.
+ * one. Every attempt is recorded with how long it took and how it ended: "the
+ * judge timed out" is only useful if the owner can see which judge, and for how
+ * long, otherwise the organ fails and the reason is folklore.
  */
-async function askJudgeBatch(samples: AuditSample[], ms: number): Promise<string | null> {
-  if (ms <= 0) return null;
+export interface JudgeAttempt {
+  provider: "groq" | "google";
+  ms: number;
+  outcome: "ok" | "slow" | "empty" | "error";
+}
+
+async function askJudgeBatch(samples: AuditSample[], ms: number): Promise<{ raw: string | null; attempts: JudgeAttempt[] }> {
+  const attempts: JudgeAttempt[] = [];
+  if (ms <= 0) return { raw: null, attempts };
   const messages = [
     { role: "system", content: SELF_AUDIT_SYSTEM },
     { role: "user", content: judgeBatchPrompt(samples) },
   ];
-  const groqSlice = Math.min(GROQ_JUDGE_MS, Math.max(1, Math.floor(ms / 3)));
-  const groq = await withDeadline(
-    askGroqMessages(messages, { temperature: 0, maxTokens: 900, jsonMode: true }),
-    groqSlice,
-  );
-  if (groq?.success && groq.content?.trim()) return groq.content;
+
+  const groqSlice = Math.min(GROQ_JUDGE_MS, Math.max(1, Math.floor(ms / 4)));
+  const groqStarted = Date.now();
+  try {
+    const groq = await withDeadline(askGroqMessages(messages, { temperature: 0, maxTokens: 900, jsonMode: true }), groqSlice);
+    if (groq === null) attempts.push({ provider: "groq", ms: Date.now() - groqStarted, outcome: "slow" });
+    else if (!groq.success) attempts.push({ provider: "groq", ms: Date.now() - groqStarted, outcome: "error" });
+    else if (!groq.content?.trim()) attempts.push({ provider: "groq", ms: Date.now() - groqStarted, outcome: "empty" });
+    else {
+      attempts.push({ provider: "groq", ms: Date.now() - groqStarted, outcome: "ok" });
+      return { raw: groq.content, attempts };
+    }
+  } catch {
+    attempts.push({ provider: "groq", ms: Date.now() - groqStarted, outcome: "error" });
+  }
 
   const left = ms - groqSlice;
-  if (left <= 0) return null;
-  const google = await withDeadline(askGoogleMessages(messages, { temperature: 0 }), Math.min(GOOGLE_JUDGE_MS, left));
-  return google?.success && google.content?.trim() ? google.content : null;
+  if (left <= 0) return { raw: null, attempts };
+  const googleStarted = Date.now();
+  try {
+    const google = await withDeadline(askGoogleMessages(messages, { temperature: 0 }), left);
+    if (google === null) attempts.push({ provider: "google", ms: Date.now() - googleStarted, outcome: "slow" });
+    else if (!google.success || !google.content?.trim()) attempts.push({ provider: "google", ms: Date.now() - googleStarted, outcome: "empty" });
+    else {
+      attempts.push({ provider: "google", ms: Date.now() - googleStarted, outcome: "ok" });
+      return { raw: google.content, attempts };
+    }
+  } catch {
+    attempts.push({ provider: "google", ms: Date.now() - googleStarted, outcome: "error" });
+  }
+  return { raw: null, attempts };
 }
