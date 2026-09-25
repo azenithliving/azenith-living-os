@@ -313,7 +313,7 @@ export class AgentOrchestrator {
             const historyCtx = prior
               .map((m: any) => `${m.sender_type === "agent" ? "القيّم" : "المالك"}: ${String(m.content).slice(0, 300)}`)
               .join("\n");
-            promptWithToolContext = `[حوارك الأخير مع المالك:\n${historyCtx}]\n\n${promptWithToolContext}`;
+            promptWithToolContext = `[حوارك الأخير مع المالك — للتذكير بالإشارات فقط، وممنوع نسخ تقارير سابقة منه:\n${historyCtx}]\n\n${promptWithToolContext}`;
           }
         } catch {}
       }

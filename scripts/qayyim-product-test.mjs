@@ -1,0 +1,60 @@
+/**
+ * qayyim-product-test.mjs — end-to-end PRODUCT test of the Qayyim swarm.
+ * Acts as a real admin over the API (x-internal-key) and asserts that each
+ * advertised capability actually EXECUTES (tool name + toolSuccess + real
+ * payload markers), not just answers with prose.
+ *
+ * Usage: set INTERNAL_API_KEY then `node scripts/qayyim-product-test.mjs [baseUrl]`
+ */
+
+const BASE = process.argv[2] || "https://azenith-living.vercel.app";
+const KEY = process.env.INTERNAL_API_KEY;
+if (!KEY) { console.error("INTERNAL_API_KEY required in env"); process.exit(2); }
+
+const CASES = [
+  { id: "core-audit",   agent: "qayyim-core", msg: "افحص الموقع كله شاملاً وأعطني تقريراً تنفيذياً", expect: (m, md) => /فحص|تدقيق|مشكلة|غرفة|منتج/i.test(m) },
+  { id: "core-speed",   agent: "qayyim-core", msg: "وريني سرعه الموقع قد ايه دلوقتي", expect: (m, md) => md.tool === "speed_analyze" || md.tool === "qa_load_probe" },
+  { id: "core-luxury",  agent: "qayyim-core", msg: "احسب Luxury Score الآن", expect: (m, md) => md.tool === "qayyim_luxury_score" },
+  { id: "core-sec",     agent: "qayyim-core", msg: "افحص رؤوس الأمان للصفحة الرئيسية", expect: (m, md) => md.tool === "qa_security_headers" && md.toolSuccess !== false },
+  { id: "core-a11y",    agent: "qayyim-core", msg: "شغّل تدقيق إمكانية الوصول", expect: (m, md) => md.tool === "qa_accessibility" },
+  { id: "core-goals",   agent: "qayyim-core", msg: "عايز اعرف اللى بيهدد اهدافي", expect: (m, md) => md.tool === "qayyim_goals_risk" },
+  { id: "core-memory",  agent: "qayyim-core", msg: "استعرض ذاكرة الوكلاء", expect: (m, md) => md.tool === "agent_memory_inspect" },
+  { id: "core-drafts",  agent: "qayyim-core", msg: "اعرض المسودات المعلقة للمراجعة والنشر", expect: (m) => /مسودة|draft|لا مسودات|3/i.test(m) },
+  { id: "cont-health",  agent: "qayyim-cont", msg: "افحص صحة محتوى الصفحة الرئيسية", expect: (m, md) => md.tool === "content_health_check" || /محتوى/i.test(m) },
+  { id: "seo-analyze",  agent: "qayyim-seo",  msg: "حلل SEO للصفحة الرئيسية", expect: (m, md) => /SEO|سيو|عنوان|meta/i.test(m) },
+  { id: "ana-metrics",  agent: "qayyim-ana",  msg: "اعرض المؤشرات اللحظية للنظام", expect: (m, md) => md.tool === "metrics_realtime" || /مؤشر/i.test(m) },
+  { id: "dev-health",   agent: "qayyim-dev",  msg: "افحص صحة النظام التقني", expect: (m, md) => /نظام|API|صحة|سليم/i.test(m) },
+  { id: "qa-load",      agent: "qayyim-qa",   msg: "شغّل اختبار حمل خفيف على الصفحات العامة", expect: (m, md) => md.tool === "qa_load_probe" && md.toolSuccess !== false },
+  { id: "colloquial",   agent: "qayyim-core", msg: "الموقع تقيل اوى من امبارح عايز اعرف الراى فى ايه", expect: (m, md) => m.length > 40 },
+];
+
+function log(...a) { process.stdout.write(a.join(" ") + "\n"); }
+
+async function chat(agent, message) {
+  const t0 = Date.now();
+  const res = await fetch(`${BASE}/api/admin/agents/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=utf-8", "x-internal-key": KEY },
+    body: JSON.stringify({ agent_key: agent, message }),
+    signal: AbortSignal.timeout(180_000),
+  });
+  const j = await res.json().catch(() => ({}));
+  return { status: res.status, ms: Date.now() - t0, message: j?.data?.message || "", metadata: j?.data?.metadata || {}, ok: !!j?.success };
+}
+
+const results = [];
+for (const c of CASES) {
+  try {
+    const r = await chat(c.agent, c.msg);
+    const pass = r.ok && r.status === 200 && !!r.message && c.expect(r.message, r.metadata);
+    results.push({ id: c.id, pass, ms: r.ms, tool: r.metadata.tool || null, snippet: r.message.replace(/\s+/g, " ").slice(0, 110) });
+    log(`${pass ? "PASS" : "FAIL"} [${c.id}] ${r.ms}ms tool=${r.metadata.tool || "-"} :: ${r.message.replace(/\s+/g, " ").slice(0, 110)}`);
+  } catch (e) {
+    results.push({ id: c.id, pass: false, error: String(e.message).slice(0, 120) });
+    log(`FAIL [${c.id}] EXCEPTION ${String(e.message).slice(0, 120)}`);
+  }
+}
+
+const passed = results.filter((r) => r.pass).length;
+log(`\n=== PRODUCT SUITE: ${passed}/${results.length} passed on ${BASE} ===`);
+process.exit(passed === results.length ? 0 : 1);

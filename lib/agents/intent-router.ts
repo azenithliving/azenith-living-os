@@ -81,7 +81,7 @@ export async function routeIntent(message: string): Promise<RoutedIntent | null>
 
 const NEEDS_URL = new Set([
   "speed_analyze", "speed_deep_audit", "seo_analyze", "seo_fix_issues",
-  "qa_security_headers", "content_health_check",
+  "qa_security_headers",
 ]);
 
 async function routeIntentInner(message: string): Promise<RoutedIntent | null> {
