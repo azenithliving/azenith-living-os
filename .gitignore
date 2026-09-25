@@ -44,3 +44,6 @@ test-results/
 .ua/
 *KEYS*.md
 clean.js
+
+# screenshots written by scripts/qayyim-ui-test.mjs on every run
+ui-test-final.png
