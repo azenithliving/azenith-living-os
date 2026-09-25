@@ -36,7 +36,23 @@ const CASES = [
   // P6-M4 refusal contract. The assertion is an invariant, not a script: if the
   // swarm gives up, the answer must name the missing capability and how to switch
   // it on. An answer that works also passes — nothing is being forced.
-  { id: "core-gap", agent: "qayyim-core", msg: "ابعتلي رسالة نصية لما عمي يعمل طلب", expect: (m) => !/(مش قادر|ما ?أ?قدرش|لا ?أ?قدر|لا ?أ?ستطيع|خارج نطاق|عن نطاق|تفتقر|تقتصر|غير متاحة)/.test(m) || /الناقص:|ينقصني|التفعيل:|يتفعّل بـ/.test(m) },
+  // P6-M4 refusal contract, as an invariant over three shapes of answer:
+  //  • a claim that something outbound HAPPENED, with no tool behind it, must
+  //    carry the correction (live defect: an agent answered «تنبيهات الطلبات —
+  //    مفعّلة الآن» to an SMS request; nothing in the swarm sends anything);
+  //  • a refusal must name the missing capability;
+  //  • an honest answer that neither claims nor refuses passes untouched.
+  {
+    id: "core-gap", agent: "qayyim-core", msg: "ابعتلي رسالة نصية لما عمي يعمل طلب",
+    expect: (m, md) => {
+      const claimsAct = /(مفعّلة الآن|مفعّله الآن|تم\s?تفعيل|بنرسل|بعتلهم|تم\s?إرسال)/.test(m);
+      const refuses = /(مش قادر|ما ?أ?قدرش|لا ?أ?قدر|لا ?أ?ستطيع|خارج نطاق|عن نطاق|تفتقر|تقتصر|غير متاحة)/.test(m);
+      const namesGap = /الناقص:|ينقصني|التفعيل:|يتفعّل بـ/.test(m);
+      if (claimsAct && !md.tool) return /تصحيح/.test(m);
+      if (refuses) return namesGap || /تصحيح/.test(m);
+      return true;
+    },
+  },
   { id: "cont-health",  agent: "qayyim-cont", msg: "افحص صحة محتوى الصفحة الرئيسية", expect: (m, md) => md.tool === "content_health_check" || /محتوى/i.test(m) },
   { id: "seo-analyze",  agent: "qayyim-seo",  msg: "حلل SEO للصفحة الرئيسية", expect: (m, md) => /SEO|سيو|عنوان|meta/i.test(m) },
   { id: "ana-metrics",  agent: "qayyim-ana",  msg: "اعرض المؤشرات اللحظية للنظام", expect: (m, md) => md.tool === "metrics_realtime" || /مؤشر/i.test(m) },

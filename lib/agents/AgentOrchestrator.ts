@@ -502,7 +502,7 @@ export class AgentOrchestrator {
       // path to switch it on, named from the real tool catalog. Measured answers
       // get nothing appended (the contract only fires on a refusal).
       if (response) {
-        const gapNote = explainGap(response, message, { tools: TOOL_CATALOG });
+        const gapNote = explainGap(response, message, { tools: TOOL_CATALOG }, { executed: toolResult?.success === true });
         if (gapNote) response = `${response}${gapNote}`;
       }
 

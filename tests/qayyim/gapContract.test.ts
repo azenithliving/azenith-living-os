@@ -3,7 +3,6 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { describe, it, expect } from "vitest";
 import { explainGap, isRefusal, nameGap, type GapFacts } from "@/lib/qayyim/gap-contract";
-
 /**
  * P6-M4 — the refusal contract.
  *
@@ -120,6 +119,32 @@ describe("explainGap", () => {
     const already =
       "Search Console غير موصول بالدّار بعد — لا أستطيع عرض كلمات بحث حقيقية. ينقصني: GSC_SITE_URL، GOOGLE_APPLICATION_CREDENTIALS_JSON";
     expect(explainGap(already, "كلمات البحث اللي جابلي زيارات", facts)).toBe("");
+  });
+
+  // Caught live: asked to send SMS to old customers, an agent answered with a
+  // table headed «[إشعار] تنبيهات الطلبات — مفعّلة الآن». Nothing in the swarm
+  // sends anything to anyone, so the owner was told a thing had happened that
+  // cannot have happened. A refusal is recoverable; a confident fabrication is
+  // what gets a budget approved.
+  it("corrects a claimed outbound act the swarm cannot perform", () => {
+    const claim = "[إشعار] تنبيهات الطلبات — مفعّلة الآن.\n| النوع | الهدف |\n| SMS | عملاء قدامى |";
+    const out = explainGap(claim, "ابعت SMS لكل عميل قديم", facts);
+    expect(out).toContain("ما حصلش");
+    expect(out).toContain("الناقص:");
+  });
+
+  it("leaves an honest answer about the shop's own WhatsApp alone", () => {
+    // Mentioning a channel the SHOP has is not claiming the SWARM performed one.
+    const honest = "تقدر توصّل طلبك، والدار عندها واتساب للحوار مباشرة.";
+    expect(explainGap(honest, "العميل يكلم مين؟", facts)).toBe("");
+  });
+
+  it("does not correct a claim a tool actually backed", () => {
+    // When lead_dossier_send really ran, «تم الإرسال» is a report. Calling it a
+    // fabrication would tell the owner the opposite of what happened.
+    const ran = "تم الإرسال — الدوسييه وصل بالبريد الإلكتروني.";
+    expect(explainGap(ran, "ابعت الدوسييه لعميل", facts, { executed: true })).toBe("");
+    expect(explainGap(ran, "ابعت الدوسييه لعميل", facts)).toContain("ما حصلش");
   });
 
   it("keeps the note short enough to sit under an answer", () => {

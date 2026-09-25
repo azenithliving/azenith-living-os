@@ -133,7 +133,49 @@ export function nameGap(message: string, facts: GapFacts): Gap | null {
  * The note itself, or "" when the reply did not refuse. Kept short and plain:
  * it sits under the answer, it does not replace it.
  */
-export function explainGap(reply: string, message: string, facts: GapFacts): string {
+/**
+ * Claims of having switched on, or already sent, an outbound channel.
+ *
+ * Caught live on production: asked to «ابعت SMS لكل عميل قديم», the content agent
+ * answered «[إشعار] تنبيهات الطلبات — مفعّلة الآن» with a table of actions. No
+ * tool in this swarm sends anything to anyone, so that sentence is not a
+ * misunderstanding to be tolerated — it is the shop telling its owner a thing
+ * happened that cannot have happened. A refusal is recoverable; a confident lie
+ * gets budget approved.
+ */
+const OUTBOUND =
+  /SMS|(?:رسائل|رسالة)\s?الإ?نص[ي]?ة|مكالمة|اتصال\s?(?:بيه|بيا|بينه|عليه)|بريد\s?الإ?لكتروني|واتس|whatsapp|email|call/i;
+const CLAIMS_DONE =
+  /مفعّلة الآن|مفعّله الآن|تم\s?تفعيل|التفعيل\s?تمام|بنرسل|هبنرسل|بعتلها|بعتله|وصلتهم|أرسلت|تم\s?الإ?رسال|يتم\s?الإ?رسال/i;
+
+/** The correction, appended when a reply claims an outbound act the swarm cannot
+ * perform. Kept factual and short: it says what does not exist, not what the
+ * model did wrong. */
+function outboundCorrection(message: string, facts: GapFacts): string {
+  const gap = nameGap(message, facts) ?? {
+    capability: "إرسال للخارج (رسالة نصية أو مكالمة أو بريد)",
+    enablePath: "محتاج خدمة مراسلة خارجية — دي الحاجة الوحيدة اللي بتاخد فلوس، والقاعدة صفر مدفوعات.",
+  };
+  return (
+    "\n\n⚠️ تصحيح: مفيش في عتاد السرب أداة بعت أو اتصال. اللي فوق ده ما حصلش." +
+    `\nالناقص: ${gap.capability}\nيتفعّل بـ: ${gap.enablePath}`
+  );
+}
+
+export function explainGap(
+  reply: string,
+  message: string,
+  facts: GapFacts,
+  opts: { executed?: boolean } = {},
+): string {
+  if (!reply) return "";
+
+  // The claim is checked first: a reply that both boasts and hedges would
+  // otherwise get only the softer refusal note. Skipped when a tool actually
+  // ran — `lead_dossier_send` saying «تم الإرسال» is a report, not a fabrication,
+  // and correcting it would tell the owner the opposite of the truth.
+  if (!opts.executed && OUTBOUND.test(reply) && CLAIMS_DONE.test(reply)) return outboundCorrection(message, facts);
+
   if (!isRefusal(reply) || ALREADY_NAMED.test(reply)) return "";
   const gap = nameGap(message, facts);
   if (!gap) return "";
