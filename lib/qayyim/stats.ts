@@ -228,7 +228,9 @@ function linearFit(values: number[]): { slope: number; intercept: number } {
   return { slope, intercept: meanY - slope * meanX };
 }
 
-function meanAbsolutePercentageError(actual: number[], fitted: number[]): number | null {
+/** Mean absolute percentage error, skipping zero actuals (where the percentage
+ * has no meaning). Null when fewer than two comparable points. */
+export function meanAbsolutePercentageError(actual: number[], fitted: number[]): number | null {
   const terms: number[] = [];
   for (let i = 0; i < actual.length; i++) {
     const a = actual[i];

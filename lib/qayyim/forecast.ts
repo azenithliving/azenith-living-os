@@ -15,7 +15,7 @@ import "server-only";
 
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 import { storeIdFilter } from "@/lib/company-scope";
-import { holtWinters, type ForecastMethod } from "./stats";
+import { holtWinters, meanAbsolutePercentageError, type ForecastMethod } from "./stats";
 
 export interface OrderRow {
   created_at: string;
@@ -37,6 +37,10 @@ export interface ForecastSummary {
   total: number;
   /** Mean absolute percentage error of one-step fits on the history. */
   mape: number | null;
+  /** Honest self-score: fit on the earlier days, then predict the last few and
+   * compare with what actually happened. Null when the history is too short to
+   * spare any days — an in-sample error flatters the model that produced it. */
+  backtest: { days: number; mape: number | null } | null;
   caveats: string[];
   history: { days: number; total: number; from: string; to: string };
   horizonDays: number;
@@ -103,6 +107,7 @@ export function forecastFromSeries(
     points: [],
     total: 0,
     mape: null,
+    backtest: null,
     caveats: [],
     history: { days: values.length, total: historyTotal, from: fromKey, to: dateKey(opts.endDate.getTime()) },
     horizonDays: horizon,
@@ -129,7 +134,26 @@ export function forecastFromSeries(
   if (f.method === "double-exponential") {
     caveats.push("الماضي أقصر من أسبوعين كاملين — الحساب غير موسمي (اتجاه وبس).");
   }
-  if (f.mape === null) {
+
+  // Self-score the honest way: hide the last week, predict it from what came
+  // before, and compare. The in-sample error below is reported only as a
+  // fallback, because a model graded on the days it was fitted to always looks
+  // better than it is.
+  const holdDays = Math.min(seasonLength, Math.floor(values.length / 3));
+  const backtest: ForecastSummary["backtest"] =
+    holdDays >= 4 && values.length - holdDays >= 2 * seasonLength
+      ? {
+          days: holdDays,
+          mape: meanAbsolutePercentageError(
+            values.slice(values.length - holdDays),
+            holtWinters(values.slice(0, values.length - holdDays), { seasonLength, horizon: holdDays }).forecast,
+          ),
+        }
+      : null;
+
+  if (backtest?.mape !== undefined && backtest?.mape !== null) {
+    caveats.push(`اختبار حقيقي: توقعنا آخر ${backtest.days} يوم من اللي قبلهم، والخطأ المتوسط ${Math.round(backtest.mape * 10) / 10}%.`);
+  } else if (f.mape === null) {
     caveats.push("دقة النموذج على الماضي مش مقاسة — أيام المدة كانت صفر أغلبها.");
   } else if (f.mape > 25) {
     caveats.push(`دقة النموذج على الماضي ضعيفة (خطأ متوسط ${Math.round(f.mape)}%) — الرقم للتقدير مش للتعهد.`);
@@ -144,6 +168,7 @@ export function forecastFromSeries(
     points,
     total: points.reduce((a, p) => a + p.value, 0),
     mape: f.mape,
+    backtest,
     caveats,
   };
 }

@@ -68,6 +68,29 @@ describe("forecastFromSeries", () => {
     expect(f.mape!).toBeLessThan(10);
   });
 
+  // An in-sample error flatters the model: it was fitted to those very days. The
+  // number the owner should trust is "forecast the last week from the weeks
+  // before it, then compare with what actually happened".
+  it("holds out real days and scores itself on them", () => {
+    const f = forecastFromSeries(seasonal, { horizon: 7, endDate: new Date("2026-09-25T12:00:00Z") });
+    expect(f.backtest).not.toBeNull();
+    expect(f.backtest!.days).toBeGreaterThanOrEqual(4);
+    expect(f.backtest!.mape).not.toBeNull();
+    expect(f.backtest!.mape!).toBeGreaterThan(0);
+    expect(f.backtest!.mape!).toBeLessThan(25);
+  });
+
+  it("does not claim a holdout it cannot run", () => {
+    const f = forecastFromSeries([1000, 200], { horizon: 7, endDate: new Date("2026-09-25T12:00:00Z") });
+    expect(f.backtest).toBeNull();
+  });
+
+  it("quotes the holdout error, not the flattering one", () => {
+    const f = forecastFromSeries(seasonal, { horizon: 7, endDate: new Date("2026-09-25T12:00:00Z") });
+    const text = renderForecast(f);
+    expect(text).toContain("اختبار");
+  });
+
   it("refuses when there is nothing to learn from", () => {
     const f = forecastFromSeries([0, 0], { horizon: 7, endDate: new Date("2026-09-25T12:00:00Z") });
     expect(f.refused).toBe(true);
