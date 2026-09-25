@@ -1,0 +1,95 @@
+// @vitest-environment node
+import { describe, it, expect } from 'vitest';
+import {
+  summariseOrderItems,
+  renderWorldDigest,
+  buildWorldModel,
+  type WorldModel,
+} from '@/lib/qayyim/world-model';
+
+describe('summariseOrderItems', () => {
+  it('reads unit_price and the bare price alias, and defaults quantity to 1', () => {
+    const r = summariseOrderItems([
+      { name: 'صالون إمبراطوري', quantity: 2, unit_price: 270000 },
+      { name: 'طاولة خشب طبيعي', price: 15000 },
+    ]);
+    expect(r).toEqual([
+      { name: 'صالون إمبراطوري', qty: 2, amount: 540000 },
+      { name: 'طاولة خشب طبيعي', qty: 1, amount: 15000 },
+    ]);
+  });
+
+  it('drops junk instead of inventing lines', () => {
+    expect(summariseOrderItems(null)).toEqual([]);
+    expect(summariseOrderItems('nope')).toEqual([]);
+    expect(summariseOrderItems([null, { name: '' }, { unit_price: 5 }, 'x'])).toEqual([]);
+  });
+
+  it('merges the same product across orders and sorts by amount', () => {
+    const r = summariseOrderItems([
+      { name: 'أ', quantity: 1, unit_price: 100 },
+      { name: 'ب', quantity: 1, unit_price: 900 },
+      { name: 'أ', quantity: 2, unit_price: 100 },
+    ]);
+    expect(r.map((x) => x.name)).toEqual(['ب', 'أ']);
+    expect(r[1].amount).toBe(300);
+    expect(r[1].qty).toBe(3);
+  });
+});
+
+const model: WorldModel = {
+  generatedAt: '2026-09-25T00:00:00.000Z',
+  companyId: 'c1',
+  window: { start: '2026-06-27', end: '2026-09-25' },
+  revenue: { total: 715000, orders: 5, avgOrder: 143000, byStatus: { confirmed: 2, processing: 2, completed: 1 } },
+  items: { lines: [{ name: 'صالون إمبراطوري', qty: 2, amount: 540000 }], emptyOrders: 2 },
+  catalog: { products: 1, roomSections: 15, activeSections: 15 },
+  visitors: { events7d: 69, sessions7d: 19, eventsPrev7d: 12, topPaths: [{ path: '/request', count: 30 }], adminEventsExcluded: 26 },
+  goals: { active: 0, overdue: 0 },
+  openProposals: 0,
+  openSuggestions: 1,
+  customerVoice: { sessions: 2, sessionsLast7d: 1 },
+  season: { currentKey: 'schools', currentName: 'موسم المدارس', nextName: 'رمضان', nextStart: '2027-02-08' },
+  coverage: ['1 طلب بلا company_id (محسوب ضمن الدار)'],
+  gaps: [],
+};
+
+describe('renderWorldDigest', () => {
+  it('states revenue, catalogue and season from real numbers', () => {
+    const d = renderWorldDigest(model);
+    expect(d).toContain('715000');
+    expect(d).toContain('15');
+    expect(d).toContain('موسم المدارس');
+    expect(d).toContain('/request');
+  });
+
+  it('stays inside the prompt budget', () => {
+    expect(renderWorldDigest(model).length).toBeLessThanOrEqual(1200);
+  });
+
+  it('says it could not read rather than claiming zero when everything is null', () => {
+    const blank: WorldModel = { ...model, revenue: null, catalog: null, visitors: null, gaps: ['المبيعات (timeout)'] };
+    const d = renderWorldDigest(blank);
+    expect(d).toContain('لم أستطع قراءة');
+    expect(d).not.toMatch(/إيرادات: 0 /);
+  });
+
+  it('keeps coverage honesty visible', () => {
+    expect(renderWorldDigest(model)).toContain('company_id');
+  });
+});
+
+describe('buildWorldModel without a company', () => {
+  it('skips the database entirely but still knows the season', async () => {
+    const m = await buildWorldModel(null, new Date('2026-09-25T09:00:00Z'));
+    expect(m.revenue).toBeNull();
+    expect(m.season.currentKey).toBe('schools');
+    expect(m.season.nextName).toBeTruthy();
+    expect(m.gaps.join(' ')).toMatch(/لم أُحدّد شركة|company/i);
+  });
+
+  it('uses the injected clock so the season is deterministic', async () => {
+    const m = await buildWorldModel(null, new Date('2026-12-01T09:00:00Z'));
+    expect(m.season.currentKey).toBeUndefined();
+  });
+});
