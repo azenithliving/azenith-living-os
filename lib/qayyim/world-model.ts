@@ -180,7 +180,7 @@ async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel,
       topPaths: [...paths.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([path, count]) => ({ path, count })),
       adminEventsExcluded,
     };
-    if (adminEventsExcluded) coverage.push(`${adminEventsExcluded} حدث خلال 14 يومًا من صفحات الإدارة/البوابة/API — مستثنى من عدّاد الزوار`);
+    if (adminEventsExcluded) coverage.push(`${adminEventsExcluded} حدث خلال 14 يومًا من صفحات الإدارة أو البوابة أو الـ API — مستثنى من عدّاد الزوار`);
   }
 
   const catalog: WorldModel["catalog"] =
