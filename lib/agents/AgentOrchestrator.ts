@@ -344,6 +344,18 @@ export class AgentOrchestrator {
         promptWithToolContext = `${renderIdentityLine(selectedAgent, self)}\n\n${promptWithToolContext}`;
       } catch {}
 
+      // P6-M2: the commander speaks about the business only from the live
+      // world model. Cached for 10 minutes inside the module, so a busy chat
+      // does not re-read the shop on every turn. Core only — the specialist
+      // agents get their own numbers from their own tools.
+      if (selectedAgent === "qayyim-core") {
+        try {
+          const { buildWorldModel, renderWorldDigest } = await import("@/lib/qayyim/world-model");
+          const world = await buildWorldModel(resolvedCompanyId);
+          promptWithToolContext = `${renderWorldDigest(world)}\n\n${promptWithToolContext}`;
+        } catch {}
+      }
+
       // ══════════════════════════════════════════════════════════════
       // قيّم-كور: ينسق السرب الكامل عبر MasterOrchestrator
       // المستخدم يتكلم مع القائد فقط — السرب يعمل خفياً في الخلفية

@@ -22,6 +22,12 @@ const CASES = [
   { id: "core-drafts",  agent: "qayyim-core", msg: "اعرض المسودات المعلقة للمراجعة والنشر", expect: (m) => /مسودة|draft|لا مسودات|3/i.test(m) },
   // P6-M1: identity must come from the live self-model (real tool count), not boilerplate.
   { id: "core-whoami",  agent: "qayyim-core", msg: "عرف نفسك", expect: (m, md) => md.tool === "qayyim_whoami" && /الأدوات المقاسة/.test(m) && /حدودي/.test(m) },
+  // P6-M2: business answers come from the world model. Either real digits from
+  // sales_orders, or an explicit "could not read" — never invented numbers.
+  { id: "core-world",   agent: "qayyim-core", msg: "ايزاي الشغل الفترة دي", expect: (m, md) => md.tool === "qayyim_world" && /عالم الدار/.test(m) && (/ج\.م/.test(m) || /لم أستطع قراءة/.test(m)) },
+  { id: "core-sells",   agent: "qayyim-core", msg: "إيه اللي بيتبيع عندنا؟", expect: (m, md) => md.tool === "qayyim_world" && (/الأكثر مبيعًا/.test(m) || /لم أضِف|لا أصناف/.test(m)) },
+  { id: "core-gsc",     agent: "qayyim-core", msg: "كلمات البحث اللي جابلي زيارات", expect: (m, md) => md.tool === "gsc_queries" && (/غير موصول/.test(m) ? /GOOGLE_APPLICATION_CREDENTIALS_JSON/.test(m) : /نقرة/.test(m)) },
+  { id: "core-rivals",  agent: "qayyim-core", msg: "المنافسين بيعملوا ايه", expect: (m, md) => md.tool === "qayyim_rivals" && /لم أضِف|منافس/.test(m) },
   { id: "cont-health",  agent: "qayyim-cont", msg: "افحص صحة محتوى الصفحة الرئيسية", expect: (m, md) => md.tool === "content_health_check" || /محتوى/i.test(m) },
   { id: "seo-analyze",  agent: "qayyim-seo",  msg: "حلل SEO للصفحة الرئيسية", expect: (m, md) => /SEO|سيو|عنوان|meta/i.test(m) },
   { id: "ana-metrics",  agent: "qayyim-ana",  msg: "اعرض المؤشرات اللحظية للنظام", expect: (m, md) => md.tool === "metrics_realtime" || /مؤشر/i.test(m) },
