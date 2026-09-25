@@ -43,10 +43,10 @@ const LIMITS = [
 type CounterKey = "drafts" | "goals" | "learnings" | "eventsToday";
 
 const COUNTER_LABELS: Record<CounterKey, string> = {
-  drafts: "المسودات المعلقة",
-  goals: "الأهداف النشطة",
-  learnings: "التعلّمات",
-  eventsToday: "أحداث آخر 24 ساعة",
+  drafts: "مسودات معلقة",
+  goals: "أهداف نشطة",
+  learnings: "تعلّمات مسجّلة",
+  eventsToday: "حدث آخر 24 ساعة",
 };
 
 type CountResult = { count: number | null; error: { message: string } | null };
@@ -92,7 +92,7 @@ export async function buildSelfModel(companyId: string | null): Promise<SelfMode
 export function renderSelfReport(m: SelfModel): string {
   const live = m.counters
     ? (Object.keys(COUNTER_LABELS) as CounterKey[]).map(
-        (k) => `${m.counters?.[k] ?? "؟"} ${COUNTER_LABELS[k].toLowerCase()}`
+        (k) => `${m.counters?.[k] ?? "؟"} ${COUNTER_LABELS[k]}`
       )
     : null;
 

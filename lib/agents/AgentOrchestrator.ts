@@ -334,6 +334,16 @@ export class AgentOrchestrator {
         }
       } catch {}
 
+      // P6-M1: every agent knows itself before it speaks. Built with no
+      // companyId on purpose — the identity line only names the title, the
+      // agent's own roles and the live tool count, so a chat turn never pays
+      // for the DB counters (the qayyim_whoami tool renders those).
+      try {
+        const { buildSelfModel, renderIdentityLine } = await import("@/lib/qayyim/self-model");
+        const self = await buildSelfModel(null);
+        promptWithToolContext = `${renderIdentityLine(selectedAgent, self)}\n\n${promptWithToolContext}`;
+      } catch {}
+
       // ══════════════════════════════════════════════════════════════
       // قيّم-كور: ينسق السرب الكامل عبر MasterOrchestrator
       // المستخدم يتكلم مع القائد فقط — السرب يعمل خفياً في الخلفية
