@@ -4,6 +4,7 @@ import { askGroq, askOrchestratorMessages } from "@/lib/ai-orchestrator";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { predatoryDefense } from "@/lib/predatory-defense";
 import { semanticCache } from "@/lib/semantic-cache";
+import { pickFaqAnswer, type FaqRow } from "@/lib/consultant/faq-gate";
 import { sendTelegramMessage, broadcastTelegramMessage } from "@/lib/telegram-config";
 import { storeMemory, storeUserPreference, getUserPreferences } from "@/lib/ultimate-agent/memory-store";
 import { LearningEngine } from "@/lib/ultimate-agent/learning-engine";
@@ -641,6 +642,39 @@ export async function POST(
         await saveSession(sessionId, conversationHistory, nextInsights);
         return NextResponse.json({ reply: failureReply, sessionId });
       }
+    }
+
+    // --- P6-M4: the owner's own approved words answer first ---
+    // consultant_faq has held signed question/answer pairs since migration 024
+    // and nothing ever read them back, so every visitor question went to a
+    // model instead. A row is only spoken in his name when it has an approver
+    // and is switched on, and only when the question really matches it; anything
+    // else keeps flowing to the model and the human takeover below.
+    try {
+      const { data: faqRows } = await supabase
+        .from("consultant_faq")
+        .select("id,question,answer,approved_by,is_active")
+        .eq("is_active", true)
+        .not("approved_by", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      const faqHit = pickFaqAnswer(message, (faqRows || []) as FaqRow[]);
+      if (faqHit) {
+        conversationHistory.push({
+          role: "assistant",
+          content: faqHit.row.answer,
+          timestamp: new Date().toISOString(),
+        });
+        await saveSession(sessionId, conversationHistory, nextInsights);
+        return NextResponse.json({
+          reply: faqHit.row.answer,
+          sessionId,
+          answeredFrom: "consultant_faq",
+          confidence: Math.round(faqHit.score * 100) / 100,
+        });
+      }
+    } catch (faqErr) {
+      console.warn("[Consultant] approved-FAQ lookup failed, continuing with the model:", faqErr);
     }
 
     // --- L0-L3 SEMANTIC NEURAL CACHE ---
