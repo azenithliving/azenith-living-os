@@ -30,6 +30,10 @@ describe("isRefusal", () => {
       "لا أستطيع تنفيذ ذلك",
       "هذا الطلب خارج نطاق اختصاصي",
       "عذراً، الأداة غير متاحة",
+      // Both spellings seen live on production: the future («won't be able») and
+      // the habitual («don't know how») are different constructions in Egyptian.
+      "مش هقدر أبعت SMS؛ الأدوات ناقصها وكيل إشعارات",
+      "مش بقدر أعدّ المخزون من هنا",
     ]) {
       expect(isRefusal(text)).toBe(true);
     }

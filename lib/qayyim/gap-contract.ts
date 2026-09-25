@@ -30,10 +30,10 @@ export interface Gap {
  * empty. Dressing the second one in a gap note would make the honest case look
  * broken.
  */
-const REFUSAL =
-  /(?:مش قادر|ما ?أ?قدرش|لا ?أ?قدر|لا ?أ?ستطيع|عجزت|خارج نطاق|out of scope|غير متاحة|مش متاحة|مش عندي)\s*$/i;
-const REFUSAL_ANYWHERE =
-  /(?:مش قادر|ما ?أ?قدرش|لا ?أ?قدر|لا ?أ?ستطيع|عجزت|خارج نطاق|out of scope|غير متاحة|مش متاحة|مش عندي أداة)/i;
+const CAN_NOT =
+  "(?:مش|ما)\\s?(?:ه|ب)?أ?ق[ا]?در|لا\\s?أ?ستطيع|عجزت|خارج نطاق|out of scope|غير متاحة|مش متاحة|مش عندي";
+const REFUSAL = new RegExp(`(?:${CAN_NOT})\\s*$`, "i");
+const REFUSAL_ANYWHERE = new RegExp(CAN_NOT, "i");
 
 export function isRefusal(text: string): boolean {
   if (!text) return false;
