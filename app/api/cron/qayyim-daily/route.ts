@@ -15,8 +15,12 @@ export const maxDuration = 60;
 async function handle(request: NextRequest) {
   const unauthorized = assertCronAuthorized(request);
   if (unauthorized) return unauthorized;
+  // `?only=` runs one weekly organ on demand (still behind the cron secret):
+  // Sunday-only and Monday-only code should be provable today, not next weekend.
+  const only = new URL(request.url).searchParams.get("only");
+  const step = only === "audit" || only === "canary" ? only : undefined;
   try {
-    return NextResponse.json(await executeDailyRound());
+    return NextResponse.json(await executeDailyRound({ only: step }));
   } catch (error: any) {
     console.error("[Qayyim Daily Cron] Error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

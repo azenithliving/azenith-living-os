@@ -34,6 +34,13 @@ export interface DailyRoundResults {
   anomaly?: unknown;
   anomalyDigest?: string;
   anomalyReadError?: string;
+  /** P6-M5 canary: the public pages pushed this morning, with their real codes. */
+  canary?: unknown;
+  canaryDigest?: string;
+  canaryError?: string;
+  /** P6-M5 self-audit (Sundays): an outside judge grading replies the owner got. */
+  selfAudit?: unknown;
+  selfAuditNote?: string;
   /** P6-M4: the morning report on Telegram — reported, never assumed. */
   telegramSent?: boolean;
   telegramReason?: string;
@@ -50,9 +57,22 @@ export interface DailyRoundOutcome {
   skipped?: string;
 }
 
-export async function executeDailyRound(): Promise<DailyRoundOutcome> {
+/**
+ * `only` runs a single weekly step on demand. Hobby gives this app one schedule a
+ * day, so without it a Sunday-only organ could only ever be claimed, never
+ * verified — and a claim the owner cannot re-run is exactly what P6 exists to kill.
+ */
+export type RoundStep = "audit" | "canary";
+
+/** Kept under the platform's 60s cap so the round finishes reporting itself. */
+const ROUND_BUDGET_MS = 45_000;
+
+export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promise<DailyRoundOutcome> {
   const companyId = await resolveAdminCompanyId();
   if (!companyId) return { success: false, error: "No company configured" };
+
+  const startedAt = Date.now();
+  const remainingMs = () => Math.max(0, ROUND_BUDGET_MS - (Date.now() - startedAt));
 
   const results: DailyRoundResults = {
     luxuryScore: null,
@@ -61,6 +81,52 @@ export async function executeDailyRound(): Promise<DailyRoundOutcome> {
     rivals: null,
     errors: [],
   };
+
+  // (a0) P6-M5 canary — pushed first, while the whole time budget is still
+  // available. A storefront that does not open makes every other measurement in
+  // this round irrelevant, and it is the one failure the owner cannot see from a
+  // dashboard.
+  const canaryStep = async () => {
+    try {
+      const { runCanary } = await import("@/lib/qayyim/canary");
+      const c = await runCanary({ budgetMs: Math.min(24_000, remainingMs()) });
+      results.canary = c;
+      results.canaryDigest = c.digest;
+      results.canaryError = c.error;
+      if (c.error) results.errors.push(`كاناري: ${c.error}`);
+      else if (c.alerted && !c.proposalCreated) results.errors.push(`كاناري: الاقتراح ما اتسجلش (${c.error ?? "بدون سبب"})`);
+    } catch (e: any) {
+      results.errors.push(`كاناري: ${e.message}`);
+      results.canaryError = e.message;
+    }
+  };
+
+  // (a1) P6-M5 self-audit — an outside judge grading real replies. Weekly in the
+  // body of the round, but callable on its own because Sunday-only code that has
+  // never actually run on a Sunday is only a story.
+  const auditStep = async () => {
+    try {
+      const { runSelfAudit } = await import("@/lib/qayyim/self-audit");
+      const a = await runSelfAudit(companyId, { budgetMs: Math.min(30_000, remainingMs()) });
+      results.selfAudit = a;
+      results.selfAuditNote = a.note;
+      if (a.judged === 0 && a.sampled > 0) results.errors.push(`تدقيق الردود: ${a.note}`);
+    } catch (e: any) {
+      results.errors.push(`تدقيق الردود: ${e.message}`);
+      results.selfAuditNote = `استثناء: ${e.message}`;
+    }
+  };
+
+  if (opts.only === "canary") {
+    await canaryStep();
+    return { success: true, results };
+  }
+  if (opts.only === "audit") {
+    await auditStep();
+    return { success: true, results };
+  }
+
+  await canaryStep();
 
   // (a) Luxury score — measured from real signals (images, prices, SEO, load,
   // alt text), not from asking a model how luxurious the shop feels.
@@ -230,7 +296,12 @@ export async function executeDailyRound(): Promise<DailyRoundOutcome> {
     results.errors.push(`إغلاق المهام المعلقة: ${e.message}`);
   }
 
-  // (h) P6-M4 — the morning story on the owner's phone, through the store's
+  // (h) P6-M5 — once a week the swarm is graded by something other than itself.
+  // Same weekday-gate trick as the rival read: the platform schedule stays daily
+  // because Hobby allows exactly one, so the weekly rhythm lives here.
+  if (new Date().getUTCDay() === 0) await auditStep();
+
+  // (i) P6-M4 — the morning story on the owner's phone, through the store's
   // existing Telegram transport (no second config, no second sender). A round
   // that ran and a round that reached him are two different facts, so the result
   // says which one happened instead of leaving him to discover the difference.

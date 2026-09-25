@@ -21,6 +21,7 @@ export type SyncEventType =
   | 'agent_task_failed'
   | 'market_update'
   | 'anomaly_detected'
+  | 'self_audit_completed'
   | 'quality_gate_passed'
   | 'quality_gate_failed'
   | 'identity_violation'
