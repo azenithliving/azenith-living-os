@@ -199,7 +199,7 @@ export function inferUltimateTool(
   // Egyptian dialect for "the site feels slow" → real speed analysis.
   // Optimization asks ("حسّن السرعة") must keep flowing to the legacy
   // speed_optimize path below.
-  if (/سرعة|سرعه|تقيل|تقلان|بطي[ي]|بيتأخر|بيتهنج|slow|laggy|سلا|سلس/i.test(lower) && !/حسّن|تحسين|حسن|طوّر|تطوير|أحسن|optimize/i.test(lower)) {
+  if (/سرعة|سرعه|تقيل|تقلان|بطي|بيتأخر|بيتهنج|slow|sluggish|laggy|سلا|سلس/i.test(lower) && !/حسّن|تحسين|حسن|طوّر|تطوير|أحسن|optimize/i.test(lower)) {
     return { toolName: "speed_analyze", params: { url } };
   }
   if (/إمكانية.*الوصول|accessib|a11y/i.test(lower)) {
