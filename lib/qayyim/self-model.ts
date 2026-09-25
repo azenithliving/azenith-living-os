@@ -20,8 +20,9 @@ export interface SelfModel {
   /** What runs on its own schedule. Declared here so `whoami` cannot forget it. */
   organs: Organ[];
   counters?: { drafts?: number; goals?: number; learnings?: number; eventsToday?: number };
-  /** Counters whose query failed — reported instead of silently reading as zero. */
-  dataGaps?: string[];
+  /** Counters whose query failed — reported instead of silently reading as zero.
+   * `label` is what the owner reads, `reason` is the provider's own words. */
+  dataGaps?: Array<{ label: string; reason: string }>;
 }
 
 export interface Organ {
@@ -55,13 +56,17 @@ const AGENT_NAMES: Record<string, string> = {
 };
 
 const LIMITS = [
-  "كرون يومي واحد كحد أقصى (Vercel Hobby)",
-  "لا نشر بلا موافقة بشرية (دستور — قاعدة 3)",
+  "كرون يومي واحد كحد أقصى، لأن منصة الاستضافة المجانية لا تسمح بأكثر",
+  "لا نشر بلا موافقة بشرية — القاعدة الثالثة في الدستور",
   "صفر خدمات مدفوعة",
   "روابط وأرقام من خريطة المسارات وقاعدة البيانات فقط",
 ];
 
 type CounterKey = "drafts" | "goals" | "learnings" | "eventsToday";
+
+/** How many tool ids the report spells out. The count is the honest headline;
+ * the list is for the owner to recognise a name he has already seen. */
+export const TOOLS_LISTED = 6;
 
 const COUNTER_LABELS: Record<CounterKey, string> = {
   drafts: "مسودات معلقة",
@@ -101,9 +106,9 @@ export async function buildSelfModel(companyId: string | null): Promise<SelfMode
   ];
 
   const counters: NonNullable<SelfModel["counters"]> = {};
-  const gaps: string[] = [];
+  const gaps: NonNullable<SelfModel["dataGaps"]> = [];
   for (const [key, res] of results) {
-    if (res.error) gaps.push(`${COUNTER_LABELS[key]} (${res.error.message})`);
+    if (res.error) gaps.push({ label: COUNTER_LABELS[key], reason: res.error.message });
     else counters[key] = res.count ?? 0;
   }
   model.counters = counters;
@@ -120,13 +125,17 @@ export function renderSelfReport(m: SelfModel): string {
 
   return [
     `**${m.title}** (${m.brand}) — تقرير ذاتي حي`,
-    `• الوكلاء: ${m.agents.length} — ${m.agents.map((a) => `${a.name}(${a.roles} دورًا)`).join("، ")}`,
-    `• الأدوات المقاسة: ${m.tools.length} أداة — ${m.tools
-      .slice(0, 6)
+    `• الوكلاء: ${m.agents.length} — ${m.agents.map((a) => `${a.name} (${a.roles} دورًا)`).join("، ")}`,
+    // Tool ids are Latin. In an Arabic sentence the bidi renderer flips the
+    // whole line, so they go under their own Arabic caption instead.
+    `• الأدوات المقاسة: ${m.tools.length} أداة، أوّل ${Math.min(m.tools.length, TOOLS_LISTED)} أسماءها في السطر التالي`,
+    m.tools
+      .slice(0, TOOLS_LISTED)
       .map((t) => t.name)
-      .join("، ")}${m.tools.length > 6 ? "…" : ""}`,
+      .join(", "),
     live ? `• الآن: ${live.join(" · ")}` : "• العدادات غير متاحة (لا شركة محددة)",
-    m.dataGaps?.length ? `• لم أستطع قراءة: ${m.dataGaps.join("، ")}` : "",
+    m.dataGaps?.length ? `• لم أستطع قراءة: ${m.dataGaps.map((g) => g.label).join("، ")}` : "",
+    ...(m.dataGaps?.map((g) => g.reason) ?? []),
     `• اللي بيحصل لوحده من غير ما تطلب: ${m.organs.map((o) => `${o.label}: ${o.cadence}`).join("، ")}`,
     `• حدودي المعلنة: ${m.limits.join("؛ ")}`,
     "لو طلبتُ خارج هذه الحدود هقولك بصراحة وسمّي الناقص.",

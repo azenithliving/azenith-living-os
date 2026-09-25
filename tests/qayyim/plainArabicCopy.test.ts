@@ -7,6 +7,7 @@ import { buildDailyStory } from "@/lib/qayyim/daily-story";
 import { explainGap, type GapFacts } from "@/lib/qayyim/gap-contract";
 import { renderForecast, forecastFromSeries } from "@/lib/qayyim/forecast";
 import { renderAnomalyDigest } from "@/lib/qayyim/anomaly";
+import { renderSelfReport, buildSelfModel, AUTONOMOUS_ORGANS, type SelfModel } from "@/lib/qayyim/self-model";
 
 /**
  * The owner reads Arabic only, and this is not a taste question: a Latin token,
@@ -118,5 +119,42 @@ describe("owner-facing copy is Arabic per line", () => {
     expect(
       mixedLines(renderAnomalyDigest([{ date: "2026-09-21", count: 51, z: 5.2, baseline: 4 }]))
     ).toEqual([]);
+  });
+
+  /**
+   * The self-report is the one answer the owner reads for its own sake, and it
+   * shipped with tool ids and a platform name sitting inside Arabic sentences —
+   * the exact shape the rule exists to stop. Identifiers are still listed, just
+   * on lines of their own.
+   */
+  it("the self report, with counters and without", () => {
+    const withCounters: SelfModel = {
+      generatedAt: "2026-09-26T00:00:00Z",
+      title: "مدير تشغيل المحتوى",
+      brand: "قيّم الدار",
+      agents: [{ key: "qayyim-core", name: "القائد", roles: 6 }],
+      tools: [
+        { name: "qayyim_whoami", desc: "تقرير ذاتي" },
+        { name: "seo_analyze", desc: "تحليل ظهور" },
+      ],
+      limits: ["كرون يومي واحد كحد أقصى"],
+      organs: AUTONOMOUS_ORGANS,
+      counters: { drafts: 3, goals: 1, learnings: 5, eventsToday: 12 },
+      dataGaps: [{ label: "أهداف نشطة", reason: "relation qayyim_goals does not exist" }],
+    };
+    expect(mixedLines(renderSelfReport(withCounters))).toEqual([]);
+    expect(mixedLines(renderSelfReport({ ...withCounters, counters: undefined }))).toEqual([]);
+    // the identifiers did not disappear, they just got their own line
+    const report = renderSelfReport(withCounters);
+    expect(report).toContain("qayyim_whoami");
+    expect(report.split("\n").find((l) => l.includes("qayyim_whoami"))).not.toMatch(/\p{Script=Arabic}/u);
+  });
+
+  /** The shipped limits text, not a fixture's: it named the hosting platform
+   * inside an Arabic sentence, and only the real registry carries that. */
+  it("the live registry renders without a mixed line", async () => {
+    const real = await buildSelfModel(null);
+    expect(real.tools.length).toBeGreaterThan(10);
+    expect(mixedLines(renderSelfReport(real))).toEqual([]);
   });
 });
