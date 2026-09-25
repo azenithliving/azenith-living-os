@@ -20,6 +20,8 @@ const CASES = [
   { id: "core-goals",   agent: "qayyim-core", msg: "عايز اعرف اللى بيهدد اهدافي", expect: (m, md) => md.tool === "qayyim_goals_risk" },
   { id: "core-memory",  agent: "qayyim-core", msg: "استعرض ذاكرة الوكلاء", expect: (m, md) => md.tool === "agent_memory_inspect" },
   { id: "core-drafts",  agent: "qayyim-core", msg: "اعرض المسودات المعلقة للمراجعة والنشر", expect: (m) => /مسودة|draft|لا مسودات|3/i.test(m) },
+  // P6-M1: identity must come from the live self-model (real tool count), not boilerplate.
+  { id: "core-whoami",  agent: "qayyim-core", msg: "عرف نفسك", expect: (m, md) => md.tool === "qayyim_whoami" && /الأدوات المقاسة/.test(m) && /حدودي/.test(m) },
   { id: "cont-health",  agent: "qayyim-cont", msg: "افحص صحة محتوى الصفحة الرئيسية", expect: (m, md) => md.tool === "content_health_check" || /محتوى/i.test(m) },
   { id: "seo-analyze",  agent: "qayyim-seo",  msg: "حلل SEO للصفحة الرئيسية", expect: (m, md) => /SEO|سيو|عنوان|meta/i.test(m) },
   { id: "ana-metrics",  agent: "qayyim-ana",  msg: "اعرض المؤشرات اللحظية للنظام", expect: (m, md) => md.tool === "metrics_realtime" || /مؤشر/i.test(m) },
