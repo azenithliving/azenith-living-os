@@ -265,8 +265,11 @@ export class AgentOrchestrator {
       }
 
       // ── فحص وتنفيذ الأدوات الحقيقية إن وجدت ───────────────────────
-      // P5-R1: dialect-first routing (regex fast-path, then LLM intent map)
-      const inferredTool = await routeIntent(message);
+      // P5-R1: dialect-first routing (regex fast-path, then LLM intent map).
+      // Site-wide audit requests must reach the audit shortcut / swarm, never
+      // be hijacked into a single narrow tool.
+      const isSiteAudit = selectedAgent === "qayyim-core" && /افحص الموقع|الموقع كله|تقرير.*(تنفيذي|شامل)|دقّق.*شامل|audit.*site/i.test(message);
+      const inferredTool = isSiteAudit ? null : await routeIntent(message);
       let toolResult: any = null;
       let toolContextStr = "";
 

@@ -1061,7 +1061,7 @@ export async function executeSystemHealthCheck(
     if (!supabase) return { ok: false, latencyMs: null as number | null, error: "SUPABASE_SERVICE_ROLE_KEY missing" };
     const t0 = Date.now();
     try {
-      const { error } = await supabase.from("site_settings").select("id").limit(1).single();
+      const { error } = await supabase.from("site_settings").select("*").limit(1).maybeSingle();
       const latencyMs = Date.now() - t0;
       return { ok: !error, latencyMs, error: error?.message ?? null };
     } catch (e) {

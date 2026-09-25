@@ -165,17 +165,22 @@ export async function analyzeSEO(
       affectedRows: 1,
     };
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    const errorMsg =
+      error instanceof Error ? error.message
+      : typeof error === "string" ? error
+      : (() => { try { return JSON.stringify(error); } catch { return "Unknown error"; } })();
     const executionTimeMs = Date.now() - startTime;
 
-    await logAuditEvent(
-      "seo_analysis",
-      `Failed to analyze ${url}`,
-      context?.actorUserId || "system",
-      { url, error: errorMsg },
-      "failure",
-      { companyId: context?.companyId, actorUserId: context?.actorUserId, commandLogId: context?.commandLogId }
-    );
+    try {
+      await logAuditEvent(
+        "seo_analysis",
+        `Failed to analyze ${url}`,
+        context?.actorUserId || "system",
+        { url, error: errorMsg },
+        "failure",
+        { companyId: context?.companyId, actorUserId: context?.actorUserId, commandLogId: context?.commandLogId }
+      );
+    } catch { /* audit must never mask the real failure */ }
 
     return {
       success: false,
