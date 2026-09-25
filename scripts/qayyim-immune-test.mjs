@@ -77,13 +77,13 @@ const a = audit.body?.results?.selfAudit;
 record(
   "audit-runs",
   audit.status === 200 && audit.body?.success === true && !!a && typeof a.sampled === "number",
-  `status ${audit.status}, ${a ? `sampled ${a.sampled}, judged ${a.judged}, avg ${a.avgScore}` : "no selfAudit in the round results"}`,
+  `status ${audit.status}, ${a ? `sampled ${a.sampled}, judged ${a.judged}, outcome ${a.judgeOutcome}, avg ${a.avgScore}` : "no selfAudit in the round results"}`,
 );
-// An audit that judged nothing must say why instead of reporting a clean sheet.
+// Zero graded rows are only acceptable when the audit says exactly why.
 record(
-  "audit-honest-when-empty",
-  !!a && (a.judged > 0 || (a.note || "").length > 10),
-  a?.judged ? `${a.judged} graded` : `note: ${a?.note ?? "none"}`,
+  "audit-explains-itself",
+  !!a && (a.judged > 0 || ["no-samples", "timeout", "unreadable"].includes(a.judgeOutcome)) && (a.note || "").length > 10,
+  a ? `${a.judgeOutcome} — ${a.note}` : "no audit result",
 );
 
 const bm = await fetch(`${BASE}/api/admin/qayyim/benchmarks`, { headers: { "x-internal-key": KEY } });

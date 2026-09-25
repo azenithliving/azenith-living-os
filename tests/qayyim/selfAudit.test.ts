@@ -2,11 +2,14 @@
 import { describe, it, expect } from 'vitest';
 import {
   SELF_AUDIT_SYSTEM,
+  judgeBatchPrompt,
   judgePrompt,
-  pickAuditSamples,
+  parseJudgeBatch,
   parseJudgeVerdict,
+  pickAuditSamples,
   scoreOf,
   withDeadline,
+  type AuditSample,
   type MessageRow,
 } from '@/lib/qayyim/self-audit';
 
@@ -202,6 +205,71 @@ describe('withDeadline — the audit cannot turn into a 504', () => {
     const slow = new Promise<string>((r) => setTimeout(() => r('x'), 60));
     expect(await withDeadline(slow, 0)).toBeNull();
     expect(Date.now() - started).toBeLessThan(40);
+  });
+});
+
+describe('parseJudgeBatch — one call, many verdicts', () => {
+  const v = (index: number, accuracy = 3) => `{"index":${index},"accuracy":${accuracy},"brevity":2,"honesty":3,"note":"س"}`;
+
+  it('reads the verdicts object and lines it up by index', () => {
+    const raw = `{"verdicts":[${v(1)},${v(0, 1)}]}`;
+    const got = parseJudgeBatch(raw, 2);
+    expect(got[0]?.accuracy).toBe(1);
+    expect(got[1]?.accuracy).toBe(3);
+  });
+
+  it('accepts a bare array', () => {
+    expect(parseJudgeBatch(`[${v(0)},${v(1)}]`, 2).every(Boolean)).toBe(true);
+  });
+
+  it('falls back to order when the model drops the index field', () => {
+    const raw = '[{"accuracy":1,"brevity":1,"honesty":3,"note":"أ"},{"accuracy":2,"brevity":1,"honesty":3,"note":"ب"}]';
+    expect(parseJudgeBatch(raw, 2).map((x) => x?.accuracy)).toEqual([1, 2]);
+  });
+
+  // The honest half of batching: a reply the judge skipped stays unscored
+  // instead of being given a neutral number to make the row count look tidy.
+  it('keeps the gap when the answer is shorter than the sample', () => {
+    const got = parseJudgeBatch(`{"verdicts":[${v(0)}]}`, 3);
+    expect(got[0]).not.toBeNull();
+    expect(got.slice(1)).toEqual([null, null]);
+  });
+
+  it('drops one broken verdict without losing its neighbours', () => {
+    const raw = `{"verdicts":[${v(0)},{"index":1,"accuracy":"تلاتة","brevity":1,"honesty":1},${v(2)}]}`;
+    const got = parseJudgeBatch(raw, 3);
+    expect([got[0], got[2]]).toEqual([expect.objectContaining({ accuracy: 3 }), expect.objectContaining({ accuracy: 3 })]);
+    expect(got[1]).toBeNull();
+  });
+
+  it('returns an all-empty batch for prose', () => {
+    expect(parseJudgeBatch('الردود كانت مقبولة عموماً', 2)).toEqual([null, null]);
+  });
+
+  it('never invents a verdict for a count of zero', () => {
+    expect(parseJudgeBatch(`{"verdicts":[${v(0)}]}`, 0)).toEqual([]);
+  });
+});
+
+describe('judgeBatchPrompt', () => {
+  const sample = (i: number): AuditSample => ({
+    messageId: `m${i}`,
+    conversationId: 'c1',
+    agentKey: 'qayyim-core',
+    question: `سؤال ${i}`,
+    reply: `رد ${i}`,
+  });
+
+  it('numbers every sample so the verdicts can be matched back', () => {
+    const prompt = judgeBatchPrompt([sample(0), sample(1), sample(2)]);
+    expect(prompt).toContain('رد رقم 0');
+    expect(prompt).toContain('رد رقم 2');
+    expect(prompt).toContain('سؤال 1');
+  });
+
+  it('stays inside a single provider request', () => {
+    const big = Array.from({ length: 6 }, (_, i) => ({ ...sample(i), reply: 'ي'.repeat(9000) }));
+    expect(judgeBatchPrompt(big).length).toBeLessThan(7_000);
   });
 });
 

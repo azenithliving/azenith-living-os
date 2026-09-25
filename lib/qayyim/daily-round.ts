@@ -107,7 +107,7 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
   const auditStep = async () => {
     try {
       const { runSelfAudit } = await import("@/lib/qayyim/self-audit");
-      const a = await runSelfAudit(companyId, { budgetMs: Math.min(20_000, remainingMs()) });
+      const a = await runSelfAudit(companyId, { budgetMs: Math.min(40_000, remainingMs()) });
       results.selfAudit = a;
       results.selfAuditNote = a.note;
       if (a.judged === 0 && a.sampled > 0) results.errors.push(`تدقيق الردود: ${a.note}`);
