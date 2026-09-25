@@ -10,7 +10,7 @@
  */
 
 import * as cheerio from "cheerio";
-import { createClient } from "./supabase-server";
+import { supabaseAdmin } from "./supabase-server";
 import { logAuditEvent } from "./ultimate-agent/security-manager";
 import type {
   SEOAnalysis,
@@ -952,7 +952,7 @@ async function saveSEOAnalysisToDatabase(
   analysis: SEOAnalysis,
   context: ToolExecutionContext
 ): Promise<void> {
-  const supabase = await createClient();
+  const supabase = supabaseAdmin;
 
   const resultData: SEOAnalysisResultInsert = {
     execution_id: context.executionId,
@@ -1002,7 +1002,7 @@ export async function getRecentSEOAnalyses(
   limit: number = 10,
   companyId?: string
 ): Promise<SEOAnalysis[]> {
-  const supabase = await createClient();
+  const supabase = supabaseAdmin;
 
   let query = supabase
     .from("seo_analysis_results")
@@ -1044,7 +1044,7 @@ export async function getRecentSEOAnalyses(
 }
 
 export async function getSEOAnalysisById(id: string): Promise<SEOAnalysis | null> {
-  const supabase = await createClient();
+  const supabase = supabaseAdmin;
 
   const { data, error } = await supabase
     .from("seo_analysis_results")
