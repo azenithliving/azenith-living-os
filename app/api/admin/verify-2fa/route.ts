@@ -82,72 +82,43 @@ async function ensurePrimaryAdminAuthUser(email: string, password: string) {
   return { success: true as const, userId: existingUser.id };
 }
 
-async function resolveUser2FARecord(userId: string, email: string): Promise<User2FARecord | null> {
+async function resolveUser2FARecord(userId: string): Promise<User2FARecord | null> {
   const supabaseAdmin = getSupabaseAdminClient();
+  const client = supabaseAdmin ?? (await createClient());
 
-  const readByUserId = async () => {
-    const client = supabaseAdmin ?? await createClient();
-    const { data } = await client
-      .from("user_2fa")
-      .select("secret, is_enabled, backup_codes")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    return data as User2FARecord | null;
-  };
-
-  const userScopedRecord = await readByUserId();
-  if (userScopedRecord) {
-    return userScopedRecord;
-  }
-
-  const client = supabaseAdmin ?? await createClient();
-  const normalizedEmail = normalizeAdminEmail(email);
-  const { data: legacyRecord } = await client
+  const { data } = await client
     .from("user_2fa")
     .select("secret, is_enabled, backup_codes")
-    .eq("email", normalizedEmail)
+    .eq("user_id", userId)
     .maybeSingle();
 
-  if (!legacyRecord) {
-    return null;
-  }
-
-  await client
-    .from("user_2fa")
-    .update({
-      user_id: userId,
-      email: normalizedEmail,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("email", normalizedEmail);
-
-  return legacyRecord as User2FARecord;
+  return data as User2FARecord | null;
 }
 
-async function syncPrimaryAdmin2FASecret(userId: string, email: string, secret?: string) {
+async function syncPrimaryAdmin2FASecret(userId: string, secret?: string) {
   const envSecret = secret || getPrimaryAdminLegacy2FASecret();
   if (!envSecret) return;
 
   const supabaseAdmin = getSupabaseAdminClient();
-  const client = supabaseAdmin ?? await createClient();
+  const client = supabaseAdmin ?? (await createClient());
 
-  await client.from("user_2fa").upsert({
-    user_id: userId,
-    email: normalizeAdminEmail(email),
-    secret: normalizeBase32Secret(envSecret),
-    is_enabled: true,
-    updated_at: new Date().toISOString(),
-  });
+  // `user_id` is unique while `id` is the primary key, so an upsert has to be
+  // told which key it resolves — otherwise it is an insert that collides.
+  await client.from("user_2fa").upsert(
+    {
+      user_id: userId,
+      secret: normalizeBase32Secret(envSecret),
+      is_enabled: true,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" }
+  );
 }
 
-async function ensurePrimaryAdmin2FARecord(
-  userId: string,
-  email: string
-): Promise<User2FARecord | null> {
+async function ensurePrimaryAdmin2FARecord(userId: string): Promise<User2FARecord | null> {
   const envSecret = getPrimaryAdminLegacy2FASecret();
   if (!envSecret) return null;
-  await syncPrimaryAdmin2FASecret(userId, email, envSecret);
+  await syncPrimaryAdmin2FASecret(userId, envSecret);
   return {
     secret: normalizeBase32Secret(envSecret),
     is_enabled: true,
@@ -230,9 +201,9 @@ export async function POST(request: NextRequest) {
     const isPrimaryAdmin = isPrimaryAdminCredentials(normalizedEmail, password);
 
     // Step 2: Fetch 2FA data — provision from env for primary admin if missing
-    let user2FA = await resolveUser2FARecord(user.id, user.email || normalizedEmail);
+    let user2FA = await resolveUser2FARecord(user.id);
     if (!user2FA && isPrimaryAdmin) {
-      user2FA = await ensurePrimaryAdmin2FARecord(user.id, user.email || normalizedEmail);
+      user2FA = await ensurePrimaryAdmin2FARecord(user.id);
     }
 
     if (!user2FA) {
@@ -244,7 +215,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!user2FA.is_enabled && isPrimaryAdmin && getPrimaryAdminLegacy2FASecret()) {
-      await syncPrimaryAdmin2FASecret(user.id, user.email || normalizedEmail);
+      await syncPrimaryAdmin2FASecret(user.id);
       user2FA = { ...user2FA, is_enabled: true };
     }
 
@@ -262,6 +233,14 @@ export async function POST(request: NextRequest) {
     const secretsToTry = isPrimaryAdmin
       ? collectUniqueTotpSecrets(envSecret, dbSecret)
       : collectUniqueTotpSecrets(dbSecret);
+    // Which sources a refusal actually checked is the difference between "the
+    // owner typed a wrong code" and "the server cannot see the enrolled key" —
+    // and the second one used to be indistinguishable from the first. Names,
+    // never values.
+    const sourcesTried = [
+      ...(envSecret && collectUniqueTotpSecrets(envSecret).length ? ["env"] : []),
+      ...(dbSecret && collectUniqueTotpSecrets(dbSecret).length ? ["db"] : []),
+    ];
 
     const { verified, matchedSecret } = verifyTotpAgainstSecrets(token, secretsToTry, 6);
     const usedEnvSecret =
@@ -270,7 +249,7 @@ export async function POST(request: NextRequest) {
       matchedSecret === normalizeBase32Secret(envSecret!);
 
     if (verified && isPrimaryAdmin && usedEnvSecret && dbSecret !== matchedSecret) {
-      await syncPrimaryAdmin2FASecret(user.id, user.email || normalizedEmail, matchedSecret!);
+      await syncPrimaryAdmin2FASecret(user.id, matchedSecret!);
     }
 
     if (!verified) {
@@ -278,11 +257,13 @@ export async function POST(request: NextRequest) {
       // answer — in that order, because the cookies are written on the way out.
       await revokeUnverifiedSession();
 
-      // Log failed attempt
+      // Log failed attempt — with what the server could actually see. A refusal
+      // that records only "wrong code" cannot be told apart from "the enrolled
+      // key never reached the check", and that difference is the whole gate.
       await supabase.from("failed_login_attempts").insert({
         email: user.email,
         ip_address: request.headers.get("x-forwarded-for") || "unknown",
-        failure_reason: "Invalid 2FA token",
+        failure_reason: `Invalid 2FA token (sources tried: ${sourcesTried.length ? sourcesTried.join("+") : "none"})`,
         user_agent: request.headers.get("user-agent"),
       });
 

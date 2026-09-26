@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import {
   normalizeAdminEmail,
@@ -68,50 +67,41 @@ export async function POST(request: NextRequest) {
       (u) => normalizeAdminEmail(u.email || "") === normalizedEmail
     );
 
-    const supabase = await createClient();
-
-    // 3. Delete any existing stale user_2fa record(s) for this admin.
-    const deleteByEmail = await supabase
-      .from("user_2fa")
-      .delete()
-      .eq("email", normalizedEmail);
-
-    if (adminUser) {
-      await supabase
-        .from("user_2fa")
-        .delete()
-        .eq("user_id", adminUser.id);
+    // The record is keyed by the auth account, so a reset without one has
+    // nothing to write. Saying so beats inserting a row no login can read.
+    if (!adminUser) {
+      return NextResponse.json(
+        { success: false, error: "No auth account for this email yet — sign in through the gate once first" },
+        { status: 409 }
+      );
     }
 
-    // 4. Insert a clean record synced directly from the ENV secret.
-    const upsertPayload: Record<string, unknown> = {
-      email: normalizedEmail,
-      secret: normalizedSecret,
-      is_enabled: true,
-      backup_codes: [],
-      updated_at: new Date().toISOString(),
-    };
+    // This runs before any session exists, so only the service-role client can
+    // write the row — an anonymous one is refused by the policies and a reset
+    // that reports success while writing nothing is worse than an error.
+    const supabase = supabaseAdmin;
 
-    if (adminUser) {
-      upsertPayload.user_id = adminUser.id;
-    }
+    // 3. Drop the stale record, then re-enrol it from the configured key.
+    await supabase.from("user_2fa").delete().eq("user_id", adminUser.id);
 
-    const { error: insertError } = await supabase
+    const { error: upsertError } = await supabase
       .from("user_2fa")
-      .insert(upsertPayload);
+      .upsert(
+        {
+          user_id: adminUser.id,
+          secret: normalizedSecret,
+          is_enabled: true,
+          backup_codes: [],
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" }
+      );
 
-    if (insertError) {
-      // Fallback to upsert in case of unique constraint conflict.
-      const { error: upsertError } = await supabase
-        .from("user_2fa")
-        .upsert(upsertPayload, { onConflict: "email" });
-
-      if (upsertError) {
-        return NextResponse.json(
-          { success: false, error: `DB write failed: ${upsertError.message}` },
-          { status: 500 }
-        );
-      }
+    if (upsertError) {
+      return NextResponse.json(
+        { success: false, error: `DB write failed: ${upsertError.message}` },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -120,9 +110,7 @@ export async function POST(request: NextRequest) {
         "2FA record has been reset and synced from ADMIN_GATE_2FA_SECRET. " +
         "You can now log in with your Google Authenticator code.",
       email: normalizedEmail,
-      secretLength: normalizedSecret.length,
-      userId: adminUser?.id ?? null,
-      deletedByEmail: !deleteByEmail.error,
+      userId: adminUser.id,
     });
   } catch (error) {
     console.error("[gate/reset-2fa]", error);

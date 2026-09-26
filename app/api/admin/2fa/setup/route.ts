@@ -38,21 +38,29 @@ export async function POST(request: NextRequest) {
       length: 32,
     });
 
-    // توليد رموز احتياطية
-    const backupCodes = Array.from({ length: 10 }, () => 
-      Math.random().toString(36).substring(2, 8).toUpperCase()
+    // A backup code is worth the same as the second factor, so it comes from a
+    // CSPRNG — `Math.random` output is predictable.
+    const BACKUP_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+    const backupCodes = Array.from({ length: 10 }, () =>
+      Array.from(crypto.getRandomValues(new Uint8Array(6)), (byte) =>
+        BACKUP_ALPHABET[byte % BACKUP_ALPHABET.length]
+      ).join("")
     );
 
-    // حفظ السر في قاعدة البيانات (غير مفعل بعد)
+    // Save the secret (not enabled yet). The unique key is `user_id`, not `id`,
+    // so without the conflict target this reads as an insert and collides.
     const { error: insertError } = await supabase
       .from("user_2fa")
-      .upsert({
-        user_id: user.id,
-        secret: secret.base32,
-        is_enabled: false,
-        backup_codes: backupCodes,
-        updated_at: new Date().toISOString(),
-      });
+      .upsert(
+        {
+          user_id: user.id,
+          secret: secret.base32,
+          is_enabled: false,
+          backup_codes: backupCodes,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" }
+      );
 
     if (insertError) {
       console.error("2FA Setup Error:", insertError);
