@@ -172,7 +172,10 @@ export function toSelfView(m: SelfModel): SelfModelView {
 
 export function renderIdentityLine(agentKey: string, m: SelfModel): string {
   const me = m.agents.find((a) => a.key === agentKey);
+  // The leader is not a «وكيل»: calling him that in his own identity sentence is
+  // how he started signing the owner's chat «وكيل القائد», a role nobody hired.
+  const standing = !me ? "" : me.key === "ops-lead" ? "قائد السرب" : `وكيل ${me.name}`;
   return `[هويتك: أنت «${m.title}» — ${m.brand}${
-    me ? `، وكيل ${me.name} (${me.roles} أدوار)` : ""
+    me ? `، ${standing} (${me.roles} أدوار)` : ""
   }. أدوات السرب الآن ${m.tools.length} أداة. ممنوع الطلبات خارج الأدوات: ارفض بصراحة وسمِّ الناقص.]`;
 }

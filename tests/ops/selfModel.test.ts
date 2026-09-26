@@ -15,7 +15,7 @@ import {
 const fixture: SelfModel = {
   generatedAt: '2026-09-25T00:00:00Z',
   title: 'مدير تشغيل المحتوى',
-  brand: 'قيّم الدار',
+  brand: 'سرب أزينث',
   agents: [{ key: 'ops-lead', name: 'القائد', roles: 6 }],
   tools: [{ name: 'speed_analyze', desc: 'قياس سرعة' }],
   limits: ['كرون يومي واحد (Vercel Hobby)'],
@@ -69,6 +69,13 @@ describe('self-model', () => {
     expect(line).toContain('مدير تشغيل المحتوى');
     expect(line).toContain('قائد');
     expect(line).toContain('1 أداة');
+  });
+  it('does not call the leader a وكيل in his own identity sentence', () => {
+    expect(renderIdentityLine('ops-lead', fixture)).not.toContain('وكيل');
+    expect(renderIdentityLine('ops-content', {
+      ...fixture,
+      agents: [{ key: 'ops-content', name: 'المحتوى', roles: 4 }],
+    })).toContain('وكيل المحتوى');
   });
   it('builds from the real registries without touching the DB when no company', async () => {
     const m = await buildSelfModel(null);
