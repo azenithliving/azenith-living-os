@@ -40,12 +40,12 @@ try {
   await p.waitForTimeout(3000);
   const card = p.locator('a[href="/admin/v2/agents/ops"]');
   const cardTxt = (await card.count()) ? (await card.first().textContent()) || '' : '';
-  check('seed card renders', cardTxt.includes('قيّم الدار'), cardTxt.replace(/\s+/g, ' '));
+  check("seed card renders", cardTxt.includes("مدير تشغيل المحتوى") && cardTxt.includes("سرب أزينث"), cardTxt.replace(/\s+/g, ' '));
 
   // 3) Fullscreen chat
   await card.first().click();
   await p.waitForSelector('input[placeholder*="لهجتك"]', { timeout: 20000 });
-  check('fullscreen chat opens', p.url().includes('/agents/qayyim'), p.url());
+  check('fullscreen chat opens', p.url().includes('/agents/ops'), p.url());
 
   // 4) Send + persistence across the 5s poll.
   // The sentence is unique per run: history already holds every message earlier
@@ -73,7 +73,7 @@ try {
   let answered = false;
   for (let i = 0; i < 16 && !answered; i++) {
     await p.waitForTimeout(5000);
-    answered = await p.locator('p', { hasText: /^QAYYIM-CORE$/ }).count().then((c) => c >= 1);
+    answered = await p.locator('p', { hasText: /^OPS-LEAD$/ }).count().then((c) => c >= 1);
   }
   check('agent reply arrives and both sides persist', answered && seen2 > 0);
 
@@ -239,7 +239,7 @@ try {
   // The viewer page is the riskiest under a policy: it frames other sites.
   await p.goto(`${BASE}/admin/browser`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3000);
-  const askBtn = await p.locator('text=اسأل قيّم الدار عن الصفحة').count();
+  const askBtn = await p.locator('text=اسأل مدير تشغيل المحتوى عن الصفحة').count();
   check('admin browser kept the commander button', askBtn > 0, `button=${askBtn}`);
   p.off('console', onConsole);
   check('no CSP violations while browsing the admin', cspHits.length === 0, cspHits.slice(0, 2).join(' | ') || 'clean');
