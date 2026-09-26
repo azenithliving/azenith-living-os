@@ -1,5 +1,5 @@
 /**
- * Qayyim Swarm - Quality Assurance API (QAYYIM-QA)
+ * The swarm's Quality Assurance API (وكيل الجودة)
  * POST /api/admin/ops/qa
  */
 
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     success: true,
-    message: 'Qayyim QA API (QAYYIM-QA) - POST with { action, ...params }',
+    message: 'QA API (وكيل الجودة) - POST with { action, ...params }',
     actions: ['full_suite', 'e2e_smoke', 'visual_regression', 'accessibility', 'load_test', 'security_scan', 'cross_browser'],
   });
 }

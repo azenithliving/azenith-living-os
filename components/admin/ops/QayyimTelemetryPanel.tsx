@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { MousePointerClick, Loader2, PlayCircle, ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { agentLabel } from '@/lib/ops/identity';
 
 const METRIC_OPTIONS = [
   { key: 'exit_rate', label: 'معدل الخروج' },
@@ -118,7 +119,7 @@ export function QayyimTelemetryPanel() {
         <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
           <div className="flex items-center gap-2 text-xs font-semibold text-white/60">
             <MousePointerClick className="w-4 h-4 text-emerald-300" />
-            نتيجة تحليل QAYYIM-UX
+            نتيجة تحليل {agentLabel('ops-ux')}
           </div>
           {report.summary && (
             <p className="text-sm text-white/80 leading-relaxed whitespace-pre-wrap">{report.summary}</p>
@@ -147,7 +148,7 @@ export function QayyimTelemetryPanel() {
       {!report && !error && !running && (
         <div className="rounded-xl border border-dashed border-white/10 p-10 text-center text-white/30 text-sm">
           <MousePointerClick className="w-8 h-8 mx-auto mb-2 opacity-40" />
-          حدّد الصفحة والمقاييس ليحلل QAYYIM-UX سلوك الزوار الفعلي
+          حدّد الصفحة والمقاييس ليحلل {agentLabel('ops-ux')} سلوك الزوار الفعلي
         </div>
       )}
     </div>

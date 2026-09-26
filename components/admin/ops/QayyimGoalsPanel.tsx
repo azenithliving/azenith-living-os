@@ -1,11 +1,12 @@
 'use client';
 
 /**
- * QayyimGoalsPanel — أهداف التحويل التي يديرها QAYYIM-UX
+ * QayyimGoalsPanel — أهداف التحويل التي يديرها وكيل التجربة
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { Target, Loader2, RefreshCw, PlusCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { agentLabel } from '@/lib/ops/identity';
 
 interface Goal {
   id: string;
@@ -154,7 +155,7 @@ export function QayyimGoalsPanel() {
       ) : goals.length === 0 ? (
         <div className="rounded-xl border border-dashed border-white/10 p-10 text-center text-white/30 text-sm">
           <Target className="w-8 h-8 mx-auto mb-2 opacity-40" />
-          لا أهداف بعد — حدّد هدفاً ليقيس QAYYIM-UX التقدم نحوه
+          لا أهداف بعد — حدّد هدفاً ليقيس {agentLabel('ops-ux')} التقدم نحوه
         </div>
       ) : (
         <div className="space-y-2">

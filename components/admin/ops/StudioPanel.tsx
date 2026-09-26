@@ -75,17 +75,22 @@ export function StudioPanel() {
   const fetchOverview = useCallback(async () => {
     setLoadingStats(true);
     try {
+      // The luxury score is recomputed by an AI call that can take minutes, so the
+      // overview reads the last persisted benchmark run instead. A page that waits
+      // on the slowest caller shows «—» for every card, which is what happened here.
       const [draftsRes, expRes, sugRes, luxRes] = await Promise.allSettled([
         fetch('/api/admin/ops?action=list_drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }).then(r => r.json()),
-        fetch('/api/admin/ops/ab-test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list' }) }).then(r => r.json()),
+        fetch('/api/admin/ops/experiments').then(r => r.json()),
         fetch('/api/admin/ops/suggestions').then(r => r.json()),
-        fetch('/api/admin/ops/perf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'luxury_score', luxury_scope: 'full_site' }) }).then(r => r.json()),
+        fetch('/api/admin/ops/benchmarks').then(r => r.json()),
       ]);
 
       const drafts = draftsRes.status === 'fulfilled' && draftsRes.value?.success ? (draftsRes.value.drafts || draftsRes.value.result?.drafts || []) : [];
       const experiments = expRes.status === 'fulfilled' && expRes.value?.success ? (expRes.value.experiments || []) : [];
       const suggestions = sugRes.status === 'fulfilled' && sugRes.value?.success ? (sugRes.value.suggestions || []) : [];
-      const luxury = luxRes.status === 'fulfilled' && luxRes.value?.success ? luxRes.value.result?.data?.luxury_score ?? null : null;
+      const runs: any[] = luxRes.status === 'fulfilled' && luxRes.value?.success ? (luxRes.value.recent_runs || []) : [];
+      // recent_runs arrives newest-first; the first luxury row is the live measurement.
+      const luxury = runs.find((r) => r.benchmark_key === 'luxury_score' && typeof r.score === 'number')?.score ?? null;
 
       setStats({
         activeDrafts: drafts.filter((d: any) => d.status === 'draft' || d.status === 'previewing').length,

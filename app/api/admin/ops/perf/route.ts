@@ -1,5 +1,5 @@
 /**
- * Qayyim Swarm - Performance & Engineering API (QAYYIM-DEV + QAYYIM-ANA)
+ * The swarm's Performance & Engineering API (وكيل التطوير + وكيل التحليلات)
  * POST /api/admin/ops/perf
  */
 
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     success: true,
-    message: 'Qayyim Performance API (QAYYIM-DEV + QAYYIM-ANA) - POST with { action, ...params }',
+    message: 'Performance API (وكيل التطوير + وكيل التحليلات) - POST with { action, ...params }',
     actions: ['performance_budgets', 'bundle_analysis', 'dependency_audit', 'code_review', 'security_code_scan', 'luxury_score', 'revenue_correlation', 'weekly_report'],
   });
 }

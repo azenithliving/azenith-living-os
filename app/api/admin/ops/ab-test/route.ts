@@ -1,5 +1,5 @@
 /**
- * Qayyim Swarm - A/B Testing API (QAYYIM-UX + QAYYIM-ANA)
+ * The swarm's A/B Testing API (وكيل التجربة + وكيل التحليلات)
  * POST /api/admin/ops/ab-test
  */
 
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     success: true,
-    message: 'Qayyim A/B Test API - POST with { action, page_path, section_key, hypothesis?, control_version?, variant_version?, proposed_change? }',
+    message: 'A/B Test API - POST with { action, page_path, section_key, hypothesis?, control_version?, variant_version?, proposed_change? }',
     actions: ['design', 'predict_impact'],
   });
 }
