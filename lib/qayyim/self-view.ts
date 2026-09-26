@@ -9,9 +9,15 @@
  * translate by hand.
  */
 
+/**
+ * A tool crosses the wire as its id and nothing else. Its Arabic name lives in
+ * `CAPABILITY_LABELS` (`lib/qayyim/palette.ts`, client-safe and tested), because
+ * the router's `desc` is a prompt written for a model — it carries strings like
+ * `p50/p95` and `CORS probe`, and those make an Arabic line unreadable the
+ * second a browser puts them in one.
+ */
 export interface SelfToolView {
   name: string;
-  desc: string;
 }
 
 export interface SelfAgentView {

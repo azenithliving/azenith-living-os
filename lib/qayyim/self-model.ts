@@ -154,7 +154,9 @@ export function toSelfView(m: SelfModel): SelfModelView {
     title: m.title,
     brand: m.brand,
     agents: m.agents,
-    tools: m.tools,
+    // Ids only: the Arabic name of a capability is chosen where the owner will
+    // read it, not in the prompt text written for the intent model.
+    tools: m.tools.map((t) => ({ name: t.name })),
     limits: m.limits,
     organs: m.organs.map((o) => ({ label: o.label, cadence: o.cadence })),
     counters: m.counters

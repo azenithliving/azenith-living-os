@@ -74,6 +74,22 @@ try {
   check('action chips rendered', sugBtns >= 0, `chips=${sugBtns}`);
 
   // ── P6-M6: the interface layer ────────────────────────────────────
+  // The rule the owner actually lives with: a Latin word inside an Arabic line
+  // arrives scrambled on his phone. Checked on rendered text with real data in it
+  // — a source-level guard cannot see what the database interpolates.
+  const mixedLines = (selector) => p.evaluate((sel) => {
+    const root = document.querySelector(sel);
+    if (!root) return ['(السطح نفسه ما اتعرضش)'];
+    const bad = [];
+    for (const el of root.querySelectorAll('*')) {
+      if (el.children.length) continue;
+      const t = (el.textContent || '').trim();
+      if (!t) continue;
+      if (/[\u0600-\u06FF]/.test(t) && /[A-Za-z]{3,}/.test(t)) bad.push(t.slice(0, 70));
+    }
+    return [...new Set(bad)].slice(0, 4);
+  }, selector);
+
   // 8) Ctrl+K opens a palette of real capabilities, and choosing one RUNS it.
   await p.focus(input);
   await p.keyboard.press('Control+k');
@@ -87,6 +103,8 @@ try {
     await p.waitForTimeout(1000);
   }
   check('ctrl+K opens the live capability palette', paletteShown && capabilityRows > 20, `rows=${capabilityRows}`);
+  const paletteMixed = await mixedLines('[data-palette]');
+  check('the palette lists its capabilities in Arabic only', paletteMixed.length === 0, paletteMixed.join(' | '));
 
   await p.fill('[data-palette-input]', 'فخامه');
   await p.waitForTimeout(600);
@@ -112,6 +130,9 @@ try {
   const organsBlock = await p.locator('text=بيشتغل لوحده بجدوله').count();
   check('self panel renders agents and the autonomous schedule', selfShown && agentsBlock > 0 && organsBlock > 0,
     `panel=${selfShown} agents=${agentsBlock} organs=${organsBlock}`);
+
+  const selfMixed = await mixedLines('[data-self-panel]');
+  check('the self panel renders no Latin inside an Arabic line', selfMixed.length === 0, selfMixed.join(' | '));
   await p.keyboard.press('Escape');
   await p.waitForTimeout(500);
 

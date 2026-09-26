@@ -31,7 +31,7 @@ const model: SelfModelView = {
     { key: "qayyim-core", name: "القائد", roles: 6 },
     { key: "qayyim-qa", name: "الجودة", roles: 5 },
   ],
-  tools: TOOL_CATALOG.map((t) => ({ name: t.name, desc: t.desc })),
+  tools: TOOL_CATALOG.map((t) => ({ name: t.name })),
   limits: ["كرون يومي واحد"],
   organs: [{ label: "كاناري الصفحات العامة", cadence: "كل يوم" }],
   counters: [{ label: "مسودات معلقة", value: 3 }],

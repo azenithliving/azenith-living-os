@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { X, Loader2, Bot, CalendarClock, ShieldAlert, Gauge } from 'lucide-react';
+import { CAPABILITY_LABELS } from '@/lib/qayyim/palette';
 import type { SelfModelView } from '@/lib/qayyim/self-view';
 
 /**
@@ -34,6 +35,11 @@ export function SelfModelPanel({ open, model, loading, error, onClose }: SelfMod
   }, [open, onClose]);
 
   if (!open) return null;
+
+  // A capability only counts as offered when it has an Arabic name: the list
+  // below must not claim more than the owner can actually read and press.
+  const named = (model?.tools ?? []).filter((t) => Boolean(CAPABILITY_LABELS[t.name]));
+  const unnamed = (model?.tools ?? []).filter((t) => !CAPABILITY_LABELS[t.name]);
 
   return (
     <div
@@ -94,15 +100,25 @@ export function SelfModelPanel({ open, model, loading, error, onClose }: SelfMod
               </section>
 
               <section>
-                <SectionTitle icon={<Gauge className="w-3.5 h-3.5" />} text={`أقدر أنفذ (${model.tools.length})`} />
+                <SectionTitle icon={<Gauge className="w-3.5 h-3.5" />} text={`أقدر أنفذ (${named.length})`} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                  {model.tools.map((t) => (
+                  {named.map((t) => (
                     <div key={t.name} className="rounded-xl bg-white/[0.04] border border-white/10 px-2.5 py-1.5">
-                      <div className="text-[11px] text-white/85">{t.desc}</div>
+                      <div className="text-[11px] text-white/85">{CAPABILITY_LABELS[t.name]}</div>
                       <div className="text-[9px] text-sky-300/50 font-mono" dir="ltr">{t.name}</div>
                     </div>
                   ))}
                 </div>
+                {unnamed.length > 0 && (
+                  <div className="mt-1.5 text-[10px] text-amber-300/70">
+                    وفيه {unnamed.length} قدرة لسه ما اتكتبش اسمها بالعربي، فمش معروضة عليك — اسمها الأجنبي في قائمة الأوامر بس.
+                  </div>
+                )}
+                {unnamed.length > 0 && (
+                  <div className="text-[9px] text-white/25 font-mono leading-relaxed" dir="ltr">
+                    {unnamed.map((t) => t.name).join(", ")}
+                  </div>
+                )}
               </section>
 
               {model.counters && (
