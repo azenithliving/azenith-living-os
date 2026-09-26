@@ -709,7 +709,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       className={`bg-white/[0.02] border ${colors.border} ${fullScreen ? 'h-full rounded-none border-0' : 'rounded-[2rem] h-[520px]'} flex flex-col overflow-hidden shadow-2xl relative`}
     >
       {/* Header */}
-      <div className={`p-4 border-b ${colors.border} flex items-center justify-between ${colors.bg}`}>
+      <div data-chat-header="" className={`p-4 border-b ${colors.border} flex items-center justify-between ${colors.bg}`}>
         <div className="flex items-center gap-3">
           {fullScreen && (
             <Link href="/admin/v2/agents" title="رجوع لمركز القيادة" className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white text-lg">→</Link>

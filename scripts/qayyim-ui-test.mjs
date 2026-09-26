@@ -45,14 +45,26 @@ try {
   await p.waitForSelector('input[placeholder*="لهجتك"]', { timeout: 20000 });
   check('fullscreen chat opens', p.url().includes('/agents/qayyim'), p.url());
 
-  // 4) Send + persistence across the 5s poll
+  // 4) Send + persistence across the 5s poll.
+  // The sentence is unique per run: history already holds every message earlier
+  // runs sent, and a match against those would pass the check without anything
+  // being sent at all — which is exactly what it did once.
   const input = 'input[placeholder*="لهجتك"]';
-  await p.fill(input, 'اهلا قيّم');
-  await p.press(input, 'Enter');
-  await p.waitForTimeout(1500);
-  const seen1 = await p.locator('text=اهلا قيّم').count();
+  const probe = `اهلا قيّم ${Date.now()}`;
+  let seen1 = 0;
+  for (let attempt = 0; attempt < 2 && !seen1; attempt++) {
+    await p.fill(input, probe);
+    await p.press(input, 'Enter');
+    // The bubble is optimistic, so it should be there at once — but on a cold
+    // load the page is not hydrated yet and the keystroke goes nowhere. Wait for
+    // it to appear rather than assuming the send happened.
+    for (let i = 0; i < 8 && !seen1; i++) {
+      await p.waitForTimeout(1000);
+      seen1 = await p.locator(`text=${probe}`).count();
+    }
+  }
   await p.waitForTimeout(9000); // > one poll cycle
-  const seen2 = await p.locator('text=اهلا قيّم').count();
+  const seen2 = await p.locator(`text=${probe}`).count();
   check('user message survives 5s poll', seen1 > 0 && seen2 > 0, `${seen1}->${seen2}`);
 
   // 5) Agent answer arrives (sender label of agent bubbles)
@@ -143,13 +155,13 @@ try {
   // 10b) The palette's agent rows hand off to a real conversation, and an
   // unknown key must not invent one.
   await p.goto(`${BASE}/admin/v2/agents/qayyim?agent=qayyim-qa`, { waitUntil: 'domcontentloaded', timeout: 40000 });
-  await p.waitForTimeout(3000);
-  const qaHeader = (await p.locator('span.font-bold.text-white').first().textContent().catch(() => '')) || '';
-  check('?agent= opens that agent’s own chat', qaHeader.includes('الجودة'), qaHeader.trim());
+  await p.waitForTimeout(3500);
+  const qaHeader = ((await p.locator('[data-chat-header] span.text-sm').first().textContent().catch(() => '')) || '').replace(/\s+/g, ' ');
+  check('?agent= opens that agent’s own chat', qaHeader.includes('الجودة'), qaHeader.slice(0, 70));
   await p.goto(`${BASE}/admin/v2/agents/qayyim?agent=qayyim-hacker`, { waitUntil: 'domcontentloaded', timeout: 40000 });
-  await p.waitForTimeout(3000);
-  const fallbackHeader = (await p.locator('span.font-bold.text-white').first().textContent().catch(() => '')) || '';
-  check('an unknown agent key falls back to the leader', fallbackHeader.includes('مدير تشغيل المحتوى'), fallbackHeader.trim());
+  await p.waitForTimeout(3500);
+  const fallbackHeader = ((await p.locator('[data-chat-header] span.text-sm').first().textContent().catch(() => '')) || '').replace(/\s+/g, ' ');
+  check('an unknown agent key falls back to the leader', fallbackHeader.includes('مدير تشغيل المحتوى'), fallbackHeader.slice(0, 70));
 
   // 11) The Telegram decision link: junk is refused, a real row opens a card.
   await p.goto(`${BASE}/admin/v2/agents/qayyim?proposal=%3Cscript%3Ealert(1)%3C/script%3E`, { waitUntil: 'domcontentloaded', timeout: 40000 });

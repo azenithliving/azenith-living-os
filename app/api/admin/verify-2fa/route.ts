@@ -213,6 +213,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Signing in above already wrote a Supabase session into the response
+    // cookies, and the guard authorizes an admin from that session alone — it
+    // never reads `admin_2fa_verified`. So every path below that refuses the
+    // second factor has to take the session back, or a correct password is a
+    // complete login with the TOTP step answered "no".
+    const revokeUnverifiedSession = async () => {
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        /* the refusal below is what matters */
+      }
+    };
+
     const user = authData.user;
     const isPrimaryAdmin = isPrimaryAdminCredentials(normalizedEmail, password);
 
@@ -223,6 +236,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!user2FA) {
+      await revokeUnverifiedSession();
       return NextResponse.json(
         { error: "2FA not setup for this user" },
         { status: 400 }
@@ -235,6 +249,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!user2FA.is_enabled) {
+      await revokeUnverifiedSession();
       return NextResponse.json(
         { error: "2FA is not enabled for this user" },
         { status: 400 }
@@ -259,6 +274,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!verified) {
+      // Refusing the code must not leave a session standing: sign out first, then
+      // answer — in that order, because the cookies are written on the way out.
+      await revokeUnverifiedSession();
+
       // Log failed attempt
       await supabase.from("failed_login_attempts").insert({
         email: user.email,
