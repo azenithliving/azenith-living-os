@@ -10,16 +10,16 @@ P7 retired the product name «قيّم الدار». One module owns every ident
 (`AGENT_KEYS`, `LEADER_TITLE`, `SWARM_NAME`, `agentLabel`, `legacyToOps`, `storedSenderName`).
 
 - **`ops-lead` … `ops-qa`** — the live agent KEYS, stored in `agent_messages`, `agent_profiles`,
-  `agent_tasks` and the sync-event table. `lib/ops/**`, `app/api/admin/ops/**`,
+  `agent_tasks` and `ops_sync_events`. `lib/ops/**`, `app/api/admin/ops/**`,
   `app/admin/v2/ops`, `app/admin/v2/agents/ops`, `/api/cron/ops-daily` and tool ids (`ops_world`…)
-  all moved with them.
-- **`qayyim-*`, `QAYYIM-*`, «قيّم الدار»** — retired. The retired→live mapping lives only in
-  `identity.ts`, and the API doors still accept a retired key so a stale browser tab or an old
-  Telegram link keeps working. `/api/admin/qayyim/**` and the two `/admin/**/qayyim` pages are
-  forwarders, not surfaces. A guard forbids the Arabic name in shipped code:
-  `tests/ops/noRetiredName.test.ts`.
-- **Tables `qayyim_*`** — still named that way until P7-M5 renames them; `qayyim_rivals` names a
-  table while `ops_rivals` names the tool, and that split is guarded on purpose.
+  all moved with them, and the swarm's fifteen tables are `ops_*` since P7-M5.
+- **`qayyim-*`, `QAYYIM-*`, `qayyim_*` tables, «قيّم الدار»** — retired. The retired→live mapping
+  lives only in `identity.ts`; the HTTP doors still accept a retired key so a stale browser tab or
+  an old Telegram link keeps working, and each retired table name survives briefly as a
+  security-invoker alias view (dropped in P7-T12). `/api/admin/qayyim/**` and the two
+  `/admin/**/qayyim` pages are forwarders, not surfaces. Guards that keep it gone:
+  `tests/ops/noRetiredName.test.ts` (the Arabic name) and the table guard in
+  `tests/ops/toolNames.test.ts` (no shipped code queries a `qayyim_*` relation).
 - **«مدير تشغيل المحتوى»** — the leader's job title (`LEADER_TITLE`): the only human name for it, in
   chat headers, cards, Telegram messages and reports. **«سرب أزينث»** (`SWARM_NAME`) is the swarm;
   **«وكيل …»** are the eight role labels from `agentLabel(key)`.
