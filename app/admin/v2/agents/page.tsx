@@ -74,7 +74,7 @@ export default function V2AgentsPage() {
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-6" dir="rtl">
       <Link
-        href="/admin/v2/agents/qayyim"
+        href="/admin/v2/agents/ops"
         className="group w-full max-w-md block rounded-[2rem] border border-amber-500/25 bg-white/[0.02] hover:bg-amber-500/[0.04] p-7 transition-all shadow-xl"
       >
         <div className="flex items-center gap-4">

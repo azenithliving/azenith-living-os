@@ -124,7 +124,7 @@ describe('gsc_queries routing', () => {
   );
 
   it('does not hijack the world-model or SEO-page questions', () => {
-    expect(inferUltimateTool('ايزاي الشغل الفترة دي')?.toolName).toBe('qayyim_world');
+    expect(inferUltimateTool('ايزاي الشغل الفترة دي')?.toolName).toBe('ops_world');
     expect(inferUltimateTool('حلل SEO للصفحة الرئيسية')?.toolName).not.toBe('gsc_queries');
   });
 });

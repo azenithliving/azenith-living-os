@@ -1,5 +1,5 @@
 /**
- * qayyim-2fa-diag.mjs — ask the database what the gate can see about the key.
+ * ops-2fa-diag.mjs — ask the database what the gate can see about the key.
  *
  * Production refuses a TOTP that verifies locally. Either the enrolled secret
  * never reaches the check, or the account the check runs for is not the account
@@ -8,7 +8,7 @@
  *
  * Read-only. Credentials are read from an env file, never from argv.
  *
- * Usage: node scripts/qayyim-2fa-diag.mjs [envFile]
+ * Usage: node scripts/ops-2fa-diag.mjs [envFile]
  */
 import fs from "node:fs";
 import { createClient } from "@supabase/supabase-js";

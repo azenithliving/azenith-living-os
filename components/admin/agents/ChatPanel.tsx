@@ -230,7 +230,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
   const unreadLocatedRef = useRef(false);
   const scrolledToUnreadRef = useRef(false);
-  const lastReadKey = `qayyim_last_read_${agentKey}`;
+  const lastReadKey = `ops_last_read_${agentKey}`;
   const [isListening, setIsListening] = useState(false);
   const [ttsOn, setTtsOn] = useState(false);
   const recognitionRef = useRef<any>(null);
@@ -760,7 +760,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           </button>
           {(agentKey.toLowerCase() === 'prime' || agentKey.toLowerCase().startsWith('qayyim-')) && (
             <a
-              href="/admin/v2/qayyim"
+              href="/admin/v2/ops"
               title="فتح استوديو سرب قيّم الدار"
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-semibold hover:bg-amber-500/25 transition-colors"
             >

@@ -103,7 +103,7 @@ describe("filterPalette", () => {
   it("matches dialect spelling, hamza and case alike", () => {
     for (const q of ["فخامه", "فخامة", "الفخامة", "luxury"]) {
       const hit = filterPalette(items, q);
-      expect(hit.map((i) => i.runTool), q).toContain("qayyim_luxury_score");
+      expect(hit.map((i) => i.runTool), q).toContain("ops_luxury_score");
     }
   });
 
@@ -194,7 +194,7 @@ describe("the chat surface wires the palette in", () => {  const src = readFileS
    * the agent the palette chose, and ignore one that does not exist. */
   it("the chat page honours the agent the palette hands it", () => {
     const page = readFileSync(
-      resolve(process.cwd(), "app/admin/v2/agents/qayyim/page.tsx"),
+      resolve(process.cwd(), "app/admin/v2/agents/ops/page.tsx"),
       "utf8",
     );
     expect(page).toContain("agent");

@@ -1,6 +1,6 @@
 /**
  * هل الهدف في خطر؟ — one answer, used by the daily round and by the
- * `qayyim_goals_risk` tool.
+ * `ops_goals_risk` tool.
  *
  * Both callers used to carry their own copy of this logic, and both copies
  * read `title`, `progress_percentage` and `target_date` — columns that do not

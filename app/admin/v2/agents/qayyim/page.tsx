@@ -1,39 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ChatPanel } from '@/components/admin/agents/ChatPanel';
-import { ProposalDecisionCard } from '@/components/admin/agents/ProposalDecisionCard';
-import { AGENT_ROLES } from '@/lib/ops/agent-roles';
-import { legacyToOps } from '@/lib/ops/identity';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 /**
- * P5-M2 — full-screen Qayyim chat (WhatsApp-style surface).
- * Deep-linkable, browser-back works, unread separator handled inside ChatPanel.
- * P6-M6: the command palette can hand you to another agent's chat, and the
- * Telegram morning story links straight to the decision it names.
- *
- * The query is read from the live URL rather than `useSearchParams` so the page
- * stays prerenderable without a Suspense boundary — and an unknown agent key is
- * ignored instead of becoming a conversation with something that does not exist.
+ * The morning story on Telegram and the decision card deep-link here with a query
+ * (`?agent=`, `?proposal=`, `?decision=`), so the retired address forwards the
+ * query as well as the path. Removed in P7-M5 once nothing links here anymore.
  */
-const DEFAULT_AGENT = 'ops-lead';
-
-function agentFromUrl(): string {
-  const wanted = legacyToOps(new URLSearchParams(window.location.search).get('agent') || '');
-  return Object.keys(AGENT_ROLES).includes(wanted) ? wanted : DEFAULT_AGENT;
-}
-
-export default function QayyimChatPage() {
-  const [agentKey, setAgentKey] = useState(DEFAULT_AGENT);
+export default function LegacyAgentChatPage() {
+  const router = useRouter();
 
   useEffect(() => {
-    setAgentKey(agentFromUrl());
-  }, []);
+    router.replace(`/admin/v2/agents/ops${window.location.search}`);
+  }, [router]);
 
-  return (
-    <div className="fixed inset-0 z-[90] bg-[#0B0B0D]" dir="rtl">
-      <ChatPanel key={agentKey} agentKey={agentKey} fullScreen />
-      <ProposalDecisionCard />
-    </div>
-  );
+  return null;
 }

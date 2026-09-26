@@ -78,7 +78,7 @@ export function buildResultActions(data: unknown): ResultAction[] {
         label: "افتح المنتجات",
         // `/admin/products` never existed as a route — the button 404ed. The
         // studio is where a product's content is actually handled.
-        href: `/admin/v2/qayyim?highlight=${encodeURIComponent(productId)}`,
+        href: `/admin/v2/ops?highlight=${encodeURIComponent(productId)}`,
         kind: "internal",
       });
     }
@@ -87,7 +87,7 @@ export function buildResultActions(data: unknown): ResultAction[] {
     if (categoryId) {
       pushUnique(actions, {
         label: "افتح الأقسام",
-        href: `/admin/v2/qayyim?highlight=${encodeURIComponent(categoryId)}`,
+        href: `/admin/v2/ops?highlight=${encodeURIComponent(categoryId)}`,
         kind: "internal",
       });
     }

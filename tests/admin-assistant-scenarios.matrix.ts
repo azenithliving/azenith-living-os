@@ -60,9 +60,9 @@ export const ADMIN_SCENARIO_MATRIX: ScenarioExpectation[] = [
   // ── Ultimate tools ──
   // P6-M1: identity questions were reclassified out of "greetings" — the
   // swarm answers them from its live self-model instead of boilerplate.
-  { message: "who are you?", kind: "ultimate_tool", toolName: "qayyim_whoami" },
-  { message: "عرف نفسك", kind: "ultimate_tool", toolName: "qayyim_whoami" },
-  { message: "انت بتعمل ايه؟", kind: "ultimate_tool", toolName: "qayyim_whoami" },
+  { message: "who are you?", kind: "ultimate_tool", toolName: "ops_self" },
+  { message: "عرف نفسك", kind: "ultimate_tool", toolName: "ops_self" },
+  { message: "انت بتعمل ايه؟", kind: "ultimate_tool", toolName: "ops_self" },
   // P6-M2: pending drafts are counted from the table — the swarm used to guess
   // this number, and guessed wrong.
   { message: "اعرض المسودات المعلقة", kind: "ultimate_tool", toolName: "draft_list" },

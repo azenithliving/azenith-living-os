@@ -36,12 +36,12 @@ describe("buildDailyStory", () => {
 
   it("links straight to the decision card when a proposal exists", () => {
     const s = buildDailyStory({ ...base, proposalId: "abc-123" });
-    expect(s.href).toBe("https://azenith-living.vercel.app/admin/v2/agents/qayyim?proposal=abc-123");
+    expect(s.href).toBe("https://azenith-living.vercel.app/admin/v2/agents/ops?proposal=abc-123");
     expect(s.text).toContain("abc-123");
   });
 
   it("falls back to the plain dashboard link with nothing pending", () => {
-    expect(buildDailyStory(base).href).toBe("https://azenith-living.vercel.app/admin/v2/agents/qayyim");
+    expect(buildDailyStory(base).href).toBe("https://azenith-living.vercel.app/admin/v2/agents/ops");
   });
 
   it("says something useful when everything was quiet", () => {
@@ -106,7 +106,7 @@ describe("renderTelegramHtml", () => {
 
   it("hides the link behind words and leads with the date", () => {
     const html = renderTelegramHtml(buildDailyStory({ ...base, proposalId: "abc-123" }));
-    expect(html).toContain('<a href="https://azenith-living.vercel.app/admin/v2/agents/qayyim?proposal=abc-123">');
+    expect(html).toContain('<a href="https://azenith-living.vercel.app/admin/v2/agents/ops?proposal=abc-123">');
     expect(html).toContain("<b>مدير تشغيل المحتوى — صباح 2026-09-26</b>");
     expect(html).not.toContain("?proposal=abc-123 افتح");
   });

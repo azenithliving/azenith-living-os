@@ -353,7 +353,7 @@ export class AgentOrchestrator {
       // P6-M1: every agent knows itself before it speaks. Built with no
       // companyId on purpose — the identity line only names the title, the
       // agent's own roles and the live tool count, so a chat turn never pays
-      // for the DB counters (the qayyim_whoami tool renders those).
+      // for the DB counters (the ops_self tool renders those).
       //
       // Short conversational follow-ups ("كم واحدة فيهم؟", "ليه؟") are answered
       // from the replayed history. Business context must not be injected into

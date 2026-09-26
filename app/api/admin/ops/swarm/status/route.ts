@@ -1,7 +1,7 @@
 /**
  * GET /api/admin/ops/swarm/status
  * مراقبة السرب الداخلية — 7 وكلاء خفيين + القائد
- * تُستدعى فقط داخل /admin/v2/qayyim
+ * تُستدعى فقط داخل /admin/v2/ops
  */
 
 import { NextRequest, NextResponse } from "next/server";

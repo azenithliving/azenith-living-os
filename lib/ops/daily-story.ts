@@ -15,7 +15,7 @@
 /** Telegram's own budget is 4096; the owner's attention is far shorter. */
 export const STORY_LIMIT = 1000;
 
-const DASHBOARD_PATH = "/admin/v2/agents/qayyim";
+const DASHBOARD_PATH = "/admin/v2/agents/ops";
 
 export interface StoryInput {
   dateKey: string;

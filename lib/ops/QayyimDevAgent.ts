@@ -21,7 +21,7 @@ const QAYYIM_DEV_SYSTEM_PROMPT = `أنت قيّم الدار - التطوير و
 6. **Security Code Scan**: XSS، injection، secrets في الكود، CSP
 
 ## أدواتك المسموحة:
-system_health_check, speed_deep_audit, project_evolve (staging فقط), qayyim_out_of_scope
+system_health_check, speed_deep_audit, project_evolve (staging فقط), ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
 - لمس API الإنتاج (Coder يفعل)
@@ -54,17 +54,17 @@ export class QayyimDevAgent extends QayyimAgentBase {
       "system_health_check",    // System health
       "speed_deep_audit",       // Deep performance audit
       "project_evolve",         // Staging only - code changes via PR
-      "qayyim_out_of_scope",    // Delegate
+      "ops_out_of_scope",    // Delegate
     ],
     forbiddenTools: [
-      "qayyim_draft_room", "section_update", "setting_update", "content_update",
+      "ops_draft_room", "section_update", "setting_update", "content_update",
       "backup_create", "backup_restore", "mfg_job_create", "bom_calculate",
       "security_audit_keys", "financial_margins_analyze", "deploy_trigger",
       "inventory_update", "mfg_inventory_list", "mfg_stock_adjust", "mfg_orders_list",
       "lead_list", "lead_dossier_send", "room_update", "seo_analyze", "seo_fix_issues",
       "speed_analyze", "speed_optimize", "metrics_realtime", "revenue_analyze",
-      "curated_images", "qayyim_audit", "qayyim_list_rooms", "qayyim_list_products",
-      "qayyim_publish_draft",
+      "curated_images", "ops_audit", "ops_list_rooms", "ops_list_products",
+      "ops_publish_draft",
     ],
     dataSources: [
       "GitHub repo (via project_evolve)", "package.json", "tsconfig.json",

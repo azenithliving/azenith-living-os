@@ -387,7 +387,7 @@ export async function runRivalsWeekly(
   return { crawled, failed, digest, errors, skipped };
 }
 
-/** Latest stored snapshot per rival — what the `qayyim_rivals` tool answers with. */
+/** Latest stored snapshot per rival — what the `ops_rivals` tool answers with. */
 export async function latestRivalDigest(companyId: string): Promise<string> {
   if (!supabaseServer) return renderRivalsDigest([]);
   let rivals: RivalRow[] = [];

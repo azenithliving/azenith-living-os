@@ -3,7 +3,7 @@ import "server-only";
  * الجولة اليومية الاستباقية — the round itself, moved out of the cron route so
  * it has two triggers:
  *
- *  1. Vercel's schedule (`/api/cron/qayyim-daily`, 0 7 * * *) — the primary.
+ *  1. Vercel's schedule (`/api/cron/ops-daily`, 0 7 * * *) — the primary.
  *  2. A backstop from the commander's own turn: when the last round on record
  *     is older than `ROUND_STALE_MS`, the next admin chat fires it. The platform
  *     scheduler is demonstrably unreliable here (it registers the job and never
@@ -145,7 +145,7 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
     results.errors.push(`Luxury score: ${e.message}`);
   }
 
-  // (b) At-risk goals, through the same helper the `qayyim_goals_risk` tool
+  // (b) At-risk goals, through the same helper the `ops_goals_risk` tool
   // uses, so the two cannot disagree and a failed read is never an all-clear.
   try {
     const { assessGoals, renderGoalRisk } = await import("@/lib/ops/goal-risk");

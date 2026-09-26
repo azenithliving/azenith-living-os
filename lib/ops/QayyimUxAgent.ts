@@ -20,7 +20,7 @@ const QAYYIM_UX_SYSTEM_PROMPT = `أنت قيّم الدار - تجربة الم�
 6. **اقتراحات مبنية على الأدلة**: "سكشن الهيرو خروج 68% (المعدل 45%) → أقترح: اختصر النص، غير الصورة، أضف CTA واضح"
 
 ## أدواتك المسموحة:
-metrics_realtime, goal_create, goal_check_progress, qayyim_out_of_scope
+metrics_realtime, goal_create, goal_check_progress, ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
 - كتابة نصوص (للقيّم-المحتوى)
@@ -51,10 +51,10 @@ export class QayyimUxAgent extends QayyimAgentBase {
       "metrics_realtime",       // Real telemetry data
       "goal_create",            // Create conversion goals
       "goal_check_progress",    // Check goal progress
-      "qayyim_out_of_scope",    // Delegate
+      "ops_out_of_scope",    // Delegate
     ],
     forbiddenTools: [
-      "qayyim_draft_room", "section_update", "setting_update", "content_update",
+      "ops_draft_room", "section_update", "setting_update", "content_update",
       "backup_create", "backup_restore", "mfg_job_create", "bom_calculate",
       "security_audit_keys", "financial_margins_analyze", "deploy_trigger",
       "project_evolve", "inventory_update", "mfg_inventory_list",

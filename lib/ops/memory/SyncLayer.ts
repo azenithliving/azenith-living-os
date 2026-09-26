@@ -54,7 +54,7 @@ export class SyncLayer {
   private supabase: any;
   private companyId: string | null = null;
   private subscriptions: Map<string, SyncSubscription[]> = new Map();
-  private notificationChannel: string = 'qayyim_sync';
+  private notificationChannel: string = 'ops_sync';
   private listening = false;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
@@ -477,7 +477,7 @@ export class SyncLayer {
           p_payload JSONB
         ) RETURNS VOID LANGUAGE plpgsql AS $$
         BEGIN
-          PERFORM pg_notify('qayyim_sync', jsonb_build_object(
+          PERFORM pg_notify('ops_sync', jsonb_build_object(
             'event_type', p_event_type,
             'payload', p_payload,
             'timestamp', NOW()

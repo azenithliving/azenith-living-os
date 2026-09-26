@@ -26,15 +26,15 @@ describe("admin-tool-bridge", () => {
   // The forecast rule is wording-wide («توقع», «الشهر الجاي»), so these cases
   // keep it from eating the world-model path, which answers a different question.
   it("routes a revenue forecast to the arithmetic, not the world model", () => {
-    expect(inferUltimateTool("توقع مبيعات الشهر الجاي")?.toolName).toBe("qayyim_forecast");
-    expect(inferUltimateTool("هو الشهر الجاي هيجيب كام؟")?.toolName).toBe("qayyim_forecast");
-    expect(inferUltimateTool("اعمل توقع للأسبوع الجاي")?.toolName).toBe("qayyim_forecast");
+    expect(inferUltimateTool("توقع مبيعات الشهر الجاي")?.toolName).toBe("ops_forecast");
+    expect(inferUltimateTool("هو الشهر الجاي هيجيب كام؟")?.toolName).toBe("ops_forecast");
+    expect(inferUltimateTool("اعمل توقع للأسبوع الجاي")?.toolName).toBe("ops_forecast");
     expect(inferUltimateTool("اعمل توقع للأسبوع الجاي")?.params.horizonDays).toBe(7);
     expect(inferUltimateTool("توقع 14 يوم الجاي")?.params.horizonDays).toBe(30);
   });
 
   it("still answers what-is-selling from the world model", () => {
-    expect(inferUltimateTool("اللي بيتبيع دلوقتي إيه؟")?.toolName).toBe("qayyim_world");
-    expect(inferUltimateTool("المبيعات الفترة دي عاملة إيه")?.toolName).toBe("qayyim_world");
+    expect(inferUltimateTool("اللي بيتبيع دلوقتي إيه؟")?.toolName).toBe("ops_world");
+    expect(inferUltimateTool("المبيعات الفترة دي عاملة إيه")?.toolName).toBe("ops_world");
   });
 });

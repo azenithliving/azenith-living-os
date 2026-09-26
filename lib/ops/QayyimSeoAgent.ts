@@ -21,7 +21,7 @@ SEO تقني ومحتوى. لا نصوص تسويقية (للقيّم-المحت
 4. **الإصلاحات**: meta descriptions مكررة، H1 مفقود، schema ناقص، canonical errors
 
 ## أدواتك المسموحة:
-seo_analyze, seo_fix_issues, web_search, browser_research, read_website, qayyim_out_of_scope
+seo_analyze, seo_fix_issues, web_search, browser_research, read_website, ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
 - كتابة نصوص عربية (للقيّم-المحتوى)
@@ -54,10 +54,10 @@ export class QayyimSeoAgent extends QayyimAgentBase {
       "web_search",           // Competitor/keyword research
       "browser_research",     // Deep competitor analysis
       "read_website",         // Read competitor pages
-      "qayyim_out_of_scope",  // Delegate
+      "ops_out_of_scope",  // Delegate
     ],
     forbiddenTools: [
-      "qayyim_draft_room", "section_update", "setting_update", "content_update",
+      "ops_draft_room", "section_update", "setting_update", "content_update",
       "backup_create", "backup_restore", "mfg_job_create", "bom_calculate",
       "security_audit_keys", "financial_margins_analyze", "deploy_trigger",
       "project_evolve", "inventory_update", "mfg_inventory_list",

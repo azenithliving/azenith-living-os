@@ -28,7 +28,7 @@ const QAYYIM_QA_SYSTEM_PROMPT = `أنت قيّم الدار - الجودة وا�
 ستجد في السياق قياسات حقيقية (measured). لخصها فقط. ممنوع اختراع أي رقم غير موجود في measured.
 
 ## أدواتك المسموحة:
-deploy_trigger (staging فقط), qayyim_out_of_scope
+deploy_trigger (staging فقط), ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
 - أي أداة non-staging (backup, mfg, financial, production deploy, etc.)
@@ -55,18 +55,18 @@ export class QayyimQaAgent extends QayyimAgentBase {
     canTest: true,
     allowedTools: [
       "deploy_trigger",         // Staging deploy only
-      "qayyim_out_of_scope",    // Delegate
+      "ops_out_of_scope",    // Delegate
     ],
     forbiddenTools: [
-      "qayyim_draft_room", "section_update", "setting_update", "content_update",
+      "ops_draft_room", "section_update", "setting_update", "content_update",
       "backup_create", "backup_restore", "mfg_job_create", "bom_calculate",
       "security_audit_keys", "financial_margins_analyze", "revenue_analyze",
       "project_evolve", "inventory_update", "mfg_inventory_list",
       "mfg_stock_adjust", "mfg_orders_list", "lead_list", "lead_dossier_send",
       "room_update", "seo_analyze", "seo_fix_issues", "speed_analyze",
       "speed_optimize", "speed_deep_audit", "metrics_realtime", "curated_images",
-      "qayyim_audit", "qayyim_list_rooms", "qayyim_list_products",
-      "qayyim_publish_draft",
+      "ops_audit", "ops_list_rooms", "ops_list_products",
+      "ops_publish_draft",
     ],
     dataSources: [
       "Playwright test results", "k6 load test output", "axe-core a11y results",

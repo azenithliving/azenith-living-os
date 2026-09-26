@@ -19,7 +19,7 @@ const QAYYIM_ANA_SYSTEM_PROMPT = `أنت قيّم الدار - التحليلا�
 5. **Churn Prediction**: تنبؤ بانسحاب العملاء الفاخرين
 
 ## أدواتك المسموحة:
-revenue_analyze, financial_margins_analyze, metrics_realtime, lead_list, qayyim_out_of_scope
+revenue_analyze, financial_margins_analyze, metrics_realtime, lead_list, ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
 - كتابة نصوص (للقيّم-المحتوى)
@@ -51,10 +51,10 @@ export class QayyimAnalyticsAgent extends QayyimAgentBase {
       "financial_margins_analyze", // Margin analysis
       "metrics_realtime",          // Real-time metrics
       "lead_list",                 // Customer segmentation
-      "qayyim_out_of_scope",       // Delegate
+      "ops_out_of_scope",       // Delegate
     ],
     forbiddenTools: [
-      "qayyim_draft_room", "section_update", "setting_update", "content_update",
+      "ops_draft_room", "section_update", "setting_update", "content_update",
       "backup_create", "backup_restore", "mfg_job_create", "bom_calculate",
       "security_audit_keys", "deploy_trigger", "project_evolve", "inventory_update",
       "mfg_inventory_list", "mfg_stock_adjust", "mfg_orders_list",

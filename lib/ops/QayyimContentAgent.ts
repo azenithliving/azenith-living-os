@@ -26,7 +26,7 @@ const QAYYIM_CONT_SYSTEM_PROMPT = `أنت قيّم الدار - المحتوى �
 - **copy_review**: يراجع مسودة قبل النشر، يقرر pass/fail مع أسباب
 
 ## أدواتك المسموحة:
-qayyim_draft_room, section_update, setting_update, content_update, qayyim_out_of_scope
+ops_draft_room, section_update, setting_update, content_update, ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
 - أي أداة فيها: backup, mfg, bom, security, financial, deploy, project_evolve, inventory, lead, room_update
@@ -52,11 +52,11 @@ export class QayyimContentAgent extends QayyimAgentBase {
     canAnalyze: true, // Text analysis only
     canTest: false,
     allowedTools: [
-      "qayyim_draft_room",     // Draft room/product copy
+      "ops_draft_room",     // Draft room/product copy
       "section_update",        // Update section content
       "setting_update",        // Update site settings (text)
       "content_update",        // General content update
-      "qayyim_out_of_scope",   // Delegate out of scope
+      "ops_out_of_scope",   // Delegate out of scope
     ],
     forbiddenTools: [
       "backup_create", "backup_restore", "mfg_job_create", "bom_calculate",

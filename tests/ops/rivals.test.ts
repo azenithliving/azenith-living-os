@@ -161,13 +161,13 @@ describe('digest', () => {
   });
 });
 
-describe('qayyim_rivals routing', () => {
+describe('ops_rivals routing', () => {
   it.each(['المنافسين بيعملوا ايه', 'قارننا بالمنافس الفلاني', 'رصد المنافسين', 'competitor watch'])(
-    'sends "%s" to qayyim_rivals',
-    (msg) => expect(inferUltimateTool(msg)?.toolName).toBe('qayyim_rivals')
+    'sends "%s" to ops_rivals',
+    (msg) => expect(inferUltimateTool(msg)?.toolName).toBe('ops_rivals')
   );
 
   it('does not steal the world-model question', () => {
-    expect(inferUltimateTool('ايزاي الشغل الفترة دي')?.toolName).toBe('qayyim_world');
+    expect(inferUltimateTool('ايزاي الشغل الفترة دي')?.toolName).toBe('ops_world');
   });
 });

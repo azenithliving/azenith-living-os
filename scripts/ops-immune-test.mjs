@@ -1,5 +1,5 @@
 /**
- * qayyim-immune-test.mjs — proves the P6-M5 organs actually run on production.
+ * ops-immune-test.mjs — proves the P6-M5 organs actually run on production.
  *
  * Two rules shape this file:
  *  1. Secrets are read from the environment and never printed. Only the presence
@@ -10,7 +10,7 @@
  *     disagree and this run fails.
  *
  * Usage: set CRON_SECRET and INTERNAL_API_KEY, then
- *   node scripts/qayyim-immune-test.mjs [baseUrl]
+ *   node scripts/ops-immune-test.mjs [baseUrl]
  */
 
 const BASE = (process.argv[2] || "https://azenith-living.vercel.app").replace(/\/$/, "");
@@ -28,7 +28,7 @@ const record = (id, pass, detail) => {
 };
 
 async function postCron(step) {
-  const res = await fetch(`${BASE}/api/cron/qayyim-daily?only=${step}`, {
+  const res = await fetch(`${BASE}/api/cron/ops-daily?only=${step}`, {
     method: "POST",
     headers: { Authorization: `Bearer ${CRON}` },
     signal: AbortSignal.timeout(90_000),

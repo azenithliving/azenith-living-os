@@ -102,7 +102,7 @@ export async function runUltimateTool(
   }
 
   // ── P6-M1: the swarm reports on itself from live registries + counters ──
-  if (toolName === "qayyim_whoami") {
+  if (toolName === "ops_self") {
     const { buildSelfModel, renderSelfReport } = await import("@/lib/ops/self-model");
     const model = await buildSelfModel(companyId ?? null);
     return {
@@ -118,7 +118,7 @@ export async function runUltimateTool(
   }
 
   // ── P6-M2: the store's live situation, aggregated read-only ──
-  if (toolName === "qayyim_world") {
+  if (toolName === "ops_world") {
     const { buildWorldModel, renderWorldDigest } = await import("@/lib/ops/world-model");
     const world = await buildWorldModel(companyId ?? null);
     return {
@@ -150,7 +150,7 @@ export async function runUltimateTool(
   }
 
   // ── P6-M2: competitor watch — stored measurements or an honest empty state ──
-  if (toolName === "qayyim_rivals") {
+  if (toolName === "ops_rivals") {
     const { latestRivalDigest } = await import("@/lib/ops/rivals");
     const digest = await latestRivalDigest(companyId ?? "");
     return { success: true, message: digest, data: { digest: true } };
@@ -158,7 +158,7 @@ export async function runUltimateTool(
 
   // ── P6-M3: the forecast. Holt-Winters over the order ledger, and the error
   // the model makes on that ledger travels with the number.
-  if (toolName === "qayyim_forecast") {
+  if (toolName === "ops_forecast") {
     const { runRevenueForecast, renderForecast } = await import("@/lib/ops/forecast");
     const horizonDays = Number(params.horizonDays) > 0 ? Number(params.horizonDays) : 30;
     const f = await runRevenueForecast(companyId ?? null, { horizonDays });
@@ -232,7 +232,7 @@ export async function runUltimateTool(
     const res = await qayyimQaAgent.accessibilityAudit({ pages: ["/", "/rooms", "/furniture"] });
     return { success: res.success, message: res.output, data: res.data || {} };
   }
-  if (toolName === "qayyim_luxury_score") {
+  if (toolName === "ops_luxury_score") {
     const { runLuxuryScore } = await import("@/lib/ops/luxury-v2");
     const r = await runLuxuryScore(companyId ?? null);
     return {
@@ -241,7 +241,7 @@ export async function runUltimateTool(
       data: { luxury_score: r.luxury_score, signals: r.signals, missing: r.missing },
     };
   }
-  if (toolName === "qayyim_goals_risk") {
+  if (toolName === "ops_goals_risk") {
     const { getSupabaseAdminClient } = await import("@/lib/supabase-admin");
     const supabase = companyId ? getSupabaseAdminClient() : null;
     if (!supabase) return { success: false, message: "لا يوجد اتصال بقاعدة البيانات لفحص الأهداف." };
@@ -310,7 +310,7 @@ export function inferUltimateTool(
       lower
     )
   ) {
-    return { toolName: "qayyim_whoami", params: {} };
+    return { toolName: "ops_self", params: {} };
   }
   // «توقع الشهر الجاي» asks for arithmetic, and must not be swallowed by the
   // world-model path below just because the sentence also says «المبيعات».
@@ -320,7 +320,7 @@ export function inferUltimateTool(
     )
   ) {
     const days = /أسبوع|اسبوع|\b7\s*أيام|\b7\s*ايام/i.test(lower) ? 7 : 30;
-    return { toolName: "qayyim_forecast", params: { horizonDays: days } };
+    return { toolName: "ops_forecast", params: { horizonDays: days } };
   }
   // "how is the shop doing / what sells" reads the live world model. It must
   // precede revenue_analyze below, which answers the same question with a
@@ -330,7 +330,7 @@ export function inferUltimateTool(
       lower
     )
   ) {
-    return { toolName: "qayyim_world", params: {} };
+    return { toolName: "ops_world", params: {} };
   }
   // Real search-phrase traffic, or a named refusal. Must not fall into the
   // generic seo_analyze path, which audits the page but knows nothing about
@@ -341,7 +341,7 @@ export function inferUltimateTool(
   // Competitor questions must be answered from stored measurements, not from
   // the SEO agent's impression of the market.
   if (/منافس|منافسين|competitor|market\s*watch|رصد\s+السوق/i.test(lower)) {
-    return { toolName: "qayyim_rivals", params: {} };
+    return { toolName: "ops_rivals", params: {} };
   }
   // "how many drafts are pending" must be COUNTED, never guessed by the swarm.
   // The exclusion looks for an action *commanded on* a draft (leading mutating
@@ -374,10 +374,10 @@ export function inferUltimateTool(
     return { toolName: "qa_security_headers", params: { url } };
   }
   if (/luxury\s*score|مؤشر.*الفخامة|الفخامة/i.test(lower)) {
-    return { toolName: "qayyim_luxury_score", params: {} };
+    return { toolName: "ops_luxury_score", params: {} };
   }
   if (/(?:أهداف|اهداف|هدف|goals?)/i.test(lower) && /يهدد|مهدد|خطر|risk|متأخر|تعطل/i.test(lower)) {
-    return { toolName: "qayyim_goals_risk", params: {} };
+    return { toolName: "ops_goals_risk", params: {} };
   }
 
   if (/صحة.*محتوى|content\s*health|فحص.*محتوى/i.test(lower)) {

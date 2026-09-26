@@ -1,5 +1,5 @@
 /**
- * qayyim-ui-test.mjs — drives the admin UI like a human: logs in through the
+ * ops-ui-test.mjs — drives the admin UI like a human: logs in through the
  * gate (password + TOTP generated locally, never printed), opens the seed
  * card, chats in fullscreen, checks message persistence across the 5s poll,
  * opens roles, walks the studio cards/tabs and the legacy redirect.
@@ -38,7 +38,7 @@ try {
   // 2) Seed card page
   await p.goto(`${BASE}/admin/v2/agents`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3000);
-  const card = p.locator('a[href="/admin/v2/agents/qayyim"]');
+  const card = p.locator('a[href="/admin/v2/agents/ops"]');
   const cardTxt = (await card.count()) ? (await card.first().textContent()) || '' : '';
   check('seed card renders', cardTxt.includes('قيّم الدار'), cardTxt.replace(/\s+/g, ' '));
 
@@ -123,7 +123,7 @@ try {
   await p.fill('[data-palette-input]', 'فخامه');
   await p.waitForTimeout(600);
   const filtered = await p.locator('[data-palette-item]').count();
-  const luxuryRow = await p.locator('[data-palette-item="capability:qayyim_luxury_score"]').count();
+  const luxuryRow = await p.locator('[data-palette-item="capability:ops_luxury_score"]').count();
   check('dialect query narrows to the luxury capability', filtered > 0 && filtered < capabilityRows && luxuryRow === 1,
     `${capabilityRows}->${filtered}`);
 
@@ -133,7 +133,7 @@ try {
     await p.waitForTimeout(5000);
     ranTool = (await p.locator('span:has-text("تم التنفيذ الفعلي")').count()) > 0;
   }
-  const toolNamed = ranTool ? await p.locator('[dir="ltr"]:has-text("qayyim_luxury_score"), span:has-text("qayyim_luxury_score")').count() : 0;
+  const toolNamed = ranTool ? await p.locator('[dir="ltr"]:has-text("ops_luxury_score"), span:has-text("ops_luxury_score")').count() : 0;
   check('palette Enter really executes the named tool', ranTool && toolNamed > 0, `toolCard=${ranTool} named=${toolNamed}`);
 
   // 9) «اسأل عن نفسك» shows the self-model, measured not described
@@ -156,17 +156,17 @@ try {
 
   // 10b) The palette's agent rows hand off to a real conversation, and an
   // unknown key must not invent one.
-  await p.goto(`${BASE}/admin/v2/agents/qayyim?agent=qayyim-qa`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.goto(`${BASE}/admin/v2/agents/ops?agent=ops-qa`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3500);
   const qaHeader = ((await p.locator('[data-chat-header] span.text-sm').first().textContent().catch(() => '')) || '').replace(/\s+/g, ' ');
   check('?agent= opens that agent’s own chat', qaHeader.includes('الجودة'), qaHeader.slice(0, 70));
-  await p.goto(`${BASE}/admin/v2/agents/qayyim?agent=qayyim-hacker`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.goto(`${BASE}/admin/v2/agents/ops?agent=qayyim-hacker`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3500);
   const fallbackHeader = ((await p.locator('[data-chat-header] span.text-sm').first().textContent().catch(() => '')) || '').replace(/\s+/g, ' ');
   check('an unknown agent key falls back to the leader', fallbackHeader.includes('مدير تشغيل المحتوى'), fallbackHeader.slice(0, 70));
 
   // 11) The Telegram decision link: junk is refused, a real row opens a card.
-  await p.goto(`${BASE}/admin/v2/agents/qayyim?proposal=%3Cscript%3Ealert(1)%3C/script%3E`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.goto(`${BASE}/admin/v2/agents/ops?proposal=%3Cscript%3Ealert(1)%3C/script%3E`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3000);
   check('a malformed proposal link opens nothing', (await p.locator('[data-proposal-card]').count()) === 0);
 
@@ -183,7 +183,7 @@ try {
     action_type: 'assistant_health',
     description: 'قرار تجريبي من اختبار الواجهة — ارفضه',
   });
-  await p.goto(`${BASE}/admin/v2/agents/qayyim?proposal=${madeId}`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.goto(`${BASE}/admin/v2/agents/ops?proposal=${madeId}`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3500);
   const cardShown = (await p.locator('[data-proposal-card]').count()) > 0;
   const cardText = cardShown ? ((await p.locator('[data-proposal-card]').first().textContent()) || '') : '';
@@ -199,7 +199,7 @@ try {
   check('refusing a proposal reports what really happened', decided);
 
   // 12) Studio cards + tabs
-  await p.goto(`${BASE}/admin/v2/qayyim`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.goto(`${BASE}/admin/v2/ops`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3500);
   const chatBtns = await p.locator('button:has-text("محادثة")').count();
   check('studio shows 8 agent cards', chatBtns >= 8, `chat buttons=${chatBtns}`);
@@ -216,7 +216,7 @@ try {
   // 10) Legacy URL redirect
   await p.goto(`${BASE}/admin/qayyim`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(1500);
-  check('/admin/qayyim redirects to v2', p.url().includes('/admin/v2/qayyim'), p.url());
+  check('/admin/qayyim redirects to v2', p.url().includes('/admin/v2/ops'), p.url());
 
   // 11) New dashboard: ads control, and no CSP violations while using the app
   const cspHits = [];

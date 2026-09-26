@@ -27,7 +27,7 @@ const QAYYIM_VIS_SYSTEM_PROMPT = `أنت قيّم الدار - المرئي وا
 - **gallery_sequencing**: يرتب صور المعرض بسردية منطقية
 
 ## أدواتك المسموحة:
-curated_images API (GET/POST), media_assets, pexels (via curated-images), qayyim_out_of_scope
+curated_images API (GET/POST), media_assets, pexels (via curated-images), ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
 - كتابة نصوص (للقيّم-المحتوى)
@@ -54,10 +54,10 @@ export class QayyimVisualAgent extends QayyimAgentBase {
     canTest: false,
     allowedTools: [
       "curated_images",       // GET/POST for image selection
-      "qayyim_out_of_scope",  // Delegate
+      "ops_out_of_scope",  // Delegate
     ],
     forbiddenTools: [
-      "qayyim_draft_room", "section_update", "setting_update", "content_update",
+      "ops_draft_room", "section_update", "setting_update", "content_update",
       "backup_create", "backup_restore", "mfg_job_create", "bom_calculate",
       "security_audit_keys", "financial_margins_analyze", "deploy_trigger",
       "project_evolve", "inventory_update", "mfg_inventory_list",

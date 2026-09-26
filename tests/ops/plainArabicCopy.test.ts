@@ -21,7 +21,7 @@ import { renderSelfReport, buildSelfModel, AUTONOMOUS_ORGANS, type SelfModel } f
 
 const facts: GapFacts = {
   tools: [
-    { name: "qayyim_world", desc: "مبيعات الدار والأكثر بيعاً والكتالوج" },
+    { name: "ops_world", desc: "مبيعات الدار والأكثر بيعاً والكتالوج" },
     { name: "gsc_queries", desc: "كلمات البحث الحقيقية من خدمة بحث جوجل" },
   ],
 };
@@ -134,7 +134,7 @@ describe("owner-facing copy is Arabic per line", () => {
       brand: "قيّم الدار",
       agents: [{ key: "ops-lead", name: "القائد", roles: 6 }],
       tools: [
-        { name: "qayyim_whoami", desc: "تقرير ذاتي" },
+        { name: "ops_self", desc: "تقرير ذاتي" },
         { name: "seo_analyze", desc: "تحليل ظهور" },
       ],
       limits: ["كرون يومي واحد كحد أقصى"],
@@ -146,8 +146,8 @@ describe("owner-facing copy is Arabic per line", () => {
     expect(mixedLines(renderSelfReport({ ...withCounters, counters: undefined }))).toEqual([]);
     // the identifiers did not disappear, they just got their own line
     const report = renderSelfReport(withCounters);
-    expect(report).toContain("qayyim_whoami");
-    expect(report.split("\n").find((l) => l.includes("qayyim_whoami"))).not.toMatch(/\p{Script=Arabic}/u);
+    expect(report).toContain("ops_self");
+    expect(report.split("\n").find((l) => l.includes("ops_self"))).not.toMatch(/\p{Script=Arabic}/u);
   });
 
   /** The shipped limits text, not a fixture's: it named the hosting platform

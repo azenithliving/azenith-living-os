@@ -5,7 +5,7 @@
       "schedule": "0 8 * * *"
     },
     {
-      "path": "/api/cron/qayyim-daily",
+      "path": "/api/cron/ops-daily",
       "schedule": "0 7 * * *"
     }
   ]

@@ -1,5 +1,5 @@
 /**
- * qayyim-deep-test.mjs — من القشرة إلى البذرة: أعمق سيناريوهات المنتج على الإنتاج.
+ * ops-deep-test.mjs — من القشرة إلى البذرة: أعمق سيناريوهات المنتج على الإنتاج.
  * يغطي: تباين اللهجة، الذاكرة متعددة الأدوار، منع هلوسة الروابط، دورة المسودات،
  * بوابة الدستور، أحداث SyncLayer، التعلم، الأهداف.
  */
@@ -45,7 +45,7 @@ const db = async (path) => {
 const variants = ['الموقع بطيء جدا', 'وريني سرعه الموقع', 'الصفحه تقيله اوى', 'the site feels sluggish measure it', 'قياس زمن الاستجابة'];
 const tools = [];
 for (const v of variants) {
-  const r = await chat('qayyim-core', v);
+  const r = await chat('ops-lead', v);
   tools.push(r.metadata.tool || 'none');
 }
 ok('L1 dialect: ≥4/5 صياغات وصلت لأداة سرعة/حمل', tools.filter((t) => /speed|load/i.test(t)).length >= 4, tools.join(','));
@@ -68,12 +68,12 @@ const statesCount = (text, n) =>
   new RegExp(`(?<!\\d)${n}(?!\\d)`).test(toAsciiDigits(text)) || (AR_NUMS[n] ? new RegExp(AR_NUMS[n], 'i').test(text) : false);
 
 const expectedDrafts = ((await qapi('list_drafts'))?.drafts || []).length;
-const m1 = await chat('qayyim-core', 'اعرض المسودات المعلقة');
-const m2 = await chat('qayyim-core', 'كم واحدة فيهم؟ أديني رقم بس');
+const m1 = await chat('ops-lead', 'اعرض المسودات المعلقة');
+const m2 = await chat('ops-lead', 'كم واحدة فيهم؟ أديني رقم بس');
 ok('L2 multi-turn: المتابعة «كم واحدة» أعطت العدد الحقيقي', statesCount(m2.message, expectedDrafts) && !/افحص|تقرير تنفيذي/.test(m2.message.slice(0, 30)), `expected=${expectedDrafts} r1_tool=${m1.metadata.tool || '-'} r2="${m2.message.replace(/\s+/g, ' ').slice(0, 60)}"`);
 
 // ═══ L3: منع هلوسة الروابط ═══
-const l3 = await chat('qayyim-core', 'اربطلي على صفحة الصوفا الملوكي وأقولي إيه مشاكلها');
+const l3 = await chat('ops-lead', 'اربطلي على صفحة الصوفا الملوكي وأقولي إيه مشاكلها');
 const fakeLink = /\/products\/\S+/.test(l3.message) && !l3.message.includes('غير موثق');
 ok('L3 no fake /products links leak unflagged', !fakeLink, l3.message.replace(/\s+/g, ' ').slice(0, 80));
 
@@ -81,8 +81,8 @@ ok('L3 no fake /products links leak unflagged', !fakeLink, l3.message.replace(/\
 const drafts = await qapi('list_drafts');
 const draftList = drafts?.drafts || drafts?.result?.drafts || [];
 ok('L4a list_drafts returns real rows', Array.isArray(draftList), `count=${draftList.length}`);
-const blocked = await qapi('constitution', { agentKey: 'qayyim-cont', actionType: 'publish', targetPage: '/rooms', content: 'اختبار عمق' });
-const allowed = await qapi('constitution', { agentKey: 'qayyim-cont', actionType: 'publish', targetPage: '/rooms', content: { text: 'اختبار عمق', versionNumber: 9, draftId: 'deep-probe' }, evidenceUrls: [`${BASE}/rooms`], humanApproval: true, approvedBy: 'deep@test' });
+const blocked = await qapi('constitution', { agentKey: 'ops-content', actionType: 'publish', targetPage: '/rooms', content: 'اختبار عمق' });
+const allowed = await qapi('constitution', { agentKey: 'ops-content', actionType: 'publish', targetPage: '/rooms', content: { text: 'اختبار عمق', versionNumber: 9, draftId: 'deep-probe' }, evidenceUrls: [`${BASE}/rooms`], humanApproval: true, approvedBy: 'deep@test' });
 ok('L4b constitution blocks unversioned publish', blocked?.overall_allowed === false);
 ok('L4c constitution allows fully-attributed publish', allowed?.overall_allowed === true);
 
@@ -93,7 +93,7 @@ ok('L5 sync events flowing in last 30min', recentEvs.length >= 1, recentEvs.map(
 
 // ═══ L6: التعلم — أنشئ تعلّم واقرأه وامسحه ═══
 const lc = await qapi('learning&subaction=create', {
-  source_agent: 'qayyim-core', target_agents: ['qayyim-cont'], lesson_type: 'heuristic', domain: 'deep-test',
+  source_agent: 'ops-lead', target_agents: ['ops-content'], lesson_type: 'heuristic', domain: 'deep-test',
   pattern: { probe: 'deep-1' }, evidence: { origin: 'deep-test' }, confidence: 0.9,
 });
 const found = await qapi('learning&subaction=search', { query: 'deep-probe', domain: 'deep-test' });
@@ -104,7 +104,7 @@ const fakePub = await qapi('publish', { draft_id: '00000000-0000-0000-0000-00000
 ok('L7 publishing nonexistent draft fails cleanly (no crash)', fakePub?.result?.success === false || fakePub?.success === false || fakePub?.error !== undefined, JSON.stringify(fakePub).slice(0, 90));
 
 // ═══ L8: البذرة — الذاكرة الدلالية حية (embedding query عبر الشات) ═══
-const mem = await chat('qayyim-core', 'استعرض ذاكرة الوكلاء');
+const mem = await chat('ops-lead', 'استعرض ذاكرة الوكلاء');
 ok('L8 memory inspect returns real counts', /إجمالي|السجلات|\d/.test(mem.message), mem.message.replace(/\s+/g, ' ').slice(0, 70));
 
 const failed = results.filter((r) => !r.pass).length;

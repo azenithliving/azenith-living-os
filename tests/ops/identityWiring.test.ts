@@ -45,7 +45,7 @@ describe("the whole codebase speaks one key set", () => {
   it("normalises a retired key at every door it can still arrive through", () => {
     const doors = [
       "lib/agents/AgentOrchestrator.ts",
-      "app/admin/v2/agents/qayyim/page.tsx",
+      "app/admin/v2/agents/ops/page.tsx",
       "app/api/admin/agents/chat/route.ts",
       "app/api/admin/agents/messages/route.ts",
       "app/api/admin/agents/tasks/route.ts",

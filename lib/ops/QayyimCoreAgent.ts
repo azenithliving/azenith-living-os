@@ -39,11 +39,11 @@ export class QayyimCoreAgent extends QayyimAgentBase {
     canAnalyze: true, // High-level analysis
     canTest: false,
     allowedTools: [
-      "qayyim_audit",           // Full site audit
-      "qayyim_list_rooms",      // List public rooms
-      "qayyim_list_products",   // List storefront products
-      "qayyim_publish_draft",   // Publish approved draft
-      "qayyim_out_of_scope",    // Delegate to other agents
+      "ops_audit",           // Full site audit
+      "ops_list_rooms",      // List public rooms
+      "ops_list_products",   // List storefront products
+      "ops_publish_draft",   // Publish approved draft
+      "ops_out_of_scope",    // Delegate to other agents
       "content_update",         // For coordinated updates
       "section_update",
       "setting_update",

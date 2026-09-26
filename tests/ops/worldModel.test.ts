@@ -8,7 +8,7 @@ import {
 } from '@/lib/ops/world-model';
 import { inferUltimateTool } from '@/lib/admin-tool-bridge';
 
-describe('qayyim_world routing', () => {
+describe('ops_world routing', () => {
   it.each([
     'ايزاي الشغل الفترة دي',
     'إزاي الشغل الفترة دي؟',
@@ -17,12 +17,12 @@ describe('qayyim_world routing', () => {
     'ايه اللي بيتبيع اكتر',
     'world model',
   ])('sends "%s" to the world model, not to a guessed margin', (msg) => {
-    expect(inferUltimateTool(msg)?.toolName).toBe('qayyim_world');
+    expect(inferUltimateTool(msg)?.toolName).toBe('ops_world');
   });
 
   it('does not steal identity or speed questions', () => {
-    expect(inferUltimateTool('عرف نفسك')?.toolName).toBe('qayyim_whoami');
-    expect(inferUltimateTool('وريني سرعه الموقع قد ايه دلوقتي')?.toolName).not.toBe('qayyim_world');
+    expect(inferUltimateTool('عرف نفسك')?.toolName).toBe('ops_self');
+    expect(inferUltimateTool('وريني سرعه الموقع قد ايه دلوقتي')?.toolName).not.toBe('ops_world');
   });
 
   it('counts drafts but leaves publish wording to the publish flow', () => {

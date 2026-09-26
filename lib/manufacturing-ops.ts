@@ -491,7 +491,7 @@ export async function createProductionJob(
     production_job_id: job.id,
     event_type: "created",
     reason: "أنشئ من محادثة قيّم الدار",
-    metadata: { source: "qayyim_chat", description },
+    metadata: { source: "ops_chat", description },
   });
 
   return {

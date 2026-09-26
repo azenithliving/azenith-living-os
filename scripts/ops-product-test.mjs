@@ -1,10 +1,10 @@
 /**
- * qayyim-product-test.mjs — end-to-end PRODUCT test of the Qayyim swarm.
+ * ops-product-test.mjs — end-to-end PRODUCT test of the Qayyim swarm.
  * Acts as a real admin over the API (x-internal-key) and asserts that each
  * advertised capability actually EXECUTES (tool name + toolSuccess + real
  * payload markers), not just answers with prose.
  *
- * Usage: set INTERNAL_API_KEY then `node scripts/qayyim-product-test.mjs [baseUrl]`
+ * Usage: set INTERNAL_API_KEY then `node scripts/ops-product-test.mjs [baseUrl]`
  */
 
 const BASE = process.argv[2] || "https://azenith-living.vercel.app";
@@ -12,32 +12,32 @@ const KEY = process.env.INTERNAL_API_KEY;
 if (!KEY) { console.error("INTERNAL_API_KEY required in env"); process.exit(2); }
 
 const CASES = [
-  { id: "core-audit",   agent: "qayyim-core", msg: "افحص الموقع كله شاملاً وأعطني تقريراً تنفيذياً", expect: (m, md) => /فحص|تدقيق|مشكلة|غرفة|منتج/i.test(m) },
-  { id: "core-speed",   agent: "qayyim-core", msg: "وريني سرعه الموقع قد ايه دلوقتي", expect: (m, md) => md.tool === "speed_analyze" || md.tool === "qa_load_probe" },
-  { id: "core-luxury",  agent: "qayyim-core", msg: "احسب Luxury Score الآن", expect: (m, md) => md.tool === "qayyim_luxury_score" },
-  { id: "core-sec",     agent: "qayyim-core", msg: "افحص رؤوس الأمان للصفحة الرئيسية", expect: (m, md) => md.tool === "qa_security_headers" && md.toolSuccess !== false },
-  { id: "core-a11y",    agent: "qayyim-core", msg: "شغّل تدقيق إمكانية الوصول", expect: (m, md) => md.tool === "qa_accessibility" },
-  { id: "core-goals",   agent: "qayyim-core", msg: "عايز اعرف اللى بيهدد اهدافي", expect: (m, md) => md.tool === "qayyim_goals_risk" },
-  { id: "core-memory",  agent: "qayyim-core", msg: "استعرض ذاكرة الوكلاء", expect: (m, md) => md.tool === "agent_memory_inspect" },
+  { id: "core-audit",   agent: "ops-lead", msg: "افحص الموقع كله شاملاً وأعطني تقريراً تنفيذياً", expect: (m, md) => /فحص|تدقيق|مشكلة|غرفة|منتج/i.test(m) },
+  { id: "core-speed",   agent: "ops-lead", msg: "وريني سرعه الموقع قد ايه دلوقتي", expect: (m, md) => md.tool === "speed_analyze" || md.tool === "qa_load_probe" },
+  { id: "core-luxury",  agent: "ops-lead", msg: "احسب Luxury Score الآن", expect: (m, md) => md.tool === "ops_luxury_score" },
+  { id: "core-sec",     agent: "ops-lead", msg: "افحص رؤوس الأمان للصفحة الرئيسية", expect: (m, md) => md.tool === "qa_security_headers" && md.toolSuccess !== false },
+  { id: "core-a11y",    agent: "ops-lead", msg: "شغّل تدقيق إمكانية الوصول", expect: (m, md) => md.tool === "qa_accessibility" },
+  { id: "core-goals",   agent: "ops-lead", msg: "عايز اعرف اللى بيهدد اهدافي", expect: (m, md) => md.tool === "ops_goals_risk" },
+  { id: "core-memory",  agent: "ops-lead", msg: "استعرض ذاكرة الوكلاء", expect: (m, md) => md.tool === "agent_memory_inspect" },
   // Must be COUNTED by the tool: the old assertion passed on swarm prose that
   // reported the wrong number, which is precisely the failure P6 removes.
-  { id: "core-drafts",  agent: "qayyim-core", msg: "اعرض المسودات المعلقة للمراجعة والنشر", expect: (m, md) => md.tool === "draft_list" && /المسودات المعلقة: \d+|لا مسودات معلقة الآن/.test(m) },
+  { id: "core-drafts",  agent: "ops-lead", msg: "اعرض المسودات المعلقة للمراجعة والنشر", expect: (m, md) => md.tool === "draft_list" && /المسودات المعلقة: \d+|لا مسودات معلقة الآن/.test(m) },
   // P6-M1: identity must come from the live self-model (real tool count), not boilerplate.
-  { id: "core-whoami",  agent: "qayyim-core", msg: "عرف نفسك", expect: (m, md) => md.tool === "qayyim_whoami" && /الأدوات المقاسة/.test(m) && /حدودي/.test(m) },
+  { id: "core-whoami",  agent: "ops-lead", msg: "عرف نفسك", expect: (m, md) => md.tool === "ops_self" && /الأدوات المقاسة/.test(m) && /حدودي/.test(m) },
   // P6-M2: business answers come from the world model. Either real digits from
   // sales_orders, or an explicit "could not read" — never invented numbers.
-  { id: "core-world",   agent: "qayyim-core", msg: "ايزاي الشغل الفترة دي", expect: (m, md) => md.tool === "qayyim_world" && /عالم الدار/.test(m) && (/ج\.م/.test(m) || /لم أستطع قراءة/.test(m)) },
-  { id: "core-sells",   agent: "qayyim-core", msg: "إيه اللي بيتبيع عندنا؟", expect: (m, md) => md.tool === "qayyim_world" && (/الأكثر مبيعًا/.test(m) || /لم أضِف|لا أصناف/.test(m)) },
+  { id: "core-world",   agent: "ops-lead", msg: "ايزاي الشغل الفترة دي", expect: (m, md) => md.tool === "ops_world" && /عالم الدار/.test(m) && (/ج\.م/.test(m) || /لم أستطع قراءة/.test(m)) },
+  { id: "core-sells",   agent: "ops-lead", msg: "إيه اللي بيتبيع عندنا؟", expect: (m, md) => md.tool === "ops_world" && (/الأكثر مبيعًا/.test(m) || /لم أضِف|لا أصناف/.test(m)) },
   // Three honest answers, and nothing else: not wired (names the variable),
   // real rows (names clicks), or a real zero (names the window it checked).
-  { id: "core-gsc",     agent: "qayyim-core", msg: "كلمات البحث اللي جابلي زيارات", expect: (m, md) => md.tool === "gsc_queries" && (
+  { id: "core-gsc",     agent: "ops-lead", msg: "كلمات البحث اللي جابلي زيارات", expect: (m, md) => md.tool === "gsc_queries" && (
     (/موصولةش|موصولة/.test(m) ? /GOOGLE_APPLICATION_CREDENTIALS_JSON/.test(m) : false) ||
     /نقرة/.test(m) ||
     (/صفر نتائج/.test(m) && /\d{4}-\d{2}-\d{2}/.test(m))) },
-  { id: "core-rivals",  agent: "qayyim-core", msg: "المنافسين بيعملوا ايه", expect: (m, md) => md.tool === "qayyim_rivals" && /لم أضِف|منافس/.test(m) },
+  { id: "core-rivals",  agent: "ops-lead", msg: "المنافسين بيعملوا ايه", expect: (m, md) => md.tool === "ops_rivals" && /لم أضِف|منافس/.test(m) },
   // P6-M3: a forecast is either numbers with the measured error, or a refusal
   // that says why. A confident number with no history behind it fails this.
-  { id: "core-forecast", agent: "qayyim-core", msg: "توقع مبيعات الشهر الجاي", expect: (m, md) => md.tool === "qayyim_forecast" && (/الإجمالي المتوقع/.test(m) ? /خطأ|غير موسمي|مبني على/.test(m) : /مش قادر/.test(m)) },
+  { id: "core-forecast", agent: "ops-lead", msg: "توقع مبيعات الشهر الجاي", expect: (m, md) => md.tool === "ops_forecast" && (/الإجمالي المتوقع/.test(m) ? /خطأ|غير موسمي|مبني على/.test(m) : /مش قادر/.test(m)) },
   // P6-M4 refusal contract. The assertion is an invariant, not a script: if the
   // swarm gives up, the answer must name the missing capability and how to switch
   // it on. An answer that works also passes — nothing is being forced.
@@ -48,7 +48,7 @@ const CASES = [
   //  • a refusal must name the missing capability;
   //  • an honest answer that neither claims nor refuses passes untouched.
   {
-    id: "core-gap", agent: "qayyim-core", msg: "ابعتلي رسالة نصية لما عمي يعمل طلب",
+    id: "core-gap", agent: "ops-lead", msg: "ابعتلي رسالة نصية لما عمي يعمل طلب",
     expect: (m, md) => {
       const claimsAct = /(مفعّلة الآن|مفعّله الآن|تم\s?تفعيل|بنرسل|بعتلهم|تم\s?إرسال)/.test(m);
       const refuses = /(مش قادر|ما ?أ?قدرش|لا ?أ?قدر|لا ?أ?ستطيع|خارج نطاق|عن نطاق|تفتقر|تقتصر|غير متاحة)/.test(m);
@@ -58,12 +58,12 @@ const CASES = [
       return true;
     },
   },
-  { id: "cont-health",  agent: "qayyim-cont", msg: "افحص صحة محتوى الصفحة الرئيسية", expect: (m, md) => md.tool === "content_health_check" || /محتوى/i.test(m) },
-  { id: "seo-analyze",  agent: "qayyim-seo",  msg: "حلل SEO للصفحة الرئيسية", expect: (m, md) => /SEO|سيو|عنوان|meta/i.test(m) },
-  { id: "ana-metrics",  agent: "qayyim-ana",  msg: "اعرض المؤشرات اللحظية للنظام", expect: (m, md) => md.tool === "metrics_realtime" || /مؤشر/i.test(m) },
-  { id: "dev-health",   agent: "qayyim-dev",  msg: "افحص صحة النظام التقني", expect: (m, md) => /نظام|API|صحة|سليم/i.test(m) },
-  { id: "qa-load",      agent: "qayyim-qa",   msg: "شغّل اختبار حمل خفيف على الصفحات العامة", expect: (m, md) => md.tool === "qa_load_probe" && md.toolSuccess !== false },
-  { id: "colloquial",   agent: "qayyim-core", msg: "الموقع تقيل اوى من امبارح عايز اعرف الراى فى ايه", expect: (m, md) => m.length > 40 },
+  { id: "cont-health",  agent: "ops-content", msg: "افحص صحة محتوى الصفحة الرئيسية", expect: (m, md) => md.tool === "content_health_check" || /محتوى/i.test(m) },
+  { id: "seo-analyze",  agent: "ops-seo",  msg: "حلل SEO للصفحة الرئيسية", expect: (m, md) => /SEO|سيو|عنوان|meta/i.test(m) },
+  { id: "ana-metrics",  agent: "ops-analytics",  msg: "اعرض المؤشرات اللحظية للنظام", expect: (m, md) => md.tool === "metrics_realtime" || /مؤشر/i.test(m) },
+  { id: "dev-health",   agent: "ops-dev",  msg: "افحص صحة النظام التقني", expect: (m, md) => /نظام|API|صحة|سليم/i.test(m) },
+  { id: "qa-load",      agent: "ops-qa",   msg: "شغّل اختبار حمل خفيف على الصفحات العامة", expect: (m, md) => md.tool === "qa_load_probe" && md.toolSuccess !== false },
+  { id: "colloquial",   agent: "ops-lead", msg: "الموقع تقيل اوى من امبارح عايز اعرف الراى فى ايه", expect: (m, md) => m.length > 40 },
 ];
 
 function log(...a) { process.stdout.write(a.join(" ") + "\n"); }

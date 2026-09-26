@@ -100,7 +100,7 @@ describe('self-model', () => {
   });
 });
 
-describe('qayyim_whoami routing', () => {
+describe('ops_self routing', () => {
   // Egyptian users type hamza-free as often as not — both must land.
   it.each([
     'انت بتعمل ايه بالظبط؟',
@@ -110,12 +110,12 @@ describe('qayyim_whoami routing', () => {
     'قدراتك إيه؟',
     'who are you',
     'what can you do',
-  ])('routes "%s" to qayyim_whoami', (msg) => {
-    expect(inferUltimateTool(msg)?.toolName).toBe('qayyim_whoami');
+  ])('routes "%s" to ops_self', (msg) => {
+    expect(inferUltimateTool(msg)?.toolName).toBe('ops_self');
   });
 
   it('does not hijack a real measurement request', () => {
-    expect(inferUltimateTool('وريني سرعه الموقع قد ايه دلوقتي')?.toolName).not.toBe('qayyim_whoami');
-    expect(inferUltimateTool('اعرض المسودات المعلقة')?.toolName).not.toBe('qayyim_whoami');
+    expect(inferUltimateTool('وريني سرعه الموقع قد ايه دلوقتي')?.toolName).not.toBe('ops_self');
+    expect(inferUltimateTool('اعرض المسودات المعلقة')?.toolName).not.toBe('ops_self');
   });
 });

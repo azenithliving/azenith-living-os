@@ -1,5 +1,5 @@
 /**
- * qayyim-vision-test.mjs — production human-simulation:
+ * ops-vision-test.mjs — production human-simulation:
  * logs in, uploads a real site image into the fullscreen chat,
  * waits for the live Gemini vision analysis, and captures screenshots
  * of the final product surfaces.
@@ -35,7 +35,7 @@ await p.waitForTimeout(3500);
 await p.screenshot({ path: 'shot-seed-card.png' });
 
 // Fullscreen chat + vision upload
-await p.goto(`${BASE}/admin/v2/agents/qayyim`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+await p.goto(`${BASE}/admin/v2/agents/ops`, { waitUntil: 'domcontentloaded', timeout: 40000 });
 await p.waitForSelector('input[type=file]', { timeout: 15000, state: 'attached' });
 await p.setInputFiles('input[type=file]', 'test-hero.png');
 let analysis = '';
@@ -47,7 +47,7 @@ ok('live vision analysis appeared in chat', !!analysis, String(analysis).slice(0
 await p.screenshot({ path: 'shot-vision-chat.png' });
 
 // Studio screenshot
-await p.goto(`${BASE}/admin/v2/qayyim`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+await p.goto(`${BASE}/admin/v2/ops`, { waitUntil: 'domcontentloaded', timeout: 40000 });
 await p.waitForTimeout(4000);
 await p.screenshot({ path: 'shot-studio.png' });
 

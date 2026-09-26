@@ -42,17 +42,17 @@ export interface PaletteCommand {
  * a test instead of turning the palette into fiction.
  */
 export const CAPABILITY_LABELS: Record<string, string> = {
-  qayyim_whoami: "عرف نفسك: قدراتك وأدواتك وحدودك",
-  qayyim_world: "ايزاي الشغل الفترة دي: مبيعات وأكثر مبيعًا وزوار وموسم",
+  ops_self: "عرف نفسك: قدراتك وأدواتك وحدودك",
+  ops_world: "ايزاي الشغل الفترة دي: مبيعات وأكثر مبيعًا وزوار وموسم",
   gsc_queries: "كلمات البحث الحقيقية من جوجل",
-  qayyim_rivals: "قياس المنافسين: أسعارهم ومنتجاتهم",
-  qayyim_forecast: "توقع المبيعات للفترة الجاية",
+  ops_rivals: "قياس المنافسين: أسعارهم ومنتجاتهم",
+  ops_forecast: "توقع المبيعات للفترة الجاية",
   draft_list: "جرد المسودات المعلقة",
   qa_load_probe: "اختبار حمل الصفحات العامة",
   qa_security_headers: "فحص رؤوس الأمان للإطلالة",
   qa_accessibility: "تدقيق إمكانية الوصول للصفحات",
-  qayyim_luxury_score: "مقياس الفخامة المقاس",
-  qayyim_goals_risk: "الأهداف المهددة في الدار",
+  ops_luxury_score: "مقياس الفخامة المقاس",
+  ops_goals_risk: "الأهداف المهددة في الدار",
   seo_analyze: "تحليل الظهور لصفحة",
   seo_fix_issues: "إصلاح مشاكل الظهور تلقائيًا",
   content_health_check: "فحص صحة محتوى صفحة",
@@ -74,7 +74,7 @@ export const CAPABILITY_LABELS: Record<string, string> = {
 
 /** Where the palette takes the owner without going through the swarm. */
 export const NAV_LINKS: Array<{ label: string; href: string }> = [
-  { label: "استوديو السرب: الوكلاء الثمانية", href: "/admin/v2/qayyim" },
+  { label: "استوديو السرب: الوكلاء الثمانية", href: "/admin/v2/ops" },
   { label: "مركز قيادة الوكلاء", href: "/admin/v2/agents" },
   { label: "لوحة المالك", href: "/admin/v2/owner-dashboard" },
   { label: "قاعدة البيانات", href: "/admin/v2/database" },
@@ -120,7 +120,7 @@ export function buildPalette(model: SelfModelView | null | undefined): PaletteCo
       kind: "agent",
       label: agent.name,
       hint: `فتح محادثة · ${agent.roles} أدوار مسجّلة`,
-      href: "/admin/v2/agents/qayyim",
+      href: "/admin/v2/agents/ops",
       agentKey: agent.key,
     });
   }

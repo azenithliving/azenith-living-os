@@ -2,7 +2,7 @@
  * The decision card — what the Telegram morning link opens.
  *
  * `lib/ops/daily-story.ts` sends the owner one proposal per story with a deep
- * link to `/admin/v2/agents/qayyim?proposal=<id>`. This is the other end of that
+ * link to `/admin/v2/agents/ops?proposal=<id>`. This is the other end of that
  * link: read the id, find the real row, and give him the three answers a
  * decision has — do it, do it better, no.
  *

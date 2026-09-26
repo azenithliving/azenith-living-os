@@ -13,11 +13,11 @@ import { explainGap, isRefusal, nameGap, type GapFacts } from "@/lib/ops/gap-con
 
 const facts: GapFacts = {
   tools: [
-    { name: "qayyim_world", desc: "مبيعات الدار والأكثر بيعاً والكتالوج والزوار" },
-    { name: "qayyim_rivals", desc: "قياس المنافسين من جدول qayyim_rivals" },
+    { name: "ops_world", desc: "مبيعات الدار والأكثر بيعاً والكتالوج والزوار" },
+    { name: "ops_rivals", desc: "قياس المنافسين: أسعارهم ومنتجاتهم" },
     { name: "gsc_queries", desc: "كلمات البحث الحقيقية من Google Search Console" },
-    { name: "qayyim_forecast", desc: "توقع المبيعات بحساب Holt-Winters" },
-    { name: "qayyim_luxury_score", desc: "حساب Luxury Score الفعلي للموقع" },
+    { name: "ops_forecast", desc: "توقع المبيعات بحساب Holt-Winters" },
+    { name: "ops_luxury_score", desc: "حساب Luxury Score الفعلي للموقع" },
   ],
 };
 

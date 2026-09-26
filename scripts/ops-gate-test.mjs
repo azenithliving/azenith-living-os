@@ -1,5 +1,5 @@
 /**
- * qayyim-gate-test.mjs — does the second factor actually decide anything?
+ * ops-gate-test.mjs — does the second factor actually decide anything?
  *
  * `app/api/admin/verify-2fa` signs the admin in with the password *before* it
  * checks the TOTP. The Supabase session lands in the response cookies at that
@@ -14,7 +14,7 @@
  * Nothing here prints a secret: the credentials go into a request body built in
  * this process, and only statuses, cookie NAMES and shapes are reported.
  *
- * Usage: node scripts/qayyim-gate-test.mjs [baseUrl]
+ * Usage: node scripts/ops-gate-test.mjs [baseUrl]
  */
 import fs from "node:fs";
 import speakeasy from "speakeasy";
@@ -79,7 +79,7 @@ record(
   leaked.length ? `session cookies still set: ${leaked.join(", ")}` : "no auth cookie handed back",
 );
 
-const guardedApi = await fetch(`${BASE}/api/admin/agents/messages?agent_key=qayyim-core`, {
+const guardedApi = await fetch(`${BASE}/api/admin/agents/messages?agent_key=ops-lead`, {
   headers: jar ? { cookie: jar } : {},
   redirect: "manual",
   signal: AbortSignal.timeout(30_000),
