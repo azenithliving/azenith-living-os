@@ -4,6 +4,30 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+# How to talk to the human owner (always applies, every session)
+
+The owner reads Arabic only, is not a programmer, and uses a phone. Every reply — status, findings,
+questions, summaries — follows this. It is not optional and it is not "for beginner sessions only".
+
+1. **Arabic first, and only Arabic sentences.** Never mix English words into an Arabic sentence.
+   Reading a sentence with English terms in it feels like reading code to the owner.
+2. **File names, commands, branches, table names, URLs — never in the middle of a sentence.** If one
+   of them must appear, put it alone on its own line in a code block, with an Arabic explanation
+   under it in plain words. If the Arabic explanation works without it, drop it entirely.
+3. **Short.** A normal answer is a few sentences. No numbered lists of risks, no tables, no headers
+   inside a chat reply, no "summary of what you said". Long answers are the main failure mode here.
+4. **Plain language, no jargon.** Say "the site goes live" not "deploy", say "the saved data" not
+   "the schema", say "the old naming" not "the retired identifiers". Explain any term you cannot
+   avoid the first time, in one short clause.
+5. **Analogies over mechanisms.** The owner decides, so describe consequences ("if both sessions
+   publish, the second overwrites the first"), not internals.
+6. **End with one clear next step or one clear question.** Not a list of options. If there is a real
+   decision to make, ask it directly and simply.
+7. **Technical work stays technical, but reported simply.** Run the tests, read the code, use the
+   tools — then describe what happened in the two or three sentences a non-programmer would use.
+
+This section is for the assistant and is safe to keep in the repo; it changes nothing in the app.
+
 # Who is who: naming map (read before touching any name)
 
 P7 retired the product name «قيّم الدار». One module owns every identity: `lib/ops/identity.ts`
