@@ -47,7 +47,7 @@ export async function roundFreshness(companyId: string | null): Promise<RoundFre
   if (!supabaseServer || !companyId) return freshnessFrom(null, new Date(), true);
   try {
     const { data, error } = await supabaseServer
-      .from("qayyim_sync_events")
+      .from("ops_sync_events")
       .select("created_at,payload")
       .eq("company_id", companyId)
       .eq("event_type", "context_update")

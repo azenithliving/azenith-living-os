@@ -270,7 +270,7 @@ export async function listStorefrontProducts(): Promise<ToolExecutionResult> {
 }
 
 /**
- * ── 2. إنشاء مسودة في qayyim_drafts v2 ──────────────────────────────────
+ * ── 2. إنشاء مسودة في ops_drafts v2 ──────────────────────────────────
  */
 export async function createQayyimDraft(params: {
   targetTable: string; // 'room_sections' | 'products' | 'site_sections' | 'site_settings'
@@ -301,7 +301,7 @@ export async function createQayyimDraft(params: {
 
     // Determine current version number
     const { data: latestDraft } = await supabaseServer
-      .from("qayyim_drafts")
+      .from("ops_drafts")
       .select("version, id")
       .eq("target_table", params.targetTable)
       .eq("target_id", params.targetId)
@@ -314,7 +314,7 @@ export async function createQayyimDraft(params: {
     const previewToken = crypto.randomUUID();
 
     const { data: newDraft, error } = await supabaseServer
-      .from("qayyim_drafts")
+      .from("ops_drafts")
       .insert({
         company_id: companyId,
         target_table: params.targetTable,
@@ -374,7 +374,7 @@ export async function publishQayyimDraft(
     const companyId = await resolveCompanyId(companyHint);
 
     const { data: draft, error: fetchErr } = await supabaseServer
-      .from("qayyim_drafts")
+      .from("ops_drafts")
       .select("*")
       .eq("id", draftId)
       .maybeSingle();
@@ -413,7 +413,7 @@ export async function publishQayyimDraft(
 
     // Mark draft as published
     await supabaseServer
-      .from("qayyim_drafts")
+      .from("ops_drafts")
       .update({
         status: "published",
         approved_by: approvedBy,
@@ -461,7 +461,7 @@ export async function rollbackQayyimDraft(
 ): Promise<ToolExecutionResult> {
   try {
     const { data: draft, error: fetchErr } = await supabaseServer
-      .from("qayyim_drafts")
+      .from("ops_drafts")
       .select("*")
       .eq("id", draftId)
       .maybeSingle();
@@ -475,7 +475,7 @@ export async function rollbackQayyimDraft(
     // If targetVersion is specified and differs from previous snapshot, look for that specific version
     if (targetVersion && targetVersion !== (draft.version - 1)) {
       const { data: targetDraft } = await supabaseServer
-        .from("qayyim_drafts")
+        .from("ops_drafts")
         .select("proposed, previous, version")
         .eq("target_table", draft.target_table)
         .eq("target_id", draft.target_id)
@@ -510,7 +510,7 @@ export async function rollbackQayyimDraft(
 
     // Mark current draft as rolled_back
     await supabaseServer
-      .from("qayyim_drafts")
+      .from("ops_drafts")
       .update({
         status: "rolled_back",
         rolled_back_at: new Date().toISOString(),
@@ -552,7 +552,7 @@ export async function rollbackQayyimDraft(
  */
 export async function getDraftByPreviewToken(token: string): Promise<QayyimDraftRow | null> {
   const { data, error } = await supabaseServer
-    .from("qayyim_drafts")
+    .from("ops_drafts")
     .select("*")
     .eq("preview_token", token)
     .maybeSingle();
@@ -571,7 +571,7 @@ export async function listQayyimDrafts(params?: {
 }): Promise<ToolExecutionResult> {
   const companyId = await resolveCompanyId(params?.companyHint);
   let query = supabaseServer
-    .from("qayyim_drafts")
+    .from("ops_drafts")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(params?.limit || 20);
@@ -651,7 +651,7 @@ export async function publishLatestRoomDraft(
 
   const companyId = await resolveCompanyId(companyHint);
   const { data: latest } = await supabaseServer
-    .from("qayyim_drafts")
+    .from("ops_drafts")
     .select("id")
     .eq("status", "draft")
     .order("created_at", { ascending: false })
@@ -659,7 +659,7 @@ export async function publishLatestRoomDraft(
     .maybeSingle();
 
   if (!latest?.id) {
-    return { success: false, message: "لا توجد مسودة معلقة في qayyim_drafts للنشر." };
+    return { success: false, message: "لا توجد مسودة معلقة في ops_drafts للنشر." };
   }
 
   return publishQayyimDraft(latest.id, "مالك الموقع", companyId);

@@ -59,7 +59,7 @@ export class QayyimCoreAgent extends QayyimAgentBase {
     ],
     dataSources: [
       "room_sections", "products", "site_sections", 
-      "site_settings", "qayyim_drafts", "visitor_telemetry"
+      "site_settings", "ops_drafts", "visitor_telemetry"
     ],
   };
 
@@ -234,7 +234,7 @@ ${issues.slice(0, 5).map((iss, idx) => `${idx + 1}. ${iss.detail} — ${iss.targ
     const taskId = `qgate_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     
     const { data: draft } = await supabaseServer
-      .from("qayyim_drafts")
+      .from("ops_drafts")
       .select("*")
       .eq("id", draftId)
       .maybeSingle();

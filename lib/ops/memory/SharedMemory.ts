@@ -157,7 +157,7 @@ export class SharedMemory {
     const embedding = await this.generateEmbedding(item.content);
 
     const { data, error } = await this.supabase
-      .from('qayyim_semantic_memory')
+      .from('ops_semantic_memory')
       .insert({
         company_id: this.companyId,
         agent_key: item.agent_key,
@@ -197,7 +197,7 @@ export class SharedMemory {
 
     // Build query
     let queryBuilder = this.supabase
-      .from('qayyim_semantic_memory')
+      .from('ops_semantic_memory')
       .select('*, embedding')
       .eq('company_id', this.companyId);
 
@@ -246,7 +246,7 @@ export class SharedMemory {
     if (!this.companyId) await this.initialize();
 
     const { data, error } = await this.supabase
-      .from('qayyim_semantic_memory')
+      .from('ops_semantic_memory')
       .select('*')
       .eq('id', id)
       .eq('company_id', this.companyId)
@@ -261,7 +261,7 @@ export class SharedMemory {
    */
   async incrementAccess(id: string): Promise<void> {
     await this.supabase
-      .from('qayyim_semantic_memory')
+      .from('ops_semantic_memory')
       .update({
         access_count: this.supabase.raw('access_count + 1'),
         last_accessed_at: new Date().toISOString(),
@@ -274,7 +274,7 @@ export class SharedMemory {
    */
   async delete(id: string): Promise<void> {
     await this.supabase
-      .from('qayyim_semantic_memory')
+      .from('ops_semantic_memory')
       .delete()
       .eq('id', id)
       .eq('company_id', this.companyId);
@@ -291,7 +291,7 @@ export class SharedMemory {
     if (!this.companyId) await this.initialize();
 
     const { data, error } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .insert({
         company_id: this.companyId,
         source_agent: learning.source_agent,
@@ -321,7 +321,7 @@ export class SharedMemory {
     if (!this.companyId) await this.initialize();
 
     const { data, error } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('*')
       .eq('company_id', this.companyId)
       .eq('domain', domain)
@@ -344,7 +344,7 @@ export class SharedMemory {
    */
   async recordLearningOutcome(learningId: string, success: boolean): Promise<void> {
     const { data: current } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('success_count, failure_count')
       .eq('id', learningId)
       .single();
@@ -352,7 +352,7 @@ export class SharedMemory {
     if (!current) return;
 
     await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .update({
         success_count: success ? current.success_count + 1 : current.success_count,
         failure_count: success ? current.failure_count : current.failure_count + 1,
@@ -368,7 +368,7 @@ export class SharedMemory {
     if (!this.companyId) await this.initialize();
 
     const { data, error } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('*')
       .eq('company_id', this.companyId)
       .eq('source_agent', sourceAgent)
@@ -417,7 +417,7 @@ export class SharedMemory {
     if (!this.companyId) await this.initialize();
 
     let query = this.supabase
-      .from('qayyim_semantic_memory')
+      .from('ops_semantic_memory')
       .select('memory_type, agent_key', { count: 'exact', head: false })
       .eq('company_id', this.companyId);
 
@@ -429,7 +429,7 @@ export class SharedMemory {
 
     // Get learnings stats
     const { data: learnings, count: learningsCount } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('is_active', { count: 'exact', head: false })
       .eq('company_id', this.companyId);
 
@@ -457,7 +457,7 @@ export class SharedMemory {
     if (!this.companyId) await this.initialize();
 
     const { data, error } = await this.supabase
-      .from('qayyim_semantic_memory')
+      .from('ops_semantic_memory')
       .delete()
       .eq('company_id', this.companyId)
       .lt('expires_at', new Date().toISOString())

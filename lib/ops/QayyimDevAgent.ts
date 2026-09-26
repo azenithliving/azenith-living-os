@@ -124,7 +124,7 @@ export class QayyimDevAgent extends QayyimAgentBase {
         const scoreMatch = aiResult.output.match(/(\d+)\s*KB/);
         const score = scoreMatch ? Math.max(0, 100 - Math.round(parseInt(scoreMatch[1]) / 10)) : 75;
         if (supabase) {
-          await supabase.from('qayyim_benchmark_runs').insert({
+          await supabase.from('ops_benchmark_runs').insert({
             company_id: companyId,
             agent_key: this.agentKey,
             benchmark_key: 'bundle_size',
@@ -133,7 +133,7 @@ export class QayyimDevAgent extends QayyimAgentBase {
             passed: score >= 70,
             details: { bundleStats: aiResult.data?.bundleStats, output: aiResult.output.slice(0, 500) },
           });
-          await supabase.from('qayyim_task_metrics').insert({
+          await supabase.from('ops_task_metrics').insert({
             company_id: companyId,
             agent_key: this.agentKey,
             task_id: taskId,

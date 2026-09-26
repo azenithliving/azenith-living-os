@@ -79,7 +79,7 @@ export class SwarmLearnings {
     if (!this.companyId) await this.initialize();
 
     const { data, error } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .insert({
         company_id: this.companyId,
         source_agent: learning.source_agent,
@@ -112,7 +112,7 @@ export class SwarmLearnings {
     }
 
     const { data, error } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('*')
       .eq('id', id)
       .eq('company_id', this.companyId)
@@ -133,7 +133,7 @@ export class SwarmLearnings {
     if (!this.companyId) await this.initialize();
 
     let query = this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('*')
       .eq('company_id', this.companyId);
 
@@ -191,7 +191,7 @@ export class SwarmLearnings {
     if (!this.companyId) await this.initialize();
 
     const { data, error } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('*')
       .eq('company_id', this.companyId)
       .eq('source_agent', sourceAgent)
@@ -210,7 +210,7 @@ export class SwarmLearnings {
     if (!this.companyId) await this.initialize();
 
     const { error } = await this.supabase
-      .from('qayyim_learning_applications')
+      .from('ops_learning_applications')
       .insert({
         company_id: this.companyId,
         learning_id: application.learningId,
@@ -233,7 +233,7 @@ export class SwarmLearnings {
     if (!this.companyId) await this.initialize();
 
     const { data: current } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('success_count, failure_count')
       .eq('id', learningId)
       .eq('company_id', this.companyId)
@@ -242,7 +242,7 @@ export class SwarmLearnings {
     if (!current) return;
 
     await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .update({
         success_count: success ? current.success_count + 1 : current.success_count,
         failure_count: success ? current.failure_count : current.failure_count + 1,
@@ -264,7 +264,7 @@ export class SwarmLearnings {
     if (!this.companyId) await this.initialize();
 
     const { data: current } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('success_count, failure_count, confidence')
       .eq('id', learningId)
       .eq('company_id', this.companyId)
@@ -284,7 +284,7 @@ export class SwarmLearnings {
     const newConfidence = (centre - adjustment) / denominator;
 
     await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .update({
         confidence: Math.round(newConfidence * 100) / 100,
         last_validated_at: new Date().toISOString(),
@@ -306,7 +306,7 @@ export class SwarmLearnings {
     if (!this.companyId) await this.initialize();
 
     await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .update({
         is_active: false,
         updated_at: new Date().toISOString(),
@@ -326,7 +326,7 @@ export class SwarmLearnings {
     if (!this.companyId) await this.initialize();
 
     await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .update({
         is_active: true,
         updated_at: new Date().toISOString(),
@@ -354,7 +354,7 @@ export class SwarmLearnings {
     const newTargets = Array.from(new Set([...learning.target_agents, ...targetAgents]));
 
     await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .update({
         target_agents: newTargets,
         updated_at: new Date().toISOString(),
@@ -409,12 +409,12 @@ export class SwarmLearnings {
     if (!this.companyId) await this.initialize();
 
     const { data: learnings } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('domain, lesson_type, source_agent, confidence, is_active, success_count, failure_count')
       .eq('company_id', this.companyId);
 
     const { data: applications } = await this.supabase
-      .from('qayyim_learning_applications')
+      .from('ops_learning_applications')
       .select('success', { count: 'exact', head: false })
       .eq('company_id', this.companyId);
 
@@ -467,7 +467,7 @@ export class SwarmLearnings {
     const cutoffDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
 
     const { data, error } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .select('*')
       .eq('company_id', this.companyId)
       .eq('is_active', true)
@@ -491,7 +491,7 @@ export class SwarmLearnings {
     }
 
     await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .update({
         lesson_type: 'template',
         pattern: { ...learning.pattern, promoted_to_template: true, promoted_at: new Date().toISOString() },
@@ -521,7 +521,7 @@ export class SwarmLearnings {
     const cutoffDate = new Date(Date.now() - olderThanDays * 24 * 60 * 60 * 1000).toISOString();
 
     const { data, error } = await this.supabase
-      .from('qayyim_swarm_learnings')
+      .from('ops_swarm_learnings')
       .delete()
       .eq('company_id', this.companyId)
       .eq('is_active', false)
@@ -538,10 +538,10 @@ export class SwarmLearnings {
   static async createTables(supabase: any): Promise<void> {
     await supabase.rpc('exec_sql', {
       sql_query: `
-        CREATE TABLE IF NOT EXISTS public.qayyim_learning_applications (
+        CREATE TABLE IF NOT EXISTS public.ops_learning_applications (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           company_id UUID,
-          learning_id UUID NOT NULL REFERENCES qayyim_swarm_learnings(id) ON DELETE CASCADE,
+          learning_id UUID NOT NULL REFERENCES ops_swarm_learnings(id) ON DELETE CASCADE,
           applied_by_agent TEXT NOT NULL,
           context JSONB DEFAULT '{}',
           success BOOLEAN NOT NULL,
@@ -549,11 +549,11 @@ export class SwarmLearnings {
           applied_at TIMESTAMPTZ DEFAULT NOW()
         );
         
-        CREATE INDEX IF NOT EXISTS idx_learning_apps_company ON public.qayyim_learning_applications(company_id);
-        CREATE INDEX IF NOT EXISTS idx_learning_apps_learning ON public.qayyim_learning_applications(learning_id);
-        CREATE INDEX IF NOT EXISTS idx_learning_apps_agent ON public.qayyim_learning_applications(applied_by_agent);
-        CREATE INDEX IF NOT EXISTS idx_learning_apps_success ON public.qayyim_learning_applications(success);
-        CREATE INDEX IF NOT EXISTS idx_learning_apps_applied ON public.qayyim_learning_applications(applied_at);
+        CREATE INDEX IF NOT EXISTS idx_learning_apps_company ON public.ops_learning_applications(company_id);
+        CREATE INDEX IF NOT EXISTS idx_learning_apps_learning ON public.ops_learning_applications(learning_id);
+        CREATE INDEX IF NOT EXISTS idx_learning_apps_agent ON public.ops_learning_applications(applied_by_agent);
+        CREATE INDEX IF NOT EXISTS idx_learning_apps_success ON public.ops_learning_applications(success);
+        CREATE INDEX IF NOT EXISTS idx_learning_apps_applied ON public.ops_learning_applications(applied_at);
       `
     });
   }

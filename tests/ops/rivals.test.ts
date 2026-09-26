@@ -141,7 +141,7 @@ describe('digest', () => {
   it('tells the owner how to add a rival when none is configured', () => {
     const d = renderRivalsDigest([]);
     expect(d).toContain('مضفتش');
-    expect(d).toMatch(/qayyim_rivals|ضيف/);
+    expect(d).toMatch(/ops_rivals|ضيف/);
   });
 
   it('summarises each rival with its latest change list', () => {

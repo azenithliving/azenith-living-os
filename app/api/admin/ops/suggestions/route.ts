@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const companyId = await getCompanyId(searchParams.get('company_id') || undefined);
 
     let query = supabaseServer
-      .from('qayyim_suggestions')
+      .from('ops_suggestions')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(50);
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     if (action === 'accept') {
       // Fetch the suggestion, mark accepted, and convert to a draft via the payload
       const { data: suggestion, error: fetchErr } = await supabaseServer
-        .from('qayyim_suggestions')
+        .from('ops_suggestions')
         .select('*')
         .eq('id', suggestion_id)
         .single();
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       }
 
       await supabaseServer
-        .from('qayyim_suggestions')
+        .from('ops_suggestions')
         .update({ status: 'converted_to_draft', resolved_at: new Date().toISOString() })
         .eq('id', suggestion_id);
 
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'dismiss') {
       const { error } = await supabaseServer
-        .from('qayyim_suggestions')
+        .from('ops_suggestions')
         .update({ status: 'dismissed', resolved_at: new Date().toISOString() })
         .eq('id', suggestion_id);
 

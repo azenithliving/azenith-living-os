@@ -77,7 +77,7 @@ describe("nameGap", () => {
 
   it("names the competitor table when the market question fails", () => {
     const gap = nameGap("المنافسين بيعملوا ايه دلوقتي", facts);
-    expect(gap!.enablePath).toContain("qayyim_rivals");
+    expect(gap!.enablePath).toContain("ops_rivals");
   });
 
   it("names the publishing gate as a rule, not a bug", () => {

@@ -118,7 +118,7 @@ export class SyncLayer {
 
     try {
       let query = this.supabase
-        .from('qayyim_sync_events')
+        .from('ops_sync_events')
         .select('*')
         .eq('company_id', this.companyId)
         .order('created_at', { ascending: true })
@@ -219,7 +219,7 @@ export class SyncLayer {
       if (!this.companyId) await this.initialize();
 
       const { data, error } = await this.supabase
-        .from('qayyim_sync_events')
+        .from('ops_sync_events')
         .insert({
           company_id: this.companyId,
           event_type: event.event_type,
@@ -377,7 +377,7 @@ export class SyncLayer {
       
       // Store lock info for monitoring
       await this.supabase
-        .from('qayyim_locks')
+        .from('ops_locks')
         .upsert({
           lock_id: lockId,
           lock_name: lockName,
@@ -403,7 +403,7 @@ export class SyncLayer {
       await this.supabase.rpc('pg_advisory_unlock', { lock_id: lockId });
       
       await this.supabase
-        .from('qayyim_locks')
+        .from('ops_locks')
         .delete()
         .eq('lock_id', lockId)
         .eq('company_id', this.companyId);
@@ -437,7 +437,7 @@ export class SyncLayer {
   static async createTables(supabase: any): Promise<void> {
     await supabase.rpc('exec_sql', {
       sql_query: `
-        CREATE TABLE IF NOT EXISTS public.qayyim_sync_events (
+        CREATE TABLE IF NOT EXISTS public.ops_sync_events (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           company_id UUID,
           event_type TEXT NOT NULL,
@@ -447,13 +447,13 @@ export class SyncLayer {
           created_at TIMESTAMPTZ DEFAULT NOW()
         );
         
-        CREATE INDEX IF NOT EXISTS idx_sync_events_company ON public.qayyim_sync_events(company_id);
-        CREATE INDEX IF NOT EXISTS idx_sync_events_type ON public.qayyim_sync_events(event_type);
-        CREATE INDEX IF NOT EXISTS idx_sync_events_source ON public.qayyim_sync_events(source_agent);
-        CREATE INDEX IF NOT EXISTS idx_sync_events_created ON public.qayyim_sync_events(created_at);
+        CREATE INDEX IF NOT EXISTS idx_sync_events_company ON public.ops_sync_events(company_id);
+        CREATE INDEX IF NOT EXISTS idx_sync_events_type ON public.ops_sync_events(event_type);
+        CREATE INDEX IF NOT EXISTS idx_sync_events_source ON public.ops_sync_events(source_agent);
+        CREATE INDEX IF NOT EXISTS idx_sync_events_created ON public.ops_sync_events(created_at);
         
         -- Locks table for advisory lock monitoring
-        CREATE TABLE IF NOT EXISTS public.qayyim_locks (
+        CREATE TABLE IF NOT EXISTS public.ops_locks (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           company_id UUID,
           lock_id BIGINT NOT NULL,
@@ -464,8 +464,8 @@ export class SyncLayer {
           UNIQUE(company_id, lock_id)
         );
         
-        CREATE INDEX IF NOT EXISTS idx_locks_company ON public.qayyim_locks(company_id);
-        CREATE INDEX IF NOT EXISTS idx_locks_expires ON public.qayyim_locks(expires_at);
+        CREATE INDEX IF NOT EXISTS idx_locks_company ON public.ops_locks(company_id);
+        CREATE INDEX IF NOT EXISTS idx_locks_expires ON public.ops_locks(expires_at);
       `
     });
 

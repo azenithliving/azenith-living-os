@@ -140,7 +140,7 @@ describe("owner-facing copy is Arabic per line", () => {
       limits: ["كرون يومي واحد كحد أقصى"],
       organs: AUTONOMOUS_ORGANS,
       counters: { drafts: 3, goals: 1, learnings: 5, eventsToday: 12 },
-      dataGaps: [{ label: "أهداف نشطة", reason: "relation qayyim_goals does not exist" }],
+      dataGaps: [{ label: "أهداف نشطة", reason: "relation ops_goals does not exist" }],
     };
     expect(mixedLines(renderSelfReport(withCounters))).toEqual([]);
     expect(mixedLines(renderSelfReport({ ...withCounters, counters: undefined }))).toEqual([]);

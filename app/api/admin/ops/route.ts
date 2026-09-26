@@ -621,7 +621,7 @@ async function handleListDrafts(body: any) {
 
   const { supabaseServer } = await import('@/lib/dal/unified-supabase');
   let query = supabaseServer
-    .from('qayyim_drafts')
+    .from('ops_drafts')
     .select('id, created_by, target_path, target_table, target_id, draft_type, status, version, proposed, previous, preview_token, created_at')
     .order('created_at', { ascending: false })
     .limit(100);

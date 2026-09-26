@@ -67,7 +67,7 @@ export class QayyimVisualAgent extends QayyimAgentBase {
       "speed_optimize", "speed_deep_audit", "metrics_realtime", "revenue_analyze",
     ],
     dataSources: [
-      "media_assets", "curated_images storage", "pexels API", "qayyim_drafts"
+      "media_assets", "curated_images storage", "pexels API", "ops_drafts"
     ],
   };
 

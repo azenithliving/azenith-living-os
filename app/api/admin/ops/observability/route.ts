@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
 
     let query = supabaseServer
-      .from('qayyim_task_metrics')
+      .from('ops_task_metrics')
       .select('agent_key, task_id, status, duration_ms, quality_gate_result, created_at')
       .gte('created_at', since);
 

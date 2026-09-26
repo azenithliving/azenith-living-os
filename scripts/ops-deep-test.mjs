@@ -87,7 +87,7 @@ ok('L4b constitution blocks unversioned publish', blocked?.overall_allowed === f
 ok('L4c constitution allows fully-attributed publish', allowed?.overall_allowed === true);
 
 // ═══ L5: أحداث SyncLayer حقيقية بعد كل ده ═══
-const evs = await db('qayyim_sync_events?select=event_type,created_at&order=created_at.desc&limit=6');
+const evs = await db('ops_sync_events?select=event_type,created_at&order=created_at.desc&limit=6');
 const recentEvs = (evs || []).filter((e) => Date.now() - new Date(e.created_at).getTime() < 30 * 60 * 1000);
 ok('L5 sync events flowing in last 30min', recentEvs.length >= 1, recentEvs.map((e) => e.event_type).join(','));
 

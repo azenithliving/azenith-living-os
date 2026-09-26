@@ -69,7 +69,7 @@ export class QayyimContentAgent extends QayyimAgentBase {
       "curated_images", "web_search", "browser_research", "read_website",
     ],
     dataSources: [
-      "room_sections", "products", "site_sections", "site_settings", "qayyim_drafts"
+      "room_sections", "products", "site_sections", "site_settings", "ops_drafts"
     ],
   };
 

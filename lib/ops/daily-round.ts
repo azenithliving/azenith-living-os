@@ -150,7 +150,7 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
   try {
     const { assessGoals, renderGoalRisk } = await import("@/lib/ops/goal-risk");
     const { data, error } = await supabaseServer
-      .from("qayyim_goals")
+      .from("ops_goals")
       .select("id,name,target_value,current_value,deadline,status")
       .eq("company_id", companyId)
       .eq("status", "active");
@@ -358,7 +358,7 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
   // is how a scheduled function misses its own deadline.
   try {
     const { supabaseServer } = await import("@/lib/dal/unified-supabase");
-    await supabaseServer.from("qayyim_sync_events").insert({
+    await supabaseServer.from("ops_sync_events").insert({
       company_id: companyId,
       event_type: "context_update",
       source_agent: "ops-lead",

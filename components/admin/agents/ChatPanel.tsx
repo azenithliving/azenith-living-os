@@ -7,6 +7,7 @@ import {
   Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff
 } from 'lucide-react';
 import { AGENT_ROLES } from '@/lib/ops/agent-roles';
+import { isOpsKey } from '@/lib/ops/identity';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
 import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/ops/palette';
@@ -758,7 +759,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             <Layers className="w-3.5 h-3.5" />
             أدوار
           </button>
-          {(agentKey.toLowerCase() === 'prime' || agentKey.toLowerCase().startsWith('qayyim-')) && (
+          {(isOpsKey(agentKey.toLowerCase()) || agentKey.toLowerCase() === 'prime') && (
             <a
               href="/admin/v2/ops"
               title="فتح استوديو سرب أزينث"

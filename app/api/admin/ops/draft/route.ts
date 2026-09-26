@@ -2,7 +2,7 @@
  * Qayyim Swarm - Draft API
  * POST /api/admin/ops/draft
  *
- * يحفظ مسودة حقيقية في qayyim_drafts بعد رد الوكيل
+ * يحفظ مسودة حقيقية في ops_drafts بعد رد الوكيل
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: `Unknown draft type: ${draft_type}` }, { status: 400 });
     }
 
-    // ── 2. حفظ المسودة في qayyim_drafts ────────────────────────────────
+    // ── 2. حفظ المسودة في ops_drafts ────────────────────────────────
     // إذا كان الوكيل لم يُنشئ draft_id (أي لم يستدعِ createQayyimDraft مسبقاً)
     let savedDraftId = agentResult?.data?.draft_id as string | undefined;
     let previewToken = agentResult?.data?.preview_token as string | undefined;

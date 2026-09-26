@@ -183,7 +183,7 @@ export async function runUltimateTool(
       return { success: true, message: "لم تُحدَّد شركة في هذه الجلسة — لا أستطيع عدّ مسودات، ولن أخمّن.", data: { count: null } };
     }
     const { data, error } = await supabaseServer
-      .from("qayyim_drafts")
+      .from("ops_drafts")
       .select("target_path,draft_type,status,version,created_at")
       .eq("company_id", companyId)
       .in("status", ["draft", "previewing"])
@@ -247,7 +247,7 @@ export async function runUltimateTool(
     if (!supabase) return { success: false, message: "لا يوجد اتصال بقاعدة البيانات لفحص الأهداف." };
     const { assessGoals, renderGoalRisk } = await import("@/lib/ops/goal-risk");
     const { data, error } = await supabase
-      .from("qayyim_goals")
+      .from("ops_goals")
       .select("id,name,target_value,current_value,deadline,status")
       .eq("company_id", companyId)
       .eq("status", "active");

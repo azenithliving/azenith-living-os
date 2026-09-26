@@ -11,6 +11,7 @@ import { UnifiedAssistant } from '@/components/admin/UnifiedAssistant';
 
 import { Brain, MessageSquare, ShieldAlert, Activity, Terminal, Sparkles, Users, Zap, RefreshCw } from 'lucide-react';
 import { QuickActionsPanel } from '@/components/admin/agents/QuickActionsPanel';
+import { isOpsKey } from '@/lib/ops/identity';
 import { ProactiveSuggestions } from '@/components/admin/agents/ProactiveSuggestions';
 import { AgentActionsFeed } from '@/components/admin/agents/AgentActionsFeed';
 import { AgentHealthPanel } from '@/components/admin/agents/AgentHealthPanel';
@@ -310,7 +311,7 @@ export default function AgentsPage() {
                 </div>
                 <div className="flex items-center gap-2 self-start sm:self-auto">
                   <a
-                    href="/admin/qayyim"
+                    href="/admin/v2/ops"
                     className="px-4 py-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg"
                   >
                     <Sparkles className="w-4 h-4" />
@@ -366,7 +367,7 @@ export default function AgentsPage() {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-1.5 mt-2">
-                        {ENTERPRISE_AGENTS.filter(a => a.key.startsWith('qayyim-') && a.key !== 'ops-lead').map(a => (
+                        {ENTERPRISE_AGENTS.filter(a => isOpsKey(a.key) && a.key !== 'ops-lead').map(a => (
                           <span key={a.key} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
                             {a.icon} {a.name}
                           </span>
@@ -390,7 +391,7 @@ export default function AgentsPage() {
                   <span className="text-[10px] text-white/30 font-mono bg-white/5 px-2 py-0.5 rounded-full border border-white/10">6 وكلاء · عمليات ومبيعات وأمان</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {ENTERPRISE_AGENTS.filter(a => !a.key.startsWith('qayyim-')).map(agent => {
+                  {ENTERPRISE_AGENTS.filter(a => !isOpsKey(a.key)).map(agent => {
                     const st = agentStatuses[agent.key];
                     return (
                       <AgentTeamCard
@@ -493,7 +494,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     role: 'قائد السرب: تنسيق، تدقيق شامل، نشر/تراجع، بوابة جودة',
     color: 'amber',
     icon: '👑',
-    inputs: ['room_sections', 'products', 'qayyim_drafts', 'visitor_telemetry'],
+    inputs: ['room_sections', 'products', 'ops_drafts', 'visitor_telemetry'],
     outputs: ['تقرير تدقيق شامل', 'مسودات منسقة', 'نشر/تراجع بموافقة'],
     missions: [
       { label: 'افحص الموقع كله شاملاً',     prompt: 'افحص الموقع كله شاملاً وأعطني تقريراً تنفيذياً' },
@@ -549,7 +550,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     role: 'سلوك زوار، معدل تحويل، A/B testing، تحليل خروج',
     color: 'emerald',
     icon: '🎯',
-    inputs: ['qayyim_telemetry_events', 'visitor_telemetry', 'qayyim_experiments'],
+    inputs: ['ops_telemetry_events', 'visitor_telemetry', 'ops_experiments'],
     outputs: ['تقرير سلوك زوار', 'اقتراحات A/B', 'تحليل معدل خروج'],
     missions: [
       { label: 'تحليل سلوك الزوار',          prompt: 'حلل سلوك الزوار ومعدلات الخروج من الصفحات' },
@@ -563,7 +564,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     role: 'ربط تحويل بإيرادات، Luxury Score، تنبؤ، تقسيم عملاء',
     color: 'cyan',
     icon: '📈',
-    inputs: ['visitor_telemetry', 'qayyim_telemetry_events', 'qayyim_experiments'],
+    inputs: ['visitor_telemetry', 'ops_telemetry_events', 'ops_experiments'],
     outputs: ['Luxury Score', 'تنبؤ تحويل', 'تقرير أعمال أسبوعي'],
     missions: [
       { label: 'احسب Luxury Score',           prompt: 'احسب Luxury Score الحالي للموقع' },

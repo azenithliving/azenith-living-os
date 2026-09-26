@@ -495,7 +495,7 @@ export class MasterOrchestrator {
 {
   "subtasks": [
     {
-      "agentKey": "qayyim-xxx",
+      "agentKey": "ops-xxx",
       "type": "task_type",
       "title": "عنوان المهمة",
       "description": "وصف مفصل",
@@ -721,7 +721,7 @@ export class MasterOrchestrator {
     let response = `✅ **تم — ${draft.sections.length} تغيير جاهز**\n`;
     response += `📄 ${draft.pagePath} · 🔒 ${draft.sections.every(s => s.identityCompliant) ? 'متوافق' : 'مراجعة'}\n\n`;
     for (const section of draft.sections) {
-      response += `• **${section.sectionKey}** ← ${section.agentKey.replace('qayyim-','')} ${section.evidenceUrls.length ? `— ${section.evidenceUrls[0]}` : ''}\n`;
+      response += `• **${section.sectionKey}** ← ${section.agentKey.replace('ops-','')} ${section.evidenceUrls.length ? `— ${section.evidenceUrls[0]}` : ''}\n`;
     }
     if (realUrls.length) {
       response += `\n🔗 أدلة:\n${realUrls.slice(0,3).map(u => `- ${u}`).join('\n')}\n`;

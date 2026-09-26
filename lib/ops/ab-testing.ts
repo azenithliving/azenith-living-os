@@ -1,8 +1,8 @@
 /**
  * Qayyim A/B Testing Engine
  *
- * Deterministic visitor bucketing + persistence on qayyim_experiments /
- * qayyim_experiment_events. Statistical significance via two-proportion
+ * Deterministic visitor bucketing + persistence on ops_experiments /
+ * ops_experiment_events. Statistical significance via two-proportion
  * z-test (normal approximation), sufficient for luxury-traffic volumes.
  */
 
@@ -91,7 +91,7 @@ export function assignArm(experimentKey: string, visitorId: string, trafficSplit
 
 export async function createExperiment(input: CreateExperimentInput): Promise<Experiment> {
   const { data, error } = await supabaseServer
-    .from('qayyim_experiments')
+    .from('ops_experiments')
     .insert({
       company_id: input.company_id || null,
       experiment_key: input.experiment_key,
@@ -117,7 +117,7 @@ export async function createExperiment(input: CreateExperimentInput): Promise<Ex
 
 export async function startExperiment(experimentId: string): Promise<Experiment> {
   const { data, error } = await supabaseServer
-    .from('qayyim_experiments')
+    .from('ops_experiments')
     .update({ status: 'running', started_at: new Date().toISOString() })
     .eq('id', experimentId)
     .in('status', ['draft', 'paused'])
@@ -130,7 +130,7 @@ export async function startExperiment(experimentId: string): Promise<Experiment>
 
 export async function pauseExperiment(experimentId: string): Promise<Experiment> {
   const { data, error } = await supabaseServer
-    .from('qayyim_experiments')
+    .from('ops_experiments')
     .update({ status: 'paused' })
     .eq('id', experimentId)
     .eq('status', 'running')
@@ -143,7 +143,7 @@ export async function pauseExperiment(experimentId: string): Promise<Experiment>
 
 export async function getExperiment(experimentId: string): Promise<Experiment | null> {
   const { data, error } = await supabaseServer
-    .from('qayyim_experiments')
+    .from('ops_experiments')
     .select('*')
     .eq('id', experimentId)
     .maybeSingle();
@@ -154,7 +154,7 @@ export async function getExperiment(experimentId: string): Promise<Experiment | 
 
 export async function listExperiments(companyId?: string, status?: string): Promise<Experiment[]> {
   let query = supabaseServer
-    .from('qayyim_experiments')
+    .from('ops_experiments')
     .select('*')
     .order('created_at', { ascending: false });
 
@@ -176,7 +176,7 @@ export async function resolveActiveExperiment(
   visitorId: string
 ): Promise<{ experiment: Experiment; arm: 'control' | 'variant'; content: any } | null> {
   const { data, error } = await supabaseServer
-    .from('qayyim_experiments')
+    .from('ops_experiments')
     .select('*')
     .eq('page_path', pagePath)
     .eq('section_key', sectionKey)
@@ -213,7 +213,7 @@ export async function recordEvent(
   pagePath?: string,
   metadata?: Record<string, any>
 ): Promise<void> {
-  const { error } = await supabaseServer.from('qayyim_experiment_events').insert({
+  const { error } = await supabaseServer.from('ops_experiment_events').insert({
     experiment_id: experimentId,
     visitor_id: visitorId,
     arm,
@@ -241,7 +241,7 @@ export async function getExperimentStats(experimentId: string): Promise<Experime
   if (!experiment) throw new Error(`Experiment ${experimentId} not found`);
 
   const { data: events, error } = await supabaseServer
-    .from('qayyim_experiment_events')
+    .from('ops_experiment_events')
     .select('arm, event_type, visitor_id')
     .eq('experiment_id', experimentId);
 
@@ -317,7 +317,7 @@ export async function concludeExperiment(
   const stats = await getExperimentStats(experimentId);
 
   const { data, error } = await supabaseServer
-    .from('qayyim_experiments')
+    .from('ops_experiments')
     .update({
       status: 'winner_declared',
       winner,

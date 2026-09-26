@@ -101,7 +101,7 @@ export async function reconcileStaleTasks(now: Date = new Date()): Promise<Recon
       output_data: {
         failure_reason: "المهمة اتقفلت آليًا: كانت «شغالة» من غير ما تخلص — العملية اللي بدأتها ماتت في النص.",
         stale_for: stale.map((r) => describeStale(r, now)),
-        reconciled_by: "qayyim-task-reconcile",
+        reconciled_by: "ops-task-reconcile",
       },
     })
     .in("id", stale.map((r) => r.id));

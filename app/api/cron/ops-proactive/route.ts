@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     // Take top 3 issues, avoid duplicates in last 6 hours
     const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
-    const { data: recentSug } = await supabase.from("qayyim_suggestions").select("evidence").gte("created_at", sixHoursAgo).limit(20);
+    const { data: recentSug } = await supabase.from("ops_suggestions").select("evidence").gte("created_at", sixHoursAgo).limit(20);
     const recentTargets = new Set((recentSug || []).map((s: any) => JSON.stringify(s.evidence?.target || s.evidence)));
 
     let created = 0;
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       if (recentTargets.has(targetKey)) continue;
 
       // Create suggestion
-      const { data: sug, error: sugErr } = await supabase.from("qayyim_suggestions").insert({
+      const { data: sug, error: sugErr } = await supabase.from("ops_suggestions").insert({
         company_id: companyId,
         source_agent: "ops-lead",
         suggestion_type: issue.kind.includes("image") ? "image_fix" : issue.kind.includes("description") ? "identity_fix" : "content_gap",
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, created, totalIssues: issues.length });
   } catch (e: any) {
-    console.error("[qayyim-proactive] error", e);
+    console.error("[ops-proactive] error", e);
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });
   }
 }

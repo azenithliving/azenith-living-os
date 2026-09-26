@@ -101,10 +101,10 @@ export async function buildSelfModel(companyId: string | null): Promise<SelfMode
     sb.from(table).select("id", { count: "exact", head: true }).eq("company_id", companyId);
 
   const results: [CounterKey, CountResult][] = [
-    ["drafts", await headCount("qayyim_drafts").in("status", ["draft", "previewing"])],
-    ["goals", await headCount("qayyim_goals").eq("status", "active")],
-    ["learnings", await headCount("qayyim_swarm_learnings")],
-    ["eventsToday", await headCount("qayyim_sync_events").gte("created_at", dayAgo)],
+    ["drafts", await headCount("ops_drafts").in("status", ["draft", "previewing"])],
+    ["goals", await headCount("ops_goals").eq("status", "active")],
+    ["learnings", await headCount("ops_swarm_learnings")],
+    ["eventsToday", await headCount("ops_sync_events").gte("created_at", dayAgo)],
   ];
 
   const counters: NonNullable<SelfModel["counters"]> = {};

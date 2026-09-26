@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       let lastId: number | null = null;
       try {
         const { data: newest } = await supabase
-          .from("qayyim_sync_events")
+          .from("ops_sync_events")
           .select("id")
           .eq("company_id", companyId)
           .order("id", { ascending: false })
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
         if (closed) return;
         try {
           let query = supabase
-            .from("qayyim_sync_events")
+            .from("ops_sync_events")
             .select("*")
             .eq("company_id", companyId)
             .order("created_at", { ascending: true })

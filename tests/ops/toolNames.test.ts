@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { TOOL_CATALOG } from "@/lib/agents/intent-router";
 
 const bridge = readFileSync("lib/admin-tool-bridge.ts", "utf8");
@@ -16,13 +17,22 @@ const SWARM_TOOLS = [
   "ops_goals_risk",
 ];
 
-/** Relations that keep their name until P7-M5 moves them; a tool id has no excuse. */
-const STILL_LIVE_TABLES = new Set([
-  "qayyim_drafts", "qayyim_swarm_learnings", "qayyim_sync_events", "qayyim_experiments",
-  "qayyim_benchmark_runs", "qayyim_rivals", "qayyim_goals", "qayyim_task_metrics",
-  "qayyim_locks", "qayyim_semantic_memory", "qayyim_suggestions", "qayyim_telemetry_events",
-  "qayyim_learning_applications", "qayyim_experiment_events", "qayyim_rival_snapshots",
-]);
+/** The relations the swarm owns, by the names P7-M5 gave them. */
+const SWARM_TABLES = [
+  "ops_drafts", "ops_swarm_learnings", "ops_sync_events", "ops_experiments",
+  "ops_benchmark_runs", "ops_rivals", "ops_goals", "ops_task_metrics",
+  "ops_locks", "ops_semantic_memory", "ops_suggestions", "ops_telemetry_events",
+  "ops_learning_applications", "ops_experiment_events", "ops_rival_snapshots",
+];
+
+function sources(dir: string): string[] {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir).flatMap((e) => {
+    const full = join(dir, e);
+    if (statSync(full).isDirectory()) return sources(full);
+    return /\.(ts|tsx)$/.test(full) && !full.includes(".test.") ? [full] : [];
+  });
+}
 
 describe("tool ids carry no retired brand", () => {
   it("renames the six swarm tools", () => {
@@ -39,21 +49,33 @@ describe("tool ids carry no retired brand", () => {
   });
 
   /**
-   * `qayyim_rivals` names both a tool and a table. The tool moved in P7-M2's data
-   * migration; the table does not move until P7-M5 — so the sweep must not carry
-   * the table reference with it, or the rivals tool reads a relation that does not
-   * exist and answers 42P01 in the middle of a sentence to the owner.
+   * `qayyim_rivals` used to name both a tool and a table, and the tool moved two
+   * milestones before the table did — that split is why a sweep had to be careful
+   * here. After P7-M5 both answer to `ops_rivals`, so the guard is inverted: code
+   * that still read the retired relation would work only through the alias view,
+   * and an alias is a migration window, not a place to live.
    */
-  it("keeps naming the rivals table by the name it still has", () => {
+  it("reads the rivals table by its live name", () => {
     const rivals = readFileSync("lib/ops/rivals.ts", "utf8");
-    expect(rivals).toContain('from("qayyim_rivals")');
-    expect(rivals).not.toContain('from("ops_rivals")');
+    expect(rivals).toContain('from("ops_rivals")');
+    expect(rivals).not.toContain('from("qayyim_rivals")');
+  });
+
+  it("names no table by the retired word anywhere in shipped code", () => {
+    const hits = [...sources("lib"), ...sources("app"), ...sources("components")]
+      .filter((f) =>
+        /(from|into|update)\(\s*['"]qayyim_|(?:FROM|UPDATE|INTO)\s+public\.qayyim_/i.test(
+          readFileSync(f, "utf8")
+        )
+      )
+      .map((f) => f.replace(/\\/g, "/"));
+    expect(hits, hits.join("\n")).toEqual([]);
   });
 
   /**
    * The retired brand also survived in capability lists — tools the swarm offers
    * itself. The live database was scanned column by column and holds none of these
-   * tokens, so this half of the rename needs no migration behind it.
+   * tokens, so that half of the rename needed no migration behind it.
    */
   it("leaves no retired tool token in the swarm's own lists", () => {
     const files = [
@@ -64,12 +86,17 @@ describe("tool ids carry no retired brand", () => {
       "lib/agents/intent-router.ts", "lib/admin-tool-bridge.ts", "lib/ops/palette.ts",
     ];
     const hits = files.flatMap((file) =>
-      [...readFileSync(file, "utf8").matchAll(/qayyim_([a-z0-9_]+)/g)]
+      [...readFileSync(file, "utf8").matchAll(/q[a-z]*yim_[a-z0-9_]+/g)]
         .map((m) => m[0])
-        .filter((token) => !STILL_LIVE_TABLES.has(token))
         .map((token) => `${file}: ${token}`)
     );
     expect(hits, hits.join("\n")).toEqual([]);
+  });
+
+  /** Written out rather than derived, so a table disappearing is noticed here. */
+  it("keeps the fifteen relations the swarm owns", () => {
+    expect(SWARM_TABLES).toHaveLength(15);
+    expect(SWARM_TABLES.every((t) => t.startsWith("ops_"))).toBe(true);
   });
 });
 

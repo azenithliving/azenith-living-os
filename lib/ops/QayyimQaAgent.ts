@@ -106,7 +106,7 @@ export class QayyimQaAgent extends QayyimAgentBase {
         const passed = aiResult.data?.overallVerdict === 'PASS' || aiResult.output.includes('✅');
         const score = passed ? 95 : 45;
         if (supabase) {
-          await supabase.from('qayyim_benchmark_runs').insert({
+          await supabase.from('ops_benchmark_runs').insert({
             company_id: companyId,
             agent_key: this.agentKey,
             benchmark_key: 'qa_suite',
@@ -115,7 +115,7 @@ export class QayyimQaAgent extends QayyimAgentBase {
             passed,
             details: { suites, verdict: aiResult.data?.overallVerdict, output: aiResult.output.slice(0, 500) },
           });
-          await supabase.from('qayyim_task_metrics').insert({
+          await supabase.from('ops_task_metrics').insert({
             company_id: companyId,
             agent_key: this.agentKey,
             task_id: taskId,

@@ -64,7 +64,7 @@ export class QayyimAnalyticsAgent extends QayyimAgentBase {
     ],
     dataSources: [
       "sales_orders", "payments", "leads", "bookings", "visitor_telemetry",
-      "agent_goals_v2", "qayyim_drafts", "qayyim_swarm_learnings"
+      "agent_goals_v2", "ops_drafts", "ops_swarm_learnings"
     ],
   };
 
@@ -148,7 +148,7 @@ export class QayyimAnalyticsAgent extends QayyimAgentBase {
         const companyId = await resolveAdminCompanyId(params.context?.company_id) ?? this.companyId;
         const score = aiResult.data?.luxuryScore?.total ?? aiResult.data?.luxuryScore ?? 0;
         if (supabase && typeof score === 'number') {
-          await supabase.from('qayyim_benchmark_runs').insert({
+          await supabase.from('ops_benchmark_runs').insert({
             company_id: companyId,
             agent_key: this.agentKey,
             benchmark_key: 'luxury_score',

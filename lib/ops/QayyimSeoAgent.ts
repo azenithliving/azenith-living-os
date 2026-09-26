@@ -222,7 +222,7 @@ export class QayyimSeoAgent extends QayyimAgentBase {
   }
 
   /**
-   * Fix discovered SEO issues — يُصلح ويحفظ مسودة schema في qayyim_drafts
+   * Fix discovered SEO issues — يُصلح ويحفظ مسودة schema في ops_drafts
    */
   async fixSEOIssues(params: {
     analysisId?: string;
@@ -246,7 +246,7 @@ export class QayyimSeoAgent extends QayyimAgentBase {
 
     const aiResult = await this.process(task);
 
-    // حفظ الإصلاحات كمسودة في qayyim_drafts
+    // حفظ الإصلاحات كمسودة في ops_drafts
     if (aiResult.success) {
       const schema = aiResult.data?.schema;
       const fixes  = aiResult.data?.issues ?? aiResult.suggestions ?? [];
@@ -276,7 +276,7 @@ export class QayyimSeoAgent extends QayyimAgentBase {
   }
 
   /**
-   * Generate Schema.org — يحفظ JSON-LD في qayyim_drafts
+   * Generate Schema.org — يحفظ JSON-LD في ops_drafts
    */
   async generateSchema(params: {
     pageType: 'Service' | 'Product' | 'Article' | 'FAQPage' | 'BreadcrumbList' | 'Organization' | 'LocalBusiness';

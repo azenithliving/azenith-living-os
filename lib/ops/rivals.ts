@@ -275,7 +275,7 @@ export function renderRivalsDigest(entries: RivalDigestEntry[]): string {
     return [
       "مضفتش أي منافس لحد دلوقتي — عيني على السوق مقفولة.",
       "التفعيل: ضيف سطر لكل منافس فيه اسمه ورابط موقعه، في الدفتر ده:",
-      "qayyim_rivals",
+      "ops_rivals",
       "وأنا أقيسه كل اثنين بهدوء، باحترام قواعد الموقع وعلى 10 صفحات كحد أقصى.",
       "بعدها أقارن بالأرقام: عدد المنتجات، والأسعار الظاهرة، ووجود واتساب، وحجم المحتوى.",
     ].join("\n");
@@ -299,7 +299,7 @@ export function renderRivalsDigest(entries: RivalDigestEntry[]): string {
 export async function listRivals(companyId: string): Promise<RivalRow[]> {
   if (!supabaseServer) return [];
   const { data, error } = await supabaseServer
-    .from("qayyim_rivals")
+    .from("ops_rivals")
     .select("id,name,url,enabled")
     .eq("company_id", companyId)
     .eq("enabled", true)
@@ -348,7 +348,7 @@ export async function runRivalsWeekly(
     }
     let prev: RivalSignals | null = null;
     const { data: prevRow } = await supabaseServer
-      .from("qayyim_rival_snapshots")
+      .from("ops_rival_snapshots")
       .select("summary,crawled_at,status")
       .eq("rival_id", rival.id)
       .eq("status", "completed")
@@ -357,7 +357,7 @@ export async function runRivalsWeekly(
     if (prevRow?.[0]?.summary) prev = prevRow[0].summary as RivalSignals;
 
     const outcome = await crawlRival(rival, { maxPages: opts.maxPagesPerRival ?? 6 });
-    await supabaseServer.from("qayyim_rival_snapshots").insert({
+    await supabaseServer.from("ops_rival_snapshots").insert({
       rival_id: rival.id,
       company_id: companyId,
       status: outcome.status,
@@ -399,7 +399,7 @@ export async function latestRivalDigest(companyId: string): Promise<string> {
   const entries: RivalDigestEntry[] = [];
   for (const rival of rivals) {
     const { data } = await supabaseServer
-      .from("qayyim_rival_snapshots")
+      .from("ops_rival_snapshots")
       .select("summary,crawled_at,status,error")
       .eq("rival_id", rival.id)
       .order("crawled_at", { ascending: false })

@@ -65,7 +65,7 @@ export class QayyimUxAgent extends QayyimAgentBase {
     ],
     dataSources: [
       "visitor_telemetry", "TelemetryTracker hook", "useImageTracking hook",
-      "qayyim_drafts", "experiments table"
+      "ops_drafts", "experiments table"
     ],
   };
 
@@ -130,7 +130,7 @@ export class QayyimUxAgent extends QayyimAgentBase {
         const companyId = await resolveAdminCompanyId(params.context?.company_id) ?? this.companyId;
         if (supabase) {
           const expKey = `exp_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
-          const { data, error } = await supabase.from('qayyim_experiments').insert({
+          const { data, error } = await supabase.from('ops_experiments').insert({
             company_id: companyId,
             experiment_key: expKey,
             hypothesis: params.hypothesis,

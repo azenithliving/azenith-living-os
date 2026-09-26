@@ -5,7 +5,7 @@
  * schedule, not seven) an independent judge reads the last handful of answers
  * real humans got and grades them: does the reply say something true, is it the
  * right size, and is it honest about what the swarm cannot do. The number lands
- * in `qayyim_benchmark_runs`, the same ledger every other measurement in this
+ * in `ops_benchmark_runs`, the same ledger every other measurement in this
  * swarm writes to, so a drift in answer quality shows up on the same axis as a
  * drift in traffic or revenue.
  *
@@ -317,7 +317,7 @@ export async function runSelfAudit(
     const score = scoreOf(verdict);
     scores.push(score);
 
-    const { error } = await supabaseServer.from("qayyim_benchmark_runs").insert({
+    const { error } = await supabaseServer.from("ops_benchmark_runs").insert({
       company_id: companyId,
       agent_key: sample.agentKey,
       benchmark_key: SELF_AUDIT_BENCHMARK_KEY,
@@ -355,7 +355,7 @@ export async function runSelfAudit(
     // never stops is how a scheduled function misses its own deadline. The
     // insert is the same row the rest of the swarm already reads.
     const { data: row } = await supabaseServer
-      .from("qayyim_sync_events")
+      .from("ops_sync_events")
       .insert({
         company_id: companyId,
         event_type: "self_audit_completed",

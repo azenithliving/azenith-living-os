@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const companyId = await getCompanyId(searchParams.get('company_id') || undefined);
 
     let query = supabaseServer
-      .from('qayyim_goals')
+      .from('ops_goals')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(50);

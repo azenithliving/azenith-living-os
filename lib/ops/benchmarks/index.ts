@@ -3,7 +3,7 @@
  *
  * Deterministic, runnable quality checks that score agent outputs against
  * the Qayyim constitution. Each benchmark returns 0..100 with evidence.
- * Persisted to qayyim_benchmark_runs for trend tracking.
+ * Persisted to ops_benchmark_runs for trend tracking.
  */
 
 import { supabaseServer } from "@/lib/dal/unified-supabase";
@@ -180,7 +180,7 @@ export async function runBenchmark(
   };
 
   if (options?.persist !== false) {
-    const { error } = await supabaseServer.from('qayyim_benchmark_runs').insert({
+    const { error } = await supabaseServer.from('ops_benchmark_runs').insert({
       company_id: options?.company_id || null,
       agent_key: result.agent_key,
       benchmark_key: result.benchmark_key,

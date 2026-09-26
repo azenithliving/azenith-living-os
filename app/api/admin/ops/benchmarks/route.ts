@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const { data: recentRuns, error } = await supabaseServer
-      .from('qayyim_benchmark_runs')
+      .from('ops_benchmark_runs')
       .select('id, agent_key, benchmark_key, score, passed, created_at')
       .order('created_at', { ascending: false })
       .limit(100);

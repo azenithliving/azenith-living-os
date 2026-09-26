@@ -45,9 +45,9 @@ describe("assessGoals", () => {
 
 describe("renderGoalRisk", () => {
   it("reports a query failure instead of an empty all-clear", () => {
-    const m = renderGoalRisk(null, 'column qayyim_goals.title does not exist', []);
+    const m = renderGoalRisk(null, 'column ops_goals.title does not exist', []);
     expect(m).toContain("لم أستطع قراءة الأهداف");
-    expect(m).toContain("column qayyim_goals.title");
+    expect(m).toContain("column ops_goals.title");
     expect(m).not.toContain("لا أهداف مهددة");
   });
 

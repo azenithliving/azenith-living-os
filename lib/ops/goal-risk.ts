@@ -4,7 +4,7 @@
  *
  * Both callers used to carry their own copy of this logic, and both copies
  * read `title`, `progress_percentage` and `target_date` — columns that do not
- * exist on `qayyim_goals` (the real ones are `name`, `target_value`,
+ * exist on `ops_goals` (the real ones are `name`, `target_value`,
  * `current_value`, `deadline`). PostgREST rejects such a select, the callers
  * ignored the error, and the swarm answered «لا أهداف مهددة» from a query that
  * never returned anything. The shared helpers below read the real columns and
