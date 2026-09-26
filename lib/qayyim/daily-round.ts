@@ -351,6 +351,30 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
     results.errors.push(`Telegram: ${e.message}`);
   }
 
+  // "A round ran" and "the report reached him" are two facts, and only the first
+  // one was stored — so nobody could later tell a delivered report from one that
+  // died on a closed switch. The receipt goes straight into the events table:
+  // SyncLayer starts a polling timer on first use, and a timer that never stops
+  // is how a scheduled function misses its own deadline.
+  try {
+    const { supabaseServer } = await import("@/lib/dal/unified-supabase");
+    await supabaseServer.from("qayyim_sync_events").insert({
+      company_id: companyId,
+      event_type: "context_update",
+      source_agent: "qayyim-core",
+      target_agents: [],
+      payload: {
+        kind: "daily_report",
+        telegramSent: results.telegramSent ?? false,
+        reason: results.telegramReason ?? null,
+        href: results.telegramHref ?? null,
+        neededHim: needsIntervention,
+      },
+    });
+  } catch {
+    /* the report already went out; losing the receipt must not undo it */
+  }
+
   return { success: true, results };
 }
 

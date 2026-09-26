@@ -1,5 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { buildDailyStory, renderTelegramHtml, STORY_LIMIT, type StoryInput } from "@/lib/qayyim/daily-story";
 
 /**
@@ -107,5 +109,27 @@ describe("renderTelegramHtml", () => {
     expect(html).toContain('<a href="https://azenith-living.vercel.app/admin/v2/agents/qayyim?proposal=abc-123">');
     expect(html).toContain("<b>مدير تشغيل المحتوى — صباح 2026-09-26</b>");
     expect(html).not.toContain("?proposal=abc-123 افتح");
+  });
+});
+
+/**
+ * Two facts the store must not confuse: the round ran, and the report reached
+ * him. The title rule is the same idea on the surface he reads every morning —
+ * the brand is not the swarm's name.
+ */
+describe("the morning report keeps a receipt", () => {
+  const round = readFileSync(resolve(process.cwd(), "lib/qayyim/daily-round.ts"), "utf8");
+  const story = readFileSync(resolve(process.cwd(), "lib/qayyim/daily-story.ts"), "utf8");
+
+  it("is signed with the job title, never the brand", () => {
+    expect(story).toContain("مدير تشغيل المحتوى — صباح");
+    expect(story).not.toContain("قيّم الدار — صباح");
+  });
+
+  it("writes whether Telegram actually took it", () => {
+    const receipt = round.slice(round.indexOf(`kind: "daily_report"`));
+    expect(receipt.length).toBeGreaterThan(0);
+    expect(receipt).toContain("telegramSent");
+    expect(receipt).toContain("reason");
   });
 });
