@@ -4,11 +4,17 @@ import "server-only";
  * it has two triggers:
  *
  *  1. Vercel's schedule (`/api/cron/ops-daily`, 0 7 * * *) — the primary.
- *  2. A backstop from the commander's own turn: when the last round on record
- *     is older than `ROUND_STALE_MS`, the next admin chat fires it. The platform
+ *  2. A backstop from the commander's own turn: when the last round on record is
+ *     older than `ROUND_STALE_MS`, the next admin chat fires it. The platform
  *     scheduler is demonstrably unreliable here (it registers the job and never
  *     lands a row), and a swarm that reports "all clear" while asleep is the
  *     exact thing P6 exists to prevent.
+ *
+ * This file is the whole one-day rhythm the swarm runs on: one deep check a day
+ * plus the morning report on Telegram, and everything else happens when the owner
+ * is actually looking. The plan allows a hundred daily jobs, but a second schedule
+ * would buy nothing here — the round is bounded by what the owner reads in a
+ * morning and by the 45 seconds a function may run, not by how often it could wake.
  *
  * The backstop is best-effort: a serverless instance can be frozen as soon as
  * the reply is sent, so it is not a guarantee — the freshness line in the world
@@ -58,9 +64,10 @@ export interface DailyRoundOutcome {
 }
 
 /**
- * `only` runs a single weekly step on demand. Hobby gives this app one schedule a
- * day, so without it a Sunday-only organ could only ever be claimed, never
- * verified — and a claim the owner cannot re-run is exactly what P6 exists to kill.
+ * `only` runs a single weekly step on demand. A weekly organ hides behind a
+ * weekday gate inside the daily round, so without this it could only ever be
+ * claimed, never verified — and a claim the owner cannot re-run is exactly what
+ * P6 exists to kill.
  */
 export type RoundStep = "audit" | "canary";
 
@@ -264,8 +271,10 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
     }
   }
 
-  // (f) Weekly competitor read. The platform schedule stays daily (Hobby limit),
-  // so the weekday gate lives here rather than in vercel.json.
+  // (f) Weekly competitor read. The weekday gate lives here rather than in
+  // vercel.json on purpose: a rival crawl wants the same warm cache and the same
+  // seconds as the round, and splitting it into its own job would only double the
+  // places a failure can hide.
   if (new Date().getUTCDay() === 1) {
     try {
       const { runRivalsWeekly } = await import("@/lib/ops/rivals");
@@ -297,8 +306,9 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
   }
 
   // (h) P6-M5 — once a week the swarm is graded by something other than itself.
-  // Same weekday-gate trick as the rival read: the platform schedule stays daily
-  // because Hobby allows exactly one, so the weekly rhythm lives here.
+  // Same weekday-gate trick as the rival read: the judge costs a model call per
+  // graded reply, so it runs where the round's seconds are already budgeted
+  // rather than on a schedule of its own.
   if (new Date().getUTCDay() === 0) await auditStep();
 
   // (i) P6-M4 — the morning story on the owner's phone, through the store's

@@ -57,10 +57,29 @@ const AGENT_NAMES: Record<string, string> = {
   "ops-qa": "الجودة",
 };
 
+/**
+ * The swarm's real envelope, measured from the platform's own terms rather than
+ * remembered from an earlier draft. Two numbers here used to be wrong in ways that
+ * cost the swarm capability it actually had:
+ *
+ * - «cron يومي واحد» was never the rule. The free hosting plan allows a hundred
+ *   scheduled jobs per project; the restriction is that each one may fire only once
+ *   a day, and may arrive up to an hour late. Believing the false limit wrote
+ *   itself into the reasoning of `daily-round.ts` and `self-audit.ts`, where the
+ *   weekly organs are now justified by their own time budget instead.
+ * - «صفر خدمات مدفوعة» was contradicted by the five free third-party services the
+ *   swarm already depends on, so the swarm could watch its own rule broken and
+ *   learned to distrust its self-model. What the owner actually holds is the
+ *   principle below, and unlike the old wording it is enforceable.
+ *
+ * Every entry is rendered inside one Arabic sentence by `renderSelfReport`, so the
+ * services are named in Arabic: a Latin token here flips the line's bidi rendering
+ * and the owner cannot read it. `tests/ops/plainArabicCopy.test.ts` enforces that.
+ */
 const LIMITS = [
-  "كرون يومي واحد كحد أقصى، لأن منصة الاستضافة المجانية لا تسمح بأكثر",
+  "المسموح مئة مهمة مجدولة، لكن كل واحدة لا تعمل إلا مرة واحدة في اليوم، وقد تتأخر حتى ساعة عن موعدها",
   "لا نشر بلا موافقة بشرية — القاعدة الثالثة في الدستور",
-  "صفر خدمات مدفوعة",
+  "لا اشتراك جديد بالمال بلا موافقة المالك؛ والخدمات المجانية المعتمدة حاليًا: قاعدة البيانات، وخدمة تحليل بحث جوجل، وخدمة الرسائل، وخدمة قياس الزوار، ونموذج الذكاء الاصطناعي",
   "روابط وأرقام من خريطة المسارات وقاعدة البيانات فقط",
 ];
 
