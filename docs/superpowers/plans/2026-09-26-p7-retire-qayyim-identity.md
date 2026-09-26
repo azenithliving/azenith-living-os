@@ -10,6 +10,48 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-26-p7-retire-qayyim-identity-design.md`
 
+## Execution ledger — milestones 1–4 are DONE and deployed (2026-09-26)
+
+Tasks 1–10 landed, each with its own commit, and every gate ran on the final tree:
+`npm run typecheck` 0 errors · `npx eslint` 0 errors on the touched files ·
+`npx vitest run` **848 passed, 2 skipped (68 files)** · `npx next build` clean ·
+production **21/21** product suite and **27/27** browser suite, twice.
+
+| commit | what it moved |
+|---|---|
+| `ed13422` | M1 — `lib/ops/identity.ts` owns keys, labels and the retired↔live map |
+| `59c6dc3` | M2 — two tables were throwing 42703 on every UPDATE (missing `updated_at` behind a trigger) |
+| `c7a95a2` | M3/T5 — `lib/qayyim` → `lib/ops`, the atomic key sweep, stamps from the module |
+| `b50641c` | M3/T6 — 22 API routes → `/api/admin/ops`, `[[...legacy]]` answers 308 |
+| `724dec2` | M3/T7 — tool ids `ops_*`, `/admin/v2/ops`, `/admin/v2/agents/ops`, `/api/cron/ops-daily` |
+| `73279a9` | M4/T8 — the eight personas introduced by role; the dead `prime` alias deleted |
+| `4996d91` | M4/T9 — 103 occurrences of «قيّم الدار» gone; `tests/ops/noRetiredName.test.ts` guards it |
+| `9dff314` | found by the live proof: the leader called himself «وكيل القائد» in his own identity line |
+| `fccdf99` | the browser suite was asserting the retired name in four places; 23/27 → 27/27 |
+
+**Proof read off production, not off a test runner.** `POST /api/admin/agents/chat`
+(UTF-8 payload — a Windows argv probe mangles Arabic into `?` and that looked like an app bug
+until the payload was sent as a file) answered: «أنا **مدير تشغيل المحتوى** في سرب أزينث،
+قائد السرب مع 6 أدوار و28 أداة تحت إمرتي». The product suite's tool chips read `ops_self`,
+`ops_world`, `ops_rivals`, `ops_forecast`, `ops_luxury_score`, `ops_goals_risk`. Fresh rows
+written after the deploy carry `sender_name=OPS-LEAD`, and `scripts/p7-verify-values.mjs`
+reports every migrated column at 0 retired rows. `/api/cron/ops-daily` runs the round and
+records the receipt (`kind=daily_report, source_agent=ops-lead, telegramSent=true`);
+unauthenticated it answers 401, and the retired `/api/cron/qayyim-daily` is a 404. The 308
+shim is proven at the handler, not from the shell — the gate answers 401 to an
+unauthenticated probe before routing ever sees it.
+
+**Side effect to own:** proving the cron receipt ran a full round at 17:23 UTC, so the owner's
+Telegram got a second daily report today. `executeDailyRound` does guard on freshness, but the
+gap since the 11:06 round was already overdue.
+
+**Still open — M5 (Tasks 11–13):** rename the 15 `qayyim_*` tables (the live inventory is 15
+tables, 4 foreign keys between them, one view `enterprise_agents` that reads them, 0 functions,
+57 indexes carrying the old name). An alias view must be created `WITH (security_invoker =
+true)` and granted explicitly, or it becomes an RLS bypass owned by `postgres`.
+Deliberately retained, each with its reason: `lib/ops/Qayyim*Agent.ts`, `QayyimFacade`,
+`lib/qayyim-ops.ts`, `qayyim.rego`, `scripts/qayyim-smoke.mjs` (an npm alias in package.json).
+
 ## Global Constraints
 
 - $0: **no new npm dependencies** — `git diff package.json` must stay empty.
