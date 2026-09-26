@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, AlertCircle, Shield, KeyRound } from "lucide-react";
 
@@ -12,6 +12,18 @@ export default function GateLoginPage() {
   const [error, setError] = useState("");
   const [step, setStep] = useState<"login" | "2fa">("login");
   const [token, setToken] = useState("");
+
+  // The form is in the HTML before React owns it, so a person who types in the
+  // first moments is writing into fields that hydration then clears. Whatever is
+  // already typed is taken over instead of thrown away.
+  useEffect(() => {
+    const typed = (name: string) =>
+      (document.querySelector(`input[name="${name}"]`) as HTMLInputElement | null)?.value ?? "";
+    const preEmail = typed("gate-email");
+    const prePassword = typed("gate-password");
+    if (preEmail) setEmail(preEmail);
+    if (prePassword) setPassword(prePassword);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
