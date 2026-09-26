@@ -324,7 +324,7 @@ export default function OwnerDashboardPage() {
               صحة الوكلاء المستقلين
             </h2>
             <div className="space-y-4">
-              <AgentMetric label="قيّم الدار" count={data?.agent_stats.prime_tasks_completed || 0} icon="👑" color="gold" />
+              <AgentMetric label="مدير تشغيل المحتوى" count={data?.agent_stats.prime_tasks_completed || 0} icon="👑" color="gold" />
               <AgentMetric label="VANGUARD AI" count={data?.agent_stats.vanguard_tasks_completed || 0} icon="💼" color="emerald" />
               <AgentMetric label="ACTIVE DEVICES" count={data?.agent_stats.active_conversations || 0} icon="💻" color="blue" />
             </div>

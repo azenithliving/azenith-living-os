@@ -424,7 +424,7 @@ export default function AdminPage() {
                     <AgentStatusCard
                       key={agentKey}
                       agentKey={agentKey}
-                      agentName={agentKey === 'qayyim-core' ? 'قيّم الدار' : agentKey === 'qayyim' ? 'قيّم الدار' : agentKey}
+                      agentName={agentKey === 'qayyim-core' ? 'مدير تشغيل المحتوى' : agentKey === 'qayyim' ? 'مدير تشغيل المحتوى' : agentKey}
                       agentRole={agentKey === 'qayyim-core' ? 'واجهة موحدة — 7 خفيين' : 'سجل المهام الفعلي'}
                       color={agentKey === 'qayyim-core' ? 'purple' : index % 2 === 0 ? 'emerald' : 'purple' as any}
                       icon={agentKey === 'qayyim-core' ? "👑" : "💼"}

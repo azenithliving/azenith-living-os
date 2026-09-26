@@ -86,7 +86,7 @@ export function buildDailyStory(input: StoryInput): DailyStory {
   }
 
   const text = clamp([...kept, tail].join("\n"), STORY_LIMIT);
-  return { title: `قيّم الدار — صباح ${input.dateKey}`, text, href };
+  return { title: `مدير تشغيل المحتوى — صباح ${input.dateKey}`, text, href };
 }
 
 /** Telegram rejects an over-long message outright, so the story is cut short and
