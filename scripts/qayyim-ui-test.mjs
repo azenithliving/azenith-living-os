@@ -73,7 +73,86 @@ try {
   const sugBtns = await p.locator('button:has-text("⚡")').count();
   check('action chips rendered', sugBtns >= 0, `chips=${sugBtns}`);
 
-  // 8) Studio cards + tabs
+  // ── P6-M6: the interface layer ────────────────────────────────────
+  // 8) Ctrl+K opens a palette of real capabilities, and choosing one RUNS it.
+  await p.focus(input);
+  await p.keyboard.press('Control+k');
+  await p.waitForTimeout(1000);
+  const paletteShown = (await p.locator('[data-palette-input]').count()) > 0;
+  // The list is the live self-model, so wait for the read instead of assuming it.
+  let capabilityRows = 0;
+  for (let i = 0; i < 12 && capabilityRows <= 20; i++) {
+    capabilityRows = await p.locator('[data-palette-item^="capability:"]').count();
+    if (capabilityRows > 20) break;
+    await p.waitForTimeout(1000);
+  }
+  check('ctrl+K opens the live capability palette', paletteShown && capabilityRows > 20, `rows=${capabilityRows}`);
+
+  await p.fill('[data-palette-input]', 'فخامه');
+  await p.waitForTimeout(600);
+  const filtered = await p.locator('[data-palette-item]').count();
+  const luxuryRow = await p.locator('[data-palette-item="capability:qayyim_luxury_score"]').count();
+  check('dialect query narrows to the luxury capability', filtered > 0 && filtered < capabilityRows && luxuryRow === 1,
+    `${capabilityRows}->${filtered}`);
+
+  await p.press('[data-palette-input]', 'Enter');
+  let ranTool = false;
+  for (let i = 0; i < 14 && !ranTool; i++) {
+    await p.waitForTimeout(5000);
+    ranTool = (await p.locator('span:has-text("تم التنفيذ الفعلي")').count()) > 0;
+  }
+  const toolNamed = ranTool ? await p.locator('[dir="ltr"]:has-text("qayyim_luxury_score"), span:has-text("qayyim_luxury_score")').count() : 0;
+  check('palette Enter really executes the named tool', ranTool && toolNamed > 0, `toolCard=${ranTool} named=${toolNamed}`);
+
+  // 9) «اسأل عن نفسك» shows the self-model, measured not described
+  await p.locator('button:has-text("نفسك")').first().click();
+  await p.waitForTimeout(2500);
+  const selfShown = (await p.locator('[data-self-panel]').count()) > 0;
+  const agentsBlock = await p.locator('text=/الوكلاء \\(\\d+\\)/').count();
+  const organsBlock = await p.locator('text=بيشتغل لوحده بجدوله').count();
+  check('self panel renders agents and the autonomous schedule', selfShown && agentsBlock > 0 && organsBlock > 0,
+    `panel=${selfShown} agents=${agentsBlock} organs=${organsBlock}`);
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(500);
+
+  // 10) Continuous dictation is offered next to the one-shot mic
+  const dictBtn = await p.locator('[data-dictation]').count();
+  check('continuous dictation control exists', dictBtn > 0, `buttons=${dictBtn}`);
+
+  // 11) The Telegram decision link: junk is refused, a real row opens a card.
+  await p.goto(`${BASE}/admin/v2/agents/qayyim?proposal=%3Cscript%3Ealert(1)%3C/script%3E`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.waitForTimeout(3000);
+  check('a malformed proposal link opens nothing', (await p.locator('[data-proposal-card]').count()) === 0);
+
+  const madeId = await p.evaluate(async (payload) => {
+    const res = await fetch('/api/admin/agents/approval-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    return json?.id || null;
+  }, {
+    action_id: `uitest-${Date.now()}`,
+    action_type: 'assistant_health',
+    description: 'قرار تجريبي من اختبار الواجهة — ارفضه',
+  });
+  await p.goto(`${BASE}/admin/v2/agents/qayyim?proposal=${madeId}`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.waitForTimeout(3500);
+  const cardShown = (await p.locator('[data-proposal-card]').count()) > 0;
+  const cardText = cardShown ? ((await p.locator('[data-proposal-card]').first().textContent()) || '') : '';
+  check('the proposal link opens its own decision card', cardShown && cardText.includes('قرار تجريبي'), cardText.replace(/\s+/g, ' ').slice(0, 80));
+
+  // Reject — never approve: this suite must not execute anything on the shop.
+  await p.locator('[data-proposal-card] button:has-text("ارفض")').first().click();
+  let decided = false;
+  for (let i = 0; i < 8 && !decided; i++) {
+    await p.waitForTimeout(1500);
+    decided = (await p.locator('[data-proposal-card]').textContent().catch(() => '')).includes('رفضت');
+  }
+  check('refusing a proposal reports what really happened', decided);
+
+  // 12) Studio cards + tabs
   await p.goto(`${BASE}/admin/v2/qayyim`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3500);
   const chatBtns = await p.locator('button:has-text("محادثة")').count();

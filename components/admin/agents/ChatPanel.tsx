@@ -1197,9 +1197,12 @@ function StructuredToolCard({ toolName, toolData }: { toolName: string; toolData
   return (
     <div className="mt-3 pt-3 border-t border-white/10 space-y-2">
       <div className="flex items-center justify-between text-[11px]">
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-mono font-bold">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-bold">
           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-          {toolData?.success === false ? 'فشل التنفيذ' : 'تم التنفيذ الفعلي'}: {toolName}
+          {toolData?.success === false ? 'فشل التنفيذ' : 'تم التنفيذ الفعلي'}
+          {/* The tool id is Latin: its own element, its own direction, or the
+              Arabic sentence around it arrives scrambled. */}
+          <span className="font-mono text-[10px] text-emerald-200/80" dir="ltr">{toolName}</span>
         </span>
         {toolData && (
           <button
