@@ -27,7 +27,9 @@ try {
   await p.fill('input[type=password]', env.ADMIN_GATE_PASSWORD);
   await p.click('button[type=submit]');
   await p.waitForSelector('input[placeholder="000000"]', { timeout: 25000 });
-  const code = speakeasy.totp({ secret: env.ADMIN_GATE_2FA_SECRET, step: 30, digits: 6 });
+  // The same normalization the gate itself applies to a configured key.
+  const secret = env.ADMIN_GATE_2FA_SECRET.replace(/\s+/g, '').replace(/-/g, '').toUpperCase();
+  const code = speakeasy.totp({ secret, encoding: 'base32', step: 30, digits: 6 });
   await p.fill('input[placeholder="000000"]', code);
   await p.click('button[type=submit]');
   for (let i = 0; i < 10 && !p.url().includes('/admin'); i++) await p.waitForTimeout(2000);

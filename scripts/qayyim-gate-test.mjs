@@ -8,7 +8,8 @@
  *
  * This script refuses itself: right credentials, wrong code, then it asks a
  * guarded admin API and a guarded page with whatever the refusal handed back.
- * Either must come back unauthenticated.
+ * Either must come back unauthenticated. A gate that only ever says no is not a
+ * gate either, so the last leg answers correctly and must get in.
  *
  * Nothing here prints a secret: the credentials go into a request body built in
  * this process, and only statuses, cookie NAMES and shapes are reported.
@@ -16,6 +17,7 @@
  * Usage: node scripts/qayyim-gate-test.mjs [baseUrl]
  */
 import fs from "node:fs";
+import speakeasy from "speakeasy";
 
 const BASE = (process.argv[2] || "https://azenith-living.vercel.app").replace(/\/$/, "");
 const env = {};
@@ -25,8 +27,9 @@ for (const l of fs.readFileSync(".env.local", "utf8").split(/\r?\n/)) {
 }
 const email = env.ADMIN_GATE_EMAIL;
 const password = env.ADMIN_GATE_PASSWORD;
-if (!email || !password) {
-  console.error("ADMIN_GATE_EMAIL and ADMIN_GATE_PASSWORD are required in .env.local");
+const secret = (env.ADMIN_GATE_2FA_SECRET || "").trim().replace(/\s+/g, "").toUpperCase();
+if (!email || !password || !secret) {
+  console.error("ADMIN_GATE_EMAIL, ADMIN_GATE_PASSWORD and ADMIN_GATE_2FA_SECRET are required in .env.local");
   process.exit(2);
 }
 
@@ -98,6 +101,27 @@ record(
   "guarded-page-stays-shut-after-refusal",
   guardedPage.status !== 200,
   `status ${guardedPage.status}${guardedPage.headers.get("location") ? ` → ${guardedPage.headers.get("location")}` : ""}`,
+);
+
+// A gate that never opens is as broken as one that opens for the wrong answer.
+// The code is generated here from the configured key — the same key the
+// database holds — and is never printed.
+const accepted = await fetch(`${BASE}/api/admin/verify-2fa`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    email,
+    password,
+    token: speakeasy.totp({ secret, encoding: "base32", step: 30, digits: 6 }),
+  }),
+  signal: AbortSignal.timeout(45_000),
+});
+const acceptedBody = await accepted.json().catch(() => ({}));
+const acceptedNames = liveSessionCookies(accepted.headers.get("set-cookie"));
+record(
+  "gate-opens-for-the-right-code",
+  accepted.status === 200 && acceptedBody.success === true && acceptedNames.length > 0,
+  `status ${accepted.status}, ${acceptedBody.error ?? `${acceptedNames.length} session cookie(s)`}`,
 );
 
 const failed = results.filter((r) => !r.pass).length;
