@@ -28,7 +28,7 @@ const chat = async (agent_key, message) => {
   return { message: j?.data?.message || '', metadata: j?.data?.metadata || {}, success: !!j?.success };
 };
 const qapi = async (action, body = {}) => {
-  const r = await fetch(`${BASE}/api/admin/qayyim?action=${action}`, {
+  const r = await fetch(`${BASE}/api/admin/ops?action=${action}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json; charset=utf-8', 'x-internal-key': KEY },
     body: JSON.stringify(body), signal: AbortSignal.timeout(120000),
   });

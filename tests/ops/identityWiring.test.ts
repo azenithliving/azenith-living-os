@@ -50,6 +50,7 @@ describe("the whole codebase speaks one key set", () => {
       "app/api/admin/agents/messages/route.ts",
       "app/api/admin/agents/tasks/route.ts",
       "app/api/admin/agents/learn/route.ts",
+      "app/api/admin/ops/route.ts",
     ];
     for (const file of doors) {
       expect(readFileSync(file, "utf8"), file).toContain("legacyToOps(");

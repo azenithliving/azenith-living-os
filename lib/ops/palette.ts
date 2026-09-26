@@ -3,7 +3,7 @@
  * the owner's language, and how a half-typed dialect query finds it.
  *
  * Deliberately client-safe and pure — no `server-only`, no fetch. The chat
- * screen pulls the live self-model over `/api/admin/qayyim/self` and hands it
+ * screen pulls the live self-model over `/api/admin/ops/self` and hands it
  * here, so the palette can never advertise a capability the registries lost.
  *
  * Two rules this file exists to keep:

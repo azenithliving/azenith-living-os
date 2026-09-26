@@ -733,7 +733,7 @@ export class MasterOrchestrator {
       // No real draft yet — don't hallucinate link
       response += `\n👁️ المعاينة ستظهر داخل الشات بعد إنشاء المسودة\n`;
     } else if (draft.previewToken) {
-      response += `\n👁️ **معاينة:** /api/admin/qayyim/preview/${draft.previewToken}\n`;
+      response += `\n👁️ **معاينة:** /api/admin/ops/preview/${draft.previewToken}\n`;
     }
     response += `✅ قل "وافق" للنشر أو "عايز أحسن" لبديل\n`;
     return response;

@@ -43,14 +43,14 @@ export function QayyimExperimentsPanel() {
   const fetchExperiments = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/qayyim/experiments');
+      const res = await fetch('/api/admin/ops/experiments');
       const data = await res.json();
       if (data.success) {
         const list: Experiment[] = data.experiments || [];
         setExperiments(list);
         // Fetch stats for running experiments
         for (const exp of list.filter((e) => e.status === 'running')) {
-          fetch(`/api/admin/qayyim/experiments?id=${exp.id}&stats=1`)
+          fetch(`/api/admin/ops/experiments?id=${exp.id}&stats=1`)
             .then((r) => r.json())
             .then((d) => {
               if (d.success && d.stats) setStats((prev) => ({ ...prev, [exp.id]: d.stats }));
@@ -68,7 +68,7 @@ export function QayyimExperimentsPanel() {
     if (acting) return;
     setActing(id);
     try {
-      await fetch('/api/admin/qayyim/experiments', {
+      await fetch('/api/admin/ops/experiments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, experiment_id: id }),
@@ -97,7 +97,7 @@ export function QayyimExperimentsPanel() {
       ) : experiments.length === 0 ? (
         <div className="rounded-xl border border-dashed border-white/10 p-10 text-center text-white/30 text-sm">
           <FlaskConical className="w-8 h-8 mx-auto mb-2 opacity-40" />
-          لا توجد تجارب — صمّم تجربة عبر QAYYIM-UX من خلال API: /api/admin/qayyim/ab-test
+          لا توجد تجارب — صمّم تجربة عبر QAYYIM-UX من خلال API: /api/admin/ops/ab-test
         </div>
       ) : (
         <div className="space-y-2.5">

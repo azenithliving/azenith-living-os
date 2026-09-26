@@ -86,7 +86,7 @@ record(
   a ? `${a.judgeOutcome} — ${a.note}` : "no audit result",
 );
 
-const bm = await fetch(`${BASE}/api/admin/qayyim/benchmarks`, { headers: { "x-internal-key": KEY } });
+const bm = await fetch(`${BASE}/api/admin/ops/benchmarks`, { headers: { "x-internal-key": KEY } });
 const bmBody = await bm.json().catch(() => ({}));
 const runs = (bmBody.recent_runs || []).filter((r) => r.benchmark_key === "owner_reply_audit");
 record(

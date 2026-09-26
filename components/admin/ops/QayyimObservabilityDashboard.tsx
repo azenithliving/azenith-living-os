@@ -28,7 +28,7 @@ export function QayyimObservabilityDashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/qayyim/observability?metric=dashboard');
+      const res = await fetch('/api/admin/ops/observability?metric=dashboard');
       const json = await res.json();
       if (json.success) setData(json.dashboard);
     } catch { /* silent */ }

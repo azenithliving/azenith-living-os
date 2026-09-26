@@ -115,7 +115,7 @@ function InlineDraftPreview({ previewUrl, onApprove, onReject, onBetter }: { pre
   useEffect(() => {
     if (!token) return;
     // Fetch draft JSON via list_drafts and find by token — 100% real DB
-    fetch('/api/admin/qayyim?action=list_drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+    fetch('/api/admin/ops?action=list_drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
       .then(r => r.json()).then(j => {
         const drafts = j.drafts || j.result?.drafts || [];
         const d = drafts.find((x: any) => x.preview_token === token || x.id === token);
@@ -256,7 +256,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
     setSelfLoading(true);
     setSelfError(null);
     try {
-      const res = await fetch('/api/admin/qayyim/self');
+      const res = await fetch('/api/admin/ops/self');
       const data = await res.json();
       if (!data?.success || !data.model) throw new Error(data?.error || 'رد غير مفهوم');
       selfLoadedRef.current = true;
@@ -896,7 +896,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             setIsTyping(true);
             try {
               // P5-M4: real vision — full image to Gemini, then the agent acts on the analysis
-              const res = await fetch('/api/admin/qayyim/vision', {
+              const res = await fetch('/api/admin/ops/vision', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: dataUrl }),
               });
@@ -1108,7 +1108,7 @@ function MessageBubble({
             {/* معاينة مسودة قبل/بعد داخل الشات */}
             {((message as any).previewUrl || (message as any).preview_token || (message.metadata as any)?.previewUrl || (message.metadata as any)?.preview_token || (message.metadata as any)?.draft?.previewToken || (message.metadata as any)?.toolData?.preview_url || (message.metadata as any)?.toolData?.preview_token || (message as any).draftId) ? (
               <InlineDraftPreview
-                previewUrl={(message as any).previewUrl || (message as any).preview_token || (message.metadata as any)?.previewUrl || (message.metadata as any)?.preview_token || (message.metadata as any)?.toolData?.preview_url || (message.metadata as any)?.toolData?.preview_token || `/api/admin/qayyim/preview/${(message.metadata as any)?.draft?.previewToken || (message.metadata as any)?.toolData?.draft_id || (message as any).draftId}`}
+                previewUrl={(message as any).previewUrl || (message as any).preview_token || (message.metadata as any)?.previewUrl || (message.metadata as any)?.preview_token || (message.metadata as any)?.toolData?.preview_url || (message.metadata as any)?.toolData?.preview_token || `/api/admin/ops/preview/${(message.metadata as any)?.draft?.previewToken || (message.metadata as any)?.toolData?.draft_id || (message as any).draftId}`}
                 onApprove={() => (window as any).__qayyimSend?.(`وافق على المسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''}`)}
                 onReject={() => (window as any).__qayyimSend?.(`ارفض المسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''}`)}
                 onBetter={() => (window as any).__qayyimSend?.(`عايز حاجة أحسن للمسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''} — اقترح بديلاً أفخم`)}

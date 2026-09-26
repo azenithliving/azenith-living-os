@@ -32,7 +32,7 @@ export function QayyimAuditReport() {
     setError(null);
     setResult(null);
     try {
-      const res = await fetch('/api/admin/qayyim/audit', {
+      const res = await fetch('/api/admin/ops/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ page_path: pagePath, scope }),

@@ -31,7 +31,7 @@ export function QayyimTelemetryPanel() {
     setError(null);
     setReport(null);
     try {
-      const res = await fetch('/api/admin/qayyim/telemetry', {
+      const res = await fetch('/api/admin/ops/telemetry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

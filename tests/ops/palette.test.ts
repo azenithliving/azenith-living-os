@@ -187,7 +187,7 @@ describe("the chat surface wires the palette in", () => {  const src = readFileS
   });
 
   it("reads its commands from the live self endpoint, not a typed list", () => {
-    expect(src).toContain("/api/admin/qayyim/self");
+    expect(src).toContain("/api/admin/ops/self");
   });
 
   /** A row that navigates somewhere is a promise. The chat page has to honour

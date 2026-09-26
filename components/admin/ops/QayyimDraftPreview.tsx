@@ -42,7 +42,7 @@ export function QayyimDraftPreview() {
   const fetchDrafts = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/qayyim?action=list_drafts', {
+      const res = await fetch('/api/admin/ops?action=list_drafts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
@@ -66,7 +66,7 @@ export function QayyimDraftPreview() {
     if (acting) return;
     setActing(draftId);
     try {
-      const endpoint = action === 'publish' ? '/api/admin/qayyim/publish' : '/api/admin/qayyim/rollback';
+      const endpoint = action === 'publish' ? '/api/admin/ops/publish' : '/api/admin/ops/rollback';
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -140,7 +140,7 @@ export function QayyimDraftPreview() {
                     <div className="flex items-center gap-2">
                       {draft.preview_token && (
                         <a
-                          href={`/api/admin/qayyim/preview/${draft.preview_token}`}
+                          href={`/api/admin/ops/preview/${draft.preview_token}`}
                           target="_blank"
                           rel="noreferrer"
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-300 text-xs font-medium hover:bg-sky-500/20 transition-colors"

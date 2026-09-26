@@ -34,7 +34,7 @@ export function QayyimProactiveSuggestions() {
 
   const fetchSuggestions = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/qayyim/suggestions?status=pending');
+      const res = await fetch('/api/admin/ops/suggestions?status=pending');
       const data = await res.json();
       if (data.success) setSuggestions(data.suggestions || []);
     } catch { /* silent */ }
@@ -51,7 +51,7 @@ export function QayyimProactiveSuggestions() {
     if (acting) return;
     setActing(id);
     try {
-      await fetch('/api/admin/qayyim/suggestions', {
+      await fetch('/api/admin/ops/suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ suggestion_id: id, action }),

@@ -1,5 +1,5 @@
 /**
- * The wire shape of the swarm's self-model — what `GET /api/admin/qayyim/self`
+ * The wire shape of the swarm's self-model — what `GET /api/admin/ops/self`
  * answers and what the chat screen renders.
  *
  * It lives in its own client-safe file on purpose: `self-model.ts` reads the

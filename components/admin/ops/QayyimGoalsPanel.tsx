@@ -35,7 +35,7 @@ export function QayyimGoalsPanel() {
 
   const fetchGoals = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/qayyim/goals');
+      const res = await fetch('/api/admin/ops/goals');
       const data = await res.json();
       if (data.success) setGoals(data.goals || []);
     } catch { /* silent */ }
@@ -48,7 +48,7 @@ export function QayyimGoalsPanel() {
     if (!form.name.trim()) return;
     setCreating(true);
     try {
-      const res = await fetch('/api/admin/qayyim/telemetry', {
+      const res = await fetch('/api/admin/ops/telemetry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

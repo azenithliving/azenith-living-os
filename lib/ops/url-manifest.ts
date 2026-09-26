@@ -29,7 +29,7 @@ const DYNAMIC_PREFIXES = [
   "/pages/", // CMS slug — validated async when DB is reachable
   "/seo/", // SEO landing pages linked from the home footer
   "/preview/section/",
-  "/api/admin/qayyim/preview/",
+  "/api/admin/ops/preview/",
   "/dashboard",
 ];
 

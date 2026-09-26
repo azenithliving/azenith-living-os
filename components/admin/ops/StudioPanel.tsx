@@ -76,10 +76,10 @@ export function StudioPanel() {
     setLoadingStats(true);
     try {
       const [draftsRes, expRes, sugRes, luxRes] = await Promise.allSettled([
-        fetch('/api/admin/qayyim?action=list_drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }).then(r => r.json()),
-        fetch('/api/admin/qayyim/ab-test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list' }) }).then(r => r.json()),
-        fetch('/api/admin/qayyim/suggestions').then(r => r.json()),
-        fetch('/api/admin/qayyim/perf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'luxury_score', luxury_scope: 'full_site' }) }).then(r => r.json()),
+        fetch('/api/admin/ops?action=list_drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }).then(r => r.json()),
+        fetch('/api/admin/ops/ab-test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list' }) }).then(r => r.json()),
+        fetch('/api/admin/ops/suggestions').then(r => r.json()),
+        fetch('/api/admin/ops/perf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'luxury_score', luxury_scope: 'full_site' }) }).then(r => r.json()),
       ]);
 
       const drafts = draftsRes.status === 'fulfilled' && draftsRes.value?.success ? (draftsRes.value.drafts || draftsRes.value.result?.drafts || []) : [];

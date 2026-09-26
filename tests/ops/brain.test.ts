@@ -96,8 +96,8 @@ describe('url-manifest — the site route truth', () => {
   });
 
   it('keepRealEvidenceUrls drops the old /products whitelist hole', () => {
-    const urls = ['/products/sofa-1', '/rooms', '/furniture', '/api/admin/qayyim/preview/abc', '/#section'];
-    expect(keepRealEvidenceUrls(urls)).toEqual(['/rooms', '/furniture', '/api/admin/qayyim/preview/abc', '/#section']);
+    const urls = ['/products/sofa-1', '/rooms', '/furniture', '/api/admin/ops/preview/abc', '/#section'];
+    expect(keepRealEvidenceUrls(urls)).toEqual(['/rooms', '/furniture', '/api/admin/ops/preview/abc', '/#section']);
   });
 });
 

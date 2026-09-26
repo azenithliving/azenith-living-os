@@ -32,7 +32,7 @@ export function QayyimBenchmarksPanel() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/qayyim/benchmarks');
+      const res = await fetch('/api/admin/ops/benchmarks');
       const data = await res.json();
       if (data.success) {
         setBenchmarks(data.benchmarks || []);
@@ -47,7 +47,7 @@ export function QayyimBenchmarksPanel() {
   async function runBenchmark(benchmarkKey: string, agentKey: string) {
     setRunning(`${benchmarkKey}:${agentKey}`);
     try {
-      await fetch('/api/admin/qayyim/benchmarks', {
+      await fetch('/api/admin/ops/benchmarks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ benchmark_key: benchmarkKey, agent_key: agentKey }),

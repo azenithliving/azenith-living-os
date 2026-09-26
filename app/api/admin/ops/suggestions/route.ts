@@ -1,0 +1,107 @@
+/**
+ * Qayyim Swarm - Proactive Suggestions API
+ * GET  /api/admin/ops/suggestions?status=pending
+ * POST /api/admin/ops/suggestions { suggestion_id, action: 'accept' | 'dismiss' }
+ */
+
+import { NextRequest, NextResponse } from "next/server";
+import { supabaseServer } from "@/lib/dal/unified-supabase";
+import { getCompanyId } from "@/lib/ops/api/utils";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    const companyId = await getCompanyId(searchParams.get('company_id') || undefined);
+
+    let query = supabaseServer
+      .from('qayyim_suggestions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (status) query = query.eq('status', status);
+    if (companyId) query = query.eq('company_id', companyId);
+
+    const { data, error } = await query;
+
+    if (error) {
+      // Table may not exist yet — degrade gracefully
+      return NextResponse.json({ success: true, suggestions: [], warning: error.message });
+    }
+
+    return NextResponse.json({ success: true, suggestions: data || [] });
+  } catch (error: any) {
+    console.error('[Qayyim Suggestions API] GET error:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { suggestion_id, action } = body;
+
+    if (!suggestion_id || !action) {
+      return NextResponse.json({ success: false, error: 'suggestion_id and action are required' }, { status: 400 });
+    }
+
+    if (action === 'accept') {
+      // Fetch the suggestion, mark accepted, and convert to a draft via the payload
+      const { data: suggestion, error: fetchErr } = await supabaseServer
+        .from('qayyim_suggestions')
+        .select('*')
+        .eq('id', suggestion_id)
+        .single();
+
+      if (fetchErr || !suggestion) {
+        return NextResponse.json({ success: false, error: 'Suggestion not found' }, { status: 404 });
+      }
+
+      await supabaseServer
+        .from('qayyim_suggestions')
+        .update({ status: 'converted_to_draft', resolved_at: new Date().toISOString() })
+        .eq('id', suggestion_id);
+
+      // If the payload describes a draftable change, route through the draft pipeline
+      const payload = suggestion.action_payload || {};
+      if (payload.target_table && payload.target_id && payload.proposed) {
+        try {
+          const { createQayyimDraft } = await import('@/lib/qayyim-ops');
+          await createQayyimDraft({
+            targetTable: payload.target_table,
+            targetId: payload.target_id,
+            targetPath: payload.target_path || '/',
+            proposed: payload.proposed,
+            previous: payload.previous || null,
+            draftType: payload.draft_type || suggestion.suggestion_type,
+            metadata: { source: 'proactive_suggestion', suggestion_id },
+            createdBy: suggestion.source_agent,
+            companyId: suggestion.company_id,
+          });
+        } catch (draftErr: any) {
+          console.error('[Qayyim Suggestions] draft conversion failed:', draftErr.message);
+        }
+      }
+
+      return NextResponse.json({ success: true, status: 'converted_to_draft' });
+    }
+
+    if (action === 'dismiss') {
+      const { error } = await supabaseServer
+        .from('qayyim_suggestions')
+        .update({ status: 'dismissed', resolved_at: new Date().toISOString() })
+        .eq('id', suggestion_id);
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, status: 'dismissed' });
+    }
+
+    return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 });
+  } catch (error: any) {
+    console.error('[Qayyim Suggestions API] POST error:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
