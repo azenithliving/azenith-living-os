@@ -8,34 +8,18 @@ type ProvidersProps = {
 };
 
 export function Providers({ children }: ProvidersProps) {
-  // KILL SWITCH: Force loading end after 3 seconds regardless of data status
-  const [isLoading, setIsLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
-  
-  useEffect(() => {
-    setMounted(true);
-    
-    // Kill switch - force end loading after 10 seconds
-    const killTimer = setTimeout(() => {
-      console.warn("[KILL SWITCH] Forcing loading end after 10s timeout");
-      setIsLoading(false);
-    }, 10000);
-    
-    return () => clearTimeout(killTimer);
-  }, []);
-  
-  // HYDRATION FIX: Don't render until mounted to prevent server-client mismatch
-  if (!mounted) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#050505]">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#C5A059]/30 border-t-[#C5A059]" />
-      </div>
-    );
-  }
-
   const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
-  if (!apiKey) {
+  // Analytics lives in browser storage, so its provider mounts with the client.
+  // It renders no DOM, so the page is server-rendered either way — the previous
+  // version withheld the entire site behind a spinner until mount, which handed
+  // every crawler (and every first paint) an empty page.
+  const [clientReady, setClientReady] = useState(false);
+  useEffect(() => {
+    setClientReady(true);
+  }, []);
+
+  if (!apiKey || !clientReady) {
     return <>{children}</>;
   }
 
