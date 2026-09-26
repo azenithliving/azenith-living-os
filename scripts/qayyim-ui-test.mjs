@@ -140,6 +140,17 @@ try {
   const dictBtn = await p.locator('[data-dictation]').count();
   check('continuous dictation control exists', dictBtn > 0, `buttons=${dictBtn}`);
 
+  // 10b) The palette's agent rows hand off to a real conversation, and an
+  // unknown key must not invent one.
+  await p.goto(`${BASE}/admin/v2/agents/qayyim?agent=qayyim-qa`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.waitForTimeout(3000);
+  const qaHeader = (await p.locator('span.font-bold.text-white').first().textContent().catch(() => '')) || '';
+  check('?agent= opens that agent’s own chat', qaHeader.includes('الجودة'), qaHeader.trim());
+  await p.goto(`${BASE}/admin/v2/agents/qayyim?agent=qayyim-hacker`, { waitUntil: 'domcontentloaded', timeout: 40000 });
+  await p.waitForTimeout(3000);
+  const fallbackHeader = (await p.locator('span.font-bold.text-white').first().textContent().catch(() => '')) || '';
+  check('an unknown agent key falls back to the leader', fallbackHeader.includes('مدير تشغيل المحتوى'), fallbackHeader.trim());
+
   // 11) The Telegram decision link: junk is refused, a real row opens a card.
   await p.goto(`${BASE}/admin/v2/agents/qayyim?proposal=%3Cscript%3Ealert(1)%3C/script%3E`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3000);

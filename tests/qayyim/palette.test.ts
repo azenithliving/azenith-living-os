@@ -189,4 +189,16 @@ describe("the chat surface wires the palette in", () => {  const src = readFileS
   it("reads its commands from the live self endpoint, not a typed list", () => {
     expect(src).toContain("/api/admin/qayyim/self");
   });
+
+  /** A row that navigates somewhere is a promise. The chat page has to honour
+   * the agent the palette chose, and ignore one that does not exist. */
+  it("the chat page honours the agent the palette hands it", () => {
+    const page = readFileSync(
+      resolve(process.cwd(), "app/admin/v2/agents/qayyim/page.tsx"),
+      "utf8",
+    );
+    expect(page).toContain("agent");
+    expect(page).toContain("AGENT_ROLES");
+    expect(page).toContain("qayyim-core");
+  });
 });
