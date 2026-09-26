@@ -39,7 +39,10 @@ interface ServiceAccount {
 }
 
 const SCOPE = "https://www.googleapis.com/auth/webmasters.readonly";
-const QUERY_ENDPOINT = "https://searchconsole.googleapis.com/webmasters/v1/query";
+// Google's discovery document puts the analytics query under webmasters/v3 with
+// the site as a path segment — not v1 with the site as a query parameter.
+const queryEndpoint = (siteUrl: string) =>
+  `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`;
 
 export function gscConfig(env: NodeJS.ProcessEnv = process.env): {
   ready: boolean;
@@ -158,7 +161,7 @@ export async function fetchSearchQueries(opts: {
   }
 
   try {
-    const res = await doFetch(`${QUERY_ENDPOINT}?siteUrl=${encodeURIComponent(cfg.siteUrl)}`, {
+    const res = await doFetch(queryEndpoint(cfg.siteUrl), {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -193,10 +196,10 @@ export async function fetchSearchQueries(opts: {
  * line on screen, so they are not used here.
  */
 const SETUP_STEPS = [
-  "الخطوة 1: افتح منصة جوجل للمطورين، اعمل مشروع جديد، وفعّل واجهة بحث جوجل. مجانية.",
-  "الخطوة 2: اعمل حساب خدمة جديد، ونزّل منه مفتاح على شكل ملف بيانات.",
-  "الخطوة 3: في خدمة بحث جوجل، ضيف البريد بتاع حساب الخدمة ده كمالك لعقار الدار.",
-  "الخطوة 4: في منصة الاستضافة، ضيف المتغيرين دول ثم أعد النشر:",
+  "الخطوة 1: من منصة جوجل للمطورين فعّل واجهة بحث جوجل على مشروع موجود عندك، ومش محتاج تعمل مشروع جديد.",
+  "الخطوة 2: في نفس المشروع اعمل حساب خدمة، ومن صفحة المفاتيح نزّل مفتاح كملف.",
+  "الخطوة 3: في خدمة بحث جوجل، افتح إعدادات عقار الدار ثم المستخدمون والأذونات، وضيف البريد بتاع حساب الخدمة ده كمالك.",
+  "الخطوة 4: ضيف المتغيرين دول في إعدادات الاستضافة ثم أعد النشر:",
   "GOOGLE_APPLICATION_CREDENTIALS_JSON",
   "GSC_SITE_URL",
 ];

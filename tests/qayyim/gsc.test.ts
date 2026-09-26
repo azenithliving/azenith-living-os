@@ -78,7 +78,11 @@ describe('fetchSearchQueries', () => {
     expect(r.rows?.[0]).toMatchObject({ query: 'سرير ملكي', clicks: 5 });
     expect(calls[0].url).toContain('oauth2.googleapis.com/token');
     expect(calls[0].body).toContain('jwt-bearer');
-    expect(calls[1].url).toContain('searchconsole.googleapis.com/webmasters/v1/query');
+    // The path Google's own discovery document publishes: version 3, and the
+    // site is a PATH segment, not a query parameter.
+    expect(calls[1].url).toBe(
+      "https://searchconsole.googleapis.com/webmasters/v3/sites/sc-domain%3Aazenith.example/searchAnalytics/query"
+    );
     expect(calls[1].body).toContain('"dimensions":["query"]');
   });
 
