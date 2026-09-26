@@ -12,9 +12,9 @@ import { resolveAdminCompanyId } from "@/lib/admin-company";
 export type QayyimScope = "enterprise" | "swarm";
 
 export interface EnterpriseAgentMeta {
-  key: "qayyim";
+  key: "swarm";
   name: "سرب أزينث";
-  nameEn: "Qayyim";
+  nameEn: "Azenith Swarm";
   icon: "👑";
   color: "amber";
   subAgents: string[]; // 7 internal keys
@@ -22,9 +22,9 @@ export interface EnterpriseAgentMeta {
 }
 
 export const QAYYIM_ENTERPRISE_META: EnterpriseAgentMeta = {
-  key: "qayyim",
+  key: "swarm",
   name: "سرب أزينث",
-  nameEn: "Qayyim",
+  nameEn: "Azenith Swarm",
   icon: "👑",
   color: "amber",
   subAgents: ["ops-content", "ops-visual", "ops-seo", "ops-ux", "ops-analytics", "ops-dev", "ops-qa"],
@@ -46,16 +46,13 @@ export class QayyimFacade {
   }> {
     const companyId = await resolveAdminCompanyId(context?.company_id);
 
-    // Prime alias → qayyim (soft redirect)
-    // inferUltimateTool inside AgentOrchestrator already handles, but we normalize here too
-
     // استخدم MasterOrchestrator (LangGraph) — هو يفكك ويوزع على 7 خفياً
     try {
       const result = await masterOrchestrator.execute(message, {
         ...context,
         company_id: companyId,
         source: context?.source ?? "facade",
-        facade: "qayyim",
+        facade: "swarm",
       });
 
       return {
@@ -136,18 +133,6 @@ export class QayyimFacade {
       },
       subs,
     };
-  }
-
-  /**
-   * تحويل legacy prime → qayyim في أي payload يصل من UI قديم
-   */
-  normalizeAgentKey(key: string): string {
-    if (!key) return "qayyim";
-    const k = key.toLowerCase().trim();
-    if (k === "prime") return "qayyim";
-    if (k === "ops-lead") return "qayyim";
-    if (k.startsWith("qayyim-")) return k; // sub-agent inside studio only
-    return k;
   }
 }
 

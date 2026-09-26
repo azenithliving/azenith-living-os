@@ -4,7 +4,7 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
-import { agentLabel } from "./identity";
+import { agentLabel, legacyToOps } from "./identity";
 import { auditVisitorExperience, publishQayyimDraft, rollbackQayyimDraft } from "@/lib/qayyim-ops";
 import { constitutionEngine } from "./governance/ConstitutionEngine";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
@@ -292,18 +292,21 @@ ${report.summary}`,
 
   private extractDelegations(text: string): Array<{ agent: string; task: string; reason: string }> {
     const delegations: Array<{ agent: string; task: string; reason: string }> = [];
-    // Pattern: "أوجه لـ ops-seo: افحص السيو" or "delegate to ops-content: اكتب الهيرو"
+    // Pattern: "أوجه لـ ops-seo: افحص السيو" or "delegate to ops-content: اكتب الهيرو".
+    // The retired prefix stays in the alternation on purpose: a model that was
+    // fine-tuned or prompted with the old spelling still emits it, and a
+    // delegation that silently fails to parse is a sub-agent that never ran.
     const patterns = [
-      /أوجه\s+لـ\s+(qayyim-\w+)\s*[:：]\s*([^\n]+)/gi,
-      /delegate\s+to\s+(qayyim-\w+)\s*[:：]\s*([^\n]+)/gi,
-      /(qayyim-\w+)\s*[:：]\s*(افحص|اكتب|حلل|اختر|راجع|أصلح)\s*([^\n]+)/gi,
+      /أوجه\s+لـ\s+((?:ops|qayyim)-\w+)\s*[:：]\s*([^\n]+)/gi,
+      /delegate\s+to\s+((?:ops|qayyim)-\w+)\s*[:：]\s*([^\n]+)/gi,
+      /((?:ops|qayyim)-\w+)\s*[:：]\s*(افحص|اكتب|حلل|اختر|راجع|أصلح)\s*([^\n]+)/gi,
     ];
     
     for (const pattern of patterns) {
       let match;
       while ((match = pattern.exec(text)) !== null) {
         delegations.push({
-          agent: match[1],
+          agent: legacyToOps(match[1]),
           task: (match[2] || match[3] || '').trim(),
           reason: 'من تنسيق مدير تشغيل المحتوى'
         });

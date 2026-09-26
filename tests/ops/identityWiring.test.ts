@@ -38,6 +38,19 @@ describe("the whole codebase speaks one key set", () => {
   });
 
   /**
+   * The leader hands work to the seven by writing their key in prose. When the
+   * keys moved, the parser kept looking for the retired prefix and every
+   * delegation became a silent no-op — so the pattern accepts either spelling
+   * and the result goes through the same map the HTTP doors use.
+   */
+  it("parses a delegation written with either key spelling", () => {
+    const core = readFileSync("lib/ops/QayyimCoreAgent.ts", "utf8");
+    expect(core).toContain("(?:ops|qayyim)-\\w+");
+    expect(core).toContain("legacyToOps(match[1])");
+    expect(core).not.toMatch(/\(qayyim-\\w\+\)/);
+  });
+
+  /**
    * A browser tab opened before the rename keeps posting the key it was built
    * with until the owner reloads, and a Telegram deep link never expires. Each
    * door maps that key instead of rejecting it or storing a second identity.
