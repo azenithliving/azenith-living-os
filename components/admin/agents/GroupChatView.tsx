@@ -21,7 +21,7 @@ interface GroupChatViewProps {
 }
 
 const AGENT_PERSONAS: Record<string, { name: string; role: string; color: string }> = {
-  'OPS-LEAD': { name: 'قيّم الدار', role: 'قائد سرب القيّم — إطلالة الموقع', color: 'amber' },
+  'OPS-LEAD': { name: 'مدير تشغيل المحتوى', role: 'قائد سرب أزينث — إطلالة الموقع', color: 'amber' },
   Vanguard:      { name: 'Vanguard',   role: 'مدير العمليات والمبيعات',          color: 'emerald' },
   Analyst:       { name: 'Analyst',    role: 'محلل البيانات والتقارير',           color: 'blue' },
   Coder:         { name: 'Coder',      role: 'مطور الكود والتقنية',              color: 'cyan' },
@@ -261,7 +261,7 @@ export function GroupChatView({
                 handleSendMessage();
               }
             }}
-            placeholder="اكتب رسالتك للوكلاء... (مثال: @قيّم افحص الموقع)"
+            placeholder="اكتب رسالتك للوكلاء... (مثال: @OPS-LEAD افحص الموقع)"
             disabled={isLoading}
             className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#C5A059]/50"
           />

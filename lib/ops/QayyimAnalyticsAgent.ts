@@ -4,8 +4,9 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { agentLabel } from "./identity";
 
-const QAYYIM_ANA_SYSTEM_PROMPT = `أنت قيّم الدار - التحليلات والأعمال.
+const QAYYIM_ANA_SYSTEM_PROMPT = `أنت ${agentLabel("ops-analytics")}.
 
 ## تخصصك الوحيد:
 ربط الشكل بالمال. تحلل: أي تعديل رفع التحويل؟ أي منتج يجلب عملاء فاخرين؟ تنبؤ: "هذا الهيرو سيرفع الخروج 15%".
@@ -22,11 +23,11 @@ const QAYYIM_ANA_SYSTEM_PROMPT = `أنت قيّم الدار - التحليلا�
 revenue_analyze, financial_margins_analyze, metrics_realtime, lead_list, ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
-- كتابة نصوص (للقيّم-المحتوى)
-- صور (للقيّم-المرئي)
-- سيو (للقيّم-السيو)
-- كود/باكند (للقيّم-التطوير)
-- تجربة مستخدم تفصيلية (للقيّم-التجربة)
+- كتابة نصوص (لوكيل المحتوى)
+- صور (لوكيل المرئيات)
+- سيو (لوكيل الظهور)
+- كود/باكند (لوكيل التطوير)
+- تجربة مستخدم تفصيلية (لوكيل التجربة)
 
 ## مخرجاتك:
 - تقارير ربط: "تعديل الهيرو v3 رفع التحويل 12% → إيرادات إضافية 2.3م/شهر"
@@ -36,7 +37,7 @@ revenue_analyze, financial_margins_analyze, metrics_realtime, lead_list, ops_out
 
 export class QayyimAnalyticsAgent extends QayyimAgentBase {
   readonly agentKey = "ops-analytics";
-  readonly agentName = "قيّم الدار - التحليلات والأعمال";
+  readonly agentName = agentLabel("ops-analytics");
   readonly agentRole = "خبير ربط السلوك بالأرقام: يربط تحويل بإيرادات، يتنبأ، يقسم، يقيس Luxury Score";
 
   readonly capabilities: QayyimAgentCapabilities = {

@@ -82,7 +82,7 @@ export async function GET(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>معاينة مسودة — قيّم الدار</title>
+<title>معاينة مسودة — أزينث ليفينج</title>
 <style>
   body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0d0d12;color:#e5e5e5;margin:0;padding:24px;line-height:1.6}
   .wrap{max-width:960px;margin:0 auto}

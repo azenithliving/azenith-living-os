@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
         record: { table: "sales_orders", id: orderData?.id, details: orderPayload },
       });
 
-      // ── Step 3: قيّم الدار يحسب كشف الـ BOM ويفحص المخزون ──────────────────
+      // ── Step 3: مدير تشغيل المحتوى يحسب كشف الـ BOM ويفحص المخزون ──────────────────
       // التأكد من وجود خامة خشب الزان في المخزون
       const { data: woodItem } = await supabaseServer
         .from("inventory_items")
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
         estimated_labor_cost: 48000,
       };
 
-      // ── Step 4: قيّم الدار ينشئ أمر تشغيل صناعي في production_jobs ─────────
+      // ── Step 4: مدير تشغيل المحتوى ينشئ أمر تشغيل صناعي في production_jobs ─────────
       const jobPayload: Record<string, any> = {
         order_id: orderData?.id || null,
         status: "in_progress",
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
 
       steps.push({
         agentKey: "ops-lead",
-        agentName: "مدير تشغيل المحتوى — قيّم الدار",
+        agentName: "مدير تشغيل المحتوى",
         role: "كبير مهندسي التصميم والتصنيع",
         icon: "👑",
         color: "amber",
@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
 
       steps.push({
         agentKey: "ops-lead",
-        agentName: "مدير تشغيل المحتوى — قيّم الدار",
+        agentName: "مدير تشغيل المحتوى",
         role: "كبير المهندسين",
         icon: "👑",
         color: "amber",

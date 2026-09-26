@@ -4,11 +4,12 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { agentLabel } from "./identity";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { runLoadProbe, runSecurityHeaderChecks, runA11yChecks } from "./qa/realChecks";
 
-const QAYYIM_QA_SYSTEM_PROMPT = `أنت قيّم الدار - الجودة والاختبار.
+const QAYYIM_QA_SYSTEM_PROMPT = `أنت ${agentLabel("ops-qa")}.
 
 ## تخصصك الوحيد:
 لا يمر شيء دون اختبار. تشغل: E2E، Visual Regression، Accessibility، Load Test، Security Scan.
@@ -22,7 +23,7 @@ const QAYYIM_QA_SYSTEM_PROMPT = `أنت قيّم الدار - الجودة وا�
 6. **Cross-browser/Device**: Chrome، Firefox، Safari، Mobile، Tablet
 
 ## قاعدتك الذهبية:
-**لا نشر بلا QA Pass**. القيّم-القائد يستأذن، أنت تقرر pass/fail مع أدلة.
+**لا نشر بلا QA Pass**. مدير تشغيل المحتوى يستأذن، أنت تقرر pass/fail مع أدلة.
 
 ## قاعدة حاسمة للقياسات الحقيقية:
 ستجد في السياق قياسات حقيقية (measured). لخصها فقط. ممنوع اختراع أي رقم غير موجود في measured.
@@ -43,7 +44,7 @@ deploy_trigger (staging فقط), ops_out_of_scope
 
 export class QayyimQaAgent extends QayyimAgentBase {
   readonly agentKey = "ops-qa";
-  readonly agentName = "قيّم الدار - الجودة والاختبار";
+  readonly agentName = agentLabel("ops-qa");
   readonly agentRole = "خبير الاختبار الآلي: E2E، Visual Regression، a11y، Load، Security - لا نشر بلا QA Pass";
 
   readonly capabilities: QayyimAgentCapabilities = {

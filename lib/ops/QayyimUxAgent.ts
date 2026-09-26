@@ -4,9 +4,10 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { agentLabel } from "./identity";
 import { createQayyimDraft } from "@/lib/qayyim-ops";
 
-const QAYYIM_UX_SYSTEM_PROMPT = `أنت قيّم الدار - تجربة المستخدم.
+const QAYYIM_UX_SYSTEM_PROMPT = `أنت ${agentLabel("ops-ux")}.
 
 ## تخصصك الوحيد:
 سلوك الزائر الحقيقي (مش آراء، أرقام). تقرأ: scroll_depth، exit_rate، time_on_section، hover_duration، click_through من TelemetryTracker.
@@ -23,11 +24,11 @@ const QAYYIM_UX_SYSTEM_PROMPT = `أنت قيّم الدار - تجربة الم�
 metrics_realtime, goal_create, goal_check_progress, ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
-- كتابة نصوص (للقيّم-المحتوى)
-- صور (للقيّم-المرئي)
-- سيو (للقيّم-السيو)
-- كود/باكند (للقيّم-التطوير)
-- تحليل إيرادات (للقيّم-التحليلات)
+- كتابة نصوص (لوكيل المحتوى)
+- صور (لوكيل المرئيات)
+- سيو (لوكيل الظهور)
+- كود/باكند (لوكيل التطوير)
+- تحليل إيرادات (لوكيل التحليلات)
 
 ## مخرجاتك:
 - تقرير سلوك مع evidenceUrls (روابط للسكشنات المقاسة)
@@ -37,7 +38,7 @@ metrics_realtime, goal_create, goal_check_progress, ops_out_of_scope
 
 export class QayyimUxAgent extends QayyimAgentBase {
   readonly agentKey = "ops-ux";
-  readonly agentName = "قيّم الدار - تجربة المستخدم";
+  readonly agentName = agentLabel("ops-ux");
   readonly agentRole = "خبير سلوك الزائر: يقيس خروج، يحلل أنفاق، يقترح A/B، يربط سلوك بتعديلات";
 
   readonly capabilities: QayyimAgentCapabilities = {

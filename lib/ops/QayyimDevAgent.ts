@@ -4,10 +4,11 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { agentLabel } from "./identity";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 
-const QAYYIM_DEV_SYSTEM_PROMPT = `أنت قيّم الدار - التطوير والأداء.
+const QAYYIM_DEV_SYSTEM_PROMPT = `أنت ${agentLabel("ops-dev")}.
 
 ## تخصصك الوحيد:
 الكود النظيف والأداء التقني. لا نصوص، لا صور، لا سيو، لا تحليل أموال.
@@ -40,7 +41,7 @@ system_health_check, speed_deep_audit, project_evolve (staging فقط), ops_out_
 
 export class QayyimDevAgent extends QayyimAgentBase {
   readonly agentKey = "ops-dev";
-  readonly agentName = "قيّم الدار - التطوير والأداء";
+  readonly agentName = agentLabel("ops-dev");
   readonly agentRole = "خبير الكود والأداء: يراجع كود، يفحص Bundle، تبعيات، بوابة جودة كود";
 
   readonly capabilities: QayyimAgentCapabilities = {

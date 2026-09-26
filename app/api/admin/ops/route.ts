@@ -658,14 +658,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         agents: [
-          { key: 'ops-lead', name: 'قيّم الدار - القائد', role: 'تنسيق السرب، تدقيق شامل، إدارة نشر/تراجع، بوابة جودة' },
-          { key: 'ops-content', name: 'قيّم الدار - المحتوى والعربية', role: 'كتابة فاخرة، توحيد نبرة، قانون هوية، صقل نصوص' },
-          { key: 'ops-visual', name: 'قيّم الدار - المرئي والصور', role: 'انتقاء صور، اختيار هيرو، alt text، علامة تجارية' },
-          { key: 'ops-seo', name: 'قيّم الدار - الظهور والبحث', role: 'تدقيق SEO، إصلاح Schema، فجوات محتوى، منافسين' },
-          { key: 'ops-ux', name: 'قيّم الدار - تجربة المستخدم', role: 'سلوك زائر، A/B testing، تقارير خروج، أهداف' },
-          { key: 'ops-analytics', name: 'قيّم الدار - التحليلات والأعمال', role: 'ربط تحويل بإيرادات، تنبؤ، Luxury Score، تقسيم' },
-          { key: 'ops-dev', name: 'قيّم الدار - التطوير والأداء', role: 'مراجعة كود، Bundle، تبعيات، أداء، أمان كود' },
-          { key: 'ops-qa', name: 'قيّم الدار - الجودة والاختبار', role: 'E2E، Visual Regression، a11y، Load Test، Security' },
+          { key: 'ops-lead', name: 'مدير تشغيل المحتوى', role: 'تنسيق السرب، تدقيق شامل، إدارة نشر/تراجع، بوابة جودة' },
+          { key: 'ops-content', name: 'وكيل المحتوى', role: 'كتابة فاخرة، توحيد نبرة، قانون هوية، صقل نصوص' },
+          { key: 'ops-visual', name: 'وكيل المرئيات', role: 'انتقاء صور، اختيار هيرو، alt text، علامة تجارية' },
+          { key: 'ops-seo', name: 'وكيل الظهور', role: 'تدقيق SEO، إصلاح Schema، فجوات محتوى، منافسين' },
+          { key: 'ops-ux', name: 'وكيل التجربة', role: 'سلوك زائر، A/B testing، تقارير خروج، أهداف' },
+          { key: 'ops-analytics', name: 'وكيل التحليلات', role: 'ربط تحويل بإيرادات، تنبؤ، Luxury Score، تقسيم' },
+          { key: 'ops-dev', name: 'وكيل التطوير', role: 'مراجعة كود، Bundle، تبعيات، أداء، أمان كود' },
+          { key: 'ops-qa', name: 'وكيل الجودة', role: 'E2E، Visual Regression، a11y، Load Test، Security' },
         ],
       });
     }

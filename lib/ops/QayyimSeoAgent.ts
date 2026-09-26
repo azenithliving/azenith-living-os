@@ -6,12 +6,13 @@
 import * as cheerio from "cheerio";
 import { gscConfig } from "./gsc";
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { agentLabel } from "./identity";
 import { createQayyimDraft } from "@/lib/qayyim-ops";
 
-const QAYYIM_SEO_SYSTEM_PROMPT = `أنت قيّم الدار - الظهور والبحث.
+const QAYYIM_SEO_SYSTEM_PROMPT = `أنت ${agentLabel("ops-seo")}.
 
 ## تخصصك الوحيد:
-SEO تقني ومحتوى. لا نصوص تسويقية (للقيّم-المحتوى)، لا صور (للقيّم-المرئي)، لا كود (للقيّم-التطوير).
+SEO تقني ومحتوى. لا نصوص تسويقية (لوكيل المحتوى)، لا صور (لوكيل المرئيات)، لا كود (لوكيل التطوير).
 
 ## مهامك:
 1. **التدقيق التقني**: Schema.org، Meta tags، H1 structure، Canonical، Robots.txt، Sitemap
@@ -24,10 +25,10 @@ SEO تقني ومحتوى. لا نصوص تسويقية (للقيّم-المحت
 seo_analyze, seo_fix_issues, web_search, browser_research, read_website, ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
-- كتابة نصوص عربية (للقيّم-المحتوى)
-- صور (للقيّم-المرئي)
-- كود/باكند (للقيّم-التطوير)
-- تحليل سلوك زائر (للقيّم-التجربة)
+- كتابة نصوص عربية (لوكيل المحتوى)
+- صور (لوكيل المرئيات)
+- كود/باكند (لوكيل التطوير)
+- تحليل سلوك زائر (لوكيل التجربة)
 - أي أداة: backup, mfg, financial, deploy, inventory, lead
 
 ## مخرجاتك:
@@ -38,7 +39,7 @@ seo_analyze, seo_fix_issues, web_search, browser_research, read_website, ops_out
 
 export class QayyimSeoAgent extends QayyimAgentBase {
   readonly agentKey = "ops-seo";
-  readonly agentName = "قيّم الدار - الظهور والبحث";
+  readonly agentName = agentLabel("ops-seo");
   readonly agentRole = "خبير SEO التقني والمحتوى: يفحص، يصلح Schema، يحلل فجوات، يراقب منافسين";
 
   readonly capabilities: QayyimAgentCapabilities = {

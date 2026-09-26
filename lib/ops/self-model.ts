@@ -8,6 +8,7 @@
 import "server-only";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 import { AGENT_ROLES } from "./agent-roles";
+import { SWARM_NAME } from "./identity";
 import { TOOL_CATALOG } from "@/lib/agents/intent-router";
 import type { SelfModelView } from "./self-view";
 
@@ -82,7 +83,7 @@ export async function buildSelfModel(companyId: string | null): Promise<SelfMode
   const model: SelfModel = {
     generatedAt: new Date().toISOString(),
     title: "مدير تشغيل المحتوى",
-    brand: "قيّم الدار",
+    brand: SWARM_NAME,
     agents: Object.keys(AGENT_ROLES).map((key) => ({
       key,
       name: AGENT_NAMES[key] ?? key,

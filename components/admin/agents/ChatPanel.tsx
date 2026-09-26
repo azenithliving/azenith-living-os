@@ -50,17 +50,17 @@ interface ChatPanelProps {
 }
 
 const AGENT_METADATA: Record<string, { name: string; role: string; icon: string; color: string }> = {
-  // ── سرب قيّم الدار (8 وكلاء) ───────────────────────────────────
-  'ops-lead': { name: 'مدير تشغيل المحتوى — قيّم الدار',     role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع',   icon: '👑', color: 'amber' },
-  'ops-content': { name: 'قيّم الدار — المحتوى',    role: 'كتابة فاخرة، توحيد نبرة، قانون هوية',  icon: '✍️', color: 'rose' },
-  'ops-visual':  { name: 'قيّم الدار — المرئيات',   role: 'انتقاء صور، صورة علوية، أوصاف الصور، علامة',    icon: '🖼️', color: 'violet' },
-  'ops-seo':  { name: 'قيّم الدار — الظهور',     role: 'تدقيق الظهور، بيانات منظمة، فجوات، منافسين',   icon: '🔍', color: 'sky' },
-  'ops-ux':   { name: 'قيّم الدار — التجربة',    role: 'سلوك زائر، تحويل، تجارب مقارنة',       icon: '🎯', color: 'emerald' },
-  'ops-analytics':  { name: 'قيّم الدار — التحليلات',  role: 'إيرادات، تنبؤ تحويل، مؤشر الفخامة',   icon: '📈', color: 'cyan' },
-  'ops-dev':  { name: 'قيّم الدار — التطوير',    role: 'أداء، حجم الحزمة، بوابة جودة الكود',      icon: '⚡', color: 'orange' },
-  'ops-qa':   { name: 'قيّم الدار — الجودة',     role: 'اختبارات شاملة، مقارنة بصرية، وصول',        icon: '🧪', color: 'lime' },
+  // ── سرب أزينث (8 وكلاء) ───────────────────────────────────
+  'ops-lead': { name: 'مدير تشغيل المحتوى',     role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع',   icon: '👑', color: 'amber' },
+  'ops-content': { name: 'وكيل المحتوى',    role: 'كتابة فاخرة، توحيد نبرة، قانون هوية',  icon: '✍️', color: 'rose' },
+  'ops-visual':  { name: 'وكيل المرئيات',   role: 'انتقاء صور، صورة علوية، أوصاف الصور، علامة',    icon: '🖼️', color: 'violet' },
+  'ops-seo':  { name: 'وكيل الظهور',     role: 'تدقيق الظهور، بيانات منظمة، فجوات، منافسين',   icon: '🔍', color: 'sky' },
+  'ops-ux':   { name: 'وكيل التجربة',    role: 'سلوك زائر، تحويل، تجارب مقارنة',       icon: '🎯', color: 'emerald' },
+  'ops-analytics':  { name: 'وكيل التحليلات',  role: 'إيرادات، تنبؤ تحويل، مؤشر الفخامة',   icon: '📈', color: 'cyan' },
+  'ops-dev':  { name: 'وكيل التطوير',    role: 'أداء، حجم الحزمة، بوابة جودة الكود',      icon: '⚡', color: 'orange' },
+  'ops-qa':   { name: 'وكيل الجودة',     role: 'اختبارات شاملة، مقارنة بصرية، وصول',        icon: '🧪', color: 'lime' },
   // ── alias للتوافق مع القديم ─────────────────────────────────────
-  prime:    { name: 'قيّم الدار', role: 'قيّم إطلالة أزينث على الموقع', icon: '🧠', color: 'purple' },
+  prime:    { name: 'مدير تشغيل المحتوى', role: 'مسؤول إطلالة أزينث على الموقع', icon: '🧠', color: 'purple' },
   // ── وكلاء العمليات ──────────────────────────────────────────────
   vanguard: { name: 'Vanguard', role: 'مدير العمليات والمبيعات', icon: '💼', color: 'emerald' },
   analyst:  { name: 'Analyst',  role: 'محلل البيانات والتقارير', icon: '📊', color: 'blue' },
@@ -761,7 +761,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           {(agentKey.toLowerCase() === 'prime' || agentKey.toLowerCase().startsWith('qayyim-')) && (
             <a
               href="/admin/v2/ops"
-              title="فتح استوديو سرب قيّم الدار"
+              title="فتح استوديو سرب أزينث"
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-semibold hover:bg-amber-500/25 transition-colors"
             >
               <Layers className="w-3.5 h-3.5" />
@@ -905,7 +905,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               if (j.success && j.analysis) {
                 setMessages(prev => [...prev, {
                   id: `vision-${Date.now()}`, sender_type: 'agent',
-                  sender_name: agentName || 'القيّم',
+                  sender_name: agentName || 'مدير تشغيل المحتوى',
                   content: `🔎 تحليل الصورة:\n${j.analysis}`,
                   created_at: new Date().toISOString(),
                 }]);

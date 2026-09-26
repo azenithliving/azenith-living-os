@@ -234,7 +234,7 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
     try {
       const atRisk = results.atRiskGoals as Array<{ name: string; progressPct: number | null; reasons: string[] }>;
       const description =
-        `نظام قيّم الدار يحتاج مراجعتك:\n\n` +
+        `سرب أزينث يحتاج مراجعتك:\n\n` +
         `• مستوى الفخامة (مقيس): ${results.luxuryScore ?? results.luxuryNote ?? "غير متاح"}\n` +
         `• عدد الأهداف المهددة: ${atRisk.length}\n\n` +
         (atRisk.length
@@ -244,7 +244,7 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
               .join("\n")}\n\n`
           : "") +
         (anomalyHits.length ? `حركة الزوار فيها يوم مش طبيعي:\n${results.anomalyDigest}\n\n` : "") +
-        `الرجاء مراجعة لوحة قيّم الدار واتخاذ الإجراء المناسب.`;
+        `الرجاء مراجعة لوحة سرب أزينث واتخاذ الإجراء المناسب.`;
 
       const proposal = await createAdminProposal({
         title: "تقرير مدير تشغيل المحتوى اليومي — يتطلب تدخل",

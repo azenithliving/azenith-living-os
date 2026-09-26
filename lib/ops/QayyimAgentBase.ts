@@ -102,7 +102,7 @@ export abstract class QayyimAgentBase {
       return {
         success: false,
         taskId: `pub_err_${Date.now()}`,
-        output: `⛔ غير مصرح للوكيل ${this.agentName} بتنفيذ النشر المباشر. النشر محصور بـ قيّم الدار - القائد بعد الموافقة البشرية.`,
+        output: `⛔ غير مصرح للوكيل ${this.agentName} بتنفيذ النشر المباشر. النشر محصور بـ مدير تشغيل المحتوى بعد الموافقة البشرية.`,
       };
     }
     const taskId = `pub_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -124,7 +124,7 @@ export abstract class QayyimAgentBase {
       return {
         success: false,
         taskId: `rb_err_${Date.now()}`,
-        output: `⛔ غير مصرح للوكيل ${this.agentName} بتنفيذ التراجع. التراجع محصور بـ قيّم الدار - القائد.`,
+        output: `⛔ غير مصرح للوكيل ${this.agentName} بتنفيذ التراجع. التراجع محصور بـ مدير تشغيل المحتوى.`,
       };
     }
     const taskId = `rb_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;

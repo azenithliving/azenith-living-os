@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       else {
         const { data: newConv } = await supabase.from("agent_conversations").insert({
           company_id: companyId,
-          title: "قيّم الدار — تنبيهات استباقية",
+          title: "تنبيهات استباقية",
           conversation_type: "direct",
           participants: ["ops-lead"],
           is_active: true,
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         await supabase.from("agent_messages").insert({
           conversation_id: convId,
           sender_type: "agent",
-          sender_name: "مدير تشغيل المحتوى — قيّم الدار",
+          sender_name: "مدير تشغيل المحتوى",
           content: `لاحظت: ${issue.detail} في **${issue.target}** (${issue.path})\nجهزت لك مسودة مقترحة — تريد أن أعرضها؟ [معاينة] [وافق]`,
           is_read: false,
           created_at: new Date().toISOString(),

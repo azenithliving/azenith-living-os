@@ -1,5 +1,5 @@
 /**
- * قيّم الدار — visitor-facing website operations (v2)
+ * سرب أزينث — visitor-facing website operations (v2)
  * Reads and writes public presentation records only: room_sections, products, site_sections, site_settings.
  * Full versioning, preview tokens, and instant rollback.
  * Never touches inventory, production jobs, or factory BOM.
@@ -135,7 +135,7 @@ export async function auditVisitorExperience(companyHint?: string | null): Promi
   if (rooms.length === 0 && products.length === 0) {
     return {
       success: false,
-      message: "لا توجد غرف في room_sections ولا منتجات في products. قيّم الدار لا يملك ما يفحصه على الواجهة بعد.",
+      message: "لا توجد غرف في room_sections ولا منتجات في products. السرب لا يملك ما يفحصه على الواجهة بعد.",
       data: { rooms: 0, products: 0, issues: [] },
     };
   }
@@ -264,7 +264,7 @@ export async function listStorefrontProducts(): Promise<ToolExecutionResult> {
   }));
   return {
     success: true,
-    message: `بطاقات المنتجات من جدول products: ${items.length} منتج، الظاهر منها ${items.filter((item) => item.visible).length}. الكميات والمخزن خارج اختصاص قيّم الدار.`,
+    message: `بطاقات المنتجات من جدول products: ${items.length} منتج، الظاهر منها ${items.filter((item) => item.visible).length}. الكميات والمخزن خارج اختصاص سرب أزينث.`,
     data: { items, source_table: "products" },
   };
 }
@@ -667,7 +667,7 @@ export async function publishLatestRoomDraft(
 
 export function qayyimOutOfScope(topic: string): ToolExecutionResult {
   const map: Record<string, string> = {
-    factory: "المصنع والمخزن والخامات وأوامر التشغيل ليست اختصاص قيّم الدار. استخدمي تبويب التصنيع أو وكيل التشغيل المختص.",
+    factory: "المصنع والمخزن والخامات وأوامر التشغيل ليست اختصاص سرب أزينث. استخدمي تبويب التصنيع أو وكيل التشغيل المختص.",
     sales: "العملاء وأوامر البيع من اختصاص Vanguard.",
     money: "الأرقام المالية من اختصاص Analyst.",
     infra: "النسخ الاحتياطي وسرعة السيرفر من اختصاص Ops.",
@@ -676,7 +676,7 @@ export function qayyimOutOfScope(topic: string): ToolExecutionResult {
   };
   return {
     success: true,
-    message: map[topic] || "هذا الطلب خارج إطلالة الموقع ولا ينفّذه قيّم الدار.",
+    message: map[topic] || "هذا الطلب خارج إطلالة الموقع ولا ينفّذه السرب.",
     data: { out_of_scope: true, topic },
   };
 }

@@ -1,5 +1,5 @@
 /**
- * QayyimFacade — الواجهة الموحدة لقيّم الدار (Enterprise)
+ * QayyimFacade — الواجهة الموحدة لسرب أزينث (Enterprise)
  * هو الوكيل الوحيد الظاهر في الداشبورد — الـ 7 الآخرون يعملون خفياً
  * $0 — يعتمد على MasterOrchestrator + Postgres فقط
  */
@@ -13,7 +13,7 @@ export type QayyimScope = "enterprise" | "swarm";
 
 export interface EnterpriseAgentMeta {
   key: "qayyim";
-  name: "قيّم الدار";
+  name: "سرب أزينث";
   nameEn: "Qayyim";
   icon: "👑";
   color: "amber";
@@ -23,12 +23,12 @@ export interface EnterpriseAgentMeta {
 
 export const QAYYIM_ENTERPRISE_META: EnterpriseAgentMeta = {
   key: "qayyim",
-  name: "قيّم الدار",
+  name: "سرب أزينث",
   nameEn: "Qayyim",
   icon: "👑",
   color: "amber",
   subAgents: ["ops-content", "ops-visual", "ops-seo", "ops-ux", "ops-analytics", "ops-dev", "ops-qa"],
-  role: "قيّم إطلالة أزينث — قائد سرب (7 وكلاء خفيين)",
+  role: "مسؤول إطلالة أزينث — قائد سرب (7 وكلاء خفيين)",
 };
 
 export class QayyimFacade {

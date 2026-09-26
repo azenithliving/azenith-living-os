@@ -53,7 +53,7 @@ export default function AskQayyimAboutPage({ url }: { url: string | null }) {
         className="flex items-center gap-2 rounded-2xl border border-[#C5A059]/40 bg-[#C5A059]/10 px-4 py-2 text-sm font-medium text-[#e6cf9d] transition hover:bg-[#C5A059]/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/5 disabled:text-white/30"
       >
         <Sparkles className="h-4 w-4" />
-        {state === "asking" ? "بيقرأ الصفحة…" : "اسأل قيّم الدار عن الصفحة"}
+        {state === "asking" ? "بيقرأ الصفحة…" : "اسأل مدير تشغيل المحتوى عن الصفحة"}
       </button>
 
       {state !== "idle" ? (

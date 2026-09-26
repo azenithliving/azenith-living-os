@@ -4,11 +4,12 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { agentLabel } from "./identity";
 import { auditVisitorExperience, publishQayyimDraft, rollbackQayyimDraft } from "@/lib/qayyim-ops";
 import { constitutionEngine } from "./governance/ConstitutionEngine";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 
-const QAYYIM_CORE_SYSTEM_PROMPT = `أنت قيّم الدار - القائد. مهمتك: تعطي المفيد بسرعة، بلا رغي.
+const QAYYIM_CORE_SYSTEM_PROMPT = `أنت ${agentLabel("ops-lead")}. مهمتك: تعطي المفيد بسرعة، بلا رغي.
 
 ## قوانينك:
 - تتكلم مصري مبسط فصيح، مختصر جداً — 5 أسطر كحد أقصى + جدول
@@ -28,8 +29,8 @@ ops-content (يكتب) | ops-visual (صور) | ops-seo (ظهور) | ops-ux (سل
 
 export class QayyimCoreAgent extends QayyimAgentBase {
   readonly agentKey = "ops-lead";
-  readonly agentName = "قيّم الدار - القائد";
-  readonly agentRole = "قائد سرب القيّم: تنسيق، تدقيق شامل، إدارة نشر/تراجع، بوابة جودة";
+  readonly agentName = agentLabel("ops-lead");
+  readonly agentRole = "قائد سرب أزينث: تنسيق، تدقيق شامل، إدارة نشر/تراجع، بوابة جودة";
 
   readonly capabilities: QayyimAgentCapabilities = {
     canAudit: true,
@@ -304,7 +305,7 @@ ${report.summary}`,
         delegations.push({
           agent: match[1],
           task: (match[2] || match[3] || '').trim(),
-          reason: 'من تنسيق القيّم-القائد'
+          reason: 'من تنسيق مدير تشغيل المحتوى'
         });
       }
     }

@@ -302,10 +302,10 @@ export default function AgentsPage() {
                 <div>
                   <h2 className="text-lg font-black flex items-center gap-2">
                     <Users className="w-5 h-5 text-[#C5A059]" />
-                    سرب قيّم الدار + الوكلاء الميدانيون
+                    سرب أزينث + الوكلاء الميدانيون
                   </h2>
                   <p className="text-xs text-white/40 mt-1">
-                    8 وكلاء قيّم لإطلالة الموقع + 6 وكلاء ميدانيين — يقرأون معطياتهم من Postgres ويصدرون أوامر حقيقية
+                    8 وكلاء لإطلالة الموقع + 6 وكلاء ميدانيين — يقرأون معطياتهم من Postgres ويصدرون أوامر حقيقية
                   </p>
                 </div>
                 <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -314,7 +314,7 @@ export default function AgentsPage() {
                     className="px-4 py-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg"
                   >
                     <Sparkles className="w-4 h-4" />
-                    استوديو القيّم
+                    الاستوديو
                   </a>
                   <button
                     onClick={() => setShowGroupChat(true)}
@@ -326,10 +326,10 @@ export default function AgentsPage() {
                 </div>
               </div>
 
-              {/* سرب القيّم — القائد فقط، الباقون يعملون في الخلفية */}
+              {/* سرب أزينث — القائد فقط، الباقون يعملون في الخلفية */}
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold text-amber-400">👑 سرب قيّم الدار</span>
+                  <span className="text-xs font-bold text-amber-400">👑 سرب أزينث</span>
                   <span className="text-[10px] text-white/30 font-mono bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">8 وكلاء يعملون خفياً · القائد هو واجهتك الوحيدة</span>
                 </div>
                 {/* القائد — البطاقة الرئيسية */}
@@ -368,7 +368,7 @@ export default function AgentsPage() {
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {ENTERPRISE_AGENTS.filter(a => a.key.startsWith('qayyim-') && a.key !== 'ops-lead').map(a => (
                           <span key={a.key} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
-                            {a.icon} {a.name.replace('قيّم الدار — ', '')}
+                            {a.icon} {a.name}
                           </span>
                         ))}
                       </div>
@@ -415,7 +415,7 @@ export default function AgentsPage() {
               </div>
             </div>
 
-            {/* غرف العمليات المباشرة — قيّم الدار و Vanguard */}
+            {/* غرف العمليات المباشرة — مدير تشغيل المحتوى و Vanguard */}
             <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 space-y-6">
               <div>
                 <h3 className="text-base font-black flex items-center gap-2 text-white">
@@ -423,11 +423,11 @@ export default function AgentsPage() {
                   غرف العمليات الميدانية السريعة
                 </h3>
                 <p className="text-xs text-white/40 mt-1">
-                  قناة اتصال فوري مع قائد سرب القيّم ووكيل العمليات Vanguard — تنفيذ مهام لحظية بلا نوافذ منبثقة
+                  قناة اتصال فوري مع قائد سرب أزينث ووكيل العمليات Vanguard — تنفيذ مهام لحظية بلا نوافذ منبثقة
                 </p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ChatPanel agentKey="ops-lead" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
+                <ChatPanel agentKey="ops-lead" agentName="مدير تشغيل المحتوى" agentColor="amber" />
                 <ChatPanel agentKey="vanguard" agentColor="emerald" />
               </div>
             </div>
@@ -441,7 +441,7 @@ export default function AgentsPage() {
           <div className="w-full max-w-2xl bg-[#111] border border-white/20 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
             <ChatPanel 
               agentKey={activeChatAgent} 
-              agentName={activeChatAgent === 'ops-lead' || activeChatAgent === 'prime' ? 'مدير تشغيل المحتوى — قيّم الدار' : undefined}
+              agentName={activeChatAgent === 'ops-lead' || activeChatAgent === 'prime' ? 'مدير تشغيل المحتوى' : undefined}
               initialMessage={chatInitialMission}
             />
           </div>
@@ -450,7 +450,7 @@ export default function AgentsPage() {
       {showPrimeChat && (
         <div className="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl flex items-center justify-center p-6" onClick={() => setShowPrimeChat(false)}>
           <div className="w-full max-w-2xl bg-[#111] border border-amber-500/30 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-            <ChatPanel agentKey="ops-lead" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
+            <ChatPanel agentKey="ops-lead" agentName="مدير تشغيل المحتوى" agentColor="amber" />
           </div>
         </div>
       )}
@@ -485,11 +485,11 @@ interface EnterpriseAgentConfig {
 
 const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   // ════════════════════════════════════════════════════════════
-  // سرب قيّم الدار — 8 وكلاء إطلالة الموقع
+  // سرب أزينث — 8 وكلاء إطلالة الموقع
   // ════════════════════════════════════════════════════════════
   {
     key: 'ops-lead',
-    name: 'مدير تشغيل المحتوى — قيّم الدار',
+    name: 'مدير تشغيل المحتوى',
     role: 'قائد السرب: تنسيق، تدقيق شامل، نشر/تراجع، بوابة جودة',
     color: 'amber',
     icon: '👑',
@@ -503,7 +503,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   },
   {
     key: 'ops-content',
-    name: 'قيّم الدار — المحتوى',
+    name: 'وكيل المحتوى',
     role: 'كتابة فاخرة، توحيد نبرة، قانون هوية، صقل نصوص',
     color: 'rose',
     icon: '✍️',
@@ -517,7 +517,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   },
   {
     key: 'ops-visual',
-    name: 'قيّم الدار — المرئيات',
+    name: 'وكيل المرئيات',
     role: 'انتقاء صور، هيرو، alt text، اتساق علامة تجارية',
     color: 'violet',
     icon: '🖼️',
@@ -531,7 +531,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   },
   {
     key: 'ops-seo',
-    name: 'قيّم الدار — الظهور',
+    name: 'وكيل الظهور',
     role: 'تدقيق SEO تقني، Schema.org، فجوات محتوى، منافسين',
     color: 'sky',
     icon: '🔍',
@@ -545,7 +545,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   },
   {
     key: 'ops-ux',
-    name: 'قيّم الدار — التجربة',
+    name: 'وكيل التجربة',
     role: 'سلوك زوار، معدل تحويل، A/B testing، تحليل خروج',
     color: 'emerald',
     icon: '🎯',
@@ -559,7 +559,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   },
   {
     key: 'ops-analytics',
-    name: 'قيّم الدار — التحليلات',
+    name: 'وكيل التحليلات',
     role: 'ربط تحويل بإيرادات، Luxury Score، تنبؤ، تقسيم عملاء',
     color: 'cyan',
     icon: '📈',
@@ -573,7 +573,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   },
   {
     key: 'ops-dev',
-    name: 'قيّم الدار — التطوير',
+    name: 'وكيل التطوير',
     role: 'Core Web Vitals، bundle، جودة كود، dependency check',
     color: 'orange',
     icon: '⚡',
@@ -587,7 +587,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   },
   {
     key: 'ops-qa',
-    name: 'قيّم الدار — الجودة',
+    name: 'وكيل الجودة',
     role: 'E2E smoke tests، visual regression، a11y، load test',
     color: 'lime',
     icon: '🧪',

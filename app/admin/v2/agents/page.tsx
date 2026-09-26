@@ -92,7 +92,7 @@ export default function V2AgentsPage() {
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500 text-white animate-pulse">{unread} ●</span>
               )}
             </div>
-            <p className="text-[11px] text-white/40">قيّم الدار · {statusText}{agentStatus?.taskCount ? ` · ${agentStatus.taskCount} مهمة` : ''}</p>
+            <p className="text-[11px] text-white/40">سرب أزينث · {statusText}{agentStatus?.taskCount ? ` · ${agentStatus.taskCount} مهمة` : ''}</p>
           </div>
           <span className="text-white/20 group-hover:text-amber-400 transition-colors text-xl">➜</span>
         </div>

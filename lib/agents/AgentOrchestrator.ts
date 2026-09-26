@@ -329,7 +329,7 @@ export class AgentOrchestrator {
           const prior = (hist || []).slice(1).reverse(); // drop the message we just stored
           if (prior.length) {
             const historyCtx = prior
-              .map((m: any) => `${m.sender_type === "agent" ? "القيّم" : "المالك"}: ${String(m.content).slice(0, 300)}`)
+              .map((m: any) => `${m.sender_type === "agent" ? "المدير" : "المالك"}: ${String(m.content).slice(0, 300)}`)
               .join("\n");
             promptWithToolContext = `[حوارك الأخير مع المالك — للتذكير بالإشارات فقط، وممنوع نسخ تقارير سابقة منه:\n${historyCtx}]\n\n${promptWithToolContext}`;
           }
@@ -388,7 +388,7 @@ export class AgentOrchestrator {
       }
 
       // ══════════════════════════════════════════════════════════════
-      // قيّم-كور: ينسق السرب الكامل عبر MasterOrchestrator
+      // مدير السرب: ينسق السرب الكامل عبر MasterOrchestrator
       // المستخدم يتكلم مع القائد فقط — السرب يعمل خفياً في الخلفية
       // ══════════════════════════════════════════════════════════════
       if (selectedAgent === "ops-lead") {
@@ -466,7 +466,7 @@ export class AgentOrchestrator {
         }
       }
       // ══════════════════════════════════════════════════════════════
-      // وكلاء قيّم الآخرون — يُستدعَون مباشرة (للمحادثات الفردية)
+      // بقية وكلاء السرب — يُستدعَون مباشرة (للمحادثات الفردية)
       // ══════════════════════════════════════════════════════════════
       else if (["ops-content","ops-visual","ops-seo","ops-ux","ops-analytics","ops-dev","ops-qa"].includes(selectedAgent)) {
         const agentInstance = this.agents[selectedAgent];

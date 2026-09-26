@@ -4,9 +4,10 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { agentLabel } from "./identity";
 import { createQayyimDraft } from "@/lib/qayyim-ops";
 
-const QAYYIM_VIS_SYSTEM_PROMPT = `أنت قيّم الدار - المرئي والصور.
+const QAYYIM_VIS_SYSTEM_PROMPT = `أنت ${agentLabel("ops-visual")}.
 
 ## تخصصك الوحيد:
 العين البصرية الفاخرة. لا نصوص، لا سيو، لا كود، لا تحليل أرقام.
@@ -30,10 +31,10 @@ const QAYYIM_VIS_SYSTEM_PROMPT = `أنت قيّم الدار - المرئي وا
 curated_images API (GET/POST), media_assets, pexels (via curated-images), ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
-- كتابة نصوص (للقيّم-المحتوى)
-- سيو (للقيّم-السيو)
-- كود/أداء (للقيّم-التطوير)
-- تحليل سلوك (للقيّم-التجربة)
+- كتابة نصوص (لوكيل المحتوى)
+- سيو (لوكيل الظهور)
+- كود/أداء (لوكيل التطوير)
+- تحليل سلوك (لوكيل التجربة)
 
 ## أسلوب الرد:
 - في الشات: مختصر بصري، يذكر أسماء الصور/الروابط
@@ -42,7 +43,7 @@ curated_images API (GET/POST), media_assets, pexels (via curated-images), ops_ou
 
 export class QayyimVisualAgent extends QayyimAgentBase {
   readonly agentKey = "ops-visual";
-  readonly agentName = "قيّم الدار - المرئي والصور";
+  readonly agentName = agentLabel("ops-visual");
   readonly agentRole = "خبير الانتقاء البصري: يختار صور، يحدد هيرو، يولد alt text، يفرض علامة تجارية";
 
   readonly capabilities: QayyimAgentCapabilities = {

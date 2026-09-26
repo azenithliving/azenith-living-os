@@ -103,7 +103,7 @@ export class ConstitutionEngine {
     this.rules.push({
       id: 'scope_boundary',
       name: 'حدود الاختصاص - لا تلمس مجالات تانية',
-      description: 'قيّم الدار لا يلمس: API، سيرفر، مخزن، عملاء، أرباح، مفاتيح، تعلم وكلاء آخرين',
+      description: 'سرب أزينث لا يلمس: API، سيرفر، مخزن، عملاء، أرباح، مفاتيح، تعلم وكلاء آخرين',
       weight: 1.0,
       enforcement: 'hard_block',
       check: this.checkScopeBoundary.bind(this),

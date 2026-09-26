@@ -73,7 +73,7 @@ export function FloatingAgentButton() {
               }`}
             >
               <Brain className="w-4 h-4" />
-              قيّم الدار
+                                مدير تشغيل المحتوى
             </button>
             <button
               onClick={() => setActiveTab('vanguard')}
@@ -102,7 +102,7 @@ export function FloatingAgentButton() {
           {/* Panel Content */}
           <div className="h-[400px]">
             {activeTab === 'ops-lead' && (
-              <ChatPanel agentKey="ops-lead" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
+              <ChatPanel agentKey="ops-lead" agentName="مدير تشغيل المحتوى" agentColor="amber" />
             )}
             {activeTab === 'vanguard' && (
               <ChatPanel agentKey="vanguard" />

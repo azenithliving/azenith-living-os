@@ -1,5 +1,5 @@
 /**
- * The daily story — what «قيّم الدار» sends the owner in the morning.
+ * The daily story — what the swarm sends the owner in the morning.
  *
  * Pure on purpose: numbers and strings in, Arabic out. The transport lives in
  * `admin-telegram-summon.ts` (already wired, already reads its own config), and

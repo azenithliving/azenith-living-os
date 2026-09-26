@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * StudioPanel — الاستوديو الرئيسي لسرب قيّم الدار (P5-M3)
+ * StudioPanel — الاستوديو الرئيسي لسرب أزينث (P5-M3)
  * 8 كروت وكلاء كمدخل أوحد للمحادثات، وتابات موحّدة:
  * نظرة عامة / العمليات / التحسين / المراقبة.
  */
@@ -166,7 +166,7 @@ export function StudioPanel() {
                       <div className="flex items-center gap-2.5">
                         <span className="text-2xl">{agent.icon}</span>
                         <div className="min-w-0">
-                          <h3 className="text-sm font-black text-white truncate">قيّم — {agent.name}</h3>
+                          <h3 className="text-sm font-black text-white truncate">{agent.name}</h3>
                           <p className="text-[10px] text-white/50 leading-snug">{agent.role}</p>
                         </div>
                       </div>
@@ -236,7 +236,7 @@ export function StudioPanel() {
           <div className="w-full h-full max-w-4xl max-h-[92vh] bg-[#0f0f0f] border border-white/15 rounded-[2rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
             <ChatPanel
               agentKey={chatAgent}
-              agentName={activeMeta ? `قيّم الدار — ${activeMeta.name}` : undefined}
+              agentName={activeMeta?.name}
               agentColor={activeMeta?.color || 'amber'}
               initialMessage={chatMission}
             />

@@ -661,14 +661,14 @@ export function UnifiedAssistant() {
                 فريق الوكلاء — تكلم مع أي وكيل مباشرة
               </h2>
               <p className="text-xs text-white/40">
-                قيّم الدار وVanguard هما جزء من المساعد الموحّد. يمكنك توجيه مهام متخصصة لكل منهما من هنا.
+                مدير تشغيل المحتوى وVanguard هما جزء من المساعد الموحّد. يمكنك توجيه مهام متخصصة لكل منهما من هنا.
               </p>
             </div>
 
             {/* agent status cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { key: "ops-lead", name: "قيّم الدار", role: "قائد سرب القيّم — إطلالة الموقع", color: "amber"   as const },
+                { key: "ops-lead", name: "مدير تشغيل المحتوى", role: "قائد سرب أزينث — إطلالة الموقع", color: "amber"   as const },
                 { key: "vanguard",    name: "Vanguard",   role: "مدير العمليات والمبيعات",          color: "emerald" as const },
               ].map((agent) => {
                 const st = agentStatuses[agent.key];

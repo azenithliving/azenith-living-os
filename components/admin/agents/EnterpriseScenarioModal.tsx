@@ -20,9 +20,9 @@ const SCENARIOS = [
     icon: '👑',
     gradient: 'from-purple-600/30 via-indigo-600/20 to-emerald-600/20',
     border: 'border-purple-500/40',
-    agentsInvolved: ['Vanguard', 'قيّم الدار', 'Analyst', 'Ops', 'Security', 'Learner'],
+    agentsInvolved: ['Vanguard', 'مدير تشغيل المحتوى', 'Analyst', 'Ops', 'Security', 'Learner'],
     tablesAffected: ['leads', 'sales_orders', 'inventory_items', 'production_jobs', 'agent_memory'],
-    description: 'يقوم Vanguard باستقبال طلب العميل طارق الدسوقي بميزانية 350 ألف ج.م لصالون إمبراطوري، ويصدر عقد البيع، ثم يقوم قيّم الدار بحساب استهلاك خشب الزان والأقمشة، ويتحقق من المخزون، ويصدر أمر تصنيع حقيقي في جدول production_jobs، بينما يحسب Analyst هامش الربح (40.5%).',
+    description: 'يقوم Vanguard باستقبال طلب العميل طارق الدسوقي بميزانية 350 ألف ج.م لصالون إمبراطوري، ويصدر عقد البيع، ثم يقوم مدير تشغيل المحتوى بحساب استهلاك خشب الزان والأقمشة، ويتحقق من المخزون، ويصدر أمر تصنيع حقيقي في جدول production_jobs، بينما يحسب Analyst هامش الربح (40.5%).',
   },
   {
     id: 'stock_shortage_alert',
@@ -31,9 +31,9 @@ const SCENARIOS = [
     icon: '🪵',
     gradient: 'from-amber-600/30 via-orange-600/20 to-red-600/20',
     border: 'border-amber-500/40',
-    agentsInvolved: ['Ops', 'قيّم الدار', 'Vanguard', 'Analyst'],
+    agentsInvolved: ['Ops', 'مدير تشغيل المحتوى', 'Vanguard', 'Analyst'],
     tablesAffected: ['inventory_items', 'sales_orders'],
-    description: 'يرصد Ops انخفاض مخزون خشب الزان إلى 2.2 م³، ليقوم قيّم الدار بحصر الأوامر المعلقة واقتراح دفعة توريد 6 م³، ويقوم Vanguard بجدولة التسليمات لعدم التأخير، بينما يحسب Analyst الميزانية المطلوبة.',
+    description: 'يرصد Ops انخفاض مخزون خشب الزان إلى 2.2 م³، ليقوم مدير تشغيل المحتوى بحصر الأوامر المعلقة واقتراح دفعة توريد 6 م³، ويقوم Vanguard بجدولة التسليمات لعدم التأخير، بينما يحسب Analyst الميزانية المطلوبة.',
   },
   {
     id: 'security_backup_sweep',

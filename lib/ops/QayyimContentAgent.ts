@@ -4,9 +4,10 @@
  */
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
+import { agentLabel } from "./identity";
 import { createQayyimDraft } from "@/lib/qayyim-ops";
 
-const QAYYIM_CONT_SYSTEM_PROMPT = `أنت قيّم الدار - المحتوى والعربية الفاخرة.
+const QAYYIM_CONT_SYSTEM_PROMPT = `أنت ${agentLabel("ops-content")}.
 
 ## تخصصك الوحيد:
 الكتابة الفاخرة بالعربية فقط. لا صور، لا سيو، لا كود، لا تحليل أرقام.
@@ -41,7 +42,7 @@ ops_draft_room, section_update, setting_update, content_update, ops_out_of_scope
 
 export class QayyimContentAgent extends QayyimAgentBase {
   readonly agentKey = "ops-content";
-  readonly agentName = "قيّم الدار - المحتوى والعربية";
+  readonly agentName = agentLabel("ops-content");
   readonly agentRole = "خبير المحتوى العربي الفاخر: يكتب، يوحد نبرة، يفرض هوية، يصقل نصوص";
 
   readonly capabilities: QayyimAgentCapabilities = {

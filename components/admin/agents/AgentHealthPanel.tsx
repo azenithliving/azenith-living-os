@@ -2,7 +2,7 @@
 
 /**
  * AgentHealthPanel — لوحة صحة النظام
- * يجلب من /api/admin/agents/chat (حالة قيّم الدار / Vanguard)
+ * يجلب من /api/admin/agents/chat (حالة مدير تشغيل المحتوى / Vanguard)
  * و /api/admin/agents/tasks (إحصائيات التنفيذ)
  * يعرض: حالة كل API key pool، معدل النجاح/الفشل، عدد المهام
  */

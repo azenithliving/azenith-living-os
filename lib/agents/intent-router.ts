@@ -67,7 +67,7 @@ export function explicitIntent(runTool: unknown, runParams?: unknown): RoutedInt
   return { toolName, params };
 }
 
-const SYSTEM = `أنت موجّه نوايا لوكيل "قيّم الدار" لموقع أثاث مصري. المستخدم يكتب بالعامية المصرية بأي صياغة.
+const SYSTEM = `أنت موجّه نوايا لسرب أزينث لموقع أثاث مصري. المستخدم يكتب بالعامية المصرية بأي صياغة.
 مهمتك: تقرر لو رسالته تطلب أداة من القائمة دي. اختَر أداة واحدة أو none.
 
 الأدوات:

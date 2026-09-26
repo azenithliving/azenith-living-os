@@ -550,7 +550,7 @@ export default function AdminPage() {
               <div className="rounded-xl bg-amber-500/30 p-3 w-fit mb-4">
                 <Brain className="w-6 h-6 text-amber-300" />
               </div>
-              <h3 className="text-lg font-bold text-white group-hover:text-amber-300 transition-colors">قيّم الدار — استوديو السرب</h3>
+              <h3 className="text-lg font-bold text-white group-hover:text-amber-300 transition-colors">استوديو سرب أزينث</h3>
               <p className="text-sm text-white/60 mt-2">8 وكلاء متخصصون: تدقيق، مسودات، تجارب A/B، جودة ومراقبة</p>
             </Link>
 

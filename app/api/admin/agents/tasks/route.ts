@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer, agentTasksDAL } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
-import { legacyToOps } from '@/lib/ops/identity';
+import { agentLabel, LEADER_TITLE, SWARM_NAME, legacyToOps } from '@/lib/ops/identity';
 import { z } from 'zod';
 
 // التحقق من بيانات المهمة
@@ -145,16 +145,19 @@ export async function POST(request: NextRequest) {
         .insert({
           company_id: resolvedCompanyId,
           agent_key: data.agent_key,
-          name: (data.agent_key === 'prime' || data.agent_key === 'ops-lead')
-            ? 'مدير تشغيل المحتوى — قيّم الدار'
-            : data.agent_key.startsWith('qayyim-')
-              ? `قيّم الدار — ${data.agent_key.replace('qayyim-', '')}`
-              : 'VANGUARD',
-          description: (data.agent_key === 'prime' || data.agent_key === 'ops-lead')
-            ? 'قائد سرب قيّم الدار — إطلالة الموقع'
-            : data.agent_key.startsWith('qayyim-')
-              ? 'وكيل سرب قيّم الدار'
-              : 'وكيل المبيعات والعمليات',
+          // The key reaching this row is already normalised by the schema, so the
+          // `qayyim-` prefix test that used to decide the name could never match
+          // again — the label comes from the identity module instead.
+          name: data.agent_key === 'vanguard'
+            ? 'VANGUARD'
+            : data.agent_key === 'prime'
+              ? LEADER_TITLE
+              : agentLabel(data.agent_key),
+          description: data.agent_key === 'vanguard'
+            ? 'وكيل المبيعات والعمليات'
+            : data.agent_key === 'prime' || data.agent_key === 'ops-lead'
+              ? `قائد ${SWARM_NAME} — إطلالة الموقع`
+              : `وكيل ${SWARM_NAME}`,
           is_active: true,
         })
         .select('id')

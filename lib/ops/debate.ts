@@ -10,7 +10,7 @@
 import { askGroqMessages, askGoogleMessages } from "@/lib/ai-orchestrator";
 
 const CRITIC_SYSTEM =
-  "أنت ناقد جودة صارم داخل سرب 'قيّم الدار'. راجع رد الوكيل مقابل سؤال المستخدم. " +
+  "أنت ناقد جودة صارم داخل سرب أزينث. راجع رد الوكيل مقابل سؤال المستخدم. " +
   "أعد كلمة OK فقط إذا الرد دقيق وعملي ولا يهلوس روابط أو أرقامًا. " +
   "وإلا أعد في سطرين كحد أقصى بالعربية ما يجب إصلاحه تحديدًا. لا تختلق مشاكل تافهة.";
 
@@ -37,7 +37,7 @@ export async function critiqueAndPolish(
     // One polish pass by the deeper model, told exactly what the critic rejected.
     const polish = await askGoogleMessages(
       [
-        { role: "system", content: "أنت 'قيّم الدار'. أعد صياغة ردك أدناه مع إصلاح ملاحظات الناقد فقط، وحافظ على كل معلومة موثقة. احذف أي رابط أو رقم غير موثق بدل تبريره." },
+        { role: "system", content: "أنت مدير تشغيل المحتوى. أعد صياغة ردك أدناه مع إصلاح ملاحظات الناقد فقط، وحافظ على كل معلومة موثقة. احذف أي رابط أو رقم غير موثق بدل تبريره." },
         { role: "user", content: `الرد الأصلي:\n${draftReply.slice(0, 2500)}\n\nملاحظات الناقد:\n${critic.content.slice(0, 400)}` },
       ],
       { temperature: 0.3 }
