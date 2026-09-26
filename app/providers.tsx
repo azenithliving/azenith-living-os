@@ -1,39 +1,48 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { PostHogProvider } from "posthog-js/react";
+import { useEffect } from "react";
 
 type ProvidersProps = {
   children: React.ReactNode;
 };
 
+let analyticsStarted = false;
+
+/**
+ * Nothing in this app reads an analytics context — the provider existed only to
+ * start pageview capture. Wrapping the tree in it after mount changed the
+ * element type of the root, which remounted every page and wiped form state on
+ * the first paint (the gate's password field lost what was typed).
+ *
+ * So the children are returned untouched, and analytics starts in the browser
+ * beside them. Same capture, no re-render of the page underneath.
+ */
 export function Providers({ children }: ProvidersProps) {
   const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
-  // Analytics lives in browser storage, so its provider mounts with the client.
-  // It renders no DOM, so the page is server-rendered either way — the previous
-  // version withheld the entire site behind a spinner until mount, which handed
-  // every crawler (and every first paint) an empty page.
-  const [clientReady, setClientReady] = useState(false);
   useEffect(() => {
-    setClientReady(true);
-  }, []);
+    if (!apiKey || analyticsStarted) return;
+    let cancelled = false;
 
-  if (!apiKey || !clientReady) {
-    return <>{children}</>;
-  }
+    import("posthog-js")
+      .then((mod) => {
+        if (cancelled || analyticsStarted) return;
+        const posthog = mod.default;
+        posthog.init(apiKey, {
+          api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+          capture_pageview: true,
+          persistence: "localStorage+cookie",
+        });
+        analyticsStarted = true;
+      })
+      .catch(() => {
+        /* analytics failing must never take a page down */
+      });
 
-  return (
-    <PostHogProvider
-      apiKey={apiKey}
-      options={{
-        api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-        capture_pageview: true,
-        persistence: "localStorage+cookie",
-      }}
-    >
-      {children}
-    </PostHogProvider>
-  );
+    return () => {
+      cancelled = true;
+    };
+  }, [apiKey]);
+
+  return <>{children}</>;
 }
-
