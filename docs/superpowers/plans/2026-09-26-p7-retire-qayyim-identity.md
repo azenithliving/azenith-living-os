@@ -21,6 +21,7 @@
 - DB changes only through an idempotent file `supabase/migrations/20260927_p7_*.sql`, applied with `node scripts/apply-p6-migration.mjs <file> --apply`, then read back.
 - Arabic UI copy: simplified Egyptian. The owner is a man — masculine address. No Latin token inside an Arabic sentence.
 - Git: no force-push, no `git reset --hard`, no history rewrite, no amend of pushed commits. Push triggers a deploy — wait ~4 minutes and verify on `https://azenith-living.vercel.app`.
+- **The agent-key rename is atomic** (Task 2): catalogs, literals, writers and prompts change in one commit, after the data migration. A half-renamed key set returns `undefined` from the role catalog and breaks the live chat.
 - The owner runs his own `next dev` on port 3000: never kill it, never start a second dev server. To verify a production build locally use `npx next start -p 3112` and kill **that PID only**.
 - No autonomous publishing to live content. Constitution gate stays human-approved.
 
@@ -211,112 +212,39 @@ git add lib/ops/identity.ts tests/ops/identity.test.ts
 git commit -m "feat(ops): one module owns the swarm's keys and names (P7-M1)"
 ```
 
-### Task 2: route the existing catalogs through it
+### Task 2: the atomicity rule (no code change — read this before Task 5)
 
-**Files:**
-- Modify: `lib/qayyim/agent-roles.ts` (`AGENT_ROLES` keys)
-- Modify: `lib/agents/AgentOrchestrator.ts:533` (`sender_name: selectedAgent.toUpperCase()`)
-- Modify: `app/api/admin/agents/messages/route.ts:115-117`
-- Modify: `lib/qayyim/self-model.ts` (agent list source)
-- Test: `tests/ops/identityWiring.test.ts`
+Attempted during drafting and rejected: re-keying `AGENT_ROLES` alone. The app passes
+`agent_key` from URL params, saved localStorage and DB rows into that catalog, so a
+catalog keyed `ops-*` while its callers still say `qayyim-*` returns `undefined` and
+the live chat breaks on the next deploy.
 
-**Interfaces:**
-- Consumes: Task 1 exports.
-- Produces: `AGENT_ROLES` keyed by `ops-*`; every written `sender_name` equals `storedSenderName(key)`.
+- [ ] **Step 1: Accept the rule**
 
-- [ ] **Step 1: Write the failing test**
+**The key rename is atomic.** Catalogs (`agent-roles`, `AGENT_PERSONAS`, `AGENT_REGISTRY`,
+zod enums, `VALID_AGENTS` lists), every literal in `lib app components`, the two
+`sender_name` writers, the prompt text and the tool ids all change in **one commit
+series inside Milestone 3**, and Milestone 2's data migration is applied first so the
+stored rows already speak `ops-*`.
 
-Create `tests/ops/identityWiring.test.ts`:
+- [ ] **Step 2: Nothing to commit**
 
-```ts
-// @vitest-environment node
-import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-import { AGENT_ROLES } from "@/lib/qayyim/agent-roles";
-import { AGENT_KEYS } from "@/lib/ops/identity";
+Task 1 is the whole of Milestone 1. Milestone 2 starts at Task 4.
 
-describe("the catalogs speak the new identity", () => {
-  it("keys the role catalog by the new keys only", () => {
-    expect(Object.keys(AGENT_ROLES).sort()).toEqual([...AGENT_KEYS].sort());
-  });
+### Task 3: Milestone 1 closes inert
 
-  it("no writer stamps a legacy sender name any more", () => {
-    for (const file of [
-      "lib/agents/AgentOrchestrator.ts",
-      "app/api/admin/agents/messages/route.ts",
-    ]) {
-      const src = readFileSync(resolve(process.cwd(), file), "utf8");
-      expect(src, file).toContain("storedSenderName");
-    }
-  });
-});
-```
+`lib/ops/identity.ts` is imported by nothing yet, so there is no behaviour to deploy
+and no deploy gate to run. Verification is the unit suite; the first production
+verification happens after Milestone 3's sweep (Task 7 Step 6).
 
-- [ ] **Step 2: Run it, see it fail**
-
-Run: `npx vitest run tests/ops/identityWiring.test.ts`
-Expected: FAIL on both assertions.
-
-- [ ] **Step 3: Re-key the catalog and the writers**
-
-In `lib/qayyim/agent-roles.ts` replace the eight object keys with the new ones (values untouched):
+- [ ] **Step 1: Confirm nothing imports it yet**
 
 ```bash
-perl -CSD -Mutf8 -i -pe '
-  s/"qayyim-core"/"ops-lead"/; s/"qayyim-cont"/"ops-content"/; s/"qayyim-vis"/"ops-visual"/;
-  s/"qayyim-seo"/"ops-seo"/;   s/"qayyim-ux"/"ops-ux"/;     s/"qayyim-ana"/"ops-analytics"/;
-  s/"qayyim-dev"/"ops-dev"/;   s/"qayyim-qa"/"ops-qa"/;
-' lib/qayyim/agent-roles.ts
+grep -rln "lib/ops/identity" --include=*.ts --include=*.tsx lib app components
 ```
 
-In `lib/agents/AgentOrchestrator.ts` change the stamp line and add the import:
-
-```ts
-import { storedSenderName } from "@/lib/ops/identity";
-// …
-sender_name: storedSenderName(selectedAgent),
-```
-
-In `app/api/admin/agents/messages/route.ts` replace `agent_key?.toUpperCase()` with `storedSenderName(agent_key)` (same import), keeping the `'أنت'` and `'Agent'` branches untouched.
-
-- [ ] **Step 4: Fix the readers that still ask by the old key**
-
-```bash
-grep -rn "qayyim-core\|qayyim-cont\|qayyim-vis\|qayyim-ana\|qayyim-ux\|qayyim-seo\|qayyim-dev\|qayyim-qa" \
-  --include=*.ts --include=*.tsx lib app components | grep -v "lib/ops/identity.ts"
-```
-
-For each hit that is a **lookup or comparison**, wrap the value in `legacyToOps(...)` at the boundary (query params, DB rows, saved localStorage) and use the new key in literals. Do not change `docs/` or `scripts/` yet — those are Tasks 9 and 13.
-
-- [ ] **Step 5: Verify**
-
-Run: `npx vitest run && npm run typecheck`
-Expected: all green; typecheck 0 errors.
-
-- [ ] **Step 6: Commit**
-
-```bash
-git add -A lib app components tests
-git commit -m "refactor(ops): catalogs and message stamps read the identity module (P7-M1)"
-```
-
-### Task 3: deploy gate for Milestone 1
-
-- [ ] **Step 1: Push and wait**
-
-```bash
-git push origin main && sleep 240
-```
-
-- [ ] **Step 2: Verify on production**
-
-```bash
-node scripts/qayyim-ui-test.mjs        # expect 27/27
-node scripts/qayyim-gate-test.mjs      # expect 5/5
-```
-
-If the chat or the studio shows an unknown agent, stop and fix before Milestone 2 — the data migration assumes the app resolves new keys.
+Expected: only test files. If a source file already imports it, stop — the atomicity
+rule in Task 2 means that coupling belongs in Task 5.
 
 ---
 
@@ -460,34 +388,103 @@ git commit -m "fix(ops): stored agent identity speaks the new keys (P7-M2)"
 
 ## Milestone 3 — move the code and the routes
 
-### Task 5: `git mv lib/qayyim → lib/ops` and rewire imports
+### Task 5: the atomic key sweep (catalogs, literals, writers)
+
+This is the commit Task 2 warned about: everything that speaks an agent key changes
+together, after Milestone 2 put `ops-*` into the rows.
 
 **Files:**
-- Move: 53 files `lib/qayyim/**` → `lib/ops/**`
+- Move: 53 files `lib/qayyim/**` → `lib/ops/**`; `tests/qayyim/**` → `tests/ops/**`
 - Modify: the 39 files importing `@/lib/qayyim/`
-- Move: `tests/qayyim/**` → `tests/ops/**`
+- Modify: `lib/qayyim/agent-roles.ts` (keys), `lib/agents/AgentOrchestrator.ts` (type union, `AGENT_PERSONAS`, registry, `sender_name`, routing table), `lib/qayyim/orchestrator/MasterOrchestrator.ts`, `lib/qayyim/facade/*`, `lib/qayyim/api/utils.ts`, `lib/qayyim/self-model.ts`, `lib/qayyim/self-audit.ts`, `lib/qayyim/daily-round.ts`, `app/api/admin/agents/*`, `app/api/admin/qayyim/*`, `app/api/cron/qayyim-proactive`, `components/admin/**`
+- Test: `tests/ops/identityWiring.test.ts`
 
-- [ ] **Step 1: Move both trees in one commit**
+- [ ] **Step 1: Write the failing test**
+
+Create `tests/ops/identityWiring.test.ts`:
+
+```ts
+// @vitest-environment node
+import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { AGENT_ROLES } from "@/lib/ops/agent-roles";
+import { AGENT_KEYS } from "@/lib/ops/identity";
+
+function sources(dir: string): string[] {
+  return readdirSync(dir).flatMap((e) => {
+    const full = join(dir, e);
+    if (statSync(full).isDirectory()) return sources(full);
+    return /\.(ts|tsx)$/.test(full) && !full.includes(".test.") ? [full] : [];
+  });
+}
+
+describe("the whole codebase speaks one key set", () => {
+  it("keys the role catalog by the new keys only", () => {
+    expect(Object.keys(AGENT_ROLES).sort()).toEqual([...AGENT_KEYS].sort());
+  });
+
+  it("no source file carries a retired agent key", () => {
+    const hits = ["lib", "app", "components"]
+      .flatMap(sources)
+      .filter((f) => !f.includes("lib/ops/identity.ts"))
+      .filter((f) => /qayyim-(core|cont|vis|seo|ux|ana|dev|qa)\b/.test(readFileSync(f, "utf8")));
+    expect(hits, hits.join("\n")).toEqual([]);
+  });
+
+  it("message stamps come from the identity module", () => {
+    expect(readFileSync("lib/agents/AgentOrchestrator.ts", "utf8")).toContain("storedSenderName(");
+    expect(readFileSync("app/api/admin/agents/messages/route.ts", "utf8")).toContain("storedSenderName(");
+  });
+});
+```
+
+- [ ] **Step 2: Run it, see it fail** — `npx vitest run tests/ops/identityWiring.test.ts`.
+
+- [ ] **Step 3: Move the trees, then sweep every key literal in one pass**
 
 ```bash
 git mv lib/qayyim lib/ops
 git mv tests/qayyim tests/ops
-```
-
-- [ ] **Step 2: Rewrite every import path**
-
-```bash
-grep -rl "@/lib/qayyim/" --include=*.ts --include=*.tsx app components lib tests scripts \
+grep -rl "@/lib/qayyim/" --include=*.ts --include=*.tsx app components lib tests \
   | xargs perl -pi -e 's{\@/lib/qayyim/}{\@/lib/ops/}g'
-grep -rn "lib/qayyim" --include=*.ts --include=*.tsx app components lib tests scripts | wc -l
+
+# the keys themselves — one sweep over every source file
+grep -rl "qayyim-core\|qayyim-cont\|qayyim-vis\|qayyim-seo\|qayyim-ux\|qayyim-ana\|qayyim-dev\|qayyim-qa" \
+  --include=*.ts --include=*.tsx lib app components \
+  | grep -v "lib/ops/identity.ts" \
+  | xargs perl -pi -e '
+      s/\bqayyim-core\b/ops-lead/g;     s/\bqayyim-cont\b/ops-content/g;
+      s/\bqayyim-vis\b/ops-visual/g;    s/\bqayyim-seo\b/ops-seo/g;
+      s/\bqayyim-ux\b/ops-ux/g;         s/\bqayyim-ana\b/ops-analytics/g;
+      s/\bqayyim-dev\b/ops-dev/g;       s/\bqayyim-qa\b/ops-qa/g;
+      s/\bQAYYIM-CORE\b/OPS-LEAD/g;
+    '
 ```
 
-Expected after the sweep: `0`.
+- [ ] **Step 4: Replace the two raw upper-case stamps with the module**
 
-- [ ] **Step 3: Verify**
+In `lib/agents/AgentOrchestrator.ts` add `import { storedSenderName } from "@/lib/ops/identity";` and change `sender_name: selectedAgent.toUpperCase()` to `sender_name: storedSenderName(selectedAgent)`.
+
+In `app/api/admin/agents/messages/route.ts` add the same import and change `(msg as any).agent_key?.toUpperCase()` to `(msg as any).agent_key ? storedSenderName((msg as any).agent_key) : msg.sender_name || 'Agent'`.
+
+- [ ] **Step 5: Accept legacy input at the three doors**
+
+Query params, saved localStorage and any row written before Milestone 2 can still carry the old key. Normalize once, at the edge:
+
+```ts
+import { legacyToOps } from "@/lib/ops/identity";
+// app/admin/v2/agents/qayyim/page.tsx → agentFromUrl()
+return AGENT_KEYS.includes(legacyToOps(raw) as OpsAgentKey) ? legacyToOps(raw) : LEADER_KEY;
+```
+
+Apply the same wrap in `app/api/admin/agents/chat/route.ts` (the zod enum check) and in `components/admin/agents/CommandConsole.tsx` / `FloatingAgentButton.tsx` where a stored key is read back.
+
+- [ ] **Step 6: Verify**
 
 Run: `npm run typecheck && npx vitest run`
-Expected: 0 type errors; all tests green (test files moved with their imports intact).
+Expected: 0 type errors; all tests green, including the three assertions above.
 
 - [ ] **Step 4: Commit**
 
