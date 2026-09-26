@@ -49,6 +49,24 @@ export const TOOL_CATALOG: Array<{ name: string; desc: string }> = [
 
 const ALLOWED = new Set(TOOL_CATALOG.map((t) => t.name));
 
+/**
+ * A tool named by the interface — the command palette — is an order, not a
+ * guess: it runs without the intent model being asked, and it is still checked
+ * against the whitelist, because "the caller said so" is exactly what a
+ * hallucinated or forged tool id sounds like. A `Set` lookup, so `constructor`
+ * and friends cannot answer "yes".
+ */
+export function explicitIntent(runTool: unknown, runParams?: unknown): RoutedIntent | null {
+  if (typeof runTool !== "string") return null;
+  const toolName = runTool.trim();
+  if (!ALLOWED.has(toolName)) return null;
+  const params =
+    runParams && typeof runParams === "object" && !Array.isArray(runParams)
+      ? (runParams as Record<string, unknown>)
+      : {};
+  return { toolName, params };
+}
+
 const SYSTEM = `أنت موجّه نوايا لوكيل "قيّم الدار" لموقع أثاث مصري. المستخدم يكتب بالعامية المصرية بأي صياغة.
 مهمتك: تقرر لو رسالته تطلب أداة من القائمة دي. اختَر أداة واحدة أو none.
 

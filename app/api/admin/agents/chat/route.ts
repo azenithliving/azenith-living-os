@@ -24,6 +24,10 @@ const chatSchema = z.object({
   message: z.string().min(1).max(4000),
   context: z.record(z.string(), z.any()).optional(),
   session_id: z.string().optional(),
+  /** P6-M6: a command-palette click names its tool. Whitelisted downstream by
+   * `explicitIntent` — anything invented here is refused, never executed. */
+  run_tool: z.string().max(80).optional(),
+  run_params: z.record(z.string(), z.any()).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -38,11 +42,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { agent_key, message, context, session_id } = parseResult.data;
+    const { agent_key, message, context, session_id, run_tool, run_params } = parseResult.data;
 
     const result = await agentOrchestrator.chat(agent_key as AgentType, message, {
       ...context,
       session_id,
+      run_tool,
+      run_params,
     });
 
     await agentOrchestrator.logEvent(

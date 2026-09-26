@@ -27,18 +27,18 @@ export type QayyimTab = 'overview' | 'operations' | 'improvement' | 'monitoring'
 const TABS: Array<{ key: QayyimTab; label: string; icon: any; hint: string }> = [
   { key: 'overview',    label: 'نظرة عامة', icon: Brain,      hint: 'صحة السرب الآن: كروت الوكلاء، الأرقام الحية، اقتراحاته المبنية على قياس، وأهدافك.' },
   { key: 'operations',  label: 'العمليات',  icon: ShieldCheck, hint: 'دورة العمل: تقرير التدقيق الشامل ← المسودات وبوابة الجودة ← النشر بموافقتك.' },
-  { key: 'improvement', label: 'التحسين',   icon: FlaskConical, hint: 'التجارب A/B الجارية ومعايير الجودة التي تُقاس عليها.' },
+  { key: 'improvement', label: 'التحسين',   icon: FlaskConical, hint: 'التجارب المقارنة الجارية ومعايير الجودة التي تُقاس عليها.' },
   { key: 'monitoring',  label: 'المراقبة',  icon: Activity,    hint: 'نبض النظام الحي: لوحة الرصد، تيليمتري الزوار، وأحداث السرب لحظيًا.' },
 ];
 
 const SWARM: Array<{ key: string; name: string; role: string; icon: string; color: string }> = [
   { key: 'qayyim-core', name: 'مدير تشغيل المحتوى',        role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع، بوابة جودة', icon: '👑', color: 'amber' },
   { key: 'qayyim-cont', name: 'المحتوى',       role: 'كتابة فاخرة، توحيد نبرة، قانون هوية',            icon: '✍️', color: 'rose' },
-  { key: 'qayyim-vis',  name: 'المرئيات',      role: 'انتقاء صور، هيرو، alt text، علامة مميزة',        icon: '🖼️', color: 'violet' },
-  { key: 'qayyim-seo',  name: 'الظهور (SEO)',  role: 'زحف حقيقي للصفقات، عناوين، Schema، فجوات',       icon: '🔍', color: 'sky' },
-  { key: 'qayyim-ux',   name: 'التجربة',       role: 'سلوك زائر، تحويل، تجارب A/B',                     icon: '🎯', color: 'emerald' },
-  { key: 'qayyim-ana',  name: 'التحليلات',     role: 'إيرادات، Luxury Score، أهداف مهددة',              icon: '📈', color: 'cyan' },
-  { key: 'qayyim-dev',  name: 'التطوير',       role: 'أداء، مسارات API، جودة الكود',                    icon: '⚡', color: 'orange' },
+  { key: 'qayyim-vis',  name: 'المرئيات',      role: 'انتقاء صور، صورة علوية، أوصاف الصور، علامة مميزة',        icon: '🖼️', color: 'violet' },
+  { key: 'qayyim-seo',  name: 'الظهور',  role: 'زحف حقيقي للصفحات، عناوين، بيانات منظمة، فجوات',       icon: '🔍', color: 'sky' },
+  { key: 'qayyim-ux',   name: 'التجربة',       role: 'سلوك زائر، تحويل، تجارب مقارنة',                     icon: '🎯', color: 'emerald' },
+  { key: 'qayyim-ana',  name: 'التحليلات',     role: 'إيرادات، مؤشر الفخامة، أهداف مهددة',              icon: '📈', color: 'cyan' },
+  { key: 'qayyim-dev',  name: 'التطوير',       role: 'أداء، مسارات الخدمات، جودة الكود',                    icon: '⚡', color: 'orange' },
   { key: 'qayyim-qa',   name: 'الجودة',        role: 'اختبار حمل حقيقي، رؤوس أمان، إمكانية وصول',       icon: '🧪', color: 'lime' },
 ];
 
@@ -188,7 +188,7 @@ export function QayyimStudio() {
                   <StatCard label="مسودات نشطة" value={stats?.activeDrafts ?? '—'} icon={ShieldCheck} tone="sky" />
                   <StatCard label="تجارب جارية" value={stats?.runningExperiments ?? '—'} icon={FlaskConical} tone="violet" />
                   <StatCard label="اقتراحات معلقة" value={stats?.pendingSuggestions ?? '—'} icon={Sparkles} tone="rose" />
-                  <StatCard label="Luxury Score" value={stats?.luxuryScore ?? '—'} icon={Gauge} tone="emerald" />
+                  <StatCard label="مؤشر الفخامة" value={stats?.luxuryScore ?? '—'} icon={Gauge} tone="emerald" />
                 </div>
 
                 <QayyimProactiveSuggestions />

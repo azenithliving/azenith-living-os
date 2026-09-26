@@ -291,10 +291,12 @@ export function inferUltimateTool(
 
   if (/تذكّ?ر|remember/i.test(lower)) return null;
 
-  if (/صلح.*seo|fix.*seo|seo_fix|مشاكل.*seo|أصلح.*seo/i.test(lower)) {
+  if (/صلح.*seo|fix.*seo|seo_fix|مشاكل.*seo|أصلح.*seo|إصلاح.*ظهور|صلح.*ظهور/i.test(lower)) {
     return { toolName: "seo_fix_issues", params: { url, autoFixAll: true } };
   }
-  if (/seo|تحسين.*بحث|محركات|meta\s*tags/i.test(lower) && !/fix|صلح/i.test(lower)) {
+  // «الظهور» is what the Arabic interface calls this capability, so the spoken
+  // word has to route too — an owner repeats the label he sees on screen.
+  if (/seo|تحسين.*بحث|محركات|meta\s*tags|ظهور/i.test(lower) && !/fix|صلح|إصلاح/i.test(lower)) {
     return { toolName: "seo_analyze", params: { url } };
   }
 

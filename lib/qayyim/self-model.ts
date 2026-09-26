@@ -9,6 +9,7 @@ import "server-only";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 import { AGENT_ROLES } from "./agent-roles";
 import { TOOL_CATALOG } from "@/lib/agents/intent-router";
+import type { SelfModelView } from "./self-view";
 
 export interface SelfModel {
   generatedAt: string;
@@ -142,6 +143,28 @@ export function renderSelfReport(m: SelfModel): string {
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+/** The client shape: Arabic labels decided here, foreign identifiers dropped, so
+ * no browser code translates a key and no Latin token can land inside an Arabic
+ * sentence on the owner's screen. */
+export function toSelfView(m: SelfModel): SelfModelView {
+  return {
+    generatedAt: m.generatedAt,
+    title: m.title,
+    brand: m.brand,
+    agents: m.agents,
+    tools: m.tools,
+    limits: m.limits,
+    organs: m.organs.map((o) => ({ label: o.label, cadence: o.cadence })),
+    counters: m.counters
+      ? (Object.keys(COUNTER_LABELS) as CounterKey[]).map((k) => ({
+          label: COUNTER_LABELS[k],
+          value: m.counters?.[k] ?? null,
+        }))
+      : undefined,
+    dataGaps: m.dataGaps,
+  };
 }
 
 export function renderIdentityLine(agentKey: string, m: SelfModel): string {

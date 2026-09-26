@@ -1,12 +1,26 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { 
   Send, Bot, User, Loader2, Sparkles, ThumbsUp, ThumbsDown, 
-  Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers
+  Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff
 } from 'lucide-react';
 import { AGENT_ROLES } from '@/lib/qayyim/agent-roles';
+import { CommandPalette } from './CommandPalette';
+import { SelfModelPanel } from './SelfModelPanel';
+import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/qayyim/palette';
+import type { SelfModelView } from '@/lib/qayyim/self-view';
+import {
+  CONTINUOUS_SILENCE_MS,
+  createDictation,
+  dueToSend,
+  markSent,
+  record,
+  shouldRestart,
+  stopDictation as stopDictationState,
+  transcriptOf,
+} from '@/lib/qayyim/voice-continuous';
 
 export interface Message {
   id: string;
@@ -38,12 +52,12 @@ const AGENT_METADATA: Record<string, { name: string; role: string; icon: string;
   // ── سرب قيّم الدار (8 وكلاء) ───────────────────────────────────
   'qayyim-core': { name: 'مدير تشغيل المحتوى — قيّم الدار',     role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع',   icon: '👑', color: 'amber' },
   'qayyim-cont': { name: 'قيّم الدار — المحتوى',    role: 'كتابة فاخرة، توحيد نبرة، قانون هوية',  icon: '✍️', color: 'rose' },
-  'qayyim-vis':  { name: 'قيّم الدار — المرئيات',   role: 'انتقاء صور، هيرو، alt text، علامة',    icon: '🖼️', color: 'violet' },
-  'qayyim-seo':  { name: 'قيّم الدار — الظهور',     role: 'تدقيق SEO، Schema، فجوات، منافسين',   icon: '🔍', color: 'sky' },
-  'qayyim-ux':   { name: 'قيّم الدار — التجربة',    role: 'سلوك زائر، تحويل، A/B testing',       icon: '🎯', color: 'emerald' },
-  'qayyim-ana':  { name: 'قيّم الدار — التحليلات',  role: 'إيرادات، تنبؤ تحويل، Luxury Score',   icon: '📈', color: 'cyan' },
-  'qayyim-dev':  { name: 'قيّم الدار — التطوير',    role: 'أداء، bundle، code quality gate',      icon: '⚡', color: 'orange' },
-  'qayyim-qa':   { name: 'قيّم الدار — الجودة',     role: 'E2E، visual regression، a11y',        icon: '🧪', color: 'lime' },
+  'qayyim-vis':  { name: 'قيّم الدار — المرئيات',   role: 'انتقاء صور، صورة علوية، أوصاف الصور، علامة',    icon: '🖼️', color: 'violet' },
+  'qayyim-seo':  { name: 'قيّم الدار — الظهور',     role: 'تدقيق الظهور، بيانات منظمة، فجوات، منافسين',   icon: '🔍', color: 'sky' },
+  'qayyim-ux':   { name: 'قيّم الدار — التجربة',    role: 'سلوك زائر، تحويل، تجارب مقارنة',       icon: '🎯', color: 'emerald' },
+  'qayyim-ana':  { name: 'قيّم الدار — التحليلات',  role: 'إيرادات، تنبؤ تحويل، مؤشر الفخامة',   icon: '📈', color: 'cyan' },
+  'qayyim-dev':  { name: 'قيّم الدار — التطوير',    role: 'أداء، حجم الحزمة، بوابة جودة الكود',      icon: '⚡', color: 'orange' },
+  'qayyim-qa':   { name: 'قيّم الدار — الجودة',     role: 'اختبارات شاملة، مقارنة بصرية، وصول',        icon: '🧪', color: 'lime' },
   // ── alias للتوافق مع القديم ─────────────────────────────────────
   prime:    { name: 'قيّم الدار', role: 'قيّم إطلالة أزينث على الموقع', icon: '🧠', color: 'purple' },
   // ── وكلاء العمليات ──────────────────────────────────────────────
@@ -59,7 +73,7 @@ const AGENT_MISSIONS: Record<string, string[]> = {
   prime: [
     'افحص صحة محتوى الصفحة الرئيسية',
     'اعرض المنتجات',
-    'حلّل SEO للموقع',
+    'حلّل ظهور الموقع',
   ],
   vanguard: [
     'اعرض قائمة العملاء',
@@ -73,7 +87,7 @@ const AGENT_MISSIONS: Record<string, string[]> = {
   ],
   coder: [
     'فحص صحة النظام التقني',
-    'فحص مسارات الـ API',
+    'فحص مسارات الخدمات',
     'تدقيق سرعة الاستجابة',
   ],
   ops: [
@@ -82,7 +96,7 @@ const AGENT_MISSIONS: Record<string, string[]> = {
     'تدقيق سرعة الأداء',
   ],
   security: [
-    'فحص مفاتيح الـ API',
+    'فحص مفاتيح الخدمات',
     'تدقيق الأمان والامتثال',
     'فحص سجل الأوامر المحصن',
   ],
@@ -115,7 +129,7 @@ function InlineDraftPreview({ previewUrl, onApprove, onReject, onBetter }: { pre
   return (
     <div className="mt-3 rounded-xl border border-white/10 overflow-hidden bg-black/20">
       <div className="flex items-center justify-between px-3 py-2 bg-white/5 border-b border-white/10">
-        <span className="text-[11px] font-bold text-white/70">معاينة قبل / بعد — حقيقية من DB</span>
+        <span className="text-[11px] font-bold text-white/70">معاينة قبل وبعد — حقيقية من قاعدة البيانات</span>
         <a href={previewUrl} target="_blank" className="text-[10px] text-sky-300 hover:underline">فتح كامل ↗</a>
       </div>
       {isImage && beforeImg && afterImg ? (
@@ -219,6 +233,46 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   const [isListening, setIsListening] = useState(false);
   const [ttsOn, setTtsOn] = useState(false);
   const recognitionRef = useRef<any>(null);
+
+  // ── P6-M6: القائمة والأمر والذات ─────────────────────────────────
+  // The palette and the self screen both read the swarm's live self-model, so a
+  // capability that left the registry stops being offerable here.
+  const [selfModel, setSelfModel] = useState<SelfModelView | null>(null);
+  const [selfLoading, setSelfLoading] = useState(false);
+  const [selfError, setSelfError] = useState<string | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [selfOpen, setSelfOpen] = useState(false);
+  const selfLoadedRef = useRef(false);
+
+  const [isDictating, setIsDictating] = useState(false);
+  const dictationRef = useRef(createDictation(Date.now(), false));
+  const dictationRecRef = useRef<any>(null);
+  const dictationTimerRef = useRef<any>(null);
+  const stoppedByOwnerRef = useRef(false);
+
+  const loadSelf = useCallback(async (force = false) => {
+    if (selfLoadedRef.current && !force) return;
+    setSelfLoading(true);
+    setSelfError(null);
+    try {
+      const res = await fetch('/api/admin/qayyim/self');
+      const data = await res.json();
+      if (!data?.success || !data.model) throw new Error(data?.error || 'رد غير مفهوم');
+      selfLoadedRef.current = true;
+      setSelfModel(data.model);
+    } catch (err: any) {
+      // A failed read has to be retryable, or one cold start freezes the palette
+      // on an empty list for the rest of the session.
+      setSelfError(`مقدرتش أقرأ القدرات الحيّة — ${err?.message || 'خطأ في الاتصال'}`);
+    } finally {
+      setSelfLoading(false);
+    }
+  }, []);
+
+  const paletteCommands = useMemo(
+    () => buildPalette(selfModel).filter((c) => !c.agentKey || c.agentKey !== agentKey.toLowerCase()),
+    [selfModel, agentKey],
+  );
 
   // P5-M4: speak agent replies when the speaker toggle is on (Web Speech, $0)
   const speak = useCallback((text: string) => {
@@ -396,7 +450,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
     return () => clearInterval(interval);
   }, [fetchMessages]);
 
-  const sendMessage = async (messageText?: string) => {
+  const sendMessage = async (messageText?: string, runTool?: string) => {
     const textToSend = (messageText || input).trim();
     if (!textToSend || isTyping) return;
 
@@ -424,6 +478,9 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           agent_key: agentKey,
           message: textToSend,
           session_id: sessionIdRef.current,
+          // A palette click names its tool: the server runs that exact tool
+          // instead of interpreting the Arabic label.
+          ...(runTool ? { run_tool: runTool } : {}),
         }),
         signal: controller.signal,
       });
@@ -472,6 +529,146 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
     }
   };
 
+  // ── P6-M6: إملاء مستمر بباب صمت ────────────────────────────────
+  // The single-utterance mic above answers one sentence and closes. This mode
+  // stays open while he dictates a whole thought, and the silence gate in
+  // `lib/qayyim/voice-continuous.ts` decides when a pause means «ابعت».
+  const stopDictation = useCallback((flush = true) => {
+    stoppedByOwnerRef.current = true;
+    if (dictationTimerRef.current) {
+      clearInterval(dictationTimerRef.current);
+      dictationTimerRef.current = null;
+    }
+    const rec = dictationRecRef.current;
+    if (rec) {
+      try {
+        rec.stop();
+      } catch {
+        /* already closed */
+      }
+    }
+    dictationRecRef.current = null;
+    const { dictation, leftover } = stopDictationState(dictationRef.current);
+    dictationRef.current = dictation;
+    setIsDictating(false);
+    if (!leftover) return;
+    if (flush) {
+      setInput('');
+      sendMessage(leftover);
+    } else {
+      setInput(leftover);
+    }
+  }, []);
+
+  const startDictation = useCallback(() => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      setError('التعرف الصوتي غير مدعوم في هذا المتصفح');
+      return;
+    }
+    if (isDictating) {
+      stopDictation();
+      return;
+    }
+    // The two mics fight over one microphone — drop the single-sentence one.
+    if (isListening) {
+      try {
+        recognitionRef.current?.stop();
+      } catch {
+        /* ignore */
+      }
+      setIsListening(false);
+    }
+    stoppedByOwnerRef.current = false;
+    dictationRef.current = createDictation(Date.now(), true);
+    setInput('');
+    const rec = new SR();
+    rec.lang = 'ar-EG';
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.onresult = (ev: any) => {
+      const heard = transcriptOf(ev);
+      dictationRef.current = record(dictationRef.current, heard, Date.now());
+      // He reads what has been understood, including the words still being heard.
+      setInput(`${dictationRef.current.pending}${heard.interimText}`);
+    };
+    rec.onerror = (ev: any) => {
+      if (ev?.error === 'not-allowed' || ev?.error === 'service-not-allowed') {
+        setError('المتصفح مانع الميكروفون — اسمح به من إعدادات الموقع ثم جرّب');
+        stopDictation(false);
+      }
+    };
+    rec.onend = () => {
+      // Chrome closes a session by itself after a pause. While he is still
+      // dictating that is a restart, not the end of the mode.
+      if (shouldRestart({ armed: dictationRef.current.armed, stoppedByOwner: stoppedByOwnerRef.current })) {
+        try {
+          rec.start();
+        } catch {
+          /* still starting */
+        }
+        return;
+      }
+      dictationRecRef.current = null;
+      setIsDictating(false);
+      if (dictationTimerRef.current) {
+        clearInterval(dictationTimerRef.current);
+        dictationTimerRef.current = null;
+      }
+    };
+    dictationRecRef.current = rec;
+    try {
+      rec.start();
+    } catch {
+      /* start is idempotent per browser spec, but a double tap is a real thing */
+    }
+    setIsDictating(true);
+    if (dictationTimerRef.current) clearInterval(dictationTimerRef.current);
+    dictationTimerRef.current = setInterval(() => {
+      const due = dueToSend(dictationRef.current, Date.now(), CONTINUOUS_SILENCE_MS);
+      if (!due) return;
+      dictationRef.current = markSent(dictationRef.current, Date.now());
+      setInput('');
+      sendMessage(due);
+    }, 250);
+  }, [isDictating, isListening, stopDictation]);
+
+  useEffect(
+    () => () => {
+      // A dictation left running when the panel unmounts keeps the microphone lit.
+      stoppedByOwnerRef.current = true;
+      if (dictationTimerRef.current) clearInterval(dictationTimerRef.current);
+      try {
+        dictationRecRef.current?.abort?.();
+      } catch {
+        /* ignore */
+      }
+    },
+    [],
+  );
+
+  const openPalette = useCallback(() => {
+    setSelfOpen(false);
+    setPaletteOpen(true);
+    loadSelf();
+  }, [loadSelf]);
+
+  const runPaletteCommand = useCallback(
+    (cmd: PaletteCommand) => {
+      if (cmd.href) {
+        window.location.assign(cmd.agentKey ? `${cmd.href}?agent=${encodeURIComponent(cmd.agentKey)}` : cmd.href);
+        return;
+      }
+      if (cmd.kind === 'view') {
+        setSelfOpen(true);
+        loadSelf(true);
+        return;
+      }
+      if (cmd.send) sendMessage(cmd.send, cmd.runTool);
+    },
+    [loadSelf],
+  );
+
   // ── تنفيذ المهمة المبدئية إن وجدت ─────────────────────────────────
   useEffect(() => {
     if (initialMessage && !initialTriggerRef.current) {
@@ -503,7 +700,16 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   const missions = AGENT_ROLES[agentKey.toLowerCase()] || AGENT_MISSIONS[agentKey.toLowerCase()] || [];
 
   return (
-    <div className={`bg-white/[0.02] border ${colors.border} ${fullScreen ? 'h-full rounded-none border-0' : 'rounded-[2rem] h-[520px]'} flex flex-col overflow-hidden shadow-2xl relative`}>
+    <div
+      onKeyDown={(e) => {
+        if (isPaletteHotkey(e)) {
+          e.preventDefault();
+          if (paletteOpen) setPaletteOpen(false);
+          else openPalette();
+        }
+      }}
+      className={`bg-white/[0.02] border ${colors.border} ${fullScreen ? 'h-full rounded-none border-0' : 'rounded-[2rem] h-[520px]'} flex flex-col overflow-hidden shadow-2xl relative`}
+    >
       {/* Header */}
       <div className={`p-4 border-b ${colors.border} flex items-center justify-between ${colors.bg}`}>
         <div className="flex items-center gap-3">
@@ -529,6 +735,23 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={openPalette}
+            title="قائمة الأوامر (اضغط كترل وك)"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-[11px] font-semibold transition-colors"
+          >
+            <Command className="w-3.5 h-3.5" />
+            أوامر
+            <span className="text-[9px] font-mono text-white/30" dir="ltr">Ctrl K</span>
+          </button>
+          <button
+            onClick={() => { setSelfOpen(true); loadSelf(true); }}
+            title="اسأل عن نفسك: القدرات والحدود والعدادات"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-[11px] font-semibold transition-colors"
+          >
+            <Fingerprint className="w-3.5 h-3.5" />
+            نفسك
+          </button>
           <button
             onClick={() => setShowRoles(!showRoles)}
             title="أدوار وقدرات الوكيل"
@@ -606,7 +829,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             <Bot className={`w-12 h-12 ${colors.text} mx-auto opacity-30`} />
             <p className="text-white/40 text-sm font-bold">ابدأ محادثة تشغيلية مع {agentName || agentKey}</p>
             <p className="text-white/25 text-xs max-w-sm mx-auto">
-              يمكنك طلب تنفيذ عمليات مباشرة على قاعدة البيانات، أو فحص المخزون، أو حساب الـ BOM، أو توليد العقود.
+              يمكنك طلب تنفيذ عمليات مباشرة على قاعدة البيانات، أو فحص المخزون، أو حساب قائمة الخامات، أو توليد العقود.
             </p>
             <div className="flex flex-wrap justify-center gap-2 pt-2">
               {missions.map((mission, idx) => (
@@ -732,11 +955,21 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           </button>
           <button
             onClick={toggleMic}
-            disabled={isTyping}
-            title={isListening ? 'إيقاف الاستماع' : 'تكلّم بالعامية (ar-EG)'}
+            disabled={isTyping || isDictating}
+            title={isListening ? 'إيقاف الاستماع' : 'تكلّم بالعامية (ارفع الميك بعد الجملة)'}
             className={`px-3 py-2.5 border rounded-xl flex items-center justify-center disabled:opacity-30 ${isListening ? 'bg-rose-600/30 border-rose-500/50 text-rose-200 animate-pulse' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'}`}
           >
             🎙️
+          </button>
+          <button
+            onClick={startDictation}
+            disabled={isTyping}
+            title="إملاء مستمر: اتكلم براحتك، والرسالة بتتبان بعد سكوتة قصيرة"
+            data-dictation={isDictating ? 'on' : 'off'}
+            className={`px-3 py-2.5 border rounded-xl flex items-center gap-1 text-[11px] font-bold disabled:opacity-30 ${isDictating ? 'bg-emerald-600/30 border-emerald-500/50 text-emerald-200' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'}`}
+          >
+            {isDictating ? <MicOff className="w-3.5 h-3.5" /> : <span>🎙</span>}
+            {isDictating ? 'إيقاف' : 'مستمر'}
           </button>
           <button
             onClick={() => setTtsOn(v => !v)}
@@ -780,8 +1013,26 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             {isTyping ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4 rtl:rotate-180" />}
           </button>
         </div>
-        <div className="text-[10px] text-white/20 mt-1.5 text-center">تلميح: الصق سكرين شوت `Ctrl+V` أو اسحب صورة هنا — أفهمها وأحدد موقعها تلقائياً</div>
+        <div className="text-[10px] text-white/20 mt-1.5 text-center">تلميح: الصق صورة بمفتاح اللصق أو اسحبها هنا — أفهمها وأحدد موقعها تلقائياً</div>
       </div>
+
+      <SelfModelPanel
+        open={selfOpen}
+        model={selfModel}
+        loading={selfLoading}
+        error={selfError}
+        onClose={() => setSelfOpen(false)}
+      />
+
+      {paletteOpen && (
+        <CommandPalette
+          commands={paletteCommands}
+          loading={selfLoading && !selfModel}
+          error={selfError && !selfModel ? selfError : null}
+          onPick={runPaletteCommand}
+          onClose={() => setPaletteOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -956,7 +1207,7 @@ function StructuredToolCard({ toolName, toolData }: { toolName: string; toolData
             className="text-[10px] text-white/40 hover:text-white/70 flex items-center gap-1 cursor-pointer font-mono"
           >
             {showJson ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            {showJson ? 'إخفاء البيانات' : 'فحص السجل (DB)'}
+            {showJson ? 'إخفاء البيانات' : 'فحص سجل قاعدة البيانات'}
           </button>
         )}
       </div>

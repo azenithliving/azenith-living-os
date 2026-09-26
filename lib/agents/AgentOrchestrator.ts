@@ -8,7 +8,7 @@ import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 import { askGroqMessages, askGoogle, askGoogleMessages, askOpenRouter, askMistral } from "@/lib/ai-orchestrator";
 import { runUltimateTool } from "@/lib/admin-tool-bridge";
-import { routeIntent, TOOL_CATALOG } from "@/lib/agents/intent-router";
+import { routeIntent, explicitIntent, TOOL_CATALOG } from "@/lib/agents/intent-router";
 import { recallMemory, finalizeReply } from "@/lib/qayyim/chat-brain";
 import { critiqueAndPolish, shouldDebate } from "@/lib/qayyim/debate";
 import { withOwnerRuleOnMessages } from "@/lib/qayyim/owner-address";
@@ -277,8 +277,13 @@ export class AgentOrchestrator {
       // P5-R1: dialect-first routing (regex fast-path, then LLM intent map).
       // Site-wide audit requests must reach the audit shortcut / swarm, never
       // be hijacked into a single narrow tool.
+      // P6-M6: unless the interface named the tool. A command-palette click is an
+      // order with a whitelist check on it, not a sentence to interpret — so it
+      // wins, and no intent model is called at all.
       const isSiteAudit = selectedAgent === "qayyim-core" && /افحص الموقع|الموقع كله|تقرير.*(تنفيذي|شامل)|دقّق.*شامل|audit.*site/i.test(message);
-      const inferredTool = isSiteAudit ? null : await routeIntent(message);
+      const explicitTool = explicitIntent(context?.run_tool, context?.run_params);
+      const inferredTool =
+        explicitTool ?? (isSiteAudit ? null : await routeIntent(message));
       let toolResult: any = null;
       let toolContextStr = "";
 

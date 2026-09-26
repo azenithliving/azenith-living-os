@@ -6,6 +6,7 @@ import { inferUltimateTool } from '@/lib/admin-tool-bridge';
 import {
   buildSelfModel,
   renderSelfReport,
+  toSelfView,
   renderIdentityLine,
   AUTONOMOUS_ORGANS,
   type SelfModel,
@@ -78,6 +79,24 @@ describe('self-model', () => {
     expect(m.tools.length).toBeGreaterThan(10);
     expect(m.counters).toBeUndefined();
     expect(renderSelfReport(m)).toContain('العدادات غير متاحة');
+  });
+
+  /**
+   * The browser gets Arabic labels it never has to translate, and no module
+   * path: `source` exists so the organ list can be grepped against the daily
+   * round, and it stays on the server with the rest of the internals.
+   */
+  it('ships a client view whose counters arrive labelled in Arabic', async () => {
+    const view = toSelfView(fixture);
+    expect(view.counters).toEqual([
+      { label: 'مسودات معلقة', value: 3 },
+      { label: 'أهداف نشطة', value: 0 },
+      { label: 'تعلّمات مسجّلة', value: 5 },
+      { label: 'حدث آخر 24 ساعة', value: 12 },
+    ]);
+    expect(view.organs.every((o) => !('source' in o))).toBe(true);
+    expect(JSON.stringify(view)).not.toContain('@/lib/');
+    expect(toSelfView({ ...fixture, counters: undefined }).counters).toBeUndefined();
   });
 });
 
