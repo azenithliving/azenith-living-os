@@ -900,7 +900,9 @@ export class AzenithPrime {
           title: `فرصة ذهبية: ${opp.title}`,
           body: opp.philosophy.substring(0, 100) + "...",
           priority: "high",
-          actionUrl: `/admin/sovereign/opportunities/${opp.id}`,
+          // No action link: nothing in the app renders an opportunity, and a
+          // button that opens a page that was never built teaches the owner to
+          // ignore the ones that work.
         });
       }
     }

@@ -47,32 +47,33 @@ export default function Home() {
   // Empty initial images (client will fetch)
   const initialRoomImages = {};
 
-  // Minimal placeholder while mounting (avoids hydration mismatch)
-  if (!mounted) {
-    return (
-      <div style={{ background: '#000', height: '100vh', width: '100vw' }} />
-    );
-  }
-
+  // The crawlable document must not depend on JavaScript. Rendering everything
+  // only after mount handed every crawler a black empty div — no headline, no
+  // text, no links — which is what "crawled, not indexed" is made of. So the
+  // words are server-rendered, and only the parts that genuinely need a browser
+  // (the video backdrop and the fetched inventory) wait for the client.
   return (
     <main id="main-content" className="relative min-h-screen">
       <a
         href="#inventory-section"
         className="sr-only absolute right-4 top-4 z-[120] rounded-full bg-white px-4 py-2 text-sm font-medium text-black focus:not-sr-only"
+        suppressHydrationWarning
       >
         {isRTL ? "تجاوز إلى المحتوى" : "Skip to content"}
       </a>
 
-      <div className="fixed inset-0 w-full h-full -z-10">
-        <AzenithLegacy />
-      </div>
+      {mounted && (
+        <div className="fixed inset-0 w-full h-full -z-10">
+          <AzenithLegacy />
+        </div>
+      )}
 
       <Hero />
 
       <div className="relative">
         <section className="relative z-10 min-h-screen w-full border-t border-white/10 bg-black/40 backdrop-blur-md md:mx-auto md:max-w-7xl">
           <div id="inventory-section" className="relative z-20 pt-8">
-            <HomePageClient runtimeConfig={runtimeConfig} initialRoomImages={initialRoomImages} />
+            {mounted && <HomePageClient runtimeConfig={runtimeConfig} initialRoomImages={initialRoomImages} />}
           </div>
 
           <section className="relative z-20 mx-auto max-w-6xl px-6 py-16 md:px-10" aria-labelledby="seo-entry-title">
