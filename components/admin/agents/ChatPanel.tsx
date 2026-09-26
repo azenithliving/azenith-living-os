@@ -18,6 +18,7 @@ import {
   markSent,
   record,
   shouldRestart,
+  speakableSummary,
   stopDictation as stopDictationState,
   transcriptOf,
 } from '@/lib/qayyim/voice-continuous';
@@ -274,18 +275,15 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
     [selfModel, agentKey],
   );
 
-  // P5-M4: speak agent replies when the speaker toggle is on (Web Speech, $0)
+  // P5-M4: speak agent replies when the speaker toggle is on (Web Speech, $0).
+  // P6-M6: it reads a summary and says that it did — a voice that recites a whole
+  // audit is a voice the owner switches off after one morning.
   const speak = useCallback((text: string) => {
     if (typeof window === 'undefined' || !window.speechSynthesis) return;
     try {
       window.speechSynthesis.cancel();
-      const clean = text
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')      // markdown links → label
-        .replace(/https?:\/\/\S+/g, 'رابط')
-        .replace(/[*#`>|]/g, '')
-        .replace(/[-—]{2,}/g, '،')
-        .replace(/\s+/g, ' ')
-        .slice(0, 500);
+      const clean = speakableSummary(text);
+      if (!clean) return;
       const utter = new SpeechSynthesisUtterance(clean);
       utter.lang = 'ar-EG';
       utter.rate = 0.95;

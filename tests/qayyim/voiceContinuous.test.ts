@@ -7,6 +7,7 @@ import {
   markSent,
   record,
   shouldRestart,
+  speakableSummary,
   stopDictation,
   transcriptOf,
 } from "@/lib/qayyim/voice-continuous";
@@ -97,9 +98,6 @@ describe("stopDictation", () => {
 });
 
 describe("restart rule", () => {
-  /** Chrome's recognizer ends by itself after a pause. In continuous mode that is
-   * a restart, not the end of the session — but only while the owner is armed, or
-   * the button would be lighting itself back up after he let go. */
   it("restarts when the recognizer stopped on its own mid-session", () => {
     expect(shouldRestart({ armed: true, stoppedByOwner: false })).toBe(true);
   });
@@ -107,5 +105,46 @@ describe("restart rule", () => {
   it("does not restart after the owner pressed stop, nor in single-utterance mode", () => {
     expect(shouldRestart({ armed: true, stoppedByOwner: true })).toBe(false);
     expect(shouldRestart({ armed: false, stoppedByOwner: false })).toBe(false);
+  });
+});
+
+/**
+ * The plan asked for «نطق ملخص لا كامل»: a voice that reads a whole audit out
+ * loud is a voice that gets switched off. So the summary is a decision with a
+ * rule, not a `slice(0, 500)` — it stops at a sentence, says what it left out,
+ * and never invents a shorter answer than the one on screen.
+ */
+describe("speakableSummary", () => {
+  it("passes a short reply through untouched apart from markdown noise", () => {
+    expect(speakableSummary("**الموقع شغال** تمام")).toBe("الموقع شغال تمام");
+  });
+
+  it("stops at a sentence boundary, not in the middle of a word", () => {
+    const long = "الصفحة الرئيسية تفتح في ثانيتين. " + "باقى الكلام طويل جداً ومش لازم يتنطق كله. وشكراً";
+    const out = speakableSummary(long, 40);
+    // The sentence ends at 34 characters of a 40 budget, and it still says it
+    // stopped: the owner must never hear a truncated reading as a complete one.
+    expect(out).toBe("الصفحة الرئيسية تفتح في ثانيتين.… كمّل في الشاشة");
+  });
+
+  it("says what it left out, so a short reading is not mistaken for a short answer", () => {
+    const long = "الأهداف المهددة: اتنين. " + "تفاصيل ".repeat(60);
+    const out = speakableSummary(long, 60);
+    expect(out).toContain("اتنين");
+    expect(out).toContain("كمّل في الشاشة");
+    expect(out.length).toBeLessThanOrEqual(60 + "… كمّل في الشاشة".length);
+  });
+
+  it("drops links to a word the owner can hear, and never returns silence for text", () => {
+    expect(speakableSummary("شوف https://azenith-living.vercel.app/rooms")).toContain("رابط");
+    expect(speakableSummary("   ")).toBe("");
+    expect(speakableSummary("")).toBe("");
+    expect(speakableSummary(null as unknown as string)).toBe("");
+  });
+
+  it("never reads Latin inline where an Arabic listener would hear noise", () => {
+    const out = speakableSummary("الأداة qa_load_probe قاست ٣ صفحات");
+    expect(out).not.toMatch(/[A-Za-z]{2,}/);
+    expect(out).toContain("قاست");
   });
 });

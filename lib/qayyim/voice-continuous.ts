@@ -82,6 +82,41 @@ export function shouldRestart(state: { armed: boolean; stoppedByOwner: boolean }
   return state.armed && !state.stoppedByOwner;
 }
 
+/** What the voice says when it stopped early. An omission has to be announced. */
+export const SPEAK_TRUNCATED_MARK = "كمّل في الشاشة";
+
+/**
+ * Turn an agent reply into something worth listening to.
+ *
+ * The screen can hold a whole audit; a speaker holding the owner in traffic
+ * cannot. So: markdown and links go, Latin identifiers go (they are unreadable
+ * out loud in an Arabic sentence), it stops at a sentence boundary inside the
+ * budget, and when anything was left behind the voice says so rather than
+ * sounding like a complete answer.
+ */
+export function speakableSummary(text: string | null | undefined, budget = 240): string {
+  if (!text) return "";
+  const clean = String(text)
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/https?:\/\/\S+/g, "رابط")
+    .replace(/[*#`>|_]/g, " ")
+    .replace(/[-—]{2,}/g, "،")
+    // Latin runs are unreadable spoken inside Arabic — the URL above already
+    // became «رابط». Digits stay: a number the owner cannot hear is no number.
+    .replace(/[A-Za-zÀ-ÿ_.\/-]{2,}/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!clean) return "";
+  if (clean.length <= budget) return clean;
+
+  const window = clean.slice(0, budget);
+  const lastStop = Math.max(window.lastIndexOf("."), window.lastIndexOf("؟"), window.lastIndexOf("!"));
+  const cut = lastStop >= Math.floor(budget / 3) ? window.slice(0, lastStop + 1) : window.slice(0, window.lastIndexOf(" ")).trim();
+  const said = cut.replace(/[،,\s-]+$/g, "");
+  return `${said}… ${SPEAK_TRUNCATED_MARK}`;
+}
+
 /**
  * Read a real `SpeechRecognitionEvent`. `results` is a live result list, not an
  * array, and each row is index-addressed — hence the defensive walk: the shapes
