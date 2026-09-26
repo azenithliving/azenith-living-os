@@ -1,5 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { buildApprovalRow, isUuid } from "@/lib/qayyim/approval-intake";
 
 /**
@@ -94,5 +96,23 @@ describe("buildApprovalRow", () => {
     for (const bad of [null, undefined, "x", 7, []]) {
       expect(buildApprovalRow(bad, null, NOW)).toEqual({ ok: false, error: "محتوى الطلب غير صالح" });
     }
+  });
+});
+
+/**
+ * The write side is only half of a decision surface: `approveRequest` and
+ * `rejectRequest` ran on the public anon client, and `approval_requests` is
+ * RLS-locked to an admin JWT claim a server route never has. Every lookup came
+ * back "not found" — on rows that were sitting right there. The queue reads
+ * through the service role, so the deciders must too, or the card tells the
+ * owner his refusal failed when it was never even looked up.
+ */
+describe("the deciders can see the rows they decide on", () => {
+  const src = readFileSync(resolve(process.cwd(), "lib/agent-tools/approval-system.ts"), "utf8");
+
+  it("uses the service-role client, not the public one", () => {
+    expect(src).toContain("@/lib/dal/unified-supabase");
+    expect(src).not.toMatch(/await createClient\(\)/);
+    expect(src.match(/const supabase = supabaseServer;/g)?.length).toBeGreaterThanOrEqual(4);
   });
 });

@@ -7,7 +7,12 @@
  * - Handles approval execution with real tools
  */
 
-import { createClient } from "@/lib/supabase-server";
+// The service-role client, not the public one: `approval_requests` is RLS-locked
+// to `auth.jwt()->>'role' = 'admin'`, and a server route holding the anon key
+// has no such claim — so every read answered "Approval request not found" on rows
+// that exist, and the owner's decision could never be recorded. This is the same
+// class of bug that silently killed the approval queue's own GET endpoint.
+import { supabaseServer } from "@/lib/dal/unified-supabase";
 import { TOOL_REGISTRY, executeTool, getTool, type ToolExecutionContext } from "./tool-registry";
 import { createExecutionRecord, updateExecutionRecord } from "./execution-tracker";
 import { logAuditEvent } from "@/lib/ultimate-agent/security-manager";
@@ -62,7 +67,7 @@ export function requiresApproval(toolName: string): boolean {
 export async function createApprovalRequest(
   input: CreateApprovalInput
 ): Promise<ApprovalResult> {
-  const supabase = await createClient();
+  const supabase = supabaseServer;
 
   try {
     const tool = getTool(input.toolName);
@@ -135,7 +140,7 @@ export async function getPendingApprovals(
   companyId?: string,
   limit: number = 50
 ): Promise<ApprovalRequest[]> {
-  const supabase = await createClient();
+  const supabase = supabaseServer;
 
   const query = supabase
     .from("approval_requests")
@@ -186,7 +191,7 @@ export async function approveRequest(
     error?: string;
   };
 }> {
-  const supabase = await createClient();
+  const supabase = supabaseServer;
 
   try {
     // Get approval request
@@ -301,7 +306,7 @@ export async function rejectRequest(
   success: boolean;
   message: string;
 }> {
-  const supabase = await createClient();
+  const supabase = supabaseServer;
 
   try {
     const { data: approval, error: fetchError } = await supabase
