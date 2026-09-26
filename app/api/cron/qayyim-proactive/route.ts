@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       // Create suggestion
       const { data: sug, error: sugErr } = await supabase.from("qayyim_suggestions").insert({
         company_id: companyId,
-        source_agent: "qayyim-core",
+        source_agent: "ops-lead",
         suggestion_type: issue.kind.includes("image") ? "image_fix" : issue.kind.includes("description") ? "identity_fix" : "content_gap",
         title: `${issue.detail} — ${issue.target}`,
         description: `${issue.detail} في ${issue.target} (${issue.path})`,
@@ -47,16 +47,16 @@ export async function GET(request: NextRequest) {
       if (sugErr) continue;
 
       // Create chat message from Qayyim (proactive) — appears in ChatPanel
-      // Find or create conversation for qayyim-core
+      // Find or create conversation for ops-lead
       let convId: string | null = null;
-      const { data: existingConv } = await supabase.from("agent_conversations").select("id").eq("company_id", companyId).contains("participants", ["qayyim-core"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      const { data: existingConv } = await supabase.from("agent_conversations").select("id").eq("company_id", companyId).contains("participants", ["ops-lead"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
       if (existingConv) convId = existingConv.id;
       else {
         const { data: newConv } = await supabase.from("agent_conversations").insert({
           company_id: companyId,
           title: "قيّم الدار — تنبيهات استباقية",
           conversation_type: "direct",
-          participants: ["qayyim-core"],
+          participants: ["ops-lead"],
           is_active: true,
         }).select("id").single();
         if (newConv) convId = newConv.id;

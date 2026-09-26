@@ -8,7 +8,7 @@ import {
   filterPalette,
   paletteSectionTitle,
   type PaletteCommand,
-} from '@/lib/qayyim/palette';
+} from '@/lib/ops/palette';
 
 /**
  * Ctrl/Cmd+K over the chat: every capability the swarm really has, searchable in

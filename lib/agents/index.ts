@@ -1,6 +1,6 @@
 /**
  * Agents Index - Qayyim Swarm only
- * PRIMEAgent completely replaced by Qayyim Swarm — qayyim-core is the new leader
+ * PRIMEAgent completely replaced by Qayyim Swarm — ops-lead is the new leader
  */
 
 export { CoderAgent, coderAgent } from "./CoderAgent";
@@ -19,7 +19,7 @@ export {
   QayyimDevAgent, qayyimDevAgent,
   QayyimQaAgent, qayyimQaAgent,
   MasterOrchestrator, masterOrchestrator,
-} from "@/lib/qayyim";
+} from "@/lib/ops";
 
 export { agentOrchestrator } from "./AgentOrchestrator";
 
@@ -27,5 +27,5 @@ export type { CoderTask, CoderResult } from "./CoderAgent";
 export type { SecurityTask, SecurityResult, Vulnerability } from "./SecurityAgent";
 export type { AnalystTask, AnalysisResult } from "./AnalystAgent";
 export type { OpsTask, OpsResult, HealthStatus } from "./OpsAgent";
-export type { QayyimTask, QayyimResult, QayyimAgentCapabilities } from "@/lib/qayyim/QayyimAgentBase";
+export type { QayyimTask, QayyimResult, QayyimAgentCapabilities } from "@/lib/ops/QayyimAgentBase";
 export type { AgentMessage, AgentOrchestratorResult, AgentType } from "./AgentOrchestrator";

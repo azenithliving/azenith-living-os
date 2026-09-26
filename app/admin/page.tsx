@@ -403,12 +403,12 @@ export default function AdminPage() {
             </h2>
             {(() => {
               const raw = mastermindData?.agents ?? {};
-              // دمج prime القديم في qayyim-core (Enterprise Moode) — لا تكرار
+              // دمج prime القديم في ops-lead (Enterprise Moode) — لا تكرار
               const merged: Record<string, any> = { ...raw };
               if (merged['prime']) {
                 const p = merged['prime'];
-                const q = merged['qayyim-core'] ?? { tasks: 0, completed: 0, failed: 0, avgTime: 0, successRate: 0 };
-                merged['qayyim-core'] = {
+                const q = merged['ops-lead'] ?? { tasks: 0, completed: 0, failed: 0, avgTime: 0, successRate: 0 };
+                merged['ops-lead'] = {
                   tasks: (q.tasks ?? 0) + (p.tasks ?? 0),
                   completed: (q.completed ?? 0) + (p.completed ?? 0),
                   failed: (q.failed ?? 0) + (p.failed ?? 0),
@@ -424,10 +424,10 @@ export default function AdminPage() {
                     <AgentStatusCard
                       key={agentKey}
                       agentKey={agentKey}
-                      agentName={agentKey === 'qayyim-core' ? 'مدير تشغيل المحتوى' : agentKey === 'qayyim' ? 'مدير تشغيل المحتوى' : agentKey}
-                      agentRole={agentKey === 'qayyim-core' ? 'واجهة موحدة — 7 خفيين' : 'سجل المهام الفعلي'}
-                      color={agentKey === 'qayyim-core' ? 'purple' : index % 2 === 0 ? 'emerald' : 'purple' as any}
-                      icon={agentKey === 'qayyim-core' ? "👑" : "💼"}
+                      agentName={agentKey === 'ops-lead' ? 'مدير تشغيل المحتوى' : agentKey === 'qayyim' ? 'مدير تشغيل المحتوى' : agentKey}
+                      agentRole={agentKey === 'ops-lead' ? 'واجهة موحدة — 7 خفيين' : 'سجل المهام الفعلي'}
+                      color={agentKey === 'ops-lead' ? 'purple' : index % 2 === 0 ? 'emerald' : 'purple' as any}
+                      icon={agentKey === 'ops-lead' ? "👑" : "💼"}
                       mastermindData={{ ...mastermindData, agents: merged }}
                     />
                   ))}

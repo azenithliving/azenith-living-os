@@ -6,8 +6,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { syncLayer } from "@/lib/qayyim/memory/SyncLayer";
-import { getCompanyId, getAgentInstance, DraftSchema } from "@/lib/qayyim/api/utils";
+import { syncLayer } from "@/lib/ops/memory/SyncLayer";
+import { getCompanyId, getAgentInstance, DraftSchema } from "@/lib/ops/api/utils";
 import { createQayyimDraft } from "@/lib/qayyim-ops";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 

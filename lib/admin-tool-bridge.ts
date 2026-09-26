@@ -103,7 +103,7 @@ export async function runUltimateTool(
 
   // ── P6-M1: the swarm reports on itself from live registries + counters ──
   if (toolName === "qayyim_whoami") {
-    const { buildSelfModel, renderSelfReport } = await import("@/lib/qayyim/self-model");
+    const { buildSelfModel, renderSelfReport } = await import("@/lib/ops/self-model");
     const model = await buildSelfModel(companyId ?? null);
     return {
       success: true,
@@ -119,7 +119,7 @@ export async function runUltimateTool(
 
   // ── P6-M2: the store's live situation, aggregated read-only ──
   if (toolName === "qayyim_world") {
-    const { buildWorldModel, renderWorldDigest } = await import("@/lib/qayyim/world-model");
+    const { buildWorldModel, renderWorldDigest } = await import("@/lib/ops/world-model");
     const world = await buildWorldModel(companyId ?? null);
     return {
       success: true,
@@ -140,7 +140,7 @@ export async function runUltimateTool(
   // correct terminal answer. Marking it failed would hand the question to the
   // LLM, which would answer with invented search phrases.
   if (toolName === "gsc_queries") {
-    const { fetchSearchQueries, renderGscResult } = await import("@/lib/qayyim/gsc");
+    const { fetchSearchQueries, renderGscResult } = await import("@/lib/ops/gsc");
     const r = await fetchSearchQueries();
     return {
       success: true,
@@ -151,7 +151,7 @@ export async function runUltimateTool(
 
   // ── P6-M2: competitor watch — stored measurements or an honest empty state ──
   if (toolName === "qayyim_rivals") {
-    const { latestRivalDigest } = await import("@/lib/qayyim/rivals");
+    const { latestRivalDigest } = await import("@/lib/ops/rivals");
     const digest = await latestRivalDigest(companyId ?? "");
     return { success: true, message: digest, data: { digest: true } };
   }
@@ -159,7 +159,7 @@ export async function runUltimateTool(
   // ── P6-M3: the forecast. Holt-Winters over the order ledger, and the error
   // the model makes on that ledger travels with the number.
   if (toolName === "qayyim_forecast") {
-    const { runRevenueForecast, renderForecast } = await import("@/lib/qayyim/forecast");
+    const { runRevenueForecast, renderForecast } = await import("@/lib/ops/forecast");
     const horizonDays = Number(params.horizonDays) > 0 ? Number(params.horizonDays) : 30;
     const f = await runRevenueForecast(companyId ?? null, { horizonDays });
     return {
@@ -206,7 +206,7 @@ export async function runUltimateTool(
 
   // ── P5: Qayyim measured probes — real numbers from realChecks/QA agents ──
   if (toolName === "qa_load_probe") {
-    const { qayyimQaAgent } = await import("@/lib/qayyim");
+    const { qayyimQaAgent } = await import("@/lib/ops");
     const res = await qayyimQaAgent.loadTest({
       scenarios: [
         { name: "الرئيسية", path: "/", method: "GET" },
@@ -223,17 +223,17 @@ export async function runUltimateTool(
     };
   }
   if (toolName === "qa_security_headers") {
-    const { qayyimQaAgent } = await import("@/lib/qayyim");
+    const { qayyimQaAgent } = await import("@/lib/ops");
     const res = await qayyimQaAgent.securityScan({ targetUrl: String(params.url || siteUrl()) });
     return { success: res.success, message: res.output, data: res.data || {} };
   }
   if (toolName === "qa_accessibility") {
-    const { qayyimQaAgent } = await import("@/lib/qayyim");
+    const { qayyimQaAgent } = await import("@/lib/ops");
     const res = await qayyimQaAgent.accessibilityAudit({ pages: ["/", "/rooms", "/furniture"] });
     return { success: res.success, message: res.output, data: res.data || {} };
   }
   if (toolName === "qayyim_luxury_score") {
-    const { runLuxuryScore } = await import("@/lib/qayyim/luxury-v2");
+    const { runLuxuryScore } = await import("@/lib/ops/luxury-v2");
     const r = await runLuxuryScore(companyId ?? null);
     return {
       success: r.luxury_score !== null,
@@ -245,7 +245,7 @@ export async function runUltimateTool(
     const { getSupabaseAdminClient } = await import("@/lib/supabase-admin");
     const supabase = companyId ? getSupabaseAdminClient() : null;
     if (!supabase) return { success: false, message: "لا يوجد اتصال بقاعدة البيانات لفحص الأهداف." };
-    const { assessGoals, renderGoalRisk } = await import("@/lib/qayyim/goal-risk");
+    const { assessGoals, renderGoalRisk } = await import("@/lib/ops/goal-risk");
     const { data, error } = await supabase
       .from("qayyim_goals")
       .select("id,name,target_value,current_value,deadline,status")

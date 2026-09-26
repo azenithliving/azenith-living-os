@@ -6,11 +6,11 @@ import {
   Send, Bot, User, Loader2, Sparkles, ThumbsUp, ThumbsDown, 
   Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff
 } from 'lucide-react';
-import { AGENT_ROLES } from '@/lib/qayyim/agent-roles';
+import { AGENT_ROLES } from '@/lib/ops/agent-roles';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
-import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/qayyim/palette';
-import type { SelfModelView } from '@/lib/qayyim/self-view';
+import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/ops/palette';
+import type { SelfModelView } from '@/lib/ops/self-view';
 import {
   CONTINUOUS_SILENCE_MS,
   createDictation,
@@ -21,7 +21,7 @@ import {
   speakableSummary,
   stopDictation as stopDictationState,
   transcriptOf,
-} from '@/lib/qayyim/voice-continuous';
+} from '@/lib/ops/voice-continuous';
 
 export interface Message {
   id: string;
@@ -51,14 +51,14 @@ interface ChatPanelProps {
 
 const AGENT_METADATA: Record<string, { name: string; role: string; icon: string; color: string }> = {
   // ── سرب قيّم الدار (8 وكلاء) ───────────────────────────────────
-  'qayyim-core': { name: 'مدير تشغيل المحتوى — قيّم الدار',     role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع',   icon: '👑', color: 'amber' },
-  'qayyim-cont': { name: 'قيّم الدار — المحتوى',    role: 'كتابة فاخرة، توحيد نبرة، قانون هوية',  icon: '✍️', color: 'rose' },
-  'qayyim-vis':  { name: 'قيّم الدار — المرئيات',   role: 'انتقاء صور، صورة علوية، أوصاف الصور، علامة',    icon: '🖼️', color: 'violet' },
-  'qayyim-seo':  { name: 'قيّم الدار — الظهور',     role: 'تدقيق الظهور، بيانات منظمة، فجوات، منافسين',   icon: '🔍', color: 'sky' },
-  'qayyim-ux':   { name: 'قيّم الدار — التجربة',    role: 'سلوك زائر، تحويل، تجارب مقارنة',       icon: '🎯', color: 'emerald' },
-  'qayyim-ana':  { name: 'قيّم الدار — التحليلات',  role: 'إيرادات، تنبؤ تحويل، مؤشر الفخامة',   icon: '📈', color: 'cyan' },
-  'qayyim-dev':  { name: 'قيّم الدار — التطوير',    role: 'أداء، حجم الحزمة، بوابة جودة الكود',      icon: '⚡', color: 'orange' },
-  'qayyim-qa':   { name: 'قيّم الدار — الجودة',     role: 'اختبارات شاملة، مقارنة بصرية، وصول',        icon: '🧪', color: 'lime' },
+  'ops-lead': { name: 'مدير تشغيل المحتوى — قيّم الدار',     role: 'تنسيق السرب، تدقيق شامل، نشر/تراجع',   icon: '👑', color: 'amber' },
+  'ops-content': { name: 'قيّم الدار — المحتوى',    role: 'كتابة فاخرة، توحيد نبرة، قانون هوية',  icon: '✍️', color: 'rose' },
+  'ops-visual':  { name: 'قيّم الدار — المرئيات',   role: 'انتقاء صور، صورة علوية، أوصاف الصور، علامة',    icon: '🖼️', color: 'violet' },
+  'ops-seo':  { name: 'قيّم الدار — الظهور',     role: 'تدقيق الظهور، بيانات منظمة، فجوات، منافسين',   icon: '🔍', color: 'sky' },
+  'ops-ux':   { name: 'قيّم الدار — التجربة',    role: 'سلوك زائر، تحويل، تجارب مقارنة',       icon: '🎯', color: 'emerald' },
+  'ops-analytics':  { name: 'قيّم الدار — التحليلات',  role: 'إيرادات، تنبؤ تحويل، مؤشر الفخامة',   icon: '📈', color: 'cyan' },
+  'ops-dev':  { name: 'قيّم الدار — التطوير',    role: 'أداء، حجم الحزمة، بوابة جودة الكود',      icon: '⚡', color: 'orange' },
+  'ops-qa':   { name: 'قيّم الدار — الجودة',     role: 'اختبارات شاملة، مقارنة بصرية، وصول',        icon: '🧪', color: 'lime' },
   // ── alias للتوافق مع القديم ─────────────────────────────────────
   prime:    { name: 'قيّم الدار', role: 'قيّم إطلالة أزينث على الموقع', icon: '🧠', color: 'purple' },
   // ── وكلاء العمليات ──────────────────────────────────────────────
@@ -530,7 +530,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   // ── P6-M6: إملاء مستمر بباب صمت ────────────────────────────────
   // The single-utterance mic above answers one sentence and closes. This mode
   // stays open while he dictates a whole thought, and the silence gate in
-  // `lib/qayyim/voice-continuous.ts` decides when a pause means «ابعت».
+  // `lib/ops/voice-continuous.ts` decides when a pause means «ابعت».
   const stopDictation = useCallback((flush = true) => {
     stoppedByOwnerRef.current = true;
     if (dictationTimerRef.current) {

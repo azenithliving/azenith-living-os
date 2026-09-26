@@ -668,7 +668,7 @@ export function UnifiedAssistant() {
             {/* agent status cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { key: "qayyim-core", name: "قيّم الدار", role: "قائد سرب القيّم — إطلالة الموقع", color: "amber"   as const },
+                { key: "ops-lead", name: "قيّم الدار", role: "قائد سرب القيّم — إطلالة الموقع", color: "amber"   as const },
                 { key: "vanguard",    name: "Vanguard",   role: "مدير العمليات والمبيعات",          color: "emerald" as const },
               ].map((agent) => {
                 const st = agentStatuses[agent.key];
@@ -689,7 +689,7 @@ export function UnifiedAssistant() {
                       agent.color === "amber" ? "bg-amber-500/10" : "bg-emerald-500/10"
                     }`}>
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{agent.key === "qayyim-core" ? "👑" : "💼"}</span>
+                        <span className="text-2xl">{agent.key === "ops-lead" ? "👑" : "💼"}</span>
                         <div>
                           <p className="font-bold text-sm">{agent.name}</p>
                           <p className="text-[10px] text-white/40">{agent.role}</p>

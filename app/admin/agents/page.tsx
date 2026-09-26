@@ -63,7 +63,7 @@ function AgentStatusBar({ onStatusLoad }: { onStatusLoad?: (s: Record<string, Ag
   const agentColor = (key: string) => {
     switch (key) {
       case 'prime':
-      case 'qayyim-core': return { ring: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-400' };
+      case 'ops-lead': return { ring: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-400' };
       case 'vanguard': return { ring: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-400' };
       case 'analyst':  return { ring: 'border-blue-500/20', bg: 'bg-blue-500/10', text: 'text-blue-400' };
       case 'coder':    return { ring: 'border-cyan-500/20', bg: 'bg-cyan-500/10', text: 'text-cyan-400' };
@@ -74,7 +74,7 @@ function AgentStatusBar({ onStatusLoad }: { onStatusLoad?: (s: Record<string, Ag
     }
   };
 
-  const agentKeys = ['qayyim-core', 'vanguard', 'analyst', 'coder', 'ops', 'security', 'learner'];
+  const agentKeys = ['ops-lead', 'vanguard', 'analyst', 'coder', 'ops', 'security', 'learner'];
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -334,7 +334,7 @@ export default function AgentsPage() {
                 </div>
                 {/* القائد — البطاقة الرئيسية */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {ENTERPRISE_AGENTS.filter(a => a.key === 'qayyim-core').map(agent => {
+                  {ENTERPRISE_AGENTS.filter(a => a.key === 'ops-lead').map(agent => {
                     const st = agentStatuses[agent.key];
                     return (
                       <AgentTeamCard
@@ -366,7 +366,7 @@ export default function AgentsPage() {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-1.5 mt-2">
-                        {ENTERPRISE_AGENTS.filter(a => a.key.startsWith('qayyim-') && a.key !== 'qayyim-core').map(a => (
+                        {ENTERPRISE_AGENTS.filter(a => a.key.startsWith('qayyim-') && a.key !== 'ops-lead').map(a => (
                           <span key={a.key} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
                             {a.icon} {a.name.replace('قيّم الدار — ', '')}
                           </span>
@@ -427,7 +427,7 @@ export default function AgentsPage() {
                 </p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ChatPanel agentKey="qayyim-core" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
+                <ChatPanel agentKey="ops-lead" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
                 <ChatPanel agentKey="vanguard" agentColor="emerald" />
               </div>
             </div>
@@ -441,7 +441,7 @@ export default function AgentsPage() {
           <div className="w-full max-w-2xl bg-[#111] border border-white/20 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
             <ChatPanel 
               agentKey={activeChatAgent} 
-              agentName={activeChatAgent === 'qayyim-core' || activeChatAgent === 'prime' ? 'مدير تشغيل المحتوى — قيّم الدار' : undefined}
+              agentName={activeChatAgent === 'ops-lead' || activeChatAgent === 'prime' ? 'مدير تشغيل المحتوى — قيّم الدار' : undefined}
               initialMessage={chatInitialMission}
             />
           </div>
@@ -450,7 +450,7 @@ export default function AgentsPage() {
       {showPrimeChat && (
         <div className="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl flex items-center justify-center p-6" onClick={() => setShowPrimeChat(false)}>
           <div className="w-full max-w-2xl bg-[#111] border border-amber-500/30 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-            <ChatPanel agentKey="qayyim-core" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
+            <ChatPanel agentKey="ops-lead" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
           </div>
         </div>
       )}
@@ -488,7 +488,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
   // سرب قيّم الدار — 8 وكلاء إطلالة الموقع
   // ════════════════════════════════════════════════════════════
   {
-    key: 'qayyim-core',
+    key: 'ops-lead',
     name: 'مدير تشغيل المحتوى — قيّم الدار',
     role: 'قائد السرب: تنسيق، تدقيق شامل، نشر/تراجع، بوابة جودة',
     color: 'amber',
@@ -502,7 +502,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     ],
   },
   {
-    key: 'qayyim-cont',
+    key: 'ops-content',
     name: 'قيّم الدار — المحتوى',
     role: 'كتابة فاخرة، توحيد نبرة، قانون هوية، صقل نصوص',
     color: 'rose',
@@ -516,7 +516,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     ],
   },
   {
-    key: 'qayyim-vis',
+    key: 'ops-visual',
     name: 'قيّم الدار — المرئيات',
     role: 'انتقاء صور، هيرو، alt text، اتساق علامة تجارية',
     color: 'violet',
@@ -530,7 +530,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     ],
   },
   {
-    key: 'qayyim-seo',
+    key: 'ops-seo',
     name: 'قيّم الدار — الظهور',
     role: 'تدقيق SEO تقني، Schema.org، فجوات محتوى، منافسين',
     color: 'sky',
@@ -544,7 +544,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     ],
   },
   {
-    key: 'qayyim-ux',
+    key: 'ops-ux',
     name: 'قيّم الدار — التجربة',
     role: 'سلوك زوار، معدل تحويل، A/B testing، تحليل خروج',
     color: 'emerald',
@@ -558,7 +558,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     ],
   },
   {
-    key: 'qayyim-ana',
+    key: 'ops-analytics',
     name: 'قيّم الدار — التحليلات',
     role: 'ربط تحويل بإيرادات، Luxury Score، تنبؤ، تقسيم عملاء',
     color: 'cyan',
@@ -572,7 +572,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     ],
   },
   {
-    key: 'qayyim-dev',
+    key: 'ops-dev',
     name: 'قيّم الدار — التطوير',
     role: 'Core Web Vitals، bundle، جودة كود، dependency check',
     color: 'orange',
@@ -586,7 +586,7 @@ const ENTERPRISE_AGENTS: EnterpriseAgentConfig[] = [
     ],
   },
   {
-    key: 'qayyim-qa',
+    key: 'ops-qa',
     name: 'قيّم الدار — الجودة',
     role: 'E2E smoke tests، visual regression، a11y، load test',
     color: 'lime',

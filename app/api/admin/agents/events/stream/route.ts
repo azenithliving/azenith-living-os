@@ -9,7 +9,7 @@ import { NextRequest } from "next/server";
 import { requireAdminApi } from "@/lib/admin-api-guard";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-import type { SyncEvent } from "@/lib/qayyim/memory/SyncLayer";
+import type { SyncEvent } from "@/lib/ops/memory/SyncLayer";
 
 export const dynamic = "force-dynamic";
 

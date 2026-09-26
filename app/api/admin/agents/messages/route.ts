@@ -5,10 +5,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
 import { resolveMasterCompanyId } from '@/lib/admin-env-resolver';
+import { legacyToOps, storedSenderName } from '@/lib/ops/identity';
 import { z } from 'zod';
 
 const messageSchema = z.object({
-  agent_key: z.string(),
+  agent_key: z.string().transform(legacyToOps),
   content: z.string().min(1),
   sender_type: z.enum(['agent', 'user', 'system']),
   conversation_id: z.string().uuid().optional(),
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     let resolvedConvId = conversationId;
 
     if (!resolvedConvId && agentKey) {
-      const normKey = agentKey.toLowerCase();
+      const normKey = legacyToOps(agentKey.toLowerCase());
       const companyId = (await resolveAdminCompanyId()) || (await resolveMasterCompanyId());
       let convQuery = supabaseServer
         .from('agent_conversations')
@@ -114,7 +115,7 @@ export async function GET(request: NextRequest) {
       ...msg,
       sender_name: msg.sender_type === 'user'   ? 'أنت'    :
                    msg.sender_type === 'system'  ? 'النظام' :
-                   (msg as any).agent_key?.toUpperCase() || msg.sender_name || 'Agent',
+                   (msg as any).agent_key ? storedSenderName((msg as any).agent_key) : msg.sender_name || 'Agent',
     }));
 
     return NextResponse.json({ success: true, data: formattedMessages });
@@ -188,7 +189,7 @@ export async function POST(request: NextRequest) {
       .insert({
         conversation_id: conversationId,
         sender_type: data.sender_type,
-        sender_name: data.sender_type === 'user' ? 'أنت' : data.agent_key,
+        sender_name: data.sender_type === 'user' ? 'أنت' : storedSenderName(data.agent_key),
         content: data.content,
         mentions: data.mentions || [],
         created_at: new Date().toISOString()
@@ -222,7 +223,7 @@ export async function POST(request: NextRequest) {
             .insert({
               conversation_id: conversationId,
               sender_type: 'agent',
-              sender_name: data.agent_key.toUpperCase(),
+              sender_name: storedSenderName(data.agent_key),
               content: brain.reply,
               mentions: [],
               created_at: new Date().toISOString(),

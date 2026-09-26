@@ -3,15 +3,15 @@
  *
  * GET /api/admin/qayyim/self
  *
- * `lib/qayyim/self-model.ts` is server-only (it reads the service-role DAL), so
+ * `lib/ops/self-model.ts` is server-only (it reads the service-role DAL), so
  * the command palette and the «اسأل عن نفسك» screen cannot import it — this is
  * the door. Guarded like every other /api/admin route by the session check in
  * the proxy.
  */
 
 import { NextResponse } from "next/server";
-import { buildSelfModel, toSelfView } from "@/lib/qayyim/self-model";
-import { getCompanyId } from "@/lib/qayyim/api/utils";
+import { buildSelfModel, toSelfView } from "@/lib/ops/self-model";
+import { getCompanyId } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 

@@ -637,7 +637,7 @@ export async function draftRoomCopy(
     proposed: { description: proposedText },
     previous: { description: room.description },
     draftType: "room_copy",
-    createdBy: "qayyim-cont",
+    createdBy: "ops-content",
   });
 }
 

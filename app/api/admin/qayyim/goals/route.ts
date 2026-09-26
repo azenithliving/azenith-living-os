@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
-import { getCompanyId } from "@/lib/qayyim/api/utils";
+import { getCompanyId } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 

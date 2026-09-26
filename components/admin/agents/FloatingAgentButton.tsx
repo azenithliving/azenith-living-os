@@ -7,7 +7,7 @@ import { GroupChatView } from './GroupChatView';
 
 export function FloatingAgentButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'qayyim-core' | 'vanguard' | 'group'>('qayyim-core');
+  const [activeTab, setActiveTab] = useState<'ops-lead' | 'vanguard' | 'group'>('ops-lead');
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
@@ -65,9 +65,9 @@ export function FloatingAgentButton() {
           {/* Panel Header */}
           <div className="flex items-center border-b border-gray-200">
             <button
-              onClick={() => setActiveTab('qayyim-core')}
+              onClick={() => setActiveTab('ops-lead')}
               className={`flex-1 py-3 px-4 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
-                activeTab === 'qayyim-core'
+                activeTab === 'ops-lead'
                   ? 'bg-amber-50 text-amber-700 border-b-2 border-amber-500'
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
@@ -101,15 +101,15 @@ export function FloatingAgentButton() {
 
           {/* Panel Content */}
           <div className="h-[400px]">
-            {activeTab === 'qayyim-core' && (
-              <ChatPanel agentKey="qayyim-core" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
+            {activeTab === 'ops-lead' && (
+              <ChatPanel agentKey="ops-lead" agentName="مدير تشغيل المحتوى — قيّم الدار" agentColor="amber" />
             )}
             {activeTab === 'vanguard' && (
               <ChatPanel agentKey="vanguard" />
             )}
             {activeTab === 'group' && (
               <GroupChatView
-                participants={['QAYYIM-CORE', 'Vanguard', 'You']}
+                participants={['OPS-LEAD', 'Vanguard', 'You']}
                 onClose={() => setIsOpen(false)}
               />
             )}

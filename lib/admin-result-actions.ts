@@ -1,4 +1,4 @@
-import { isRealPath } from "@/lib/qayyim/url-manifest";
+import { isRealPath } from "@/lib/ops/url-manifest";
 
 export type ResultAction = {
   label: string;

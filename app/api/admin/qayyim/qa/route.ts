@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getCompanyId, QaSchema } from "@/lib/qayyim/api/utils";
+import { getCompanyId, QaSchema } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // QA suites can be long-running
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const data = parsed.data;
     const companyId = await getCompanyId(data.company_id);
 
-    const agentModule = await import('@/lib/qayyim');
+    const agentModule = await import('@/lib/ops');
     const qaAgent = agentModule.qayyimQaAgent;
 
     let result;

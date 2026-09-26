@@ -4,16 +4,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer, agentTasksDAL } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
+import { legacyToOps } from '@/lib/ops/identity';
 import { z } from 'zod';
 
 // التحقق من بيانات المهمة
 const taskSchema = z.object({
-  agent_key: z.enum([
-    'qayyim-core', 'qayyim-cont', 'qayyim-vis', 'qayyim-seo',
-    'qayyim-ux', 'qayyim-ana', 'qayyim-dev', 'qayyim-qa',
+  agent_key: z.preprocess((k) => legacyToOps(String(k)), z.enum([
+    'ops-lead', 'ops-content', 'ops-visual', 'ops-seo',
+    'ops-ux', 'ops-analytics', 'ops-dev', 'ops-qa',
     'prime',    // deprecated alias — kept for backward compat
     'vanguard',
-  ]),
+  ])),
   task_type: z.string().min(1),
   title: z.string().min(3),
   description: z.string().optional(),
@@ -144,12 +145,12 @@ export async function POST(request: NextRequest) {
         .insert({
           company_id: resolvedCompanyId,
           agent_key: data.agent_key,
-          name: (data.agent_key === 'prime' || data.agent_key === 'qayyim-core')
+          name: (data.agent_key === 'prime' || data.agent_key === 'ops-lead')
             ? 'مدير تشغيل المحتوى — قيّم الدار'
             : data.agent_key.startsWith('qayyim-')
               ? `قيّم الدار — ${data.agent_key.replace('qayyim-', '')}`
               : 'VANGUARD',
-          description: (data.agent_key === 'prime' || data.agent_key === 'qayyim-core')
+          description: (data.agent_key === 'prime' || data.agent_key === 'ops-lead')
             ? 'قائد سرب قيّم الدار — إطلالة الموقع'
             : data.agent_key.startsWith('qayyim-')
               ? 'وكيل سرب قيّم الدار'

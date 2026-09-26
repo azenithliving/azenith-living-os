@@ -41,10 +41,10 @@ export default function V2AgentsPage() {
     try {
       const [statusRes, msgRes] = await Promise.all([
         fetch('/api/admin/agents/chat'),
-        fetch('/api/admin/agents/messages?agent_key=qayyim-core&unread=true'),
+        fetch('/api/admin/agents/messages?agent_key=ops-lead&unread=true'),
       ]);
       const statusData = await statusRes.json();
-      if (statusData.success && statusData.data?.['qayyim-core']) setAgentStatus(statusData.data['qayyim-core']);
+      if (statusData.success && statusData.data?.['ops-lead']) setAgentStatus(statusData.data['ops-lead']);
       const msgData = await msgRes.json();
       if (msgData.success) {
         setUnread(msgData.count || 0);
@@ -62,7 +62,7 @@ export default function V2AgentsPage() {
       try {
         const res = await fetch('/api/admin/agents/chat');
         const data = await res.json();
-        if (data.success && data.data?.['qayyim-core']) setAgentStatus(data.data['qayyim-core']);
+        if (data.success && data.data?.['ops-lead']) setAgentStatus(data.data['ops-lead']);
       } catch {}
     }, 30000);
     return () => clearInterval(iv);

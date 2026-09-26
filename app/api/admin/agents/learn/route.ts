@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { selfLearningEngine, InteractionFeedback } from "@/lib/agents/SelfLearningEngine";
+import { legacyToOps } from "@/lib/ops/identity";
 import { z } from "zod";
 
 const feedbackSchema = z.object({
-  agent_key: z.string(),
+  agent_key: z.string().transform(legacyToOps),
   user_message: z.string(),
   agent_response: z.string(),
   rating: z.enum(["positive", "negative", "neutral"]).optional(),
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const agentKey = searchParams.get("agent_key") || "qayyim-core";
+    const agentKey = legacyToOps(searchParams.get("agent_key") || "ops-lead");
     const action = searchParams.get("action") || "patterns";
 
     switch (action) {

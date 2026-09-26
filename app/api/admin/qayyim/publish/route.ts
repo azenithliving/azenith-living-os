@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { syncLayer } from "@/lib/qayyim/memory/SyncLayer";
-import { getCompanyId, PublishSchema } from "@/lib/qayyim/api/utils";
+import { syncLayer } from "@/lib/ops/memory/SyncLayer";
+import { getCompanyId, PublishSchema } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const { draft_id, approved_by, company_id } = parsed.data;
     const companyId = await getCompanyId(company_id);
 
-    const agentModule = await import('@/lib/qayyim');
+    const agentModule = await import('@/lib/ops');
     const coreAgent = agentModule.qayyimCoreAgent;
 
     const result = await coreAgent.publishDraft(draft_id, approved_by);
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     // Publish sync event
     if (result.success) {
       await syncLayer.initialize(companyId);
-      await syncLayer.publishDraftUpdate('qayyim-core', draft_id, 'published', { approved_by });
+      await syncLayer.publishDraftUpdate('ops-lead', draft_id, 'published', { approved_by });
     }
 
     return NextResponse.json({ success: true, result });

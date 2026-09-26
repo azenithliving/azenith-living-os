@@ -229,12 +229,12 @@ async function getLowStockItems(companyId: string) {
 
 // Get agent stats
 async function getAgentStats(companyId: string, startOfMonth: string, startOfToday: string) {
-  // Get Qayyim Core stats (supports both old 'prime' key and new 'qayyim-core' key)
+  // Get Qayyim Core stats (supports both old 'prime' key and new 'ops-lead' key)
   const { data: qayyimCoreProfileNew } = await supabaseServer
     .from('agent_profiles')
     .select('id')
     .eq('company_id', companyId)
-    .eq('agent_key', 'qayyim-core')
+    .eq('agent_key', 'ops-lead')
     .maybeSingle();
 
   const { data: qayyimCoreProfileLegacy } = await supabaseServer
@@ -244,7 +244,7 @@ async function getAgentStats(companyId: string, startOfMonth: string, startOfTod
     .eq('agent_key', 'prime')
     .maybeSingle();
 
-  // Use qayyim-core profile if available, fall back to legacy prime profile
+  // Use ops-lead profile if available, fall back to legacy prime profile
   const primeProfile = qayyimCoreProfileNew ?? qayyimCoreProfileLegacy;
 
   const { data: vanguardProfile } = await supabaseServer

@@ -13,8 +13,8 @@ import {
   startExperiment,
   pauseExperiment,
   concludeExperiment,
-} from "@/lib/qayyim/ab-testing";
-import { getCompanyId } from "@/lib/qayyim/api/utils";
+} from "@/lib/ops/ab-testing";
+import { getCompanyId } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 

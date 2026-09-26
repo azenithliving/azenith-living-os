@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { syncLayer } from "@/lib/qayyim/memory/SyncLayer";
-import { getCompanyId, getAgentInstance, ImageDraftSchema } from "@/lib/qayyim/api/utils";
+import { syncLayer } from "@/lib/ops/memory/SyncLayer";
+import { getCompanyId, getAgentInstance, ImageDraftSchema } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 

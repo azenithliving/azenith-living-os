@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getCompanyId, TelemetrySchema } from "@/lib/qayyim/api/utils";
+import { getCompanyId, TelemetrySchema } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const data = parsed.data;
     const companyId = await getCompanyId(data.company_id);
 
-    const agentModule = await import('@/lib/qayyim');
+    const agentModule = await import('@/lib/ops');
     const uxAgent = agentModule.qayyimUxAgent;
 
     let result;

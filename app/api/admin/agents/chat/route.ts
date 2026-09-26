@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { agentOrchestrator, AgentType } from "@/lib/agents/AgentOrchestrator";
+import { legacyToOps } from "@/lib/ops/identity";
 import { z } from "zod";
 
 const chatSchema = z.object({
-  agent_key: z.enum([
-    "qayyim-core",
-    "qayyim-cont",
-    "qayyim-vis",
-    "qayyim-seo",
-    "qayyim-ux",
-    "qayyim-ana",
-    "qayyim-dev",
-    "qayyim-qa",
+  // A stale bundle or an old Telegram deep link can still post a retired key;
+  // normalising here keeps one key set in the database instead of two.
+  agent_key: z.preprocess((k) => legacyToOps(String(k)), z.enum([
+    "ops-lead",
+    "ops-content",
+    "ops-visual",
+    "ops-seo",
+    "ops-ux",
+    "ops-analytics",
+    "ops-dev",
+    "ops-qa",
     "prime",
     "vanguard",
     "analyst",
@@ -20,7 +23,7 @@ const chatSchema = z.object({
     "security",
     "learner",
     "auto",
-  ]),
+  ])),
   message: z.string().min(1).max(4000),
   context: z.record(z.string(), z.any()).optional(),
   session_id: z.string().optional(),
@@ -82,14 +85,14 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const [core, cont, vis, seo, ux, ana, dev, qa, vanguard, analyst, coder, ops, security, learner] = await Promise.all([
-      agentOrchestrator.getAgentStatus("qayyim-core"),
-      agentOrchestrator.getAgentStatus("qayyim-cont"),
-      agentOrchestrator.getAgentStatus("qayyim-vis"),
-      agentOrchestrator.getAgentStatus("qayyim-seo"),
-      agentOrchestrator.getAgentStatus("qayyim-ux"),
-      agentOrchestrator.getAgentStatus("qayyim-ana"),
-      agentOrchestrator.getAgentStatus("qayyim-dev"),
-      agentOrchestrator.getAgentStatus("qayyim-qa"),
+      agentOrchestrator.getAgentStatus("ops-lead"),
+      agentOrchestrator.getAgentStatus("ops-content"),
+      agentOrchestrator.getAgentStatus("ops-visual"),
+      agentOrchestrator.getAgentStatus("ops-seo"),
+      agentOrchestrator.getAgentStatus("ops-ux"),
+      agentOrchestrator.getAgentStatus("ops-analytics"),
+      agentOrchestrator.getAgentStatus("ops-dev"),
+      agentOrchestrator.getAgentStatus("ops-qa"),
       agentOrchestrator.getAgentStatus("vanguard"),
       agentOrchestrator.getAgentStatus("analyst"),
       agentOrchestrator.getAgentStatus("coder"),
@@ -101,14 +104,14 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: {
-        "qayyim-core": core,
-        "qayyim-cont": cont,
-        "qayyim-vis": vis,
-        "qayyim-seo": seo,
-        "qayyim-ux": ux,
-        "qayyim-ana": ana,
-        "qayyim-dev": dev,
-        "qayyim-qa": qa,
+        "ops-lead": core,
+        "ops-content": cont,
+        "ops-visual": vis,
+        "ops-seo": seo,
+        "ops-ux": ux,
+        "ops-analytics": ana,
+        "ops-dev": dev,
+        "ops-qa": qa,
         vanguard,
         analyst,
         coder,

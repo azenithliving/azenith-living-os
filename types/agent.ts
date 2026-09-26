@@ -7,15 +7,15 @@
 // AGENT PROFILES
 // ===========================================
 
-export type QayyimSubAgentKey = 'qayyim-cont' | 'qayyim-vis' | 'qayyim-seo' | 'qayyim-ux' | 'qayyim-ana' | 'qayyim-dev' | 'qayyim-qa';
+export type OpsSubAgentKey = 'ops-content' | 'ops-visual' | 'ops-seo' | 'ops-ux' | 'ops-analytics' | 'ops-dev' | 'ops-qa';
 export type EnterpriseAgentKey = 'qayyim' | 'vanguard' | 'analyst' | 'coder' | 'ops' | 'security' | 'learner';
-export type LegacyAgentKey = 'prime' | 'qayyim-core';
+export type LegacyAgentKey = 'prime';
 
 export interface AgentProfile {
   id: string;
   company_id: string;
-  // prime = deprecated alias for qayyim-core — يُحذف بعد 2026-10-24 (migration 20260924)
-  agent_key: 'qayyim-core' | QayyimSubAgentKey | 'prime' | 'qayyim' | 'vanguard' | string;
+  // prime = deprecated alias for ops-lead — يُحذف بعد 2026-10-24 (migration 20260924)
+  agent_key: 'ops-lead' | OpsSubAgentKey | 'prime' | 'qayyim' | 'vanguard' | string;
   name: string;
   description?: string;
   avatar_url?: string;

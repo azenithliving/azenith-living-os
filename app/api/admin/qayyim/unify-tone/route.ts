@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { syncLayer } from "@/lib/qayyim/memory/SyncLayer";
-import { getCompanyId, getAgentInstance, ToneDraftSchema } from "@/lib/qayyim/api/utils";
+import { syncLayer } from "@/lib/ops/memory/SyncLayer";
+import { getCompanyId, getAgentInstance, ToneDraftSchema } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Tone operations only for content agent
-    if (agent !== 'qayyim-cont') {
-      return NextResponse.json({ success: false, error: 'Tone unification only available for qayyim-cont agent' }, { status: 400 });
+    if (agent !== 'ops-content') {
+      return NextResponse.json({ success: false, error: 'Tone unification only available for ops-content agent' }, { status: 400 });
     }
 
     let result;
@@ -65,6 +65,6 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     success: true,
-    message: 'Qayyim Unify Tone API - Use POST with { agent: "qayyim-cont", page_path, section_key, draft_type: "tone_unification", instructions, current_content?, context?, company_id? }',
+    message: 'Qayyim Unify Tone API - Use POST with { agent: "ops-content", page_path, section_key, draft_type: "tone_unification", instructions, current_content?, context?, company_id? }',
   });
 }

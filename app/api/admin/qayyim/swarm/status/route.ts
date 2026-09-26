@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { qayyimFacade } from "@/lib/qayyim/facade/QayyimFacade";
+import { qayyimFacade } from "@/lib/ops/facade/QayyimFacade";
 
 export const dynamic = "force-dynamic";
 

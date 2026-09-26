@@ -11,7 +11,7 @@ import {
   proposalStatusLabel,
   riskLabel,
   type ProposalRow,
-} from '@/lib/qayyim/proposal-card';
+} from '@/lib/ops/proposal-card';
 
 /**
  * The other end of the Telegram morning link.

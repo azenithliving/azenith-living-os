@@ -6,8 +6,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { masterOrchestrator, qayyimCoreAgent } from "@/lib/qayyim";
-import { getCompanyId, AuditSchema } from "@/lib/qayyim/api/utils";
+import { masterOrchestrator, qayyimCoreAgent } from "@/lib/ops";
+import { getCompanyId, AuditSchema } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 

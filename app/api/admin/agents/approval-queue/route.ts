@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
-import { buildApprovalRow } from '@/lib/qayyim/approval-intake';
+import { buildApprovalRow } from '@/lib/ops/approval-intake';
 
 // GET: جلب كل الطلبات المعلقة
 export async function GET(request: NextRequest) {

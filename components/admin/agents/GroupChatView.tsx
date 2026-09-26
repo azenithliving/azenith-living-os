@@ -21,7 +21,7 @@ interface GroupChatViewProps {
 }
 
 const AGENT_PERSONAS: Record<string, { name: string; role: string; color: string }> = {
-  'QAYYIM-CORE': { name: 'قيّم الدار', role: 'قائد سرب القيّم — إطلالة الموقع', color: 'amber' },
+  'OPS-LEAD': { name: 'قيّم الدار', role: 'قائد سرب القيّم — إطلالة الموقع', color: 'amber' },
   Vanguard:      { name: 'Vanguard',   role: 'مدير العمليات والمبيعات',          color: 'emerald' },
   Analyst:       { name: 'Analyst',    role: 'محلل البيانات والتقارير',           color: 'blue' },
   Coder:         { name: 'Coder',      role: 'مطور الكود والتقنية',              color: 'cyan' },
@@ -32,7 +32,7 @@ const AGENT_PERSONAS: Record<string, { name: string; role: string; color: string
 
 export function GroupChatView({
   conversationId = 'group-chat',
-  participants = ['QAYYIM-CORE', 'Vanguard', 'Analyst', 'Coder', 'Ops', 'Security', 'Learner', 'You'],
+  participants = ['OPS-LEAD', 'Vanguard', 'Analyst', 'Coder', 'Ops', 'Security', 'Learner', 'You'],
   onClose,
 }: GroupChatViewProps) {
   const [messages, setMessages] = useState<Message[]>([

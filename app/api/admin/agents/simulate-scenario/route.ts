@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
       if (jobErr) console.warn("[Scenario] Job insert warn:", jobErr.message);
 
       steps.push({
-        agentKey: "qayyim-core",
+        agentKey: "ops-lead",
         agentName: "مدير تشغيل المحتوى — قيّم الدار",
         role: "كبير مهندسي التصميم والتصنيع",
         icon: "👑",
@@ -290,7 +290,7 @@ export async function POST(request: NextRequest) {
       });
 
       steps.push({
-        agentKey: "qayyim-core",
+        agentKey: "ops-lead",
         agentName: "مدير تشغيل المحتوى — قيّم الدار",
         role: "كبير المهندسين",
         icon: "👑",

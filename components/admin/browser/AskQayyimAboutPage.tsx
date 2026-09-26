@@ -31,7 +31,7 @@ export default function AskQayyimAboutPage({ url }: { url: string | null }) {
         headers: { "Content-Type": "application/json; charset=utf-8" },
         // The commander can take half a minute when it really reads a page.
         signal: AbortSignal.timeout(240_000),
-        body: JSON.stringify({ agent_key: "qayyim-core", message: ASK(url) }),
+        body: JSON.stringify({ agent_key: "ops-lead", message: ASK(url) }),
       });
       const j = (await res.json().catch(() => ({}))) as { data?: { message?: string } };
       const text = j?.data?.message?.trim();

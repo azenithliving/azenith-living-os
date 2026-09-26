@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { syncLayer } from "@/lib/qayyim/memory/SyncLayer";
-import { getCompanyId, getAgentInstance, IdentityDraftSchema } from "@/lib/qayyim/api/utils";
+import { syncLayer } from "@/lib/ops/memory/SyncLayer";
+import { getCompanyId, getAgentInstance, IdentityDraftSchema } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Identity operations only for content agent
-    if (agent !== 'qayyim-cont') {
-      return NextResponse.json({ success: false, error: 'Identity operations only available for qayyim-cont agent' }, { status: 400 });
+    if (agent !== 'ops-content') {
+      return NextResponse.json({ success: false, error: 'Identity operations only available for ops-content agent' }, { status: 400 });
     }
 
     let result;
@@ -65,6 +65,6 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     success: true,
-    message: 'Qayyim Identity API - Use POST with { agent: "qayyim-cont", page_path, section_key, draft_type: "identity_fix", instructions, current_content?, context?, company_id? }',
+    message: 'Qayyim Identity API - Use POST with { agent: "ops-content", page_path, section_key, draft_type: "identity_fix", instructions, current_content?, context?, company_id? }',
   });
 }

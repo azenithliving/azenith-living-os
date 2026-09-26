@@ -5,9 +5,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { listBenchmarks, runBenchmark } from "@/lib/qayyim/benchmarks";
+import { listBenchmarks, runBenchmark } from "@/lib/ops/benchmarks";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
-import { getCompanyId } from "@/lib/qayyim/api/utils";
+import { getCompanyId } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -43,16 +43,16 @@ export async function POST(request: NextRequest) {
     // If no sample output provided, generate a fresh one by running the agent's self-check
     let output = sample_output;
     if (!output) {
-      const agentModule = await import('@/lib/qayyim') as Record<string, any>;
+      const agentModule = await import('@/lib/ops') as Record<string, any>;
       const agentsMap: Record<string, string> = {
-        'qayyim-core': 'qayyimCoreAgent',
-        'qayyim-cont': 'qayyimContentAgent',
-        'qayyim-vis': 'qayyimVisualAgent',
-        'qayyim-seo': 'qayyimSeoAgent',
-        'qayyim-ux': 'qayyimUxAgent',
-        'qayyim-ana': 'qayyimAnalyticsAgent',
-        'qayyim-dev': 'qayyimDevAgent',
-        'qayyim-qa': 'qayyimQaAgent',
+        'ops-lead': 'qayyimCoreAgent',
+        'ops-content': 'qayyimContentAgent',
+        'ops-visual': 'qayyimVisualAgent',
+        'ops-seo': 'qayyimSeoAgent',
+        'ops-ux': 'qayyimUxAgent',
+        'ops-analytics': 'qayyimAnalyticsAgent',
+        'ops-dev': 'qayyimDevAgent',
+        'ops-qa': 'qayyimQaAgent',
       };
       const agent = agentModule[agentsMap[agent_key]];
       if (!agent) {

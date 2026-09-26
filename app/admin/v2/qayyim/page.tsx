@@ -1,6 +1,6 @@
 'use client';
 
-import { QayyimStudio } from '@/components/admin/qayyim/QayyimStudio';
+import { StudioPanel } from '@/components/admin/ops/StudioPanel';
 import Link from 'next/link';
 import { Crown, ArrowRight } from 'lucide-react';
 
@@ -23,7 +23,7 @@ export default function V2QayyimPage() {
         </div>
       </header>
       <div className="max-w-[1600px] mx-auto px-4 py-6">
-        <QayyimStudio />
+        <StudioPanel />
       </div>
     </div>
   );

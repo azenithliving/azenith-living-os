@@ -5,10 +5,10 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { masterOrchestrator } from "@/lib/qayyim";
-import { constitutionEngine } from "@/lib/qayyim/governance/ConstitutionEngine";
-import { swarmLearnings } from "@/lib/qayyim/memory/SwarmLearnings";
-import { sharedMemory } from "@/lib/qayyim/memory";
+import { masterOrchestrator } from "@/lib/ops";
+import { constitutionEngine } from "@/lib/ops/governance/ConstitutionEngine";
+import { swarmLearnings } from "@/lib/ops/memory/SwarmLearnings";
+import { sharedMemory } from "@/lib/ops/memory";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 
 export const dynamic = "force-dynamic";
@@ -19,8 +19,8 @@ export const dynamic = "force-dynamic";
 
 const ExecuteTaskSchema = z.object({
   agent: z.enum([
-    'qayyim-core', 'qayyim-cont', 'qayyim-vis', 'qayyim-seo',
-    'qayyim-ux', 'qayyim-ana', 'qayyim-dev', 'qayyim-qa'
+    'ops-lead', 'ops-content', 'ops-visual', 'ops-seo',
+    'ops-ux', 'ops-analytics', 'ops-dev', 'ops-qa'
   ]),
   task: z.object({
     type: z.string(),
@@ -34,8 +34,8 @@ const ExecuteTaskSchema = z.object({
 
 const ChatSchema = z.object({
   agent: z.enum([
-    'qayyim-core', 'qayyim-cont', 'qayyim-vis', 'qayyim-seo',
-    'qayyim-ux', 'qayyim-ana', 'qayyim-dev', 'qayyim-qa'
+    'ops-lead', 'ops-content', 'ops-visual', 'ops-seo',
+    'ops-ux', 'ops-analytics', 'ops-dev', 'ops-qa'
   ]),
   message: z.string().min(1).max(4000),
   context: z.record(z.string(), z.any()).optional(),
@@ -55,7 +55,7 @@ const AuditSchema = z.object({
 });
 
 const DraftSchema = z.object({
-  agent: z.enum(['qayyim-cont', 'qayyim-vis', 'qayyim-seo', 'qayyim-ux']),
+  agent: z.enum(['ops-content', 'ops-visual', 'ops-seo', 'ops-ux']),
   page_path: z.string(),
   section_key: z.string(),
   draft_type: z.enum(['hero_text', 'section_reorder', 'product_card', 'tone_unification', 'identity_fix', 'storytelling', 'curate_gallery', 'select_hero_image', 'generate_alt_text', 'brand_consistency_check']),
@@ -139,18 +139,18 @@ async function getCompanyId(hint?: string): Promise<string> {
 
 async function getAgentInstance(agentKey: string) {
   const agents: Record<string, string> = {
-    'qayyim-core': 'qayyimCoreAgent',
-    'qayyim-cont': 'qayyimContentAgent',
-    'qayyim-vis': 'qayyimVisualAgent',
-    'qayyim-seo': 'qayyimSeoAgent',
-    'qayyim-ux': 'qayyimUxAgent',
-    'qayyim-ana': 'qayyimAnalyticsAgent',
-    'qayyim-dev': 'qayyimDevAgent',
-    'qayyim-qa': 'qayyimQaAgent',
+    'ops-lead': 'qayyimCoreAgent',
+    'ops-content': 'qayyimContentAgent',
+    'ops-visual': 'qayyimVisualAgent',
+    'ops-seo': 'qayyimSeoAgent',
+    'ops-ux': 'qayyimUxAgent',
+    'ops-analytics': 'qayyimAnalyticsAgent',
+    'ops-dev': 'qayyimDevAgent',
+    'ops-qa': 'qayyimQaAgent',
   };
   
   // Dynamic import to avoid circular dependencies
-  const agentModule = await import('@/lib/qayyim') as Record<string, any>;
+  const agentModule = await import('@/lib/ops') as Record<string, any>;
   return agentModule[agents[agentKey]];
 }
 
@@ -269,7 +269,7 @@ async function handleAudit(body: any) {
   const { page_path = '/', scope = 'full', company_id } = parsed.data;
   const companyId = await getCompanyId(company_id);
 
-  const agentModule = await import('@/lib/qayyim');
+  const agentModule = await import('@/lib/ops');
   const coreAgent = agentModule.qayyimCoreAgent;
 
   const result = await coreAgent.auditFullSite({
@@ -330,7 +330,7 @@ async function handleDraft(body: any) {
   }
 
   // Publish sync event
-  const { syncLayer } = await import('@/lib/qayyim/memory/SyncLayer');
+  const { syncLayer } = await import('@/lib/ops/memory/SyncLayer');
   await syncLayer.initialize(companyId);
   await syncLayer.publishDraftUpdate(agent, result.data?.draft_id || 'new', 'created', { page_path, section_key, draft_type });
 
@@ -346,16 +346,16 @@ async function handlePublish(body: any) {
   const { draft_id, approved_by, company_id } = parsed.data;
   const companyId = await getCompanyId(company_id);
 
-  const agentModule = await import('@/lib/qayyim');
+  const agentModule = await import('@/lib/ops');
   const coreAgent = agentModule.qayyimCoreAgent;
 
   const result = await coreAgent.publishDraft(draft_id, approved_by);
 
   // Publish sync event
   if (result.success) {
-    const { syncLayer } = await import('@/lib/qayyim/memory/SyncLayer');
+    const { syncLayer } = await import('@/lib/ops/memory/SyncLayer');
     await syncLayer.initialize(companyId);
-    await syncLayer.publishDraftUpdate('qayyim-core', draft_id, 'published', { approved_by });
+    await syncLayer.publishDraftUpdate('ops-lead', draft_id, 'published', { approved_by });
   }
 
   return NextResponse.json({ success: true, result });
@@ -370,16 +370,16 @@ async function handleRollback(body: any) {
   const { draft_id, target_version, company_id } = parsed.data;
   const companyId = await getCompanyId(company_id);
 
-  const agentModule = await import('@/lib/qayyim');
+  const agentModule = await import('@/lib/ops');
   const coreAgent = agentModule.qayyimCoreAgent;
 
   const result = await coreAgent.rollbackDraft(draft_id, target_version);
 
   // Publish sync event
   if (result.success) {
-    const { syncLayer } = await import('@/lib/qayyim/memory/SyncLayer');
+    const { syncLayer } = await import('@/lib/ops/memory/SyncLayer');
     await syncLayer.initialize(companyId);
-    await syncLayer.publishDraftUpdate('qayyim-core', draft_id, 'rolled_back', { target_version });
+    await syncLayer.publishDraftUpdate('ops-lead', draft_id, 'rolled_back', { target_version });
   }
 
   return NextResponse.json({ success: true, result });
@@ -403,13 +403,13 @@ async function handleConstitutionCheck(body: any) {
 
   // P3: Publish quality gate event
   try {
-    const { syncLayer } = await import('@/lib/qayyim/memory/SyncLayer');
+    const { syncLayer } = await import('@/lib/ops/memory/SyncLayer');
     await syncLayer.initialize(companyId);
     const passed = report.overallPassed;
     const blockingResults = report.results.filter((r: any) => !r.passed && r.enforcement === 'hard_block');
     const draftId = (input as any).draft_id || 'constitution_check';
     await syncLayer.publishQualityGate(
-      'qayyim-core',
+      'ops-lead',
       draftId,
       passed,
       blockingResults
@@ -442,7 +442,7 @@ async function handleLearning(body: any, request: NextRequest) {
     const learningId = await swarmLearnings.create(learning);
 
     // Broadcast to target agents
-    const { syncLayer } = await import('@/lib/qayyim/memory/SyncLayer');
+    const { syncLayer } = await import('@/lib/ops/memory/SyncLayer');
     await syncLayer.initialize(companyId);
     await syncLayer.publishLearningCreated(parsed.data.source_agent, learningId, parsed.data.domain, parsed.data.target_agents || []);
 
@@ -525,7 +525,7 @@ async function handleSync(body: any) {
   const subAction = body?.subaction || 'publish';
 
   const companyId = await getCompanyId(body.company_id);
-  const { syncLayer } = await import('@/lib/qayyim/memory/SyncLayer');
+  const { syncLayer } = await import('@/lib/ops/memory/SyncLayer');
   await syncLayer.initialize(companyId);
 
   if (subAction === 'publish') {
@@ -559,7 +559,7 @@ async function handleSync(body: any) {
       return NextResponse.json({ success: false, error: parsed.error.format() }, { status: 400 });
     }
 
-    const { syncLayer } = await import('@/lib/qayyim/memory/SyncLayer');
+    const { syncLayer } = await import('@/lib/ops/memory/SyncLayer');
     const unsubscribe = syncLayer.subscribe({
       eventTypes: parsed.data.event_types,
       agentKey: parsed.data.agent_key,
@@ -588,7 +588,7 @@ async function handleStats(body: any) {
   
   const learningStats = await swarmLearnings.getStats();
   
-  const { VectorStore } = await import('@/lib/qayyim/memory/VectorStore');
+  const { VectorStore } = await import('@/lib/ops/memory/VectorStore');
   const vectorStore = new VectorStore();
   await vectorStore.initialize(companyId);
   const vectorStats = await vectorStore.getStats();
@@ -636,8 +636,8 @@ export async function GET(request: NextRequest) {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         agents: [
-          'qayyim-core', 'qayyim-cont', 'qayyim-vis', 'qayyim-seo',
-          'qayyim-ux', 'qayyim-ana', 'qayyim-dev', 'qayyim-qa'
+          'ops-lead', 'ops-content', 'ops-visual', 'ops-seo',
+          'ops-ux', 'ops-analytics', 'ops-dev', 'ops-qa'
         ],
       });
     }
@@ -646,14 +646,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         agents: [
-          { key: 'qayyim-core', name: 'قيّم الدار - القائد', role: 'تنسيق السرب، تدقيق شامل، إدارة نشر/تراجع، بوابة جودة' },
-          { key: 'qayyim-cont', name: 'قيّم الدار - المحتوى والعربية', role: 'كتابة فاخرة، توحيد نبرة، قانون هوية، صقل نصوص' },
-          { key: 'qayyim-vis', name: 'قيّم الدار - المرئي والصور', role: 'انتقاء صور، اختيار هيرو، alt text، علامة تجارية' },
-          { key: 'qayyim-seo', name: 'قيّم الدار - الظهور والبحث', role: 'تدقيق SEO، إصلاح Schema، فجوات محتوى، منافسين' },
-          { key: 'qayyim-ux', name: 'قيّم الدار - تجربة المستخدم', role: 'سلوك زائر، A/B testing، تقارير خروج، أهداف' },
-          { key: 'qayyim-ana', name: 'قيّم الدار - التحليلات والأعمال', role: 'ربط تحويل بإيرادات، تنبؤ، Luxury Score، تقسيم' },
-          { key: 'qayyim-dev', name: 'قيّم الدار - التطوير والأداء', role: 'مراجعة كود، Bundle، تبعيات، أداء، أمان كود' },
-          { key: 'qayyim-qa', name: 'قيّم الدار - الجودة والاختبار', role: 'E2E، Visual Regression، a11y، Load Test، Security' },
+          { key: 'ops-lead', name: 'قيّم الدار - القائد', role: 'تنسيق السرب، تدقيق شامل، إدارة نشر/تراجع، بوابة جودة' },
+          { key: 'ops-content', name: 'قيّم الدار - المحتوى والعربية', role: 'كتابة فاخرة، توحيد نبرة، قانون هوية، صقل نصوص' },
+          { key: 'ops-visual', name: 'قيّم الدار - المرئي والصور', role: 'انتقاء صور، اختيار هيرو، alt text، علامة تجارية' },
+          { key: 'ops-seo', name: 'قيّم الدار - الظهور والبحث', role: 'تدقيق SEO، إصلاح Schema، فجوات محتوى، منافسين' },
+          { key: 'ops-ux', name: 'قيّم الدار - تجربة المستخدم', role: 'سلوك زائر، A/B testing، تقارير خروج، أهداف' },
+          { key: 'ops-analytics', name: 'قيّم الدار - التحليلات والأعمال', role: 'ربط تحويل بإيرادات، تنبؤ، Luxury Score، تقسيم' },
+          { key: 'ops-dev', name: 'قيّم الدار - التطوير والأداء', role: 'مراجعة كود، Bundle، تبعيات، أداء، أمان كود' },
+          { key: 'ops-qa', name: 'قيّم الدار - الجودة والاختبار', role: 'E2E، Visual Regression، a11y، Load Test، Security' },
         ],
       });
     }

@@ -5,13 +5,13 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
-import { getCompanyId } from "@/lib/qayyim/api/utils";
+import { getCompanyId } from "@/lib/ops/api/utils";
 
 export const dynamic = "force-dynamic";
 
 const AGENT_KEYS = [
-  'qayyim-core', 'qayyim-cont', 'qayyim-vis', 'qayyim-seo',
-  'qayyim-ux', 'qayyim-ana', 'qayyim-dev', 'qayyim-qa',
+  'ops-lead', 'ops-content', 'ops-visual', 'ops-seo',
+  'ops-ux', 'ops-analytics', 'ops-dev', 'ops-qa',
 ];
 
 export async function GET(request: NextRequest) {

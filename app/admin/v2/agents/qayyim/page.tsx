@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { ChatPanel } from '@/components/admin/agents/ChatPanel';
 import { ProposalDecisionCard } from '@/components/admin/agents/ProposalDecisionCard';
-import { AGENT_ROLES } from '@/lib/qayyim/agent-roles';
+import { AGENT_ROLES } from '@/lib/ops/agent-roles';
+import { legacyToOps } from '@/lib/ops/identity';
 
 /**
  * P5-M2 — full-screen Qayyim chat (WhatsApp-style surface).
@@ -15,10 +16,10 @@ import { AGENT_ROLES } from '@/lib/qayyim/agent-roles';
  * stays prerenderable without a Suspense boundary — and an unknown agent key is
  * ignored instead of becoming a conversation with something that does not exist.
  */
-const DEFAULT_AGENT = 'qayyim-core';
+const DEFAULT_AGENT = 'ops-lead';
 
 function agentFromUrl(): string {
-  const wanted = new URLSearchParams(window.location.search).get('agent') || '';
+  const wanted = legacyToOps(new URLSearchParams(window.location.search).get('agent') || '');
   return Object.keys(AGENT_ROLES).includes(wanted) ? wanted : DEFAULT_AGENT;
 }
 

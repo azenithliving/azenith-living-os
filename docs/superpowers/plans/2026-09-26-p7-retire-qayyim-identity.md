@@ -489,7 +489,7 @@ Expected: 0 type errors; all tests green, including the three assertions above.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add -A
+git add -A -- lib app components tests types supabase/migrations scripts docs vercel.json
 git commit -m "refactor(ops): the swarm's library lives under lib/ops (P7-M3)"
 ```
 
@@ -579,10 +579,19 @@ grep -rn "/api/admin/qayyim/" --include=*.ts --include=*.tsx app components lib 
 
 Replace each with `/api/admin/ops/` **except** the Playwright suite assertions that deliberately test the redirect (Task 6 Step 6).
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Keep the moved route's `agent:` enums answering a retired key**
+
+`app/api/admin/qayyim/route.ts` validates `agent: z.enum([...])` in three schemas. A browser tab
+opened before the deploy still posts the key it was built with, and an enum answers that with a
+`400` the owner sees as «the studio stopped working». Wrap each in
+`z.preprocess((k) => legacyToOps(String(k)), z.enum([...]))`, the same shape Task 5 used for
+`/api/admin/agents/chat` and `/api/admin/agents/tasks`, and add those files to the doors list in
+`tests/ops/identityWiring.test.ts`.
+
+- [ ] **Step 7: Commit**
 
 ```bash
-git add -A
+git add -A -- lib app components tests types supabase/migrations scripts docs vercel.json
 git commit -m "refactor(ops): the swarm's API moved to /api/admin/ops, old path redirects 308 (P7-M3)"
 ```
 
@@ -653,7 +662,7 @@ Create `app/admin/qayyim/page.tsx` (replaces the moved page) that renders a clie
 
 ```bash
 npm run typecheck && npx vitest run
-git add -A && git commit -m "refactor(ops): tools, pages and the cron path lose the retired brand (P7-M3)"
+git add -A -- lib app components tests types supabase/migrations scripts docs vercel.json && git commit -m "refactor(ops): tools, pages and the cron path lose the retired brand (P7-M3)"
 ```
 
 - [ ] **Step 6: Deploy and prove the redirects**
@@ -770,7 +779,7 @@ describe("the retired name is gone from shipped code", () => {
 
 ```bash
 npm run typecheck && npx vitest run
-git add -A && git commit -m "refactor(ops): the owner never reads the retired name again (P7-M4)"
+git add -A -- lib app components tests types supabase/migrations scripts docs vercel.json && git commit -m "refactor(ops): the owner never reads the retired name again (P7-M4)"
 ```
 
 ### Task 10: prove the owner's experience changed
@@ -880,7 +889,7 @@ npm run typecheck && npx vitest run
 - [ ] **Step 5: Commit and deploy**
 
 ```bash
-git add -A && git commit -m "fix(ops): the swarm's tables are named ops_* (P7-M5)" && git push origin main
+git add -A -- lib app components tests types supabase/migrations scripts docs vercel.json && git commit -m "fix(ops): the swarm's tables are named ops_* (P7-M5)" && git push origin main
 ```
 
 ### Task 12: remove every compatibility alias

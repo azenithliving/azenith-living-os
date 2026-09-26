@@ -9,11 +9,12 @@ import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 import { askGroqMessages, askGoogle, askGoogleMessages, askOpenRouter, askMistral } from "@/lib/ai-orchestrator";
 import { runUltimateTool } from "@/lib/admin-tool-bridge";
 import { routeIntent, explicitIntent, TOOL_CATALOG } from "@/lib/agents/intent-router";
-import { recallMemory, finalizeReply } from "@/lib/qayyim/chat-brain";
-import { critiqueAndPolish, shouldDebate } from "@/lib/qayyim/debate";
-import { withOwnerRuleOnMessages } from "@/lib/qayyim/owner-address";
-import { explainGap } from "@/lib/qayyim/gap-contract";
-import { isStaleRunning } from "@/lib/qayyim/task-reconcile";
+import { legacyToOps, storedSenderName } from "@/lib/ops/identity";
+import { recallMemory, finalizeReply } from "@/lib/ops/chat-brain";
+import { critiqueAndPolish, shouldDebate } from "@/lib/ops/debate";
+import { withOwnerRuleOnMessages } from "@/lib/ops/owner-address";
+import { explainGap } from "@/lib/ops/gap-contract";
+import { isStaleRunning } from "@/lib/ops/task-reconcile";
 import { 
   QayyimCoreAgent, qayyimCoreAgent,
   QayyimContentAgent, qayyimContentAgent,
@@ -24,18 +25,18 @@ import {
   QayyimDevAgent, qayyimDevAgent,
   QayyimQaAgent, qayyimQaAgent,
   MasterOrchestrator, masterOrchestrator,
-} from "@/lib/qayyim";
+} from "@/lib/ops";
 
 export type AgentType =
-  | "qayyim-core"
-  | "qayyim-cont"
-  | "qayyim-vis"
-  | "qayyim-seo"
-  | "qayyim-ux"
-  | "qayyim-ana"
-  | "qayyim-dev"
-  | "qayyim-qa"
-  | "prime" // deprecated alias for qayyim-core
+  | "ops-lead"
+  | "ops-content"
+  | "ops-visual"
+  | "ops-seo"
+  | "ops-ux"
+  | "ops-analytics"
+  | "ops-dev"
+  | "ops-qa"
+  | "prime" // deprecated alias for ops-lead
   | "vanguard"
   | "analyst"
   | "coder"
@@ -66,7 +67,7 @@ export interface AgentOrchestratorResult {
 }
 
 export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt: string }> = {
-  "qayyim-core": {
+  "ops-lead": {
     name: "قيّم الدار - القائد",
     role: "تنسيق السرب، تدقيق شامل، إدارة نشر/تراجع، بوابة جودة",
     prompt: `أنت قيّم الدار - القائد، منسق سرب "قيّم الدار" لإدارة إطلالة Azenith Living على الموقع.
@@ -75,7 +76,7 @@ export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt
 إذا طُلب منك شيء خارج نطاق الإطلالة (مصنع، مخزن، مبيعات، كود خلفي)، قل: "مش قادر على الصفحة دي" أو حوّل للوكلاء المختصين.
 رد بالعربية الفصحى المبسطة بأسلوب فاخر وسلطان.`
   },
-  "qayyim-cont": {
+  "ops-content": {
     name: "قيّم الدار - المحتوى والعربية",
     role: "كتابة فاخرة، توحيد نبرة، قانون هوية، صقل نصوص",
     prompt: `أنت قيّم الدار - المحتوى والعربية، كاتب النصوص الفاخرة لـ Azenith Living.
@@ -84,7 +85,7 @@ export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt
 إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
 رد بالعربية الفصحى الفاخرة، بأسلوب يعكس رقي Azenith Living.`
   },
-  "qayyim-vis": {
+  "ops-visual": {
     name: "قيّم الدار - المرئي والصور",
     role: "انتقاء صور، اختيار هيرو، alt text، علامة تجارية",
     prompt: `أنت قيّم الدار - المرئي والصور، أمين المعرض البصري لـ Azenith Living.
@@ -93,7 +94,7 @@ export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt
 إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
 رد بالعربية الفصحى بأسلوب بصري دقيق.`
   },
-  "qayyim-seo": {
+  "ops-seo": {
     name: "قيّم الدار - الظهور والبحث",
     role: "تدقيق SEO، إصلاح Schema، فجوات محتوى، منافسين",
     prompt: `أنت قيّم الدار - الظهور والبحث، مهندس الرؤية في محركات البحث لـ Azenith Living.
@@ -102,7 +103,7 @@ export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt
 إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
 رد بالعربية الفصحى بأسلوب تحليلي تقني.`
   },
-  "qayyim-ux": {
+  "ops-ux": {
     name: "قيّم الدار - تجربة المستخدم",
     role: "سلوك زائر، A/B testing، تقارير خروج، أهداف",
     prompt: `أنت قيّم الدار - تجربة المستخدم، محلل سلوك الزوار لـ Azenith Living.
@@ -111,7 +112,7 @@ export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt
 إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
 رد بالعربية الفصحى بأسلوب مستخدم-محوري.`
   },
-  "qayyim-ana": {
+  "ops-analytics": {
     name: "قيّم الدار - التحليلات والأعمال",
     role: "ربط تحويل بإيرادات، تنبؤ، Luxury Score، تقسيم",
     prompt: `أنت قيّم الدار - التحليلات والأعمال، عالم البيانات الاستراتيجية لـ Azenith Living.
@@ -120,7 +121,7 @@ export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt
 إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
 رد بالعربية الفصحى بأسلوب تحليلي تنفيذي.`
   },
-  "qayyim-dev": {
+  "ops-dev": {
     name: "قيّم الدار - التطوير والأداء",
     role: "مراجعة كود، Bundle، تبعيات، أداء، أمان كود",
     prompt: `أنت قيّم الدار - التطوير والأداء، مهندس المنصة التقني لـ Azenith Living.
@@ -129,7 +130,7 @@ export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt
 إذا لم تستطع تنفيذ مهمة، قل: "مش قادر على الصفحة دي".
 رد بالعربية الفصحى بأسلوب هندسي دقيق.`
   },
-  "qayyim-qa": {
+  "ops-qa": {
     name: "قيّم الدار - الجودة والاختبار",
     role: "E2E، Visual Regression، a11y، Load Test، Security",
     prompt: `أنت قيّم الدار - الجودة والاختبار، حارس الجودة الشامل لـ Azenith Living.
@@ -141,7 +142,7 @@ export const AGENT_PERSONAS: Record<string, { name: string; role: string; prompt
   // deprecated alias — kept for backward compatibility with legacy DB records only
   prime: {
     name: "قيّم الدار — القائد",
-    role: "قائد سرب القيّم (alias لـ qayyim-core)",
+    role: "قائد سرب القيّم (alias لـ ops-lead)",
     prompt: `أنت قيّم الدار - القائد، منسق سرب أزينث للموقع.
 تخصصك: شكل الصفحات الظاهرة للزائر، النصوص، صور الغرف والمنتجات، وفخامة الهوية البصرية.
 لا تتحدث عن المصنع أو المخزن أو الخامات أو أوامر التشغيل.
@@ -196,26 +197,27 @@ export class AgentOrchestrator {
 
   constructor() {
     this.agents = {
-      "qayyim-core": qayyimCoreAgent,
-      "qayyim-cont": qayyimContentAgent,
-      "qayyim-vis": qayyimVisualAgent,
-      "qayyim-seo": qayyimSeoAgent,
-      "qayyim-ux": qayyimUxAgent,
-      "qayyim-ana": qayyimAnalyticsAgent,
-      "qayyim-dev": qayyimDevAgent,
-      "qayyim-qa": qayyimQaAgent,
+      "ops-lead": qayyimCoreAgent,
+      "ops-content": qayyimContentAgent,
+      "ops-visual": qayyimVisualAgent,
+      "ops-seo": qayyimSeoAgent,
+      "ops-ux": qayyimUxAgent,
+      "ops-analytics": qayyimAnalyticsAgent,
+      "ops-dev": qayyimDevAgent,
+      "ops-qa": qayyimQaAgent,
       prime: qayyimCoreAgent, // alias
       vanguard: null, // Will use AI fallback
     };
   }
 
-  private normalizeAgentKey(key: string): string {
-    if (key === 'prime') return 'qayyim-core';
-    return key;
+  /** Retired keys and the old `prime` alias both resolve to one swarm member. */
+  private normalizeAgentKey(key: string): AgentType {
+    if (key === 'prime') return 'ops-lead';
+    return legacyToOps(key) as AgentType;
   }
 
   async chat(agentKey: AgentType, message: string, context?: Record<string, any>): Promise<AgentOrchestratorResult> {
-    const selectedAgent = agentKey === "auto" ? this.detectAgent(message) : agentKey;
+    const selectedAgent = agentKey === "auto" ? this.detectAgent(message) : this.normalizeAgentKey(agentKey);
     const supabase = getSupabaseAdminClient();
     // Automated callers (the product/deep suites) are not the owner reading the
     // shop's inbox. Their turns used to land as unread agent messages, so the
@@ -280,7 +282,7 @@ export class AgentOrchestrator {
       // P6-M6: unless the interface named the tool. A command-palette click is an
       // order with a whitelist check on it, not a sentence to interpret — so it
       // wins, and no intent model is called at all.
-      const isSiteAudit = selectedAgent === "qayyim-core" && /افحص الموقع|الموقع كله|تقرير.*(تنفيذي|شامل)|دقّق.*شامل|audit.*site/i.test(message);
+      const isSiteAudit = selectedAgent === "ops-lead" && /افحص الموقع|الموقع كله|تقرير.*(تنفيذي|شامل)|دقّق.*شامل|audit.*site/i.test(message);
       const explicitTool = explicitIntent(context?.run_tool, context?.run_params);
       const inferredTool =
         explicitTool ?? (isSiteAudit ? null : await routeIntent(message));
@@ -361,7 +363,7 @@ export class AgentOrchestrator {
       const isShortFollowUp =
         message.length < 70 && !/أنشئ|انشئ|اعرض|نسّق|نسق|شغّل|شغل|ادرس|قارن|نشر|رجّع|draft|publish/i.test(message);
       try {
-        const { buildSelfModel, renderIdentityLine } = await import("@/lib/qayyim/self-model");
+        const { buildSelfModel, renderIdentityLine } = await import("@/lib/ops/self-model");
         const self = await buildSelfModel(null);
         promptWithToolContext = `${renderIdentityLine(selectedAgent, self)}\n\n${promptWithToolContext}`;
       } catch {}
@@ -370,9 +372,9 @@ export class AgentOrchestrator {
       // world model. Cached for 10 minutes inside the module, so a busy chat
       // does not re-read the shop on every turn. Core only — the specialist
       // agents get their own numbers from their own tools.
-      if (selectedAgent === "qayyim-core" && !isShortFollowUp) {
+      if (selectedAgent === "ops-lead" && !isShortFollowUp) {
         try {
-          const { buildWorldModel, renderWorldDigest } = await import("@/lib/qayyim/world-model");
+          const { buildWorldModel, renderWorldDigest } = await import("@/lib/ops/world-model");
           const world = await buildWorldModel(resolvedCompanyId);
           promptWithToolContext = `${renderWorldDigest(world)}\n\n${promptWithToolContext}`;
         } catch {}
@@ -381,7 +383,7 @@ export class AgentOrchestrator {
         // recorded round is overdue, this turn kicks one off. Deliberately not
         // awaited — the instance may freeze once the reply is sent — so the
         // world digest still prints the round's age rather than trusting this.
-        void import("@/lib/qayyim/daily-round")
+        void import("@/lib/ops/daily-round")
           .then((m) => m.ensureDailyRound(resolvedCompanyId))
           .catch(() => {});
       }
@@ -390,7 +392,7 @@ export class AgentOrchestrator {
       // قيّم-كور: ينسق السرب الكامل عبر MasterOrchestrator
       // المستخدم يتكلم مع القائد فقط — السرب يعمل خفياً في الخلفية
       // ══════════════════════════════════════════════════════════════
-      if (selectedAgent === "qayyim-core") {
+      if (selectedAgent === "ops-lead") {
         // Shortcut: افحص → تقرير تنفيذي مختصر مباشر (أسرع وأفيد من السرب الكامل).
         // Tested on the RAW message — injected history must not drag old audit
         // keywords into short follow-ups.
@@ -421,7 +423,7 @@ export class AgentOrchestrator {
         // Short conversational follow-ups ("كم واحدة فيهم؟", "ليه؟") belong to
         // the persona chat (it has the injected history), not a fresh swarm run.
         if (!response && isShortFollowUp) {
-          const coreInstance = this.agents["qayyim-core"];
+          const coreInstance = this.agents["ops-lead"];
           if (coreInstance) {
             try {
               response = await coreInstance.chat(promptWithToolContext, context);
@@ -445,14 +447,14 @@ export class AgentOrchestrator {
               (metadata as any).version        = swarmResult.version;
               (metadata as any).draft          = swarmResult.draft ?? null;
             } else {
-              const agentInstance = this.agents["qayyim-core"];
+              const agentInstance = this.agents["ops-lead"];
               response = agentInstance
                 ? await agentInstance.chat(promptWithToolContext, context)
                 : `⚠️ السرب غير متاح حالياً: ${swarmResult.response}`;
             }
           } catch (swarmErr: any) {
             console.warn("[AgentOrchestrator] Swarm failed, falling back to core:", swarmErr?.message);
-            const agentInstance = this.agents["qayyim-core"];
+            const agentInstance = this.agents["ops-lead"];
             response = agentInstance
               ? await agentInstance.chat(promptWithToolContext, context)
               : `⚠️ خطأ في السرب: ${swarmErr.message}`;
@@ -460,19 +462,19 @@ export class AgentOrchestrator {
         }
         // Ensure response is defined
         if (!response) {
-          const agentInstance = this.agents["qayyim-core"];
+          const agentInstance = this.agents["ops-lead"];
           response = agentInstance ? await agentInstance.chat(promptWithToolContext, context) : "⚠️ خطأ";
         }
       }
       // ══════════════════════════════════════════════════════════════
       // وكلاء قيّم الآخرون — يُستدعَون مباشرة (للمحادثات الفردية)
       // ══════════════════════════════════════════════════════════════
-      else if (["qayyim-cont","qayyim-vis","qayyim-seo","qayyim-ux","qayyim-ana","qayyim-dev","qayyim-qa"].includes(selectedAgent)) {
+      else if (["ops-content","ops-visual","ops-seo","ops-ux","ops-analytics","ops-dev","ops-qa"].includes(selectedAgent)) {
         const agentInstance = this.agents[selectedAgent];
         if (agentInstance && typeof agentInstance.chat === 'function') {
           response = await agentInstance.chat(promptWithToolContext, context);
         } else {
-          const persona = AGENT_PERSONAS[selectedAgent] ?? AGENT_PERSONAS["qayyim-core"];
+          const persona = AGENT_PERSONAS[selectedAgent] ?? AGENT_PERSONAS["ops-lead"];
           const messages = [
             { role: "system" as const, content: persona.prompt },
             { role: "user"   as const, content: promptWithToolContext },
@@ -489,7 +491,7 @@ export class AgentOrchestrator {
         response = await this.callAI(messages);
       } else {
         // Specialist agents (analyst, coder, ops, security, learner) - use AI
-        const persona = AGENT_PERSONAS[selectedAgent] || AGENT_PERSONAS["qayyim-core"];
+        const persona = AGENT_PERSONAS[selectedAgent] || AGENT_PERSONAS["ops-lead"];
         const systemPrompt = persona.prompt;
         const messages = [
           { role: "system" as const, content: systemPrompt },
@@ -500,7 +502,7 @@ export class AgentOrchestrator {
 
       // P5-M5: friendly war — a critic pass polices the leader's actionable
       // answers before the owner ever sees them (short replies skip it).
-      if (selectedAgent === "qayyim-core" && response && shouldDebate(response)) {
+      if (selectedAgent === "ops-lead" && response && shouldDebate(response)) {
         const polished = await critiqueAndPolish(message, response);
         response = polished.reply;
       }
@@ -530,7 +532,7 @@ export class AgentOrchestrator {
         await supabase.from("agent_messages").insert({
           conversation_id: conversationId,
           sender_type: "agent",
-          sender_name: selectedAgent.toUpperCase(),
+          sender_name: storedSenderName(selectedAgent),
           content: response,
           created_at: new Date().toISOString(),
           action_taken: !!toolResult,
@@ -584,8 +586,8 @@ export class AgentOrchestrator {
     try {
       // Qayyim agents handle their own task processing
       const qayyimAgents = [
-        "qayyim-core", "qayyim-cont", "qayyim-vis", "qayyim-seo",
-        "qayyim-ux", "qayyim-ana", "qayyim-dev", "qayyim-qa"
+        "ops-lead", "ops-content", "ops-visual", "ops-seo",
+        "ops-ux", "ops-analytics", "ops-dev", "ops-qa"
       ];
 
       if (qayyimAgents.includes(agentKey)) {
@@ -608,7 +610,7 @@ export class AgentOrchestrator {
       }
 
       // Fallback for other agents
-      const persona = AGENT_PERSONAS[agentKey] || AGENT_PERSONAS["qayyim-core"];
+      const persona = AGENT_PERSONAS[agentKey] || AGENT_PERSONAS["ops-lead"];
       const messages = [
         { role: "system" as const, content: persona.prompt },
         { role: "user" as const, content: `قم بتنفيذ هذه المهمة: ${JSON.stringify(task)}` },
@@ -624,7 +626,7 @@ export class AgentOrchestrator {
     } catch (error: any) {
       return {
         success: false,
-        agentUsed: agentKey === "auto" ? "qayyim-core" : agentKey,
+        agentUsed: agentKey === "auto" ? "ops-lead" : agentKey,
         response: `⚠️ خطأ في تنفيذ المهمة: ${error.message || "خطأ غير معروف"}`,
       };
     }
@@ -641,7 +643,7 @@ export class AgentOrchestrator {
 
     try {
       if (supabase && resolvedCompanyId) {
-        const key = agentKey === "auto" ? "qayyim-core" : agentKey;
+        const key = agentKey === "auto" ? "ops-lead" : agentKey;
         let { data: agentProfile } = await supabase
           .from("agent_profiles")
           .select("id")
@@ -800,14 +802,14 @@ export class AgentOrchestrator {
 
     // Check all Qayyim agent keyword groups
     const keywordGroups: [string, string[]][] = [
-      ["qayyim-core", coreKeywords],
-      ["qayyim-cont", contentKeywords],
-      ["qayyim-vis", visualKeywords],
-      ["qayyim-seo", seoKeywords],
-      ["qayyim-ux", uxKeywords],
-      ["qayyim-ana", anaKeywords],
-      ["qayyim-dev", devKeywords],
-      ["qayyim-qa", qaKeywords],
+      ["ops-lead", coreKeywords],
+      ["ops-content", contentKeywords],
+      ["ops-visual", visualKeywords],
+      ["ops-seo", seoKeywords],
+      ["ops-ux", uxKeywords],
+      ["ops-analytics", anaKeywords],
+      ["ops-dev", devKeywords],
+      ["ops-qa", qaKeywords],
     ];
 
     const scores: Record<string, number> = {};
@@ -819,7 +821,7 @@ export class AgentOrchestrator {
     }
 
     // Find highest scoring Qayyim agent
-    let maxAgent = "qayyim-core";
+    let maxAgent = "ops-lead";
     let maxScore = 0;
     for (const [agent, score] of Object.entries(scores)) {
       if (score > maxScore) {
@@ -832,7 +834,7 @@ export class AgentOrchestrator {
     if (maxScore > 0) return maxAgent as AgentType;
 
     // Default to core for general website appearance queries
-    return "qayyim-core";
+    return "ops-lead";
   }
 
   async logEvent(eventType: string, agentKey: string, data: Record<string, any>) {

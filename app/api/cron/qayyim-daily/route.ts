@@ -2,13 +2,13 @@
  * Qayyim Daily Proactive Round — HTTP surface.
  * Cron: daily at 7:00 AM UTC
  *
- * The round itself lives in `lib/qayyim/daily-round.ts` so the commander's own
+ * The round itself lives in `lib/ops/daily-round.ts` so the commander's own
  * turn can use it as a backstop when the platform scheduler stays silent.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { assertCronAuthorized } from "@/lib/cron-auth";
-import { executeDailyRound } from "@/lib/qayyim/daily-round";
+import { executeDailyRound } from "@/lib/ops/daily-round";
 
 export const maxDuration = 60;
 

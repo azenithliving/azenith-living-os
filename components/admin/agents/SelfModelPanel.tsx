@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { X, Loader2, Bot, CalendarClock, ShieldAlert, Gauge } from 'lucide-react';
-import { CAPABILITY_LABELS } from '@/lib/qayyim/palette';
-import type { SelfModelView } from '@/lib/qayyim/self-view';
+import { CAPABILITY_LABELS } from '@/lib/ops/palette';
+import type { SelfModelView } from '@/lib/ops/self-view';
 
 /**
  * «اسأل عن نفسك» as a screen instead of a paragraph: the same live self-model the
