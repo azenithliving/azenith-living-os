@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { isOpsKey } from '@/lib/ops/identity';
+import { isOpsKey, legacyToOps } from '@/lib/ops/identity';
 
 interface Handoff {
   id: string;
@@ -52,7 +52,7 @@ export function HandoffInterface() {
   
   const getAgentColor = (agent: string) => {
     const a = agent.toLowerCase();
-    if (isOpsKey(a) || a === 'prime') return 'bg-amber-100 text-amber-800';
+    if (isOpsKey(legacyToOps(a))) return 'bg-amber-100 text-amber-800';
     if (agent.includes('vanguard') || agent.includes('Vanguard')) return 'bg-green-100 text-green-800';
     return 'bg-blue-100 text-blue-800';
   };

@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Activity, CheckCircle, XCircle, Clock, RefreshCw, Loader2 } from 'lucide-react';
+import { legacyToOps, senderDisplayName } from '@/lib/ops/identity';
 
 interface FeedItem {
   id:         string;
@@ -50,7 +51,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const AGENT_COLORS: Record<string, string> = {
-  prime:    'text-purple-400 bg-purple-500/10 border-purple-500/20',
+  'ops-lead': 'text-purple-400 bg-purple-500/10 border-purple-500/20',
   vanguard: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   system:   'text-blue-400 bg-blue-500/10 border-blue-500/20',
 };
@@ -182,7 +183,7 @@ export function AgentActionsFeed() {
         <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
           {filtered.map(item => {
             const st        = STATUS_STYLES[item.status] ?? STATUS_STYLES.pending;
-            const agentCls  = AGENT_COLORS[item.agent] ?? AGENT_COLORS.system;
+            const agentCls  = AGENT_COLORS[legacyToOps(String(item.agent ?? '').toLowerCase())] ?? AGENT_COLORS.system;
 
             return (
               <div
@@ -196,7 +197,7 @@ export function AgentActionsFeed() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border uppercase ${agentCls}`}>
-                      {item.agent}
+                      {senderDisplayName(item.agent)}
                     </span>
                     <span className="text-[10px] text-white/30 font-mono">{item.type}</span>
                   </div>

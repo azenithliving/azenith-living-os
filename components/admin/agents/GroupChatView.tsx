@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, Bot, User, Users, AtSign, Loader2 } from 'lucide-react';
+import { senderDisplayName } from '@/lib/ops/identity';
 
 interface Message {
   id: string;
@@ -200,7 +201,7 @@ export function GroupChatView({
           <div>
             <h3 className="font-bold text-white">المحادثة الجماعية الذكية</h3>
             <p className="text-xs text-white/40">
-              {activeParticipants.join(' • ')} + أنت
+              {activeParticipants.map(senderDisplayName).join(' • ')} + أنت
             </p>
           </div>
         </div>
@@ -333,7 +334,7 @@ function MessageBubble({ message }: { message: Message }) {
       </div>
       <div className={`max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
         <div className={`text-xs mb-1 font-semibold ${isUser ? 'text-[#C5A059]' : badgeColors[agentColor] || 'text-white/60'}`}>
-          {message.sender_name}
+          {senderDisplayName(message.sender_name)}
         </div>
         <div
           className={`rounded-2xl px-4 py-2.5 border ${

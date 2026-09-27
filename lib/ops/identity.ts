@@ -15,6 +15,16 @@ export type OpsAgentKey = (typeof AGENT_KEYS)[number];
 export const LEADER_TITLE = "مدير تشغيل المحتوى";
 export const SWARM_NAME = "سرب أزينث";
 
+/**
+ * Every key the leader has been stored under, the live one first.
+ *
+ * Rows written before either rename are still in the table for any company that
+ * was using the swarm then, so a surface that filters on one key alone silently
+ * reports zero for the same leader's real work. Doors accept the retired stamps and
+ * fold them here; nothing else in shipped code spells them.
+ */
+export const LEADER_KEYS: string[] = ["ops-lead", "prime", "qayyim-core"];
+
 const LABELS: Record<OpsAgentKey, string> = {
   "ops-lead": LEADER_TITLE,
   "ops-content": "وكيل المحتوى",
@@ -37,9 +47,19 @@ const LEGACY: Record<OpsAgentKey, string> = {
   "ops-qa": "qayyim-qa",
 };
 
-const FROM_LEGACY = Object.fromEntries(
-  (Object.keys(LEGACY) as OpsAgentKey[]).map((ops) => [LEGACY[ops], ops])
-) as Record<string, OpsAgentKey>;
+/**
+ * The leader's FIRST retired name. It predates «قيّم الدار» and is retired the same
+ * way, but unlike the swarm keys it never had a stored form to migrate — it survived
+ * as an extra row in the chat's own metadata table, which is how a retired identity
+ * keeps a job description of its own on the owner's screen. One alias, one target:
+ * every door and every label that receives it answers as the leader.
+ */
+const FROM_LEGACY = {
+  ...Object.fromEntries(
+    (Object.keys(LEGACY) as OpsAgentKey[]).map((ops) => [LEGACY[ops], ops])
+  ),
+  prime: "ops-lead",
+} as Record<string, OpsAgentKey>;
 
 export function isOpsKey(value: string): value is OpsAgentKey {
   return (AGENT_KEYS as readonly string[]).includes(value);
@@ -48,6 +68,24 @@ export function isOpsKey(value: string): value is OpsAgentKey {
 /** Unknown input is returned unchanged — a wrong key must never become a guess. */
 export function legacyToOps(key: string): OpsAgentKey {
   return FROM_LEGACY[key] ?? (key as OpsAgentKey);
+}
+
+/**
+ * The signature a human reads under a message.
+ *
+ * `agent_messages.sender_name` holds the key upper-cased — that shape is the stored
+ * record and P7 deliberately kept writing it. But the chat surfaces printed the
+ * column straight out, so the owner's Arabic thread was signed «OPS-LEAD», and every
+ * bubble written before the rename still reads «QAYYIM-CORE»: a retired name is not
+ * retired while it is still signing old messages he scrolls past. Mapping at the
+ * render covers both the live key and the historic stamps without touching a row.
+ *
+ * Anything that is not a swarm key returns unchanged — his own label, the system
+ * label, and the field agents, who belong to a different product.
+ */
+export function senderDisplayName(stored: string): string {
+  const key = legacyToOps(String(stored || "").toLowerCase());
+  return isOpsKey(key) ? agentLabel(key) : stored;
 }
 
 export function opsToLegacy(key: string): string | null {

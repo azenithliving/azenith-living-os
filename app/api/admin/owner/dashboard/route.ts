@@ -5,6 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { LEADER_KEYS } from '@/lib/ops/identity';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
 import { requireAdminApi } from '@/lib/admin-api-guard';
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest) {
 
       // Quick stats
       quick_stats: {
-        prime_tasks_today: agentsResult.prime?.tasks_today || 0,
+        leader_tasks_today: agentsResult.leader?.tasks_today || 0,
         vanguard_tasks_today: agentsResult.vanguard?.tasks_today || 0,
         active_devices: agentsResult.active_devices || 0,
         stuck_tasks: alertsResult.filter((a: any) => a.event_type === 'task_stuck').length
@@ -229,23 +230,17 @@ async function getLowStockItems(companyId: string) {
 
 // Get agent stats
 async function getAgentStats(companyId: string, startOfMonth: string, startOfToday: string) {
-  // Get Qayyim Core stats (supports both old 'prime' key and new 'ops-lead' key)
-  const { data: qayyimCoreProfileNew } = await supabaseServer
+  // One read for every stamp the leader has been stored under: a company whose rows
+  // predate the renames still has its real work, and filtering on the live key alone
+  // would show its owner a zero.
+  const { data: leaderProfiles } = await supabaseServer
     .from('agent_profiles')
-    .select('id')
+    .select('id, agent_key')
     .eq('company_id', companyId)
-    .eq('agent_key', 'ops-lead')
-    .maybeSingle();
+    .in('agent_key', LEADER_KEYS);
 
-  const { data: qayyimCoreProfileLegacy } = await supabaseServer
-    .from('agent_profiles')
-    .select('id')
-    .eq('company_id', companyId)
-    .eq('agent_key', 'prime')
-    .maybeSingle();
-
-  // Use ops-lead profile if available, fall back to legacy prime profile
-  const primeProfile = qayyimCoreProfileNew ?? qayyimCoreProfileLegacy;
+  const leaderProfile =
+    leaderProfiles?.find((p: any) => p.agent_key === 'ops-lead') ?? leaderProfiles?.[0] ?? null;
 
   const { data: vanguardProfile } = await supabaseServer
     .from('agent_profiles')
@@ -261,16 +256,16 @@ async function getAgentStats(companyId: string, startOfMonth: string, startOfTod
     .eq('company_id', companyId)
     .gte('created_at', startOfMonth);
 
-  const primeTasks = tasksData?.filter(t => t.agent_profile_id === primeProfile?.id) || [];
+  const leaderTasks = tasksData?.filter(t => t.agent_profile_id === leaderProfile?.id) || [];
   const vanguardTasks = tasksData?.filter(t => t.agent_profile_id === vanguardProfile?.id) || [];
-  const primeTasksToday = primeTasks.filter((t: any) => t.created_at >= startOfToday).length;
+  const leaderTasksToday = leaderTasks.filter((t: any) => t.created_at >= startOfToday).length;
   const vanguardTasksToday = vanguardTasks.filter((t: any) => t.created_at >= startOfToday).length;
 
   return {
-    prime: {
-      tasks_today: primeTasksToday,
-      tasks_this_month: primeTasks.length,
-      completed_tasks: primeTasks.filter(t => t.status === 'completed').length,
+    leader: {
+      tasks_today: leaderTasksToday,
+      tasks_this_month: leaderTasks.length,
+      completed_tasks: leaderTasks.filter(t => t.status === 'completed').length,
     },
     vanguard: {
       tasks_today: vanguardTasksToday,

@@ -69,13 +69,22 @@ try {
   const seen2 = await p.locator(`text=${probe}`).count();
   check('user message survives 5s poll', seen1 > 0 && seen2 > 0, `${seen1}->${seen2}`);
 
-  // 5) Agent answer arrives (sender label of agent bubbles)
+  // 5) Agent answer arrives, signed with the role — never with the key.
+  // This check used to look for a bubble captioned «OPS-LEAD», i.e. it was
+  // asserting the very defect P8 removed from the owner's screen.
   let answered = false;
   for (let i = 0; i < 16 && !answered; i++) {
     await p.waitForTimeout(5000);
-    answered = await p.locator('p', { hasText: /^OPS-LEAD$/ }).count().then((c) => c >= 1);
+    answered = await p.locator('p', { hasText: /^مدير تشغيل المحتوى$/ }).count().then((c) => c >= 1);
   }
   check('agent reply arrives and both sides persist', answered && seen2 > 0);
+
+  // The swarm stamps its keys as KEY-PART2; that shape, not any uppercase word, is
+  // what must never reach the owner's screen.
+  const latinStamp = await p.locator('p').evaluateAll(
+    (els) => els.filter((e) => /^[A-Z]+-[A-Z]+$/.test((e.textContent || '').trim())).map((e) => e.textContent.trim())
+  );
+  check('no message is signed with a machine key', latinStamp.length === 0, latinStamp.join(', '));
 
   // 6) Roles popup
   const rolesBtn = p.locator('button:has-text("أدوار")').first();

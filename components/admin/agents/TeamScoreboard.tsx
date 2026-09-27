@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { legacyToOps, senderDisplayName } from '@/lib/ops/identity';
 
 interface AgentStats {
   agent_key: string;
@@ -36,7 +37,7 @@ export function TeamScoreboard() {
   }
   
   const getAgentColor = (key: string) => {
-    if (key === 'ops-lead' || key === 'prime') return 'border-amber-500 bg-amber-50';
+    if (legacyToOps(key) === 'ops-lead') return 'border-amber-500 bg-amber-50';
     if (key === 'vanguard') return 'border-green-500 bg-green-50';
     return 'border-blue-500 bg-blue-50';
   };
@@ -63,9 +64,9 @@ export function TeamScoreboard() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                  stat.agent_key === 'ops-lead' || stat.agent_key === 'prime' ? 'bg-amber-500' : 'bg-green-500'
+                  legacyToOps(stat.agent_key) === 'ops-lead' ? 'bg-amber-500' : 'bg-green-500'
                 }`}>
-                  {stat.agent_key[0].toUpperCase()}
+                  {senderDisplayName(stat.agent_key).charAt(0)}
                 </div>
                 <div>
                   <h4 className="font-bold capitalize">{stat.agent_name}</h4>

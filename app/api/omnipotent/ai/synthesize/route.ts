@@ -6,7 +6,7 @@ import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/ge
 /**
  * SOVEREIGN OMNIPOTENT AI SYNTHESIZER
  * 
- * Takes search results from the prime substrate and feeds them to an 
+ * Takes search results from the primary substrate and feeds them to an 
  * uncensored, unrestricted AI model to produce a final, definitive summary.
  */
 

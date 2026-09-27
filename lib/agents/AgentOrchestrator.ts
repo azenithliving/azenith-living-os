@@ -36,7 +36,6 @@ export type AgentType =
   | "ops-analytics"
   | "ops-dev"
   | "ops-qa"
-  | "prime" // deprecated alias for ops-lead
   | "vanguard"
   | "analyst"
   | "coder"
@@ -204,14 +203,12 @@ export class AgentOrchestrator {
       "ops-analytics": qayyimAnalyticsAgent,
       "ops-dev": qayyimDevAgent,
       "ops-qa": qayyimQaAgent,
-      prime: qayyimCoreAgent, // alias
       vanguard: null, // Will use AI fallback
     };
   }
 
-  /** Retired keys and the old `prime` alias both resolve to one swarm member. */
+  /** Retired keys — the leader's two old names included — resolve in one module. */
   private normalizeAgentKey(key: string): AgentType {
-    if (key === 'prime') return 'ops-lead';
     return legacyToOps(key) as AgentType;
   }
 

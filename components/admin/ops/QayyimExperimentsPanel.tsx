@@ -98,7 +98,7 @@ export function QayyimExperimentsPanel() {
       ) : experiments.length === 0 ? (
         <div className="rounded-xl border border-dashed border-white/10 p-10 text-center text-white/30 text-sm">
           <FlaskConical className="w-8 h-8 mx-auto mb-2 opacity-40" />
-          لا توجد تجارب — صمّم تجربة عبر {agentLabel('ops-ux')} من خلال API: /api/admin/ops/ab-test
+          لا توجد تجارب بعد — اطلب من {agentLabel('ops-ux')} يصمّم لك أول تجربة
         </div>
       ) : (
         <div className="space-y-2.5">

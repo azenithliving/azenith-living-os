@@ -7,7 +7,7 @@ import {
   Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff
 } from 'lucide-react';
 import { AGENT_ROLES } from '@/lib/ops/agent-roles';
-import { isOpsKey } from '@/lib/ops/identity';
+import { isOpsKey, legacyToOps, senderDisplayName } from '@/lib/ops/identity';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
 import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/ops/palette';
@@ -60,8 +60,6 @@ const AGENT_METADATA: Record<string, { name: string; role: string; icon: string;
   'ops-analytics':  { name: 'وكيل التحليلات',  role: 'إيرادات، تنبؤ تحويل، مؤشر الفخامة',   icon: '📈', color: 'cyan' },
   'ops-dev':  { name: 'وكيل التطوير',    role: 'أداء، حجم الحزمة، بوابة جودة الكود',      icon: '⚡', color: 'orange' },
   'ops-qa':   { name: 'وكيل الجودة',     role: 'اختبارات شاملة، مقارنة بصرية، وصول',        icon: '🧪', color: 'lime' },
-  // ── alias للتوافق مع القديم ─────────────────────────────────────
-  prime:    { name: 'مدير تشغيل المحتوى', role: 'مسؤول إطلالة أزينث على الموقع', icon: '🧠', color: 'purple' },
   // ── وكلاء العمليات ──────────────────────────────────────────────
   vanguard: { name: 'Vanguard', role: 'مدير العمليات والمبيعات', icon: '💼', color: 'emerald' },
   analyst:  { name: 'Analyst',  role: 'محلل البيانات والتقارير', icon: '📊', color: 'blue' },
@@ -72,11 +70,6 @@ const AGENT_METADATA: Record<string, { name: string; role: string; icon: string;
 };
 
 const AGENT_MISSIONS: Record<string, string[]> = {
-  prime: [
-    'افحص صحة محتوى الصفحة الرئيسية',
-    'اعرض المنتجات',
-    'حلّل ظهور الموقع',
-  ],
   vanguard: [
     'اعرض قائمة العملاء',
     'حلل فرص الإيرادات',
@@ -493,7 +486,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       const data = await res.json();
 
       if (data.success && data.data) {
-        const meta = AGENT_METADATA[agentKey.toLowerCase()] || { name: agentKey.toUpperCase() };
+        const meta = AGENT_METADATA[legacyToOps(agentKey.toLowerCase())] || { name: agentKey.toUpperCase() };
         const agentMsg: Message = {
           id: `agent-${Date.now()}`,
           sender_type: 'agent',
@@ -676,7 +669,11 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
     }
   }, [initialMessage]);
 
-  const meta = AGENT_METADATA[agentKey.toLowerCase()] || {
+  // A retired key never reaches a lookup: the leader answers as the leader whether
+  // the link carrying it is a year old or written today.
+  const normKey = legacyToOps(agentKey.toLowerCase());
+
+  const meta = AGENT_METADATA[normKey] || {
     name: agentKey.toUpperCase(),
     role: 'وكيل ذكي متخصص',
     icon: '🤖',
@@ -696,7 +693,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   };
 
   const colors = colorClasses[activeColorKey] || colorClasses.purple;
-  const missions = AGENT_ROLES[agentKey.toLowerCase()] || AGENT_MISSIONS[agentKey.toLowerCase()] || [];
+  const missions = AGENT_ROLES[normKey] || AGENT_MISSIONS[normKey] || [];
 
   return (
     <div
@@ -759,7 +756,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             <Layers className="w-3.5 h-3.5" />
             أدوار
           </button>
-          {(isOpsKey(agentKey.toLowerCase()) || agentKey.toLowerCase() === 'prime') && (
+          {isOpsKey(normKey) && (
             <a
               href="/admin/v2/ops"
               title="فتح استوديو سرب أزينث"
@@ -1083,7 +1080,7 @@ function MessageBubble({
 
         <div className="space-y-1.5">
           <p className={`text-[10px] ${isUser ? 'text-blue-400 text-left' : colors.name}`}>
-            {message.sender_name}
+            {senderDisplayName(message.sender_name)}
           </p>
 
           <div className={`p-3.5 rounded-2xl ${

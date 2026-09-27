@@ -7,6 +7,7 @@ import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-co
 import { ImageHarvestDashboard } from "./intel/components/ImageHarvestDashboard";
 import { AdminProactiveStrip } from "@/components/admin/AdminProactiveStrip";
 import { NotificationsPanel } from "@/components/admin/NotificationsPanel";
+import { legacyToOps } from "@/lib/ops/identity";
 import TelegramControlPanel from "@/components/admin/TelegramControlPanel";
 import AIKeysControlPanel from "@/components/admin/AIKeysControlPanel";
 
@@ -403,19 +404,22 @@ export default function AdminPage() {
             </h2>
             {(() => {
               const raw = mastermindData?.agents ?? {};
-              // دمج prime القديم في ops-lead (Enterprise Moode) — لا تكرار
-              const merged: Record<string, any> = { ...raw };
-              if (merged['prime']) {
-                const p = merged['prime'];
-                const q = merged['ops-lead'] ?? { tasks: 0, completed: 0, failed: 0, avgTime: 0, successRate: 0 };
-                merged['ops-lead'] = {
-                  tasks: (q.tasks ?? 0) + (p.tasks ?? 0),
-                  completed: (q.completed ?? 0) + (p.completed ?? 0),
-                  failed: (q.failed ?? 0) + (p.failed ?? 0),
-                  avgTime: q.avgTime ?? p.avgTime ?? 0,
-                  successRate: Math.round((((q.completed ?? 0)+(p.completed ?? 0)) / Math.max(1, (q.tasks ?? 0)+(p.tasks ?? 0))) * 100),
+              // A retired key never becomes its own card: every entry folds onto its
+              // live key first, so the leader has one row whatever stamped him.
+              const zero = { tasks: 0, completed: 0, failed: 0, avgTime: 0, successRate: 0 };
+              const merged: Record<string, any> = {};
+              for (const [rawKey, value] of Object.entries(raw) as [string, any][]) {
+                const key = legacyToOps(String(rawKey ?? '').toLowerCase());
+                const base = merged[key] ?? zero;
+                const tasks = (base.tasks ?? 0) + (value?.tasks ?? 0);
+                const completed = (base.completed ?? 0) + (value?.completed ?? 0);
+                merged[key] = {
+                  tasks,
+                  completed,
+                  failed: (base.failed ?? 0) + (value?.failed ?? 0),
+                  avgTime: base.avgTime || value?.avgTime || 0,
+                  successRate: Math.round((completed / Math.max(1, tasks)) * 100),
                 };
-                delete merged['prime'];
               }
               const keys = Object.keys(merged);
               return keys.length > 0 ? (

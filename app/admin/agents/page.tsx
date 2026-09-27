@@ -11,7 +11,7 @@ import { UnifiedAssistant } from '@/components/admin/UnifiedAssistant';
 
 import { Brain, MessageSquare, ShieldAlert, Activity, Terminal, Sparkles, Users, Zap, RefreshCw } from 'lucide-react';
 import { QuickActionsPanel } from '@/components/admin/agents/QuickActionsPanel';
-import { isOpsKey } from '@/lib/ops/identity';
+import { isOpsKey, legacyToOps } from '@/lib/ops/identity';
 import { ProactiveSuggestions } from '@/components/admin/agents/ProactiveSuggestions';
 import { AgentActionsFeed } from '@/components/admin/agents/AgentActionsFeed';
 import { AgentHealthPanel } from '@/components/admin/agents/AgentHealthPanel';
@@ -63,7 +63,6 @@ function AgentStatusBar({ onStatusLoad }: { onStatusLoad?: (s: Record<string, Ag
 
   const agentColor = (key: string) => {
     switch (key) {
-      case 'prime':
       case 'ops-lead': return { ring: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-400' };
       case 'vanguard': return { ring: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-400' };
       case 'analyst':  return { ring: 'border-blue-500/20', bg: 'bg-blue-500/10', text: 'text-blue-400' };
@@ -351,8 +350,8 @@ export default function AgentsPage() {
                         inputs={agent.inputs}
                         outputs={agent.outputs}
                         missions={agent.missions}
-                        onChat={() => { setChatInitialMission(undefined); setActiveChatAgent(agent.key); }}
-                        onMissionClick={(p) => { setChatInitialMission(p); setActiveChatAgent(agent.key); }}
+                        onChat={() => { setChatInitialMission(undefined); setActiveChatAgent(legacyToOps(agent.key)); }}
+                        onMissionClick={(p) => { setChatInitialMission(p); setActiveChatAgent(legacyToOps(agent.key)); }}
                       />
                     );
                   })}
@@ -407,8 +406,8 @@ export default function AgentsPage() {
                         inputs={agent.inputs}
                         outputs={agent.outputs}
                         missions={agent.missions}
-                        onChat={() => { setChatInitialMission(undefined); setActiveChatAgent(agent.key); }}
-                        onMissionClick={(p) => { setChatInitialMission(p); setActiveChatAgent(agent.key); }}
+                        onChat={() => { setChatInitialMission(undefined); setActiveChatAgent(legacyToOps(agent.key)); }}
+                        onMissionClick={(p) => { setChatInitialMission(p); setActiveChatAgent(legacyToOps(agent.key)); }}
                       />
                     );
                   })}
@@ -442,7 +441,6 @@ export default function AgentsPage() {
           <div className="w-full max-w-2xl bg-[#111] border border-white/20 rounded-[2.5rem] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
             <ChatPanel 
               agentKey={activeChatAgent} 
-              agentName={activeChatAgent === 'ops-lead' || activeChatAgent === 'prime' ? 'مدير تشغيل المحتوى' : undefined}
               initialMessage={chatInitialMission}
             />
           </div>

@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer, agentTasksDAL } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
-import { agentLabel, LEADER_TITLE, SWARM_NAME, legacyToOps } from '@/lib/ops/identity';
+import { agentLabel, SWARM_NAME, legacyToOps } from '@/lib/ops/identity';
 import { z } from 'zod';
 
 // التحقق من بيانات المهمة
@@ -12,7 +12,6 @@ const taskSchema = z.object({
   agent_key: z.preprocess((k) => legacyToOps(String(k)), z.enum([
     'ops-lead', 'ops-content', 'ops-visual', 'ops-seo',
     'ops-ux', 'ops-analytics', 'ops-dev', 'ops-qa',
-    'prime',    // deprecated alias — kept for backward compat
     'vanguard',
   ])),
   task_type: z.string().min(1),
@@ -150,12 +149,10 @@ export async function POST(request: NextRequest) {
           // again — the label comes from the identity module instead.
           name: data.agent_key === 'vanguard'
             ? 'VANGUARD'
-            : data.agent_key === 'prime'
-              ? LEADER_TITLE
-              : agentLabel(data.agent_key),
+            : agentLabel(data.agent_key),
           description: data.agent_key === 'vanguard'
             ? 'وكيل المبيعات والعمليات'
-            : data.agent_key === 'prime' || data.agent_key === 'ops-lead'
+            : data.agent_key === 'ops-lead'
               ? `قائد ${SWARM_NAME} — إطلالة الموقع`
               : `وكيل ${SWARM_NAME}`,
           is_active: true,

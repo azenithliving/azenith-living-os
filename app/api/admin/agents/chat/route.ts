@@ -15,7 +15,6 @@ const chatSchema = z.object({
     "ops-analytics",
     "ops-dev",
     "ops-qa",
-    "prime",
     "vanguard",
     "analyst",
     "coder",

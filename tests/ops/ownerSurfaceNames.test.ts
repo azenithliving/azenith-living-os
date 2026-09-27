@@ -93,3 +93,45 @@ describe("the swarm's monitoring reads the complete ledger", () => {
     expect(route).toContain("completed.length + failed.length");
   });
 });
+
+/**
+ * The leader had a name before «قيّم الدار», and P7 retired that one too. It is the
+ * harder of the two to keep dead because the word is ordinary English — it survived
+ * as an accepted value in two door schemas whose preprocessing had already mapped it
+ * to `ops-lead` (dead branches that read as compatibility), as a second row in the
+ * chat's mission table giving the leader a job description of his own, and as the
+ * field name an owner surface read for his task count.
+ *
+ * One exception is allowed and it is not this swarm's: `app/api/admin/prime/**` is a
+ * different product's module that has always been called that. Everything else that
+ * ships spells the retired leader name nowhere.
+ */
+describe("the leader's first retired name is only a dictionary entry", () => {
+  const PRIME = /\bprime\b/i;
+  const PRIME_MODULE = /app\/api\/admin\/prime\//;
+
+  it("is spelled in no shipped surface except the module that owns the word", () => {
+    const walked = ["app", "components"].flatMap(sources);
+    const scanned = walked.filter((f) => !PRIME_MODULE.test(f.replace(/\\/g, "/")));
+    expect(scanned.length, "the scan must stay large").toBeGreaterThan(20);
+    const hits = scanned
+      .filter((f) => PRIME.test(readFileSync(f, "utf8")))
+      .map((f) => f.replace(/\\/g, "/"));
+    expect(hits, hits.join("\n")).toEqual([]);
+  });
+
+  /**
+   * Doors still take the retired stamps — a stale tab must not start a second
+   * conversation for the same leader — but they take them from the dictionary, not
+   * by spelling them, so this is where the mapping is asserted to live.
+   */
+  it("keeps the retired leader keys in the identity module alone", () => {
+    const identity = readFileSync("lib/ops/identity.ts", "utf8");
+    expect(identity).toContain('"prime"');
+    expect(identity).toContain("LEADER_KEYS");
+    const chatDoor = readFileSync("app/api/admin/agents/chat/route.ts", "utf8");
+    expect(chatDoor).toContain("legacyToOps");
+    const taskDoor = readFileSync("app/api/admin/agents/tasks/route.ts", "utf8");
+    expect(taskDoor).toContain("legacyToOps");
+  });
+});

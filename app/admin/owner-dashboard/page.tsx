@@ -29,7 +29,7 @@ interface DashboardData {
     pending_payments: number;
   };
   agent_stats: {
-    prime_tasks_completed: number;
+    leader_tasks_completed: number;
     vanguard_tasks_completed: number;
     active_conversations: number;
   };
@@ -77,7 +77,7 @@ export default function OwnerDashboardPage() {
             pending_payments: dashboard.today?.payments_due || 0,
           },
           agent_stats: {
-            prime_tasks_completed: dashboard.agent_performance?.prime?.completed_tasks || 0,
+            leader_tasks_completed: dashboard.agent_performance?.leader?.completed_tasks || 0,
             vanguard_tasks_completed: dashboard.agent_performance?.vanguard?.completed_tasks || 0,
             active_conversations: dashboard.agent_performance?.active_devices || 0,
           },
@@ -324,7 +324,7 @@ export default function OwnerDashboardPage() {
               صحة الوكلاء المستقلين
             </h2>
             <div className="space-y-4">
-              <AgentMetric label="مدير تشغيل المحتوى" count={data?.agent_stats.prime_tasks_completed || 0} icon="👑" color="gold" />
+              <AgentMetric label="مدير تشغيل المحتوى" count={data?.agent_stats.leader_tasks_completed || 0} icon="👑" color="gold" />
               <AgentMetric label="VANGUARD AI" count={data?.agent_stats.vanguard_tasks_completed || 0} icon="💼" color="emerald" />
               <AgentMetric label="ACTIVE DEVICES" count={data?.agent_stats.active_conversations || 0} icon="💻" color="blue" />
             </div>
