@@ -521,7 +521,7 @@ export class AgentOrchestrator {
 
       // P5-M1: every admin-visible reply passes the truth layer —
       // unverified site paths are neutralized, imperative quotes become buttons.
-      const brain = finalizeReply(response || "", process.env.NEXT_PUBLIC_SITE_URL);
+      const brain = finalizeReply(response || "", process.env.NEXT_PUBLIC_SITE_URL, agentLabel(selectedAgent));
       response = brain.reply;
       if (brain.actions.length && !((metadata as any).suggestions?.length || (metadata as any).nextActions?.length)) {
         (metadata as any).suggestions = brain.actions;

@@ -1,7 +1,8 @@
 /**
  * chat-brain.ts — the reasoning layer every admin chat reply passes through:
  *   1. recall: inject real semantic memories (pgvector, 768-dim) into context
- *   2. finalize: neutralize unverified links, derive clickable action buttons
+ *   2. finalize: retire any name the model resurrects, neutralize unverified
+ *      links, derive clickable action buttons
  *
  * Deterministic and LLM-free except for the embedding call inside recall,
  * which already exists (SharedMemory → gemini-embedding-001).
@@ -9,6 +10,7 @@
 
 import { sharedMemory } from "./memory/SharedMemory";
 import { verifyResponseLinks } from "./url-manifest";
+import { scrubRetiredProductName, SWARM_NAME } from "./identity";
 
 export interface ChatBrainResult {
   reply: string;
@@ -67,12 +69,21 @@ export function deriveActions(text: string): string[] {
 
 /**
  * One-stop finalizer for any reply shown to the admin.
+ *
+ * `selfLabel` is who the answering member calls itself; the retired product name a
+ * model may still write gets replaced by it. Every caller knows its agent, and the
+ * default exists only so a surface that forgets cannot publish the dead name.
  */
-export function finalizeReply(rawReply: string, siteOrigin?: string): ChatBrainResult {
-  const { text, removed } = verifyResponseLinks(rawReply, siteOrigin);
+export function finalizeReply(
+  rawReply: string,
+  siteOrigin?: string,
+  selfLabel: string = SWARM_NAME,
+): ChatBrainResult {
+  const scrubbed = scrubRetiredProductName(rawReply, selfLabel);
+  const { text, removed } = verifyResponseLinks(scrubbed, siteOrigin);
   let reply = text;
   if (removed.length) {
     reply += `\n\n⚠️ أزلت ${removed.length} رابط غير موجود في الموقع (${removed.slice(0, 2).join("، ")}${removed.length > 2 ? "…" : ""}) — كل رابط أعلاه يفحص مقابل خريطة المسارات الحقيقية.`;
   }
-  return { reply, actions: deriveActions(rawReply), unverifiedLinks: removed };
+  return { reply, actions: deriveActions(scrubbed), unverifiedLinks: removed };
 }

@@ -39,11 +39,18 @@ P7 retired the product name «قيّم الدار». One module owns every ident
   all moved with them, and the swarm's fifteen tables are `ops_*` since P7-M5.
 - **`qayyim-*`, `QAYYIM-*`, `qayyim_*` tables, «قيّم الدار»** — retired. The retired→live mapping
   lives only in `identity.ts`; the HTTP doors still accept a retired key so a stale browser tab or
-  an old Telegram link keeps working, and each retired table name survives briefly as a
-  security-invoker alias view (dropped in P7-T12). `/api/admin/qayyim/**` and the two
-  `/admin/**/qayyim` pages are forwarders, not surfaces. Guards that keep it gone:
-  `tests/ops/noRetiredName.test.ts` (the Arabic name) and the table guard in
-  `tests/ops/toolNames.test.ts` (no shipped code queries a `qayyim_*` relation).
+  an old Telegram link keeps working. The fifteen alias views over the old table names were dropped
+  in **P7-T12 (2026-09-28)**, so a `qayyim_*` relation no longer resolves anywhere. `/api/admin/qayyim/**` and the two
+  `/admin/**/qayyim` pages are forwarders, not surfaces — kept on purpose, because the owner's older
+  Telegram messages deep-link to them. Guards that keep the name out of anything shipped or served:
+  `tests/ops/noRetiredName.test.ts` (the Arabic name in code, plus the reply-boundary scrub that
+  stops a model re-naming itself with it), the table guard in `tests/ops/toolNames.test.ts`, and
+  `tests/ops/ownerSurfaceNames.test.ts` (the retired KEY inside Arabic copy on the owner's screens).
+- **Database internals still wearing the old word** — roughly 65 index, primary-key, policy and
+  trigger names (`qayyim_drafts_pkey`, `service_role_qayyim_rivals`, `update_qayyim_drafts_updated_at`).
+  They follow their table by internal id, appear on no surface, and are read by no code; renaming them
+  is churn with zero owner-visible gain. The count and the reason live in
+  `docs/qayyim-phases/P7-identity-retirement.md` — do not rediscover them as a bug.
 - **«مدير تشغيل المحتوى»** — the leader's job title (`LEADER_TITLE`): the only human name for it, in
   chat headers, cards, Telegram messages and reports. **«سرب أزينث»** (`SWARM_NAME`) is the swarm;
   **«وكيل …»** are the eight role labels from `agentLabel(key)`.

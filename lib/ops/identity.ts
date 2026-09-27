@@ -64,3 +64,23 @@ export function agentLabel(key: string): string {
 export function storedSenderName(key: string): string {
   return legacyToOps(key).toUpperCase();
 }
+
+/**
+ * The retired product name in the two spellings a model produces — with and
+ * without the emphasis mark on the ي, either carrying the leading article.
+ *
+ * P7 swept the source and the stored rows and both came back empty, yet a
+ * development agent still answered the owner «بصفتي **قيّم الدار**»: the name came
+ * out of the model's memory of what this product was called. A prompt cannot be
+ * trusted with a name that no longer exists, so the reply boundary rewrites it.
+ *
+ * «الدار» is required, and the lookbehind refuses an Arabic letter in front, so
+ * «تقييم الدار» and «قيّم جودتها» (a verb) and «القيّم على القسم» (a custodian) are
+ * ordinary Arabic this function must never touch.
+ */
+const RETIRED_PRODUCT_NAME =
+  /(?<![\u0600-\u06FF])(?:ال)?قيّم الدار|(?<![\u0600-\u06FF])(?:ال)?قيم الدار/g;
+
+export function scrubRetiredProductName(text: string, replacement: string): string {
+  return text.replace(RETIRED_PRODUCT_NAME, replacement);
+}
