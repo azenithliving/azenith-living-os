@@ -5,6 +5,7 @@
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
 import { agentLabel } from "./identity";
+import { measuredNumber } from "./measured-benchmark";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 
@@ -122,25 +123,30 @@ export class QayyimDevAgent extends QayyimAgentBase {
         const supabase = getSupabaseAdminClient();
         const companyId = await resolveAdminCompanyId(params.context?.company_id) ?? this.companyId;
         const scoreMatch = aiResult.output.match(/(\d+)\s*KB/);
-        const score = scoreMatch ? Math.max(0, 100 - Math.round(parseInt(scoreMatch[1]) / 10)) : 75;
+        // A prose answer with no kilobyte figure in it measured nothing, and the
+        // fallback used to record that as a healthy-looking 75 out of 100.
+        const score = scoreMatch
+          ? measuredNumber(Math.max(0, 100 - Math.round(parseInt(scoreMatch[1], 10) / 10)))
+          : null;
         if (supabase) {
-          await supabase.from('ops_benchmark_runs').insert({
-            company_id: companyId,
-            agent_key: this.agentKey,
-            benchmark_key: 'bundle_size',
-            score,
-            max_score: 100,
-            passed: score >= 70,
-            details: { bundleStats: aiResult.data?.bundleStats, output: aiResult.output.slice(0, 500) },
-          });
+          if (score !== null) {
+            await supabase.from('ops_benchmark_runs').insert({
+              company_id: companyId,
+              agent_key: this.agentKey,
+              benchmark_key: 'bundle_size',
+              score,
+              max_score: 100,
+              passed: score >= 70,
+              details: { bundleStats: aiResult.data?.bundleStats, output: aiResult.output.slice(0, 500) },
+            });
+          }
           await supabase.from('ops_task_metrics').insert({
             company_id: companyId,
             agent_key: this.agentKey,
             task_id: taskId,
             task_type: 'bundle_analysis',
             status: 'completed',
-            duration_ms: 1000,
-            quality_gate_result: score >= 70 ? 'passed' : 'failed',
+            quality_gate_result: score === null ? null : score >= 70 ? 'passed' : 'failed',
             metadata: { score },
           });
         }

@@ -92,7 +92,7 @@ describe('self-model', () => {
    * Two of the shipped limits were beliefs, not measurements, and each one cost
    * the swarm something real: «كرون يومي واحد» was never the platform's rule (a
    * hundred jobs are allowed, each once a day), and «صفر خدمات مدفوعة» was already
-   * broken by five free services — a rule the swarm watches itself break is a rule
+   * broken by eight free services — a rule the swarm watches itself break is a rule
    * it learns not to trust. These assertions pin the corrected envelope.
    */
   it('the shipped limits state the real schedule rule and the paid rule the owner can enforce', async () => {
@@ -101,6 +101,26 @@ describe('self-model', () => {
     expect(limits).toContain('مئة مهمة مجدولة');
     expect(limits).toContain('مرة واحدة في اليوم');
     expect(limits).toContain('لا اشتراك جديد بالمال بلا موافقة المالك');
+  });
+
+  /**
+   * The limit line announces a count and then names the services, so the two can
+   * drift apart the moment one dependency is added — and a self-model whose numbers
+   * do not match its own sentence is the failure this phase keeps tripping over.
+   * The count is read back off the list rather than hard-coded a second time.
+   */
+  it('counts exactly the free services it names', async () => {
+    const ARABIC_COUNT: Record<string, number> = {
+      'واحدة': 1, 'اثنتان': 2, 'ثلاث': 3, 'أربع': 4, 'خمس': 5,
+      'ست': 6, 'سبع': 7, 'ثمانية': 8, 'تسع': 9, 'عشر': 10,
+    };
+    const line = (await buildSelfModel(null)).limits.find((l) => l.includes('الخدمات المجانية المعتمدة'));
+    expect(line, 'the limits must still name the free services').toBeDefined();
+    const [stated, listed] = (line as string).split('حاليًا')[1].split(':');
+    const names = listed.split('،').map((s) => s.trim()).filter(Boolean);
+    const count = ARABIC_COUNT[stated.trim()];
+    expect(count, `«${stated.trim()}» is not a count this test knows`).toBeDefined();
+    expect(names).toHaveLength(count);
   });
 
   /**

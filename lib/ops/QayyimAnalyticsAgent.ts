@@ -5,6 +5,7 @@
 
 import { QayyimAgentBase, QayyimTask, QayyimResult, QayyimAgentCapabilities } from "./QayyimAgentBase";
 import { agentLabel } from "./identity";
+import { measuredNumber } from "./measured-benchmark";
 
 const QAYYIM_ANA_SYSTEM_PROMPT = `أنت ${agentLabel("ops-analytics")}.
 
@@ -146,8 +147,11 @@ export class QayyimAnalyticsAgent extends QayyimAgentBase {
         const { resolveAdminCompanyId } = await import('@/lib/admin-company');
         const supabase = getSupabaseAdminClient();
         const companyId = await resolveAdminCompanyId(params.context?.company_id) ?? this.companyId;
-        const score = aiResult.data?.luxuryScore?.total ?? aiResult.data?.luxuryScore ?? 0;
-        if (supabase && typeof score === 'number') {
+        const score = measuredNumber(aiResult.data?.luxuryScore?.total ?? aiResult.data?.luxuryScore);
+        // A run that measured nothing records nothing: the ledger's zero used to be
+        // indistinguishable from a store that genuinely scored zero.
+        if (score === null) console.warn('[ops-analytics] luxury run produced no measurement — nothing recorded');
+        if (supabase && score !== null) {
           await supabase.from('ops_benchmark_runs').insert({
             company_id: companyId,
             agent_key: this.agentKey,
