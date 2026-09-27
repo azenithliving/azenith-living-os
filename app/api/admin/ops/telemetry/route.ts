@@ -1,5 +1,5 @@
 /**
- * Qayyim Swarm - Telemetry & Behavior API (QAYYIM-UX)
+ * The swarm's Telemetry & Behavior API (وكيل التجربة)
  * POST /api/admin/ops/telemetry
  */
 
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     success: true,
-    message: 'Qayyim Telemetry API (QAYYIM-UX) - POST with { action, page_path?, section_key?, time_range?, metrics?, goal? }',
+    message: 'Telemetry API (وكيل التجربة) - POST with { action, page_path?, section_key?, time_range?, metrics?, goal? }',
     actions: ['analyze_behavior', 'exit_rate_report', 'create_goal', 'get_goals'],
   });
 }

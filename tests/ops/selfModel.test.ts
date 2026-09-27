@@ -89,6 +89,37 @@ describe('self-model', () => {
   });
 
   /**
+   * Two of the shipped limits were beliefs, not measurements, and each one cost
+   * the swarm something real: «كرون يومي واحد» was never the platform's rule (a
+   * hundred jobs are allowed, each once a day), and «صفر خدمات مدفوعة» was already
+   * broken by five free services — a rule the swarm watches itself break is a rule
+   * it learns not to trust. These assertions pin the corrected envelope.
+   */
+  it('the shipped limits state the real schedule rule and the paid rule the owner can enforce', async () => {
+    const limits = (await buildSelfModel(null)).limits.join('؛ ');
+    expect(limits).not.toMatch(/واحد كحد أقصى|صفر خدمات/);
+    expect(limits).toContain('مئة مهمة مجدولة');
+    expect(limits).toContain('مرة واحدة في اليوم');
+    expect(limits).toContain('لا اشتراك جديد بالمال بلا موافقة المالك');
+  });
+
+  /**
+   * The false limit outlived its sentence by a long way: it was the stated reason
+   * the weekly organs ride the daily round. Nothing in the shipped code may justify
+   * a design by a schedule shortage the platform never imposed — if a job is
+   * single, its own comment has to say why.
+   */
+  it('no shipped file still blames a platform that allows a hundred jobs', () => {
+    const root = process.cwd();
+    const offenders: string[] = [];
+    for (const rel of ['lib/ops/daily-round.ts', 'lib/ops/self-audit.ts', 'lib/ops/self-model.ts']) {
+      const src = readFileSync(resolve(root, rel), 'utf8');
+      if (/one schedule|exactly one|a day, so|Hobby (limit|gives)|not seven/i.test(src)) offenders.push(rel);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  /**
    * The browser gets Arabic labels it never has to translate, and no module
    * path: `source` exists so the organ list can be grepped against the daily
    * round, and it stays on the server with the rest of the internals.

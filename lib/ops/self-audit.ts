@@ -1,13 +1,17 @@
 /**
  * P6-M5 — the swarm's weekly blood test.
  *
- * Once a week (inside the existing daily cron, on Sundays — Hobby gives us one
- * schedule, not seven) an independent judge reads the last handful of answers
- * real humans got and grades them: does the reply say something true, is it the
- * right size, and is it honest about what the swarm cannot do. The number lands
- * in `ops_benchmark_runs`, the same ledger every other measurement in this
- * swarm writes to, so a drift in answer quality shows up on the same axis as a
- * drift in traffic or revenue.
+ * Once a week (inside the existing daily cron, on Sundays) an independent judge
+ * reads the last handful of answers real humans got and grades them: does the
+ * reply say something true, is it the right size, and is it honest about what the
+ * swarm cannot do. The number lands in `ops_benchmark_runs`, the same ledger every
+ * other measurement in this swarm writes to, so a drift in answer quality shows up
+ * on the same axis as a drift in traffic or revenue.
+ *
+ * It rides the daily round rather than having its own schedule because of the
+ * function's 60-second budget, not a shortage of schedules — the free plan allows
+ * many daily jobs, but a weekly organ is cheap to run and expensive to re-run
+ * inside a round that already spends its seconds elsewhere.
  *
  * Everything that can lie is kept out of the model call and into pure functions
  * the suite can argue with: which replies are sampled at all, how the verdict
