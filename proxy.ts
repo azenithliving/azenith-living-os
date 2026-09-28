@@ -9,6 +9,7 @@ import {
 } from "@/lib/rate-limit";
 import { isValidRoomSlug } from "@/lib/rooms-catalog";
 import { isAuthorizedAdminEmail } from "@/lib/admin-access";
+import { legacyAddressRedirect } from "@/lib/ops/legacy-address-table";
 
 /**
  * SOVEREIGN PROXY ENGINE v1.0
@@ -38,6 +39,14 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.hostname = "azenith-living.vercel.app";
     return NextResponse.redirect(url, 301);
+  }
+
+  // 0. RETIRED ADDRESSES — answered here and nowhere else. The forwarder pages
+  // that used to live inside /admin/v2 are gone: a redirect inside the new house
+  // means the new house still knows the old name.
+  const retiredTarget = legacyAddressRedirect(pathname, search);
+  if (retiredTarget) {
+    return NextResponse.redirect(new URL(retiredTarget, request.url), 308);
   }
 
   // 1. GATEKEEPER LEAK DETECTION (Sovereign Mesh)

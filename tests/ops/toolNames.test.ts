@@ -106,17 +106,20 @@ describe("the owner's surfaces and the clock", () => {
   });
 
   /**
-   * The retired addresses stay, but only as forwarders: a bookmark and the morning
-   * story both carry a query (`?highlight=`, `?agent=`, `?proposal=`), and a second
-   * studio rendering the same panels would let the two surfaces drift apart.
+   * Inverted in batch four. The retired addresses still answer — a bookmark on the
+   * owner's phone and every Telegram message he already sent carry them — but they
+   * are answered by one table at the outer gate, not by pages living inside the new
+   * house. A forwarder room in `/admin/v2` was the new house remembering the old.
    */
-  it("keeps the retired addresses forwarding, with their query", () => {
-    const studio = readFileSync("app/admin/v2/qayyim/page.tsx", "utf8");
-    expect(studio).toContain("/admin/v2/ops");
-    expect(studio).toContain("window.location.search");
-    const chat = readFileSync("app/admin/v2/agents/qayyim/page.tsx", "utf8");
-    expect(chat).toContain("/admin/v2/agents/ops");
-    expect(readFileSync("app/admin/qayyim/page.tsx", "utf8")).toContain("/admin/v2/ops");
+  it("answers the retired addresses at the gate, with no page left behind", () => {
+    const table = readFileSync("lib/ops/legacy-address-table.ts", "utf8");
+    expect(table).toContain('"/admin/v2/qayyim"');
+    expect(table).toContain('"/admin/v2/agents/qayyim"');
+    expect(table).toContain('"/admin/qayyim"');
+    expect(readFileSync("proxy.ts", "utf8")).toContain("legacyAddressRedirect");
+    expect(existsSync("app/admin/v2/qayyim/page.tsx")).toBe(false);
+    expect(existsSync("app/admin/v2/agents/qayyim/page.tsx")).toBe(false);
+    expect(existsSync("app/admin/qayyim/page.tsx")).toBe(false);
   });
 
   it("moves the cron routes and the schedule that calls them", () => {
