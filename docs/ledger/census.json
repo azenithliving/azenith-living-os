@@ -1,12 +1,17 @@
 {
-  "generatedAt": "2026-09-29T13:16:16.007Z",
+  "generatedAt": "2026-09-29T15:06:24.395Z",
   "counts": {
     "oldPages": 18,
-    "oldPageLines": 5790,
+    "oldPageLines": 5865,
     "newPages": 11,
     "newPageLines": 319,
     "adminDoors": 122,
     "allDoors": 200,
+    "outsideDoors": 8,
+    "outsideDoorLines": 2520,
+    "rootLibFiles": 152,
+    "rootLibUsed": 40,
+    "rootLibUsedLines": 14955,
     "furnitureFiles": 57,
     "furnitureLines": 15023,
     "furnitureUsedByBoth": 3,
@@ -14,13 +19,13 @@
     "furnitureNewOnly": 13,
     "furnitureOldOnly": 17,
     "furnitureUnreachable": 24,
-    "swarmFiles": 53,
-    "swarmFileLines": 13442,
+    "swarmFiles": 54,
+    "swarmFileLines": 13674,
     "crons": 2,
     "navEntries": 9,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 9,
-    "atoms": 272
+    "atoms": 321
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -92,7 +97,7 @@
     {
       "kind": "old-page",
       "id": "app/admin/sales/page.tsx",
-      "lines": 2033
+      "lines": 2108
     },
     {
       "kind": "old-page",
@@ -780,6 +785,294 @@
       "resource": "admin/war-room"
     },
     {
+      "kind": "outside-door",
+      "id": "app/api/analytics/route.ts",
+      "lines": 34,
+      "callers": 1
+    },
+    {
+      "kind": "outside-door",
+      "id": "app/api/consultant/faq/route.ts",
+      "lines": 231,
+      "callers": 1
+    },
+    {
+      "kind": "outside-door",
+      "id": "app/api/consultant/learnings/route.ts",
+      "lines": 246,
+      "callers": 1
+    },
+    {
+      "kind": "outside-door",
+      "id": "app/api/consultant/pending-questions/route.ts",
+      "lines": 260,
+      "callers": 1
+    },
+    {
+      "kind": "outside-door",
+      "id": "app/api/consultant/route.ts",
+      "lines": 1460,
+      "callers": 1
+    },
+    {
+      "kind": "outside-door",
+      "id": "app/api/omnipotent/route.ts",
+      "lines": 86,
+      "callers": 2
+    },
+    {
+      "kind": "outside-door",
+      "id": "app/api/system-health/route.ts",
+      "lines": 117,
+      "callers": 2
+    },
+    {
+      "kind": "outside-door",
+      "id": "app/api/tenants/route.ts",
+      "lines": 86,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/aaca-client.ts",
+      "lines": 411,
+      "callers": 3
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-access.ts",
+      "lines": 32,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-api-auth.ts",
+      "lines": 45,
+      "callers": 9
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-api-guard.ts",
+      "lines": 48,
+      "callers": 31
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-approved-executor.ts",
+      "lines": 287,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-assistant-capabilities.ts",
+      "lines": 477,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-assistant-evidence.ts",
+      "lines": 217,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-assistant-log.ts",
+      "lines": 96,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-company.ts",
+      "lines": 32,
+      "callers": 18
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-env-resolver.ts",
+      "lines": 217,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-gate.ts",
+      "lines": 47,
+      "callers": 5
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-live-browser.ts",
+      "lines": 370,
+      "callers": 4
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-natural-brain.ts",
+      "lines": 498,
+      "callers": 4
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-nav.ts",
+      "lines": 77,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-proactive-snapshot.ts",
+      "lines": 74,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-result-actions.ts",
+      "lines": 104,
+      "callers": 4
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-sovereign-mind.ts",
+      "lines": 392,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/admin-telegram-summon.ts",
+      "lines": 62,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/ai-orchestrator.ts",
+      "lines": 775,
+      "callers": 7
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/api-keys-service.ts",
+      "lines": 642,
+      "callers": 5
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/architect-tools.ts",
+      "lines": 1211,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/azenith-prime.ts",
+      "lines": 1057,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/command-executor.ts",
+      "lines": 1165,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/company-resolver.ts",
+      "lines": 40,
+      "callers": 4
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/crypto-keys.ts",
+      "lines": 327,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/key-tester.ts",
+      "lines": 277,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/lead-insights.ts",
+      "lines": 133,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/leads-delete-guard.ts",
+      "lines": 115,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/mastermind-ai.ts",
+      "lines": 895,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/qayyim-ops.ts",
+      "lines": 683,
+      "callers": 3
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/real-tool-executor.ts",
+      "lines": 2222,
+      "callers": 3
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/remote-browser.ts",
+      "lines": 160,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/sovereign-os.ts",
+      "lines": 1235,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/supabase-admin.ts",
+      "lines": 21,
+      "callers": 22
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/supabase-client.ts",
+      "lines": 27,
+      "callers": 3
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/supabase-server.ts",
+      "lines": 32,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/supabase-service.ts",
+      "lines": 58,
+      "callers": 4
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/telegram-config.ts",
+      "lines": 182,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/telegram-notify.ts",
+      "lines": 142,
+      "callers": 6
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/totp-verify.ts",
+      "lines": 70,
+      "callers": 2
+    },
+    {
       "kind": "furniture",
       "id": "components/admin/AdminProactiveStrip.tsx",
       "lines": 89,
@@ -1265,6 +1558,11 @@
       "kind": "swarm-file",
       "id": "lib/ops/memory/VectorStore.ts",
       "lines": 198
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/migration-map.ts",
+      "lines": 232
     },
     {
       "kind": "swarm-file",

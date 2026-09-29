@@ -1,0 +1,20 @@
+{
+  "_comment": "The only hand-written row source for the transfer ledger: one row per atom that has moved, is moving, or has been erased. Every other atom in the census is `not-moved` by default. `scripts/ops-census.mjs` writes the complete ledger to docs/ledger/transfers.json; a guard fails if a row here names an atom the census does not have, or repeats one. The office is NOT written here — it comes from lib/ops/migration-map.ts, so a move can never disagree with the map.",
+  "states": ["not-moved", "moving", "moved", "erased"],
+  "rows": [
+    {
+      "atom": "app/admin/v2/ops/page.tsx",
+      "state": "moved",
+      "phase": "P6",
+      "when": "2026-09-28",
+      "proof": "production suites measured on the published URL: browser 28 of 28, product 21 of 21"
+    },
+    {
+      "atom": "app/admin/v2/agents/ops/page.tsx",
+      "state": "moved",
+      "phase": "P6",
+      "when": "2026-09-28",
+      "proof": "same run, and the retired agent key is rewritten at the outer gate for old links"
+    }
+  ]
+}

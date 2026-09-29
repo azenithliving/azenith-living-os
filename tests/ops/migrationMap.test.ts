@@ -1,7 +1,14 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
-import { OFFICES, unassignedAtoms, officeOf, type CensusAtom } from "@/lib/ops/migration-map";
+import {
+  OFFICES,
+  SHARED_OFFICE,
+  officeOf,
+  sharedMachines,
+  unassignedAtoms,
+  type CensusAtom,
+} from "@/lib/ops/migration-map";
 
 /**
  * The owner's test is «I want to see that not one nail was forgotten». That cannot
@@ -37,12 +44,33 @@ describe("every atom in the census has an office", () => {
   });
 
   it("never seats the shared machines inside an office", () => {
-    // A swallowed machine stops every employee, so it is asserted, not remembered.
+    // A swallowed machine stops every employee. The fence counts them so they are
+    // never forgotten, and the sign says they belong to no single office.
     const forbidden = ["lib/vanguard", "lib/rate-limit", "utils/supabase"];
     for (const atom of census!.atoms) {
-      for (const path of forbidden) {
-        expect(atom.id.startsWith(path), atom.id).toBe(false);
-      }
+      if (!forbidden.some((path) => atom.id.startsWith(path))) continue;
+      expect(officeOf(atom)?.office, atom.id).toBe(SHARED_OFFICE);
     }
+    const seated = sharedMachines(census!.atoms);
+    expect(seated.length, "the fence counts no shared machinery at all").toBeGreaterThan(0);
+    expect(OFFICES.some((o) => o.id === SHARED_OFFICE), "shared is not an office").toBe(false);
+    // The swallow test: exactly the library files one surface calls are allowed to be
+    // seated, and the list is short on purpose. A new one is a decision, not a default.
+    const libSeated = census!.atoms
+      .filter((a) => /^lib\/[^/]+\.ts$/.test(a.id) && officeOf(a)?.office !== SHARED_OFFICE)
+      .map((a) => a.id)
+      .sort();
+    expect(libSeated, JSON.stringify(libSeated)).toEqual(["lib/lead-insights.ts", "lib/leads-delete-guard.ts"]);
+  });
+
+  it("counts the doors and library files the first fence left outside the wall", () => {
+    const kinds = census!.atoms.reduce<Record<string, number>>((acc, a) => {
+      acc[a.kind] = (acc[a.kind] ?? 0) + 1;
+      return acc;
+    }, {});
+    expect(kinds["outside-door"], "doors outside /api/admin that an admin surface calls").toBeGreaterThan(0);
+    expect(kinds["root-lib"], "library files an admin surface imports").toBeGreaterThan(0);
+    // Every one of them resolves — a counted atom with no sign is the forgotten nail.
+    expect(unassignedAtoms(census!.atoms).map((a) => a.id)).toEqual([]);
   });
 });

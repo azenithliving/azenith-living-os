@@ -8,6 +8,7 @@ const world = vi.hoisted(() => {
     log: [] as string[],
     tables: {} as Record<string, { id: string; [key: string]: unknown }[]>,
     resistant: new Set<string>(),
+    failSelect: null as string | null,
   };
 
   const makeClient = () => ({
@@ -31,8 +32,12 @@ const world = vi.hoisted(() => {
             );
           }
           const result = {
-            then: (onOk: (v: unknown) => unknown) =>
-              Promise.resolve({ data: matched.map((row) => ({ id: row.id })), error: null }).then(onOk),
+            then: (onOk: (v: unknown) => unknown) => {
+              if (op === "select" && state.failSelect) {
+                return Promise.resolve({ data: [], error: { message: state.failSelect } }).then(onOk);
+              }
+              return Promise.resolve({ data: matched.map((row) => ({ id: row.id })), error: null }).then(onOk);
+            },
             select: () => result,
           };
           return result;
@@ -70,6 +75,7 @@ const deletes = () => world.state.log.filter((entry) => entry.startsWith("delete
 beforeEach(() => {
   world.state.log.length = 0;
   world.state.resistant.clear();
+  world.state.failSelect = null;
   world.state.tables = {
     consultant_sessions: [{ id: "s-1", session_id: SESSION_KEY }],
     users: [{ id: "u-1", session_id: SESSION_KEY }],
@@ -147,5 +153,27 @@ describe("leads delete door", () => {
     expect(json.error).toBe("فاضل سجلات ما اتمسحتش");
     expect(json.residue.visitorTelemetry).toBe(1);
     expect(json.deleted.visitorTelemetry).toBe(2);
+  });
+
+  it("answers the owner in Arabic on every rejection the screen can show", async () => {
+    const missing = await post({});
+    expect(missing.status).toBe(400);
+    expect(missing.json.error).toMatch(/[\u0600-\u06FF]/);
+    expect(missing.json.error).not.toMatch(/[a-z]{4,}/);
+
+    world.state.failSelect = "connection timeout";
+    const broken = await post({ sessionIds: [SESSION_KEY] });
+    expect(broken.status).toBe(500);
+    expect(broken.json.error).toMatch(/[\u0600-\u06FF]/);
+    expect(broken.json.error).not.toMatch(/[a-z]{4,}/);
+    // Every statement that carried keys reports its own raw failure — the door keeps
+    // the machine detail out of the owner's sentence, not out of the response.
+    expect(broken.json.failures).toHaveLength(3);
+    expect(broken.json.failures.every((f: string) => f === "connection timeout")).toBe(true);
+
+    world.state.failSelect = null;
+    const mismatch = await post({ sessionIds: [SESSION_KEY], confirm: true, expectedRows: 99 });
+    expect(mismatch.json.error).toMatch(/[\u0600-\u06FF]/);
+    expect(mismatch.json.error).not.toMatch(/[a-z]{4,}/);
   });
 });

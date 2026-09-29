@@ -160,10 +160,51 @@ const furniture = furnitureFiles.map((f) => {
   };
 });
 
+/**
+ * The fence the first census left open. It counted the admin doors only, but the
+ * admin surfaces call doors outside /api/admin and stand on library files at the
+ * library root — and a machine nobody counted is exactly the forgotten nail the
+ * owner asked to see. Both are collected here, by measurement of what the admin
+ * surfaces actually import, not by name.
+ */
+const adminTree = [...walk("app/admin"), ...walk("components/admin")].filter((f) => /\.tsx?$/.test(f));
+const callerSources = [...adminTree, ...adminOnlyDoors];
+const callerTexts = callerSources.map((f) => [f, sourceOf(f)]);
+
+/** Is `/api/x` called, without letting it match the longer `/api/x/faq`? */
+function calledAs(spec) {
+  return callerTexts.filter(([, text]) => {
+    let at = text.indexOf(spec);
+    while (at !== -1) {
+      const next = text[at + spec.length];
+      if (next === undefined || !/[A-Za-z0-9_\-/.]/.test(next)) return true;
+      at = text.indexOf(spec, at + spec.length);
+    }
+    return false;
+  }).length;
+}
+
+const outsideDoors = adminDoors.filter((f) => !f.startsWith("app/api/admin/"));
+const calledDoors = outsideDoors
+  .map((f) => ({ file: f, callers: calledAs(`/api/${doorResource(f)}`) }))
+  .filter((d) => d.callers > 0);
+
+const rootLib = walk("lib").filter((f) => /\.ts$/.test(f) && f.split("/").length === 2);
+const usedLib = rootLib
+  .map((f) => {
+    const frag = `@/lib/${f.replace("lib/", "").replace(/\.ts$/, "")}`;
+    const callers = callerTexts.filter(([, text]) =>
+      text.includes(`${frag}"`) || text.includes(`${frag}'`)).length;
+    return { file: f, callers };
+  })
+  .filter((l) => l.callers > 0);
+
 const atoms = [
   ...oldPages.map((f) => ({ kind: "old-page", id: f, lines: linesOf(f) })),
   ...newPages.map((f) => ({ kind: "new-page", id: f, lines: linesOf(f) })),
   ...adminOnlyDoors.map((f) => ({ kind: "admin-door", id: f, resource: doorResource(f) })),
+  ...calledDoors.map((d) => ({ kind: "outside-door", id: d.file, lines: linesOf(d.file), callers: d.callers })),
+  ...usedLib.map((l) => ({ kind: "root-lib", id: l.file, lines: linesOf(l.file), callers: l.callers })),
   ...furniture.map((f) => ({ kind: "furniture", id: f.id, lines: f.lines, usedBy: f.usedBy })),
   ...opsFiles.map((f) => ({ kind: "swarm-file", id: f, lines: linesOf(f) })),
   ...crons.map((c) => ({ kind: "cron", id: c.path, schedule: c.schedule })),
@@ -177,6 +218,11 @@ const counts = {
   newPageLines: newPages.reduce((a, f) => a + linesOf(f), 0),
   adminDoors: adminOnlyDoors.length,
   allDoors: adminDoors.length,
+  outsideDoors: calledDoors.length,
+  outsideDoorLines: calledDoors.reduce((a, d) => a + linesOf(d.file), 0),
+  rootLibFiles: rootLib.length,
+  rootLibUsed: usedLib.length,
+  rootLibUsedLines: usedLib.reduce((a, l) => a + linesOf(l.file), 0),
   furnitureFiles: furnitureFiles.length,
   furnitureLines: furniture.reduce((a, f) => a + f.lines, 0),
   furnitureUsedByBoth: furniture.filter((f) => f.usedBy === "both").length,
@@ -194,11 +240,55 @@ const counts = {
 };
 
 mkdirSync("docs/ledger", { recursive: true });
-writeFileSync(
-  "docs/ledger/census.json",
+writeFileSync(  "docs/ledger/census.json",
   JSON.stringify({ generatedAt: new Date().toISOString(), counts, duplicatedDoors: duplicatedLeaves(adminOnlyDoors), atoms }, null, 2),
+  "utf8",
+);
+
+/**
+ * The transfer ledger — one row per atom, generated. Only the states are written by
+ * hand (`docs/ledger/movements.json`); everything else is `not-moved`. The owner's
+ * badge on the old screen reads this file, so a row here that names nothing in the
+ * census, or a state off the four, stops the generation instead of quietly lying.
+ */
+const movementsPath = "docs/ledger/movements.json";
+const STATES = ["not-moved", "moving", "moved", "erased"];
+let rows = atoms.map((a) => ({ atom: a.id, kind: a.kind, state: "not-moved" }));
+const problems = [];
+if (existsSync(movementsPath)) {
+  const movements = JSON.parse(readFileSync(movementsPath, "utf8"));
+  const known = new Set(movements.states ?? STATES);
+  const ids = new Set(atoms.map((a) => a.id));
+  const seen = new Set();
+  const byId = new Map();
+  for (const row of movements.rows ?? []) {
+    if (!ids.has(row.atom)) problems.push(`row names an atom the census does not have: ${row.atom}`);
+    if (!known.has(row.state)) problems.push(`state off the four: ${row.atom} -> ${row.state}`);
+    if (seen.has(row.atom)) problems.push(`two rows for the same atom: ${row.atom}`);
+    seen.add(row.atom);
+    byId.set(row.atom, row);
+  }
+  rows = atoms.map((a) => ({ kind: a.kind, ...(byId.get(a.id) ?? { atom: a.id, state: "not-moved" }) }));
+} else {
+  problems.push("docs/ledger/movements.json is missing — the ledger would claim nothing has moved");
+}
+
+const ledgerCounts = rows.reduce((acc, r) => ({ ...acc, [r.state]: (acc[r.state] ?? 0) + 1 }), {});
+writeFileSync(
+  "docs/ledger/transfers.json",
+  JSON.stringify(
+    { generatedAt: new Date().toISOString(), states: STATES, counts: ledgerCounts, rows },
+    null,
+    2,
+  ),
   "utf8",
 );
 
 console.log(JSON.stringify(counts, null, 2));
 console.log(`wrote docs/ledger/census.json (${atoms.length} atoms)`);
+console.log(`wrote docs/ledger/transfers.json (${rows.length} rows: ${JSON.stringify(ledgerCounts)})`);
+
+if (problems.length > 0) {
+  for (const p of problems) console.error(`LEDGER PROBLEM: ${p}`);
+  process.exitCode = 1;
+}

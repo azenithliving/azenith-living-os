@@ -70,6 +70,12 @@ export const OFFICES: Office[] = [
 ];
 
 /**
+ * Not an office. The sign an atom gets when it is machinery several offices stand
+ * on: counted so it can never be forgotten, and never seated inside one employee.
+ */
+export const SHARED_OFFICE = "shared";
+
+/**
  * Rule order matters: first match wins. `match` is tested against an atom id
  * (a page path, a door resource, a component path). Anything that reaches the end
  * unassigned is a classification we have not made yet — the guard fails on it.
@@ -135,6 +141,22 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^\/admin\/(elite)$/, office: "elite-room", reason: "النخبة" },
   { match: /^\/admin\/(agents)$/, office: "swarm-house", reason: "الوكلاء" },
   { match: /^\/admin\/(system|settings|database)$/, office: "system-room", reason: "النظام" },
+
+  /**
+   * The fence the first census left open, now counted: the doors outside
+   * `/api/admin` that an admin surface calls, and the library files at the library
+   * root. Measured today: 8 doors (2520 lines) and 40 library files (14955 lines).
+   * Most of the latter are machinery several offices stand on, and machinery is
+   * never seated inside an employee — it gets the shared sign instead, so the
+   * guard can fail a build that tries to swallow it.
+   */
+  { match: /^app\/api\/consultant\//, office: "swarm-house", reason: "مستشار المتجر وجسمه: آلة السرب" },
+  { match: /^app\/api\/(tenant|tenants)\//, office: "system-room", reason: "الشركات والاشتراكات ضبط، مش موظف" },
+  { match: /^app\/api\/system-health\//, office: "system-room", reason: "فحص صحة المتجر" },
+  { match: /^app\/api\/analytics\//, office: "decision-desk", reason: "الأرقام اللي بتظهر في مؤشراتك" },
+  { match: /^app\/api\/omnipotent\//, office: SHARED_OFFICE, reason: "آلة المرآة اللي بتقرأ منها البوابة الخارجية — ما ليهاش مكتب" },
+  { match: /^lib\/(lead-insights|leads-delete-guard)\.ts$/, office: "sales-office", reason: "آلة الموظف نفسه: ما بيفتحهاش غير سطح المبيعات وبابه" },
+  { match: /^lib\/[^/]+\.ts$/, office: SHARED_OFFICE, reason: "آلة مشتركة فوقها أكتر من مكتب — ما بتدخلش جوه موظف" },
 ];
 
 /** Atoms the rules cannot see: they need an explicit decision, not a guess. */
@@ -201,4 +223,9 @@ export function officeOf(atom: CensusAtom): OfficeRule | ExplicitPlacement | nul
 /** Every atom with no office — the list the guard fails on, and the owner reads. */
 export function unassignedAtoms(atoms: CensusAtom[]): CensusAtom[] {
   return atoms.filter((a) => officeOf(a) === null);
+}
+
+/** The atoms the fence counts but no office seats: machinery every office stands on. */
+export function sharedMachines(atoms: CensusAtom[]): CensusAtom[] {
+  return atoms.filter((a) => officeOf(a)?.office === SHARED_OFFICE);
 }

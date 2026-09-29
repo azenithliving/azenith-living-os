@@ -1,0 +1,1626 @@
+{
+  "generatedAt": "2026-09-29T15:06:24.398Z",
+  "states": [
+    "not-moved",
+    "moving",
+    "moved",
+    "erased"
+  ],
+  "counts": {
+    "not-moved": 319,
+    "moved": 2
+  },
+  "rows": [
+    {
+      "kind": "old-page",
+      "atom": "app/admin/agents/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/assistant/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/browser/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/computer/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/database/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/elite/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/fate/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/intel/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/intelligence/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/manufacturing/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/owner-dashboard/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/phone/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/sales/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/sandbox/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/settings/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/system/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "old-page",
+      "atom": "app/admin/work/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/agents/ops/page.tsx",
+      "state": "moved",
+      "phase": "P6",
+      "when": "2026-09-28",
+      "proof": "same run, and the retired agent key is rewritten at the outer gate for old links"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/agents/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/database/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/elite/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/ops/page.tsx",
+      "state": "moved",
+      "phase": "P6",
+      "when": "2026-09-28",
+      "proof": "production suites measured on the published URL: browser 28 of 28, product 21 of 21"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/owner-dashboard/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/sales/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/settings/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/system/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/work/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/2fa/disable/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/2fa/set-verified/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/2fa/setup/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/2fa/status/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/2fa/verify/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/aaca/status/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agent/communication/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agent/goals/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agent/rollback/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agent/smart/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agent/tools/execute/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agent/ultimate/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/approval/decision/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/approval-queue/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/chat/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/conversations/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/events/stream/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/learn/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/lock/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/messages/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/notify/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/orchestrate/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/simulate-scenario/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/suggestions/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/tasks/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ai/health/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/analyze-lead/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/architect/command/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/arsenal/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/assistant/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/assistant/summon/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/automation/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/categories/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/command/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/elite/invitations/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/eternal/genesis/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/fate/latest/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/fate/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/gate/health/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/gate/reset-2fa/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/gate/validate/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/images/stats/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/images/trigger-harvest/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/intel/evolve/decision/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/intel/evolve/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/intel/relations/health/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/inventory/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/keys/bulk/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/keys/import-env/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/keys/live-stats/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/keys/public/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/keys/reload/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/keys/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/keys/stats/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/keys/[id]/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/knowledge/audit/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/leads/analyze/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/leads/delete/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/leads/follow-up/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/leads/release/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/leads/reply/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/leads/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/leads/suggestions/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/live-browser/action/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/live-browser/screenshot/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/live-browser/session/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/live-browser/stream/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/manufacturing/bom/calculate/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/manufacturing/designs/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/manufacturing/inventory/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/manufacturing/metrics/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/manufacturing/orders/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/manufacturing/price/calculate/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/manufacturing/schedule/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/mastermind/chat/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/mastermind/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/mastermind/stats/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/metrics/realtime/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/mind/decision/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/mind/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/notifications/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/ab-test/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/audit/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/benchmarks/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/draft/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/experiments/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/goals/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/identity/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/images/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/observability/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/perf/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/preview/[token]/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/publish/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/qa/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/rollback/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/self/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/seo/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/suggestions/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/swarm/status/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/telemetry/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/unify-tone/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/ops/vision/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/owner/approval/decision/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/owner/dashboard/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/owner/emergency-stop/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/prime/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/proactive/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/products/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/qayyim/[[...legacy]]/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/quality/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/remote-browser/health/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/remote-browser/session/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/settings/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/silent/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/sovereign/pulse/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/supreme/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/telegram/config/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/telegram/status/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/telegram/test/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/verify-2fa/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/war-room/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "outside-door",
+      "atom": "app/api/analytics/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "outside-door",
+      "atom": "app/api/consultant/faq/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "outside-door",
+      "atom": "app/api/consultant/learnings/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "outside-door",
+      "atom": "app/api/consultant/pending-questions/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "outside-door",
+      "atom": "app/api/consultant/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "outside-door",
+      "atom": "app/api/omnipotent/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "outside-door",
+      "atom": "app/api/system-health/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "outside-door",
+      "atom": "app/api/tenants/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/aaca-client.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-access.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-api-auth.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-api-guard.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-approved-executor.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-assistant-capabilities.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-assistant-evidence.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-assistant-log.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-company.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-env-resolver.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-gate.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-live-browser.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-natural-brain.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-nav.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-proactive-snapshot.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-result-actions.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-sovereign-mind.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/admin-telegram-summon.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/ai-orchestrator.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/api-keys-service.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/architect-tools.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/azenith-prime.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/command-executor.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/company-resolver.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/crypto-keys.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/key-tester.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/lead-insights.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/leads-delete-guard.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/mastermind-ai.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/qayyim-ops.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/real-tool-executor.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/remote-browser.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/sovereign-os.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/supabase-admin.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/supabase-client.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/supabase-server.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/supabase-service.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/telegram-config.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/telegram-notify.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/totp-verify.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/AdminProactiveStrip.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/AgentActionsFeed.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/AgentHealthPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/ApprovalGate.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/BOMTable.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/ChatPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/CommandConsole.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/CommandPalette.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/DesignStudio.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/EnterprisePipelineBar.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/EnterpriseScenarioModal.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/FloatingAgentButton.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/GroupChatView.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/HandoffInterface.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/InventoryManager.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/ManufacturingDashboard.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/MultiLLMChat.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/OrderPipeline.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/ProactiveSuggestions.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/ProjectGantt.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/ProposalDecisionCard.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/QualityCheckPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/QuickActionsPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/SelfModelPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/TaskQueue.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/TeamScoreboard.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/AIKeysControlPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ArchitectWidget.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/AssistantBrowserCopilot.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/browser/AskQayyimAboutPage.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/EvolutionManager.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/GlobalAssistantDock.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/GrowthInsights.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/master-dashboard-components.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/MasterControlCenter.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/NeuralMirror.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/NeuralStream.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/NotificationBell.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/NotificationsPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/index.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/QayyimAuditReport.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/QayyimBenchmarksPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/QayyimDraftPreview.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/QayyimExperimentsPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/QayyimGoalsPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/QayyimObservabilityDashboard.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/QayyimProactiveSuggestions.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/QayyimQualityGate.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/QayyimTelemetryPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ops/StudioPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/settings/AdsSettingsCard.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/settings/ConsultantFaqCard.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/SmartSuggestions.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/SovereignMindPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/SovereignPulse.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/TelegramControlPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/UnifiedAssistant.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/ab-testing.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/agent-roles.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/anomaly.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/api/utils.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/approval-intake.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/benchmarks/index.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/canary.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/chat-brain.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/daily-round.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/daily-story.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/debate.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/egypt-calendar.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/experiment-verdict.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/facade/QayyimFacade.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/forecast.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/gap-contract.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/goal-risk.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/governance/ConstitutionEngine.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/gsc.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/identity.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/index.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/legacy-address-table.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/luxury-v2.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/measured-benchmark.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/memory/index.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/memory/SharedMemory.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/memory/SwarmLearnings.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/memory/SyncLayer.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/memory/VectorStore.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/migration-map.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/orchestrator/MasterOrchestrator.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/owner-address.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/palette.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/proposal-card.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/qa/realChecks.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/QayyimAgentBase.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/QayyimAnalyticsAgent.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/QayyimContentAgent.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/QayyimCoreAgent.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/QayyimDevAgent.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/QayyimQaAgent.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/QayyimSeoAgent.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/QayyimUxAgent.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/QayyimVisualAgent.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/rivals.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/round-freshness.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/self-audit.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/self-model.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/self-view.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/stats.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/task-reconcile.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/url-manifest.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/voice-continuous.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/world-model.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "cron",
+      "atom": "/api/cron/admin-daily-report",
+      "state": "not-moved"
+    },
+    {
+      "kind": "cron",
+      "atom": "/api/cron/ops-daily",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/owner-dashboard",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/work",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/sales",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/elite",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/agents",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/system",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/settings",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/database",
+      "state": "not-moved"
+    }
+  ]
+}

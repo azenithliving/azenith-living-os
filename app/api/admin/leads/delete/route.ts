@@ -72,18 +72,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const body = await request.json().catch(() => null);
     const sessionIds = body?.sessionIds;
     if (!Array.isArray(sessionIds) || sessionIds.length === 0) {
-      return NextResponse.json({ error: "Missing sessionIds" }, { status: 400 });
+      return NextResponse.json({ error: "مفيش سجل محدد للحذف" }, { status: 400 });
     }
 
     const client = getSupabaseAdminClient();
     if (!client) {
-      return NextResponse.json({ error: "Database not initialized" }, { status: 500 });
+      return NextResponse.json({ error: "الدفتر مش متصل دلوقتى" }, { status: 500 });
     }
 
     const { uuids, sessions: sessionKeys } = splitKeys(sessionIds);
     const { plan, failures } = await measure(client, sessionKeys, uuids);
     if (failures.length > 0) {
-      return NextResponse.json({ error: "Measurement failed", failures }, { status: 500 });
+      return NextResponse.json({ error: "الحساب اترفض — الدفتر ما ردّش", failures }, { status: 500 });
     }
 
     const confirmed = body?.confirm === true;
@@ -148,6 +148,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
   } catch (error) {
     console.error("[Leads Delete] API Error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "حصل خطأ غير متوقع — السجلات ممكن تكون لسه موجودة" }, { status: 500 });
   }
 }
