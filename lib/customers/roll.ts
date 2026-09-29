@@ -1,0 +1,129 @@
+/**
+ * The customers roll — one human, one line.
+ *
+ * Seven spaces in this store describe the same buyer separately: the profile written
+ * when he first arrived, the consultant's conversation, the quote request, the lead
+ * form, the order, the appointment, the conversion. Until now the dashboard counted
+ * customers in one place and the chat's tool counted them in another, and both were
+ * telling the owner the truth about a different pile.
+ *
+ * This module is the counting rule, kept pure so it can be tested without a
+ * database. The door reads, this decides, the screen shows.
+ *
+ * The brakes held here: a row with no phone, no email and no name is never a customer
+ * — it is counted as anonymous so nothing disappears silently; a name alone is marked
+ * weak, because two «أحمد» rows are not one human; and the cold clock is carried from
+ * `lib/leads-freshness`, so an unknown date stays unknown instead of looking new.
+ */
+import { identityOf, phoneKey, type IdentityKind } from "@/lib/customers/identity";
+import { freshnessOf, hoursSinceLastTouch, needsReplyNow, type FreshnessKey } from "@/lib/leads-freshness";
+
+export type Space = "profile" | "conversation" | "quote" | "form" | "order" | "appointment" | "conversion";
+
+export type RawRow = {
+  space: Space;
+  phone?: string | null;
+  email?: string | null;
+  name?: string | null;
+  at?: string | null;
+  tier?: string | null;
+  price?: number | string | null;
+  paid?: number | string | null;
+  budget?: string | null;
+  intent?: string | null;
+  score?: number | string | null;
+};
+
+export type CustomerRow = {
+  key: string;
+  kind: IdentityKind;
+  name: string | null;
+  phone: string | null;
+  email: string | null;
+  tier: string | null;
+  budget: string | null;
+  intent: string | null;
+  score: number | null;
+  spaces: Space[];
+  money: { quoted: number; paid: number };
+  lastTouch: string | null;
+  hoursSince: number | null;
+  freshness: { key: FreshnessKey; label: string };
+  needsReply: boolean;
+  anonymous: number;
+};
+
+const TIER_STRENGTH: Record<string, number> = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
+
+const num = (v: unknown): number => {
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const best = (a: string | null, b: string | null): string | null => a || b || null;
+
+export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerRow[] {
+  const byKey = new Map<string, CustomerRow>();
+  let anonymous = 0;
+
+  for (const row of rows) {
+    const id = identityOf({ phone: row.phone, email: row.email, name: row.name });
+    if (!id.key) {
+      anonymous++;
+      continue;
+    }
+    const phone = phoneKey(row.phone);
+    const at = row.at ?? null;
+    let line = byKey.get(id.key);
+    if (!line) {
+      line = {
+        key: id.key,
+        kind: id.kind,
+        name: best(row.name?.trim() ?? null, null),
+        phone,
+        email: row.email?.trim() ?? null,
+        tier: row.tier ?? null,
+        budget: row.budget ?? null,
+        intent: row.intent ?? null,
+        score: row.score == null ? null : num(row.score),
+        spaces: [],
+        money: { quoted: 0, paid: 0 },
+        lastTouch: at,
+        hoursSince: null,
+        freshness: { key: "unknown", label: "بدون تاريخ" },
+        needsReply: false,
+        anonymous: 0,
+      };
+      byKey.set(id.key, line);
+    }
+    if (!line.spaces.includes(row.space)) line.spaces.push(row.space);
+    line.name = best(line.name, row.name?.trim() ?? null);
+    line.phone = line.phone ?? phone;
+    line.email = line.email ?? row.email?.trim() ?? null;
+    line.budget = line.budget ?? row.budget ?? null;
+    line.intent = line.intent ?? row.intent ?? null;
+    if (line.score === null && row.score != null) line.score = num(row.score);
+    if (row.tier && (!line.tier || (TIER_STRENGTH[row.tier] ?? 0) > (TIER_STRENGTH[line.tier] ?? 0))) line.tier = row.tier;
+    line.money.quoted += num(row.price);
+    line.money.paid += num(row.paid);
+    if (at && (!line.lastTouch || Date.parse(at) > Date.parse(line.lastTouch))) line.lastTouch = at;
+  }
+
+  const lines = [...byKey.values()];
+  for (const line of lines) {
+    const hours = hoursSinceLastTouch({ created_at: line.lastTouch ?? undefined, messages: [] }, now);
+    line.hoursSince = hours;
+    const f = freshnessOf(hours);
+    line.freshness = { key: f.key, label: f.label };
+    line.needsReply = needsReplyNow(hours);
+  }
+
+  // Longest-silenced first: the owner reads this list as a waiting queue, not a gallery.
+  lines.sort((a, b) => (b.hoursSince ?? -1) - (a.hoursSince ?? -1));
+  if (anonymous > 0) lines.push({
+    key: "anonymous", kind: "none", name: null, phone: null, email: null, tier: null, budget: null,
+    intent: null, score: null, spaces: [], money: { quoted: 0, paid: 0 }, lastTouch: null, hoursSince: null,
+    freshness: { key: "unknown", label: "بدون تاريخ" }, needsReply: false, anonymous,
+  });
+  return lines;
+}

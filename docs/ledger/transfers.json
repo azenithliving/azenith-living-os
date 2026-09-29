@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T20:15:58.296Z",
+  "generatedAt": "2026-09-29T20:30:26.345Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 445,
+    "not-moved": 447,
     "moved": 3,
     "moving": 1
   },
@@ -334,6 +334,11 @@
     {
       "kind": "admin-door",
       "atom": "app/api/admin/command/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/customers/route.ts",
       "state": "not-moved"
     },
     {
@@ -964,6 +969,11 @@
     {
       "kind": "root-lib",
       "atom": "lib/crypto-keys.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/customers/roll.ts",
       "state": "not-moved"
     },
     {

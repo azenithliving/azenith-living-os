@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-09-29T20:15:58.293Z",
+  "generatedAt": "2026-09-29T20:30:26.342Z",
   "counts": {
     "oldPages": 18,
     "oldPageLines": 5021,
     "newPages": 11,
     "newPageLines": 340,
-    "adminDoors": 122,
-    "allDoors": 200,
+    "adminDoors": 123,
+    "allDoors": 201,
     "outsideDoors": 8,
     "outsideDoorLines": 2520,
-    "rootLibFiles": 256,
-    "rootLibUsed": 52,
+    "rootLibFiles": 257,
+    "rootLibUsed": 53,
     "orphanDoors": 70,
-    "rootLibUsedLines": 21628,
+    "rootLibUsedLines": 21758,
     "furnitureFiles": 58,
     "furnitureLines": 15931,
     "furnitureUsedByBoth": 4,
@@ -28,7 +28,7 @@
     "navEntries": 9,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 9,
-    "atoms": 449
+    "atoms": 451
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -346,6 +346,11 @@
       "kind": "admin-door",
       "id": "app/api/admin/command/route.ts",
       "resource": "admin/command"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/customers/route.ts",
+      "resource": "admin/customers"
     },
     {
       "kind": "admin-door",
@@ -857,7 +862,7 @@
       "kind": "root-lib",
       "id": "lib/admin-api-guard.ts",
       "lines": 48,
-      "callers": 31
+      "callers": 32
     },
     {
       "kind": "root-lib",
@@ -1017,6 +1022,12 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/customers/roll.ts",
+      "lines": 130,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/dal/unified-supabase.ts",
       "lines": 637,
       "callers": 21
@@ -1085,7 +1096,7 @@
       "kind": "root-lib",
       "id": "lib/supabase-admin.ts",
       "lines": 21,
-      "callers": 22
+      "callers": 23
     },
     {
       "kind": "root-lib",
