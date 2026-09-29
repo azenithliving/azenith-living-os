@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T19:01:59.581Z",
+  "generatedAt": "2026-09-29T19:24:30.165Z",
   "counts": {
     "oldPages": 18,
     "oldPageLines": 5021,
@@ -11,6 +11,7 @@
     "outsideDoorLines": 2520,
     "rootLibFiles": 153,
     "rootLibUsed": 41,
+    "orphanDoors": 70,
     "rootLibUsedLines": 15024,
     "furnitureFiles": 58,
     "furnitureLines": 15931,
@@ -20,14 +21,14 @@
     "furnitureOldOnly": 17,
     "furnitureUnreachable": 24,
     "swarmFiles": 54,
-    "swarmFileLines": 13727,
+    "swarmFileLines": 13741,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 9,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 9,
-    "atoms": 368
+    "atoms": 438
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -1081,6 +1082,356 @@
       "callers": 2
     },
     {
+      "kind": "orphan-door",
+      "id": "app/api/ai/analyze-vision/route.ts",
+      "lines": 23
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/analytics/session/route.ts",
+      "lines": 106
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/analyze-image/route.ts",
+      "lines": 152
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/architect/action/route.ts",
+      "lines": 61
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/architect/route.ts",
+      "lines": 118
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/auth/dev-login/route.ts",
+      "lines": 17
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/auth/recovery/route.ts",
+      "lines": 182
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/bookings/route.ts",
+      "lines": 242
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/bookings/[id]/route.ts",
+      "lines": 87
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/channels/email/route.ts",
+      "lines": 253
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/channels/websocket/route.ts",
+      "lines": 65
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/channels/whatsapp/route.ts",
+      "lines": 178
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/checkout/route.ts",
+      "lines": 45
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/cms/config/route.ts",
+      "lines": 127
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/cms/public-config/route.ts",
+      "lines": 71
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/cms/upload/route.ts",
+      "lines": 115
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/config/route.ts",
+      "lines": 18
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/consultant/catalog-crawler/route.ts",
+      "lines": 177
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/consultant/check-reply/route.ts",
+      "lines": 53
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/consultant/check-takeover/route.ts",
+      "lines": 44
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/consultant/inject/route.ts",
+      "lines": 68
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/consultant/typing/route.ts",
+      "lines": 47
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/content-generator/improve/route.ts",
+      "lines": 24
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/content-generator/route.ts",
+      "lines": 59
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/cron/admin-daily-report/route.ts",
+      "lines": 43
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/cron/admin-sovereign-mind/route.ts",
+      "lines": 31
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/cron/autonomous-monitoring/route.ts",
+      "lines": 48
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/cron/monthly-refresh/route.ts",
+      "lines": 54
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/cron/ops-daily/route.ts",
+      "lines": 37
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/cron/ops-proactive/route.ts",
+      "lines": 86
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/curate-images/route.ts",
+      "lines": 318
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/curated-images/route.ts",
+      "lines": 256
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/curated-pages/route.ts",
+      "lines": 133
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/elite-brief/route.ts",
+      "lines": 96
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/elite-gallery/route.ts",
+      "lines": 216
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/elite-leads/route.ts",
+      "lines": 168
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/enhance-image/route.ts",
+      "lines": 93
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/growth-insights/route.ts",
+      "lines": 81
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/leads/route.ts",
+      "lines": 94
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/mark-dead-image/route.ts",
+      "lines": 71
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/media/route.ts",
+      "lines": 98
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/navigation/route.ts",
+      "lines": 111
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/omnipotent/ai/synthesize/route.ts",
+      "lines": 135
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/omnipotent/[...catchall]/route.ts",
+      "lines": 39
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/orchestrator/route.ts",
+      "lines": 121
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/pages/route.ts",
+      "lines": 93
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/pages/[id]/route.ts",
+      "lines": 102
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/pages/[id]/sections/route.ts",
+      "lines": 49
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/pexels/route.ts",
+      "lines": 228
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/proxy/gemini/route.ts",
+      "lines": 114
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/reality/check/route.ts",
+      "lines": 41
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/room-sections/route.ts",
+      "lines": 57
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/telemetry/route.ts",
+      "lines": 52
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/tenant/route.ts",
+      "lines": 74
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/test-harvest/route.ts",
+      "lines": 19
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/test-search/route.ts",
+      "lines": 19
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/theme/route.ts",
+      "lines": 88
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/translations/route.ts",
+      "lines": 96
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/automation/notifications/route.ts",
+      "lines": 176
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/automation/routing/route.ts",
+      "lines": 156
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/automation/tasks/route.ts",
+      "lines": 123
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/automation/triggers/route.ts",
+      "lines": 93
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/automation/triggers/[id]/route.ts",
+      "lines": 150
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/automation/workflows/route.ts",
+      "lines": 103
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/automation/workflows/[id]/route.ts",
+      "lines": 163
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/execute/pipeline/route.ts",
+      "lines": 215
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/execute/register/route.ts",
+      "lines": 159
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/execute/route.ts",
+      "lines": 249
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/memory/embed/route.ts",
+      "lines": 169
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/vanguard/memory/search/route.ts",
+      "lines": 114
+    },
+    {
       "kind": "furniture",
       "id": "components/admin/AdminProactiveStrip.tsx",
       "lines": 89,
@@ -1576,7 +1927,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 285
+      "lines": 299
     },
     {
       "kind": "swarm-file",

@@ -189,6 +189,15 @@ const calledDoors = outsideDoors
   .map((f) => ({ file: f, callers: calledAs(`/api/${doorResource(f)}`) }))
   .filter((d) => d.callers > 0);
 
+/**
+ * The fence used to see only what the dashboard calls. A door that exists, answers on
+ * the published site, and is called by nobody is still a door — six like that are
+ * failing right now under the vanguard path. So the rest are counted too, as orphans.
+ */
+const orphanDoors = outsideDoors
+  .map((f) => ({ file: f, callers: calledAs(`/api/${doorResource(f)}`) }))
+  .filter((d) => d.callers === 0);
+
 const rootLib = walk("lib").filter((f) => /\.ts$/.test(f) && f.split("/").length === 2);
 const usedLib = rootLib
   .map((f) => {
@@ -229,6 +238,7 @@ const atoms = [
   ...adminOnlyDoors.map((f) => ({ kind: "admin-door", id: f, resource: doorResource(f) })),
   ...calledDoors.map((d) => ({ kind: "outside-door", id: d.file, lines: linesOf(d.file), callers: d.callers })),
   ...usedLib.map((l) => ({ kind: "root-lib", id: l.file, lines: linesOf(l.file), callers: l.callers })),
+  ...orphanDoors.map((d) => ({ kind: "orphan-door", id: d.file, lines: linesOf(d.file) })),
   ...furniture.map((f) => ({ kind: "furniture", id: f.id, lines: f.lines, usedBy: f.usedBy })),
   ...opsFiles.map((f) => ({ kind: "swarm-file", id: f, lines: linesOf(f) })),
   ...viewAtoms.map((v) => ({ kind: v.kind, id: v.id, route: v.route, layer: v.layer, wrote: v.wrote })),
@@ -247,6 +257,7 @@ const counts = {
   outsideDoorLines: calledDoors.reduce((a, d) => a + linesOf(d.file), 0),
   rootLibFiles: rootLib.length,
   rootLibUsed: usedLib.length,
+  orphanDoors: orphanDoors.length,
   rootLibUsedLines: usedLib.reduce((a, l) => a + linesOf(l.file), 0),
   furnitureFiles: furnitureFiles.length,
   furnitureLines: furniture.reduce((a, f) => a + f.lines, 0),

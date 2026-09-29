@@ -184,6 +184,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^app\/api\/omnipotent\//, office: SHARED_OFFICE, reason: "آلة المرآة اللي بتقرأ منها البوابة الخارجية — ما ليهاش مكتب" },
   { match: /^lib\/(lead-insights|leads-delete-guard)\.ts$/, office: "sales-office", reason: "آلة الموظف نفسه: ما بيفتحهاش غير سطح المبيعات وبابه" },
   { match: /^lib\/[^/]+\.ts$/, office: SHARED_OFFICE, reason: "آلة مشتركة فوقها أكتر من مكتب — ما بتدخلش جوه موظف" },
+  { match: /^app\/api\//, office: SHARED_OFFICE, reason: "باب ما بيفتحوش وجه إداري — آلة مستنية التصنيف" },
 ];
 
 /** Atoms the rules cannot see: they need an explicit decision, not a guess. */
@@ -233,6 +234,20 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "components/admin/SmartSuggestions.tsx", office: "swarm-house", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
   { id: "components/admin/SovereignMindPanel.tsx", office: "swarm-house", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
   { id: "components/admin/SovereignPulse.tsx", office: "decision-desk", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+
+  /**
+   * The phantom CRM. The agent class calls itself «مدير العمليات والمبيعات», six
+   * source files write to three customer tables, and none of those tables exists in
+   * the live database. Six of its doors answer 503/400 on the published site right
+   * now. This is rehabilitation material, not deletion material: what it promised is
+   * a real lead pipeline, and the customers employee is the office that would run it.
+   */
+  { id: "app/api/vanguard/automation/tasks/route.ts", office: "sales-office", status: "needs-verdict", reason: "سيآرإم وهمي: جدول العملاء بتاعه مش موجود في الداتابيس" },
+  { id: "app/api/vanguard/automation/triggers/route.ts", office: "sales-office", status: "needs-verdict", reason: "سيآرإم وهمي: جدول العملاء بتاعه مش موجود في الداتابيس" },
+  { id: "app/api/vanguard/automation/workflows/route.ts", office: "sales-office", status: "needs-verdict", reason: "سيآرإم وهمي: جدول العملاء بتاعه مش موجود في الداتابيس" },
+  { id: "app/api/vanguard/automation/routing/route.ts", office: "sales-office", status: "needs-verdict", reason: "سيآرإم وهمي: جدول العملاء بتاعه مش موجود في الداتابيس" },
+  { id: "app/api/vanguard/automation/notifications/route.ts", office: "sales-office", status: "needs-verdict", reason: "سيآرإم وهمي: جدول العملاء بتاعه مش موجود في الداتابيس" },
+  { id: "lib/agents/VanguardAgent.ts", office: "sales-office", status: "needs-verdict", reason: "وكيل بيقول عن نفسه مدير العمليات والمبيعات — ولا سطح بينادي عليه" },
 
   /**
    * Found by pressing the live site, not by reading the tree: six different old

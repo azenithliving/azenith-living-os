@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T19:01:59.584Z",
+  "generatedAt": "2026-09-29T19:24:30.176Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 364,
+    "not-moved": 434,
     "moved": 3,
     "moving": 1
   },
@@ -1019,6 +1019,356 @@
     {
       "kind": "root-lib",
       "atom": "lib/totp-verify.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/ai/analyze-vision/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/analytics/session/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/analyze-image/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/architect/action/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/architect/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/auth/dev-login/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/auth/recovery/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/bookings/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/bookings/[id]/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/channels/email/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/channels/websocket/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/channels/whatsapp/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/checkout/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/cms/config/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/cms/public-config/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/cms/upload/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/config/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/consultant/catalog-crawler/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/consultant/check-reply/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/consultant/check-takeover/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/consultant/inject/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/consultant/typing/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/content-generator/improve/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/content-generator/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/cron/admin-daily-report/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/cron/admin-sovereign-mind/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/cron/autonomous-monitoring/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/cron/monthly-refresh/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/cron/ops-daily/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/cron/ops-proactive/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/curate-images/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/curated-images/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/curated-pages/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/elite-brief/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/elite-gallery/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/elite-leads/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/enhance-image/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/growth-insights/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/leads/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/mark-dead-image/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/media/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/navigation/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/omnipotent/ai/synthesize/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/omnipotent/[...catchall]/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/orchestrator/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/pages/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/pages/[id]/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/pages/[id]/sections/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/pexels/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/proxy/gemini/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/reality/check/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/room-sections/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/telemetry/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/tenant/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/test-harvest/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/test-search/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/theme/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/translations/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/automation/notifications/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/automation/routing/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/automation/tasks/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/automation/triggers/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/automation/triggers/[id]/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/automation/workflows/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/automation/workflows/[id]/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/execute/pipeline/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/execute/register/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/execute/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/memory/embed/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/vanguard/memory/search/route.ts",
       "state": "not-moved"
     },
     {

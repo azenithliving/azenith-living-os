@@ -4,6 +4,7 @@ import { readFileSync, existsSync } from "node:fs";
 import {
   OFFICES,
   SHARED_OFFICE,
+  EXPLICIT,
   officeOf,
   sharedMachines,
   unassignedAtoms,
@@ -72,5 +73,38 @@ describe("every atom in the census has an office", () => {
     expect(kinds["root-lib"], "library files an admin surface imports").toBeGreaterThan(0);
     // Every one of them resolves — a counted atom with no sign is the forgotten nail.
     expect(unassignedAtoms(census!.atoms).map((a) => a.id)).toEqual([]);
+  });
+});
+
+/**
+ * The phantom CRM, asserted so it cannot quietly become «we thought it worked».
+ * Six doors answer on the published site, five of them fail, and the three customer
+ * tables their code writes to do not exist in the database — measured tonight by
+ * `scripts/ops-customer-systems-census.mjs`. They are counted, signed, and waiting
+ * for a verdict; they are not deleted and not trusted.
+ */
+describe("the orphan doors and the phantom customer pipeline", () => {
+  const atoms = census ? census.atoms : [];
+
+  it("counts the doors no admin surface calls", () => {
+    const orphans = atoms.filter((a) => a.kind === "orphan-door");
+    expect(orphans.length, "the fence stopped counting orphan doors").toBeGreaterThan(50);
+    expect(unassignedAtoms(orphans)).toEqual([]);
+  });
+
+  it("holds the vanguard pipeline as a verdict we have not made yet", () => {
+    for (const id of [
+      "app/api/vanguard/automation/tasks/route.ts",
+      "app/api/vanguard/automation/triggers/route.ts",
+      "app/api/vanguard/automation/workflows/route.ts",
+      "app/api/vanguard/automation/routing/route.ts",
+      "app/api/vanguard/automation/notifications/route.ts",
+      "lib/agents/VanguardAgent.ts",
+    ]) {
+      const row = EXPLICIT.find((e) => e.id === id);
+      expect(row, `${id} vanished from the map`).toBeTruthy();
+      expect(row!.status, `${id} was given a home without a dossier`).toBe("needs-verdict");
+      expect(row!.office).toBe("sales-office");
+    }
   });
 });
