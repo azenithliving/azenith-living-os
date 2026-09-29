@@ -79,3 +79,21 @@ describe("a model cannot bring the retired name back into a reply", () => {
     expect(orchestrator).toMatch(/finalizeReply\(\s*response[^)]*,\s*process\.env\.NEXT_PUBLIC_SITE_URL\s*,/);
   });
 });
+
+/**
+ * The clause the owner froze says the new house does not know the old name — in code,
+ * in a component, or in a comment. Measured tonight, three Latin spellings of the
+ * retired word were still inside `app/admin/v2` (two page function names and one
+ * comment), and the guard above never saw them because it only reads the Arabic name.
+ * A guard that checks one spelling is a guard on one spelling.
+ */
+describe("the new house does not know the retired word at all", () => {
+  it("carries no spelling of it, Arabic or Latin", () => {
+    const walked = files("app/admin/v2");
+    expect(walked.length, "app/admin/v2 was not walked").toBeGreaterThan(10);
+    const hits = walked
+      .filter((f) => /\.tsx?$/.test(f))
+      .filter((f) => /qayyim|قيّم الدار/i.test(readFileSync(f, "utf8")));
+    expect(hits, hits.join("\n")).toEqual([]);
+  });
+});

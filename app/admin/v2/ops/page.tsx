@@ -4,7 +4,7 @@ import { StudioPanel } from '@/components/admin/ops/StudioPanel';
 import Link from 'next/link';
 import { Crown, ArrowRight } from 'lucide-react';
 
-export default function V2QayyimPage() {
+export default function OpsStudioPage() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white" dir="rtl">
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#0A0A0A]/95 backdrop-blur-xl">

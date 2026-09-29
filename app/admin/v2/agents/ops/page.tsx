@@ -6,7 +6,7 @@ import { ProposalDecisionCard } from '@/components/admin/agents/ProposalDecision
 import { AGENT_ROLES } from '@/lib/ops/agent-roles';
 
 /**
- * P5-M2 — full-screen Qayyim chat (WhatsApp-style surface).
+ * P5-M2 — the swarm's full-screen chat (WhatsApp-style surface).
  * Deep-linkable, browser-back works, unread separator handled inside ChatPanel.
  * P6-M6: the command palette can hand you to another agent's chat, and the
  * Telegram morning story links straight to the decision it names.
@@ -24,7 +24,7 @@ function agentFromUrl(): string {
   return Object.keys(AGENT_ROLES).includes(wanted) ? wanted : DEFAULT_AGENT;
 }
 
-export default function QayyimChatPage() {
+export default function OpsChatPage() {
   const [agentKey, setAgentKey] = useState(DEFAULT_AGENT);
 
   useEffect(() => {
