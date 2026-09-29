@@ -9,6 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import toast from "react-hot-toast";
 import { translateTag, summarizeInterest } from "@/lib/lead-insights";
+import { LEDGER_LABELS, LEDGER_ORDER, type LedgerTotals } from "@/lib/leads-delete-guard";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // أنواع البيانات
@@ -637,6 +638,7 @@ function LeadsTab() {
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteAsk, setDeleteAsk] = useState<{ keys: string[]; ledgers: LedgerTotals | null } | null>(null);
   const searchParams = useSearchParams();
   useEffect(() => {
     const expandParam = searchParams?.get("expand");
@@ -661,29 +663,56 @@ function LeadsTab() {
       return;
     }
 
-    // REMOVED confirm() to bypass potential browser blocks
-    toast.success(`جاري محاولة حذف ${validIds.length} سجل...`);
-    
-    setIsDeleting(true);
-    const toastId = toast.loading("🚀 جاري التنفيذ الفوري...");
-    
+    // The count is measured before anything is asked for, so the owner confirms a number
+    // and not a feeling.
+    setDeleteAsk({ keys: validIds, ledgers: null });
     try {
       const res = await fetch("/api/admin/leads/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionIds: validIds })
+        body: JSON.stringify({ sessionIds: validIds }),
       });
-      
-      if (res.ok) {
-        setLeads(prev => prev.filter(l => !validIds.includes(l.session_id || "") && !validIds.includes(l.id)));
-        setSelectedLeads([]);
-        toast.success("تم الحذف بنجاح", { id: toastId });
+      const data = await res.json();
+      if (!res.ok || !data.preview) {
+        setDeleteAsk(null);
+        toast.error(data.error || "فشل حساب السجلات قبل الحذف");
+        return;
+      }
+      setDeleteAsk({ keys: validIds, ledgers: data.ledgers });
+    } catch (err) {
+      console.error("Delete preview failed:", err);
+      setDeleteAsk(null);
+      toast.error("خطأ في الاتصال بالخادم");
+    }
+  };
+
+  const confirmDeleteLeads = async () => {
+    if (!deleteAsk || !deleteAsk.ledgers || deleteAsk.ledgers.total === 0) return;
+    const expectedRows = deleteAsk.ledgers.total;
+    setIsDeleting(true);
+    try {
+      const res = await fetch("/api/admin/leads/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionIds: deleteAsk.keys, confirm: true, expectedRows }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (data.ledgers) setDeleteAsk({ keys: deleteAsk.keys, ledgers: data.ledgers });
+        toast.error(data.error || "الحذف اترفض — عدد السجلات مش مطابق");
+        return;
+      }
+      setDeleteAsk(null);
+      setSelectedLeads([]);
+      await loadLeads(true);
+      if (data.verified) {
+        toast.success(`تم مسح ${data.deletedTotal} سجل — مطابق للعدد اللي أكدته`);
       } else {
-        toast.error("فشل في إكمال عملية الحذف", { id: toastId });
+        toast.error(`المسح اتعمل بس العدد مش مطابق: ${data.deletedTotal} من ${expectedRows}`);
       }
     } catch (err) {
       console.error("Delete failed:", err);
-      toast.error("خطأ في الاتصال بالخادم", { id: toastId });
+      toast.error("خطأ في الاتصال بالخادم — السجلات ممكن تكون لسه موجودة");
     } finally {
       setIsDeleting(false);
     }
@@ -897,15 +926,12 @@ function LeadsTab() {
         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between animate-in slide-in-from-top duration-300">
           <p className="text-sm text-red-200">تم تحديد {selectedLeads.length} من العملاء</p>
           <button 
-            onClick={() => {
-              toast.success("تم الضغط على حذف الكل");
-              deleteLeads(selectedLeads);
-            }}
+            onClick={() => deleteLeads(selectedLeads)}
             disabled={isDeleting}
             className="relative z-[9999] px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-bold rounded-xl transition shadow-lg shadow-red-600/40"
             style={{ cursor: 'pointer !important', pointerEvents: 'auto' }}
           >
-            {isDeleting ? "جاري الحذف..." : "🗑️ حذف المحدد نهائياً (فوري)"}
+            {isDeleting ? "جاري التنفيذ..." : "🗑️ حذف المحدد نهائياً"}
           </button>
         </div>
       )}
@@ -966,7 +992,6 @@ function LeadsTab() {
                      <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        toast.success("تم الضغط على سلة المهملات");
                         deleteLeads([lead.session_id || lead.id]);
                       }}
                       className="relative z-[9999] p-3 text-red-500/40 hover:text-red-500 transition-colors"
@@ -1316,6 +1341,56 @@ function LeadsTab() {
           </div>
         )}
       </div>
+
+      {deleteAsk && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/85 p-4" dir="rtl">
+          <div className="w-full max-w-md space-y-4 rounded-2xl border border-red-500/40 bg-[#141414] p-6">
+            <p className="text-sm font-bold text-red-300">تأكيد الحذف النهائي</p>
+            {!deleteAsk.ledgers ? (
+              <p className="text-sm text-white/60">جاري حساب السجلات المرتبطة...</p>
+            ) : deleteAsk.ledgers.total === 0 ? (
+              <div className="space-y-4">
+                <p className="text-sm text-white/70">مفيش سجلات مطابقة — يمكن تكون اتشالت قبل كده.</p>
+                <button
+                  onClick={() => setDeleteAsk(null)}
+                  className="w-full rounded-xl bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20"
+                >
+                  إلغاء
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-white/80">
+                  الحيده ده مربوط بـ <span className="font-bold text-red-300">{deleteAsk.ledgers.total}</span> سجل، وهيتمسح كله نهائي ومن غير رجعة:
+                </p>
+                <ul className="space-y-1">
+                  {LEDGER_ORDER.filter((ledger) => (deleteAsk.ledgers?.[ledger] ?? 0) > 0).map((ledger) => (
+                    <li key={ledger} className="flex items-center justify-between text-sm text-white/70">
+                      <span>{LEDGER_LABELS[ledger]}</span>
+                      <span className="font-bold text-white">{deleteAsk.ledgers?.[ledger]}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() => setDeleteAsk(null)}
+                    className="flex-1 rounded-xl bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    onClick={confirmDeleteLeads}
+                    disabled={isDeleting}
+                    className="flex-1 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-500 disabled:opacity-50"
+                  >
+                    {isDeleting ? "جاري التنفيذ..." : `أيوه، امسح الـ ${deleteAsk.ledgers.total}`}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
