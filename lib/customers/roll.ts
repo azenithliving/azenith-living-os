@@ -27,6 +27,8 @@ export type RawRow = {
   name?: string | null;
   /** The conversation this row belongs to, so a screen can open it instead of guessing. */
   session?: string | null;
+  /** The profile row this row speaks for, when one exists. */
+  profileId?: string | null;
   at?: string | null;
   tier?: string | null;
   price?: number | string | null;
@@ -49,6 +51,8 @@ export type CustomerRow = {
   spaces: Space[];
   /** The conversations that belong to this human, newest unknown until the door reads them. */
   sessions: string[];
+  /** The profile rows that carry him. An order can only be attached to one of these. */
+  profileIds: string[];
   money: { quoted: number; paid: number };
   lastTouch: string | null;
   hoursSince: number | null;
@@ -101,6 +105,7 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
         score: row.score == null ? null : num(row.score),
         spaces: [],
         sessions: [],
+        profileIds: [],
         money: { quoted: 0, paid: 0 },
         lastTouch: at,
         hoursSince: null,
@@ -112,6 +117,7 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
     }
     if (!line.spaces.includes(row.space)) line.spaces.push(row.space);
     if (row.session && !line.sessions.includes(row.session)) line.sessions.push(row.session);
+    if (row.profileId && !line.profileIds.includes(row.profileId)) line.profileIds.push(row.profileId);
     line.name = best(line.name, row.name?.trim() ?? null);
     line.phone = line.phone ?? phone;
     line.email = line.email ?? row.email?.trim() ?? null;
@@ -138,7 +144,7 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
   lines.sort((a, b) => (b.hoursSince ?? -1) - (a.hoursSince ?? -1));
   if (anonymous > 0) lines.push({
     key: "anonymous", kind: "none", name: null, phone: null, email: null, tier: null, budget: null,
-    intent: null, score: null, spaces: [], sessions: [], money: { quoted: 0, paid: 0 }, lastTouch: null, hoursSince: null,
+    intent: null, score: null, spaces: [], sessions: [], profileIds: [], money: { quoted: 0, paid: 0 }, lastTouch: null, hoursSince: null,
     freshness: { key: "unknown", label: "بدون تاريخ" }, needsReply: false, anonymous,
   });
   return lines;

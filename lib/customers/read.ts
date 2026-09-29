@@ -21,15 +21,25 @@ async function read(client: Client, table: string, columns: string) {
 const str = (v: unknown) => (typeof v === "string" ? v : typeof v === "number" ? String(v) : null);
 const at = (row: Record<string, unknown>) => str(row.updated_at) ?? str(row.created_at);
 
+/** A flag is not an amount: `deposit_paid` says whether the deposit arrived, `deposit_amount` says how much. */
+const money = (v: unknown): number => {
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+
 export type CustomersRead = {
   customers: CustomerRow[];
   real: CustomerRow[];
+  /** The orders nobody owns yet — enough to show them and link them, not to guess at them. */
+  unownedOrders: Array<{ id: string; name: string | null; quoted: number; paid: number }>;
   totals: {
     customers: number;
     bySpace: Record<string, number>;
     needingReply: number;
     anonymous: number;
     rowsRead: number;
+    /** Orders whose money has no human attached yet — counted out loud, never dropped. */
+    unowned: { orders: number; quoted: number; paid: number };
   };
   failures: string[];
 };
@@ -40,7 +50,7 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
     read(client, "consultant_sessions", "id,session_id,updated_at,created_at"),
     read(client, "requests", "id,user_id,budget,price,paid,updated_at,created_at"),
     read(client, "leads", "id,name,email,phone,status,updated_at,created_at"),
-    read(client, "sales_orders", "id,customer_name,total_amount,deposit_amount,deposit_paid,updated_at,created_at"),
+    read(client, "sales_orders", "id,user_id,customer_name,total_amount,deposit_amount,deposit_paid,updated_at,created_at"),
     read(client, "bookings", "id,user_id,status,updated_at,created_at"),
     read(client, "lead_conversions", "id,session_id,contactMethod,contactValue,status,updated_at,created_at"),
   ]);
@@ -51,7 +61,8 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
     return {
       customers: [],
       real: [],
-      totals: { customers: 0, bySpace: {}, needingReply: 0, anonymous: 0, rowsRead: 0 },
+      unownedOrders: [],
+      totals: { customers: 0, bySpace: {}, needingReply: 0, anonymous: 0, rowsRead: 0, unowned: { orders: 0, quoted: 0, paid: 0 } },
       failures,
     };
   }
@@ -74,6 +85,9 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
       email: str(row.email) ?? str(base.email),
       name: str(row.full_name) ?? str(row.name) ?? str(row.customer_name) ?? str(base.full_name) ?? str(base.name),
       session: str(row.session_id) ?? str(base.session_id),
+      // A borrowed profile is the only thing that counts as a profile row; a lead form's
+      // own id is not one, and calling it that would let an order attach to a form.
+      profileId: str(from?.id) ?? (space === "profile" ? str(row.id) : null),
       at: at(row),
       tier: str(row.tier) ?? str(base.tier),
       budget: str(row.budget) ?? str(base.budget),
@@ -88,7 +102,40 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
   for (const s of sessions.rows) push("conversation", s, bySession.get(String(s.session_id ?? "")));
   for (const q of quotes.rows) push("quote", q, byUserId.get(String(q.user_id ?? "")));
   for (const f of forms.rows) push("form", f);
-  for (const o of orders.rows) push("order", o);
+  // An order speaks about a human only through its owner. Its free-text name is what a
+  // consultant typed on a form, not an identity: two of those lines in a row made one
+  // buyer appear twice on the customers screen, once with his number and once without.
+  const unowned = { orders: 0, quoted: 0, paid: 0 };
+  const unownedOrders: CustomersRead["unownedOrders"] = [];
+  for (const o of orders.rows) {
+    const owner = byUserId.get(String(o.user_id ?? ""));
+    const paid = o.deposit_paid === true ? money(o.deposit_amount) : 0;
+    if (!owner) {
+      unowned.orders++;
+      unowned.quoted += money(o.total_amount);
+      unowned.paid += paid;
+      unownedOrders.push({
+        id: String(o.id),
+        name: str(o.customer_name)?.trim() || null,
+        quoted: money(o.total_amount),
+        paid,
+      });
+      continue;
+    }
+    rows.push({
+      space: "order",
+      phone: str(owner.phone),
+      email: str(owner.email),
+      name: str(owner.full_name),
+      session: str(owner.session_id),
+      profileId: str(owner.id),
+      at: at(o),
+      tier: str(owner.tier),
+      budget: str(owner.budget),
+      price: money(o.total_amount),
+      paid,
+    });
+  }
   for (const b of appointments.rows) push("appointment", b, byUserId.get(String(b.user_id ?? "")));
   for (const c of conversions.rows) push("conversion", c, bySession.get(String(c.session_id ?? "")));
 
@@ -99,6 +146,7 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
   return {
     customers,
     real,
+    unownedOrders,
     totals: {
       customers: real.length,
       bySpace: real.reduce<Record<string, number>>((acc, c) => {
@@ -108,6 +156,7 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
       needingReply: real.filter((c) => c.needsReply).length,
       anonymous,
       rowsRead: rows.length,
+      unowned,
     },
     failures: [],
   };

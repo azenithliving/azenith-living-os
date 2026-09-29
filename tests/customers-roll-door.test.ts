@@ -71,15 +71,19 @@ describe("the customers roll door", () => {
     const ali = body.customers.find((c: { name: string }) => c.name === "علي سيد");
     expect(ali.spaces).toEqual(["profile", "conversation", "quote"]);
     expect(ali.money).toEqual({ quoted: 60000, paid: 15000 });
-    expect(body.totals.customers).toBe(4);
+    expect(body.totals.customers).toBe(3);
     expect(body.totals.bySpace.profile).toBe(1);
+    // The order with no owner is money with no human attached, so it is reported in its
+    // own bucket instead of becoming a fourth customer nobody can call.
+    expect(body.totals.unowned).toEqual({ orders: 1, quoted: 1000, paid: 0 });
   });
 
   it("counts what it cannot identify instead of dropping it quietly", async () => {
     world.state.tables.sales_orders = [{ id: "o1", total_amount: 1000, updated_at: "2026-09-21T07:00:00.000Z" }];
     const { GET } = await import("@/app/api/admin/customers/route");
     const body = await (await GET()).json();
-    expect(body.totals.anonymous).toBe(1);
+    expect(body.totals.unowned.orders).toBe(1);
+    expect(body.totals.unowned.quoted).toBe(1000);
     expect(body.totals.rowsRead).toBeGreaterThan(0);
   });
 

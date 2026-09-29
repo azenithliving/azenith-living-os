@@ -29,7 +29,11 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json({ error: "الحساب اترفض — الدفتر ما ردّش", failures: roll.failures }, { status: 500 });
     }
 
-    return NextResponse.json({ customers: roll.real, totals: roll.totals });
+    return NextResponse.json({
+      customers: roll.real,
+      totals: roll.totals,
+      unownedOrders: roll.unownedOrders,
+    });
   } catch (error) {
     console.error("[Customers Roll] API Error:", error);
     return NextResponse.json({ error: "حصل خطأ غير متوقع — الرقم ده مش معناه إن مفيش عملاء" }, { status: 500 });
