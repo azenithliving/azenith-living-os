@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T20:30:26.345Z",
+  "generatedAt": "2026-09-29T21:15:13.129Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 447,
+    "not-moved": 460,
     "moved": 3,
     "moving": 1
   },
@@ -943,6 +943,11 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/analytics.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/api-keys-service.ts",
       "state": "not-moved"
     },
@@ -968,7 +973,17 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/consultant/faq-gate.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/crypto-keys.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/customers/capture.ts",
       "state": "not-moved"
     },
     {
@@ -983,7 +998,17 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/discovery-engine.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/elite/auth.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/general-agent.ts",
       "state": "not-moved"
     },
     {
@@ -1008,7 +1033,27 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/location-services.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/mastermind-ai.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/pdf-generator.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/predatory-defense.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/proactive-agent.ts",
       "state": "not-moved"
     },
     {
@@ -1028,7 +1073,22 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/semantic-cache.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/sentinel.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/sovereign-os.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/specialized-providers.ts",
       "state": "not-moved"
     },
     {
@@ -1069,6 +1129,11 @@
     {
       "kind": "root-lib",
       "atom": "lib/ultimate-agent/agent-core.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/ultimate-agent/learning-engine.ts",
       "state": "not-moved"
     },
     {

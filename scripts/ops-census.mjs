@@ -199,15 +199,18 @@ const orphanDoors = outsideDoors
   .filter((d) => d.callers === 0);
 
 /**
- * Library machinery an admin surface stands on, at any depth. The fence used to look
- * only at the library root, so a module one folder deeper was invisible — which is
- * how the customers' own identity file nearly escaped the ledger.
+ * Library machinery the store stands on, at any depth. The fence used to look only at
+ * the library root, so a module one folder deeper was invisible — which is how the
+ * customers' own identity file nearly escaped the ledger. The doors the admin surfaces
+ * call are callers too: the consultant's door carries the customer capture, and a
+ * machine reachable only from a customer-facing door is still in use.
  */
+const callerTextsWide = [...callerTexts, ...calledDoors.map((d) => [d.file, sourceOf(d.file)])];
 const rootLib = walk("lib").filter((f) => /\.ts$/.test(f) && !f.startsWith("lib/ops/"));
 const usedLib = rootLib
   .map((f) => {
     const frag = `@/lib/${f.replace("lib/", "").replace(/\.ts$/, "")}`;
-    const callers = callerTexts.filter(([, text]) =>
+    const callers = callerTextsWide.filter(([, text]) =>
       text.includes(`${frag}"`) || text.includes(`${frag}'`)).length;
     return { file: f, callers };
   })

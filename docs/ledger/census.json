@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T20:30:26.342Z",
+  "generatedAt": "2026-09-29T21:15:13.127Z",
   "counts": {
     "oldPages": 18,
     "oldPageLines": 5021,
@@ -8,11 +8,11 @@
     "adminDoors": 123,
     "allDoors": 201,
     "outsideDoors": 8,
-    "outsideDoorLines": 2520,
-    "rootLibFiles": 257,
-    "rootLibUsed": 53,
+    "outsideDoorLines": 2535,
+    "rootLibFiles": 258,
+    "rootLibUsed": 66,
     "orphanDoors": 70,
-    "rootLibUsedLines": 21758,
+    "rootLibUsedLines": 26648,
     "furnitureFiles": 58,
     "furnitureLines": 15931,
     "furnitureUsedByBoth": 4,
@@ -28,7 +28,7 @@
     "navEntries": 9,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 9,
-    "atoms": 451
+    "atoms": 464
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -819,7 +819,7 @@
     {
       "kind": "outside-door",
       "id": "app/api/consultant/route.ts",
-      "lines": 1460,
+      "lines": 1475,
       "callers": 1
     },
     {
@@ -856,13 +856,13 @@
       "kind": "root-lib",
       "id": "lib/admin-api-auth.ts",
       "lines": 45,
-      "callers": 9
+      "callers": 10
     },
     {
       "kind": "root-lib",
       "id": "lib/admin-api-guard.ts",
       "lines": 48,
-      "callers": 32
+      "callers": 35
     },
     {
       "kind": "root-lib",
@@ -982,7 +982,13 @@
       "kind": "root-lib",
       "id": "lib/ai-orchestrator.ts",
       "lines": 775,
-      "callers": 7
+      "callers": 10
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/analytics.ts",
+      "lines": 236,
+      "callers": 1
     },
     {
       "kind": "root-lib",
@@ -1016,14 +1022,26 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/consultant/faq-gate.ts",
+      "lines": 174,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/crypto-keys.ts",
       "lines": 327,
       "callers": 1
     },
     {
       "kind": "root-lib",
+      "id": "lib/customers/capture.ts",
+      "lines": 120,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/customers/roll.ts",
-      "lines": 130,
+      "lines": 140,
       "callers": 1
     },
     {
@@ -1034,8 +1052,20 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/discovery-engine.ts",
+      "lines": 599,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/elite/auth.ts",
       "lines": 304,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/general-agent.ts",
+      "lines": 727,
       "callers": 1
     },
     {
@@ -1064,8 +1094,32 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/location-services.ts",
+      "lines": 216,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/mastermind-ai.ts",
       "lines": 895,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/pdf-generator.ts",
+      "lines": 435,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/predatory-defense.ts",
+      "lines": 560,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/proactive-agent.ts",
+      "lines": 476,
       "callers": 1
     },
     {
@@ -1088,15 +1142,33 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/semantic-cache.ts",
+      "lines": 559,
+      "callers": 3
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/sentinel.ts",
+      "lines": 374,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/sovereign-os.ts",
       "lines": 1235,
       "callers": 1
     },
     {
       "kind": "root-lib",
+      "id": "lib/specialized-providers.ts",
+      "lines": 295,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/supabase-admin.ts",
       "lines": 21,
-      "callers": 23
+      "callers": 28
     },
     {
       "kind": "root-lib",
@@ -1108,7 +1180,7 @@
       "kind": "root-lib",
       "id": "lib/supabase-server.ts",
       "lines": 32,
-      "callers": 1
+      "callers": 2
     },
     {
       "kind": "root-lib",
@@ -1120,7 +1192,7 @@
       "kind": "root-lib",
       "id": "lib/telegram-config.ts",
       "lines": 182,
-      "callers": 2
+      "callers": 3
     },
     {
       "kind": "root-lib",
@@ -1142,9 +1214,15 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/ultimate-agent/learning-engine.ts",
+      "lines": 109,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/ultimate-agent/memory-store.ts",
       "lines": 717,
-      "callers": 1
+      "callers": 2
     },
     {
       "kind": "root-lib",

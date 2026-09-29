@@ -9,6 +9,7 @@ import { sendTelegramMessage, broadcastTelegramMessage } from "@/lib/telegram-co
 import { storeMemory, storeUserPreference, getUserPreferences } from "@/lib/ultimate-agent/memory-store";
 import { LearningEngine } from "@/lib/ultimate-agent/learning-engine";
 import { tryFastResponse, classifyIntent } from "@/lib/specialized-providers";
+import { captureConversationContact } from "@/lib/customers/capture";
 import {
   buildLocationReply,
   buildNearbyFoodReply,
@@ -1404,6 +1405,20 @@ async function saveSession(
     }
 
     console.log(`[Consultant] Session saved: ${sessionId}${insights ? " with insights" : ""}`);
+
+    // The number the consultant asked for and got used to disappear into a Telegram
+    // message. It now attaches the conversation to a customer profile and records the
+    // contact once. Not awaited: the customer's reply is never held up by the ledger,
+    // and the capture cannot throw.
+    const conversation = normalizedMessages.map((m) => m.content).join("\n");
+    void captureConversationContact({
+      sessionId,
+      text: conversation,
+      name: insights?.customerName ?? null,
+    }).then((captured) => {
+      if (captured.recorded) console.log(`[Consultant] Contact captured for ${sessionId}: ${captured.reason}`);
+      else if (captured.reason === "failed") console.error(`[Consultant] Contact capture failed: ${captured.detail}`);
+    });
   } catch (err) {
     console.error("[Consultant] Exception in saveSession:", err);
   }
