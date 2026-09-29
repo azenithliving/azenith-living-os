@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T18:41:46.572Z",
+  "generatedAt": "2026-09-29T19:01:59.581Z",
   "counts": {
     "oldPages": 18,
     "oldPageLines": 5021,
@@ -9,13 +9,13 @@
     "allDoors": 200,
     "outsideDoors": 8,
     "outsideDoorLines": 2520,
-    "rootLibFiles": 152,
-    "rootLibUsed": 40,
-    "rootLibUsedLines": 14955,
+    "rootLibFiles": 153,
+    "rootLibUsed": 41,
+    "rootLibUsedLines": 15024,
     "furnitureFiles": 58,
-    "furnitureLines": 15887,
+    "furnitureLines": 15931,
     "furnitureUsedByBoth": 4,
-    "furnitureBothLines": 2483,
+    "furnitureBothLines": 2527,
     "furnitureNewOnly": 13,
     "furnitureOldOnly": 17,
     "furnitureUnreachable": 24,
@@ -27,7 +27,7 @@
     "navEntries": 9,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 9,
-    "atoms": 367
+    "atoms": 368
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -1004,6 +1004,12 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/leads-freshness.ts",
+      "lines": 69,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/mastermind-ai.ts",
       "lines": 895,
       "callers": 1
@@ -1377,7 +1383,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/sales/CustomersPanel.tsx",
-      "lines": 864,
+      "lines": 908,
       "usedBy": "both"
     },
     {

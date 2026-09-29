@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T18:41:46.581Z",
+  "generatedAt": "2026-09-29T19:01:59.584Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 363,
+    "not-moved": 364,
     "moved": 3,
     "moving": 1
   },
@@ -954,6 +954,11 @@
     {
       "kind": "root-lib",
       "atom": "lib/leads-delete-guard.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/leads-freshness.ts",
       "state": "not-moved"
     },
     {

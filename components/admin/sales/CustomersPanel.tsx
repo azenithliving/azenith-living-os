@@ -15,6 +15,16 @@ import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { summarizeInterest } from "@/lib/lead-insights";
 import { LEDGER_LABELS, LEDGER_ORDER, type LedgerTotals } from "@/lib/leads-delete-guard";
+import { hoursSinceLastTouch, freshnessOf, needsReplyNow, type FreshnessKey } from "@/lib/leads-freshness";
+
+/** The cold clock's colours — the badge a customer wears for how long he has waited. */
+const FRESHNESS_STYLE: Record<FreshnessKey, string> = {
+  hot: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+  warm: "border-amber-500/30 bg-amber-500/10 text-amber-300",
+  cold: "border-orange-500/30 bg-orange-500/10 text-orange-300",
+  lost: "border-red-500/30 bg-red-500/10 text-red-300",
+  unknown: "border-white/10 bg-white/5 text-white/40",
+};
 
 interface Lead {
   id: string;
@@ -48,10 +58,20 @@ interface Lead {
   };
 }
 
+function FreshnessBadge({ lead }: { lead: Lead }) {
+  const f = freshnessOf(hoursSinceLastTouch(lead));
+  return (
+    <span className={`px-2 py-1 rounded-full text-[10px] border ${FRESHNESS_STYLE[f.key]}`}>
+      {f.label}
+    </span>
+  );
+}
+
 export default function CustomersPanel() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "diamond" | "gold" | "silver" | "bronze">("all");
+  const [onlyWaiting, setOnlyWaiting] = useState(false);
 
   const loadLeads = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -74,7 +94,13 @@ export default function CustomersPanel() {
     return () => clearInterval(interval);
   }, []);
 
-  const filteredLeads = filter === "all" ? leads : leads.filter(l => l.tier === filter);
+  const waitingCount = leads.filter((l) => needsReplyNow(hoursSinceLastTouch(l))).length;
+  // The waiting list leads with whoever has been ignored longest; a customer with no
+  // date sorts last rather than pretending to be new.
+  const filteredLeads = leads
+    .filter((l) => filter === "all" || l.tier === filter)
+    .filter((l) => !onlyWaiting || needsReplyNow(hoursSinceLastTouch(l)))
+    .sort((a, b) => freshnessOf(hoursSinceLastTouch(b)).rank - freshnessOf(hoursSinceLastTouch(a)).rank);
 
   const tierColors = {
     diamond: "bg-purple-500/20 text-purple-400 border-purple-500/30",
@@ -388,6 +414,23 @@ export default function CustomersPanel() {
         ))}
       </div>
 
+      {/* The cold clock: who is waiting for an answer right now. */}
+      <div className="mt-4 mb-2 flex items-center gap-3">
+        <button
+          onClick={() => setOnlyWaiting((v) => !v)}
+          className={`rounded-full border px-4 py-1.5 text-xs font-bold transition ${
+            onlyWaiting
+              ? "border-red-500/40 bg-red-500/15 text-red-300"
+              : "border-white/10 bg-white/[0.03] text-white/70 hover:bg-white/[0.06]"
+          }`}
+        >
+          محتاجين رد دلوقتى · {loading ? "--" : waitingCount}
+        </button>
+        <p className="text-[11px] text-white/35">
+          البارد يعني أكثر من يوم من غير رد، والبيضيع يعني أسبوعًا. من غير تاريخ يعني ما عرفتش — مش يعني جديد.
+        </p>
+      </div>
+
       {/* Bulk Actions Bar */}
       {selectedLeads.length > 0 && (
         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between animate-in slide-in-from-top duration-300">
@@ -455,6 +498,7 @@ export default function CustomersPanel() {
                     <span className={`px-3 py-1 rounded-full text-xs border ${tierColors[lead.tier as keyof typeof tierColors] || tierColors.bronze}`}>
                       {lead.tier === "diamond" ? "ماسي" : lead.tier === "gold" ? "ذهبي" : lead.tier === "silver" ? "فضي" : "برونزي"}
                     </span>
+                    <FreshnessBadge lead={lead} />
                     <span className="text-sm text-white/60">{new Date(lead.created_at).toLocaleDateString("ar-EG")}</span>
                      <button 
                       onClick={(e) => {
