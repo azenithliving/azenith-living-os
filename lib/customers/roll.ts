@@ -25,6 +25,8 @@ export type RawRow = {
   phone?: string | null;
   email?: string | null;
   name?: string | null;
+  /** The conversation this row belongs to, so a screen can open it instead of guessing. */
+  session?: string | null;
   at?: string | null;
   tier?: string | null;
   price?: number | string | null;
@@ -45,6 +47,8 @@ export type CustomerRow = {
   intent: string | null;
   score: number | null;
   spaces: Space[];
+  /** The conversations that belong to this human, newest unknown until the door reads them. */
+  sessions: string[];
   money: { quoted: number; paid: number };
   lastTouch: string | null;
   hoursSince: number | null;
@@ -96,6 +100,7 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
         intent: row.intent ?? null,
         score: row.score == null ? null : num(row.score),
         spaces: [],
+        sessions: [],
         money: { quoted: 0, paid: 0 },
         lastTouch: at,
         hoursSince: null,
@@ -106,6 +111,7 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
       byKey.set(id.key, line);
     }
     if (!line.spaces.includes(row.space)) line.spaces.push(row.space);
+    if (row.session && !line.sessions.includes(row.session)) line.sessions.push(row.session);
     line.name = best(line.name, row.name?.trim() ?? null);
     line.phone = line.phone ?? phone;
     line.email = line.email ?? row.email?.trim() ?? null;
@@ -132,7 +138,7 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
   lines.sort((a, b) => (b.hoursSince ?? -1) - (a.hoursSince ?? -1));
   if (anonymous > 0) lines.push({
     key: "anonymous", kind: "none", name: null, phone: null, email: null, tier: null, budget: null,
-    intent: null, score: null, spaces: [], money: { quoted: 0, paid: 0 }, lastTouch: null, hoursSince: null,
+    intent: null, score: null, spaces: [], sessions: [], money: { quoted: 0, paid: 0 }, lastTouch: null, hoursSince: null,
     freshness: { key: "unknown", label: "بدون تاريخ" }, needsReply: false, anonymous,
   });
   return lines;

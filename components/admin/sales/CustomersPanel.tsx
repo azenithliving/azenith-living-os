@@ -28,7 +28,7 @@ const FRESHNESS_STYLE: Record<FreshnessKey, string> = {
 
 interface Lead {
   id: string;
-  session_id?: string;
+  session_id?: string | null;
   name: string;
   email?: string;
   phone: string;
@@ -500,21 +500,23 @@ export default function CustomersPanel() {
                     </span>
                     <FreshnessBadge lead={lead} />
                     <span className="text-sm text-white/60">{new Date(lead.created_at).toLocaleDateString("ar-EG")}</span>
+                     {!lead.session_id ? null : (
                      <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        deleteLeads([lead.session_id || lead.id]);
+                        deleteLeads([lead.session_id as string]);
                       }}
                       className="relative z-[9999] p-3 text-red-500/40 hover:text-red-500 transition-colors"
                       style={{ cursor: 'pointer !important', pointerEvents: 'auto' }}
                     >
                       <Trash2 className="w-5 h-5" />
-                    </button>
+                     </button>
+                     )}
                   </div>
                 </div>
                 
                 {/* Expanded Details */}
-                {(expandedLead === lead.session_id || expandedLead === lead.id) && (
+                {(expandedLead !== null && (expandedLead === lead.session_id || expandedLead === lead.id)) && (
                   <div className="p-4 bg-black/40 border-t border-white/5 space-y-4">
                     <div className="grid md:grid-cols-2 gap-4 text-sm">
                       <div className="space-y-2">
@@ -634,6 +636,7 @@ export default function CustomersPanel() {
                       </div>
                     )}
                     <div className="flex gap-2">
+                      {/^01\d{9}$/.test(lead.phone || "") ? (
                       <a 
                         href={`https://wa.me/20${lead.phone.startsWith('0') ? lead.phone.substring(1) : lead.phone}`} 
                         target="_blank" 
@@ -642,6 +645,11 @@ export default function CustomersPanel() {
                       >
                         📱 تواصل عبر واتساب
                       </a>
+                      ) : (
+                        <p className="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-xs text-white/50">
+                          {lead.email ? `مفيش رقم مسجل — البريد: ${lead.email}` : "مفيش وسيلة تواصل مسجلة — وصل من غير ما يسيب رقم"}
+                        </p>
+                      )}
                       <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
                         <button 
                           onClick={() => generateFollowUp(lead)}
@@ -650,12 +658,16 @@ export default function CustomersPanel() {
                         >
                           {isLoadingFollowUp ? "⏳ جارٍ التوليد..." : "📱 متابعة واتساب"}
                         </button>
+                        {lead.session_id ? (
                         <button 
                           onClick={() => setShowChatFor(showChatFor === lead.id ? null : lead.id)}
                           className="px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg transition"
                         >
                           💬 {showChatFor === lead.id ? "إخفاء المحادثة" : "المحادثة الأصلية"}
                         </button>
+                        ) : (
+                          <p className="px-4 py-1.5 text-xs text-white/40">مفيش محادثة — أول كلام معاه هيبدأ من عندك</p>
+                        )}
                       </div>
                     </div>
 
@@ -668,6 +680,7 @@ export default function CustomersPanel() {
                           className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-white/90 min-h-[120px] outline-none"
                         />
                         <div className="flex gap-2">
+                          {/^01\d{9}$/.test(lead.phone || "") ? (
                           <a
                             href={`https://wa.me/${normalizeWhatsAppPhone(lead.phone) || lead.phone.replace(/\D/g, "")}?text=${encodeURIComponent(followUpTemplate)}`}
                             target="_blank"
@@ -676,6 +689,11 @@ export default function CustomersPanel() {
                           >
                             فتح واتساب
                           </a>
+                          ) : (
+                            <p className="flex-1 rounded-lg border border-white/10 px-4 py-2 text-center text-sm text-white/50">
+                              مفيش رقم يفتح واتساب — انسخ الرسالة وابعتهالها من عندك
+                            </p>
+                          )}
                           <button
                             onClick={() => {
                               navigator.clipboard?.writeText(followUpTemplate).then(() => toast.success("تم نسخ الرسالة"));
@@ -688,7 +706,7 @@ export default function CustomersPanel() {
                       </div>
                     )}
 
-                    {showChatFor === lead.id && lead.messages && (
+                    {showChatFor === lead.id && lead.session_id && lead.messages && (
                       <div className="mt-4 p-4 rounded-xl border border-white/10 bg-black/50 space-y-4">
                         {/* SEAMLESS TAKEOVER MODE BANNER */}
                         {lead.ui_state?.takeover_active ? (

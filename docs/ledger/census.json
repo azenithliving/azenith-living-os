@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T21:15:13.127Z",
+  "generatedAt": "2026-09-29T22:58:48.235Z",
   "counts": {
     "oldPages": 18,
     "oldPageLines": 5021,
@@ -9,14 +9,14 @@
     "allDoors": 201,
     "outsideDoors": 8,
     "outsideDoorLines": 2535,
-    "rootLibFiles": 258,
+    "rootLibFiles": 259,
     "rootLibUsed": 66,
     "orphanDoors": 70,
-    "rootLibUsedLines": 26648,
+    "rootLibUsedLines": 26623,
     "furnitureFiles": 58,
-    "furnitureLines": 15931,
+    "furnitureLines": 15949,
     "furnitureUsedByBoth": 4,
-    "furnitureBothLines": 2527,
+    "furnitureBothLines": 2545,
     "furnitureNewOnly": 13,
     "furnitureOldOnly": 17,
     "furnitureUnreachable": 24,
@@ -1040,9 +1040,9 @@
     },
     {
       "kind": "root-lib",
-      "id": "lib/customers/roll.ts",
-      "lines": 140,
-      "callers": 1
+      "id": "lib/customers/read.ts",
+      "lines": 115,
+      "callers": 2
     },
     {
       "kind": "root-lib",
@@ -1889,7 +1889,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/sales/CustomersPanel.tsx",
-      "lines": 908,
+      "lines": 926,
       "usedBy": "both"
     },
     {

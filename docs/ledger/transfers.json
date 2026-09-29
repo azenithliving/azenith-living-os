@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T21:15:13.129Z",
+  "generatedAt": "2026-09-29T22:58:48.237Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,9 +7,9 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 460,
+    "not-moved": 459,
     "moved": 3,
-    "moving": 1
+    "moving": 2
   },
   "rows": [
     {
@@ -479,7 +479,10 @@
     {
       "kind": "admin-door",
       "atom": "app/api/admin/leads/route.ts",
-      "state": "not-moved"
+      "state": "moving",
+      "phase": "consolidation-3",
+      "when": "2026-09-30",
+      "proof": "the screen's door used to decide on its own who is a customer and showed 4 while the roll saw 6 (measured on the published site); it now reads lib/customers/read.ts, and measured on the built app against the live data both doors answer 6 with no phone on one side and missing on the other"
     },
     {
       "kind": "admin-door",
@@ -988,7 +991,7 @@
     },
     {
       "kind": "root-lib",
-      "atom": "lib/customers/roll.ts",
+      "atom": "lib/customers/read.ts",
       "state": "not-moved"
     },
     {

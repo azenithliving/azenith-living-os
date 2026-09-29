@@ -29,6 +29,13 @@
       "proof": "the tab's 811 lines moved verbatim into components/admin/sales/CustomersPanel.tsx; the page fell from 2108 to 1264 lines; types clean, 912 of 912 tests, build green. It still renders inside the old page until the new window takes it."
     },
     {
+      "atom": "app/api/admin/leads/route.ts",
+      "state": "moving",
+      "phase": "consolidation-3",
+      "when": "2026-09-30",
+      "proof": "the screen's door used to decide on its own who is a customer and showed 4 while the roll saw 6 (measured on the published site); it now reads lib/customers/read.ts, and measured on the built app against the live data both doors answer 6 with no phone on one side and missing on the other"
+    },
+    {
       "atom": "app/admin/v2/sales/page.tsx",
       "state": "moved",
       "phase": "consolidation-2",
