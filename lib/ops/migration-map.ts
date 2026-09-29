@@ -195,7 +195,7 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "app/admin/v2/agents/ops/page.tsx", office: "swarm-house", status: "moved", reason: "محادثة الوكلاء اتنقلت فعلاً" },
   { id: "app/admin/v2/database/page.tsx", office: "system-room", status: "pending", reason: "قاعدة البيانات" },
   { id: "app/admin/v2/elite/page.tsx", office: "elite-room", status: "pending", reason: "النخبة" },
-  { id: "app/admin/v2/sales/page.tsx", office: "sales-office", status: "pending", reason: "المبيعات" },
+  { id: "app/admin/v2/sales/page.tsx", office: "sales-office", status: "moved", reason: "المبيعات — أول موظف يسكن بيته" },
   { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "pending", reason: "الإعدادات" },
   { id: "app/admin/v2/system/page.tsx", office: "system-room", status: "pending", reason: "حالة النظام" },
   { id: "app/admin/v2/work/page.tsx", office: "records-office", status: "pending", reason: "مركز العمل" },

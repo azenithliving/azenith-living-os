@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T18:22:39.989Z",
+  "generatedAt": "2026-09-29T18:41:46.581Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,8 +7,8 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 364,
-    "moved": 2,
+    "not-moved": 363,
+    "moved": 3,
     "moving": 1
   },
   "rows": [
@@ -146,7 +146,10 @@
     {
       "kind": "new-page",
       "atom": "app/admin/v2/sales/page.tsx",
-      "state": "not-moved"
+      "state": "moved",
+      "phase": "consolidation-2",
+      "when": "2026-09-29",
+      "proof": "live on the published URL: the window shows the sales office header, the four tier counters and five real customer rows; scripts/verify-sales-office.mjs 9 of 10, and the delete panel counted and cancelled without erasing anything"
     },
     {
       "kind": "new-page",
