@@ -72,6 +72,16 @@ describe("the customers roll", () => {
     expect(roll.map((r) => r.name)).toEqual(["قديم", "حديث", "بلا تاريخ"]);
   });
 
+  it("refuses to read a flag as money or a browsing stage as a tier", () => {
+    const roll = rollCustomers([
+      { space: "quote", phone: "01005554444", price: 250000, paid: true },
+      { space: "profile", phone: "01005554444", tier: "browsing" },
+    ], NOW);
+    expect(roll[0].money.paid).toBe(0);
+    expect(roll[0].money.quoted).toBe(250000);
+    expect(roll[0].tier).toBeNull();
+  });
+
   it("reports the roll's totals so a screen cannot quietly lose a row", () => {
     const roll = rollCustomers([
       { space: "profile", phone: "01005554444", name: "علي" },

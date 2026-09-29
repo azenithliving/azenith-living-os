@@ -56,8 +56,17 @@ export type CustomerRow = {
 const TIER_STRENGTH: Record<string, number> = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
 
 const num = (v: unknown): number => {
+  // A boolean is not an amount. `paid: true` summed as 1 would tell the owner he
+  // received one pound — the honest answer about a flag is that it is not money.
+  if (typeof v === "boolean") return 0;
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : 0;
+};
+
+/** Only the four metal tiers the store uses. Anything else in that column is not a tier. */
+const asTier = (v: unknown): string | null => {
+  const s = typeof v === "string" ? v.trim().toLowerCase() : "";
+  return TIER_STRENGTH[s] ? s : null;
 };
 
 const best = (a: string | null, b: string | null): string | null => a || b || null;
@@ -82,7 +91,7 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
         name: best(row.name?.trim() ?? null, null),
         phone,
         email: row.email?.trim() ?? null,
-        tier: row.tier ?? null,
+        tier: asTier(row.tier),
         budget: row.budget ?? null,
         intent: row.intent ?? null,
         score: row.score == null ? null : num(row.score),
@@ -103,7 +112,8 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
     line.budget = line.budget ?? row.budget ?? null;
     line.intent = line.intent ?? row.intent ?? null;
     if (line.score === null && row.score != null) line.score = num(row.score);
-    if (row.tier && (!line.tier || (TIER_STRENGTH[row.tier] ?? 0) > (TIER_STRENGTH[line.tier] ?? 0))) line.tier = row.tier;
+    const tier = asTier(row.tier);
+    if (tier && (!line.tier || TIER_STRENGTH[tier] > TIER_STRENGTH[line.tier])) line.tier = tier;
     line.money.quoted += num(row.price);
     line.money.paid += num(row.paid);
     if (at && (!line.lastTouch || Date.parse(at) > Date.parse(line.lastTouch))) line.lastTouch = at;
