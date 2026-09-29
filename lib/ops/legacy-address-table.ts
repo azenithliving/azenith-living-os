@@ -7,6 +7,8 @@
  * were what answered for it. This table is now the only place a retired address
  * exists — `proxy.ts` reads it, and a guard fails if either side drifts.
  */
+import { isOpsKey, legacyToOps } from "@/lib/ops/identity";
+
 export type LegacyAddress = {
   /** The retired address, without a trailing slash. */
   from: string;
@@ -29,4 +31,25 @@ export function legacyAddressRedirect(pathname: string, search = ""): string | n
   const clean = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
   const hit = LEGACY_ADDRESS_REDIRECTS.find((entry) => entry.from === clean);
   return hit ? `${hit.to}${search}` : null;
+}
+
+/**
+ * A retired *agent key* arriving in a query is the same problem wearing a different
+ * hat: the owner's older Telegram messages deep-link with the retired spelling of
+ * the leader's key. Translating it inside the new house means the new house knows
+ * the old name, so the gate answers it instead and the page only ever sees a live
+ * key.
+ *
+ * A key that is live, unknown, or absent is left exactly as it is — a wrong key is
+ * the page's own business (it falls back to the leader), not a rename.
+ */
+export function retiredAgentQueryRedirect(pathname: string, search = ""): string | null {
+  if (!search.includes("agent=")) return null;
+  const params = new URLSearchParams(search);
+  const sent = params.get("agent");
+  if (!sent || isOpsKey(sent)) return null;
+  const live = legacyToOps(sent);
+  if (!isOpsKey(live) || live === sent) return null;
+  params.set("agent", live);
+  return `${pathname}?${params.toString()}`;
 }

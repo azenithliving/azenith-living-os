@@ -9,7 +9,7 @@ import {
 } from "@/lib/rate-limit";
 import { isValidRoomSlug } from "@/lib/rooms-catalog";
 import { isAuthorizedAdminEmail } from "@/lib/admin-access";
-import { legacyAddressRedirect } from "@/lib/ops/legacy-address-table";
+import { legacyAddressRedirect, retiredAgentQueryRedirect } from "@/lib/ops/legacy-address-table";
 
 /**
  * SOVEREIGN PROXY ENGINE v1.0
@@ -47,6 +47,13 @@ export async function proxy(request: NextRequest) {
   const retiredTarget = legacyAddressRedirect(pathname, search);
   if (retiredTarget) {
     return NextResponse.redirect(new URL(retiredTarget, request.url), 308);
+  }
+
+  // 0b. A retired agent key in the query is normalised here too, so the page behind
+  // it only ever receives a live key.
+  const retiredKeyTarget = retiredAgentQueryRedirect(pathname, search);
+  if (retiredKeyTarget) {
+    return NextResponse.redirect(new URL(retiredKeyTarget, request.url), 308);
   }
 
   // 1. GATEKEEPER LEAK DETECTION (Sovereign Mesh)

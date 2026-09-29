@@ -1,9 +1,11 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import {
   LEGACY_ADDRESS_REDIRECTS,
   legacyAddressRedirect,
+  retiredAgentQueryRedirect,
 } from "@/lib/ops/legacy-address-table";
 
 /**
@@ -53,5 +55,37 @@ describe("the retired addresses are answered at the gate, not inside the house",
     const gate = readFileSync("proxy.ts", "utf8");
     expect(gate).toContain("legacy-address-table");
     expect(gate).toContain("legacyAddressRedirect");
+  });
+});
+
+/**
+ * The retired *keys* are the other half of the same problem: an old Telegram
+ * message deep-links to `?agent=qayyim-core`, and until now the new house itself
+ * translated that name — which is the program's rule eight broken in one line of
+ * import. The translation moves to the gate, and the new house only ever accepts
+ * a live key or falls back to the leader.
+ */
+describe("a retired agent key is normalised at the gate, not inside the house", () => {
+  it("rewrites a retired key to the live one, keeping the rest of the query", () => {
+    expect(retiredAgentQueryRedirect("/admin/v2/agents/ops", "?agent=qayyim-core")).toBe(
+      "/admin/v2/agents/ops?agent=ops-lead",
+    );
+    expect(retiredAgentQueryRedirect("/admin/v2/agents/ops", "?agent=prime&proposal=7")).toBe(
+      "/admin/v2/agents/ops?agent=ops-lead&proposal=7",
+    );
+  });
+
+  it("leaves a live key, an unknown key and no key alone", () => {
+    expect(retiredAgentQueryRedirect("/admin/v2/agents/ops", "?agent=ops-qa")).toBeNull();
+    expect(retiredAgentQueryRedirect("/admin/v2/agents/ops", "?agent=whoever")).toBeNull();
+    expect(retiredAgentQueryRedirect("/admin/v2/agents/ops", "?proposal=7")).toBeNull();
+  });
+
+  it("leaves the new house with no name translator imported", () => {
+    const offenders = readdirSync("app/admin/v2", { recursive: true })
+      .map((p) => String(p))
+      .filter((p) => /\.tsx?$/.test(p))
+      .filter((p) => readFileSync(join("app/admin/v2", p), "utf8").includes("legacyToOps"));
+    expect(offenders, offenders.join("\n")).toEqual([]);
   });
 });

@@ -8,6 +8,7 @@ import { agentLabel } from "./identity";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { runLoadProbe, runSecurityHeaderChecks, runA11yChecks } from "./qa/realChecks";
+import { suiteScore } from "./measured-benchmark";
 
 const QAYYIM_QA_SYSTEM_PROMPT = `أنت ${agentLabel("ops-qa")}.
 
@@ -85,6 +86,7 @@ export class QayyimQaAgent extends QayyimAgentBase {
     suites?: ('e2e' | 'visual' | 'a11y' | 'load' | 'security')[];
     context?: Record<string, any>;
   }): Promise<QayyimResult> {
+    const startedAt = Date.now();
     const taskId = `qa_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     
     const suites = params.suites || ['e2e', 'visual', 'a11y', 'security'];
@@ -103,25 +105,42 @@ export class QayyimQaAgent extends QayyimAgentBase {
       try {
         const supabase = getSupabaseAdminClient();
         const companyId = await resolveAdminCompanyId(params.context?.company_id) ?? this.companyId;
-        const passed = aiResult.data?.overallVerdict === 'PASS' || aiResult.output.includes('✅');
-        const score = passed ? 95 : 45;
+        /**
+         * The metric's meaning, decided 2026-09-29: the score is the share of the
+         * tests that ran and were counted, and a run passes at 80 or above. Before
+         * this the writer stored `95` or `45` because a verdict had to be a number —
+         * two readings that said nothing about the run that produced them.
+         */
+        const measured = suiteScore(aiResult.data?.testResults);
+        const passed = measured ? measured.score >= 80 : aiResult.data?.overallVerdict === 'PASS';
+        if (measured === null) {
+          console.warn('[ops-qa] the run counted no tests — no score is recorded');
+        }
         if (supabase) {
-          await supabase.from('ops_benchmark_runs').insert({
-            company_id: companyId,
-            agent_key: this.agentKey,
-            benchmark_key: 'qa_suite',
-            score,
-            max_score: 100,
-            passed,
-            details: { suites, verdict: aiResult.data?.overallVerdict, output: aiResult.output.slice(0, 500) },
-          });
+          if (measured) {
+            await supabase.from('ops_benchmark_runs').insert({
+              company_id: companyId,
+              agent_key: this.agentKey,
+              benchmark_key: 'qa_suite',
+              score: measured.score,
+              max_score: 100,
+              passed,
+              details: {
+                suites,
+                verdict: aiResult.data?.overallVerdict,
+                counted: measured.counted,
+                passedTests: measured.passed,
+                output: aiResult.output.slice(0, 500),
+              },
+            });
+          }
           await supabase.from('ops_task_metrics').insert({
             company_id: companyId,
             agent_key: this.agentKey,
             task_id: taskId,
             task_type: 'full_qa_suite',
             status: passed ? 'completed' : 'failed',
-            duration_ms: 2000,
+            duration_ms: Date.now() - startedAt,
             quality_gate_result: passed ? 'passed' : 'failed',
             metadata: { suites },
           });

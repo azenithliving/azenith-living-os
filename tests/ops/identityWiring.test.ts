@@ -58,7 +58,6 @@ describe("the whole codebase speaks one key set", () => {
   it("normalises a retired key at every door it can still arrive through", () => {
     const doors = [
       "lib/agents/AgentOrchestrator.ts",
-      "app/admin/v2/agents/ops/page.tsx",
       "app/api/admin/agents/chat/route.ts",
       "app/api/admin/agents/messages/route.ts",
       "app/api/admin/agents/tasks/route.ts",
@@ -68,5 +67,12 @@ describe("the whole codebase speaks one key set", () => {
     for (const file of doors) {
       expect(readFileSync(file, "utf8"), file).toContain("legacyToOps(");
     }
+    /**
+     * The chat page used to be in that list. Batch four moved its door to the outer
+     * gate: a retired key in `?agent=` is rewritten before the page is reached, so
+     * the page must NOT own a translator — see `legacyAddressTable.test.ts`.
+     */
+    expect(readFileSync("app/admin/v2/agents/ops/page.tsx", "utf8")).not.toContain("legacyToOps");
+    expect(readFileSync("proxy.ts", "utf8")).toContain("retiredAgentQueryRedirect");
   });
 });

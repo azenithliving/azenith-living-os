@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { ChatPanel } from '@/components/admin/agents/ChatPanel';
 import { ProposalDecisionCard } from '@/components/admin/agents/ProposalDecisionCard';
 import { AGENT_ROLES } from '@/lib/ops/agent-roles';
-import { legacyToOps } from '@/lib/ops/identity';
 
 /**
  * P5-M2 — full-screen Qayyim chat (WhatsApp-style surface).
@@ -15,11 +14,13 @@ import { legacyToOps } from '@/lib/ops/identity';
  * The query is read from the live URL rather than `useSearchParams` so the page
  * stays prerenderable without a Suspense boundary — and an unknown agent key is
  * ignored instead of becoming a conversation with something that does not exist.
+ * A retired key never reaches this page at all: the outer gate rewrites it first,
+ * which is why nothing here knows the old names.
  */
 const DEFAULT_AGENT = 'ops-lead';
 
 function agentFromUrl(): string {
-  const wanted = legacyToOps(new URLSearchParams(window.location.search).get('agent') || '');
+  const wanted = new URLSearchParams(window.location.search).get('agent') || '';
   return Object.keys(AGENT_ROLES).includes(wanted) ? wanted : DEFAULT_AGENT;
 }
 
