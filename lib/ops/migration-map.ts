@@ -1,0 +1,204 @@
+/**
+ * The office map — where each atom of the old admin house lives in the new one.
+ *
+ * Two rules make this the thing the owner can trust. First: the atoms come from
+ * `scripts/ops-census.mjs`, generated from the repository, so nothing is remembered
+ * and nothing is forgotten. Second: assignment is by rule, and a rule that matches
+ * nothing leaves the atom UNASSIGNED — a guard then fails and names it. An unmarked
+ * nail is therefore a red build, not a silent hole.
+ *
+ * Read `docs/ledger/contract.md` before editing: offices are frozen by the owner,
+ * and a shared machine must never be swallowed into an employee's office.
+ */
+export type Office = {
+  /** Stable id used in the ledger and in the old-house badges. */
+  id: string;
+  /** The Arabic name the owner reads in the menu. */
+  label: string;
+  /** Why this office exists — the question of his it answers. */
+  answers: string;
+  /** Domain employees seated here. Shared machinery is never listed. */
+  employees: string[];
+};
+
+export const OFFICES: Office[] = [
+  {
+    id: "decision-desk",
+    label: "مكتب القرار",
+    answers: "إيه اللي حصل في المتجر النهارده، وإيه اللي محتاج موافقتي",
+    employees: ["مدير تشغيل المحتوى"],
+  },
+  {
+    id: "swarm-house",
+    label: "دار الموظفين",
+    answers: "مين شغال، وإيه اللي عمله، وأقول لمين إيه",
+    employees: [
+      "وكيل المحتوى", "وكيل الصور", "وكيل الظهور", "وكيل التجربة",
+      "وكيل التحليلات", "وكيل التطوير", "وكيل الجودة",
+    ],
+  },
+  {
+    id: "sales-office",
+    label: "مكتب المبيعات",
+    answers: "مين كلّمنا، وإيه اللي اتفقنا عليه، وإيه اللي واقف",
+    employees: ["موظف المبيعات", "موظف الإنتاج"],
+  },
+  {
+    id: "elite-room",
+    label: "غرفة النخبة",
+    answers: "مين لسه على قائمة الانتظار، ومين دخل بالدعوة",
+    employees: ["موظف النخبة"],
+  },
+  {
+    id: "records-office",
+    label: "مكتب السجلات",
+    answers: "إيه اللي اتعمل، ومين عمله، وهل اتنقل فعلاً ولا لأ",
+    employees: ["موظف المتابعة"],
+  },
+  {
+    id: "workshop",
+    label: "الورشة",
+    answers: "أجرب على نسخة من المتجر من غير ما ألمس الأصلي",
+    employees: ["موظف التجريب"],
+  },
+  {
+    id: "system-room",
+    label: "غرفة النظام",
+    answers: "المتجر سليم؟ البيانات متصلة؟ الإعدادات ليه اتغيرت؟",
+    employees: ["موظف النظام"],
+  },
+];
+
+/**
+ * Rule order matters: first match wins. `match` is tested against an atom id
+ * (a page path, a door resource, a component path). Anything that reaches the end
+ * unassigned is a classification we have not made yet — the guard fails on it.
+ */
+export type OfficeRule = {
+  match: RegExp;
+  office: string;
+  /** Why this rule exists, in one line the owner can read. */
+  reason: string;
+};
+
+export const OFFICE_RULES: OfficeRule[] = [
+  // The leader's own surfaces and the swarm's doors.
+  { match: /^app\/admin\/(page|owner-dashboard\/page)\.tsx$/, office: "decision-desk", reason: "نظرة العامة ولوحة المالك كانت بتجاوبين على نفس السؤال" },
+  { match: /^app\/admin\/v2\/(page|owner-dashboard)\//, office: "decision-desk", reason: "البيت الجديد بيبدأ من مكتب القرار" },
+  { match: /^app\/admin\/(agents|assistant|intel|intelligence)\//, office: "swarm-house", reason: "كل ما له علاقة بالوكلاء في دار واحدة" },
+  { match: /^app\/admin\/v2\/agents\//, office: "swarm-house", reason: "نفس الدار في البيت الجديد" },
+  { match: /^app\/admin\/(sales|manufacturing)\//, office: "sales-office", reason: "المبيعات والإنتاج شغلنة واحدة: العميل من السؤال للطلب" },
+  { match: /^app\/admin\/elite\//, office: "elite-room", reason: "الباب الخاص بالنخبة له عالمه" },
+  { match: /^app\/admin\/(browser|computer|phone|sandbox|fate)\//, office: "workshop", reason: "كل التجريب على نسخة في مكان واحد" },
+  { match: /^app\/admin\/(work)\//, office: "records-office", reason: "المهام والسجلات" },
+  { match: /^app\/admin\/v2\/(work|ledger)\//, office: "records-office", reason: "السجل جزء من مكتب المتابعة" },
+  { match: /^app\/admin\/(system|settings|database)\//, office: "system-room", reason: "صحة الموقع وإعداداته" },
+
+  // Service doors, grouped by their first path segment under /api/admin.
+  { match: /^app\/api\/admin\/(ops|agents|assistant|mastermind)\//, office: "swarm-house", reason: "أبواب السرب" },
+  { match: /^app\/api\/admin\/(sales|leads|tenants|bookings|channels|whatsapp)\//, office: "sales-office", reason: "أبواب العملاء والطلبات" },
+  { match: /^app\/api\/admin\/elite\//, office: "elite-room", reason: "أبواب النخبة" },
+  { match: /^app\/api\/admin\/(browser|computer|phone|sandbox|automation|simulate-scenario)\//, office: "workshop", reason: "أبواب التجربة" },
+  { match: /^app\/api\/admin\/(tasks|decisions|audit|telemetry|work)\//, office: "records-office", reason: "أبواب السجلات والقرارات" },
+  { match: /^app\/api\/admin\/(system|settings|database|keys|health|env|config)\//, office: "system-room", reason: "أبواب النظام والمفاتيح" },
+
+  // The furniture that both houses stand on today: it moves to the new tree first.
+  { match: /^components\/admin\/agents\//, office: "swarm-house", reason: "عفش دار الموظفين" },
+  { match: /^components\/admin\/ops\//, office: "swarm-house", reason: "عفش الاستوديو والمراقبة" },
+  { match: /^components\/admin\/(dashboard|overview)\//, office: "decision-desk", reason: "عفش المؤشرات" },
+  { match: /^lib\/ops\//, office: "swarm-house", reason: "جسم السرب نفسه" },
+
+  // Second pass: the doors and furniture the first rules did not reach.
+  { match: /^app\/api\/admin\/(2fa|verify-2fa|gate)\//, office: "system-room", reason: "أبواب الدخول والأمان" },
+  { match: /^app\/api\/admin\/aaca\//, office: "system-room", reason: "فحص البنية التحتية" },
+  { match: /^app\/api\/admin\/ai\//, office: "system-room", reason: "صحة مصادر الذكاء" },
+  { match: /^app\/api\/admin\/telegram\//, office: "decision-desk", reason: "القناة اللي بتوصلك رسالة الصبح" },
+  { match: /^app\/api\/admin\/owner\//, office: "decision-desk", reason: "أبواب المالك: موافقات وإيقاف طارئ" },
+  { match: /^app\/api\/admin\/notifications\//, office: "decision-desk", reason: "اللي يستنى ردك" },
+  { match: /^app\/api\/admin\/metrics\//, office: "decision-desk", reason: "المؤشرات اللحظية" },
+  { match: /^app\/api\/admin\/agent\//, office: "swarm-house", reason: "أبواب الوكيل الواحد" },
+  { match: /^app\/api\/admin\/(intel|images|proactive|quality|knowledge)\//, office: "swarm-house", reason: "أعضاء السرب: الصور والاستخبارات والجودة" },
+  { match: /^app\/api\/admin\/(categories|products)\//, office: "swarm-house", reason: "الكتالوج شغلنة وكيل المحتوى" },
+  { match: /^app\/api\/admin\/(manufacturing|inventory)\//, office: "sales-office", reason: "من السؤال للطلب للإنتاج" },
+  { match: /^app\/api\/admin\/analyze-lead\//, office: "sales-office", reason: "تقييم العميل المحتمل" },
+  { match: /^app\/api\/admin\/(live-browser|remote-browser|architect)\//, office: "workshop", reason: "أبواب التجربة على نسخة" },
+  { match: /^components\/admin\/settings\//, office: "system-room", reason: "كروت الإعدادات" },
+  { match: /^components\/admin\/browser\//, office: "workshop", reason: "عفش المتصفح الحي" },
+  { match: /^components\/admin\/(Notification|GlobalAssistantDock|UnifiedAssistant|AssistantBrowserCopilot)/, office: "swarm-house", reason: "المساعد الموحد والجرس" },
+  { match: /^components\/admin\/AIKeysControlPanel/, office: "system-room", reason: "خزان مفاتيح الذكاء" },
+  { match: /^components\/admin\/TelegramControlPanel/, office: "decision-desk", reason: "ضبط رسالة الصبح" },
+  { match: /^\/api\/cron\/ops-daily$/, office: "swarm-house", reason: "جولة السرب اليومية" },
+  { match: /^\/api\/cron\/admin-daily-report$/, office: "decision-desk", reason: "تقريرك اليومي" },
+  { match: /^\/admin(\/owner-dashboard)?$/, office: "decision-desk", reason: "أول ما يفتح: مكتب القرار" },
+  { match: /^\/admin\/(work)$/, office: "records-office", reason: "المهام" },
+  { match: /^\/admin\/(sales)$/, office: "sales-office", reason: "المبيعات" },
+  { match: /^\/admin\/(elite)$/, office: "elite-room", reason: "النخبة" },
+  { match: /^\/admin\/(agents)$/, office: "swarm-house", reason: "الوكلاء" },
+  { match: /^\/admin\/(system|settings|database)$/, office: "system-room", reason: "النظام" },
+];
+
+/** Atoms the rules cannot see: they need an explicit decision, not a guess. */
+export type ExplicitPlacement = { id: string; office: string; status: string; reason: string };
+
+export const EXPLICIT: ExplicitPlacement[] = [
+  { id: "app/admin/v2/page.tsx", office: "decision-desk", status: "pending", reason: "صفحة الهبوط الجديدة" },
+  { id: "app/admin/v2/ops/page.tsx", office: "swarm-house", status: "moved", reason: "الاستوديو اتنقل فعلاً" },
+  { id: "app/admin/v2/agents/ops/page.tsx", office: "swarm-house", status: "moved", reason: "محادثة الوكلاء اتنقلت فعلاً" },
+  { id: "app/admin/v2/database/page.tsx", office: "system-room", status: "pending", reason: "قاعدة البيانات" },
+  { id: "app/admin/v2/elite/page.tsx", office: "elite-room", status: "pending", reason: "النخبة" },
+  { id: "app/admin/v2/sales/page.tsx", office: "sales-office", status: "pending", reason: "المبيعات" },
+  { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "pending", reason: "الإعدادات" },
+  { id: "app/admin/v2/system/page.tsx", office: "system-room", status: "pending", reason: "حالة النظام" },
+  { id: "app/admin/v2/work/page.tsx", office: "records-office", status: "pending", reason: "مركز العمل" },
+  { id: "app/admin/layout.tsx", office: "decision-desk", status: "pending", reason: "قشرة البيت القديم" },
+  { id: "app/admin/layout-client.tsx", office: "decision-desk", status: "pending", reason: "قشرة البيت القديمة بمكوناتها" },
+
+  /**
+   * The grand-name cluster: doors and panels whose names promise more than the code
+   * has ever shown. They are deliberately NOT given an office yet — an office is a
+   * verdict, and a verdict needs the dossier first (what it really does, where it is
+   * duplicated, what is broken, what is missing). `needs-verdict` is the honest
+   * fourth state: the owner sees it is not forgotten, and nobody pretends it is home.
+   */
+  { id: "app/api/admin/arsenal/route.ts", office: "records-office", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "app/api/admin/command/route.ts", office: "records-office", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "app/api/admin/eternal/genesis/route.ts", office: "swarm-house", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "app/api/admin/fate/route.ts", office: "workshop", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "app/api/admin/fate/latest/route.ts", office: "workshop", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "app/api/admin/mind/route.ts", office: "swarm-house", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "app/api/admin/mind/decision/route.ts", office: "swarm-house", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "app/api/admin/prime/route.ts", office: "swarm-house", status: "kept-as-door", reason: "باب المدير الأول: حيّ عشان مفضّلة ومفتاح قديم، مش سطح" },
+  { id: "app/api/admin/qayyim/[[...legacy]]/route.ts", office: "swarm-house", status: "kept-as-door", reason: "باب الاسم المفصول: رسايل تليجرام القديمة بتضرب عليه" },
+  { id: "app/api/admin/silent/route.ts", office: "records-office", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "app/api/admin/sovereign/pulse/route.ts", office: "decision-desk", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "app/api/admin/supreme/route.ts", office: "swarm-house", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "app/api/admin/war-room/route.ts", office: "workshop", status: "needs-verdict", reason: "اسم بلا صاحب معروف — ملف كامل بالدليل قبل الدمج أو المسح" },
+  { id: "components/admin/AdminProactiveStrip.tsx", office: "decision-desk", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+  { id: "components/admin/ArchitectWidget.tsx", office: "workshop", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+  { id: "components/admin/EvolutionManager.tsx", office: "swarm-house", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+  { id: "components/admin/GrowthInsights.tsx", office: "decision-desk", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+  { id: "components/admin/master-dashboard-components.tsx", office: "decision-desk", status: "needs-verdict", reason: "ملف كبير فيه أكتر من حاجة — بيتقسم الأول" },
+  { id: "components/admin/MasterControlCenter.tsx", office: "decision-desk", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+  { id: "components/admin/NeuralMirror.tsx", office: "swarm-house", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+  { id: "components/admin/NeuralStream.tsx", office: "swarm-house", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+  { id: "components/admin/SmartSuggestions.tsx", office: "swarm-house", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+  { id: "components/admin/SovereignMindPanel.tsx", office: "swarm-house", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+  { id: "components/admin/SovereignPulse.tsx", office: "decision-desk", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+];
+
+/** Atoms still waiting for a real verdict — the number that must go down, phase by phase. */
+export const NEEDS_VERDICT = EXPLICIT.filter((e) => e.status === "needs-verdict").length;
+
+export type CensusAtom = { kind: string; id: string; lines?: number; usedBy?: string };
+
+/** The office an atom belongs to, or null when no rule reached it. */
+export function officeOf(atom: CensusAtom): OfficeRule | ExplicitPlacement | null {
+  const explicit = EXPLICIT.find((e) => e.id === atom.id);
+  if (explicit) return explicit;
+  return OFFICE_RULES.find((r) => r.match.test(atom.id)) ?? null;
+}
+
+/** Every atom with no office — the list the guard fails on, and the owner reads. */
+export function unassignedAtoms(atoms: CensusAtom[]): CensusAtom[] {
+  return atoms.filter((a) => officeOf(a) === null);
+}

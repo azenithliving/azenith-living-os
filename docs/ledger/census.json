@@ -1,0 +1,1436 @@
+{
+  "generatedAt": "2026-09-29T13:16:16.007Z",
+  "counts": {
+    "oldPages": 18,
+    "oldPageLines": 5790,
+    "newPages": 11,
+    "newPageLines": 319,
+    "adminDoors": 122,
+    "allDoors": 200,
+    "furnitureFiles": 57,
+    "furnitureLines": 15023,
+    "furnitureUsedByBoth": 3,
+    "furnitureBothLines": 1619,
+    "furnitureNewOnly": 13,
+    "furnitureOldOnly": 17,
+    "furnitureUnreachable": 24,
+    "swarmFiles": 53,
+    "swarmFileLines": 13442,
+    "crons": 2,
+    "navEntries": 9,
+    "duplicatedAdminLeaves": 0,
+    "duplicatedDoorLeavesAll": 9,
+    "atoms": 272
+  },
+  "duplicatedDoors": [],
+  "atoms": [
+    {
+      "kind": "old-page",
+      "id": "app/admin/agents/page.tsx",
+      "lines": 798
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/assistant/page.tsx",
+      "lines": 23
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/browser/page.tsx",
+      "lines": 610
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/computer/page.tsx",
+      "lines": 6
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/database/page.tsx",
+      "lines": 290
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/elite/page.tsx",
+      "lines": 244
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/fate/page.tsx",
+      "lines": 27
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/intel/page.tsx",
+      "lines": 7
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/intelligence/page.tsx",
+      "lines": 7
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/manufacturing/page.tsx",
+      "lines": 23
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/owner-dashboard/page.tsx",
+      "lines": 461
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/page.tsx",
+      "lines": 850
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/phone/page.tsx",
+      "lines": 6
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/sales/page.tsx",
+      "lines": 2033
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/sandbox/page.tsx",
+      "lines": 8
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/settings/page.tsx",
+      "lines": 280
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/system/page.tsx",
+      "lines": 62
+    },
+    {
+      "kind": "old-page",
+      "id": "app/admin/work/page.tsx",
+      "lines": 55
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/agents/ops/page.tsx",
+      "lines": 41
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/agents/page.tsx",
+      "lines": 109
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/database/page.tsx",
+      "lines": 16
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/elite/page.tsx",
+      "lines": 16
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/ops/page.tsx",
+      "lines": 31
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/owner-dashboard/page.tsx",
+      "lines": 16
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/page.tsx",
+      "lines": 15
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/sales/page.tsx",
+      "lines": 16
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/settings/page.tsx",
+      "lines": 27
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/system/page.tsx",
+      "lines": 16
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/work/page.tsx",
+      "lines": 16
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/2fa/disable/route.ts",
+      "resource": "admin/2fa/disable"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/2fa/set-verified/route.ts",
+      "resource": "admin/2fa/set-verified"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/2fa/setup/route.ts",
+      "resource": "admin/2fa/setup"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/2fa/status/route.ts",
+      "resource": "admin/2fa/status"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/2fa/verify/route.ts",
+      "resource": "admin/2fa/verify"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/aaca/status/route.ts",
+      "resource": "admin/aaca/status"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agent/communication/route.ts",
+      "resource": "admin/agent/communication"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agent/goals/route.ts",
+      "resource": "admin/agent/goals"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agent/rollback/route.ts",
+      "resource": "admin/agent/rollback"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agent/smart/route.ts",
+      "resource": "admin/agent/smart"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agent/tools/execute/route.ts",
+      "resource": "admin/agent/tools/execute"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agent/ultimate/route.ts",
+      "resource": "admin/agent/ultimate"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/approval/decision/route.ts",
+      "resource": "admin/agents/approval/decision"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/approval-queue/route.ts",
+      "resource": "admin/agents/approval-queue"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/chat/route.ts",
+      "resource": "admin/agents/chat"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/conversations/route.ts",
+      "resource": "admin/agents/conversations"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/events/stream/route.ts",
+      "resource": "admin/agents/events/stream"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/learn/route.ts",
+      "resource": "admin/agents/learn"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/lock/route.ts",
+      "resource": "admin/agents/lock"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/messages/route.ts",
+      "resource": "admin/agents/messages"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/notify/route.ts",
+      "resource": "admin/agents/notify"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/orchestrate/route.ts",
+      "resource": "admin/agents/orchestrate"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/simulate-scenario/route.ts",
+      "resource": "admin/agents/simulate-scenario"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/suggestions/route.ts",
+      "resource": "admin/agents/suggestions"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/tasks/route.ts",
+      "resource": "admin/agents/tasks"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ai/health/route.ts",
+      "resource": "admin/ai/health"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/analyze-lead/route.ts",
+      "resource": "admin/analyze-lead"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/architect/command/route.ts",
+      "resource": "admin/architect/command"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/arsenal/route.ts",
+      "resource": "admin/arsenal"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/assistant/route.ts",
+      "resource": "admin/assistant"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/assistant/summon/route.ts",
+      "resource": "admin/assistant/summon"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/automation/route.ts",
+      "resource": "admin/automation"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/categories/route.ts",
+      "resource": "admin/categories"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/command/route.ts",
+      "resource": "admin/command"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/elite/invitations/route.ts",
+      "resource": "admin/elite/invitations"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/eternal/genesis/route.ts",
+      "resource": "admin/eternal/genesis"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/fate/latest/route.ts",
+      "resource": "admin/fate/latest"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/fate/route.ts",
+      "resource": "admin/fate"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/gate/health/route.ts",
+      "resource": "admin/gate/health"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/gate/reset-2fa/route.ts",
+      "resource": "admin/gate/reset-2fa"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/gate/validate/route.ts",
+      "resource": "admin/gate/validate"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/images/stats/route.ts",
+      "resource": "admin/images/stats"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/images/trigger-harvest/route.ts",
+      "resource": "admin/images/trigger-harvest"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/intel/evolve/decision/route.ts",
+      "resource": "admin/intel/evolve/decision"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/intel/evolve/route.ts",
+      "resource": "admin/intel/evolve"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/intel/relations/health/route.ts",
+      "resource": "admin/intel/relations/health"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/inventory/route.ts",
+      "resource": "admin/inventory"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/keys/bulk/route.ts",
+      "resource": "admin/keys/bulk"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/keys/import-env/route.ts",
+      "resource": "admin/keys/import-env"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/keys/live-stats/route.ts",
+      "resource": "admin/keys/live-stats"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/keys/public/route.ts",
+      "resource": "admin/keys/public"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/keys/reload/route.ts",
+      "resource": "admin/keys/reload"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/keys/route.ts",
+      "resource": "admin/keys"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/keys/stats/route.ts",
+      "resource": "admin/keys/stats"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/keys/[id]/route.ts",
+      "resource": "admin/keys/[id]"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/knowledge/audit/route.ts",
+      "resource": "admin/knowledge/audit"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/leads/analyze/route.ts",
+      "resource": "admin/leads/analyze"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/leads/delete/route.ts",
+      "resource": "admin/leads/delete"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/leads/follow-up/route.ts",
+      "resource": "admin/leads/follow-up"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/leads/release/route.ts",
+      "resource": "admin/leads/release"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/leads/reply/route.ts",
+      "resource": "admin/leads/reply"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/leads/route.ts",
+      "resource": "admin/leads"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/leads/suggestions/route.ts",
+      "resource": "admin/leads/suggestions"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/live-browser/action/route.ts",
+      "resource": "admin/live-browser/action"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/live-browser/screenshot/route.ts",
+      "resource": "admin/live-browser/screenshot"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/live-browser/session/route.ts",
+      "resource": "admin/live-browser/session"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/live-browser/stream/route.ts",
+      "resource": "admin/live-browser/stream"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/manufacturing/bom/calculate/route.ts",
+      "resource": "admin/manufacturing/bom/calculate"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/manufacturing/designs/route.ts",
+      "resource": "admin/manufacturing/designs"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/manufacturing/inventory/route.ts",
+      "resource": "admin/manufacturing/inventory"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/manufacturing/metrics/route.ts",
+      "resource": "admin/manufacturing/metrics"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/manufacturing/orders/route.ts",
+      "resource": "admin/manufacturing/orders"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/manufacturing/price/calculate/route.ts",
+      "resource": "admin/manufacturing/price/calculate"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/manufacturing/schedule/route.ts",
+      "resource": "admin/manufacturing/schedule"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/mastermind/chat/route.ts",
+      "resource": "admin/mastermind/chat"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/mastermind/route.ts",
+      "resource": "admin/mastermind"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/mastermind/stats/route.ts",
+      "resource": "admin/mastermind/stats"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/metrics/realtime/route.ts",
+      "resource": "admin/metrics/realtime"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/mind/decision/route.ts",
+      "resource": "admin/mind/decision"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/mind/route.ts",
+      "resource": "admin/mind"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/notifications/route.ts",
+      "resource": "admin/notifications"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/ab-test/route.ts",
+      "resource": "admin/ops/ab-test"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/audit/route.ts",
+      "resource": "admin/ops/audit"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/benchmarks/route.ts",
+      "resource": "admin/ops/benchmarks"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/draft/route.ts",
+      "resource": "admin/ops/draft"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/experiments/route.ts",
+      "resource": "admin/ops/experiments"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/goals/route.ts",
+      "resource": "admin/ops/goals"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/identity/route.ts",
+      "resource": "admin/ops/identity"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/images/route.ts",
+      "resource": "admin/ops/images"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/observability/route.ts",
+      "resource": "admin/ops/observability"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/perf/route.ts",
+      "resource": "admin/ops/perf"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/preview/[token]/route.ts",
+      "resource": "admin/ops/preview/[token]"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/publish/route.ts",
+      "resource": "admin/ops/publish"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/qa/route.ts",
+      "resource": "admin/ops/qa"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/rollback/route.ts",
+      "resource": "admin/ops/rollback"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/route.ts",
+      "resource": "admin/ops"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/self/route.ts",
+      "resource": "admin/ops/self"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/seo/route.ts",
+      "resource": "admin/ops/seo"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/suggestions/route.ts",
+      "resource": "admin/ops/suggestions"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/swarm/status/route.ts",
+      "resource": "admin/ops/swarm/status"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/telemetry/route.ts",
+      "resource": "admin/ops/telemetry"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/unify-tone/route.ts",
+      "resource": "admin/ops/unify-tone"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/ops/vision/route.ts",
+      "resource": "admin/ops/vision"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/owner/approval/decision/route.ts",
+      "resource": "admin/owner/approval/decision"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/owner/dashboard/route.ts",
+      "resource": "admin/owner/dashboard"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/owner/emergency-stop/route.ts",
+      "resource": "admin/owner/emergency-stop"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/prime/route.ts",
+      "resource": "admin/prime"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/proactive/route.ts",
+      "resource": "admin/proactive"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/products/route.ts",
+      "resource": "admin/products"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/qayyim/[[...legacy]]/route.ts",
+      "resource": "admin/qayyim/[[...legacy]]"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/quality/route.ts",
+      "resource": "admin/quality"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/remote-browser/health/route.ts",
+      "resource": "admin/remote-browser/health"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/remote-browser/session/route.ts",
+      "resource": "admin/remote-browser/session"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/settings/route.ts",
+      "resource": "admin/settings"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/silent/route.ts",
+      "resource": "admin/silent"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/sovereign/pulse/route.ts",
+      "resource": "admin/sovereign/pulse"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/supreme/route.ts",
+      "resource": "admin/supreme"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/telegram/config/route.ts",
+      "resource": "admin/telegram/config"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/telegram/status/route.ts",
+      "resource": "admin/telegram/status"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/telegram/test/route.ts",
+      "resource": "admin/telegram/test"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/verify-2fa/route.ts",
+      "resource": "admin/verify-2fa"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/war-room/route.ts",
+      "resource": "admin/war-room"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/AdminProactiveStrip.tsx",
+      "lines": 89,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/AgentActionsFeed.tsx",
+      "lines": 230,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/AgentHealthPanel.tsx",
+      "lines": 234,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/ApprovalGate.tsx",
+      "lines": 195,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/BOMTable.tsx",
+      "lines": 331,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/ChatPanel.tsx",
+      "lines": 1269,
+      "usedBy": "both"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/CommandConsole.tsx",
+      "lines": 172,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/CommandPalette.tsx",
+      "lines": 160,
+      "usedBy": "both"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/DesignStudio.tsx",
+      "lines": 224,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/EnterprisePipelineBar.tsx",
+      "lines": 187,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/EnterpriseScenarioModal.tsx",
+      "lines": 277,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/FloatingAgentButton.tsx",
+      "lines": 163,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/GroupChatView.tsx",
+      "lines": 366,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/HandoffInterface.tsx",
+      "lines": 115,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/InventoryManager.tsx",
+      "lines": 303,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/ManufacturingDashboard.tsx",
+      "lines": 152,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/MultiLLMChat.tsx",
+      "lines": 169,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/OrderPipeline.tsx",
+      "lines": 139,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/ProactiveSuggestions.tsx",
+      "lines": 240,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/ProjectGantt.tsx",
+      "lines": 230,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/ProposalDecisionCard.tsx",
+      "lines": 187,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/QualityCheckPanel.tsx",
+      "lines": 225,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/QuickActionsPanel.tsx",
+      "lines": 183,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/SelfModelPanel.tsx",
+      "lines": 190,
+      "usedBy": "both"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/TaskQueue.tsx",
+      "lines": 162,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/TeamScoreboard.tsx",
+      "lines": 130,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/AIKeysControlPanel.tsx",
+      "lines": 1303,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ArchitectWidget.tsx",
+      "lines": 209,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/AssistantBrowserCopilot.tsx",
+      "lines": 937,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/browser/AskQayyimAboutPage.tsx",
+      "lines": 72,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/EvolutionManager.tsx",
+      "lines": 229,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/GlobalAssistantDock.tsx",
+      "lines": 283,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/GrowthInsights.tsx",
+      "lines": 455,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/master-dashboard-components.tsx",
+      "lines": 258,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/MasterControlCenter.tsx",
+      "lines": 293,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/NeuralMirror.tsx",
+      "lines": 117,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/NeuralStream.tsx",
+      "lines": 99,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/NotificationBell.tsx",
+      "lines": 175,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/NotificationsPanel.tsx",
+      "lines": 204,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/index.ts",
+      "lines": 15,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/QayyimAuditReport.tsx",
+      "lines": 168,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/QayyimBenchmarksPanel.tsx",
+      "lines": 130,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/QayyimDraftPreview.tsx",
+      "lines": 192,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/QayyimExperimentsPanel.tsx",
+      "lines": 221,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/QayyimGoalsPanel.tsx",
+      "lines": 193,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/QayyimObservabilityDashboard.tsx",
+      "lines": 145,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/QayyimProactiveSuggestions.tsx",
+      "lines": 136,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/QayyimQualityGate.tsx",
+      "lines": 82,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/QayyimTelemetryPanel.tsx",
+      "lines": 157,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/ops/StudioPanel.tsx",
+      "lines": 346,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/settings/AdsSettingsCard.tsx",
+      "lines": 178,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/settings/ConsultantFaqCard.tsx",
+      "lines": 165,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/SmartSuggestions.tsx",
+      "lines": 73,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/SovereignMindPanel.tsx",
+      "lines": 360,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/SovereignPulse.tsx",
+      "lines": 167,
+      "usedBy": "unreachable"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/TelegramControlPanel.tsx",
+      "lines": 590,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/UnifiedAssistant.tsx",
+      "lines": 749,
+      "usedBy": "old-only"
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/ab-testing.ts",
+      "lines": 335
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/agent-roles.ts",
+      "lines": 62
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/anomaly.ts",
+      "lines": 167
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/api/utils.ts",
+      "lines": 296
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/approval-intake.ts",
+      "lines": 91
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/benchmarks/index.ts",
+      "lines": 217
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/canary.ts",
+      "lines": 150
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/chat-brain.ts",
+      "lines": 90
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/daily-round.ts",
+      "lines": 412
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/daily-story.ts",
+      "lines": 117
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/debate.ts",
+      "lines": 59
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/egypt-calendar.ts",
+      "lines": 97
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/experiment-verdict.ts",
+      "lines": 86
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/facade/QayyimFacade.ts",
+      "lines": 140
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/forecast.ts",
+      "lines": 279
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/gap-contract.ts",
+      "lines": 197
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/goal-risk.ts",
+      "lines": 76
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/governance/ConstitutionEngine.ts",
+      "lines": 594
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/gsc.ts",
+      "lines": 231
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/identity.ts",
+      "lines": 125
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/index.ts",
+      "lines": 57
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/legacy-address-table.ts",
+      "lines": 56
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/luxury-v2.ts",
+      "lines": 182
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/measured-benchmark.ts",
+      "lines": 28
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/memory/index.ts",
+      "lines": 16
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/memory/SharedMemory.ts",
+      "lines": 472
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/memory/SwarmLearnings.ts",
+      "lines": 568
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/memory/SyncLayer.ts",
+      "lines": 511
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/memory/VectorStore.ts",
+      "lines": 198
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/orchestrator/MasterOrchestrator.ts",
+      "lines": 842
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/owner-address.ts",
+      "lines": 57
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/palette.ts",
+      "lines": 217
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/proposal-card.ts",
+      "lines": 93
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/qa/realChecks.ts",
+      "lines": 421
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/QayyimAgentBase.ts",
+      "lines": 480
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/QayyimAnalyticsAgent.ts",
+      "lines": 340
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/QayyimContentAgent.ts",
+      "lines": 303
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/QayyimCoreAgent.ts",
+      "lines": 327
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/QayyimDevAgent.ts",
+      "lines": 363
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/QayyimQaAgent.ts",
+      "lines": 605
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/QayyimSeoAgent.ts",
+      "lines": 472
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/QayyimUxAgent.ts",
+      "lines": 316
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/QayyimVisualAgent.ts",
+      "lines": 429
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/rivals.ts",
+      "lines": 428
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/round-freshness.ts",
+      "lines": 63
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/self-audit.ts",
+      "lines": 463
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/self-model.ts",
+      "lines": 205
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/self-view.ts",
+      "lines": 55
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/stats.ts",
+      "lines": 339
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/task-reconcile.ts",
+      "lines": 112
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/url-manifest.ts",
+      "lines": 166
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/voice-continuous.ts",
+      "lines": 143
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/world-model.ts",
+      "lines": 294
+    },
+    {
+      "kind": "cron",
+      "id": "/api/cron/admin-daily-report",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "kind": "cron",
+      "id": "/api/cron/ops-daily",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/owner-dashboard"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/work"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/sales"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/elite"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/agents"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/system"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/settings"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/database"
+    }
+  ]
+}
