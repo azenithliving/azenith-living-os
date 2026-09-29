@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T17:32:37.346Z",
+  "generatedAt": "2026-09-29T18:22:39.989Z",
   "states": [
     "not-moved",
     "moving",
@@ -8,7 +8,8 @@
   ],
   "counts": {
     "not-moved": 364,
-    "moved": 2
+    "moved": 2,
+    "moving": 1
   },
   "rows": [
     {
@@ -1264,6 +1265,11 @@
     },
     {
       "kind": "furniture",
+      "atom": "components/admin/sales/CustomersPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
       "atom": "components/admin/settings/AdsSettingsCard.tsx",
       "state": "not-moved"
     },
@@ -1655,7 +1661,10 @@
     {
       "kind": "view",
       "atom": "/admin/sales#العملاء",
-      "state": "not-moved"
+      "state": "moving",
+      "phase": "consolidation-1",
+      "when": "2026-09-29",
+      "proof": "the tab's 811 lines moved verbatim into components/admin/sales/CustomersPanel.tsx; the page fell from 2108 to 1264 lines; types clean, 912 of 912 tests, build green. It still renders inside the old page until the new window takes it."
     },
     {
       "kind": "view",

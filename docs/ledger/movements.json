@@ -15,6 +15,13 @@
       "phase": "P6",
       "when": "2026-09-28",
       "proof": "same run, and the retired agent key is rewritten at the outer gate for old links"
+    },
+    {
+      "atom": "/admin/sales#العملاء",
+      "state": "moving",
+      "phase": "consolidation-1",
+      "when": "2026-09-29",
+      "proof": "the tab's 811 lines moved verbatim into components/admin/sales/CustomersPanel.tsx; the page fell from 2108 to 1264 lines; types clean, 912 of 912 tests, build green. It still renders inside the old page until the new window takes it."
     }
   ]
 }

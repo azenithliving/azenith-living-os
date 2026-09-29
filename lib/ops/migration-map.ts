@@ -109,6 +109,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^app\/api\/admin\/(system|settings|database|keys|health|env|config)\//, office: "system-room", reason: "أبواب النظام والمفاتيح" },
 
   // The furniture that both houses stand on today: it moves to the new tree first.
+  { match: /^components\/admin\/sales\//, office: "sales-office", reason: "عفش مكتب المبيعات في البيت الجديد" },
   { match: /^components\/admin\/agents\//, office: "swarm-house", reason: "عفش دار الموظفين" },
   { match: /^components\/admin\/ops\//, office: "swarm-house", reason: "عفش الاستوديو والمراقبة" },
   { match: /^components\/admin\/(dashboard|overview)\//, office: "decision-desk", reason: "عفش المؤشرات" },
