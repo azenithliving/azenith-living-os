@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T19:24:30.176Z",
+  "generatedAt": "2026-09-29T20:15:58.296Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 434,
+    "not-moved": 445,
     "moved": 3,
     "moving": 1
   },
@@ -908,6 +908,31 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/agent-tools/approval-system.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/agent-tools/execution-tracker.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/agent-tools/tool-registry.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/agents/AgentOrchestrator.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/agents/SelfLearningEngine.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/ai-orchestrator.ts",
       "state": "not-moved"
     },
@@ -939,6 +964,16 @@
     {
       "kind": "root-lib",
       "atom": "lib/crypto-keys.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/dal/unified-supabase.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/elite/auth.ts",
       "state": "not-moved"
     },
     {
@@ -1019,6 +1054,26 @@
     {
       "kind": "root-lib",
       "atom": "lib/totp-verify.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/ultimate-agent/agent-core.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/ultimate-agent/memory-store.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/ultimate-agent/predictive-engine.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/ultimate-agent/security-manager.ts",
       "state": "not-moved"
     },
     {

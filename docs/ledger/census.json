@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T19:24:30.165Z",
+  "generatedAt": "2026-09-29T20:15:58.293Z",
   "counts": {
     "oldPages": 18,
     "oldPageLines": 5021,
@@ -9,10 +9,10 @@
     "allDoors": 200,
     "outsideDoors": 8,
     "outsideDoorLines": 2520,
-    "rootLibFiles": 153,
-    "rootLibUsed": 41,
+    "rootLibFiles": 256,
+    "rootLibUsed": 52,
     "orphanDoors": 70,
-    "rootLibUsedLines": 15024,
+    "rootLibUsedLines": 21628,
     "furnitureFiles": 58,
     "furnitureLines": 15931,
     "furnitureUsedByBoth": 4,
@@ -21,14 +21,14 @@
     "furnitureOldOnly": 17,
     "furnitureUnreachable": 24,
     "swarmFiles": 54,
-    "swarmFileLines": 13741,
+    "swarmFileLines": 13742,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 9,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 9,
-    "atoms": 438
+    "atoms": 449
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -945,6 +945,36 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/agent-tools/approval-system.ts",
+      "lines": 421,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/agent-tools/execution-tracker.ts",
+      "lines": 394,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/agent-tools/tool-registry.ts",
+      "lines": 1107,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/agents/AgentOrchestrator.ts",
+      "lines": 867,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/agents/SelfLearningEngine.ts",
+      "lines": 191,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/ai-orchestrator.ts",
       "lines": 775,
       "callers": 7
@@ -983,6 +1013,18 @@
       "kind": "root-lib",
       "id": "lib/crypto-keys.ts",
       "lines": 327,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/dal/unified-supabase.ts",
+      "lines": 637,
+      "callers": 21
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/elite/auth.ts",
+      "lines": 304,
       "callers": 1
     },
     {
@@ -1080,6 +1122,30 @@
       "id": "lib/totp-verify.ts",
       "lines": 70,
       "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/ultimate-agent/agent-core.ts",
+      "lines": 454,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/ultimate-agent/memory-store.ts",
+      "lines": 717,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/ultimate-agent/predictive-engine.ts",
+      "lines": 728,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/ultimate-agent/security-manager.ts",
+      "lines": 784,
+      "callers": 3
     },
     {
       "kind": "orphan-door",
@@ -1927,7 +1993,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 299
+      "lines": 300
     },
     {
       "kind": "swarm-file",

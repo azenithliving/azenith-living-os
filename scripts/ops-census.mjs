@@ -198,7 +198,12 @@ const orphanDoors = outsideDoors
   .map((f) => ({ file: f, callers: calledAs(`/api/${doorResource(f)}`) }))
   .filter((d) => d.callers === 0);
 
-const rootLib = walk("lib").filter((f) => /\.ts$/.test(f) && f.split("/").length === 2);
+/**
+ * Library machinery an admin surface stands on, at any depth. The fence used to look
+ * only at the library root, so a module one folder deeper was invisible — which is
+ * how the customers' own identity file nearly escaped the ledger.
+ */
+const rootLib = walk("lib").filter((f) => /\.ts$/.test(f) && !f.startsWith("lib/ops/"));
 const usedLib = rootLib
   .map((f) => {
     const frag = `@/lib/${f.replace("lib/", "").replace(/\.ts$/, "")}`;

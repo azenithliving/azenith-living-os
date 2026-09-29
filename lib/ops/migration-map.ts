@@ -183,7 +183,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^app\/api\/analytics\//, office: "decision-desk", reason: "الأرقام اللي بتظهر في مؤشراتك" },
   { match: /^app\/api\/omnipotent\//, office: SHARED_OFFICE, reason: "آلة المرآة اللي بتقرأ منها البوابة الخارجية — ما ليهاش مكتب" },
   { match: /^lib\/(lead-insights|leads-delete-guard)\.ts$/, office: "sales-office", reason: "آلة الموظف نفسه: ما بيفتحهاش غير سطح المبيعات وبابه" },
-  { match: /^lib\/[^/]+\.ts$/, office: SHARED_OFFICE, reason: "آلة مشتركة فوقها أكتر من مكتب — ما بتدخلش جوه موظف" },
+  { match: /^lib\/(?!ops\/)[^/]+\/.*\.ts$|^lib\/[^/]+\.ts$/, office: SHARED_OFFICE, reason: "آلة مشتركة فوقها أكتر من مكتب — ما بتدخلش جوه موظف" },
   { match: /^app\/api\//, office: SHARED_OFFICE, reason: "باب ما بيفتحوش وجه إداري — آلة مستنية التصنيف" },
 ];
 
