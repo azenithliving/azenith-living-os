@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T15:06:24.398Z",
+  "generatedAt": "2026-09-29T17:32:37.346Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 319,
+    "not-moved": 364,
     "moved": 2
   },
   "rows": [
@@ -1565,6 +1565,231 @@
     {
       "kind": "swarm-file",
       "atom": "lib/ops/world-model.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/agents#مركز القيادة",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/agents#المساعد الموحّد",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/agents#فريق الوكلاء",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/agents#محادثة جماعية",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/assistant#مركز القيادة",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/assistant#المساعد الموحّد",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/assistant#فريق الوكلاء",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/assistant#محادثة جماعية",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/intel#مركز القيادة",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/intel#المساعد الموحّد",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/intel#فريق الوكلاء",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/intel#محادثة جماعية",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/intelligence#مركز القيادة",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/intelligence#المساعد الموحّد",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/intelligence#فريق الوكلاء",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/intelligence#محادثة جماعية",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/sales#مدير المبيعات",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/sales#العملاء",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/sales#المستأجرين",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/sales#الإدارة",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/sales#CMS",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/sandbox#مركز القيادة",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/sandbox#المساعد الموحّد",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/sandbox#فريق الوكلاء",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/sandbox#محادثة جماعية",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/settings#تحديث",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/agents/ops#أوامرCtrl K",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/agents/ops#نفسك",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/agents/ops#أدوار",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/agents/ops#✕",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/agents/ops#⚡نسّق السرب لتحسين الصفحة الرئيسية كاملاً",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/agents/ops#⚡اعرض أهدافي المهددة هذا الشهر",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/agents/ops#⚡افحص رؤوس الأمان للصفحة الرئيسية",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/agents/ops#⚡استعرض ذاكرة الوكلاء",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/agents/ops#فحص سجل قاعدة البيانات",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/ops#نظرة عامة",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/ops#العمليات",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/ops#التحسين",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/ops#المراقبة",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/ops#تحليل السلوك",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/settings#احفظ",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/admin/v2/settings#مقفول",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/bookings#EN",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/bookings#AR",
+      "state": "not-moved"
+    },
+    {
+      "kind": "view",
+      "atom": "/elite-intelligence#EN",
       "state": "not-moved"
     },
     {

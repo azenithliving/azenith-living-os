@@ -1,195 +1,14 @@
 {
-  "generatedAt": "2026-09-29T16:24:15.332Z",
+  "generatedAt": "2026-09-29T17:29:20.509Z",
   "base": "https://azenith-living.vercel.app",
   "rows": [
     {
       "route": "/admin/agents",
+      "layer": "admin",
       "urlBefore": "/admin/agents",
-      "arabicControls": 57,
-      "pressable": 11,
-      "dangerCount": 36,
-      "headings": [
-        "الرئيسية",
-        "العمل",
-        "الوكلاء الذكية",
-        "النظام",
-        "مركز الوكلاء الموحّد",
-        "قائمة المهام"
-      ],
-      "labels": [
-        "مركز القيادة",
-        "المساعد الموحّد",
-        "فريق الوكلاء",
-        "تحديث",
-        "تحليل SEOتحليل شامل لأداء الموقع",
-        "نسخة احتياطيةحفظ نسخة كاملة الآن",
-        "تقرير الإيراداتتحليل المبيعات والتحويلات",
-        "فحص المخزونكشف المنتجات المنخفضة",
-        "0مكتملة",
-        "0جارية",
-        "0فاشلة"
-      ],
-      "pressed": 11,
-      "views": 4,
-      "distinctStates": 3,
-      "sameUrl": 4,
-      "detail": [
-        {
-          "label": "مركز القيادة",
-          "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|قائمة المهام|اقتراحات استباقية|ص"
-        },
-        {
-          "label": "المساعد الموحّد",
-          "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد"
-        },
-        {
-          "label": "فريق الوكلاء",
-          "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
-        },
-        {
-          "label": "محادثة جماعية",
-          "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
-        }
-      ]
-    },
-    {
-      "route": "/admin/assistant",
-      "urlBefore": "/admin/assistant",
-      "arabicControls": 10,
-      "pressable": 0,
-      "dangerCount": 0,
-      "headings": [
-        "الرئيسية",
-        "العمل",
-        "الوكلاء الذكية",
-        "النظام"
-      ],
-      "labels": [],
-      "pressed": 0,
-      "views": 0,
-      "distinctStates": 0,
-      "sameUrl": 0,
-      "detail": []
-    },
-    {
-      "route": "/admin/browser",
-      "urlBefore": "/admin/browser",
-      "arabicControls": 11,
-      "pressable": 0,
-      "dangerCount": 1,
-      "headings": [
-        "الرئيسية",
-        "العمل",
-        "الوكلاء الذكية",
-        "النظام",
-        "Browser Workspace",
-        "Managed Session"
-      ],
-      "labels": [],
-      "pressed": 0,
-      "views": 0,
-      "distinctStates": 0,
-      "sameUrl": 0,
-      "detail": []
-    },
-    {
-      "route": "/admin/computer",
-      "urlBefore": "/admin/browser",
-      "arabicControls": 11,
-      "pressable": 0,
-      "dangerCount": 1,
-      "headings": [
-        "الرئيسية",
-        "العمل",
-        "الوكلاء الذكية",
-        "النظام",
-        "Browser Workspace",
-        "Managed Session"
-      ],
-      "labels": [],
-      "pressed": 0,
-      "views": 0,
-      "distinctStates": 0,
-      "sameUrl": 0,
-      "detail": []
-    },
-    {
-      "route": "/admin/database",
-      "urlBefore": "/admin/database",
-      "arabicControls": 12,
-      "pressable": 1,
-      "dangerCount": 0,
-      "headings": [
-        "الرئيسية",
-        "العمل",
-        "الوكلاء الذكية",
-        "النظام",
-        "حالة البيانات والنظام",
-        "نتيجة آخر فحص"
-      ],
-      "labels": [
-        "تحديث الفحص"
-      ],
-      "pressed": 1,
-      "views": 0,
-      "distinctStates": 0,
-      "sameUrl": 0,
-      "detail": []
-    },
-    {
-      "route": "/admin/elite",
-      "urlBefore": "/admin/elite",
-      "arabicControls": 12,
-      "pressable": 2,
-      "dangerCount": 0,
-      "headings": [
-        "الرئيسية",
-        "العمل",
-        "الوكلاء الذكية",
-        "النظام",
-        "دعوات النخبة",
-        "إضافة وصول معتمد"
-      ],
-      "labels": [
-        "تحديث",
-        "إنشاء سجل الوصول"
-      ],
-      "pressed": 2,
-      "views": 0,
-      "distinctStates": 0,
-      "sameUrl": 0,
-      "detail": []
-    },
-    {
-      "route": "/admin/fate",
-      "urlBefore": "/admin/fate",
-      "arabicControls": 11,
-      "pressable": 0,
-      "dangerCount": 0,
-      "headings": [
-        "الرئيسية",
-        "العمل",
-        "الوكلاء الذكية",
-        "النظام",
-        "تم إيقاف أدوات التأثير الوهمية"
-      ],
-      "labels": [],
-      "pressed": 0,
-      "views": 0,
-      "distinctStates": 0,
-      "sameUrl": 0,
-      "detail": []
-    },
-    {
-      "route": "/admin/intel",
-      "urlBefore": "/admin/agents",
-      "arabicControls": 54,
+      "arabicControls": 20,
       "pressable": 8,
-      "dangerCount": 36,
+      "dangerCount": 2,
       "headings": [
         "الرئيسية",
         "العمل",
@@ -212,31 +31,237 @@
       "views": 4,
       "distinctStates": 3,
       "sameUrl": 4,
+      "dead": 0,
+      "deadLabels": [],
       "detail": [
         {
           "label": "مركز القيادة",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|قائمة المهام|اقتراحات استباقية|ص"
         },
         {
           "label": "المساعد الموحّد",
+          "kind": "view",
           "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد"
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد##354##710"
         },
         {
           "label": "فريق الوكلاء",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
         },
         {
           "label": "محادثة جماعية",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
         }
       ]
     },
     {
-      "route": "/admin/intelligence",
+      "route": "/admin/assistant",
+      "layer": "admin",
+      "urlBefore": "/admin/agents",
+      "arabicControls": 19,
+      "pressable": 9,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "مركز الوكلاء الموحّد",
+        "المساعد الموحّد"
+      ],
+      "labels": [
+        "مركز القيادة",
+        "المساعد الموحّد",
+        "فريق الوكلاء",
+        "الشات",
+        "المتصفح الحي",
+        "كل القدرات",
+        "سجل الأدلة",
+        "عقل النظام",
+        "الفريق"
+      ],
+      "pressed": 9,
+      "views": 4,
+      "distinctStates": 3,
+      "sameUrl": 4,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": [
+        {
+          "label": "مركز القيادة",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|قائمة المهام|اقتراحات استباقية|ص"
+        },
+        {
+          "label": "المساعد الموحّد",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد##361##579"
+        },
+        {
+          "label": "فريق الوكلاء",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        },
+        {
+          "label": "محادثة جماعية",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        }
+      ]
+    },
+    {
+      "route": "/admin/browser",
+      "layer": "admin",
+      "urlBefore": "/admin/browser",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 1,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "Browser Workspace",
+        "Managed Session"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/admin/computer",
+      "layer": "admin",
+      "urlBefore": "/admin/browser",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 1,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "Browser Workspace",
+        "Managed Session"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/admin/database",
+      "layer": "admin",
+      "urlBefore": "/admin/database",
+      "arabicControls": 12,
+      "pressable": 1,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "حالة البيانات والنظام",
+        "نتيجة آخر فحص"
+      ],
+      "labels": [
+        "تحديث الفحص"
+      ],
+      "pressed": 1,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/admin/elite",
+      "layer": "admin",
+      "urlBefore": "/admin/elite",
+      "arabicControls": 12,
+      "pressable": 2,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "دعوات النخبة",
+        "إضافة وصول معتمد"
+      ],
+      "labels": [
+        "تحديث",
+        "إنشاء سجل الوصول"
+      ],
+      "pressed": 2,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/admin/fate",
+      "layer": "admin",
+      "urlBefore": "/admin/fate",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "تم إيقاف أدوات التأثير الوهمية"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/admin/intel",
+      "layer": "admin",
       "urlBefore": "/admin/agents",
       "arabicControls": 57,
       "pressable": 11,
@@ -266,31 +291,115 @@
       "views": 4,
       "distinctStates": 3,
       "sameUrl": 4,
+      "dead": 0,
+      "deadLabels": [],
       "detail": [
         {
           "label": "مركز القيادة",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|قائمة المهام|اقتراحات استباقية|ص"
         },
         {
           "label": "المساعد الموحّد",
+          "kind": "view",
           "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد"
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد##354##710"
         },
         {
           "label": "فريق الوكلاء",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
         },
         {
           "label": "محادثة جماعية",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        }
+      ]
+    },
+    {
+      "route": "/admin/intelligence",
+      "layer": "admin",
+      "urlBefore": "/admin/agents",
+      "arabicControls": 57,
+      "pressable": 11,
+      "dangerCount": 36,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "مركز الوكلاء الموحّد",
+        "قائمة المهام"
+      ],
+      "labels": [
+        "مركز القيادة",
+        "المساعد الموحّد",
+        "فريق الوكلاء",
+        "تحديث",
+        "تحليل SEOتحليل شامل لأداء الموقع",
+        "نسخة احتياطيةحفظ نسخة كاملة الآن",
+        "تقرير الإيراداتتحليل المبيعات والتحويلات",
+        "فحص المخزونكشف المنتجات المنخفضة",
+        "0مكتملة",
+        "0جارية",
+        "0فاشلة"
+      ],
+      "pressed": 11,
+      "views": 4,
+      "distinctStates": 3,
+      "sameUrl": 4,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": [
+        {
+          "label": "مركز القيادة",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|قائمة المهام|اقتراحات استباقية|ص"
+        },
+        {
+          "label": "المساعد الموحّد",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد##352##695"
+        },
+        {
+          "label": "فريق الوكلاء",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        },
+        {
+          "label": "محادثة جماعية",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
         }
       ]
     },
     {
       "route": "/admin/manufacturing",
+      "layer": "admin",
       "urlBefore": "/admin/manufacturing",
       "arabicControls": 10,
       "pressable": 0,
@@ -306,10 +415,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/owner-dashboard",
+      "layer": "admin",
       "urlBefore": "/admin/owner-dashboard",
       "arabicControls": 11,
       "pressable": 0,
@@ -327,12 +439,15 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin",
+      "layer": "admin",
       "urlBefore": "/admin",
-      "arabicControls": 21,
+      "arabicControls": 14,
       "pressable": 0,
       "dangerCount": 0,
       "headings": [
@@ -348,10 +463,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/phone",
+      "layer": "admin",
       "urlBefore": "/admin/browser",
       "arabicControls": 11,
       "pressable": 0,
@@ -369,10 +487,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/sales",
+      "layer": "admin",
       "urlBefore": "/admin/sales",
       "arabicControls": 18,
       "pressable": 7,
@@ -395,34 +516,57 @@
         "الأسئلة"
       ],
       "pressed": 7,
-      "views": 4,
-      "distinctStates": 4,
-      "sameUrl": 4,
+      "views": 5,
+      "distinctStates": 5,
+      "sameUrl": 5,
+      "dead": 0,
+      "deadLabels": [],
       "detail": [
         {
           "label": "مدير المبيعات",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة|مدير المبيعات (ADMIN CONTROL v2.0)|"
         },
         {
           "label": "العملاء",
+          "kind": "view",
           "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة|العملاء المحتملين"
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة|العملاء المحتملين##362##699"
         },
         {
           "label": "المستأجرين",
+          "kind": "view",
           "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة|المستأجرين"
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة|المستأجرين##264##534"
         },
         {
           "label": "الإدارة",
+          "kind": "view",
           "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة"
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة|الإدارة والتحكم|إعدادات SEO|إعدادات"
+        },
+        {
+          "label": "CMS",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة|إدارة المحتوى##257##480"
         }
       ]
     },
     {
       "route": "/admin/sandbox",
+      "layer": "admin",
       "urlBefore": "/admin/agents",
       "arabicControls": 85,
       "pressable": 50,
@@ -451,35 +595,50 @@
         "أوامرCtrl K",
         "نفسك"
       ],
-      "pressed": 14,
+      "pressed": 40,
       "views": 4,
       "distinctStates": 3,
       "sameUrl": 4,
+      "dead": 0,
+      "deadLabels": [],
       "detail": [
         {
           "label": "مركز القيادة",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|قائمة المهام|اقتراحات استباقية|ص"
         },
         {
           "label": "المساعد الموحّد",
+          "kind": "view",
           "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد"
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد##354##710"
         },
         {
           "label": "فريق الوكلاء",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
         },
         {
           "label": "محادثة جماعية",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
         }
       ]
     },
     {
       "route": "/admin/settings",
+      "layer": "admin",
       "urlBefore": "/admin/settings",
       "arabicControls": 46,
       "pressable": 19,
@@ -508,20 +667,26 @@
         "حفظ",
         "حفظ"
       ],
-      "pressed": 14,
+      "pressed": 19,
       "views": 1,
       "distinctStates": 1,
       "sameUrl": 1,
+      "dead": 0,
+      "deadLabels": [],
       "detail": [
         {
           "label": "تحديث",
+          "kind": "view",
           "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|إعدادات الموقع"
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|إعدادات الموقع|cms_budget_options|cms_hero_background"
         }
       ]
     },
     {
       "route": "/admin/system",
+      "layer": "admin",
       "urlBefore": "/admin/system",
       "arabicControls": 15,
       "pressable": 0,
@@ -539,10 +704,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/work",
+      "layer": "admin",
       "urlBefore": "/admin/work",
       "arabicControls": 13,
       "pressable": 0,
@@ -560,10 +728,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/v2/agents/ops",
+      "layer": "admin",
       "urlBefore": "/admin/v2/agents/ops",
       "arabicControls": 41,
       "pressable": 28,
@@ -590,20 +761,122 @@
         "فحص سجل قاعدة البيانات",
         "فحص سجل قاعدة البيانات"
       ],
-      "pressed": 14,
-      "views": 1,
-      "distinctStates": 1,
-      "sameUrl": 1,
+      "pressed": 28,
+      "views": 13,
+      "distinctStates": 13,
+      "sameUrl": 13,
+      "dead": 0,
+      "deadLabels": [],
       "detail": [
         {
           "label": "أوامرCtrl K",
+          "kind": "view",
           "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام"
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2287##16333"
+        },
+        {
+          "label": "نفسك",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2446##18169"
+        },
+        {
+          "label": "أدوار",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2260##16424"
+        },
+        {
+          "label": "✕",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2248##16094"
+        },
+        {
+          "label": "⚡نسّق السرب لتحسين الصفحة الرئيسية كاملاً",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": true,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2268##16236"
+        },
+        {
+          "label": "⚡اعرض أهدافي المهددة هذا الشهر",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": true,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2286##16351"
+        },
+        {
+          "label": "⚡افحص رؤوس الأمان للصفحة الرئيسية",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": true,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2289##16424"
+        },
+        {
+          "label": "⚡استعرض ذاكرة الوكلاء",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": true,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2292##16497"
+        },
+        {
+          "label": "فحص سجل قاعدة البيانات",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2293##16553"
+        },
+        {
+          "label": "فحص سجل قاعدة البيانات",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2294##16564"
+        },
+        {
+          "label": "فحص سجل قاعدة البيانات",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2295##16664"
+        },
+        {
+          "label": "فحص سجل قاعدة البيانات",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2296##22766"
+        },
+        {
+          "label": "فحص سجل قاعدة البيانات",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام##2297##22908"
         }
       ]
     },
     {
       "route": "/admin/v2/agents",
+      "layer": "admin",
       "urlBefore": "/admin/v2/agents",
       "arabicControls": 11,
       "pressable": 0,
@@ -620,10 +893,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/v2/database",
+      "layer": "admin",
       "urlBefore": "/admin/v2/database",
       "arabicControls": 11,
       "pressable": 0,
@@ -640,10 +916,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/v2/elite",
+      "layer": "admin",
       "urlBefore": "/admin/v2/elite",
       "arabicControls": 11,
       "pressable": 0,
@@ -660,10 +939,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/v2/ops",
+      "layer": "admin",
       "urlBefore": "/admin/v2/ops",
       "arabicControls": 32,
       "pressable": 21,
@@ -692,30 +974,87 @@
         "محادثة",
         "⚡ مهمته الأولى"
       ],
-      "pressed": 14,
-      "views": 3,
-      "distinctStates": 3,
-      "sameUrl": 3,
+      "pressed": 21,
+      "views": 5,
+      "distinctStates": 4,
+      "sameUrl": 5,
+      "dead": 7,
+      "deadLabels": [
+        {
+          "label": "24h",
+          "kind": "view"
+        },
+        {
+          "label": "7d",
+          "kind": "view"
+        },
+        {
+          "label": "30d",
+          "kind": "view"
+        },
+        {
+          "label": "معدل الخروج",
+          "kind": "view"
+        },
+        {
+          "label": "عمق التمرير",
+          "kind": "view"
+        },
+        {
+          "label": "الزمن على القسم",
+          "kind": "view"
+        },
+        {
+          "label": "نسبة النقر",
+          "kind": "view"
+        }
+      ],
       "detail": [
         {
           "label": "نظرة عامة",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": true,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مدير تشغيل المحتوى — استوديو السرب|مدير تشغيل المحتوى"
         },
         {
-          "label": "التحسين",
+          "label": "العمليات",
+          "kind": "view",
           "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مدير تشغيل المحتوى — استوديو السرب"
+          "wrote": true,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مدير تشغيل المحتوى — استوديو السرب##291##660"
+        },
+        {
+          "label": "التحسين",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مدير تشغيل المحتوى — استوديو السرب##466##1147"
         },
         {
           "label": "المراقبة",
+          "kind": "view",
           "urlChanged": false,
-          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مدير تشغيل المحتوى — استوديو السرب|أحداث السرب الحية"
+          "wrote": false,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مدير تشغيل المحتوى — استوديو السرب|أحداث السرب الحية#"
+        },
+        {
+          "label": "تحليل السلوك",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": true,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مدير تشغيل المحتوى — استوديو السرب|أحداث السرب الحية#"
         }
       ]
     },
     {
       "route": "/admin/v2/owner-dashboard",
+      "layer": "admin",
       "urlBefore": "/admin/v2/owner-dashboard",
       "arabicControls": 11,
       "pressable": 0,
@@ -732,10 +1071,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/v2",
+      "layer": "admin",
       "urlBefore": "/admin/v2",
       "arabicControls": 11,
       "pressable": 0,
@@ -752,10 +1094,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/v2/sales",
+      "layer": "admin",
       "urlBefore": "/admin/v2/sales",
       "arabicControls": 11,
       "pressable": 0,
@@ -772,10 +1117,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/v2/settings",
+      "layer": "admin",
       "urlBefore": "/admin/v2/settings",
       "arabicControls": 19,
       "pressable": 5,
@@ -796,19 +1144,33 @@
         "سجّله ووقّعه"
       ],
       "pressed": 5,
-      "views": 1,
+      "views": 2,
       "distinctStates": 1,
-      "sameUrl": 1,
+      "sameUrl": 2,
+      "dead": 0,
+      "deadLabels": [],
       "detail": [
         {
           "label": "احفظ",
+          "kind": "view",
           "urlChanged": false,
+          "wrote": true,
+          "dialog": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|التحكم في الموقع|الإعلانات والقياس|الكلام اللي المستش"
+        },
+        {
+          "label": "مقفول",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": true,
+          "dialog": false,
           "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|التحكم في الموقع|الإعلانات والقياس|الكلام اللي المستش"
         }
       ]
     },
     {
       "route": "/admin/v2/system",
+      "layer": "admin",
       "urlBefore": "/admin/v2/system",
       "arabicControls": 11,
       "pressable": 0,
@@ -825,10 +1187,13 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     },
     {
       "route": "/admin/v2/work",
+      "layer": "admin",
       "urlBefore": "/admin/v2/work",
       "arabicControls": 11,
       "pressable": 0,
@@ -845,6 +1210,597 @@
       "views": 0,
       "distinctStates": 0,
       "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/about",
+      "layer": "customer",
+      "urlBefore": "/about",
+      "arabicControls": 7,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "نبذة عنا"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/bookings",
+      "layer": "customer",
+      "urlBefore": "/request",
+      "arabicControls": 24,
+      "pressable": 18,
+      "dangerCount": 0,
+      "headings": [
+        "خطّط كراسة مشروعك تفاعلياً",
+        "أولاً: ما هو نوع العقار المستهدف؟",
+        "ثانياً: ما هي الحالة الإنشائية الحالية للموقع؟",
+        "ثالثاً: ما هي الفراغات المطلوب تصميمها وتجهيزه",
+        "خريطة طريق مشروعك"
+      ],
+      "labels": [
+        "شقة",
+        "فيلا",
+        "مكتب / تجاري",
+        "شاليه",
+        "نوع آخر (اكتب يدوياً)",
+        "على المحارة / طوب أحمر",
+        "نصف تشطيب",
+        "تشطيب كامل يحتاج تجديد",
+        "تسليم مفتاح جاهز للتأثيث",
+        "حالة أخرى (اكتب يدوياً)",
+        "غرف المعيشة",
+        "غرف النوم",
+        "المطابخ",
+        "الحمامات"
+      ],
+      "pressed": 18,
+      "views": 16,
+      "distinctStates": 2,
+      "sameUrl": 16,
+      "dead": 1,
+      "deadLabels": [
+        {
+          "label": "تشطيب كامل يحتاج تجديد",
+          "kind": "form"
+        }
+      ],
+      "detail": [
+        {
+          "label": "EN",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "Build Your Project Brief.|1. What type of property is this?|2. What is the current status "
+        },
+        {
+          "label": "AR",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "شقة",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "فيلا",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "مكتب / تجاري",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "شاليه",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "نوع آخر (اكتب يدوياً)",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "على المحارة / طوب أحمر",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "نصف تشطيب",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "تسليم مفتاح جاهز للتأثيث",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "حالة أخرى (اكتب يدوياً)",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "غرف المعيشة",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "غرف النوم",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": true,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "المطابخ",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "الحمامات",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        },
+        {
+          "label": "لاندسكيب / حديقة",
+          "kind": "form",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "خطّط كراسة مشروعك تفاعلياً|أولاً: ما هو نوع العقار المستهدف؟|ثانياً: ما هي الحالة الإنشائي"
+        }
+      ]
+    },
+    {
+      "route": "/dashboard",
+      "layer": "customer",
+      "urlBefore": "/admin",
+      "arabicControls": 14,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "لوحة التحكم",
+        "خدمة تليجرام"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/elite/dashboard",
+      "layer": "customer",
+      "urlBefore": "/elite/login",
+      "arabicControls": 3,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "دخول النخبة",
+        "لديك رابط دعوة",
+        "تحتاج دعوة؟"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/elite/login",
+      "layer": "customer",
+      "urlBefore": "/elite/login",
+      "arabicControls": 3,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "دخول النخبة",
+        "لديك رابط دعوة",
+        "تحتاج دعوة؟"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/elite",
+      "layer": "customer",
+      "urlBefore": "/elite/login",
+      "arabicControls": 3,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "دخول النخبة",
+        "لديك رابط دعوة",
+        "تحتاج دعوة؟"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/elite-brief",
+      "layer": "customer",
+      "urlBefore": "/elite-brief",
+      "arabicControls": 6,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/elite-intelligence",
+      "layer": "customer",
+      "urlBefore": "/elite-intelligence",
+      "arabicControls": 7,
+      "pressable": 1,
+      "dangerCount": 0,
+      "headings": [
+        "Design Your Vision",
+        "Select Your Project Scope"
+      ],
+      "labels": [
+        "🇪🇬العربية"
+      ],
+      "pressed": 1,
+      "views": 1,
+      "distinctStates": 1,
+      "sameUrl": 1,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": [
+        {
+          "label": "EN",
+          "kind": "view",
+          "urlChanged": false,
+          "wrote": false,
+          "dialog": false,
+          "headings": "Design Your Vision|Select Your Project Scope##191##897"
+        }
+      ]
+    },
+    {
+      "route": "/furniture",
+      "layer": "customer",
+      "urlBefore": "/furniture",
+      "arabicControls": 40,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "جميع قطع الأثاث حسب الغرفة",
+        "سرير رئيسي فاخر",
+        "كومودات السرير",
+        "كنبة غرفة نوم رئيسية",
+        "كنبة غرفة معيشة كلاسيك",
+        "كنبة زاوية للصالة"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/furniture/[type]",
+      "layer": "customer",
+      "urlBefore": "/furniture/[type]",
+      "arabicControls": 8,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "%5Btype%5D"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/gate/login",
+      "layer": "customer",
+      "urlBefore": "/admin",
+      "arabicControls": 14,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "لوحة التحكم",
+        "خدمة تليجرام"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/page.tsx",
+      "layer": "customer",
+      "urlBefore": "/page.tsx",
+      "arabicControls": 0,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/pages/[slug]",
+      "layer": "customer",
+      "urlBefore": "/pages/[slug]",
+      "arabicControls": 2,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الصفحة غير موجودة"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/preview/section/[id]",
+      "layer": "customer",
+      "urlBefore": "/preview/section/[id]",
+      "arabicControls": 2,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الصفحة غير موجودة"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/privacy",
+      "layer": "customer",
+      "urlBefore": "/privacy",
+      "arabicControls": 0,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "سياسة الخصوصية"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/request",
+      "layer": "customer",
+      "urlBefore": "/request",
+      "arabicControls": 0,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "Build Your Project Brief.",
+        "1. What type of property is this?",
+        "2. What is the current status of the site?",
+        "3. Which spaces need design work? (Multi-selec",
+        "Your Project Roadmap"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/rooms",
+      "layer": "customer",
+      "urlBefore": "/rooms",
+      "arabicControls": 0,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "Choose the space you want to start with.",
+        "Master Bedrooms",
+        "Living Rooms",
+        "Kitchens",
+        "Dressing Rooms",
+        "Home Offices"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/rooms/[slug]",
+      "layer": "customer",
+      "urlBefore": "/rooms/[slug]",
+      "arabicControls": 0,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/seo/[slug]",
+      "layer": "customer",
+      "urlBefore": "/seo/[slug]",
+      "arabicControls": 2,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الصفحة غير موجودة"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/start",
+      "layer": "customer",
+      "urlBefore": "/start",
+      "arabicControls": 0,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "Start Your Smart Design Journey.",
+        "Select Space Type"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
+      "detail": []
+    },
+    {
+      "route": "/terms",
+      "layer": "customer",
+      "urlBefore": "/terms",
+      "arabicControls": 0,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "شروط الاستخدام"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "dead": 0,
+      "deadLabels": [],
       "detail": []
     }
   ]

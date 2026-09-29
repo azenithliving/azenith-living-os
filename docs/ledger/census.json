@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T15:06:24.395Z",
+  "generatedAt": "2026-09-29T17:32:37.344Z",
   "counts": {
     "oldPages": 18,
     "oldPageLines": 5865,
@@ -20,12 +20,14 @@
     "furnitureOldOnly": 17,
     "furnitureUnreachable": 24,
     "swarmFiles": 54,
-    "swarmFileLines": 13674,
+    "swarmFileLines": 13725,
     "crons": 2,
+    "views": 45,
+    "viewsOpeningWrites": 9,
     "navEntries": 9,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 9,
-    "atoms": 321
+    "atoms": 366
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -1562,7 +1564,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 232
+      "lines": 283
     },
     {
       "kind": "swarm-file",
@@ -1683,6 +1685,321 @@
       "kind": "swarm-file",
       "id": "lib/ops/world-model.ts",
       "lines": 294
+    },
+    {
+      "kind": "view",
+      "id": "/admin/agents#مركز القيادة",
+      "route": "/admin/agents",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/agents#المساعد الموحّد",
+      "route": "/admin/agents",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/agents#فريق الوكلاء",
+      "route": "/admin/agents",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/agents#محادثة جماعية",
+      "route": "/admin/agents",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/assistant#مركز القيادة",
+      "route": "/admin/assistant",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/assistant#المساعد الموحّد",
+      "route": "/admin/assistant",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/assistant#فريق الوكلاء",
+      "route": "/admin/assistant",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/assistant#محادثة جماعية",
+      "route": "/admin/assistant",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/intel#مركز القيادة",
+      "route": "/admin/intel",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/intel#المساعد الموحّد",
+      "route": "/admin/intel",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/intel#فريق الوكلاء",
+      "route": "/admin/intel",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/intel#محادثة جماعية",
+      "route": "/admin/intel",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/intelligence#مركز القيادة",
+      "route": "/admin/intelligence",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/intelligence#المساعد الموحّد",
+      "route": "/admin/intelligence",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/intelligence#فريق الوكلاء",
+      "route": "/admin/intelligence",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/intelligence#محادثة جماعية",
+      "route": "/admin/intelligence",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/sales#مدير المبيعات",
+      "route": "/admin/sales",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/sales#العملاء",
+      "route": "/admin/sales",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/sales#المستأجرين",
+      "route": "/admin/sales",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/sales#الإدارة",
+      "route": "/admin/sales",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/sales#CMS",
+      "route": "/admin/sales",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/sandbox#مركز القيادة",
+      "route": "/admin/sandbox",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/sandbox#المساعد الموحّد",
+      "route": "/admin/sandbox",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/sandbox#فريق الوكلاء",
+      "route": "/admin/sandbox",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/sandbox#محادثة جماعية",
+      "route": "/admin/sandbox",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/settings#تحديث",
+      "route": "/admin/settings",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/agents/ops#أوامرCtrl K",
+      "route": "/admin/v2/agents/ops",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/agents/ops#نفسك",
+      "route": "/admin/v2/agents/ops",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/agents/ops#أدوار",
+      "route": "/admin/v2/agents/ops",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/agents/ops#✕",
+      "route": "/admin/v2/agents/ops",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/agents/ops#⚡نسّق السرب لتحسين الصفحة الرئيسية كاملاً",
+      "route": "/admin/v2/agents/ops",
+      "layer": "admin",
+      "wrote": true
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/agents/ops#⚡اعرض أهدافي المهددة هذا الشهر",
+      "route": "/admin/v2/agents/ops",
+      "layer": "admin",
+      "wrote": true
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/agents/ops#⚡افحص رؤوس الأمان للصفحة الرئيسية",
+      "route": "/admin/v2/agents/ops",
+      "layer": "admin",
+      "wrote": true
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/agents/ops#⚡استعرض ذاكرة الوكلاء",
+      "route": "/admin/v2/agents/ops",
+      "layer": "admin",
+      "wrote": true
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/agents/ops#فحص سجل قاعدة البيانات",
+      "route": "/admin/v2/agents/ops",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/ops#نظرة عامة",
+      "route": "/admin/v2/ops",
+      "layer": "admin",
+      "wrote": true
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/ops#العمليات",
+      "route": "/admin/v2/ops",
+      "layer": "admin",
+      "wrote": true
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/ops#التحسين",
+      "route": "/admin/v2/ops",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/ops#المراقبة",
+      "route": "/admin/v2/ops",
+      "layer": "admin",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/ops#تحليل السلوك",
+      "route": "/admin/v2/ops",
+      "layer": "admin",
+      "wrote": true
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/settings#احفظ",
+      "route": "/admin/v2/settings",
+      "layer": "admin",
+      "wrote": true
+    },
+    {
+      "kind": "view",
+      "id": "/admin/v2/settings#مقفول",
+      "route": "/admin/v2/settings",
+      "layer": "admin",
+      "wrote": true
+    },
+    {
+      "kind": "view",
+      "id": "/bookings#EN",
+      "route": "/bookings",
+      "layer": "customer",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/bookings#AR",
+      "route": "/bookings",
+      "layer": "customer",
+      "wrote": false
+    },
+    {
+      "kind": "view",
+      "id": "/elite-intelligence#EN",
+      "route": "/elite-intelligence",
+      "layer": "customer",
+      "wrote": false
     },
     {
       "kind": "cron",

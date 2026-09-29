@@ -141,6 +141,32 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^\/admin\/(elite)$/, office: "elite-room", reason: "النخبة" },
   { match: /^\/admin\/(agents)$/, office: "swarm-house", reason: "الوكلاء" },
   { match: /^\/admin\/(system|settings|database)$/, office: "system-room", reason: "النظام" },
+  { match: /^\/bookings$/, office: "sales-office", reason: "من هنا يبدأ طلب التسعير: أول ملمس للعميل لمكتب المبيعات" },
+  { match: /^\/elite-intelligence$/, office: "elite-room", reason: "واجهة دعوة النخبة قدام العميل" },
+
+  /**
+   * The language toggle is not an employee's screen. The live walk found it as a
+   * view on three customer addresses — one machine repeated, owned by nobody, so it
+   * gets the shared sign and no office may swallow it.
+   */
+  { match: /#(EN|AR)$/, office: SHARED_OFFICE, reason: "زرار اللغة مكرر على صفحات العميل — آلة مشتركة مش موظف" },
+
+  /**
+   * Address rules for the capability atoms: a view is seated where its address
+   * lives. Specific new-house paths come first, then the old ones by their segment.
+   */
+  { match: /^\/admin\/v2\/(agents|ops)\b/, office: "swarm-house", reason: "دار الموظفين في البيت الجديد" },
+  { match: /^\/admin\/v2\/sales\b/, office: "sales-office", reason: "المبيعات في البيت الجديد" },
+  { match: /^\/admin\/v2\/elite\b/, office: "elite-room", reason: "النخبة في البيت الجديد" },
+  { match: /^\/admin\/v2\/work\b/, office: "records-office", reason: "المتابعة في البيت الجديد" },
+  { match: /^\/admin\/v2\/(system|settings|database)\b/, office: "system-room", reason: "النظام في البيت الجديد" },
+  { match: /^\/admin\/(agents|assistant|intel|intelligence)\b/, office: "swarm-house", reason: "الوكلاء ومراكزهم في القديم" },
+  { match: /^\/admin\/(sales|manufacturing)\b/, office: "sales-office", reason: "المبيعات والإنتاج في القديم" },
+  { match: /^\/admin\/elite\b/, office: "elite-room", reason: "النخبة في القديم" },
+  { match: /^\/admin\/(browser|computer|phone|sandbox|fate)\b/, office: "workshop", reason: "التجريب في القديم" },
+  { match: /^\/admin\/work\b/, office: "records-office", reason: "المهام في القديم" },
+  { match: /^\/admin\/(system|settings|database)\b/, office: "system-room", reason: "النظام في القديم" },
+  { match: /^\/admin\b/, office: "decision-desk", reason: "باقي البيت: مكتب القرار" },
 
   /**
    * The fence the first census left open, now counted: the doors outside
@@ -206,18 +232,44 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "components/admin/SmartSuggestions.tsx", office: "swarm-house", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
   { id: "components/admin/SovereignMindPanel.tsx", office: "swarm-house", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
   { id: "components/admin/SovereignPulse.tsx", office: "decision-desk", status: "needs-verdict", reason: "مكوّن على الشاشة مش في دار — محتاج تصنيف" },
+
+  /**
+   * Found by pressing the live site, not by reading the tree: six different old
+   * addresses render the identical agent centre. One of them is named after
+   * production — so a rule that seats `manufacturing` in the sales office from its
+   * file name alone was wrong, and the map now says what the screen actually shows.
+   * None of these is deleted: each owes a rehabilitation file first.
+   */
+  { id: "app/admin/manufacturing/page.tsx", office: "swarm-house", status: "needs-verdict", reason: "اسمه إنتاج، والشاشة الحيّة بتطلّع مركز الوكلاء — ملف تأهيل قبل أي نقل" },
+  { id: "app/admin/intel/page.tsx", office: "swarm-house", status: "duplicate-surface", reason: "بيطلّع نفس شاشة مركز الوكلاء (قياس حيّ)" },
+  { id: "app/admin/intelligence/page.tsx", office: "swarm-house", status: "duplicate-surface", reason: "بيطلّع نفس شاشة مركز الوكلاء (قياس حيّ)" },
+  { id: "app/admin/assistant/page.tsx", office: "swarm-house", status: "duplicate-surface", reason: "بيطلّع نفس شاشة مركز الوكلاء (قياس حيّ)" },
+  { id: "app/admin/sandbox/page.tsx", office: "swarm-house", status: "duplicate-surface", reason: "بيطلّع نفس شاشة مركز الوكلاء (قياس حيّ)" },
 ];
 
 /** Atoms still waiting for a real verdict — the number that must go down, phase by phase. */
 export const NEEDS_VERDICT = EXPLICIT.filter((e) => e.status === "needs-verdict").length;
 
-export type CensusAtom = { kind: string; id: string; lines?: number; usedBy?: string };
+export type CensusAtom = { kind: string; id: string; lines?: number; usedBy?: string; route?: string };
 
-/** The office an atom belongs to, or null when no rule reached it. */
+/**
+ * The office an atom belongs to, or null when no rule reached it.
+ *
+ * A `view` atom is a capability inside a page — the tab that opens without the
+ * address moving. It is seated where its page is seated, because moving the page
+ * without the tab is exactly the nail the owner asked not to lose.
+ */
 export function officeOf(atom: CensusAtom): OfficeRule | ExplicitPlacement | null {
   const explicit = EXPLICIT.find((e) => e.id === atom.id);
   if (explicit) return explicit;
-  return OFFICE_RULES.find((r) => r.match.test(atom.id)) ?? null;
+  const direct = OFFICE_RULES.find((r) => r.match.test(atom.id));
+  if (direct) return direct;
+  if (atom.kind === "view" && atom.route) {
+    const route = atom.route;
+    const byRoute = OFFICE_RULES.find((r) => r.match.test(route)) ?? null;
+    if (byRoute) return byRoute;
+  }
+  return null;
 }
 
 /** Every atom with no office — the list the guard fails on, and the owner reads. */
