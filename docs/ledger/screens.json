@@ -1,0 +1,851 @@
+{
+  "generatedAt": "2026-09-29T16:24:15.332Z",
+  "base": "https://azenith-living.vercel.app",
+  "rows": [
+    {
+      "route": "/admin/agents",
+      "urlBefore": "/admin/agents",
+      "arabicControls": 57,
+      "pressable": 11,
+      "dangerCount": 36,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "مركز الوكلاء الموحّد",
+        "قائمة المهام"
+      ],
+      "labels": [
+        "مركز القيادة",
+        "المساعد الموحّد",
+        "فريق الوكلاء",
+        "تحديث",
+        "تحليل SEOتحليل شامل لأداء الموقع",
+        "نسخة احتياطيةحفظ نسخة كاملة الآن",
+        "تقرير الإيراداتتحليل المبيعات والتحويلات",
+        "فحص المخزونكشف المنتجات المنخفضة",
+        "0مكتملة",
+        "0جارية",
+        "0فاشلة"
+      ],
+      "pressed": 11,
+      "views": 4,
+      "distinctStates": 3,
+      "sameUrl": 4,
+      "detail": [
+        {
+          "label": "مركز القيادة",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|قائمة المهام|اقتراحات استباقية|ص"
+        },
+        {
+          "label": "المساعد الموحّد",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد"
+        },
+        {
+          "label": "فريق الوكلاء",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        },
+        {
+          "label": "محادثة جماعية",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        }
+      ]
+    },
+    {
+      "route": "/admin/assistant",
+      "urlBefore": "/admin/assistant",
+      "arabicControls": 10,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/browser",
+      "urlBefore": "/admin/browser",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 1,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "Browser Workspace",
+        "Managed Session"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/computer",
+      "urlBefore": "/admin/browser",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 1,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "Browser Workspace",
+        "Managed Session"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/database",
+      "urlBefore": "/admin/database",
+      "arabicControls": 12,
+      "pressable": 1,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "حالة البيانات والنظام",
+        "نتيجة آخر فحص"
+      ],
+      "labels": [
+        "تحديث الفحص"
+      ],
+      "pressed": 1,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/elite",
+      "urlBefore": "/admin/elite",
+      "arabicControls": 12,
+      "pressable": 2,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "دعوات النخبة",
+        "إضافة وصول معتمد"
+      ],
+      "labels": [
+        "تحديث",
+        "إنشاء سجل الوصول"
+      ],
+      "pressed": 2,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/fate",
+      "urlBefore": "/admin/fate",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "تم إيقاف أدوات التأثير الوهمية"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/intel",
+      "urlBefore": "/admin/agents",
+      "arabicControls": 54,
+      "pressable": 8,
+      "dangerCount": 36,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "مركز الوكلاء الموحّد",
+        "قائمة المهام"
+      ],
+      "labels": [
+        "مركز القيادة",
+        "المساعد الموحّد",
+        "فريق الوكلاء",
+        "تحديث",
+        "تحليل SEOتحليل شامل لأداء الموقع",
+        "نسخة احتياطيةحفظ نسخة كاملة الآن",
+        "تقرير الإيراداتتحليل المبيعات والتحويلات",
+        "فحص المخزونكشف المنتجات المنخفضة"
+      ],
+      "pressed": 8,
+      "views": 4,
+      "distinctStates": 3,
+      "sameUrl": 4,
+      "detail": [
+        {
+          "label": "مركز القيادة",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|قائمة المهام|اقتراحات استباقية|ص"
+        },
+        {
+          "label": "المساعد الموحّد",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد"
+        },
+        {
+          "label": "فريق الوكلاء",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        },
+        {
+          "label": "محادثة جماعية",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        }
+      ]
+    },
+    {
+      "route": "/admin/intelligence",
+      "urlBefore": "/admin/agents",
+      "arabicControls": 57,
+      "pressable": 11,
+      "dangerCount": 36,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "مركز الوكلاء الموحّد",
+        "قائمة المهام"
+      ],
+      "labels": [
+        "مركز القيادة",
+        "المساعد الموحّد",
+        "فريق الوكلاء",
+        "تحديث",
+        "تحليل SEOتحليل شامل لأداء الموقع",
+        "نسخة احتياطيةحفظ نسخة كاملة الآن",
+        "تقرير الإيراداتتحليل المبيعات والتحويلات",
+        "فحص المخزونكشف المنتجات المنخفضة",
+        "0مكتملة",
+        "0جارية",
+        "0فاشلة"
+      ],
+      "pressed": 11,
+      "views": 4,
+      "distinctStates": 3,
+      "sameUrl": 4,
+      "detail": [
+        {
+          "label": "مركز القيادة",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|قائمة المهام|اقتراحات استباقية|ص"
+        },
+        {
+          "label": "المساعد الموحّد",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد"
+        },
+        {
+          "label": "فريق الوكلاء",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        },
+        {
+          "label": "محادثة جماعية",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        }
+      ]
+    },
+    {
+      "route": "/admin/manufacturing",
+      "urlBefore": "/admin/manufacturing",
+      "arabicControls": 10,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/owner-dashboard",
+      "urlBefore": "/admin/owner-dashboard",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 1,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "لوحة تحكم المالك",
+        "🏭ذكاء الإنتاج (Production Intel)"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin",
+      "urlBefore": "/admin",
+      "arabicControls": 21,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "لوحة التحكم",
+        "خدمة تليجرام"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/phone",
+      "urlBefore": "/admin/browser",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 1,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "Browser Workspace",
+        "Managed Session"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/sales",
+      "urlBefore": "/admin/sales",
+      "arabicControls": 18,
+      "pressable": 7,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "المبيعات والإدارة",
+        "مدير المبيعات (ADMIN CONTROL v2.0)"
+      ],
+      "labels": [
+        "مدير المبيعات",
+        "العملاء",
+        "المستأجرين",
+        "الإدارة",
+        "المحادثة",
+        "المعرفة",
+        "الأسئلة"
+      ],
+      "pressed": 7,
+      "views": 4,
+      "distinctStates": 4,
+      "sameUrl": 4,
+      "detail": [
+        {
+          "label": "مدير المبيعات",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة|مدير المبيعات (ADMIN CONTROL v2.0)|"
+        },
+        {
+          "label": "العملاء",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة|العملاء المحتملين"
+        },
+        {
+          "label": "المستأجرين",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة|المستأجرين"
+        },
+        {
+          "label": "الإدارة",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|المبيعات والإدارة"
+        }
+      ]
+    },
+    {
+      "route": "/admin/sandbox",
+      "urlBefore": "/admin/agents",
+      "arabicControls": 85,
+      "pressable": 50,
+      "dangerCount": 23,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "مركز الوكلاء الموحّد",
+        "سرب أزينث + الوكلاء الميدانيون"
+      ],
+      "labels": [
+        "مركز القيادة",
+        "المساعد الموحّد",
+        "فريق الوكلاء",
+        "محادثة جماعية",
+        "💬محادثة وتوجيه مخصص",
+        "💬 تحدث مع القائد",
+        "💬محادثة وتوجيه مخصص",
+        "💬محادثة وتوجيه مخصص",
+        "💬محادثة وتوجيه مخصص",
+        "💬محادثة وتوجيه مخصص",
+        "💬محادثة وتوجيه مخصص",
+        "💬محادثة وتوجيه مخصص",
+        "أوامرCtrl K",
+        "نفسك"
+      ],
+      "pressed": 14,
+      "views": 4,
+      "distinctStates": 3,
+      "sameUrl": 4,
+      "detail": [
+        {
+          "label": "مركز القيادة",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|قائمة المهام|اقتراحات استباقية|ص"
+        },
+        {
+          "label": "المساعد الموحّد",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|المساعد الموحّد"
+        },
+        {
+          "label": "فريق الوكلاء",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        },
+        {
+          "label": "محادثة جماعية",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مركز الوكلاء الموحّد|سرب أزينث + الوكلاء الميدانيون|م"
+        }
+      ]
+    },
+    {
+      "route": "/admin/settings",
+      "urlBefore": "/admin/settings",
+      "arabicControls": 46,
+      "pressable": 19,
+      "dangerCount": 17,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "إعدادات الموقع",
+        "cms_budget_options"
+      ],
+      "labels": [
+        "تحديث",
+        "إضافة",
+        "حفظ",
+        "حفظ",
+        "حفظ",
+        "حفظ",
+        "حفظ",
+        "حفظ",
+        "حفظ",
+        "حفظ",
+        "حفظ",
+        "حفظ",
+        "حفظ",
+        "حفظ"
+      ],
+      "pressed": 14,
+      "views": 1,
+      "distinctStates": 1,
+      "sameUrl": 1,
+      "detail": [
+        {
+          "label": "تحديث",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|إعدادات الموقع"
+        }
+      ]
+    },
+    {
+      "route": "/admin/system",
+      "urlBefore": "/admin/system",
+      "arabicControls": 15,
+      "pressable": 0,
+      "dangerCount": 1,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "النظام",
+        "الإعدادات"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/work",
+      "urlBefore": "/admin/work",
+      "arabicControls": 13,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "العمل",
+        "المبيعات والعملاء"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/v2/agents/ops",
+      "urlBefore": "/admin/v2/agents/ops",
+      "arabicControls": 41,
+      "pressable": 28,
+      "dangerCount": 2,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام"
+      ],
+      "labels": [
+        "أوامرCtrl K",
+        "نفسك",
+        "أدوار",
+        "⚡نسّق السرب لتحسين الصفحة الرئيسية كاملاً",
+        "⚡اعرض أهدافي المهددة هذا الشهر",
+        "⚡افحص رؤوس الأمان للصفحة الرئيسية",
+        "⚡استعرض ذاكرة الوكلاء",
+        "فحص سجل قاعدة البيانات",
+        "فحص سجل قاعدة البيانات",
+        "فحص سجل قاعدة البيانات",
+        "فحص سجل قاعدة البيانات",
+        "فحص سجل قاعدة البيانات",
+        "فحص سجل قاعدة البيانات",
+        "فحص سجل قاعدة البيانات"
+      ],
+      "pressed": 14,
+      "views": 1,
+      "distinctStates": 1,
+      "sameUrl": 1,
+      "detail": [
+        {
+          "label": "أوامرCtrl K",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام"
+        }
+      ]
+    },
+    {
+      "route": "/admin/v2/agents",
+      "urlBefore": "/admin/v2/agents",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 1,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "مدير تشغيل المحتوى"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/v2/database",
+      "urlBefore": "/admin/v2/database",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "حالة قاعدة البيانات"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/v2/elite",
+      "urlBefore": "/admin/v2/elite",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "دعوات النخبة"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/v2/ops",
+      "urlBefore": "/admin/v2/ops",
+      "arabicControls": 32,
+      "pressable": 21,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "مدير تشغيل المحتوى — استوديو السرب",
+        "مدير تشغيل المحتوى"
+      ],
+      "labels": [
+        "نظرة عامة",
+        "العمليات",
+        "التحسين",
+        "المراقبة",
+        "محادثة",
+        "⚡ مهمته الأولى",
+        "محادثة",
+        "⚡ مهمته الأولى",
+        "محادثة",
+        "⚡ مهمته الأولى",
+        "محادثة",
+        "⚡ مهمته الأولى",
+        "محادثة",
+        "⚡ مهمته الأولى"
+      ],
+      "pressed": 14,
+      "views": 3,
+      "distinctStates": 3,
+      "sameUrl": 3,
+      "detail": [
+        {
+          "label": "نظرة عامة",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مدير تشغيل المحتوى — استوديو السرب|مدير تشغيل المحتوى"
+        },
+        {
+          "label": "التحسين",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مدير تشغيل المحتوى — استوديو السرب"
+        },
+        {
+          "label": "المراقبة",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|مدير تشغيل المحتوى — استوديو السرب|أحداث السرب الحية"
+        }
+      ]
+    },
+    {
+      "route": "/admin/v2/owner-dashboard",
+      "urlBefore": "/admin/v2/owner-dashboard",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "لوحة المالك"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/v2",
+      "urlBefore": "/admin/v2",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "نظرة عامة"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/v2/sales",
+      "urlBefore": "/admin/v2/sales",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "المبيعات"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/v2/settings",
+      "urlBefore": "/admin/v2/settings",
+      "arabicControls": 19,
+      "pressable": 5,
+      "dangerCount": 3,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "التحكم في الموقع",
+        "الإعلانات والقياس"
+      ],
+      "labels": [
+        "احفظ",
+        "مقفول",
+        "مقفول",
+        "مقفول",
+        "سجّله ووقّعه"
+      ],
+      "pressed": 5,
+      "views": 1,
+      "distinctStates": 1,
+      "sameUrl": 1,
+      "detail": [
+        {
+          "label": "احفظ",
+          "urlChanged": false,
+          "headings": "الرئيسية|العمل|الوكلاء الذكية|النظام|التحكم في الموقع|الإعلانات والقياس|الكلام اللي المستش"
+        }
+      ]
+    },
+    {
+      "route": "/admin/v2/system",
+      "urlBefore": "/admin/v2/system",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "مركز النظام"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    },
+    {
+      "route": "/admin/v2/work",
+      "urlBefore": "/admin/v2/work",
+      "arabicControls": 11,
+      "pressable": 0,
+      "dangerCount": 0,
+      "headings": [
+        "الرئيسية",
+        "العمل",
+        "الوكلاء الذكية",
+        "النظام",
+        "مركز العمل"
+      ],
+      "labels": [],
+      "pressed": 0,
+      "views": 0,
+      "distinctStates": 0,
+      "sameUrl": 0,
+      "detail": []
+    }
+  ]
+}
