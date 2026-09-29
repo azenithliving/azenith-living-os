@@ -38,10 +38,10 @@ export async function GET(): Promise<NextResponse> {
     }
 
     const [profiles, sessions, quotes, forms, orders, appointments, conversions] = await Promise.all([
-      read(client, "users", "id,session_id,full_name,name,email,phone,tier,budget,intent,score,updated_at,created_at"),
+      read(client, "users", "id,session_id,full_name,email,phone,tier,budget,intent,score,updated_at,created_at"),
       read(client, "consultant_sessions", "id,session_id,updated_at,created_at"),
       read(client, "requests", "id,user_id,budget,price,paid,updated_at,created_at"),
-      read(client, "leads", "id,name,email,phone,budget,status,updated_at,created_at"),
+      read(client, "leads", "id,name,email,phone,status,updated_at,created_at"),
       read(client, "sales_orders", "id,customer_name,total_amount,deposit_amount,deposit_paid,updated_at,created_at"),
       read(client, "bookings", "id,user_id,status,updated_at,created_at"),
       read(client, "lead_conversions", "id,session_id,contactMethod,contactValue,status,updated_at,created_at"),
