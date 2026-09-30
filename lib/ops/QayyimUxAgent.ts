@@ -56,12 +56,12 @@ export class QayyimUxAgent extends QayyimAgentBase {
     ],
     forbiddenTools: [
       "ops_draft_room", "section_update", "setting_update", "content_update",
-      "backup_create", "backup_restore", "mfg_job_create", "bom_calculate",
-      "security_audit_keys", "financial_margins_analyze", "deploy_trigger",
-      "project_evolve", "inventory_update", "mfg_inventory_list",
-      "mfg_stock_adjust", "mfg_orders_list", "lead_list", "lead_dossier_send",
+      "backup_create", "backup_restore",  
+      "security_audit_keys",  "deploy_trigger",
+      "project_evolve",  
+        "lead_list", "lead_dossier_send",
       "room_update", "seo_analyze", "seo_fix_issues", "speed_analyze",
-      "speed_optimize", "speed_deep_audit", "revenue_analyze", "curated_images",
+      "speed_optimize", "speed_deep_audit",  "curated_images",
     ],
     dataSources: [
       "visitor_telemetry", "TelemetryTracker hook", "useImageTracking hook",

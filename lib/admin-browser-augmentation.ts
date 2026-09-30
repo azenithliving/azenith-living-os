@@ -17,7 +17,6 @@ const BROWSER_ENRICHED_TOOLS = new Set([
   "speed_analyze",
   "speed_optimize",
   "speed_deep_audit",
-  "revenue_opportunities",
   "project_evolve",
   "content_health_check",
 ]);

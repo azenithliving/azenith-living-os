@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T06:57:56.114Z",
+  "generatedAt": "2026-09-30T07:57:33.695Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 443,
+    "not-moved": 442,
     "moved": 3,
     "moving": 1,
     "erased": 1
@@ -390,11 +390,6 @@
     {
       "kind": "admin-door",
       "atom": "app/api/admin/intel/relations/health/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "admin-door",
-      "atom": "app/api/admin/inventory/route.ts",
       "state": "not-moved"
     },
     {

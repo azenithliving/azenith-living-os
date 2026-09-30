@@ -125,30 +125,23 @@ export function heuristicClassify(
   if (/فرص.*إيراد|revenue.*opportunit/i.test(lower)) {
     return {
       kind: "ultimate_tool",
-      toolName: "revenue_opportunities",
-      toolParams: { days: 30 },
-      confidence: 0.84,
-      reasoning: "revenue-opps",
+      toolName: "out_of_trade_refusal",
+      toolParams: { domain: "money" },
+      confidence: 0.9,
+      reasoning: "out-of-trade",
     };
   }
 
-  if (/مخزون.*منخفض|low\s*stock/i.test(lower)) {
+  // The warehouse and the workshop are outside this store by the owner's ruling: the
+  // classifier names the domain and hands it to the written refusal, instead of reaching
+  // for a tool that no longer exists.
+  if (/مخزون|low\s*stock|manufacturing|تصنيع|مصنع|أمر.*تشغيل/i.test(lower)) {
     return {
       kind: "ultimate_tool",
-      toolName: /تصنيع|مصنع|mfg/i.test(lower) ? "mfg_inventory_list" : "inventory_check_low",
-      toolParams: /تصنيع|مصنع/i.test(lower) ? { lowStockOnly: true } : {},
-      confidence: 0.86,
-      reasoning: "inventory",
-    };
-  }
-
-  if (/مخزون.*تصنيع|أوامر.*تصنيع|manufacturing/i.test(lower)) {
-    return {
-      kind: "ultimate_tool",
-      toolName: /أوامر|orders/i.test(lower) ? "mfg_orders_list" : "mfg_inventory_list",
-      toolParams: {},
-      confidence: 0.85,
-      reasoning: "manufacturing",
+      toolName: "out_of_trade_refusal",
+      toolParams: { domain: /مخزون|stock/i.test(lower) ? "inventory" : "production" },
+      confidence: 0.9,
+      reasoning: "out-of-trade",
     };
   }
 

@@ -5,11 +5,6 @@
 import { executeTool, type ToolExecutionResult } from "@/lib/agent-tools/tool-registry";
 import { SovereignArchitect } from "@/lib/sovereign-architect";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
-import {
-  calculateCatalogBom,
-  createProductionJob,
-  listManufacturingInventory,
-} from "@/lib/manufacturing-ops";
 
 export interface AdminToolContext {
   userId: string;
@@ -24,13 +19,23 @@ export async function runUltimateTool(
 ): Promise<ToolExecutionResult> {
   const companyId = ctx.companyId || process.env.MASTER_COMPANY_ID || undefined;
 
-  // ── أدوات المنظومة المؤسسية الفائقة المباشرة ──────────────────────────
-  if (toolName === "bom_calculate") {
-    return calculateCatalogBom(String(params.item || params.description || ""), companyId);
-  }
-
-  if (toolName === "mfg_inventory_list") {
-    return listManufacturingInventory(companyId, params.lowStockOnly === true);
+  // The store's trade is the customer's question, design and agreement. The warehouse,
+  // the workshop and the margin are not run from here, so the honest answer is written
+  // out — not a tool invented to look busy.
+  if (toolName === "out_of_trade_refusal") {
+    const domain = String(params.domain || "trade");
+    const answer: Record<string, string> = {
+      inventory: "المتجر مابيعملش حساب مخزون — مفيش أصناف ولا كميات بتتتبع هنا، ده شغل دفتر الورشة بره النظام.",
+      materials: "المتجر مابيعملش كشف مواد ولا يحسب خامات — الحساب ده بيتعمل فى الورشة، وأي رقم هنا يفضل تخمين.",
+      production: "المتجر مابيعملش أوامر تشغيل ولا بيتابع الورشة — دول شغل بره النظام، ومش هأوّدك رقم غلط.",
+      margin: "المتجر مابيعملش تحليل ربح ولا يسعّر — السعر والربح قرار بشري، وأي نسبة تتقال هنا تكون مختلقة.",
+      money: "المتجر مابيعملش حساب إيراد ولا يتابع فلوس — الفلوس بتتم بره (كاش أو تحويل) والرقم بيتسجل فى دفاترك انت.",
+    };
+    return {
+      success: true,
+      message: answer[domain] ?? "المتجر مابيعملش الشغل ده — ده بره مجاله.",
+      data: { domain, refused: true },
+    };
   }
 
   if (toolName === "security_audit_keys") {
@@ -68,37 +73,6 @@ export async function runUltimateTool(
         cognitive_state: "calibrated",
       },
     };
-  }
-
-  if (toolName === "financial_margins_analyze") {
-    const { data: orders } = await supabaseServer
-      .from("sales_orders")
-      .select("id, total_amount, status");
-
-    const orderList = orders || [];
-    const revenue = orderList.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
-    const estCogs = Math.round(revenue * 0.58);
-    const estGrossProfit = revenue - estCogs;
-    const marginPct = revenue > 0 ? ((estGrossProfit / revenue) * 100).toFixed(1) : "42.0";
-
-    return {
-      success: true,
-      message: `تحليل مالي مباشر: إجمالي العقود المنفذة (${orderList.length}) بقيمة ${revenue.toLocaleString()} ج.م، التكلفة التقديرية ${estCogs.toLocaleString()} ج.م، صافي هامش الربح المتوقع ${estGrossProfit.toLocaleString()} ج.م (${marginPct}%).`,
-      data: {
-        total_orders: orderList.length,
-        total_revenue: revenue,
-        estimated_cogs: estCogs,
-        estimated_gross_profit: estGrossProfit,
-        profit_margin_pct: marginPct,
-      },
-    };
-  }
-
-  if (toolName === "mfg_job_create") {
-    return createProductionJob(
-      String(params.description || params.item || "أمر تشغيل جديد"),
-      companyId
-    );
   }
 
   // ── P6-M1: the swarm reports on itself from live registries + counters ──
@@ -434,8 +408,9 @@ export function inferUltimateTool(
     return { toolName: "read_website", params: { url: urlMatch?.[0] || url } };
   }
 
+  // «فرص إيراد» is a money question, and money is outside the store — the answer says so.
   if (/فرص.*إيراد|revenue.*opportunit/i.test(lower)) {
-    return { toolName: "revenue_opportunities", params: { days: 30 } };
+    return { toolName: "out_of_trade_refusal", params: { domain: "money" } };
   }
   if (/تدقيق.*سرعة.*عميق|deep.*speed|speed.*deep/i.test(lower)) {
     return { toolName: "speed_deep_audit", params: { url } };
@@ -505,7 +480,7 @@ export function inferUltimateTool(
     return { toolName: "speed_analyze", params: { url } };
   }
   if (/إيراد|revenue|مبيعات.*تحليل/i.test(lower) && !/فرص/i.test(lower)) {
-    return { toolName: "revenue_analyze", params: { days: 30 } };
+    return { toolName: "out_of_trade_refusal", params: { domain: "money" } };
   }
   if (/مؤشرات.*لحظ|realtime|metrics.*live|المؤشرات.*الآن/i.test(lower)) {
     return { toolName: "metrics_realtime", params: { timeRange: "24h" } };
@@ -539,36 +514,22 @@ export function inferUltimateTool(
     return { toolName: "system_health_check", params: {} };
   }
 
-  if (/مخزون.*منخفض|low\s*stock|نفاد.*مخزون/i.test(lower)) {
-    if (/تصنيع|مصنع|mfg|inventory_items/i.test(lower)) {
-      return { toolName: "mfg_inventory_list", params: { lowStockOnly: true } };
-    }
-    return { toolName: "inventory_check_low", params: {} };
+  // The warehouse, the workshop and the margin are outside this store by the owner's
+  // ruling — the questions are real, the tools must not be invented for them.
+  if (/مخزون|stock|نفاد.*مخزون|inventory/i.test(lower)) {
+    return { toolName: "out_of_trade_refusal", params: { domain: "inventory" } };
   }
-  if (/مخزون.*تصنيع|مصنع.*مخزون|فحص.*مخزون|خامات.*التصنيع|mfg.*inventory/i.test(lower)) {
-    return { toolName: "mfg_inventory_list", params: {} };
+  if (/bom|كشف.*مواد|حساب.*مواد|احسب.*خامات|احسب.*(صالون|طاولة|غرفة)/i.test(lower)) {
+    return { toolName: "out_of_trade_refusal", params: { domain: "materials" } };
   }
-  if (/أوامر.*(تصنيع|بيع)|manufacturing\s*orders|production\s*orders/i.test(lower)) {
-    return { toolName: "mfg_orders_list", params: { status: "pending" } };
+  if (/أوامر.*تصنيع|manufacturing\s*orders|production\s*orders|أمر.*(تشغيل|تصنيع|إنتاج)|create.*job/i.test(lower)) {
+    return { toolName: "out_of_trade_refusal", params: { domain: "production" } };
   }
   if (/انشر.*(الموقع|vercel)|deploy.*(site|vercel)/i.test(lower)) {
     return { toolName: "deploy_trigger", params: {} };
   }
   if (/طوّ?ر.*(المشروع|الكود)|project\s*evolve|أصلح.*الكود/i.test(lower)) {
     return { toolName: "project_evolve", params: { mission: message } };
-  }
-  if (/زود.*مخزون|inventory\s*update|عدّل.*مخزون/i.test(lower)) {
-    return {
-      toolName: "inventory_update",
-      params: {
-        productId: (message.match(/\b[0-9a-f-]{36}\b/i) || [])[0] || "",
-        quantityChange: Number((lower.match(/(\d+)/) || [])[1]) || 1,
-      },
-    };
-  }
-
-  if (/bom|كشف.*مواد|حساب.*مواد|احسب.*خامات|احسب.*(صالون|طاولة|غرفة)|حساب.*bom/i.test(lower)) {
-    return { toolName: "bom_calculate", params: { item: message.slice(0, 100) } };
   }
   if (/فحص.*مفاتيح|تدقيق.*مفاتيح|مفاتيح.*api|api.*keys.*audit|فحص.*أمان|فحص.*الامان|تدقيق.*الأمان/i.test(lower)) {
     return { toolName: "security_audit_keys", params: {} };
@@ -577,10 +538,7 @@ export function inferUltimateTool(
     return { toolName: "agent_memory_inspect", params: {} };
   }
   if (/هوامش.*الربح|تحليل.*الأرباح|تحليل.*مالي|profit.*margin|تقرير.*الأرباح/i.test(lower)) {
-    return { toolName: "financial_margins_analyze", params: {} };
-  }
-  if (/إنشاء.*أمر.*(تشغيل|تصنيع|إنتاج)|انشئ.*أمر.*(تشغيل|تصنيع|إنتاج)|أمر تشغيل|create.*job/i.test(lower)) {
-    return { toolName: "mfg_job_create", params: { description: message.slice(0, 100) } };
+    return { toolName: "out_of_trade_refusal", params: { domain: "margin" } };
   }
 
   return null;

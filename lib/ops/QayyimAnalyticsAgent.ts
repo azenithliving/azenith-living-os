@@ -21,7 +21,7 @@ const QAYYIM_ANA_SYSTEM_PROMPT = `أنت ${agentLabel("ops-analytics")}.
 5. **Churn Prediction**: تنبؤ بانسحاب العملاء الفاخرين
 
 ## أدواتك المسموحة:
-revenue_analyze, financial_margins_analyze, metrics_realtime, lead_list, ops_out_of_scope
+metrics_realtime, lead_list, ops_out_of_scope
 
 ## ممنوع عليك منعاً باتاً:
 - كتابة نصوص (لوكيل المحتوى)
@@ -49,17 +49,17 @@ export class QayyimAnalyticsAgent extends QayyimAgentBase {
     canAnalyze: true,
     canTest: false,
     allowedTools: [
-      "revenue_analyze",           // Revenue & conversion analysis
-      "financial_margins_analyze", // Margin analysis
+                 // Revenue & conversion analysis
+       // Margin analysis
       "metrics_realtime",          // Real-time metrics
       "lead_list",                 // Customer segmentation
       "ops_out_of_scope",       // Delegate
     ],
     forbiddenTools: [
       "ops_draft_room", "section_update", "setting_update", "content_update",
-      "backup_create", "backup_restore", "mfg_job_create", "bom_calculate",
-      "security_audit_keys", "deploy_trigger", "project_evolve", "inventory_update",
-      "mfg_inventory_list", "mfg_stock_adjust", "mfg_orders_list",
+      "backup_create", "backup_restore",  
+      "security_audit_keys", "deploy_trigger", "project_evolve", 
+        
       "lead_dossier_send", "room_update", "seo_analyze", "seo_fix_issues",
       "speed_analyze", "speed_optimize", "speed_deep_audit", "curated_images",
     ],

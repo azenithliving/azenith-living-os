@@ -18,9 +18,11 @@ describe("admin-tool-bridge", () => {
   });
 
   it("maps Qayyim swarm mission chips to real manufacturing tools", () => {
-    expect(inferUltimateTool("احسب BOM لصالون إمبراطوري")?.toolName).toBe("bom_calculate");
-    expect(inferUltimateTool("فحص مخزون خامات التصنيع")?.toolName).toBe("mfg_inventory_list");
-    expect(inferUltimateTool("إنشاء أمر تشغيل جديد")?.toolName).toBe("mfg_job_create");
+    // Materials, stock and job tickets belong to the workshop, which is outside the
+    // store by the owner's ruling — the chat answers instead of reaching for a tool.
+    expect(inferUltimateTool("احسب BOM لصالون إمبراطوري")?.toolName).toBe("out_of_trade_refusal");
+    expect(inferUltimateTool("فحص مخزون خامات التصنيع")?.toolName).toBe("out_of_trade_refusal");
+    expect(inferUltimateTool("إنشاء أمر تشغيل جديد")?.toolName).toBe("out_of_trade_refusal");
   });
 
   // The forecast rule is wording-wide («توقع», «الشهر الجاي»), so these cases

@@ -97,7 +97,8 @@ describe("admin assistant resilience primitives", () => {
 
   it("inferUltimateTool covers speed and revenue", () => {
     expect(inferUltimateTool("حلّل سرعة الموقع")?.toolName).toBe("speed_analyze");
-    expect(inferUltimateTool("حلّل الإيرادات")?.toolName).toBe("revenue_analyze");
+    // Revenue is outside the store's trade, so the honest answer replaces the old tool.
+    expect(inferUltimateTool("حلّل الإيرادات")?.toolName).toBe("out_of_trade_refusal");
   });
 
   it("genesis vs section create do not collide", () => {

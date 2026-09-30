@@ -5,18 +5,21 @@ import { heuristicClassify } from "@/lib/admin-intent-classifier";
 import { isDbFixable } from "@/lib/seo-auto-fixer";
 
 describe("full capabilities (no intentional gaps)", () => {
-  it("has 33+ tools with zero stubs", () => {
+  // The floor moved down on purpose: the warehouse, the workshop and the money-analysis
+  // tools were removed by the owner's ruling, so a higher number here would mean the
+  // phantom layer crept back.
+  it("has 25+ tools with zero stubs", () => {
     const stubs = Object.entries(TOOL_REGISTRY).filter(([, t]) =>
       /not yet implemented/i.test(String(t.handler))
     );
     expect(stubs).toEqual([]);
-    expect(Object.keys(TOOL_REGISTRY).length).toBeGreaterThanOrEqual(34);
+    expect(Object.keys(TOOL_REGISTRY).length).toBeGreaterThanOrEqual(25);
   });
 
-  it("classifies manufacturing and inventory", () => {
-    expect(heuristicClassify("افحص المخزون المنخفض")?.toolName).toBe("inventory_check_low");
-    expect(heuristicClassify("اعرض مخزون التصنيع")?.toolName).toBe("mfg_inventory_list");
-    expect(heuristicClassify("اعرض أوامر التصنيع")?.toolName).toBe("mfg_orders_list");
+  it("refuses the trades the store does not run", () => {
+    expect(heuristicClassify("افحص المخزون المنخفض")?.toolName).toBe("out_of_trade_refusal");
+    expect(heuristicClassify("اعرض مخزون التصنيع")?.toolName).toBe("out_of_trade_refusal");
+    expect(heuristicClassify("اعرض أوامر التصنيع")?.toolName).toBe("out_of_trade_refusal");
   });
 
   it("classifies SEO fix with auto apply", () => {

@@ -175,15 +175,6 @@ const ContentUpdateSchema: ToolParameterSchema = {
   required: ["entityType", "entityId", "newValue"],
 };
 
-const RevenueAnalyzeSchema: ToolParameterSchema = {
-  type: "object",
-  properties: {
-    period: { type: "string", description: "الفترة", enum: ["7d", "30d", "90d", "1y", "all"] },
-    segmentBy: { type: "string", description: "التقسيم حسب", enum: ["source", "campaign", "product", "region"] },
-    includeForecast: { type: "boolean", description: "تضمين التوقعات" },
-  },
-};
-
 const SpeedOptimizeSchema: ToolParameterSchema = {
   type: "object",
   properties: {
@@ -221,7 +212,6 @@ import {
   executeBackupCreate as backupCreateHandler,
   executeSettingUpdate as settingUpdateHandler,
   executeSEOAnalysis as seoAnalyzeHandler,
-  executeRevenueAnalysis as revenueAnalyzeHandler,
   executeSpeedOptimization as speedOptimizeHandler,
   executeSystemHealthCheck as systemHealthCheckHandler,
   executeMetricsRealtime as metricsRealtimeHandler,
@@ -240,16 +230,10 @@ import {
   executeWebSearch as webSearchHandler,
   executeReadWebsite as readWebsiteHandler,
   executeBrowserResearch as browserResearchHandler,
-  executeRevenueOpportunities as revenueOpportunitiesHandler,
   executeSpeedDeepAudit as speedDeepAuditHandler,
   executeLeadList as leadListHandler,
   executeLeadDossierSend as leadDossierSendHandler,
   executeRoomUpdate as roomUpdateHandler,
-  executeInventoryCheckLow as inventoryCheckLowHandler,
-  executeInventoryUpdateTool as inventoryUpdateHandler,
-  executeManufacturingInventory as mfgInventoryHandler,
-  executeManufacturingStockAdjust as mfgStockAdjustHandler,
-  executeManufacturingOrders as mfgOrdersHandler,
   executeDeployTrigger as deployTriggerHandler,
   executeProjectEvolve as projectEvolveHandler,
 } from "@/lib/admin-extended-handlers";
@@ -490,22 +474,6 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
   // Analytics/Revenue Tools
   // ============================================
 
-  revenue_analyze: {
-    name: "revenue_analyze",
-    displayName: "تحليل الإيرادات",
-    description: "تحليل الإيرادات والتحويلات من البيانات الحقيقية",
-    category: "revenue",
-    riskLevel: "low",
-    requiresApproval: false,
-    parameters: RevenueAnalyzeSchema,
-    handler: revenueAnalyzeHandler,
-    examples: [
-      "حلل الإيرادات",
-      "ما معدل التحويل؟",
-      "revenue analysis",
-    ],
-  },
-
   metrics_realtime: {
     name: "metrics_realtime",
     displayName: "مؤشرات لحظية",
@@ -740,23 +708,6 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
     ],
   },
 
-  revenue_opportunities: {
-    name: "revenue_opportunities",
-    displayName: "فرص الإيراد",
-    description: "تحليل فرص زيادة الإيراد والتحويل",
-    category: "revenue",
-    riskLevel: "low",
-    requiresApproval: false,
-    parameters: {
-      type: "object",
-      properties: {
-        days: { type: "number", description: "عدد الأيام" },
-      },
-    },
-    handler: revenueOpportunitiesHandler,
-    examples: ["فرص الإيراد", "revenue opportunities"],
-  },
-
   speed_deep_audit: {
     name: "speed_deep_audit",
     displayName: "تدقيق سرعة عميق",
@@ -833,88 +784,6 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
     },
     handler: roomUpdateHandler,
     examples: ["حدّث ميزانية غرفة الماستر", "update lead room type"],
-  },
-
-  inventory_check_low: {
-    name: "inventory_check_low",
-    displayName: "مخزون منخفض (منتجات)",
-    description: "فحص المنتجات ذات المخزون المنخفض",
-    category: "crm",
-    riskLevel: "low",
-    requiresApproval: false,
-    parameters: { type: "object", properties: {} },
-    handler: inventoryCheckLowHandler,
-    examples: ["افحص المخزون المنخفض", "low stock products"],
-  },
-
-  inventory_update: {
-    name: "inventory_update",
-    displayName: "تعديل مخزون منتج",
-    description: "زيادة أو تقليد stock_quantity لمنتج",
-    category: "crm",
-    riskLevel: "medium",
-    requiresApproval: true,
-    parameters: {
-      type: "object",
-      properties: {
-        productId: { type: "string", description: "معرف المنتج", required: true },
-        quantityChange: { type: "number", description: "التغيير (+/-)", required: true },
-        reason: { type: "string", description: "السبب" },
-      },
-      required: ["productId", "quantityChange"],
-    },
-    handler: inventoryUpdateHandler,
-    examples: ["زود مخزون المنتج 10", "inventory update"],
-  },
-
-  mfg_inventory_list: {
-    name: "mfg_inventory_list",
-    displayName: "مخزون التصنيع",
-    description: "عرض أصناف inventory_items",
-    category: "system",
-    riskLevel: "low",
-    requiresApproval: false,
-    parameters: {
-      type: "object",
-      properties: { lowStockOnly: { type: "boolean", description: "المنخفض فقط" } },
-    },
-    handler: mfgInventoryHandler,
-    examples: ["اعرض مخزون التصنيع", "مخزون المصنع المنخفض"],
-  },
-
-  mfg_stock_adjust: {
-    name: "mfg_stock_adjust",
-    displayName: "تعديل مخزون تصنيع",
-    description: "إدخال/إخراج inventory_items",
-    category: "system",
-    riskLevel: "high",
-    requiresApproval: true,
-    parameters: {
-      type: "object",
-      properties: {
-        inventoryItemId: { type: "string", description: "معرف الصنف", required: true },
-        quantity: { type: "number", description: "الكمية", required: true },
-        action: { type: "string", description: "stock_in|stock_out", enum: ["stock_in", "stock_out"] },
-      },
-      required: ["inventoryItemId", "quantity"],
-    },
-    handler: mfgStockAdjustHandler,
-    examples: ["أدخل 50 وحدة للمخزون", "stock in manufacturing"],
-  },
-
-  mfg_orders_list: {
-    name: "mfg_orders_list",
-    displayName: "أوامر التصنيع",
-    description: "قائمة sales_orders",
-    category: "system",
-    riskLevel: "low",
-    requiresApproval: false,
-    parameters: {
-      type: "object",
-      properties: { status: { type: "string", description: "الحالة" } },
-    },
-    handler: mfgOrdersHandler,
-    examples: ["اعرض أوامر التصنيع", "manufacturing orders"],
   },
 
   deploy_trigger: {

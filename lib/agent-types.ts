@@ -470,9 +470,7 @@ export type ToolName =
   | "product_delete"
   | "product_get"
   | "category_list"
-  | "category_create"
-  | "inventory_update"
-  | "inventory_check_low";
+  | "category_create";
 
 export interface ToolDefinition {
   name: ToolName;

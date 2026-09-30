@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-09-30T06:57:56.111Z",
+  "generatedAt": "2026-09-30T07:57:33.692Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 4996,
     "newPages": 11,
     "newPageLines": 340,
-    "adminDoors": 115,
-    "allDoors": 193,
+    "adminDoors": 114,
+    "allDoors": 192,
     "outsideDoors": 8,
     "outsideDoorLines": 2535,
-    "rootLibFiles": 259,
+    "rootLibFiles": 258,
     "rootLibUsed": 66,
     "orphanDoors": 70,
-    "rootLibUsedLines": 26661,
+    "rootLibUsedLines": 26289,
     "furnitureFiles": 51,
     "furnitureLines": 14329,
     "furnitureUsedByBoth": 3,
@@ -21,14 +21,14 @@
     "furnitureOldOnly": 17,
     "furnitureUnreachable": 17,
     "swarmFiles": 54,
-    "swarmFileLines": 13769,
+    "swarmFileLines": 13766,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 9,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 9,
-    "atoms": 448
+    "atoms": 447
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -401,11 +401,6 @@
       "kind": "admin-door",
       "id": "app/api/admin/intel/relations/health/route.ts",
       "resource": "admin/intel/relations/health"
-    },
-    {
-      "kind": "admin-door",
-      "id": "app/api/admin/inventory/route.ts",
-      "resource": "admin/inventory"
     },
     {
       "kind": "admin-door",
@@ -828,7 +823,7 @@
     {
       "kind": "root-lib",
       "id": "lib/admin-assistant-capabilities.ts",
-      "lines": 477,
+      "lines": 470,
       "callers": 1
     },
     {
@@ -918,7 +913,7 @@
     {
       "kind": "root-lib",
       "id": "lib/agent-tools/tool-registry.ts",
-      "lines": 1107,
+      "lines": 976,
       "callers": 2
     },
     {
@@ -1086,8 +1081,8 @@
     {
       "kind": "root-lib",
       "id": "lib/real-tool-executor.ts",
-      "lines": 2222,
-      "callers": 3
+      "lines": 1988,
+      "callers": 2
     },
     {
       "kind": "root-lib",
@@ -2010,7 +2005,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/palette.ts",
-      "lines": 217
+      "lines": 214
     },
     {
       "kind": "swarm-file",

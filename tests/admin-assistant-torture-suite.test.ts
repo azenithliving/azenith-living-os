@@ -59,7 +59,8 @@ describe("unified assistant torture-suite foundation", () => {
       { message: "list all backups", toolName: "backup_list" },
       { message: "analyze SEO for the site", toolName: "seo_analyze" },
       { message: "show products", toolName: "product_list" },
-      { message: "show revenue opportunities", toolName: "revenue_opportunities" },
+      // «فرص الإيراد» is answered by the written refusal in the bridge, not by a registry
+      // tool — it is covered in tests/ops/chatRefusesFactoryTalk.test.ts.
       { message: "deep system health check", toolName: "system_health_check" },
       { message: "استخدم المتصفح واتعلم من أحدث أدوات AI agents", toolName: "browser_research" },
       { message: "ابحث فى الويب عن اسعار كونتر الميلامين فى مصر اليوم", toolName: "web_search" },

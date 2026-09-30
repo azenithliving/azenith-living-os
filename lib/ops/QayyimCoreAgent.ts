@@ -50,10 +50,10 @@ export class QayyimCoreAgent extends QayyimAgentBase {
       "setting_update",
     ],
     forbiddenTools: [
-      "backup_create", "backup_restore", "mfg_job_create",
-      "bom_calculate", "security_audit_keys", "financial_margins_analyze",
-      "deploy_trigger", "project_evolve", "inventory_update",
-      "mfg_inventory_list", "mfg_stock_adjust", "mfg_orders_list",
+      "backup_create", "backup_restore", 
+       "security_audit_keys", 
+      "deploy_trigger", "project_evolve", 
+        
       "lead_list", "lead_dossier_send", "room_update",
       "seo_fix_issues", "speed_optimize", "speed_deep_audit",
     ],

@@ -29,19 +29,20 @@ describe("superhuman capability layer", () => {
       "content_health_check",
       "product_list",
       "web_search",
-      "revenue_opportunities",
     ];
     for (const name of required) {
       const tool = TOOL_REGISTRY[name];
       expect(tool, name).toBeDefined();
       expect(String(tool.handler)).not.toMatch(STUB_RE);
     }
-    expect(Object.keys(TOOL_REGISTRY).length).toBeGreaterThanOrEqual(33);
+    // 25, not 33: the warehouse, the workshop and the money-analysis tools were removed
+    // by the owner's ruling. A higher floor here would mean the phantom layer came back.
+    expect(Object.keys(TOOL_REGISTRY).length).toBeGreaterThanOrEqual(25);
   });
 
   it("maturity report shows sovereign-tier potential", () => {
     const report = getCapabilityMaturityReport();
-    expect(report.toolsLive).toBeGreaterThanOrEqual(33);
+    expect(report.toolsLive).toBeGreaterThanOrEqual(25);
     expect(report.toolsStub).toBe(0);
     expect(report.score).toBeGreaterThanOrEqual(70);
     expect(["advanced", "sovereign"]).toContain(report.tier);
