@@ -1,14 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 
 const IN_MEMORY_PENDING_QUESTIONS = new Map<string, { id: string; question: string; session_id?: string; status: string; created_at: string; answered_reply?: string }>();
 
 /**
+ * The admin desk's view of what the consultant could not answer.
+ *
+ * It reads and writes with the service client, so every verb here asks the admin gate
+ * first: measured before this line existed, an anonymous request got a real customer
+ * question and his session key back, and the same address accepted edits and deletes.
+ *
  * GET /api/consultant/pending-questions
  * Get all pending questions
  */
 export async function GET(): Promise<NextResponse> {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const supabase = getSupabaseAdminClient();
     if (!supabase) {
       const memoryQuestions = Array.from(IN_MEMORY_PENDING_QUESTIONS.values())
@@ -50,6 +60,9 @@ export async function GET(): Promise<NextResponse> {
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const body = await request.json();
     const { question, sessionId, userEmail } = body;
 
@@ -119,6 +132,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
  */
 export async function PATCH(request: NextRequest): Promise<NextResponse> {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
@@ -217,6 +233,9 @@ Return JSON array of strings only. Format: ["Q1", "Q2", ...]`;
  */
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
+    const { unauthorized } = await requireAdminApi();
+    if (unauthorized) return unauthorized;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
