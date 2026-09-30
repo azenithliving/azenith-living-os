@@ -21,8 +21,8 @@ const SCENARIOS = [
     gradient: 'from-purple-600/30 via-indigo-600/20 to-emerald-600/20',
     border: 'border-purple-500/40',
     agentsInvolved: ['Vanguard', 'مدير تشغيل المحتوى', 'Analyst', 'Ops', 'Security', 'Learner'],
-    tablesAffected: ['leads', 'sales_orders', 'inventory_items', 'production_jobs', 'agent_memory'],
-    description: 'يقوم Vanguard باستقبال طلب العميل طارق الدسوقي بميزانية 350 ألف ج.م لصالون إمبراطوري، ويصدر عقد البيع، ثم يقوم مدير تشغيل المحتوى بحساب استهلاك خشب الزان والأقمشة، ويتحقق من المخزون، ويصدر أمر تصنيع حقيقي في جدول production_jobs، بينما يحسب Analyst هامش الربح (40.5%).',
+    tablesRead: ['inventory_items'],
+    description: 'سيناريو مقترح: استقبال طلب صالون إمبراطوري، كشف استهلاك الزان والأقمشة من المخزون الحقيقى، وخطوات العقد والتشغيل. الأرقام المالية مش مقاسين، ومفيش أى سجل بيتكتب فى الدفاتر.',
   },
   {
     id: 'stock_shortage_alert',
@@ -32,8 +32,8 @@ const SCENARIOS = [
     gradient: 'from-amber-600/30 via-orange-600/20 to-red-600/20',
     border: 'border-amber-500/40',
     agentsInvolved: ['Ops', 'مدير تشغيل المحتوى', 'Vanguard', 'Analyst'],
-    tablesAffected: ['inventory_items', 'sales_orders'],
-    description: 'يرصد Ops انخفاض مخزون خشب الزان إلى 2.2 م³، ليقوم مدير تشغيل المحتوى بحصر الأوامر المعلقة واقتراح دفعة توريد 6 م³، ويقوم Vanguard بجدولة التسليمات لعدم التأخير، بينما يحسب Analyst الميزانية المطلوبة.',
+    tablesRead: ['inventory_items'],
+    description: 'سيناريو مقترح: متابعة المتاح من خشب الزان من المخزون الحقيقى، وحصر الأوامر المعلّقة، ومقترح دفعة توريد. حد الأمان والميزانية مش مقاسين، ومفيش أى سجل بيتكتب.',
   },
   {
     id: 'security_backup_sweep',
@@ -43,8 +43,8 @@ const SCENARIOS = [
     gradient: 'from-red-600/30 via-rose-600/20 to-blue-600/20',
     border: 'border-red-500/40',
     agentsInvolved: ['Security', 'Ops', 'Learner'],
-    tablesAffected: ['api_keys', 'backups', 'agent_memory'],
-    description: 'يقوم Security بفحص كافة مفاتيح الـ API وسجل الأوامر المحصن، ثم يطلق Ops لقطة نسخ احتياطي حقيقية مشفرة في جدول backups، ويحدث Learner مؤشر الثقة المعرفية.',
+    tablesRead: [],
+    description: 'سيناريو مقترح: مراجعة سلامة السجلات وجدولة نسخة احتياطى. النسخ الاحتياطى الحقيقى بيمشى من المنصة، والباب ده بيكتبش فى أى جدول.',
   },
 ];
 
@@ -152,7 +152,7 @@ export function EnterpriseScenarioModal({ isOpen, onClose, onScenarioCompleted }
                 </div>
                 <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-white/30">
                   <span>{sc.agentsInvolved.length} وكلاء</span>
-                  <span>{sc.tablesAffected.length} جداول Postgres</span>
+                  <span>{sc.tablesRead.length ? `${sc.tablesRead.length} جداول بتتقرأ` : "بيكتبش فى أى جدول"}</span>
                 </div>
               </button>
             ))}
@@ -197,12 +197,12 @@ export function EnterpriseScenarioModal({ isOpen, onClose, onScenarioCompleted }
                   {a}
                 </span>
               ))}
-              <span className="text-white/40 font-bold mr-2">الجداول المتأثرة:</span>
-              {currentScenario.tablesAffected.map(t => (
+              <span className="text-white/40 font-bold mr-2">اللى بيتقرا من الدفاتر:</span>
+              {currentScenario.tablesRead.length ? currentScenario.tablesRead.map(t => (
                 <span key={t} className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono">
                   {t}
                 </span>
-              ))}
+              )) : <span className="text-white/50">مفيش — اقتراح بس</span>}
             </div>
           </div>
 
@@ -212,12 +212,12 @@ export function EnterpriseScenarioModal({ isOpen, onClose, onScenarioCompleted }
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-black text-white/70 flex items-center gap-2">
                   <Database className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>خطوات التنفيذ التفاعلي في الوقت الفعلي (Real-Time Pipeline Execution):</span>
+                  <span>خطوات مقترحة — متنفذتش ومتسجلتش:</span>
                 </h4>
                 {completed && (
                   <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    اكتملت المحاكاة وتم تحديث قاعدة البيانات بنجاح!
+                    اقتراحات محسوبة على رقم حقيقي من المخزون — مفيش حاجة اتسجلت
                   </span>
                 )}
               </div>
@@ -243,15 +243,6 @@ export function EnterpriseScenarioModal({ isOpen, onClose, onScenarioCompleted }
                       </div>
                       <p className="text-xs text-amber-300 font-medium">{step.action}</p>
                       <p className="text-xs text-white/80 leading-relaxed">{step.result}</p>
-
-                      {step.record && (
-                        <div className="mt-2 pt-2 border-t border-white/5 flex items-center gap-2 text-[10px] font-mono text-emerald-400">
-                          <span>📦 تم إنشاء سجل في جدول: <strong>{step.record.table}</strong></span>
-                          {step.record.id && (
-                            <span className="text-white/40">معرف: {step.record.id.slice(0, 8)}…</span>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))}

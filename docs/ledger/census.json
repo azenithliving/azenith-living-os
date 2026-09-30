@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T03:44:49.326Z",
+  "generatedAt": "2026-09-30T06:06:28.667Z",
   "counts": {
     "oldPages": 18,
     "oldPageLines": 5019,
@@ -14,7 +14,7 @@
     "orphanDoors": 70,
     "rootLibUsedLines": 26661,
     "furnitureFiles": 58,
-    "furnitureLines": 15948,
+    "furnitureLines": 15939,
     "furnitureUsedByBoth": 3,
     "furnitureBothLines": 1619,
     "furnitureNewOnly": 14,
@@ -892,7 +892,7 @@
       "kind": "root-lib",
       "id": "lib/admin-company.ts",
       "lines": 32,
-      "callers": 18
+      "callers": 17
     },
     {
       "kind": "root-lib",
@@ -1649,7 +1649,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/agents/EnterpriseScenarioModal.tsx",
-      "lines": 277,
+      "lines": 268,
       "usedBy": "unreachable"
     },
     {
