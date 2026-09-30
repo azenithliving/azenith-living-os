@@ -75,9 +75,6 @@ export async function executeTool(
       case "speed_analyze":
         result = await executeSpeedAnalysis(params, context);
         break;
-      case "revenue_analyze":
-        result = await executeRevenueAnalysis(params, context);
-        break;
       case "database_query":
         result = await executeDatabaseQuery(params, context);
         break;
@@ -102,12 +99,6 @@ export async function executeTool(
         break;
       case "category_create":
         result = await executeCategoryCreate(params, context, options);
-        break;
-      case "inventory_update":
-        result = await executeInventoryUpdate(params, context, options);
-        break;
-      case "inventory_check_low":
-        result = await executeCheckLowStock(params, context);
         break;
       default:
         return {
@@ -1165,56 +1156,6 @@ async function executeSpeedAnalysis(
   };
 }
 
-// ============================================
-// Revenue Analysis Tool
-// ============================================
-
-async function executeRevenueAnalysis(
-  params: Record<string, unknown>,
-  context: ToolExecutionContext
-): Promise<ExecutionResult> {
-  const supabase = await createClient();
-
-  // Fetch analytics data
-  const { data: leads, count: leadsCount } = await supabase
-    .from("leads")
-    .select("*", { count: "exact" })
-    .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-
-  const { data: bookings, count: bookingsCount } = await supabase
-    .from("bookings")
-    .select("*", { count: "exact" })
-    .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-
-  const conversionRate = leadsCount && leadsCount > 0
-    ? ((bookingsCount || 0) / leadsCount * 100).toFixed(2)
-    : "0";
-
-  return {
-    success: true,
-    executionId: context.executionId,
-    message: `Revenue analysis: ${leadsCount} leads, ${bookingsCount} bookings (${conversionRate}% conversion)`,
-    data: {
-      period: "last_30_days",
-      leads: leadsCount || 0,
-      bookings: bookingsCount || 0,
-      conversionRate: parseFloat(conversionRate),
-      opportunities: [
-        {
-          type: "email_capture",
-          potential: "Increase leads by 25% with better forms",
-          effort: "medium",
-        },
-        {
-          type: "conversion_optimization",
-          potential: "Improve booking flow to increase conversions",
-          effort: "high",
-        },
-      ],
-    },
-    executionTimeMs: Date.now() - Date.now(),
-  };
-}
 
 // ============================================
 // Database Query Tool (Safe)
@@ -1855,174 +1796,7 @@ async function executeCategoryCreate(
   }
 }
 
-async function executeInventoryUpdate(
-  params: Record<string, unknown>,
-  context: ToolExecutionContext,
-  options: ToolExecutionOptions
-): Promise<ExecutionResult> {
-  const supabase = await createClient();
-  const startTime = Date.now();
 
-  try {
-    const productId = params.productId as string;
-    const quantityChange = params.quantityChange as number;
-    const reason = (params.reason as string) || "Inventory adjustment";
-
-    if (!productId || quantityChange === undefined) {
-      return {
-        success: false,
-        executionId: context.executionId,
-        message: "Product ID and quantity change are required",
-        error: "Missing required fields",
-        executionTimeMs: Date.now() - startTime,
-      };
-    }
-
-    const { data: product, error: fetchError } = await supabase
-      .from("products")
-      .select("stock_quantity, name")
-      .eq("id", productId)
-      .single();
-
-    if (fetchError || !product) {
-      return {
-        success: false,
-        executionId: context.executionId,
-        message: `Product not found: ${productId}`,
-        error: fetchError?.message || "Product not found",
-        executionTimeMs: Date.now() - startTime,
-      };
-    }
-
-    const newQuantity = product.stock_quantity + quantityChange;
-
-    if (newQuantity < 0) {
-      return {
-        success: false,
-        executionId: context.executionId,
-        message: `Cannot reduce stock below zero. Current: ${product.stock_quantity}, Change: ${quantityChange}`,
-        error: "Invalid quantity change",
-        executionTimeMs: Date.now() - startTime,
-      };
-    }
-
-    const action = {
-      id: crypto.randomUUID(),
-      type: "inventory_update",
-      category: "database_write" as const,
-      description: `Update inventory for "${product.name}": ${product.stock_quantity} → ${newQuantity}`,
-      payload: params,
-      estimatedImpact: "medium" as const,
-    };
-
-    const risk = classifyRisk(action);
-
-    if (risk.requiresApproval && !options.autoApprove) {
-      const approval = await createApprovalRequest(
-        { ...action, riskLevel: risk.riskLevel, requiresApproval: true },
-        { executor: "tool", toolName: "inventory_update", params },
-        { companyId: context.companyId, actorUserId: context.actorUserId, commandLogId: context.commandLogId }
-      );
-
-      if (approval.success) {
-        return {
-          success: true,
-          executionId: context.executionId,
-          message: `Inventory update requires approval. Request ID: ${approval.request?.id}`,
-          requiresApproval: true,
-          approvalRequestId: approval.request?.id,
-          executionTimeMs: Date.now() - startTime,
-        };
-      }
-    }
-
-    const { data: updatedProduct, error } = await supabase
-      .from("products")
-      .update({ stock_quantity: newQuantity, updated_at: new Date().toISOString() })
-      .eq("id", productId)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    await logAuditEvent(
-      "inventory_update",
-      `Updated inventory for "${product.name}": ${product.stock_quantity} → ${newQuantity}`,
-      context.actorUserId || "system",
-      { productId, previousQuantity: product.stock_quantity, newQuantity, change: quantityChange, reason },
-      "success",
-      { companyId: context.companyId, actorUserId: context.actorUserId, commandLogId: context.commandLogId }
-    );
-
-    return {
-      success: true,
-      executionId: context.executionId,
-      message: `Updated inventory for "${product.name}": ${product.stock_quantity} → ${newQuantity}`,
-      data: { product: updatedProduct, previousQuantity: product.stock_quantity, newQuantity, change: quantityChange },
-      executionTimeMs: Date.now() - startTime,
-      affectedTables: ["products", "product_inventory_log"],
-      affectedRows: 1,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      executionId: context.executionId,
-      message: `Failed to update inventory: ${error instanceof Error ? error.message : "Unknown error"}`,
-      error: error instanceof Error ? error.message : "Unknown error",
-      executionTimeMs: Date.now() - startTime,
-    };
-  }
-}
-
-async function executeCheckLowStock(
-  params: Record<string, unknown>,
-  context: ToolExecutionContext
-): Promise<ExecutionResult> {
-  const supabase = await createClient();
-  const startTime = Date.now();
-
-  try {
-    const { data: lowStockProducts, error } = await supabase
-      .from("v_low_stock_products")
-      .select("*");
-
-    if (error) throw error;
-
-    if (lowStockProducts && lowStockProducts.length > 0) {
-      await storeMemory({
-        type: "anomaly",
-        category: "inventory_alert",
-        content: `Found ${lowStockProducts.length} products with low stock`,
-        priority: "high",
-        context: {
-          count: lowStockProducts.length,
-          products: lowStockProducts.map((p: { name: string; stock_quantity: number }) => ({
-            name: p.name,
-            stock: p.stock_quantity,
-          })),
-        },
-      });
-    }
-
-    return {
-      success: true,
-      executionId: context.executionId,
-      message: lowStockProducts && lowStockProducts.length > 0
-        ? `⚠️ Found ${lowStockProducts.length} products with low stock`
-        : "✅ All products have adequate stock",
-      data: { lowStockCount: lowStockProducts?.length || 0, products: lowStockProducts || [] },
-      executionTimeMs: Date.now() - startTime,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      executionId: context.executionId,
-      message: `Failed to check stock: ${error instanceof Error ? error.message : "Unknown error"}`,
-      error: error instanceof Error ? error.message : "Unknown error",
-      executionTimeMs: Date.now() - startTime,
-    };
-  }
-}
 
 // ============================================
 // Export all tool definitions for registration
@@ -2109,14 +1883,6 @@ export const TOOL_DEFINITIONS = [
     riskLevel: "low",
     category: "analysis",
   },
-  {
-    name: "revenue_analyze",
-    description: "Analyze revenue opportunities",
-    parameters: {},
-    requiresApproval: false,
-    riskLevel: "low",
-    category: "analysis",
-  },
   // Product Management Tools
   {
     name: "product_list",
@@ -2197,25 +1963,5 @@ export const TOOL_DEFINITIONS = [
     requiresApproval: true,
     riskLevel: "medium",
     category: "product",
-  },
-  {
-    name: "inventory_update",
-    description: "Update product inventory quantity",
-    parameters: {
-      productId: { type: "string", description: "Product ID", required: true },
-      quantityChange: { type: "number", description: "Quantity change (positive or negative)", required: true },
-      reason: { type: "string", description: "Reason for change", required: false },
-    },
-    requiresApproval: true,
-    riskLevel: "medium",
-    category: "inventory",
-  },
-  {
-    name: "inventory_check_low",
-    description: "Check for products with low stock",
-    parameters: {},
-    requiresApproval: false,
-    riskLevel: "low",
-    category: "inventory",
   },
 ];

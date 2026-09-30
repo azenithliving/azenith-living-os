@@ -455,7 +455,6 @@ export type ToolName =
   | "setting_update"
   | "content_update"
   | "speed_analyze"
-  | "revenue_analyze"
   | "adsense_setup"
   | "affiliate_setup"
   | "automation_create"

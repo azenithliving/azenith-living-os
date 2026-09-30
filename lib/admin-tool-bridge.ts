@@ -297,8 +297,8 @@ export function inferUltimateTool(
     return { toolName: "ops_forecast", params: { horizonDays: days } };
   }
   // "how is the shop doing / what sells" reads the live world model. It must
-  // precede revenue_analyze below, which answers the same question with a
-  // guessed 58% COGS rather than the store's own numbers.
+  // The world model answers «how is business» with the store's own counted numbers;
+  // the old money-analysis tools are gone by the owner's ruling and must not come back.
   if (
     /الشغل\s+(?:ال)?(?:فترة|فتره)|المبيعات\s+(?:ال)?(?:فترة|فتره)|(?:اللي|اللى)\s?(?:بي|بت)?(?:ت?بيع)|بيتبيع|بتبيع|حجم\s+(?:ال)?(?:مبيعات|بيع)|world\s*model/i.test(
       lower
