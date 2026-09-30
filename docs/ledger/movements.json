@@ -23,10 +23,10 @@
     },
     {
       "atom": "/admin/sales#العملاء",
-      "state": "moving",
-      "phase": "consolidation-1",
-      "when": "2026-09-29",
-      "proof": "the tab's 811 lines moved verbatim into components/admin/sales/CustomersPanel.tsx; the page fell from 2108 to 1264 lines; types clean, 912 of 912 tests, build green. It still renders inside the old page until the new window takes it."
+      "state": "erased",
+      "phase": "consolidation-4",
+      "when": "2026-09-30",
+      "proof": "the tab entry and its import are gone from app/admin/sales/page.tsx; the old deep link is answered at the outer gate (/admin/sales?tab=leads&expand=… → /admin/v2/sales?expand=…), guarded by tests/ops/legacyAddressTable.test.ts, so the consultant's Telegram messages still land on the card"
     },
     {
       "atom": "app/api/admin/leads/route.ts",

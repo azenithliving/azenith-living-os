@@ -34,6 +34,30 @@ export function legacyAddressRedirect(pathname: string, search = ""): string | n
 }
 
 /**
+ * A retired *tab* inside a page that still ships. The old sales centre keeps four of its
+ * own rooms, but the customers tab moved out to the sales office window — and the
+ * consultant's Telegram messages still deep-link to `/admin/sales?tab=leads&expand=…`.
+ * Erasing the tab without answering that address would break a link the owner already
+ * sent himself, so the gate answers it and the old page never learns it had a customer
+ * room at all.
+ */
+export const LEGACY_TAB_REDIRECTS: Array<{ page: string; tab: string; to: string }> = [
+  { page: "/admin/sales", tab: "leads", to: "/admin/v2/sales" },
+];
+
+/** The address to bounce to with every other parameter kept, or null to leave it alone. */
+export function legacyTabRedirect(pathname: string, search = ""): string | null {
+  const clean = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  const hit = LEGACY_TAB_REDIRECTS.find((entry) => entry.page === clean);
+  if (!hit) return null;
+  const params = new URLSearchParams(search);
+  if (params.get("tab") !== hit.tab) return null;
+  params.delete("tab");
+  const rest = params.toString();
+  return `${hit.to}${rest ? `?${rest}` : ""}`;
+}
+
+/**
  * A retired *agent key* arriving in a query is the same problem wearing a different
  * hat: the owner's older Telegram messages deep-link with the retired spelling of
  * the leader's key. Translating it inside the new house means the new house knows

@@ -3,13 +3,12 @@
 // Version: 2026-04-20_06:54_FORCE_FIX
 
 import { useState, useEffect, useRef } from "react";
-import { Shield, Users, Building2, Settings, FileText, Crown, Send, MessageCircle, TrendingUp, Edit2, Check, X, Trash2, AlertCircle, Brain } from "lucide-react";
+import { Shield, Building2, Settings, FileText, Crown, Send, MessageCircle, TrendingUp, Edit2, Check, X, Trash2, AlertCircle, Brain } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import toast from "react-hot-toast";
 import { translateTag, summarizeInterest } from "@/lib/lead-insights";
-import CustomersPanel from "@/components/admin/sales/CustomersPanel";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // أنواع البيانات
@@ -1187,7 +1186,6 @@ function CMSTab() {
 // ═══════════════════════════════════════════════════════════════════════════════
 const tabs = [
   { id: "sales", label: "مدير المبيعات", icon: Crown, component: SalesManagerTab },
-  { id: "leads", label: "العملاء", icon: Users, component: CustomersPanel },
   { id: "tenants", label: "المستأجرين", icon: Building2, component: TenantsTab },
   { id: "management", label: "الإدارة", icon: Settings, component: ManagementTab },
   { id: "cms", label: "CMS", icon: FileText, component: CMSTab },

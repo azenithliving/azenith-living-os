@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-30T01:57:09.974Z",
+  "generatedAt": "2026-09-30T03:44:49.326Z",
   "counts": {
     "oldPages": 18,
-    "oldPageLines": 5021,
+    "oldPageLines": 5019,
     "newPages": 11,
     "newPageLines": 340,
     "adminDoors": 123,
@@ -15,13 +15,13 @@
     "rootLibUsedLines": 26661,
     "furnitureFiles": 58,
     "furnitureLines": 15948,
-    "furnitureUsedByBoth": 4,
-    "furnitureBothLines": 2544,
-    "furnitureNewOnly": 13,
+    "furnitureUsedByBoth": 3,
+    "furnitureBothLines": 1619,
+    "furnitureNewOnly": 14,
     "furnitureOldOnly": 17,
     "furnitureUnreachable": 24,
     "swarmFiles": 54,
-    "swarmFileLines": 13742,
+    "swarmFileLines": 13766,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
@@ -100,7 +100,7 @@
     {
       "kind": "old-page",
       "id": "app/admin/sales/page.tsx",
-      "lines": 1264
+      "lines": 1262
     },
     {
       "kind": "old-page",
@@ -1890,7 +1890,7 @@
       "kind": "furniture",
       "id": "components/admin/sales/CustomersPanel.tsx",
       "lines": 925,
-      "usedBy": "both"
+      "usedBy": "new-only"
     },
     {
       "kind": "furniture",
@@ -2042,7 +2042,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/legacy-address-table.ts",
-      "lines": 56
+      "lines": 80
     },
     {
       "kind": "swarm-file",

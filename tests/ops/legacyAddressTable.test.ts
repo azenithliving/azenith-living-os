@@ -4,7 +4,9 @@ import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
   LEGACY_ADDRESS_REDIRECTS,
+  LEGACY_TAB_REDIRECTS,
   legacyAddressRedirect,
+  legacyTabRedirect,
   retiredAgentQueryRedirect,
 } from "@/lib/ops/legacy-address-table";
 
@@ -87,5 +89,37 @@ describe("a retired agent key is normalised at the gate, not inside the house", 
       .filter((p) => /\.tsx?$/.test(p))
       .filter((p) => readFileSync(join("app/admin/v2", p), "utf8").includes("legacyToOps"));
     expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+});
+
+/**
+ * Phase four of the customers employee: the tab in the old house and the window in the
+ * sales office are the same component, so one of them had to stop existing. The old tab
+ * is erased — but the consultant's Telegram messages deep-link to `?tab=leads&expand=…`,
+ * so the gate answers that address, and no door dies on the owner's phone.
+ */
+describe("the old customers tab is erased, and its address still lands", () => {
+  it("sends an old customers deep link to the sales office, keeping the card key", () => {
+    expect(legacyTabRedirect("/admin/sales", "?tab=leads&expand=phone%3A1005554444")).toBe(
+      "/admin/v2/sales?expand=phone%3A1005554444",
+    );
+    expect(legacyTabRedirect("/admin/sales", "?tab=leads")).toBe("/admin/v2/sales");
+  });
+
+  it("leaves every other tab of the old house alone", () => {
+    expect(legacyTabRedirect("/admin/sales", "?tab=sales")).toBeNull();
+    expect(legacyTabRedirect("/admin/sales", "")).toBeNull();
+    expect(legacyTabRedirect("/admin/v2/sales", "?tab=leads")).toBeNull();
+  });
+
+  it("keeps the old house free of the moved employee", () => {
+    const old = readFileSync("app/admin/sales/page.tsx", "utf8");
+    expect(old).not.toContain("CustomersPanel");
+    expect(old).not.toContain('"leads"');
+    expect(LEGACY_TAB_REDIRECTS.length).toBeGreaterThan(0);
+  });
+
+  it("is wired into the outer gate", () => {
+    expect(readFileSync("proxy.ts", "utf8")).toContain("legacyTabRedirect");
   });
 });

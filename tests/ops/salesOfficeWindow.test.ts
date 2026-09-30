@@ -21,10 +21,13 @@ describe("the sales office window", () => {
     expect(t.split("\n").length, "the panel is thinner than the tab that moved").toBeGreaterThan(700);
   });
 
-  it("left the old page without the tab welded into it", () => {
+  it("keeps the moved employee out of the old page", () => {
     const t = read(OLD);
     expect(t).not.toMatch(/function LeadsTab/);
-    expect(t).toContain('import CustomersPanel from "@/components/admin/sales/CustomersPanel"');
+    // Phase four erased the tab: the fence now guards the structure, not just the name,
+    // so the customers body can never be welded back into the old house.
+    expect(t).not.toContain("CustomersPanel");
+    expect(t).not.toMatch(/id:\s*"leads"/);
     expect(t.split("\n").length, "the old page should have shrunk by the moved body").toBeLessThan(1400);
   });
 
@@ -41,7 +44,8 @@ describe("the sales office window", () => {
     };
     const row = ledger.rows.find((r) => r.atom === "/admin/sales#العملاء");
     expect(row, "the customers capability is missing from the ledger").toBeTruthy();
-    // Not `moved`: the old house is erased last, and the old tab still renders.
-    expect(row!.state).toBe("moving");
+    // The old tab is erased, and its retired address is answered at the outer gate —
+    // so the ledger says what is true instead of what is convenient.
+    expect(row!.state).toBe("erased");
   });
 });

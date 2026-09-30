@@ -9,7 +9,7 @@ import {
 } from "@/lib/rate-limit";
 import { isValidRoomSlug } from "@/lib/rooms-catalog";
 import { isAuthorizedAdminEmail } from "@/lib/admin-access";
-import { legacyAddressRedirect, retiredAgentQueryRedirect } from "@/lib/ops/legacy-address-table";
+import { legacyAddressRedirect, legacyTabRedirect, retiredAgentQueryRedirect } from "@/lib/ops/legacy-address-table";
 
 /**
  * SOVEREIGN PROXY ENGINE v1.0
@@ -54,6 +54,13 @@ export async function proxy(request: NextRequest) {
   const retiredKeyTarget = retiredAgentQueryRedirect(pathname, search);
   if (retiredKeyTarget) {
     return NextResponse.redirect(new URL(retiredKeyTarget, request.url), 308);
+  }
+
+  // 0c. A tab that moved out of its page — the old house keeps its own rooms, and the
+  // gate is what sends an old customers deep link to the sales office window.
+  const retiredTabTarget = legacyTabRedirect(pathname, search);
+  if (retiredTabTarget) {
+    return NextResponse.redirect(new URL(retiredTabTarget, request.url), 308);
   }
 
   // 1. GATEKEEPER LEAK DETECTION (Sovereign Mesh)
