@@ -93,7 +93,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^app\/admin\/v2\/(page|owner-dashboard)\//, office: "decision-desk", reason: "البيت الجديد بيبدأ من مكتب القرار" },
   { match: /^app\/admin\/(agents|assistant|intel|intelligence)\//, office: "swarm-house", reason: "كل ما له علاقة بالوكلاء في دار واحدة" },
   { match: /^app\/admin\/v2\/agents\//, office: "swarm-house", reason: "نفس الدار في البيت الجديد" },
-  { match: /^app\/admin\/(sales|manufacturing)\//, office: "sales-office", reason: "المبيعات والإنتاج شغلنة واحدة: العميل من السؤال للطلب" },
+  { match: /^app\/admin\/sales\//, office: "sales-office", reason: "العميل من السؤال للطلب — الإنتاج مش شغلانة المتجر (قرار المالك ٣٠ سبتمبر)" },
   { match: /^app\/admin\/elite\//, office: "elite-room", reason: "الباب الخاص بالنخبة له عالمه" },
   { match: /^app\/admin\/(browser|computer|phone|sandbox|fate)\//, office: "workshop", reason: "كل التجريب على نسخة في مكان واحد" },
   { match: /^app\/admin\/(work)\//, office: "records-office", reason: "المهام والسجلات" },
@@ -126,7 +126,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^app\/api\/admin\/agent\//, office: "swarm-house", reason: "أبواب الوكيل الواحد" },
   { match: /^app\/api\/admin\/(intel|images|proactive|quality|knowledge)\//, office: "swarm-house", reason: "أعضاء السرب: الصور والاستخبارات والجودة" },
   { match: /^app\/api\/admin\/(categories|products)\//, office: "swarm-house", reason: "الكتالوج شغلنة وكيل المحتوى" },
-  { match: /^app\/api\/admin\/(manufacturing|inventory)\//, office: "sales-office", reason: "من السؤال للطلب للإنتاج" },
+  { match: /^app\/api\/admin\/inventory\//, office: "sales-office", reason: "المخزن بره المتجر بقرار المالك — الباب لسه موجود ومحتاج حكم" },
   { match: /^app\/api\/admin\/analyze-lead\//, office: "sales-office", reason: "تقييم العميل المحتمل" },
   { match: /^app\/api\/admin\/(live-browser|remote-browser|architect)\//, office: "workshop", reason: "أبواب التجربة على نسخة" },
   { match: /^components\/admin\/settings\//, office: "system-room", reason: "كروت الإعدادات" },
@@ -162,7 +162,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^\/admin\/v2\/work\b/, office: "records-office", reason: "المتابعة في البيت الجديد" },
   { match: /^\/admin\/v2\/(system|settings|database)\b/, office: "system-room", reason: "النظام في البيت الجديد" },
   { match: /^\/admin\/(agents|assistant|intel|intelligence)\b/, office: "swarm-house", reason: "الوكلاء ومراكزهم في القديم" },
-  { match: /^\/admin\/(sales|manufacturing)\b/, office: "sales-office", reason: "المبيعات والإنتاج في القديم" },
+  { match: /^\/admin\/sales\b/, office: "sales-office", reason: "المبيعات في القديم — عنوان الإنتاج بيترد عليه من البوابة الخارجية" },
   { match: /^\/admin\/elite\b/, office: "elite-room", reason: "النخبة في القديم" },
   { match: /^\/admin\/(browser|computer|phone|sandbox|fate)\b/, office: "workshop", reason: "التجريب في القديم" },
   { match: /^\/admin\/work\b/, office: "records-office", reason: "المهام في القديم" },
@@ -251,12 +251,11 @@ export const EXPLICIT: ExplicitPlacement[] = [
 
   /**
    * Found by pressing the live site, not by reading the tree: six different old
-   * addresses render the identical agent centre. One of them is named after
-   * production — so a rule that seats `manufacturing` in the sales office from its
-   * file name alone was wrong, and the map now says what the screen actually shows.
-   * None of these is deleted: each owes a rehabilitation file first.
+   * addresses render the identical agent centre. The one named after production is
+   * gone — the workshop is outside the store by the owner's ruling, and its address is
+   * answered at the gate.
+   * None of the rest is deleted: each owes a rehabilitation file first.
    */
-  { id: "app/admin/manufacturing/page.tsx", office: "swarm-house", status: "needs-verdict", reason: "اسمه إنتاج، والشاشة الحيّة بتطلّع مركز الوكلاء — ملف تأهيل قبل أي نقل" },
   { id: "app/admin/intel/page.tsx", office: "swarm-house", status: "duplicate-surface", reason: "بيطلّع نفس شاشة مركز الوكلاء (قياس حيّ)" },
   { id: "app/admin/intelligence/page.tsx", office: "swarm-house", status: "duplicate-surface", reason: "بيطلّع نفس شاشة مركز الوكلاء (قياس حيّ)" },
   { id: "app/admin/assistant/page.tsx", office: "swarm-house", status: "duplicate-surface", reason: "بيطلّع نفس شاشة مركز الوكلاء (قياس حيّ)" },

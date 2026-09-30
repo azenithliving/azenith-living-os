@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T06:06:28.669Z",
+  "generatedAt": "2026-09-30T06:57:56.114Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 459,
+    "not-moved": 443,
     "moved": 3,
     "moving": 1,
     "erased": 1
@@ -56,11 +56,6 @@
     {
       "kind": "old-page",
       "atom": "app/admin/intelligence/page.tsx",
-      "state": "not-moved"
-    },
-    {
-      "kind": "old-page",
-      "atom": "app/admin/manufacturing/page.tsx",
       "state": "not-moved"
     },
     {
@@ -275,11 +270,6 @@
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/orchestrate/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "admin-door",
-      "atom": "app/api/admin/agents/simulate-scenario/route.ts",
       "state": "not-moved"
     },
     {
@@ -508,41 +498,6 @@
     {
       "kind": "admin-door",
       "atom": "app/api/admin/live-browser/stream/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "admin-door",
-      "atom": "app/api/admin/manufacturing/bom/calculate/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "admin-door",
-      "atom": "app/api/admin/manufacturing/designs/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "admin-door",
-      "atom": "app/api/admin/manufacturing/inventory/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "admin-door",
-      "atom": "app/api/admin/manufacturing/metrics/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "admin-door",
-      "atom": "app/api/admin/manufacturing/orders/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "admin-door",
-      "atom": "app/api/admin/manufacturing/price/calculate/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "admin-door",
-      "atom": "app/api/admin/manufacturing/schedule/route.ts",
       "state": "not-moved"
     },
     {
@@ -1527,11 +1482,6 @@
     },
     {
       "kind": "furniture",
-      "atom": "components/admin/agents/BOMTable.tsx",
-      "state": "not-moved"
-    },
-    {
-      "kind": "furniture",
       "atom": "components/admin/agents/ChatPanel.tsx",
       "state": "not-moved"
     },
@@ -1552,16 +1502,6 @@
     },
     {
       "kind": "furniture",
-      "atom": "components/admin/agents/EnterprisePipelineBar.tsx",
-      "state": "not-moved"
-    },
-    {
-      "kind": "furniture",
-      "atom": "components/admin/agents/EnterpriseScenarioModal.tsx",
-      "state": "not-moved"
-    },
-    {
-      "kind": "furniture",
       "atom": "components/admin/agents/FloatingAgentButton.tsx",
       "state": "not-moved"
     },
@@ -1577,32 +1517,12 @@
     },
     {
       "kind": "furniture",
-      "atom": "components/admin/agents/InventoryManager.tsx",
-      "state": "not-moved"
-    },
-    {
-      "kind": "furniture",
-      "atom": "components/admin/agents/ManufacturingDashboard.tsx",
-      "state": "not-moved"
-    },
-    {
-      "kind": "furniture",
       "atom": "components/admin/agents/MultiLLMChat.tsx",
       "state": "not-moved"
     },
     {
       "kind": "furniture",
-      "atom": "components/admin/agents/OrderPipeline.tsx",
-      "state": "not-moved"
-    },
-    {
-      "kind": "furniture",
       "atom": "components/admin/agents/ProactiveSuggestions.tsx",
-      "state": "not-moved"
-    },
-    {
-      "kind": "furniture",
-      "atom": "components/admin/agents/ProjectGantt.tsx",
       "state": "not-moved"
     },
     {

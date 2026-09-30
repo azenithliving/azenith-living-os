@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-09-30T06:06:28.667Z",
+  "generatedAt": "2026-09-30T06:57:56.111Z",
   "counts": {
-    "oldPages": 18,
-    "oldPageLines": 5019,
+    "oldPages": 17,
+    "oldPageLines": 4996,
     "newPages": 11,
     "newPageLines": 340,
-    "adminDoors": 123,
-    "allDoors": 201,
+    "adminDoors": 115,
+    "allDoors": 193,
     "outsideDoors": 8,
     "outsideDoorLines": 2535,
     "rootLibFiles": 259,
     "rootLibUsed": 66,
     "orphanDoors": 70,
     "rootLibUsedLines": 26661,
-    "furnitureFiles": 58,
-    "furnitureLines": 15939,
+    "furnitureFiles": 51,
+    "furnitureLines": 14329,
     "furnitureUsedByBoth": 3,
     "furnitureBothLines": 1619,
     "furnitureNewOnly": 14,
     "furnitureOldOnly": 17,
-    "furnitureUnreachable": 24,
+    "furnitureUnreachable": 17,
     "swarmFiles": 54,
-    "swarmFileLines": 13766,
+    "swarmFileLines": 13769,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 9,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 9,
-    "atoms": 464
+    "atoms": 448
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -76,11 +76,6 @@
       "kind": "old-page",
       "id": "app/admin/intelligence/page.tsx",
       "lines": 7
-    },
-    {
-      "kind": "old-page",
-      "id": "app/admin/manufacturing/page.tsx",
-      "lines": 23
     },
     {
       "kind": "old-page",
@@ -286,11 +281,6 @@
       "kind": "admin-door",
       "id": "app/api/admin/agents/orchestrate/route.ts",
       "resource": "admin/agents/orchestrate"
-    },
-    {
-      "kind": "admin-door",
-      "id": "app/api/admin/agents/simulate-scenario/route.ts",
-      "resource": "admin/agents/simulate-scenario"
     },
     {
       "kind": "admin-door",
@@ -516,41 +506,6 @@
       "kind": "admin-door",
       "id": "app/api/admin/live-browser/stream/route.ts",
       "resource": "admin/live-browser/stream"
-    },
-    {
-      "kind": "admin-door",
-      "id": "app/api/admin/manufacturing/bom/calculate/route.ts",
-      "resource": "admin/manufacturing/bom/calculate"
-    },
-    {
-      "kind": "admin-door",
-      "id": "app/api/admin/manufacturing/designs/route.ts",
-      "resource": "admin/manufacturing/designs"
-    },
-    {
-      "kind": "admin-door",
-      "id": "app/api/admin/manufacturing/inventory/route.ts",
-      "resource": "admin/manufacturing/inventory"
-    },
-    {
-      "kind": "admin-door",
-      "id": "app/api/admin/manufacturing/metrics/route.ts",
-      "resource": "admin/manufacturing/metrics"
-    },
-    {
-      "kind": "admin-door",
-      "id": "app/api/admin/manufacturing/orders/route.ts",
-      "resource": "admin/manufacturing/orders"
-    },
-    {
-      "kind": "admin-door",
-      "id": "app/api/admin/manufacturing/price/calculate/route.ts",
-      "resource": "admin/manufacturing/price/calculate"
-    },
-    {
-      "kind": "admin-door",
-      "id": "app/api/admin/manufacturing/schedule/route.ts",
-      "resource": "admin/manufacturing/schedule"
     },
     {
       "kind": "admin-door",
@@ -862,7 +817,7 @@
       "kind": "root-lib",
       "id": "lib/admin-api-guard.ts",
       "lines": 48,
-      "callers": 35
+      "callers": 29
     },
     {
       "kind": "root-lib",
@@ -892,7 +847,7 @@
       "kind": "root-lib",
       "id": "lib/admin-company.ts",
       "lines": 32,
-      "callers": 17
+      "callers": 12
     },
     {
       "kind": "root-lib",
@@ -1048,7 +1003,7 @@
       "kind": "root-lib",
       "id": "lib/dal/unified-supabase.ts",
       "lines": 637,
-      "callers": 21
+      "callers": 14
     },
     {
       "kind": "root-lib",
@@ -1612,12 +1567,6 @@
     },
     {
       "kind": "furniture",
-      "id": "components/admin/agents/BOMTable.tsx",
-      "lines": 331,
-      "usedBy": "unreachable"
-    },
-    {
-      "kind": "furniture",
       "id": "components/admin/agents/ChatPanel.tsx",
       "lines": 1269,
       "usedBy": "both"
@@ -1642,18 +1591,6 @@
     },
     {
       "kind": "furniture",
-      "id": "components/admin/agents/EnterprisePipelineBar.tsx",
-      "lines": 187,
-      "usedBy": "unreachable"
-    },
-    {
-      "kind": "furniture",
-      "id": "components/admin/agents/EnterpriseScenarioModal.tsx",
-      "lines": 268,
-      "usedBy": "unreachable"
-    },
-    {
-      "kind": "furniture",
       "id": "components/admin/agents/FloatingAgentButton.tsx",
       "lines": 163,
       "usedBy": "unreachable"
@@ -1672,26 +1609,8 @@
     },
     {
       "kind": "furniture",
-      "id": "components/admin/agents/InventoryManager.tsx",
-      "lines": 303,
-      "usedBy": "unreachable"
-    },
-    {
-      "kind": "furniture",
-      "id": "components/admin/agents/ManufacturingDashboard.tsx",
-      "lines": 152,
-      "usedBy": "unreachable"
-    },
-    {
-      "kind": "furniture",
       "id": "components/admin/agents/MultiLLMChat.tsx",
       "lines": 169,
-      "usedBy": "unreachable"
-    },
-    {
-      "kind": "furniture",
-      "id": "components/admin/agents/OrderPipeline.tsx",
-      "lines": 139,
       "usedBy": "unreachable"
     },
     {
@@ -1699,12 +1618,6 @@
       "id": "components/admin/agents/ProactiveSuggestions.tsx",
       "lines": 240,
       "usedBy": "old-only"
-    },
-    {
-      "kind": "furniture",
-      "id": "components/admin/agents/ProjectGantt.tsx",
-      "lines": 230,
-      "usedBy": "unreachable"
     },
     {
       "kind": "furniture",
@@ -2042,7 +1955,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/legacy-address-table.ts",
-      "lines": 80
+      "lines": 84
     },
     {
       "kind": "swarm-file",
@@ -2082,7 +1995,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 300
+      "lines": 299
     },
     {
       "kind": "swarm-file",

@@ -20,6 +20,10 @@ export const LEGACY_ADDRESS_REDIRECTS: LegacyAddress[] = [
   { from: "/admin/v2/qayyim", to: "/admin/v2/ops" },
   { from: "/admin/v2/agents/qayyim", to: "/admin/v2/agents/ops" },
   { from: "/admin/qayyim", to: "/admin/v2/ops" },
+  // The workshop address outlives the workshop: production, stock and margin are outside
+  // the store by the owner's ruling, so the old page is gone and the gate lands the visitor
+  // on the swarm centre instead of a 404.
+  { from: "/admin/manufacturing", to: "/admin/agents" },
 ];
 
 /**
