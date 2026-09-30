@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-09-29T23:48:55.189Z",
+  "generatedAt": "2026-09-30T01:57:09.974Z",
   "counts": {
     "oldPages": 18,
     "oldPageLines": 5021,
     "newPages": 11,
     "newPageLines": 340,
-    "adminDoors": 124,
-    "allDoors": 202,
+    "adminDoors": 123,
+    "allDoors": 201,
     "outsideDoors": 8,
     "outsideDoorLines": 2535,
     "rootLibFiles": 259,
     "rootLibUsed": 66,
     "orphanDoors": 70,
-    "rootLibUsedLines": 26672,
+    "rootLibUsedLines": 26661,
     "furnitureFiles": 58,
-    "furnitureLines": 16030,
+    "furnitureLines": 15948,
     "furnitureUsedByBoth": 4,
-    "furnitureBothLines": 2626,
+    "furnitureBothLines": 2544,
     "furnitureNewOnly": 13,
     "furnitureOldOnly": 17,
     "furnitureUnreachable": 24,
@@ -28,7 +28,7 @@
     "navEntries": 9,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 9,
-    "atoms": 465
+    "atoms": 464
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -346,11 +346,6 @@
       "kind": "admin-door",
       "id": "app/api/admin/command/route.ts",
       "resource": "admin/command"
-    },
-    {
-      "kind": "admin-door",
-      "id": "app/api/admin/customers/orders/route.ts",
-      "resource": "admin/customers/orders"
     },
     {
       "kind": "admin-door",
@@ -867,7 +862,7 @@
       "kind": "root-lib",
       "id": "lib/admin-api-guard.ts",
       "lines": 48,
-      "callers": 36
+      "callers": 35
     },
     {
       "kind": "root-lib",
@@ -1046,7 +1041,7 @@
     {
       "kind": "root-lib",
       "id": "lib/customers/read.ts",
-      "lines": 164,
+      "lines": 153,
       "callers": 2
     },
     {
@@ -1173,7 +1168,7 @@
       "kind": "root-lib",
       "id": "lib/supabase-admin.ts",
       "lines": 21,
-      "callers": 29
+      "callers": 28
     },
     {
       "kind": "root-lib",
@@ -1894,7 +1889,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/sales/CustomersPanel.tsx",
-      "lines": 1007,
+      "lines": 925,
       "usedBy": "both"
     },
     {

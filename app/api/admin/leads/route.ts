@@ -153,16 +153,13 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
         isFormalRequest: Boolean(card?.isFormalRequest) || customer.spaces.includes("form"),
         needsReply: customer.needsReply,
         score: customer.score,
-        profile_ids: customer.profileIds,
-        spaces: customer.spaces,
-        money: customer.money,
         freshness: customer.freshness,
       };
     });
 
     leads.sort((a, b) => new Date(String(b.created_at)).getTime() - new Date(String(a.created_at)).getTime());
 
-    return NextResponse.json({ leads, totals: roll.totals, unownedOrders: roll.unownedOrders });
+    return NextResponse.json({ leads, totals: roll.totals });
   } catch (error) {
     console.error("[Leads] API Error:", error);
     return NextResponse.json({ error: "حصل خطأ غير متوقع — الرقم ده مش معناه إن مفيش عملاء" }, { status: 500 });

@@ -30,8 +30,6 @@ const money = (v: unknown): number => {
 export type CustomersRead = {
   customers: CustomerRow[];
   real: CustomerRow[];
-  /** The orders nobody owns yet — enough to show them and link them, not to guess at them. */
-  unownedOrders: Array<{ id: string; name: string | null; quoted: number; paid: number }>;
   totals: {
     customers: number;
     bySpace: Record<string, number>;
@@ -61,7 +59,6 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
     return {
       customers: [],
       real: [],
-      unownedOrders: [],
       totals: { customers: 0, bySpace: {}, needingReply: 0, anonymous: 0, rowsRead: 0, unowned: { orders: 0, quoted: 0, paid: 0 } },
       failures,
     };
@@ -106,7 +103,6 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
   // consultant typed on a form, not an identity: two of those lines in a row made one
   // buyer appear twice on the customers screen, once with his number and once without.
   const unowned = { orders: 0, quoted: 0, paid: 0 };
-  const unownedOrders: CustomersRead["unownedOrders"] = [];
   for (const o of orders.rows) {
     const owner = byUserId.get(String(o.user_id ?? ""));
     const paid = o.deposit_paid === true ? money(o.deposit_amount) : 0;
@@ -114,12 +110,6 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
       unowned.orders++;
       unowned.quoted += money(o.total_amount);
       unowned.paid += paid;
-      unownedOrders.push({
-        id: String(o.id),
-        name: str(o.customer_name)?.trim() || null,
-        quoted: money(o.total_amount),
-        paid,
-      });
       continue;
     }
     rows.push({
@@ -146,7 +136,6 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
   return {
     customers,
     real,
-    unownedOrders,
     totals: {
       customers: real.length,
       bySpace: real.reduce<Record<string, number>>((acc, c) => {

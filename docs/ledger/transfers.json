@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T23:48:55.191Z",
+  "generatedAt": "2026-09-30T01:57:09.976Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 460,
+    "not-moved": 459,
     "moved": 3,
     "moving": 2
   },
@@ -334,11 +334,6 @@
     {
       "kind": "admin-door",
       "atom": "app/api/admin/command/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "admin-door",
-      "atom": "app/api/admin/customers/orders/route.ts",
       "state": "not-moved"
     },
     {

@@ -40,10 +40,6 @@ interface Lead {
   tier: "diamond" | "gold" | "silver" | "bronze";
   score?: number;
   status: string;
-  /** The profile rows behind this customer — the only thing an order may be attached to. */
-  profile_ids?: string[];
-  money?: { quoted: number; paid: number };
-  spaces?: string[];
   created_at: string;
   messages?: Array<{ role: string; content: string; source?: string; timestamp?: string }>;
   telemetry?: {
@@ -62,14 +58,6 @@ interface Lead {
   };
 }
 
-/** An order the ledger holds but nobody owns yet — money waiting for a name. */
-interface UnownedOrder {
-  id: string;
-  name: string | null;
-  quoted: number;
-  paid: number;
-}
-
 function FreshnessBadge({ lead }: { lead: Lead }) {  const f = freshnessOf(hoursSinceLastTouch(lead));
   return (
     <span className={`px-2 py-1 rounded-full text-[10px] border ${FRESHNESS_STYLE[f.key]}`}>
@@ -83,8 +71,6 @@ export default function CustomersPanel() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "diamond" | "gold" | "silver" | "bronze">("all");
   const [onlyWaiting, setOnlyWaiting] = useState(false);
-  const [unowned, setUnowned] = useState<UnownedOrder[]>([]);
-  const [linking, setLinking] = useState<string | null>(null);
 
   const loadLeads = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -93,7 +79,6 @@ export default function CustomersPanel() {
       if (response.ok) {
         const data = await response.json();
         setLeads(data.leads || []);
-        setUnowned(data.unownedOrders || []);
       }
     } catch (error) {
       console.error("Failed to load leads:", error);
@@ -107,27 +92,6 @@ export default function CustomersPanel() {
     const interval = setInterval(() => loadLeads(true), 3000); // Live sync every 3s
     return () => clearInterval(interval);
   }, []);
-
-  // Attaching an order to a person is the owner's call, never a guess: this sends the one
-  // pair he picked, and the door refuses anything that is not a real order and a real profile.
-  const linkOrder = async (orderId: string, profileId: string) => {
-    setLinking(orderId);
-    try {
-      const res = await fetch("/api/admin/customers/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, userId: profileId || null }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "الربط ما اتكتبش");
-      toast.success(profileId ? "الأمر بقى مسجل باسم العميل" : "الربط اتشال");
-      await loadLeads(true);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "الربط ما اتكتبش");
-    } finally {
-      setLinking(null);
-    }
-  };
 
   const waitingCount = leads.filter((l) => needsReplyNow(hoursSinceLastTouch(l))).length;
   // The waiting list leads with whoever has been ignored longest; a customer with no
@@ -466,42 +430,6 @@ export default function CustomersPanel() {
         </p>
       </div>
 
-      {/* Orders whose money has no owner yet. Shown as what they are — a receipt waiting
-          for a name — instead of being invented into a customer by a typed string. */}
-      {unowned.length > 0 && (
-        <div className="mb-4 space-y-3 rounded-xl border border-[#C5A059]/30 bg-[#C5A059]/[0.06] p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-bold text-[#C5A059]">أوامر بيع لسه مربوطش بعميل · {unowned.length}</p>
-            <p className="text-[11px] text-white/40">اختار صاحب الأمر بنفسك — مفيش حاجة بربط بالاسم لوحده</p>
-          </div>
-          {unowned.map((order) => (
-            <div key={order.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-white/10 bg-black/30 px-3 py-2">
-              <span className="text-sm text-white/80">{order.name || "أمر بلا اسم"}</span>
-              <span className="text-xs text-white/50" dir="ltr">{order.quoted.toLocaleString("en-EG")} ج</span>
-              {order.paid > 0 && (
-                <span className="text-xs text-emerald-300" dir="ltr">مقبوض {order.paid.toLocaleString("en-EG")} ج</span>
-              )}
-              <select
-                value=""
-                disabled={linking === order.id}
-                onChange={(e) => linkOrder(order.id, e.target.value)}
-                className="ms-auto rounded-lg border border-white/10 bg-black/50 px-2 py-1 text-xs text-white/80 disabled:opacity-50"
-              >
-                <option value="">{linking === order.id ? "بربط..." : "اختار العميل"}</option>
-                {leads
-                  .filter((l) => (l.profile_ids?.length ?? 0) > 0)
-                  .map((l) => (
-                    <option key={l.id} value={l.profile_ids?.[0]}>
-                      {l.name}
-                      {l.phone && l.phone !== "غير متوفر" ? ` — ${l.phone}` : ""}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Bulk Actions Bar */}
       {selectedLeads.length > 0 && (
         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between animate-in slide-in-from-top duration-300">
@@ -599,16 +527,6 @@ export default function CustomersPanel() {
                         <p className="text-white/40">وقت الاتصال: <span className="text-white font-medium">{lead.bestTime || "غير محدد"}</span></p>
                       </div>
                     </div>
-                    {lead.money && lead.money.quoted > 0 && (
-                      <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-2">
-                        <p className="text-xs text-[#C5A059] mb-1">حسابه عندك:</p>
-                        <p className="text-sm text-white/85">
-                          إجمالي الأوامر <span className="font-bold" dir="ltr">{lead.money.quoted.toLocaleString("en-EG")} ج</span>
-                          {" — "}
-                          المستلم <span className="font-bold text-emerald-300" dir="ltr">{lead.money.paid.toLocaleString("en-EG")} ج</span>
-                        </p>
-                      </div>
-                    )}
                     {lead.summary && (
                       <div className="p-3 bg-white/5 rounded-lg border border-white/10">
                         <p className="text-xs text-[#C5A059] mb-1">ملخص الذكاء الاصطناعي:</p>
