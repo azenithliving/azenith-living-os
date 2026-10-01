@@ -81,7 +81,7 @@ export default function PassportPage() {
   const confirmed = Boolean(sheet?.confirmed_at);
 
   return (
-    <main dir="rtl" className="min-h-screen bg-[#0d0f12] px-5 py-10 text-white">
+    <main dir="rtl" className="min-h-screen bg-[#0d0f12] px-5 pb-16 pt-28 text-white">
       <div className="mx-auto max-w-md">
         <p className="text-[11px] font-bold tracking-wide text-amber-400">أزينث ليفينج</p>
         <h1 className="mt-1 text-xl font-black">{sheet?.room || 'ورقة مقاساتك'}</h1>
