@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { 
-  Send, Bot, User, Loader2, Sparkles, ThumbsUp, ThumbsDown, 
-  Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff
+import {
+  Send, Bot, User, Loader2, Sparkles, ThumbsUp, ThumbsDown,
+  Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff, ShieldAlert
 } from 'lucide-react';
 import { AGENT_ROLES, SALES_MANAGER_CAPABILITIES } from '@/lib/ops/agent-roles';
 import { isOpsKey, legacyToOps, senderDisplayName } from '@/lib/ops/identity';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
+import { ApprovalGate } from './ApprovalGate';
 import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/ops/palette';
 import type { SelfModelView } from '@/lib/ops/self-view';
 import {
@@ -233,6 +234,8 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   const sessionIdRef = useRef(`chat-${agentKey}-${Date.now()}`);
   const initialTriggerRef = useRef(false);
   const [showRoles, setShowRoles] = useState(false);
+  const [showDecisions, setShowDecisions] = useState(false);
+  const [pendingDecisions, setPendingDecisions] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const firstUnreadRef = useRef<HTMLDivElement>(null);
@@ -723,37 +726,37 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
     >
       {/* Header */}
       <div data-chat-header="" className={`p-4 border-b ${colors.border} flex items-center justify-between ${colors.bg}`}>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           {fullScreen && (
-            <Link href="/admin/v2/agents" title="رجوع لمركز القيادة" className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white text-lg">→</Link>
+            <Link href="/admin/v2/agents" title="رجوع لمركز القيادة" className="w-9 h-9 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white text-lg">→</Link>
           )}
-          <div className={`w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-white font-bold shadow-lg text-lg`}>
+          <div className={`shrink-0 w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-white font-bold shadow-lg text-lg`}>
             {meta.icon}
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-white text-sm">
+              <span className="font-bold text-white text-sm truncate">
                 {agentName || meta.name}
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 font-mono">
+              <span className="hidden sm:flex text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 items-center gap-1 font-mono shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 متصل
               </span>
             </div>
-            <p className="text-[11px] text-white/40">
+            <p className="text-[11px] text-white/40 truncate">
               {meta.role}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={openPalette}
             title="قائمة الأوامر (اضغط كترل وك)"
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-[11px] font-semibold transition-colors"
           >
             <Command className="w-3.5 h-3.5" />
-            أوامر
-            <span className="text-[9px] font-mono text-white/30" dir="ltr">Ctrl K</span>
+            <span className="hidden sm:inline">أوامر</span>
+            <span className="hidden text-[9px] font-mono text-white/30 sm:inline" dir="ltr">Ctrl K</span>
           </button>
           <button
             onClick={() => { setSelfOpen(true); loadSelf(true); }}
@@ -761,7 +764,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-[11px] font-semibold transition-colors"
           >
             <Fingerprint className="w-3.5 h-3.5" />
-            نفسك
+            <span className="hidden sm:inline">نفسك</span>
           </button>
           <button
             onClick={() => setShowRoles(!showRoles)}
@@ -769,13 +772,33 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${showRoles ? 'bg-white/10 border-white/20 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'}`}
           >
             <Layers className="w-3.5 h-3.5" />
-            أدوار
+            <span className="hidden sm:inline">أدوار</span>
           </button>
+          {fullScreen && (
+            <button
+              data-decisions-toggle=""
+              onClick={() => setShowDecisions((v) => !v)}
+              title="قرارات بانتظار كلمتك"
+              className={`relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${
+                showDecisions
+                  ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                  : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">قرارات</span>
+              {pendingDecisions > 0 && (
+                <span data-decisions-count="" className="min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {pendingDecisions}
+                </span>
+              )}
+            </button>
+          )}
           {isOpsKey(normKey) && (
             <a
               href="/admin/v2/ops"
               title="فتح استوديو سرب أزينث"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-semibold hover:bg-amber-500/25 transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-semibold hover:bg-amber-500/25 transition-colors"
             >
               <Layers className="w-3.5 h-3.5" />
               الاستوديو
@@ -804,6 +827,17 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             )}
           </div>
           <div className="text-[10px] text-white/30 mt-2">تلميح: اكتب بلهجتك العادية — "الجزء اللي فوق باهت" → أفهم "الهيرو"</div>
+        </div>
+      )}
+
+      {/* خزانة القرارات: mounted from the moment the cockpit opens so the badge on
+          the button is the real queue, and shown the moment he presses it. */}
+      {fullScreen && (
+        <div
+          data-decision-vault=""
+          className={showDecisions ? 'max-h-[46vh] overflow-y-auto border-b border-white/5 bg-black/25' : 'hidden'}
+        >
+          <ApprovalGate onCount={setPendingDecisions} />
         </div>
       )}
 
@@ -840,7 +874,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             <Bot className={`w-12 h-12 ${colors.text} mx-auto opacity-30`} />
             <p className="text-white/40 text-sm font-bold">ابدأ محادثة تشغيلية مع {agentName || agentKey}</p>
             <p className="text-white/25 text-xs max-w-sm mx-auto">
-              يمكنك طلب تنفيذ عمليات مباشرة على قاعدة البيانات، أو فحص المخزون، أو حساب قائمة الخامات، أو توليد العقود.
+              اكتب بلهجتك العادية: فحص الصفحات، صحة المحتوى، سرعة الموقع، ذاكرة الوكلاء، والقرارات اللي مستنية كلمتك.
             </p>
             <div className="flex flex-wrap justify-center gap-2 pt-2">
               {missions.map((mission, idx) => (

@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { ShieldAlert, CheckCircle, XCircle, Clock, Loader2, Inbox } from 'lucide-react';
 
-interface PendingApproval {
+import { CAPABILITY_LABELS } from '@/lib/ops/palette';
+
+export interface PendingApproval {
   id: string;
   action_type: string;
   description: string;
@@ -28,7 +30,17 @@ const RISK_LABELS: Record<string, string> = {
   low: 'منخفض', normal: 'عادي', critical: 'حرج', forbidden: 'محظور',
 };
 
-export function ApprovalGate() {
+/**
+ * The request's own name in the words the owner reads. The tool identifier is not
+ * shown as a fallback: a Latin stamp inside his Arabic decision card is the defect
+ * the identity module exists to keep out of his screens.
+ */
+export function toolLabel(approval: PendingApproval): string {
+  const key = approval.metadata?.toolName;
+  return (key && CAPABILITY_LABELS[key]) || '';
+}
+
+export function ApprovalGate({ onCount }: { onCount?: (n: number) => void } = {}) {
   const [approvals, setApprovals] = useState<PendingApproval[]>([]);
   const [loading, setLoading]     = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -39,6 +51,12 @@ export function ApprovalGate() {
     const interval = setInterval(fetchApprovals, 30_000);
     return () => clearInterval(interval);
   }, []);
+
+  // Reported from the list itself, so a decision that removes a row here updates the
+  // badge on the chat's own button in the same pass.
+  useEffect(() => {
+    onCount?.(approvals.length);
+  }, [approvals.length, onCount]);
 
   async function fetchApprovals() {
     try {
@@ -90,7 +108,7 @@ export function ApprovalGate() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-black flex items-center gap-2">
           <ShieldAlert className="w-5 h-5 text-amber-400" />
-          بوابة الموافقات
+          قرارات بانتظار كلمتك
         </h2>
         {approvals.length > 0 && (
           <span className="px-3 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-full text-xs font-bold animate-pulse">
@@ -146,9 +164,11 @@ export function ApprovalGate() {
                       <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${risk.badge}`}>
                         {risk.icon} {RISK_LABELS[approval.risk_level] ?? approval.risk_level}
                       </span>
-                      <code className="text-[10px] text-white/30 font-mono bg-white/[0.04] px-2 py-0.5 rounded">
-                        {approval.metadata?.toolName ?? approval.action_type}
-                      </code>
+                      {toolLabel(approval) && (
+                        <span className="text-[10px] text-white/40 bg-white/[0.04] px-2 py-0.5 rounded">
+                          {toolLabel(approval)}
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-white/80 leading-snug">{approval.description}</p>
                   </div>
