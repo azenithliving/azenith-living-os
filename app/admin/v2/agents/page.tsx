@@ -35,6 +35,9 @@ export function previewLine(content: string): string {
   return clean.length > 130 ? `${clean.slice(0, 127).trimEnd()}…` : clean;
 }
 
+/** His numerals are the Arabic ones — the same shape the rest of the cockpit uses. */
+const arNum = (n: number) => new Intl.NumberFormat('ar-EG').format(n);
+
 const DEPT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   operations: ShieldCheck,
   sales: Users,
@@ -127,7 +130,7 @@ export default function V2AgentsPage() {
       <header className="mb-5">
         <h1 className="text-lg font-black text-white">{SWARM_NAME}</h1>
         <p className="mt-0.5 text-[11px] text-white/40">
-          {DEPARTMENT_KEYS.length} أبواب حيّة، كل باب يفتح محادثة كاملة الشاشة مع موظف حقيقي
+          {arNum(DEPARTMENT_KEYS.length)} أبواب حيّة، كل باب يفتح محادثة كاملة الشاشة مع موظف حقيقي
         </p>
         <p className="mt-1 text-[10px] leading-relaxed text-white/25">
           الأرقام هنا من سجل الرسائل نفسه: العدّاد بيتقفل لما تفتح المحادثة فعلاً.
@@ -232,13 +235,13 @@ function EmployeeCard({
             </h3>
             {unread > 0 && (
               <span className="shrink-0 rounded-full bg-rose-500 px-1.5 py-0.5 text-[9px] font-bold text-white animate-pulse">
-                {unread}
+                {arNum(unread)}
               </span>
             )}
           </div>
           <p className="mt-0.5 truncate text-[10px] text-white/35">
             {isLeader ? 'قائد السرب' : SWARM_NAME} · {statusText}
-            {status?.taskCount ? ` · ${status.taskCount} مهمة` : ''}
+            {status?.taskCount ? ` · ${arNum(status.taskCount)} مهمة` : ''}
           </p>
         </div>
       </div>

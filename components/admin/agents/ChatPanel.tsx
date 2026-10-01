@@ -13,7 +13,7 @@ import { SelfModelPanel } from './SelfModelPanel';
 import { ApprovalGate } from './ApprovalGate';
 import { QuickActionsPanel } from './QuickActionsPanel';
 import { EmergencyBanner } from './EmergencyBanner';
-import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/ops/palette';
+import { buildPalette, isPaletteHotkey, CAPABILITY_LABELS, type PaletteCommand } from '@/lib/ops/palette';
 import type { SelfModelView } from '@/lib/ops/self-view';
 import {
   CONTINUOUS_SILENCE_MS,
@@ -1101,7 +1101,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             data-actions-drawer=""
             aria-hidden={!showActions}
             className={`absolute inset-y-0 left-0 z-30 w-[88%] max-w-sm overflow-y-auto border-r border-white/10 bg-[#0d0f12] shadow-2xl transition-transform duration-200 ease-out ${
-              showActions ? 'translate-x-0' : '-translate-x-full'
+              showActions ? 'translate-x-0' : '-translate-x-[102%]'
             }`}
           >
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-[#0d0f12]/95 px-4 py-3 backdrop-blur">
@@ -1303,9 +1303,12 @@ function StructuredToolCard({ toolName, toolData }: { toolName: string; toolData
         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-bold">
           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
           {toolData?.success === false ? 'فشل التنفيذ' : 'تم التنفيذ الفعلي'}
-          {/* The tool id is Latin: its own element, its own direction, or the
-              Arabic sentence around it arrives scrambled. */}
-          <span className="font-mono text-[10px] text-emerald-200/80" dir="ltr">{toolName}</span>
+          {/* The tool id is a machine name and stays off his sentence; the Arabic
+              capability label says the same thing. The raw id is still one press
+              away in the data panel below. */}
+          {CAPABILITY_LABELS[toolName] ? (
+            <span className="text-[10px] text-emerald-200/80">{CAPABILITY_LABELS[toolName]}</span>
+          ) : null}
         </span>
         {toolData && (
           <button

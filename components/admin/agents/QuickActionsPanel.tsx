@@ -100,7 +100,7 @@ function ResultBox({ result }: { result: ActionResult }) {
   const hasData = result.data && Object.keys(result.data).length > 0;
 
   return (
-    <div className={`mt-2 rounded-xl p-3 text-xs border ${
+    <div data-action-result="" className={`mt-2 rounded-xl p-3 text-xs border ${
       result.success
         ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
         : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
