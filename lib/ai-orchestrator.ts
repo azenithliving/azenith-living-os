@@ -6,6 +6,7 @@
 import { runMastermind } from "./mastermind-graph";
 import { routeRequest, getBestModelForTask } from "./openrouter-service";
 import { getNextAvailableKey, setKeyCooldown, incrementKeyUsage, getKeyStats } from "./api-keys-service";
+import { ALL_PROVIDERS_MESSAGE, NO_KEY_MESSAGE } from "@/lib/ops/capability-tiers";
 
 type AIProvider =
   | "groq"
@@ -59,7 +60,9 @@ async function fetchWithRetry<T>(
     
     if (!keyData) {
       console.error(`[FetchWithRetry] [${requestId}] No API keys available for ${provider}`);
-      return { success: false, error: `No API keys available for ${provider}` };
+      // The log stays machine prose; what the owner reads is his language, and it names
+      // the state («no key») rather than an internal phrase he cannot act on.
+      return { success: false, error: NO_KEY_MESSAGE };
     }
 
     const { key } = keyData;
@@ -565,7 +568,7 @@ export async function askOrchestratorMessages(
     }
   }
 
-  return { success: false, content: "", error: "All Orchestrator fallbacks exhausted. The Hive Mind is unreachable." };
+  return { success: false, content: "", error: ALL_PROVIDERS_MESSAGE };
 }
 
 /**

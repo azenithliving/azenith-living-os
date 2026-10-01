@@ -146,6 +146,7 @@ export async function loadKeysFromDB(): Promise<void> {
 export async function getKeyFromDB(
   provider: ApiKeyProvider
 ): Promise<string | null> {
+  if (keylessDrillOn()) return null;
   try {
     const supabase = getSupabaseAdminClient();
     if (!supabase) return null;
@@ -189,12 +190,26 @@ const keyIndices: Record<string, number> = {
 };
 
 /**
+ * The keyless drill, on purpose: `OPS_KEYS_OFF=1` on the development server makes every
+ * provider answer as though it had no key at all, so the store is measured against the
+ * owner's law — «everything must still work with zero keys» — instead of argued about.
+ *
+ * Guarded to development on two counts: the published store must never be dimmable by an
+ * environment variable someone forgot to remove, and the drill's whole value is that it
+ * fails the same way a dead key fails.
+ */
+export function keylessDrillOn(): boolean {
+  return process.env.OPS_KEYS_OFF === "1" && process.env.NODE_ENV !== "production";
+}
+
+/**
  * Get next available key using round-robin with cooldown support
  * ⚠️ SKIPS DEAD KEYS COMPLETELY - they never enter the work cycle
  */
 export async function getNextAvailableKey(
   provider: ApiKeyProvider
 ): Promise<{ key: string; index: number } | null> {
+  if (keylessDrillOn()) return null;
   if (!keysLoaded || (Date.now() - lastLoadTime > RELOAD_INTERVAL_MS)) {
     await loadKeysFromDB();
   }

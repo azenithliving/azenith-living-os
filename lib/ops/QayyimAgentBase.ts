@@ -4,6 +4,7 @@
  */
 
 import { askOrchestratorMessages } from "@/lib/ai-orchestrator";
+import { modelFloorLine, modelFailureReason } from "@/lib/ops/capability-tiers";
 import { withOwnerRuleOnMessages } from "@/lib/ops/owner-address";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
@@ -47,6 +48,13 @@ export abstract class QayyimAgentBase {
   protected conversationHistory: Array<{ role: "user" | "assistant"; content: string }> = [];
   protected maxHistoryLength = 20;
   protected companyId: string | null = null;
+
+  /**
+   * Which row of `lib/ops/capability-tiers.ts` describes this agent's work. A subclass that
+   * does something else (reading papers, watching the site) overrides it, so the answer it
+   * gives with no model is the floor of ITS capability, not a generic apology.
+   */
+  protected capabilityId = "chat";
 
   // Each agent MUST define these
   abstract readonly agentKey: string; // 'ops-lead', 'ops-content', etc.
@@ -169,7 +177,9 @@ export abstract class QayyimAgentBase {
       const errorResult: QayyimResult = {
         success: false,
         taskId: task.id,
-        output: `⚠️ خطأ تقني: ${error.message || "خطأ غير معروف"}. يرجى المحاولة مرة أخرى.`,
+        // Not «a technical error happened»: the answer names what still stands without a
+        // model, so the owner reads a state he can act on instead of a stack trace.
+        output: modelFloorLine(this.capabilityId, modelFailureReason(error?.message)),
         confidence: 0
       };
       await this.logTask(task, errorResult, Date.now() - startTime);
@@ -192,7 +202,7 @@ export abstract class QayyimAgentBase {
 
       return response;
     } catch (error: any) {
-      return `عذراً، واجهت مشكلة تقنية: ${error.message}. يرجى إعادة المحاولة.`;
+      return modelFloorLine(this.capabilityId, modelFailureReason(error?.message));
     }
   }
 

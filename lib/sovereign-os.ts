@@ -16,6 +16,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
+import { NO_KEY_MESSAGE } from "@/lib/ops/capability-tiers";
 
 // ============================================
 // TYPES & CONFIGURATION
@@ -676,7 +677,7 @@ class IntelligenceScalingEngine {
     }
 
     if (availableKeys.length === 0) {
-      return tasks.map(() => ({ success: false, error: "No API keys available" }));
+      return tasks.map(() => ({ success: false, error: NO_KEY_MESSAGE }));
     }
 
     // Distribute chunks round-robin across keys

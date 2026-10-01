@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T20:13:38.931Z",
+  "generatedAt": "2026-10-01T20:56:08.221Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
@@ -12,7 +12,7 @@
     "rootLibFiles": 264,
     "rootLibUsed": 70,
     "orphanDoors": 71,
-    "rootLibUsedLines": 26911,
+    "rootLibUsedLines": 26930,
     "furnitureFiles": 54,
     "furnitureLines": 14934,
     "furnitureUsedByBoth": 6,
@@ -20,15 +20,15 @@
     "furnitureNewOnly": 15,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
-    "swarmFiles": 58,
-    "swarmFileLines": 14047,
+    "swarmFiles": 59,
+    "swarmFileLines": 14195,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 10,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 463
+    "atoms": 464
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -946,7 +946,7 @@
     {
       "kind": "root-lib",
       "id": "lib/ai-orchestrator.ts",
-      "lines": 775,
+      "lines": 778,
       "callers": 10
     },
     {
@@ -958,7 +958,7 @@
     {
       "kind": "root-lib",
       "id": "lib/api-keys-service.ts",
-      "lines": 642,
+      "lines": 657,
       "callers": 5
     },
     {
@@ -1144,7 +1144,7 @@
     {
       "kind": "root-lib",
       "id": "lib/sovereign-os.ts",
-      "lines": 1235,
+      "lines": 1236,
       "callers": 1
     },
     {
@@ -1946,6 +1946,11 @@
     },
     {
       "kind": "swarm-file",
+      "id": "lib/ops/capability-tiers.ts",
+      "lines": 138
+    },
+    {
+      "kind": "swarm-file",
       "id": "lib/ops/chat-brain.ts",
       "lines": 90
     },
@@ -2097,7 +2102,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/QayyimAgentBase.ts",
-      "lines": 480
+      "lines": 490
     },
     {
       "kind": "swarm-file",

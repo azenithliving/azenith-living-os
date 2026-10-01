@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T20:13:38.935Z",
+  "generatedAt": "2026-10-01T20:56:08.224Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 455,
+    "not-moved": 456,
     "moved": 6,
     "moving": 1,
     "erased": 1
@@ -158,7 +158,7 @@
       "state": "moved",
       "phase": "M2",
       "when": "2026-10-01",
-      "proof": "measured on the published site at 390px: 17 papers on the desk, each with its owner control; searching the roll in Arabic-Indic digits (٥٦٨) returned 1 candidate, pressing it wrote the link and the name survived a reload; a customer typing his own mobile on a paper the store could NOT read still claimed it, so the desk showed his name for it; the per-customer filter answered 2 rows with every row carrying the same key, and «شيل الاسم» put both back to «من غير صاحب» with 0 console errors. Taking the parked pixel engine out of the request cut the desk's answer from 57-63 s to 22 s on the same paper. The witnesses are now what they really are: across all 17 stored readings the offline pixel engine finished inside a request 0 times (12 honest failures between 12 and 40 s, and 4 rows that claimed 480 ms turned out to be a figure one of my own test instruments had handed the door — marked as such in the row, and the door refuses a client-supplied witness under guard). The reader proposes, the customer confirms, and the desk says which is which"
+      "proof": "measured on the published site at 390px: 17 papers on the desk, each with its owner control; searching the roll in Arabic-Indic digits (٥٦٧٨) returned 1 candidate, pressing it wrote the link and the name survived a reload; a customer typing his own mobile on a paper the store could NOT read still claimed it, so the desk showed his name for it; the per-customer filter answered 2 rows with every row carrying the same key, and «شيل الاسم» put both back to «من غير صاحب» with 0 console errors. Taking the parked pixel engine out of the request cut the desk's answer from 57-63 s to 22 s on the same paper. The witnesses are now what they really are: across all 17 stored readings the offline pixel engine finished inside a request 0 times (12 honest failures between 12 and 40 s, and 4 rows that claimed 480 ms turned out to be a figure one of my own test instruments had handed the door — marked as such in the row, and the door refuses a client-supplied witness under guard). The reader proposes, the customer confirms, and the desk says which is which"
     },
     {
       "kind": "new-page",
@@ -1812,6 +1812,11 @@
     {
       "kind": "swarm-file",
       "atom": "lib/ops/canary.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/capability-tiers.ts",
       "state": "not-moved"
     },
     {
