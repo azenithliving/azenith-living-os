@@ -732,7 +732,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       <EmergencyBanner />
 
       {/* Header */}
-      <div data-chat-header="" className={`p-4 border-b ${colors.border} flex flex-wrap items-center gap-y-2 justify-between ${colors.bg}`}>
+      <div data-chat-header="" className={`p-4 border-b ${colors.border} flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:gap-3 sm:items-center justify-between ${colors.bg}`}>
         <div className="flex items-center gap-3 min-w-0 flex-1">
           {fullScreen && (
             <Link href="/admin/v2/agents" title="رجوع لمركز القيادة" className="w-9 h-9 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white text-lg">→</Link>
@@ -755,7 +755,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             </p>
           </div>
         </div>
-        <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
+        <div className="flex items-center justify-end sm:justify-start gap-2 shrink-0">
           <button
             onClick={openPalette}
             title="قائمة الأوامر (اضغط كترل وك)"
