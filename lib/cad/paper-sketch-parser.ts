@@ -30,7 +30,16 @@ function langSource(): { langPath: string; gzip: boolean } | null {
   return base ? { langPath: `${base}/ocr`, gzip: false } : null;
 }
 
-export type SketchDimension = { label: string; meters: number; confirmed: boolean };
+export type SketchDimension = {
+  label: string;
+  meters: number;
+  confirmed: boolean;
+  /** Who vouched for this number. A number with no witness is never shown as done. */
+  confirmedBy?: Witness[];
+};
+
+/** The two witnesses that can vouch for a number besides the reader itself. */
+export type Witness = 'pixels' | 'customer';
 export type SketchOpening = { kind: 'door' | 'window'; widthMeters: number | null };
 
 export type SketchReading = {
@@ -150,6 +159,12 @@ export async function readPaperSketch(input: {
    * its whole budget waiting for a witness that will not arrive.
    */
   runOffline?: boolean;
+  /**
+   * The numbers the customer typed for his own room. This is the witness that always
+   * answers, and the one that ends an argument: the sheet he confirmed is the sheet
+   * the store works from.
+   */
+  customer?: number[] | null;
 }): Promise<SketchReading> {
   const mime = input.mime || 'image/png';
 
@@ -206,9 +221,22 @@ export async function readPaperSketch(input: {
     .filter((o): o is SketchOpening => o !== null)
     .slice(0, 12);
 
+  const customerNumbers = (Array.isArray(input.customer) ? input.customer : [])
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value) && value > 0 && value < 200);
+  const customerSignatures = new Set<string>();
+  for (const value of customerNumbers) {
+    for (const form of numberSignatures(Math.round(value * 100) / 100)) customerSignatures.add(form);
+  }
+
   for (const dimension of dimensions) {
     const forms = numberSignatures(dimension.meters);
-    dimension.confirmed = [...forms].some((form) => ocrSignatures.has(form));
+    const seen = [...forms];
+    const by: Witness[] = [];
+    if (seen.some((form) => ocrSignatures.has(form))) by.push('pixels');
+    if (seen.some((form) => customerSignatures.has(form))) by.push('customer');
+    dimension.confirmedBy = by;
+    dimension.confirmed = by.length > 0;
   }
   const confirmedCount = dimensions.filter((d) => d.confirmed).length;
   const notes = typeof raw.notes === 'string' ? raw.notes.trim().slice(0, 200) : null;
@@ -219,17 +247,23 @@ export async function readPaperSketch(input: {
   const areaSqm = verified.length >= 2 ? Math.round(verified[0] * verified[1] * 100) / 100 : null;
 
   if (!model.success) {
-    // The quota is spent, not the measurement. The numbers the pixels showed are
-    // still handed over — as one witness's word, labelled as such.
-    const alone = ocrNumbers
-      .filter((value) => value >= 0.2 && value <= 40)
-      .slice(0, 12)
-      .map((value) => ({ label: 'من الورقة', meters: value, confirmed: false }));
+    // The quota is spent, not the measurement. The numbers the pixels showed and the
+    // numbers the customer typed are still handed over — as one witness's word,
+    // labelled as such, because there is nothing yet to compare them against.
+    const alone: SketchDimension[] = [
+      ...ocrNumbers
+        .filter((value) => value >= 0.2 && value <= 40)
+        .map((value) => ({ label: 'من الورقة', meters: value, confirmed: false, confirmedBy: [] as Witness[] })),
+      ...customerNumbers.map((value) => ({
+        label: 'كتبها العميل',
+        meters: Math.round(value * 100) / 100,
+        confirmed: false,
+        confirmedBy: [] as Witness[],
+      })),
+    ].slice(0, 12);
     return {
       ok: false,
-      failure: ocr.ran
-        ? `القارئ الذكي مرفوض دلوقتي (${shortError(model.error)}) — الأرقام دي شوفت في البيكسلات بس، وشاهد واحد ما بيكفيش`
-        : `القارئ الذكي مرفوض والمحلي ما كملش (${shortError(model.error)})`,
+      failure: `القارئ الذكي مرفوض دلوقتي (${shortError(model.error)}) — الأرقام دي من البيكسلات أو من كلام العميل، وشاهد واحد ما بيكفيش`,
       room,
       dimensions: alone,
       openings: [],
@@ -267,23 +301,15 @@ export async function readPaperSketch(input: {
       notes,
     };
   }
-  if (!ocr.ran) {
-    return {
-      ok: false,
-      failure: `المحرك المحلي ما كملش القراءة (${ocr.error || 'سبب غير معروف'}) — الرقم من شاهد واحد ومتعلّمتش كمنجز`,
-      room,
-      dimensions,
-      openings,
-      areaSqm: null,
-      confirmedCount,
-      ocr,
-      notes,
-    };
-  }
   if (confirmedCount === 0) {
+    const others: string[] = [];
+    if (ocr.ran) others.push('قراءة البيكسلات');
+    if (customerNumbers.length) others.push('المقاسات اللي كتبها العميل');
     return {
       ok: false,
-      failure: 'ولا رقم من اللي استخرجهم القارئ الذكي ظهر في قراءة البيكسلات — بيتعرض اقتراح، مش منجز',
+      failure: others.length
+        ? `ولا رقم من اللي استخرجهم القارئ الذكي طابق ${others.join(' ولا ')} — بيتعرض اقتراح، مش منجز`
+        : `مفيش شاهد تاني يطابق الأرقام (${ocr.error || 'قارئ البيكسلات ما كملش'}) — بيتعرض اقتراح، مش منجز`,
       room,
       dimensions,
       openings,
@@ -313,4 +339,25 @@ function shortError(message: string | undefined | null): string {
   if (!text) return 'سبب غير معروف';
   if (/429|quota|rate/i.test(text)) return 'سقف الدقايق خلص';
   return text.slice(0, 60);
+}
+
+/**
+ * Compare a stored reading against numbers the customer typed, with the same folding
+ * the witnesses already use — so the desk, the passport page and the parser cannot
+ * disagree about what «the same number» means.
+ */
+export function applyCustomerWitness<
+  T extends { label: string; meters: number; confirmed?: boolean; confirmedBy?: Witness[] }
+>(dimensions: T[], typed: number[]): (T & { confirmed: boolean; confirmedBy: Witness[] })[] {
+  const signatures = new Set<string>();
+  for (const value of typed.map((v) => Number(v)).filter((v) => Number.isFinite(v) && v > 0)) {
+    for (const form of numberSignatures(Math.round(value * 100) / 100)) signatures.add(form);
+  }
+
+  return dimensions.map((dimension) => {
+    const forms = [...numberSignatures(dimension.meters)];
+    const by: Witness[] = Array.isArray(dimension.confirmedBy) ? [...dimension.confirmedBy] : [];
+    if (forms.some((form) => signatures.has(form)) && !by.includes('customer')) by.push('customer');
+    return { ...dimension, confirmed: by.length > 0, confirmedBy: by };
+  });
 }

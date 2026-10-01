@@ -80,4 +80,39 @@ describe("a reading needs both witnesses to agree", () => {
     expect(reading.failure).toContain("صيغة مش مفهومة");
     expect(reading.failure).not.toContain("ما فيهاش رقم");
   });
+
+  it("accepts a number the customer typed himself, with no pixel engine at all", async () => {
+    modelJson({
+      room: "مجلس",
+      dimensions: [
+        { label: "الطول", meters: 5.2 },
+        { label: "العرض", meters: 4 },
+      ],
+    });
+
+    const reading = await readPaperSketch({
+      base64: "AA",
+      offline: { ran: false, text: "", confidence: null, ms: 0, error: "ما اشتغلش جوه الطلب" },
+      customer: [5.2, 4],
+    });
+
+    expect(reading.ok, "the customer is a witness that always answers").toBe(true);
+    expect(reading.confirmedCount).toBe(2);
+    expect(reading.dimensions[0].confirmedBy).toContain("customer");
+    expect(reading.areaSqm).toBeCloseTo(20.8, 1);
+  });
+
+  it("refuses when the customer's own numbers disagree with the reader", async () => {
+    modelJson({ room: "غرفة", dimensions: [{ label: "الطول", meters: 5.2 }] });
+
+    const reading = await readPaperSketch({
+      base64: "AA",
+      offline: { ran: false, text: "", confidence: null, ms: 0, error: null },
+      customer: [7.9],
+    });
+
+    expect(reading.ok).toBe(false);
+    expect(reading.failure).toContain("المقاسات اللي كتبها العميل");
+    expect(reading.areaSqm).toBeNull();
+  });
 });

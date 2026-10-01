@@ -15,6 +15,7 @@ import { requireAdminApi } from "@/lib/admin-api-guard";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { readPaperSketch } from "@/lib/cad/paper-sketch-parser";
+import { newPassportToken } from "@/lib/cad/passport";
 import { syncLayer } from "@/lib/ops/memory/SyncLayer";
 
 export const dynamic = "force-dynamic";
@@ -107,6 +108,10 @@ export async function POST(request: NextRequest) {
     .from("room_sketches")
     .insert({
       company_id: companyId,
+      // Every reading gets its own private address from the moment it exists: the
+      // customer confirms his numbers on that page, and that confirmation is the
+      // witness the store can always count on.
+      token: newPassportToken(),
       customer_key: typeof body?.customer_key === "string" ? body.customer_key.slice(0, 80) : null,
       image_path: stored ? path : null,
       room: reading.room,
@@ -122,7 +127,7 @@ export async function POST(request: NextRequest) {
         mime,
       },
     })
-    .select("id")
+    .select("id, token")
     .single();
 
   if (insertError) {
@@ -159,6 +164,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     success: true,
     id: row?.id ?? null,
+    passport_path: row?.token ? `/passport/${row.token}` : null,
     stored,
     storage_error: upload.error ? String(upload.error.message ?? upload.error).slice(0, 120) : null,
     reading,
@@ -177,7 +183,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,image_path,created_at,witnesses")
+    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,image_path,created_at,witnesses,confirmed_at,frozen_hash")
     .eq("company_id", companyId)
     .order("created_at", { ascending: false })
     .limit(20);
