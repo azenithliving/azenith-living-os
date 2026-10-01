@@ -2,9 +2,20 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Brain } from 'lucide-react';
+import { Brain, Crown, Users, Image, TrendingUp, Wrench, ShieldCheck } from 'lucide-react';
+
+import {
+  DEPARTMENTS,
+  DEPARTMENT_KEYS,
+  employeeHref,
+  employeeTitle,
+  type Department,
+} from '@/lib/ops/departments';
+import { SWARM_NAME } from '@/lib/ops/identity';
 
 type AgentStatus = { agent: string; status: 'online' | 'busy' | 'offline'; taskCount: number; recentActivity: string };
+
+type Inbox = { unread: number; teaser: string | null };
 
 /**
  * One readable line out of an agent reply.
@@ -24,37 +35,80 @@ export function previewLine(content: string): string {
   return clean.length > 130 ? `${clean.slice(0, 127).trimEnd()}…` : clean;
 }
 
+const DEPT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  operations: ShieldCheck,
+  sales: Users,
+  content: Image,
+  analytics: TrendingUp,
+  engineering: Wrench,
+  security: Brain,
+};
+
+const EMPLOYEE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  'ops-lead': Crown,
+  'ops-qa': ShieldCheck,
+  vanguard: Users,
+  'ops-content': Brain,
+  'ops-visual': Image,
+  'ops-seo': TrendingUp,
+  'ops-analytics': TrendingUp,
+  'ops-ux': Wrench,
+  'ops-dev': Wrench,
+};
+
 /**
- * P5-M2 — the seed card: notifications-first, nothing else.
- * Stats/missions live inside the full-screen chat now.
+ * The command canvas: one card per employee who actually exists, grouped under the
+ * department he belongs to.
+ *
+ * Until now this screen carried a single hardcoded card for the leader. The other
+ * seven employees and the sales manager each had a working full-screen conversation
+ * that nothing linked to — so reaching them meant typing an address, which is not
+ * how a shop owner runs a shop from a phone.
+ *
+ * The badge is fetched ONCE on mount and never polled: the chat panel is what marks
+ * a thread read, when the owner actually opens the conversation. Polling here would
+ * either mark his inbox read behind his back or re-count the same noise.
  */
 export default function V2AgentsPage() {
-  const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
-  const [unread, setUnread] = useState(0);
-  const [teaser, setTeaser] = useState<string | null>(null);
+  const [statuses, setStatuses] = useState<Record<string, AgentStatus> | null>(null);
+  const [inboxes, setInboxes] = useState<Record<string, Inbox>>({});
 
-  // The badge is fetched ONCE on mount and never polled: `/messages?mark_read=true`
-  // is what clears it (the chat panel does that when the admin actually opens the
-  // conversation), and polling here would either mark his inbox read behind his
-  // back or re-count the same noise.
   const fetchOnce = useCallback(async () => {
     try {
-      const [statusRes, msgRes] = await Promise.all([
-        fetch('/api/admin/agents/chat'),
-        fetch('/api/admin/agents/messages?agent_key=ops-lead&unread=true'),
-      ]);
+      const statusRes = await fetch('/api/admin/agents/chat');
       const statusData = await statusRes.json();
-      if (statusData.success && statusData.data?.['ops-lead']) setAgentStatus(statusData.data['ops-lead']);
-      const msgData = await msgRes.json();
-      if (msgData.success) {
-        setUnread(msgData.count || 0);
-        const last = (msgData.data || []).filter((m: any) => m.sender_type === 'agent').slice(-1)[0];
-        if (last) setTeaser(previewLine(String(last.content || '')));
+      if (statusData.success && statusData.data) {
+        setStatuses(statusData.data as Record<string, AgentStatus>);
       }
     } catch {}
+
+    const settled = await Promise.all(
+      DEPARTMENT_KEYS.map(async (key) => {
+        try {
+          const res = await fetch(`/api/admin/agents/messages?agent_key=${key}&unread=true`);
+          const data = await res.json();
+          if (!data.success) return [key, { unread: 0, teaser: null }] as const;
+          const last = (data.data || [])
+            .filter((m: any) => m.sender_type === 'agent')
+            .slice(-1)[0];
+          return [
+            key,
+            {
+              unread: data.count || 0,
+              teaser: last ? previewLine(String(last.content || '')) || null : null,
+            },
+          ] as const;
+        } catch {
+          return [key, { unread: 0, teaser: null }] as const;
+        }
+      })
+    );
+    setInboxes(Object.fromEntries(settled));
   }, []);
 
-  useEffect(() => { fetchOnce(); }, [fetchOnce]);
+  useEffect(() => {
+    fetchOnce();
+  }, [fetchOnce]);
 
   // Live status dot only (never touches read state)
   useEffect(() => {
@@ -62,47 +116,140 @@ export default function V2AgentsPage() {
       try {
         const res = await fetch('/api/admin/agents/chat');
         const data = await res.json();
-        if (data.success && data.data?.['ops-lead']) setAgentStatus(data.data['ops-lead']);
+        if (data.success && data.data) setStatuses(data.data as Record<string, AgentStatus>);
       } catch {}
     }, 30000);
     return () => clearInterval(iv);
   }, []);
 
-  const statusText = agentStatus?.status === 'online' ? 'متصل وجاهز' : agentStatus?.status === 'busy' ? 'قيد المعالجة' : 'نشط';
-  const dotColor = agentStatus?.status === 'busy' ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500';
+  return (
+    <div className="min-h-[70vh] p-4 pt-16 sm:p-6 sm:pt-8" dir="rtl">
+      <header className="mb-5">
+        <h1 className="text-lg font-black text-white">{SWARM_NAME}</h1>
+        <p className="mt-0.5 text-[11px] text-white/40">
+          {DEPARTMENT_KEYS.length} أبواب حيّة، كل باب يفتح محادثة كاملة الشاشة مع موظف حقيقي
+        </p>
+        <p className="mt-1 text-[10px] leading-relaxed text-white/25">
+          الأرقام هنا من سجل الرسائل نفسه: العدّاد بيتقفل لما تفتح المحادثة فعلاً.
+        </p>
+      </header>
+
+      <div className="space-y-7">
+        {DEPARTMENTS.map((dept) => (
+          <DepartmentBlock key={dept.id} dept={dept} statuses={statuses} inboxes={inboxes} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DepartmentBlock({
+  dept,
+  statuses,
+  inboxes,
+}: {
+  dept: Department;
+  statuses: Record<string, AgentStatus> | null;
+  inboxes: Record<string, Inbox>;
+}) {
+  const Icon = DEPT_ICONS[dept.id] ?? Brain;
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center p-6" dir="rtl">
-      <Link
-        href="/admin/v2/agents/ops"
-        className="group w-full max-w-md block rounded-[2rem] border border-amber-500/25 bg-white/[0.02] hover:bg-amber-500/[0.04] p-7 transition-all shadow-xl"
-      >
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <div className="absolute inset-0 bg-amber-500 blur-xl opacity-20 rounded-full" />
-            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-yellow-700/10 border border-amber-500/25 flex items-center justify-center">
-              <Brain className="w-7 h-7 text-amber-400" />
-            </div>
-            <span className={`absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 rounded-full border-2 border-black ${dotColor}`} />
+    <section>
+      <div className="mb-2.5 flex items-center gap-2">
+        <Icon className="w-3.5 h-3.5 text-white/35" />
+        <h2 className="text-[12px] font-bold text-white/55">{dept.title}</h2>
+        <span className="h-px flex-1 bg-white/[0.06]" />
+      </div>
+
+      {dept.members.length === 0 ? (
+        dept.vacancy && (
+          <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.015] px-4 py-3 text-[11px] leading-relaxed text-white/45">
+            {dept.vacancy}
+          </p>
+        )
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {dept.members.map((key) => (
+            <EmployeeCard
+              key={key}
+              agentKey={key}
+              status={statuses?.[key] ?? null}
+              inbox={inboxes[key]}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function EmployeeCard({
+  agentKey,
+  status,
+  inbox,
+}: {
+  agentKey: string;
+  status: AgentStatus | null;
+  inbox: Inbox | undefined;
+}) {
+  const isLeader = agentKey === 'ops-lead';
+  const Icon = EMPLOYEE_ICONS[agentKey] ?? Brain;
+  const statusText =
+    status?.status === 'online' ? 'متصل وجاهز' : status?.status === 'busy' ? 'قيد المعالجة' : 'نشط';
+  const dotColor = status?.status === 'busy' ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500';
+  const unread = inbox?.unread ?? 0;
+  const teaser =
+    inbox?.teaser ??
+    (inbox ? 'لا رسائل جديدة — افتح المحادثة لتكلّفه.' : 'بستنى رد السيرفر…');
+
+  return (
+    <Link
+      href={employeeHref(agentKey)}
+      data-employee-card={agentKey}
+      className="group block rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 transition-colors hover:border-amber-500/30 hover:bg-amber-500/[0.04]"
+    >
+      <div className="flex items-center gap-3">
+        <div className="relative shrink-0">
+          <div
+            className={`w-10 h-10 rounded-xl border bg-gradient-to-br flex items-center justify-center ${
+              isLeader
+                ? 'from-amber-500/20 to-yellow-700/10 border-amber-500/25 text-amber-400'
+                : 'from-white/10 to-white/[0.03] border-white/10 text-white/70'
+            }`}
+          >
+            <Icon className="w-5 h-5" />
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="font-black text-white text-lg">مدير تشغيل المحتوى</h2>
-              {unread > 0 && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500 text-white animate-pulse">{unread} ●</span>
-              )}
-            </div>
-            <p className="text-[11px] text-white/40">سرب أزينث · {statusText}{agentStatus?.taskCount ? ` · ${agentStatus.taskCount} مهمة` : ''}</p>
-          </div>
-          <span className="text-white/20 group-hover:text-amber-400 transition-colors text-xl">➜</span>
+          <span
+            className={`absolute -bottom-0.5 -left-0.5 w-2.5 h-2.5 rounded-full border-2 border-black ${dotColor}`}
+          />
         </div>
 
-        <div className="mt-5 rounded-2xl bg-black/30 border border-white/5 px-4 py-3">
-          <p className="text-xs text-white/60 leading-relaxed line-clamp-2">
-            {teaser ?? 'لا رسائل جديدة — افتح المحادثة لتكليف مدير تشغيل المحتوى.'}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="truncate text-[13px] font-black text-white">
+              {employeeTitle(agentKey)}
+            </h3>
+            {unread > 0 && (
+              <span className="shrink-0 rounded-full bg-rose-500 px-1.5 py-0.5 text-[9px] font-bold text-white animate-pulse">
+                {unread}
+              </span>
+            )}
+          </div>
+          <p className="mt-0.5 truncate text-[10px] text-white/35">
+            {isLeader ? 'قائد السرب' : SWARM_NAME} · {statusText}
+            {status?.taskCount ? ` · ${status.taskCount} مهمة` : ''}
           </p>
         </div>
-      </Link>
-    </div>
+      </div>
+
+      <p className="mt-3 line-clamp-2 rounded-xl border border-white/5 bg-black/25 px-3 py-2 text-[11px] leading-relaxed text-white/60">
+        {teaser}
+      </p>
+
+      <span className="mt-2.5 inline-block text-[10px] font-bold text-white/25 transition-colors group-hover:text-amber-400">
+        افتح المحادثة كاملة الشاشة
+      </span>
+    </Link>
   );
 }

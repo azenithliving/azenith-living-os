@@ -35,12 +35,32 @@ try {
   for (let i = 0; i < 10 && !p.url().includes('/admin'); i++) await p.waitForTimeout(2000);
   check('gate login (password+TOTP)', p.url().includes('/admin'), p.url());
 
-  // 2) Seed card page
+  // 2) The command canvas: a card for every live employee, each opening that employee.
+  // This screen used to carry one hardcoded card, so the other eight employees had
+  // no door at all and the owner reached them only by typing an address.
   await p.goto(`${BASE}/admin/v2/agents`, { waitUntil: 'domcontentloaded', timeout: 40000 });
   await p.waitForTimeout(3000);
-  const card = p.locator('a[href="/admin/v2/agents/ops"]');
-  const cardTxt = (await card.count()) ? (await card.first().textContent()) || '' : '';
-  check("seed card renders", cardTxt.includes("مدير تشغيل المحتوى") && cardTxt.includes("سرب أزينث"), cardTxt.replace(/\s+/g, ' '));
+  const cards = await p.locator('[data-employee-card]').evaluateAll((els) =>
+    els.map((e) => ({
+      key: e.getAttribute('data-employee-card'),
+      href: e.getAttribute('href'),
+      text: (e.textContent || '').replace(/\s+/g, ' ').trim(),
+    }))
+  );
+  check('canvas carries a card per live employee', cards.length === 9, `cards=${cards.length}`);
+  const wrongDoor = cards.filter((c) =>
+    c.key === 'vanguard'
+      ? c.href !== '/admin/v2/sales'
+      : c.href !== `/admin/v2/agents/ops?agent=${c.key}`
+  );
+  check('every card opens the employee it names', wrongDoor.length === 0,
+    wrongDoor.map((c) => `${c.key} to ${c.href}`).join(', '));
+  const leaderCard = cards.find((c) => c.key === 'ops-lead');
+  check('the leader card reads as a person, not a key',
+    !!leaderCard && leaderCard.text.includes('مدير تشغيل المحتوى'),
+    (leaderCard?.text ?? '(missing)').slice(0, 70));
+
+  const card = p.locator('[data-employee-card="ops-lead"]');
 
   // 3) Fullscreen chat
   await card.first().click();
