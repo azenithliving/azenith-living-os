@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-01T19:36:25.464Z",
+  "generatedAt": "2026-10-01T20:13:38.931Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
     "newPages": 12,
-    "newPageLines": 885,
+    "newPageLines": 884,
     "adminDoors": 116,
     "allDoors": 195,
     "outsideDoors": 8,
@@ -12,7 +12,7 @@
     "rootLibFiles": 264,
     "rootLibUsed": 70,
     "orphanDoors": 71,
-    "rootLibUsedLines": 26899,
+    "rootLibUsedLines": 26911,
     "furnitureFiles": 54,
     "furnitureLines": 14934,
     "furnitureUsedByBoth": 6,
@@ -165,7 +165,7 @@
     {
       "kind": "new-page",
       "id": "app/admin/v2/sketches/page.tsx",
-      "lines": 297
+      "lines": 296
     },
     {
       "kind": "new-page",
@@ -976,7 +976,7 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/paper-sketch-parser.ts",
-      "lines": 364,
+      "lines": 376,
       "callers": 1
     },
     {
