@@ -115,7 +115,48 @@ const AGENT_MISSIONS: Record<string, string[]> = {
   ],
 };
 
-function InlineDraftPreview({ previewUrl, onApprove, onReject, onBetter }: { previewUrl: string; onApprove: () => void; onReject: () => void; onBetter: () => void }) {
+/**
+ * The instant preview. One press opens the picture over the conversation, the slider
+ * takes him to four times its size to read a joint or a seam, and one press puts him
+ * back in the same thread — leaving the chat should not be the price of looking
+ * closely at something. Anchored inside the chat's own box, like the drawer.
+ */
+function ZoomOverlay({ src, label, onClose }: { src: string; label: string; onClose: () => void }) {
+  const [zoom, setZoom] = useState(100);
+  return (
+    <div data-zoom-overlay="" className="absolute inset-0 z-40 flex flex-col bg-black/85 backdrop-blur-sm" dir="rtl">
+      <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3">
+        <span className="min-w-0 truncate text-[12px] font-black text-white">{label}</span>
+        <button
+          onClick={onClose}
+          title="إغلاق"
+          className="w-8 h-8 shrink-0 rounded-lg bg-white/10 border border-white/15 text-white/70 hover:text-white"
+        >
+          ✕
+        </button>
+      </div>
+      <div className="flex-1 overflow-auto p-3">
+        <img src={src} alt={label} style={{ width: `${zoom}%` }} className="mx-auto rounded-xl" />
+      </div>
+      <div className="flex items-center gap-3 border-t border-white/10 px-4 py-3">
+        <span className="shrink-0 text-[10px] text-white/40">تكبير</span>
+        <input
+          data-zoom-range=""
+          type="range"
+          min={100}
+          max={400}
+          step={20}
+          value={zoom}
+          onChange={(e) => setZoom(parseInt(e.target.value))}
+          className="flex-1 accent-amber-500"
+        />
+        <span className="w-14 shrink-0 text-center text-[11px] font-bold text-amber-300">{arNum(zoom)}٪</span>
+      </div>
+    </div>
+  );
+}
+
+function InlineDraftPreview({ previewUrl, onApprove, onReject, onBetter, onZoom }: { previewUrl: string; onApprove: () => void; onReject: () => void; onBetter: () => void; onZoom?: (src: string, label: string) => void }) {
   const [data, setData] = useState<any>(null);
   const [slider, setSlider] = useState(50);
   const token = previewUrl.split('token=')[1]?.split('&')[0] || previewUrl.split('/').pop()?.split('?')[0] || '';
@@ -138,7 +179,18 @@ function InlineDraftPreview({ previewUrl, onApprove, onReject, onBetter }: { pre
     <div className="mt-3 rounded-xl border border-white/10 overflow-hidden bg-black/20">
       <div className="flex items-center justify-between px-3 py-2 bg-white/5 border-b border-white/10">
         <span className="text-[11px] font-bold text-white/70">معاينة قبل وبعد — حقيقية من قاعدة البيانات</span>
-        <a href={previewUrl} target="_blank" className="text-[10px] text-sky-300 hover:underline">فتح كامل ↗</a>
+        <span className="flex items-center gap-3">
+          {isImage && onZoom && (afterImg || beforeImg) && (
+            <button
+              data-full-preview=""
+              onClick={() => onZoom(String(afterImg || beforeImg), 'المسودة المقترحة')}
+              className="text-[10px] font-bold text-amber-300 hover:text-amber-200"
+            >
+              معاينة بملء الشاشة
+            </button>
+          )}
+          <a href={previewUrl} target="_blank" className="text-[10px] text-sky-300 hover:underline">فتح كامل ↗</a>
+        </span>
       </div>
       {isImage && beforeImg && afterImg ? (
         <div className="relative h-56 overflow-hidden bg-black">
@@ -173,16 +225,29 @@ function InlineDraftPreview({ previewUrl, onApprove, onReject, onBetter }: { pre
   );
 }
 
-function MarkdownContent({ content }: { content: string }) {
+function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: string, label: string) => void }) {
   const lines = content.split('\n');
   const elements: any[] = [];
   let tableRows: string[][] = [];
   // P5-M2: any site path or URL inside prose becomes a real clickable link
   const INLINE_LINK = /(https?:\/\/[^\s)>\]"'،]+|(?<![\w/])\/[A-Za-z0-9\-_./%]+[A-Za-z0-9\-_/])/g;
+  const IMAGE_URL = /\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i;
   const renderInline = (text: string) => {
     const parts = text.split(INLINE_LINK);
     return parts.map((part, i) =>
-      part && /^(https?:\/\/|\/[A-Za-z])/.test(part) ? (
+      part && IMAGE_URL.test(part) && onZoom ? (
+        // Any picture named in the conversation is pressable: one press opens it over
+        // the thread with a zoom, one press puts it back. A link he has to leave the
+        // chat to look at is not a preview.
+        <button
+          key={i}
+          data-image-preview={part}
+          onClick={() => onZoom(part, 'صورة من المحادثة')}
+          className="my-1 block text-right"
+        >
+          <img src={part} alt="صورة مرفقة" className="max-h-40 rounded-lg border border-white/10 object-contain" />
+        </button>
+      ) : part && /^(https?:\/\/|\/[A-Za-z])/.test(part) ? (
         <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-sky-300 hover:underline" dir="ltr">{part}</a>
       ) : (
         <span key={i}>{part}</span>
@@ -246,6 +311,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   const [showRoles, setShowRoles] = useState(false);
   const [showDecisions, setShowDecisions] = useState(false);
   const [showActions, setShowActions] = useState(false);
+  const [zoom, setZoom] = useState<{ src: string; label: string } | null>(null);
   const [pendingDecisions, setPendingDecisions] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -973,6 +1039,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
                 message={msg}
                 agentColor={activeColorKey}
                 onFeedback={handleFeedback}
+                onZoom={(src, label) => setZoom({ src, label })}
               />
             </div>
           ))
@@ -1167,6 +1234,8 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
         </>
       )}
 
+      {zoom && <ZoomOverlay src={zoom.src} label={zoom.label} onClose={() => setZoom(null)} />}
+
       <SelfModelPanel
         open={selfOpen}
         model={selfModel}
@@ -1192,10 +1261,12 @@ function MessageBubble({
   message,
   agentColor = 'purple',
   onFeedback,
+  onZoom,
 }: {
   message: Message;
   agentColor?: string;
   onFeedback?: (id: string, rating: 'positive' | 'negative') => void;
+  onZoom?: (src: string, label: string) => void;
 }) {
   const isUser   = message.sender_type === 'user';
   const isSystem = message.sender_type === 'system';
@@ -1244,7 +1315,7 @@ function MessageBubble({
               : `${colors.bubble} border rounded-tl-md shadow-md`
           }`}>
             <div className="text-sm leading-relaxed">
-              <MarkdownContent content={message.content} />
+              <MarkdownContent content={message.content} onZoom={onZoom} />
             </div>
 
             {/* أزرار الاقتراحات التنفيذية */}
@@ -1261,6 +1332,7 @@ function MessageBubble({
             {/* معاينة مسودة قبل/بعد داخل الشات */}
             {((message as any).previewUrl || (message as any).preview_token || (message.metadata as any)?.previewUrl || (message.metadata as any)?.preview_token || (message.metadata as any)?.draft?.previewToken || (message.metadata as any)?.toolData?.preview_url || (message.metadata as any)?.toolData?.preview_token || (message as any).draftId) ? (
               <InlineDraftPreview
+                onZoom={onZoom}
                 previewUrl={(message as any).previewUrl || (message as any).preview_token || (message.metadata as any)?.previewUrl || (message.metadata as any)?.preview_token || (message.metadata as any)?.toolData?.preview_url || (message.metadata as any)?.toolData?.preview_token || `/api/admin/ops/preview/${(message.metadata as any)?.draft?.previewToken || (message.metadata as any)?.toolData?.draft_id || (message as any).draftId}`}
                 onApprove={() => (window as any).__qayyimSend?.(`وافق على المسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''}`)}
                 onReject={() => (window as any).__qayyimSend?.(`ارفض المسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''}`)}
