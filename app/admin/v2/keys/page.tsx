@@ -14,6 +14,10 @@ type DeskRow = {
   rows: number;
   active: number;
   alive: number;
+  /** Proven by a real four-token request, not by a model list. */
+  writes: number;
+  /** The account answers and refuses on money. */
+  unfunded: number;
   quota: number;
   refused: number;
   quarantined: number;
@@ -22,7 +26,16 @@ type DeskRow = {
   verdict: string;
 };
 
-type Totals = { keys: number; alive: number; refused: number; quarantined: number; withLiveKey: number; needingKey: number };
+type Totals = {
+  keys: number;
+  alive: number;
+  writes: number;
+  unfunded: number;
+  refused: number;
+  quarantined: number;
+  withLiveKey: number;
+  needingKey: number;
+};
 
 /**
  * The key desk: every free model the store can run on, how many of his keys answer right
@@ -94,11 +107,11 @@ export default function V2KeysDeskPage() {
           مكتب المفاتيح
         </h1>
         <p className="mt-1 text-[11px] leading-relaxed text-white/45">
-          كل نموذج مجاني المتجر يقدر يشغل عليه، وعدد مفاتيحك اللي بيجاوب فعلًا دلوقتي. الأرقام من ردّ المزود نفسه، مش من ورقة.
+          كل نموذج مجاني المتجر يقدر يشغل عليه، وعدادان مش واحد: اللي بيرد على التحية، واللي كتب رد فعليًا. الأرقام من ردّ المزود نفسه، مش من ورقة.
         </p>
         {totals && (
           <p className="mt-2 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/60" data-key-totals>
-            {arNum(totals.keys)} مفتاح عندنا · بيجاوب دلوقتي {arNum(totals.alive)} · مرفوض {arNum(totals.refused)}
+            {arNum(totals.keys)} مفتاح عندنا · كتب فعلًا {arNum(totals.writes)} · بيرد على التحية {arNum(totals.alive)} · حسابه بلا رصيد {arNum(totals.unfunded)} · مرفوض {arNum(totals.refused)}
             {totals.quarantined ? ` · معزول ${arNum(totals.quarantined)}` : ''}
             {` · ${arNum(totals.withLiveKey)} من ${arNum(rows?.length ?? 0)} مزودات ليها رد حي · ${arNum(totals.needingKey)} محتاج مفتاح`}
           </p>
@@ -126,7 +139,9 @@ export default function V2KeysDeskPage() {
               </div>
 
               <p className="mt-2 text-[11px] text-white/55">
-                {arNum(row.rows)} مفتاح · بيجاوب {arNum(row.alive)}
+                {arNum(row.rows)} مفتاح · كتب {arNum(row.writes)}
+                {row.alive ? ` · تحية بس ${arNum(row.alive)}` : ''}
+                {row.unfunded ? ` · بلا رصيد ${arNum(row.unfunded)}` : ''}
                 {row.quota ? ` · سقفه خلص ${arNum(row.quota)}` : ''}
                 {row.refused ? ` · مرفوض ${arNum(row.refused)}` : ''}
                 {row.unverified ? ` · متأكدش عنه ${arNum(row.unverified)}` : ''}

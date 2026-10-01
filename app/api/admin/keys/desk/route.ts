@@ -21,6 +21,8 @@ export const maxDuration = 60;
 
 /** The pool's own verdict column, written by the verifier; `notes` stays provenance. */
 const ALIVE = "alive";
+const WRITES = "writes";
+const UNFUNDED = "unfunded";
 const QUOTA = "quota";
 const REFUSED = "refused";
 const isQuarantined = (note: string | null) => String(note ?? "").startsWith("quarantined");
@@ -46,6 +48,8 @@ function deskOf(rows: PoolRow[]) {
       rows: mine.length,
       active: mine.filter((r) => r.is_active).length,
       alive: mine.filter((r) => r.check_state === ALIVE).length,
+      writes: mine.filter((r) => r.check_state === WRITES).length,
+      unfunded: mine.filter((r) => r.check_state === UNFUNDED).length,
       quota: mine.filter((r) => r.check_state === QUOTA).length,
       refused: mine.filter((r) => r.check_state === REFUSED).length,
       quarantined: mine.filter((r) => isQuarantined(r.notes)).length,
@@ -69,11 +73,14 @@ export async function GET() {
     providers: desk,
     totals: {
       keys: rows.length,
+      // Two numbers, not one: who answers a hello, and who has actually written an answer.
       alive: rows.filter((r) => r.check_state === ALIVE).length,
+      writes: rows.filter((r) => r.check_state === WRITES).length,
+      unfunded: rows.filter((r) => r.check_state === UNFUNDED).length,
       refused: rows.filter((r) => r.check_state === REFUSED).length,
       quarantined: rows.filter((r) => isQuarantined(r.notes)).length,
-      withLiveKey: desk.filter((p) => p.alive > 0).length,
-      needingKey: desk.filter((p) => p.alive === 0).length,
+      withLiveKey: desk.filter((p) => p.writes > 0).length,
+      needingKey: desk.filter((p) => p.writes === 0).length,
     },
   });
 }

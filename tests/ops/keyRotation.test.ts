@@ -38,23 +38,21 @@ describe("the picker's order", () => {
   beforeEach(() => {
     world.rows = [
       row({ key: "spent-ceiling", check_state: "quota", last_used_at: "2026-01-01T00:00:00.000Z" }),
-      row({ key: "answers-alive", check_state: "alive", last_used_at: "2026-01-01T00:00:00.000Z" }),
+      row({ key: "greeted-only", check_state: "alive", last_used_at: "2026-01-01T00:00:00.000Z" }),
+      row({ key: "wrote-an-answer", check_state: "writes", last_used_at: "2026-01-01T00:00:00.000Z" }),
       row({ key: "never-asked", check_state: null }),
       row({ key: "revoked", check_state: "refused", is_active: false }),
+      row({ key: "no-credit", check_state: "unfunded", is_active: false }),
     ];
   });
 
-  it("asks the living key first, the unasked one next, and the spent one last", async () => {
+  it("asks the key that wrote first, then the unasked, then the greeter, then the spent", async () => {
     const { loadKeysFromDB, getNextAvailableKey } = await import("@/lib/api-keys-service");
     await loadKeysFromDB();
 
-    const first = await getNextAvailableKey("google");
-    const second = await getNextAvailableKey("google");
-    const third = await getNextAvailableKey("google");
+    const order = [(await getNextAvailableKey("google"))?.key, (await getNextAvailableKey("google"))?.key, (await getNextAvailableKey("google"))?.key, (await getNextAvailableKey("google"))?.key];
 
-    expect(first?.key).toBe("answers-alive");
-    expect(second?.key).toBe("never-asked");
-    expect(third?.key).toBe("spent-ceiling");
+    expect(order).toEqual(["wrote-an-answer", "never-asked", "greeted-only", "spent-ceiling"]);
   });
 
   it("never puts a refused key into the work cycle, however idle it is", async () => {

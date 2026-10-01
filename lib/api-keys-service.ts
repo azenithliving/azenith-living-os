@@ -141,11 +141,13 @@ export async function loadKeysFromDB(): Promise<void> {
       });
     }
 
-    // Intelligent rotation starts here: a key the company itself answered «alive» goes
-    // first, one nobody has asked yet goes next, and a key already known to be out of
-    // quota last — so a request never spends itself on a ceiling the desk measured this
-    // morning. Refused keys never reach the pool at all (they are switched off upstream).
-    const rank = (entry: KeyState) => (entry.checkState === "alive" ? 0 : entry.checkState === null ? 1 : 2);
+    // Intelligent rotation starts here, ordered by what was measured rather than assumed: a
+    // key that wrote a real answer goes first, one nobody has asked next, a key that only ever
+    // answered a hello after that, and a spent ceiling last — so a request never spends itself
+    // on a key the desk already watched fail. Refused and unfunded keys never reach the pool
+    // at all (the verifier switches them off upstream).
+    const RANK: Record<string, number> = { writes: 0, alive: 2, quota: 3 };
+    const rank = (entry: KeyState) => (entry.checkState == null ? 1 : RANK[entry.checkState] ?? 4);
     for (const pool of Object.values(keyStates)) {
       pool.sort((a, b) => rank(a) - rank(b) || (a.lastUsedAt?.getTime() ?? 0) - (b.lastUsedAt?.getTime() ?? 0));
     }

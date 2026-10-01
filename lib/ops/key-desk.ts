@@ -124,10 +124,27 @@ export function keyDeskGuide(id: string): KeyDeskProvider | null {
   return KEY_DESK_PROVIDERS.find((p) => p.id === id) ?? null;
 }
 
-/** What one row of the desk means to the owner, in the words the screen prints. */
-export function deskVerdict(row: { rows: number; active: number; alive: number; refused: number; quota: number }): string {
+/**
+ * What one row of the desk means to the owner, in the words the screen prints.
+ *
+ * Two different facts were being collapsed into one: a key that returns its model list, and a
+ * key that writes an answer when asked. Measured the same night, 1,091 of the pool had only
+ * ever answered the first question — and every one of 150 tried from that group refused the
+ * second for lack of credit on the account. So the desk says which of the two it knows.
+ */
+export function deskVerdict(row: {
+  rows: number;
+  active: number;
+  writes: number;
+  alive: number;
+  unfunded: number;
+  refused: number;
+  quota: number;
+}): string {
   if (row.rows === 0) return "مفيش مفتاح من دول في المتجر";
-  if (row.alive > 0) return "فيه مفتاح بيجاوب دلوقتي";
+  if (row.writes > 0) return "مفتاح واحد على الأقل كتب رد فعليًا — اتقاس بطلب حقيقي";
+  if (row.unfunded > 0) return "الحساب بيجاوب على التحية بس: رصيده خلص، فلا ترسل له شغل";
+  if (row.alive > 0) return "بيرد على التحية، بس لسه ما اتقاسش إنه بيكتب";
   if (row.quota > 0) return "المفاتيح سليمة بس سقفها خلص دلوقتي";
   if (row.active > 0) return "مفيش تأكيد حيّ — اعمل التحقق";
   return "كلها مرفوضة من المزود";

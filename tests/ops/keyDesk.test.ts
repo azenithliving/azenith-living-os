@@ -53,11 +53,11 @@ describe("the list of free models", () => {
 });
 
 describe("the verdict", () => {
-  const row = (over: Partial<Parameters<typeof deskVerdict>[0]>) => ({ rows: 0, active: 0, alive: 0, refused: 0, quota: 0, ...over });
+  const row = (over: Partial<Parameters<typeof deskVerdict>[0]>) => ({ rows: 0, active: 0, writes: 0, alive: 0, unfunded: 0, refused: 0, quota: 0, ...over });
 
   it("says the difference between no key, spent ceiling and a refused key", () => {
     expect(deskVerdict(row({}))).toBe("مفيش مفتاح من دول في المتجر");
-    expect(deskVerdict(row({ rows: 10, alive: 3, active: 10 }))).toBe("فيه مفتاح بيجاوب دلوقتي");
+    expect(deskVerdict(row({ rows: 10, alive: 3, active: 10 }))).toBe("بيرد على التحية، بس لسه ما اتقاسش إنه بيكتب");
     expect(deskVerdict(row({ rows: 10, quota: 10, active: 10 }))).toContain("سقفها خلص");
     expect(deskVerdict(row({ rows: 10, refused: 10 }))).toContain("مرفوضة");
     expect(deskVerdict(row({ rows: 10, active: 10 }))).toContain("اعمل التحقق");

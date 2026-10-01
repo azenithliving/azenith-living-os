@@ -14,7 +14,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import postgres from "postgres";
 
-import { verifyKey } from "../lib/ops/key-verify.ts";
+import { verifyKey, verifyWrites } from "../lib/ops/key-verify.ts";
 
 dotenv.config({ path: join(dirname(fileURLToPath(import.meta.url)), "..", ".env.local") });
 
@@ -28,6 +28,8 @@ const PROVIDER = arg("provider");
 const LIMIT = Number(arg("limit") ?? 20);
 const NEW_ONLY = flag("new-only");
 const APPLY = flag("apply");
+const DEEP = flag("deep");
+const GREETED = flag("greeted");
 const CONCURRENCY = Number(arg("workers") ?? 3);
 
 const sql = postgres(process.env.DIRECT_URL || process.env.DATABASE_URL, { ssl: "require", max: 1 });
@@ -36,7 +38,13 @@ const TODAY = "2026-10-02";
 try {
   // Default: whatever has never been asked. Re-verifying a live key on every pass would
   // spend the ceiling the pass exists to measure.
-  const where = NEW_ONLY ? sql`notes like ${"intake 2026-10-02%"}` : sql`check_state is null`;
+  // Three questions the owner asks of this pass: what has never been asked, what came in
+  // from his folder, and what answered a hello but has never been asked to write.
+  const where = GREETED
+    ? sql`check_state = 'alive'`
+    : NEW_ONLY
+      ? sql`notes like ${"intake 2026-10-02%"}`
+      : sql`check_state is null`;
   const rows = await sql`
     select id, provider, key, is_active from public.api_keys
      where ${where} ${PROVIDER ? sql`and provider = ${PROVIDER}` : sql``}
@@ -56,10 +64,36 @@ try {
       if (APPLY) {
         const stamp = new Date().toISOString();
         if (outcome.state === "alive") {
-          await sql`update public.api_keys
-             set is_active = true, check_state = 'alive', last_checked_at = ${stamp},
-                 notes = ${`verified ${TODAY}: alive`}, last_error = null, error_count = 0, cooldown_until = null
-           where id = ${row.id}`;
+          // A provider that answers a model list is not a provider that answers a request.
+          // `--deep` asks the second question too, because the difference is the whole
+          // difference between «1,321 keys» and «two companies that can write».
+          let verdict = "alive";
+          let note = `verified ${TODAY}: alive`;
+          if (DEEP) {
+            const write = await verifyWrites(row.provider, row.key);
+            counts[`write:${write.state}`] = (counts[`write:${write.state}`] ?? 0) + 1;
+            if (write.state === "writes") { verdict = "writes"; note = `verified ${TODAY}: writes`; }
+            else if (write.state === "quota") { verdict = "quota"; note = `verified ${TODAY}: writes, ceiling spent now`; }
+            else if (write.state === "unfunded") { verdict = "unfunded"; note = `verified ${TODAY}: answers, but the account is out of credit`; }
+            else if (write.state === "dead") { verdict = "refused"; note = `verified ${TODAY}: refuses a real request`; }
+          }
+
+          if (verdict === "writes" || verdict === "alive") {
+            await sql`update public.api_keys
+               set is_active = true, check_state = ${verdict}, last_checked_at = ${stamp},
+                   notes = ${note}, last_error = null, error_count = 0, cooldown_until = null
+             where id = ${row.id}`;
+          } else if (verdict === "quota") {
+            await sql`update public.api_keys
+               set is_active = true, check_state = 'quota', last_checked_at = ${stamp},
+                   notes = ${note}, last_error = ${"quota"}, cooldown_until = now() + interval '1 hour'
+             where id = ${row.id}`;
+          } else {
+            await sql`update public.api_keys
+               set is_active = false, check_state = ${verdict === "refused" ? "refused" : "unfunded"}, last_checked_at = ${stamp},
+                   notes = ${note}, last_error = ${note}, error_count = error_count + 1
+             where id = ${row.id}`;
+          }
         } else if (outcome.state === "quota") {
           await sql`update public.api_keys
              set is_active = true, check_state = 'quota', last_checked_at = ${stamp},
