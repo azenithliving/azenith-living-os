@@ -46,6 +46,12 @@ interface KeyState {
   lastUsedAt: Date | null;
   isDead?: boolean;
   lastError?: string | null;
+  /**
+   * The desk's verdict, asked of the issuing company and not guessed: `alive`, `quota`
+   * (a real key whose ceiling is spent right now), `refused` (revoked or never activated)
+   * or null (nobody has asked it yet).
+   */
+  checkState?: string | null;
 }
 
 const keyStates: Record<string, KeyState[]> = {
@@ -86,7 +92,7 @@ export async function loadKeysFromDB(): Promise<void> {
 
     const { data, error } = await supabase
       .from("api_keys")
-      .select("provider, key, cooldown_until, total_requests, last_used_at, last_error, error_count, is_active, is_backup");
+      .select("provider, key, cooldown_until, total_requests, last_used_at, last_error, error_count, is_active, is_backup, check_state");
 
     if (error) {
       console.error("[API Keys Service] Failed to load keys from DB:", error);
@@ -125,7 +131,17 @@ export async function loadKeysFromDB(): Promise<void> {
         lastUsedAt:    row.last_used_at   ? new Date(row.last_used_at)   : null,
         isDead:        false,
         lastError:     row.last_error || null,
+        checkState:    row.check_state ?? null,
       });
+    }
+
+    // Intelligent rotation starts here: a key the company itself answered «alive» goes
+    // first, one nobody has asked yet goes next, and a key already known to be out of
+    // quota last — so a request never spends itself on a ceiling the desk measured this
+    // morning. Refused keys never reach the pool at all (they are switched off upstream).
+    const rank = (entry: KeyState) => (entry.checkState === "alive" ? 0 : entry.checkState === null ? 1 : 2);
+    for (const pool of Object.values(keyStates)) {
+      pool.sort((a, b) => rank(a) - rank(b) || (a.lastUsedAt?.getTime() ?? 0) - (b.lastUsedAt?.getTime() ?? 0));
     }
 
     keysLoaded = true;
