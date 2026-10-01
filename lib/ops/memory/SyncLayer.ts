@@ -5,27 +5,13 @@
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
+import { SYNC_EVENT_TYPES, type SyncEventType } from "@/lib/ops/syncTypes";
 
-export type SyncEventType = 
-  | 'context_update' 
-  | 'draft_created' 
-  | 'draft_updated' 
-  | 'draft_published' 
-  | 'draft_rejected' 
-  | 'draft_rolled_back'
-  | 'audit_completed'
-  | 'learning_created'
-  | 'learning_updated'
-  | 'agent_task_started'
-  | 'agent_task_completed'
-  | 'agent_task_failed'
-  | 'market_update'
-  | 'anomaly_detected'
-  | 'self_audit_completed'
-  | 'quality_gate_passed'
-  | 'quality_gate_failed'
-  | 'identity_violation'
-  | 'scope_violation';
+// Kept on this module because everything that speaks the ledger already imports it
+// from here; the list itself lives in one leaf so a route can validate without
+// pulling a database client into its module graph.
+export { SYNC_EVENT_TYPES };
+export type { SyncEventType };
 
 export interface SyncEvent {
   id: string;

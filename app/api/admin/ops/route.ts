@@ -11,6 +11,7 @@ import { swarmLearnings } from "@/lib/ops/memory/SwarmLearnings";
 import { sharedMemory } from "@/lib/ops/memory";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { AGENT_KEYS, legacyToOps } from "@/lib/ops/identity";
+import { SYNC_EVENT_TYPES } from "@/lib/ops/syncTypes";
 
 export const dynamic = "force-dynamic";
 
@@ -131,12 +132,7 @@ const MemorySearchSchema = z.object({
 });
 
 const SyncSubscribeSchema = z.object({
-  event_types: z.array(z.enum([
-    'context_update', 'draft_created', 'draft_updated', 'draft_published', 
-    'draft_rejected', 'draft_rolled_back', 'audit_completed', 'learning_created',
-    'learning_updated', 'agent_task_started', 'agent_task_completed', 'agent_task_failed',
-    'quality_gate_passed', 'quality_gate_failed', 'identity_violation', 'scope_violation'
-  ])),
+  event_types: z.array(z.enum(SYNC_EVENT_TYPES)),
   agent_key: storedAgentKey,
   filter: z.record(z.string(), z.any()).optional(),
 });
@@ -542,12 +538,7 @@ async function handleSync(body: any) {
 
   if (subAction === 'publish') {
     const parsed = z.object({
-      event_type: z.enum([
-        'context_update', 'draft_created', 'draft_updated', 'draft_published',
-        'draft_rejected', 'draft_rolled_back', 'audit_completed', 'learning_created',
-        'learning_updated', 'agent_task_started', 'agent_task_completed', 'agent_task_failed',
-        'quality_gate_passed', 'quality_gate_failed', 'identity_violation', 'scope_violation'
-      ]),
+      event_type: z.enum(SYNC_EVENT_TYPES),
       source_agent: storedAgentKey,
       target_agents: z.array(storedAgentKey).optional(),
       payload: z.record(z.string(), z.any()),
