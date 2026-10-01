@@ -6,6 +6,7 @@
  */
 
 import { createServiceRoleClient } from '@/lib/vanguard/memory/supabase_persistence';
+import { resolveAdminCompanyId } from '@/lib/admin-company';
 
 // ============================================================================
 // Event Types
@@ -381,29 +382,36 @@ export class EventBus {
 
   /**
    * Persist event to database
+   *
+   * This used to write `vanguard_api_usage`, a table that does not exist in this
+   * project's database (measured against the live API: PGRST205, "could not find the
+   * table"). Every durable event the automation fired therefore died in a
+   * `console.error` nobody reads, while the swarm's own ledger — `ops_sync_events`,
+   * the table the browser stream and the monitoring surfaces already read — held
+   * none of it. One ledger now, so one wire carries everything the store does.
    */
   private async persistEvent(event: VanguardEvent): Promise<void> {
     try {
       const supabase = createServiceRoleClient();
+      if (!supabase) throw new Error('no database client for the event ledger');
 
-      // Store in a simple events log table (we'll use vanguard_api_usage for now)
-      await supabase.from('vanguard_api_usage').insert({
-        api_name: 'event_bus',
-        endpoint: event.type,
-        method: 'EVENT',
-        status_code: 200,
-        latency_ms: 0,
-        tokens_used: 0,
-        cost_usd: 0,
-        model: event.source,
-        session_id: event.sessionId,
-        metadata: {
+      const companyId = await resolveAdminCompanyId();
+
+      const { error } = await supabase.from('ops_sync_events').insert({
+        company_id: companyId,
+        event_type: event.type,
+        source_agent: event.source,
+        target_agents: [],
+        payload: {
           event_id: event.id,
-          payload: event.payload,
-          metadata: event.metadata,
-          user_id: event.userId
-        }
+          session_id: event.sessionId ?? null,
+          user_id: event.userId ?? null,
+          metadata: event.metadata ?? {},
+          data: event.payload ?? {},
+        },
       });
+
+      if (error) throw error;
     } catch (error) {
       console.error('[EventBus] Failed to persist event:', error);
       // Don't throw - persistence failure shouldn't break event processing
