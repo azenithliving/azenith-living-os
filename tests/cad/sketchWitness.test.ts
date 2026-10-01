@@ -116,3 +116,32 @@ describe("a reading needs both witnesses to agree", () => {
     expect(reading.areaSqm).toBeNull();
   });
 });
+
+describe("a reading taken with the pixel engine parked", () => {
+  it("claims no second witness, computes no area, and names the way out", async () => {
+    modelJson({
+      room: "صالة",
+      dimensions: [
+        { label: "الضلع الطويل", meters: 4.5 },
+        { label: "الضلع القصير", meters: 3.2 },
+      ],
+    });
+
+    const reading = await readPaperSketch({ base64: "AA", runOffline: false });
+
+    expect(reading.ocr.ran, "nothing read the pixels in this request").toBe(false);
+    expect(reading.ok).toBe(false);
+    expect(reading.confirmedCount).toBe(0);
+    expect(reading.areaSqm, "two unconfirmed numbers are not a floor").toBeNull();
+    expect(reading.failure).toContain("العميل");
+  });
+
+  it("is confirmed the moment the customer's own numbers arrive", async () => {
+    modelJson({ room: "صالة", dimensions: [{ label: "الضلع الطويل", meters: 4.5 }] });
+
+    const reading = await readPaperSketch({ base64: "AA", runOffline: false, customer: [4.5] });
+
+    expect(reading.ok, "the customer is a witness that always answers").toBe(true);
+    expect(reading.dimensions[0].confirmedBy).toEqual(["customer"]);
+  });
+});

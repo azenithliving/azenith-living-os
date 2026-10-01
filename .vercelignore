@@ -62,5 +62,9 @@ Thumbs.db
 scratch
 .qoder
 
-# Offline OCR language data — 7 MB the build must never carry
+# Offline OCR language data — 7 MB the build must never carry.
+# Shipping them was tried and measured on 2026-10-01: served fine (200, 2.5 MB and 5.2 MB)
+# and changed nothing, because the engine that reads them does not finish inside a request
+# on this platform whether the tables are near it or not. They stay out until that witness
+# gets a home where it can complete.
 *.traineddata

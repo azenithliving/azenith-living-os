@@ -154,9 +154,8 @@ export default function V2SketchesPage() {
           ورق المقاسات
         </h1>
         <p className="mt-1 text-[11px] leading-relaxed text-white/45">
-          صوّر الورقة اللي العميل رسمها بالقلم، والمتجر يقرأ الأرقام بشاهدين: قارئ ذكي بيحدد الضلع والباب،
-          والعميل نفسه بيأكد مقاساته على ورقته. في قارئ تاني بيقرا البيكسلات بيخلص لما السيرفر دافي —
-          ولو ما كملش بنقول كده بدل ما نخترع رقم.
+          صوّر الورقة اللي العميل رسمها بالقلم: قارئ ذكي بيستخرج الضلع والباب، والشاهد التاني هو
+          العميل نفسه لما يكتب مقاساته في ورقته. أي رقم من غير شاهد بيتعرض اقتراح، مش منجز.
         </p>
         <p className="mt-1 text-[11px] leading-relaxed text-white/45">
           وكل ورقة بيتحدد صاحبها من الدفتر، فاللي يتصل بيقولوا «ورقته» ويتفتح.
@@ -220,7 +219,7 @@ export default function V2SketchesPage() {
           <p className="mt-3 text-[11px] text-white/55">
             المساحة: {reading.areaSqm ? `${arNum(reading.areaSqm)} متر مربع` : 'متحسبتش — محتاجة ضلعين مؤكدين'}
             {' · '}
-            قارئ البيكسلات: {reading.ocr.ran ? `${arNum(Math.round(reading.ocr.ms))} ملي ثانية بثقة ${arNum(Math.round(reading.ocr.confidence ?? 0))}٪` : `ما كملش${reading.ocr.error ? ` — ${reading.ocr.error}` : ''}`}
+            الشاهد التاني: العميل نفسه، لما يكتب مقاساته في ورقته
           </p>
           {reading.notes && <p className="mt-1 text-[11px] text-white/40">ملاحظة على الورقة: {reading.notes}</p>}
 

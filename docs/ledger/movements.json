@@ -40,7 +40,7 @@
       "state": "moved",
       "phase": "M2",
       "when": "2026-10-01",
-      "proof": "measured on the published site at 390px: 13 papers on the desk, each with its owner control; searching the roll by the last four digits returned 1 candidate, pressing it wrote the link and the name survived a reload; the per-customer filter answered 1 row with every row carrying the same key, and «شيل الاسم» put the paper back to «من غير صاحب» with 0 console errors. The witnesses are measured, not assumed: the pixel engine answered in 480 ms at 96% confidence on a warm instance and did not finish at all on a cold one (40 s, twice) — so the customer typing his own numbers on his own sheet is the second witness that always answers, and rows 9-12 are sealed that way. The desk's own copy now says which witness is which instead of promising a local engine"
+      "proof": "measured on the published site at 390px: 16 papers on the desk, each with its owner control; searching the roll in Arabic-Indic digits (٥٦٧٨) returned 1 candidate, pressing it wrote the link and the name survived a reload; the per-customer filter answered 2 rows with every row carrying the same key, and «شيل الاسم» put the paper back to «من غير صاحب» with 0 console errors. The witnesses are now what they really are: the reader proposes and the customer confirms — measured across all 16 stored readings, the offline pixel engine finished 0 times inside a request (12 honest failures at 12 s to 40 s, and 4 rows that claimed 480 ms turned out to be a figure one of my own test instruments had handed the door, now marked as such in the row and refused by the door). The desk's copy says which witness answers and which does not"
     },
     {
       "atom": "/admin/sales#العملاء",

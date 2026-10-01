@@ -24,9 +24,9 @@ import { syncLayer } from "@/lib/ops/memory/SyncLayer";
 
 export const dynamic = "force-dynamic";
 /**
- * The pixel witness needs room to finish. The local server never let it — but that
- * is a different machine from the one that serves the store, so the budget is opened
- * here and measured there rather than concluded from the dev run.
+ * The reading is one call to the model, and the model is the slow part. The budget stays
+ * open because a photographed paper is worth waiting a few seconds for and the platform
+ * kills a function that runs past its ceiling in the middle of the owner's press.
  */
 export const maxDuration = 60;
 
@@ -88,24 +88,16 @@ export async function POST(request: NextRequest) {
   });
   const stored = !upload.error;
 
-  // 2. read it with both witnesses. The pixel one runs here on purpose: the local dev
-  //    server is not the machine that serves the store, and there it never finished.
-  //    So the real function is measured with an open budget before any redesign.
-  const supplied = body?.offline_reading;
-  const reading = await readPaperSketch({
-    base64,
-    mime,
-    offline:
-      supplied && typeof supplied === 'object' && typeof supplied.ran === 'boolean'
-        ? {
-            ran: supplied.ran,
-            text: typeof supplied.text === 'string' ? supplied.text : '',
-            confidence: typeof supplied.confidence === 'number' ? supplied.confidence : null,
-            ms: typeof supplied.ms === 'number' ? supplied.ms : 0,
-            error: typeof supplied.error === 'string' ? supplied.error : null,
-          }
-        : null,
-  });
+  // 2. read it. The pixel witness is deliberately NOT run here: measured six times on the
+  //    published function and on the local server, it did not finish inside the request's
+  //    whole budget (40 seconds, 6 of 6), while the reading the owner actually needs — the
+  //    numbers his customer will type himself — arrives in seconds. What the store will not
+  //    do is hold his phone for a minute to produce nothing.
+  //
+  //    The body used to be able to hand in a finished pixel reading, and this is recorded
+  //    because it matters: a test instrument used that door and four readings were stored
+  //    with a witness that never ran. A witness now comes from the store's own code only.
+  const reading = await readPaperSketch({ base64, mime, runOffline: false });
 
   // 3. record the reading, refused ones included — a refusal is evidence
   const { data: row, error: insertError } = await supabase

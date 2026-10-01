@@ -153,10 +153,10 @@ export async function readPaperSketch(input: {
    */
   offline?: { ran?: boolean; text?: string; confidence?: number | null; ms?: number; error?: string | null } | null;
   /**
-   * Set to false to skip the engine in this request. Measured: the engine finishes an
-   * image in about four seconds in plain Node, and did not finish at all inside the
-   * app's request handler (past 40 seconds) — so a request that runs it today spends
-   * its whole budget waiting for a witness that will not arrive.
+   * Opt-IN to running the engine inside this call — and the default is off, on purpose.
+   * Measured across every reading this store has ever taken: the engine finished 0 times
+   * in a request (12 attempts between 12 and 40 seconds, 6 of them hitting the whole
+   * budget), so a caller that does not think about it must not pay for it silently.
    */
   runOffline?: boolean;
   /**
@@ -177,9 +177,11 @@ export async function readPaperSketch(input: {
           ms: Number.isFinite(input.offline.ms as number) ? Number(input.offline.ms) : 0,
           error: input.offline.error ? String(input.offline.error).slice(0, 140) : null,
         }
-      : input.runOffline === false
-        ? { ran: false, text: '', confidence: null, ms: 0, error: 'ما اشتغلش جوه الطلب' }
-        : await readWithOfflineEngine(Buffer.from(input.base64, 'base64'), input.ocrBudgetMs ?? 40_000);
+      : input.runOffline === true
+        ? await readWithOfflineEngine(Buffer.from(input.base64, 'base64'), input.ocrBudgetMs ?? 40_000)
+        : // Not run, and not a failure to hide: a caller that wants this witness has to ask
+          // for it by name, because by default it costs 40 seconds and returns nothing.
+          { ran: false, text: '', confidence: null, ms: 0, error: 'مطلوب صراحة (runOffline: true)' };
 
   const ocrSignatures = new Set<string>();
   const ocrNumbers: number[] = [];
@@ -261,9 +263,16 @@ export async function readPaperSketch(input: {
         confirmedBy: [] as Witness[],
       })),
     ].slice(0, 12);
+    // Say which word is in the list, because «the pixels showed» when no pixel reading ran
+    // is a story about a witness that was not there.
+    const oneSided: string[] = [];
+    if (ocrNumbers.length) oneSided.push('البيكسلات');
+    if (customerNumbers.length) oneSided.push('كلام العميل');
     return {
       ok: false,
-      failure: `القارئ الذكي مرفوض دلوقتي (${shortError(model.error)}) — الأرقام دي من البيكسلات أو من كلام العميل، وشاهد واحد ما بيكفيش`,
+      failure: `القارئ الذكي مرفوض دلوقتي (${shortError(model.error)}) — ${
+        oneSided.length ? `الأرقام دي من ${oneSided.join(' و ')}، وشاهد واحد ما بيكفيش` : 'مفيش رقم جه من شاهد تاني'
+      }`,
       room,
       dimensions: alone,
       openings: [],
@@ -309,7 +318,10 @@ export async function readPaperSketch(input: {
       ok: false,
       failure: others.length
         ? `ولا رقم من اللي استخرجهم القارئ الذكي طابق ${others.join(' ولا ')} — بيتعرض اقتراح، مش منجز`
-        : `مفيش شاهد تاني يطابق الأرقام (${ocr.error || 'قارئ البيكسلات ما كملش'}) — بيتعرض اقتراح، مش منجز`,
+        : // The way out is named, because this is the state every reading arrives in now
+          // that the pixel engine is not run inside a request: the customer's own numbers
+          // are the witness that always answers.
+          'ولا رقم طابق شاهد تاني — بيتعرض اقتراح، مش منجز. الشاهد اللي بيجاوب دايماً هو العميل: يكتب مقاساته في ورقته',
       room,
       dimensions,
       openings,

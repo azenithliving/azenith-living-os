@@ -74,3 +74,19 @@ describe('the customer’s own page keeps his number to itself', () => {
     expect(sheetDoor()).toMatch(/\.is\("customer_key",\s*null\)/);
   });
 });
+
+describe('the paper door answers for the store, not for whatever a tab sends', () => {
+  const door = () => readFileSync('app/api/admin/ops/sketch/route.ts', 'utf8');
+
+  it('will not take a finished pixel reading from the request body', () => {
+    // Four readings were once stored with a witness that never ran, because a test
+    // instrument handed the door one in the body and the door believed it.
+    expect(door()).not.toMatch(/offline_reading/);
+    expect(door()).toMatch(/runOffline:\s*false/);
+  });
+
+  it('takes the owner link only in the roll’s own key shapes', () => {
+    expect(door()).toMatch(/parseSketchLink\(body\?\.customer_key\)/);
+    expect(door()).toMatch(/\.eq\("id", id\)[\s\S]*\.eq\("company_id", companyId\)/);
+  });
+});
