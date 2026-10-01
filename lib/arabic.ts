@@ -22,3 +22,15 @@ export function foldArabic(value: string): string {
     .toLowerCase()
     .trim();
 }
+
+/**
+ * Arabic-Indic digits as Latin ones.
+ *
+ * Every number this owner reads is written ٠١٢٣٤٥٦٧٨٩, including the one he types into a
+ * search box and the one a customer dictates into his sheet. A rule that strips
+ * non-digits (`\D`) keeps Arabic-Indic digits as they are and then fails to match a
+ * database that stores `0100…` — so the fold happens before any comparison, in one place.
+ */
+export function latinDigits(value: unknown): string {
+  return String(value ?? "").replace(/[\u0660-\u0669]/g, (ch) => String(ch.charCodeAt(0) - 0x0660));
+}

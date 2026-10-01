@@ -40,3 +40,14 @@ export function arNum(value: number | string): string {
   const n = typeof value === "number" ? value : Number(value);
   return Number.isFinite(n) ? new Intl.NumberFormat("ar-EG").format(n) : String(value);
 }
+
+/**
+ * Arabic-Indic digits with no grouping: for a number that is read, not summed.
+ *
+ * `arNum` on a phone tail returns `٥٬٦٧٨` — a thousands separator inside a fragment of an
+ * address. Digits that identify (the last four of a mobile, a date) go through this instead.
+ */
+export function arDigits(value: number | string): string {
+  const arabic = "٠١٢٣٤٥٦٧٨٩";
+  return String(value ?? "").replace(/[0-9]/g, (d) => arabic[Number(d)]);
+}

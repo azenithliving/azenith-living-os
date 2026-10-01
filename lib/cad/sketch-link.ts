@@ -16,6 +16,7 @@
  * store — the owner picking a row off the roll, or the customer typing his own mobile on
  * his own sheet. Nothing is guessed from a photo.
  */
+import { latinDigits } from "@/lib/arabic";
 import { phoneKey } from "@/lib/customers/identity";
 
 /** The ceiling the storage column carries. */
@@ -30,11 +31,6 @@ export type SketchLink = {
 
 const KIND_OF = /^(phone|email|name):([\s\S]*)$/;
 
-/** Arabic-Indic digits as Latin ones — this is what a phone keyboard offers. */
-function toLatinDigits(text: string): string {
-  return text.replace(/[\u0660-\u0669]/g, (ch) => String(ch.charCodeAt(0) - 0x0660));
-}
-
 /**
  * Turn whatever a person typed as his mobile into the roll's key. Accepts `+20`, `0020`,
  * `01…`, spaced or hyphenated groups and Arabic-Indic digits. Returns null for anything
@@ -42,7 +38,7 @@ function toLatinDigits(text: string): string {
  * keying by it would silently merge two strangers into one.
  */
 export function linkFromPhone(raw: unknown): SketchLink | null {
-  const national = phoneKey(toLatinDigits(String(raw ?? "")));
+  const national = phoneKey(latinDigits(String(raw ?? "")));
   if (!national) return null;
   return { key: `phone:${national}`, kind: "phone", value: national };
 }

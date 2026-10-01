@@ -9,8 +9,9 @@
  * nothing returns nothing — no invented candidate, no «create new» shortcut that would
  * let a second ledger of people grow beside the real one.
  */
-import { foldArabic } from "@/lib/arabic";
+import { foldArabic, latinDigits } from "@/lib/arabic";
 import { phoneKey } from "@/lib/customers/identity";
+import { arDigits } from "@/lib/ops/metricLabels";
 
 export type RollLine = {
   key: string;
@@ -21,7 +22,7 @@ export type RollLine = {
 
 export type RollMatch<T extends RollLine> = { line: T; why: string };
 
-const digitsOf = (raw: unknown): string => String(raw ?? "").replace(/\D/g, "");
+const digitsOf = (raw: unknown): string => latinDigits(raw).replace(/\D/g, "");
 
 /**
  * Rank the roll against a query, best first. A phone match outranks a name match because
@@ -31,7 +32,9 @@ export function matchRoll<T extends RollLine>(lines: T[], query: string, limit =
   const text = String(query ?? "").trim();
   if (!text) return [];
   const folded = foldArabic(text);
-  const typedPhone = phoneKey(text);
+  // His keyboard offers ٠١٢٣٤٥٦٧٨٩. Folded before any comparison, or the search would find
+  // a name and silently never find a number.
+  const typedPhone = phoneKey(latinDigits(text));
   const typedDigits = digitsOf(text);
 
   const scored: Array<{ line: T; score: number; why: string }> = [];
@@ -76,8 +79,10 @@ export function matchRoll<T extends RollLine>(lines: T[], query: string, limit =
 export function rollLineLabel(line: RollLine): string {
   const name = String(line.name ?? "").trim();
   const digits = digitsOf(line.phone ?? "");
-  if (name && digits.length >= 4) return `${name} · ${digits.slice(-4)}`;
+  // The last four are shown so he can recognise a man, not dial him — so they are his
+  // numerals, and `arNum` would put a thousands separator inside a phone number.
+  if (name && digits.length >= 4) return `${name} · ${arDigits(digits.slice(-4))}`;
   if (name) return name;
-  if (digits) return digits;
+  if (digits) return arDigits(digits);
   return String(line.email ?? "").trim() || "من غير اسم";
 }

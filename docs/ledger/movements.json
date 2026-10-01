@@ -29,11 +29,18 @@
       "proof": "measured on the published site at 390px: the queue answered 21 and the sidebar door shows ٢١, pressing it lands on the conversation with the vault already open, and the stop button keeps the safety door's two-press shape"
     },
     {
-      "atom": "app/admin/v2/sketches/page.tsx",
-      "state": "moving",
+      "atom": "components/admin/sketches/SketchOwner.tsx",
+      "state": "moved",
       "phase": "M2",
       "when": "2026-10-01",
-      "proof": "upload, storage and the ledger row measured working on the running app (paper stored, rows recorded with their refusal reasons, the desk answering in seconds). The pixel witness is not proven yet: the same engine that reads an image in about 4 seconds in plain Node did not finish inside a request (past 40 s), and in the browser it is refused by this site's own worker policy unless the engine ships with the site — tried, served correctly, and still did not finish. Readings therefore arrive labelled one witness until the engine is placed where it can complete"
+      "proof": "built on the new surface, not carried from the old house: it reads the people list from the customers door (the same reading the customers screen uses), stores the roll's own key on the paper, and was measured pressing it on the published site — one candidate from four digits, the name on the chip after a reload, and the paper returned to «من غير صاحب»"
+    },
+    {
+      "atom": "app/admin/v2/sketches/page.tsx",
+      "state": "moved",
+      "phase": "M2",
+      "when": "2026-10-01",
+      "proof": "measured on the published site at 390px: 13 papers on the desk, each with its owner control; searching the roll by the last four digits returned 1 candidate, pressing it wrote the link and the name survived a reload; the per-customer filter answered 1 row with every row carrying the same key, and «شيل الاسم» put the paper back to «من غير صاحب» with 0 console errors. The witnesses are measured, not assumed: the pixel engine answered in 480 ms at 96% confidence on a warm instance and did not finish at all on a cold one (40 s, twice) — so the customer typing his own numbers on his own sheet is the second witness that always answers, and rows 9-12 are sealed that way. The desk's own copy now says which witness is which instead of promising a local engine"
     },
     {
       "atom": "/admin/sales#العملاء",

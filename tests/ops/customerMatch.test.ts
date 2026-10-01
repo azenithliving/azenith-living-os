@@ -10,6 +10,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { matchRoll, rollLineLabel, type RollLine } from '@/lib/customers/match';
+import { arDigits } from '@/lib/ops/metricLabels';
+
+/** Arabic-Indic digits built from char codes — a table of them typed by hand loses one. */
+const ar = (text: string) => text.replace(/\d/g, (d) => String.fromCharCode(0x0660 + Number(d)));
 
 const line = (over: Partial<RollLine> & { key: string }): RollLine => ({ name: null, phone: null, ...over });
 
@@ -33,6 +37,11 @@ describe('matchRoll', () => {
     expect(hits).toHaveLength(1);
     expect(hits[0].line.key).toBe('phone:1001234567');
     expect(hits[0].why).toBe('آخر الرقم');
+  });
+
+  it('finds him when the digits are typed on an Arabic keyboard, which is his keyboard', () => {
+    expect(matchRoll(ROLL, ar('4567'))[0].line.key).toBe('phone:1001234567');
+    expect(matchRoll(ROLL, ar('01001234567'))[0].why).toBe('نفس الرقم');
   });
 
   it('does not care how the name was spelled or cased', () => {
@@ -69,10 +78,15 @@ describe('matchRoll', () => {
 });
 
 describe('rollLineLabel', () => {
-  it('shows a name and the last digits, never a key', () => {
-    expect(rollLineLabel(ROLL[0])).toBe('أحمد محمود · 4567');
+  it('shows a name and the last digits in his own numerals, never a key', () => {
+    expect(rollLineLabel(ROLL[0])).toBe(`أحمد محمود · ${ar('4567')}`);
     expect(rollLineLabel(ROLL[2])).toBe('أحمد');
     expect(rollLineLabel(ROLL[3])).toBe('ali@example.com');
     expect(rollLineLabel(line({ key: 'x' }))).toBe('من غير اسم');
+  });
+
+  it('never puts a thousands separator inside a phone number', () => {
+    expect(arDigits('1001234567')).toBe(ar('1001234567'));
+    expect(arDigits('1001234567')).not.toMatch(/[\u066c,]/);
   });
 });

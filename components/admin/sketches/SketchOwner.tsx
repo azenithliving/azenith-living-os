@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { matchRoll, rollLineLabel } from '@/lib/customers/match';
+import { arDigits } from '@/lib/ops/metricLabels';
 import { parseSketchLink, UNLINKED_LABEL } from '@/lib/cad/sketch-link';
 
 export type RollLine = { key: string; name: string | null; phone: string | null; email?: string | null };
@@ -106,7 +107,7 @@ export default function SketchOwner({ sketchId, customerKey, roll, onLinked }: P
     <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px]">
       {link ? (
         <span className="rounded-full bg-emerald-600/15 px-2 py-0.5 font-bold text-emerald-300" data-sketch-owner={sketchId}>
-          {line ? rollLineLabel(line) : link.kind === 'phone' ? `مش في الدفتر · ${link.value}` : link.value}
+          {line ? rollLineLabel(line) : link.kind === 'phone' ? `مش في الدفتر · ${arDigits(link.value)}` : link.value}
         </span>
       ) : (
         <span className="text-white/35" data-sketch-owner={sketchId}>
