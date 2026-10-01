@@ -12,6 +12,9 @@ const world = vi.hoisted((): { model: { success: boolean; content: string; error
 }));
 
 vi.mock("@/lib/ai-orchestrator", () => ({
+  // The parser asks whoever can see, so the fake answers as the chain does — with the reader
+  // that answered attached, or the witness test would be testing a shape nobody returns.
+  askVisionAny: async () => ({ ...world.model, reader: "google" }),
   askGoogleVision: async () => world.model,
 }));
 

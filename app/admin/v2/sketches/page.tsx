@@ -6,6 +6,7 @@ import { ScanLine } from 'lucide-react';
 import Link from 'next/link';
 
 import { arNum } from '@/lib/ops/metricLabels';
+import { keyDeskGuide } from '@/lib/ops/key-desk';
 import SketchOwner, { type RollLine } from '@/components/admin/sketches/SketchOwner';
 
 type Dimension = { label: string; meters: number; confirmed: boolean };
@@ -21,6 +22,8 @@ type Reading = {
   confirmedCount: number;
   ocr: { ran: boolean; text: string; confidence: number | null; ms: number; error: string | null };
   notes: string | null;
+  /** Which company's reader looked at the drawing — named in Arabic, never as an id. */
+  reader?: string | null;
 };
 
 type Row = {
@@ -42,6 +45,15 @@ const OPENING_LABEL: Record<Opening['kind'], string> = { door: 'باب', window:
 
 function when(iso: string): string {
   return new Date(iso).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+/**
+ * The reader's Arabic name, taken from the key desk's own list. A provider id is never
+ * printed on this screen: an unknown reader is simply not named.
+ */
+function readerLabel(id?: string | null): string {
+  if (!id) return '';
+  return keyDeskGuide(id)?.label ?? '';
 }
 
 /**
@@ -220,6 +232,7 @@ export default function V2SketchesPage() {
             المساحة: {reading.areaSqm ? `${arNum(reading.areaSqm)} متر مربع` : 'متحسبتش — محتاجة ضلعين مؤكدين'}
             {' · '}
             الشاهد التاني: العميل نفسه، لما يكتب مقاساته في ورقته
+            {readerLabel(reading.reader) ? ` · القارئ: ${readerLabel(reading.reader)}` : ''}
           </p>
           {reading.notes && <p className="mt-1 text-[11px] text-white/40">ملاحظة على الورقة: {reading.notes}</p>}
 

@@ -14,7 +14,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { askGoogleVision } from '@/lib/ai-orchestrator';
+import { askVisionAny } from '@/lib/ai-orchestrator';
 
 /** Shipped with the app so the reader never waits on a download to do its job. */
 const LOCAL_LANG_DIR = join(process.cwd(), 'public', 'ocr');
@@ -51,6 +51,8 @@ export type SketchReading = {
   areaSqm: number | null;
   confirmedCount: number;
   ocr: { ran: boolean; text: string; confidence: number | null; ms: number; error: string | null };
+  /** Which company's reader actually answered this drawing, when one did. */
+  reader?: string | null;
   notes: string | null;
 };
 
@@ -193,7 +195,9 @@ export async function readPaperSketch(input: {
     if (Number.isFinite(value) && value > 0 && value < 200) ocrNumbers.push(Math.round(value * 100) / 100);
   }
 
-  const model = await askGoogleVision(PROMPT, input.base64, mime, { maxTokens: 700 });
+  // Asked of whoever can read a picture, not of one company that is often out of ceiling.
+  const model = await askVisionAny(PROMPT, input.base64, mime, { maxTokens: 700 });
+  const reader = typeof (model as { reader?: unknown }).reader === 'string' ? (model as { reader: string }).reader : null;
   const parsed = model.success ? extractJson(model.content) : null;
 
   const raw = (parsed ?? {}) as {
@@ -280,6 +284,7 @@ export async function readPaperSketch(input: {
       confirmedCount: 0,
       ocr,
       notes,
+      reader,
     };
   }
   if (!parsed) {
@@ -295,6 +300,7 @@ export async function readPaperSketch(input: {
       confirmedCount: 0,
       ocr,
       notes,
+      reader,
     };
   }
   if (dimensions.length === 0) {
@@ -308,6 +314,7 @@ export async function readPaperSketch(input: {
       confirmedCount: 0,
       ocr,
       notes,
+      reader,
     };
   }
   if (confirmedCount === 0) {
@@ -329,6 +336,7 @@ export async function readPaperSketch(input: {
       confirmedCount,
       ocr,
       notes,
+      reader,
     };
   }
 
@@ -342,6 +350,7 @@ export async function readPaperSketch(input: {
     confirmedCount,
     ocr,
     notes,
+    reader,
   };
 }
 

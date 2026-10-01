@@ -29,13 +29,16 @@ type ApiKeyProvider =
   | "groq" | "openrouter" | "mistral" | "pexels" | "deepseek"
   | "google" | "together" | "cerebras" | "cohere" | "xai" 
   | "api_ninjas" | "aimlapi" | "apifreellm" | "bytez"
-  | "nvidia" | "chutes";
+  | "nvidia" | "chutes"
+  /* Measured 2026-10-02: these three held 358 keys the desk had verified as answering,
+     and the picker never loaded them because they were not in this list. */
+  | "sambanova" | "anthropic" | "openai";
 
 const PROVIDERS: ApiKeyProvider[] = [
   "groq", "openrouter", "mistral", "pexels", "deepseek",
   "google", "together", "cerebras", "cohere", "xai",
   "api_ninjas", "aimlapi", "apifreellm", "bytez",
-  "nvidia", "chutes"
+  "nvidia", "chutes", "sambanova", "anthropic", "openai"
 ];
 
 // In-memory key state
@@ -71,6 +74,9 @@ const keyStates: Record<string, KeyState[]> = {
   bytez: [],
   nvidia: [],
   chutes: [],
+  sambanova: [],
+  anthropic: [],
+  openai: [],
 };
 
 let keysLoaded = false;
@@ -203,6 +209,9 @@ const keyIndices: Record<string, number> = {
   bytez: 0,
   nvidia: 0,
   chutes: 0,
+  sambanova: 0,
+  anthropic: 0,
+  openai: 0,
 };
 
 /**

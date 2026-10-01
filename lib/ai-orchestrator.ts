@@ -19,7 +19,12 @@ type AIProvider =
   | "cerebras"
   | "cohere"
   | "nvidia"
-  | "chutes";
+  | "chutes"
+  /* 358 keys the desk verified as answering today were sitting behind these three names
+     that the orchestrator could not say. */
+  | "sambanova"
+  | "anthropic"
+  | "openai";
 
 const CONFIG = {
   // === The Absolute Best Models on the Market ===
@@ -35,6 +40,16 @@ const CONFIG = {
   COHERE_MODEL: process.env.COHERE_MODEL || "command-a-03-2025",
   NVIDIA_MODEL: process.env.NVIDIA_MODEL || "meta/llama-3.3-70b-instruct", // NVIDIA NIM default model
   CHUTES_MODEL: process.env.CHUTES_MODEL || "deepseek/deepseek-r1", // Chutes AI default model
+  // These three identifiers were read from each company's own model list on 2026-10-02, not
+  // remembered: SambaNova serves six, Anthropic thirteen, OpenAI one hundred and twenty-seven,
+  // and a name that is not on their list fails with a message nobody can see.
+  SAMBANOVA_MODEL: process.env.SAMBANOVA_MODEL || "DeepSeek-V3.2",
+  ANTHROPIC_MODEL: process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001",
+  // The same Anthropic model reads pictures, which is why it is the first backup when the
+  // paper desk's usual reader is out of ceiling.
+  ANTHROPIC_VISION_MODEL: process.env.ANTHROPIC_VISION_MODEL || "claude-haiku-4-5-20251001",
+  OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+  OPENAI_VISION_MODEL: process.env.OPENAI_VISION_MODEL || "gpt-4o",
   MAX_RETRIES: 3,
   RETRY_DELAY_MS: 500,
 };
@@ -446,6 +461,134 @@ export async function askGoogle(prompt: string, options?: any) {
 }
 
 /**
+ * SambaNova and OpenAI both speak the OpenAI chat shape, so they share one caller rather
+ * than growing a third and fourth copy of the same request.
+ */
+async function askOpenAiCompatible(
+  provider: AIProvider,
+  url: string,
+  defaultModel: string,
+  messages: Array<{ role: string; content: unknown }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number }
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const result = await fetchWithRetry(
+    provider,
+    (key) => fetch(url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: options?.model || defaultModel,
+        messages,
+        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? 2048,
+      }),
+    }),
+    (data) => data.choices?.[0]?.message?.content || ""
+  );
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+export async function askSambaNovaMessages(
+  messages: Array<{ role: string; content: unknown }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number }
+) {
+  return askOpenAiCompatible("sambanova", "https://api.sambanova.ai/v1/chat/completions", CONFIG.SAMBANOVA_MODEL, messages, options);
+}
+
+export async function askOpenAIMessages(
+  messages: Array<{ role: string; content: unknown }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number }
+) {
+  return askOpenAiCompatible("openai", "https://api.openai.com/v1/chat/completions", CONFIG.OPENAI_MODEL, messages, options);
+}
+
+/**
+ * Anthropic keeps its own shape: the system prompt travels apart from the messages, the
+ * version is a header, and the answer arrives as content blocks.
+ */
+async function askAnthropic(
+  body: Record<string, unknown>,
+  provider: AIProvider = "anthropic"
+): Promise<{ success: boolean; content: string; error?: string }> {
+  const result = await fetchWithRetry(
+    provider,
+    (key) => fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+    (data) => (Array.isArray(data?.content) ? data.content.map((b: any) => b?.text ?? "").join("") : "")
+  );
+  return result.success ? { success: true, content: result.data } : { success: false, content: "", error: result.error };
+}
+
+export async function askAnthropicMessages(
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number }
+) {
+  const system = messages.find((m) => m.role === "system")?.content;
+  const turns = messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content }));
+  return askAnthropic({
+    model: options?.model || CONFIG.ANTHROPIC_MODEL,
+    max_tokens: options?.maxTokens ?? 2048,
+    temperature: options?.temperature ?? 0.7,
+    ...(system ? { system } : {}),
+    messages: turns,
+  });
+}
+
+/**
+ * One picture, read by whoever can read it.
+ *
+ * The paper desk used to ask a single company, and when that company's minute ceiling was
+ * spent the owner's drawing came back with no numbers at all — measured on the published
+ * store. The readers below are tried in order and the answer says which one read it, because
+ * «the store read your paper» and «Claude read your paper after جيميني refused» are different
+ * facts worth keeping.
+ */
+export async function askVisionAny(
+  prompt: string,
+  imageBase64: string,
+  mimeType: string = "image/png",
+  options?: { maxTokens?: number }
+): Promise<{ success: boolean; content: string; error?: string; reader?: string }> {
+  const google = await askGoogleVision(prompt, imageBase64, mimeType, options);
+  if (google.success && google.content.trim()) return { ...google, reader: "google" };
+
+  const anthropic = await askAnthropic({
+    model: CONFIG.ANTHROPIC_VISION_MODEL,
+    max_tokens: options?.maxTokens ?? 1500,
+    messages: [{
+      role: "user",
+      content: [
+        { type: "image", source: { type: "base64", media_type: mimeType, data: imageBase64 } },
+        { type: "text", text: prompt },
+      ],
+    }],
+  });
+  if (anthropic.success && anthropic.content.trim()) return { ...anthropic, reader: "anthropic" };
+
+  const openai = await askOpenAiCompatible(
+    "openai",
+    "https://api.openai.com/v1/chat/completions",
+    CONFIG.OPENAI_VISION_MODEL,
+    [{
+      role: "user",
+      content: [
+        { type: "text", text: prompt },
+        { type: "image_url", image_url: { url: `data:${mimeType};base64,${imageBase64}` } },
+      ],
+    }],
+    { maxTokens: options?.maxTokens ?? 1500 }
+  );
+  if (openai.success && openai.content.trim()) return { ...openai, reader: "openai" };
+
+  // Nobody read it. The first reader's reason is the one worth reporting: it is the reader
+  // this store was built on, and its failure is the news.
+  return { success: false, content: "", error: google.error || "ولا قارئ صور رد" };
+}
+
+/**
  * P5-M4: vision analysis on a base64 image via Gemini inlineData.
  * imageBase64 must be raw base64 (no data: prefix).
  */
@@ -516,6 +659,11 @@ export async function askOrchestratorMessages(
   if (!providersToTry.includes("cerebras")) providersToTry.push("cerebras");
   if (!providersToTry.includes("cohere")) providersToTry.push("cohere");
   if (!providersToTry.includes("chutes")) providersToTry.push("chutes");
+  // Added after measuring that these three held live, answering keys the chain never reached.
+  // OpenAI goes last on purpose: the desk's own note is that it is the paid one.
+  if (!providersToTry.includes("sambanova")) providersToTry.push("sambanova");
+  if (!providersToTry.includes("anthropic")) providersToTry.push("anthropic");
+  if (!providersToTry.includes("openai")) providersToTry.push("openai");
 
   console.log(`[Orchestrator] Starting inference. Provider sequence: ${providersToTry.join(' -> ')}`);
 
@@ -549,6 +697,15 @@ export async function askOrchestratorMessages(
           break;
         case "cohere":
           result = await askCohereMessages(messages, options);
+          break;
+        case "sambanova":
+          result = await askSambaNovaMessages(messages, options);
+          break;
+        case "anthropic":
+          result = await askAnthropicMessages(messages, options);
+          break;
+        case "openai":
+          result = await askOpenAIMessages(messages, options);
           break;
         case "openrouter":
           result = await askOpenRouter(messages[messages.length - 1].content);

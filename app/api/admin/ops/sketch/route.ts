@@ -121,6 +121,10 @@ export async function POST(request: NextRequest) {
       failure: reading.failure,
       witnesses: {
         offline: { ran: reading.ocr.ran, ms: reading.ocr.ms, confidence: reading.ocr.confidence, error: reading.ocr.error },
+        // Which company's reader actually looked at this drawing. The desk used to ask one
+        // company and lose the reading when its ceiling was spent; the answer now records
+        // who answered, so a reading can be traced to a witness that exists.
+        model_reader: reading.reader ?? null,
         bytes: buffer.length,
         mime,
       },
