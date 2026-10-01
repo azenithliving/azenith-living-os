@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ShieldAlert, CheckCircle, XCircle, Clock, Loader2, Inbox } from 'lucide-react';
 
 import { CAPABILITY_LABELS } from '@/lib/ops/palette';
+import { arNum } from '@/lib/ops/metricLabels';
 
 export interface PendingApproval {
   id: string;
@@ -112,7 +113,7 @@ export function ApprovalGate({ onCount }: { onCount?: (n: number) => void } = {}
         </h2>
         {approvals.length > 0 && (
           <span className="px-3 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-full text-xs font-bold animate-pulse">
-            {approvals.length} معلقة
+            {arNum(approvals.length)} معلقة
           </span>
         )}
         <button

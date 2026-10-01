@@ -246,6 +246,15 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
   const unreadLocatedRef = useRef(false);
   const scrolledToUnreadRef = useRef(false);
+  // The sidebar's «قرارات مستنية كلمتك» door opens the vault with the conversation.
+  useEffect(() => {
+    if (!fullScreen) return;
+    try {
+      if (new URLSearchParams(window.location.search).get('decisions') === '1') setShowDecisions(true);
+    } catch {
+      /* nothing to read the address from */
+    }
+  }, [fullScreen]);
   const lastReadKey = `ops_last_read_${agentKey}`;
   const [isListening, setIsListening] = useState(false);
   const [ttsOn, setTtsOn] = useState(false);

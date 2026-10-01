@@ -48,6 +48,18 @@ describe("the decisions vault speaks only the owner's language", () => {
     expect(arNum(25)).toBe("٢٥");
   });
 
+  it("counts in Arabic numerals wherever the owner reads a number", () => {
+    const surfaces: [string, string][] = [
+      ["components/admin/agents/ApprovalGate.tsx", "arNum(approvals.length)"],
+      ["components/admin/agents/EmergencyBanner.tsx", "arNum(count)"],
+      ["components/admin/CockpitDoors.tsx", "arNum(waiting)"],
+      ["app/admin/v2/agents/page.tsx", "arNum(DEPARTMENT_KEYS.length)"],
+    ];
+    for (const [file, call] of surfaces) {
+      expect(readFileSync(file, "utf8"), `${file} prints Latin digits at ${call}`).toContain(call);
+    }
+  });
+
   it("anchors the actions drawer inside the chat, not on the page", () => {
     const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
     const drawer = panel.slice(panel.indexOf("data-actions-drawer"));

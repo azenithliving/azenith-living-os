@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
+import { arNum } from '@/lib/ops/metricLabels';
+
 type Alert = { id: number; label: string; who: string; at: string | null; note: string };
 
 const REFRESH_MS = 20_000;
@@ -83,7 +85,7 @@ export function EmergencyBanner() {
       </span>
       {count > 1 && (
         <span className="shrink-0 rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-bold">
-          {count} تنبيهات
+          {arNum(count)} تنبيهات
         </span>
       )}
       <span className="shrink-0 text-[10px] text-white/80">{ago(alert.at)}</span>

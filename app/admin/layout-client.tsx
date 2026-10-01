@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { GlobalAssistantDock } from "@/components/admin/GlobalAssistantDock";
+import { CockpitDoors } from "@/components/admin/CockpitDoors";
 import { 
   Home, 
   Shield, 
@@ -187,6 +188,7 @@ export default function AdminLayoutClient({
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-white/5 space-y-4">
+          <CockpitDoors />
           <Link href="/admin/database" className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-white/60 transition hover:border-[#C5A059]/40 hover:text-white">
             <Activity className="h-4 w-4 text-[#C5A059]" />
             <span className="text-xs">افتح حالة النظام الفعلية</span>
