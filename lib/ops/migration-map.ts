@@ -61,6 +61,17 @@ export const OFFICES: Office[] = [
     employees: [],
   },
   {
+    id: "key-desk",
+    /**
+     * The desk that says which model the store is running on right now. Not an employee:
+     * what it answers is a question about the store's own capacity, and the owner asked
+     * for the list of free models and how to get a key for each in one place.
+     */
+    label: "مكتب المفاتيح",
+    answers: "كل نموذج مجاني إحنا شغالين عليه، وكم مفتاح بيجاوب دلوقتي، وإزاي تجيب الباقي",
+    employees: [],
+  },
+  {
     id: "elite-room",
     label: "غرفة النخبة",
     answers: "مين لسه على قائمة الانتظار، ومين دخل بالدعوة",
@@ -217,6 +228,8 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "components/admin/CockpitDoors.tsx", office: "decision-desk", status: "moved", reason: "بابا الكابينة في القائمة الجانبية: قرارات مستنية كلمتك بعددها الحيّ، والإيقاف الفوري" },
   { id: "app/admin/v2/sketches/page.tsx", office: "paper-desk", status: "moved", reason: "طاولة الورق: التصوير والحفظ والقراءة والسجل والربط بصاحب الورقة من الدفتر — كلها شغالة على العنوان الجديد" },
   { id: "components/admin/sketches/SketchOwner.tsx", office: "paper-desk", status: "moved", reason: "مين صاحب الورقة: بحث في دفتر العملاء نفسه، والمفتاح المخزن هو مفتاح الدفتر مش نسخة من اسمه" },
+  { id: "app/admin/v2/keys/page.tsx", office: "key-desk", status: "moving", reason: "مكتب المفاتيح: قايمة النماذج المجانية وعدد المفاتيح اللي بيجاوب فعلًا وخطوات جيب المفتاح" },
+  { id: "app/api/admin/keys/desk/route.ts", office: "key-desk", status: "moving", reason: "بوّابة المكتب: بتقرأ السجل وبتسأل كل مزود عن مفاتيحه في دفعة محدودة" },
   { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "pending", reason: "الإعدادات" },
   { id: "app/admin/v2/system/page.tsx", office: "system-room", status: "pending", reason: "حالة النظام" },
   { id: "app/admin/v2/work/page.tsx", office: "records-office", status: "pending", reason: "مركز العمل" },

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T20:56:08.224Z",
+  "generatedAt": "2026-10-01T21:56:25.543Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,7 +7,7 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 456,
+    "not-moved": 463,
     "moved": 6,
     "moving": 1,
     "erased": 1
@@ -119,6 +119,11 @@
     {
       "kind": "new-page",
       "atom": "app/admin/v2/elite/page.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/keys/page.tsx",
       "state": "not-moved"
     },
     {
@@ -408,6 +413,11 @@
     {
       "kind": "admin-door",
       "atom": "app/api/admin/keys/bulk/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/keys/desk/route.ts",
       "state": "not-moved"
     },
     {
@@ -1896,6 +1906,26 @@
     },
     {
       "kind": "swarm-file",
+      "atom": "lib/ops/key-desk.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/key-intake.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/key-provenance.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/key-verify.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
       "atom": "lib/ops/legacy-address-table.ts",
       "state": "not-moved"
     },
@@ -2345,6 +2375,11 @@
     {
       "kind": "nav-entry",
       "atom": "/admin/system",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/v2/keys",
       "state": "not-moved"
     },
     {

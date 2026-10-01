@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-10-01T20:56:08.221Z",
+  "generatedAt": "2026-10-01T21:56:25.540Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
-    "newPages": 12,
-    "newPageLines": 884,
-    "adminDoors": 116,
-    "allDoors": 195,
+    "newPages": 13,
+    "newPageLines": 1050,
+    "adminDoors": 117,
+    "allDoors": 196,
     "outsideDoors": 8,
     "outsideDoorLines": 2554,
     "rootLibFiles": 264,
     "rootLibUsed": 70,
     "orphanDoors": 71,
-    "rootLibUsedLines": 26930,
+    "rootLibUsedLines": 26935,
     "furnitureFiles": 54,
     "furnitureLines": 14934,
     "furnitureUsedByBoth": 6,
@@ -20,15 +20,15 @@
     "furnitureNewOnly": 15,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
-    "swarmFiles": 59,
-    "swarmFileLines": 14195,
+    "swarmFiles": 63,
+    "swarmFileLines": 14627,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
-    "navEntries": 10,
+    "navEntries": 11,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 464
+    "atoms": 471
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -136,6 +136,11 @@
       "kind": "new-page",
       "id": "app/admin/v2/elite/page.tsx",
       "lines": 16
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/keys/page.tsx",
+      "lines": 166
     },
     {
       "kind": "new-page",
@@ -416,6 +421,11 @@
       "kind": "admin-door",
       "id": "app/api/admin/keys/bulk/route.ts",
       "resource": "admin/keys/bulk"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/keys/desk/route.ts",
+      "resource": "admin/keys/desk"
     },
     {
       "kind": "admin-door",
@@ -827,7 +837,7 @@
       "kind": "root-lib",
       "id": "lib/admin-api-guard.ts",
       "lines": 48,
-      "callers": 32
+      "callers": 33
     },
     {
       "kind": "root-lib",
@@ -880,13 +890,13 @@
     {
       "kind": "root-lib",
       "id": "lib/admin-natural-brain.ts",
-      "lines": 498,
+      "lines": 502,
       "callers": 4
     },
     {
       "kind": "root-lib",
       "id": "lib/admin-nav.ts",
-      "lines": 114,
+      "lines": 115,
       "callers": 1
     },
     {
@@ -1157,7 +1167,7 @@
       "kind": "root-lib",
       "id": "lib/supabase-admin.ts",
       "lines": 21,
-      "callers": 30
+      "callers": 31
     },
     {
       "kind": "root-lib",
@@ -2026,6 +2036,26 @@
     },
     {
       "kind": "swarm-file",
+      "id": "lib/ops/key-desk.ts",
+      "lines": 128
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/key-intake.ts",
+      "lines": 119
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/key-provenance.ts",
+      "lines": 78
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/key-verify.ts",
+      "lines": 94
+    },
+    {
+      "kind": "swarm-file",
       "id": "lib/ops/legacy-address-table.ts",
       "lines": 84
     },
@@ -2072,7 +2102,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 319
+      "lines": 332
     },
     {
       "kind": "swarm-file",
@@ -2555,6 +2585,10 @@
     {
       "kind": "nav-entry",
       "id": "/admin/system"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/v2/keys"
     },
     {
       "kind": "nav-entry",

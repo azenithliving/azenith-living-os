@@ -45,6 +45,7 @@ const BASE_NAV: NavCategory[] = [
     title: "النظام",
     items: [
       { href: "/admin/system", label: "مركز النظام", icon: "Settings" },
+      { href: "/admin/v2/keys", label: "مكتب المفاتيح", icon: "KeyRound" },
       { href: "/admin/settings", label: "الإعدادات", icon: "Database" },
       { href: "/admin/database", label: "حالة قاعدة البيانات", icon: "Activity" },
     ],
