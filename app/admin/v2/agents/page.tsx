@@ -12,6 +12,7 @@ import {
   type Department,
 } from '@/lib/ops/departments';
 import { SWARM_NAME } from '@/lib/ops/identity';
+import { arNum } from '@/lib/ops/metricLabels';
 
 type AgentStatus = { agent: string; status: 'online' | 'busy' | 'offline'; taskCount: number; recentActivity: string };
 
@@ -34,9 +35,6 @@ export function previewLine(content: string): string {
   if (!clean) return '';
   return clean.length > 130 ? `${clean.slice(0, 127).trimEnd()}…` : clean;
 }
-
-/** His numerals are the Arabic ones — the same shape the rest of the cockpit uses. */
-const arNum = (n: number) => new Intl.NumberFormat('ar-EG').format(n);
 
 const DEPT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   operations: ShieldCheck,

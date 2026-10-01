@@ -14,6 +14,7 @@ import { ApprovalGate } from './ApprovalGate';
 import { QuickActionsPanel } from './QuickActionsPanel';
 import { EmergencyBanner } from './EmergencyBanner';
 import { buildPalette, isPaletteHotkey, CAPABILITY_LABELS, type PaletteCommand } from '@/lib/ops/palette';
+import { arNum, metricLabel } from '@/lib/ops/metricLabels';
 import type { SelfModelView } from '@/lib/ops/self-view';
 import {
   CONTINUOUS_SILENCE_MS,
@@ -731,7 +732,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       <EmergencyBanner />
 
       {/* Header */}
-      <div data-chat-header="" className={`p-4 border-b ${colors.border} flex items-center justify-between ${colors.bg}`}>
+      <div data-chat-header="" className={`p-4 border-b ${colors.border} flex flex-wrap items-center gap-y-2 justify-between ${colors.bg}`}>
         <div className="flex items-center gap-3 min-w-0 flex-1">
           {fullScreen && (
             <Link href="/admin/v2/agents" title="رجوع لمركز القيادة" className="w-9 h-9 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white text-lg">→</Link>
@@ -754,7 +755,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex w-full sm:w-auto items-center justify-end gap-2 shrink-0">
           <button
             onClick={openPalette}
             title="قائمة الأوامر (اضغط كترل وك)"
@@ -1357,10 +1358,14 @@ function StructuredToolCard({ toolName, toolData }: { toolName: string; toolData
         <div className="grid grid-cols-2 gap-1.5">
           {Object.entries(toolData).slice(0, 6).map(([key, val]) => {
             if (typeof val === 'object' && val !== null) return null;
+            const label = metricLabel(key);
+            if (!label) return null;
             return (
               <div key={key} className="p-2 rounded-xl bg-black/40 border border-white/5 flex flex-col">
-                <span className="text-[10px] text-white/40 truncate">{key}</span>
-                <span className="text-xs font-bold text-white font-mono">{String(val)}</span>
+                <span className="text-[10px] text-white/40 truncate">{label}</span>
+                <span className="text-xs font-bold text-white">
+                  {typeof val === 'number' ? arNum(val) : String(val)}
+                </span>
               </div>
             );
           })}

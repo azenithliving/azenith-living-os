@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { toolLabel, type PendingApproval } from "@/components/admin/agents/ApprovalGate";
+import { METRIC_LABELS, arNum, metricLabel } from "@/lib/ops/metricLabels";
 
 const row = (over: Partial<PendingApproval>): PendingApproval => ({
   id: "apr_1",
@@ -37,6 +38,14 @@ describe("the decisions vault speaks only the owner's language", () => {
     expect(panel).toContain("data-decisions-toggle");
     expect(panel).toContain("data-decision-vault");
     expect(panel).toContain("<ApprovalGate onCount={setPendingDecisions} />");
+  });
+
+  it("names a tool's numbers in Arabic, or not at all", () => {
+    const latin = Object.entries(METRIC_LABELS).filter(([, v]) => /[A-Za-z]/.test(v));
+    expect(latin.map(([k, v]) => `${k}=${v}`)).toEqual([]);
+    expect(metricLabel("agents")).toBe("عدد الموظفين");
+    expect(metricLabel("a_key_no_one_named")).toBe("");
+    expect(arNum(25)).toBe("٢٥");
   });
 
   it("anchors the actions drawer inside the chat, not on the page", () => {
