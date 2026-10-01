@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { applyCustomerWitness, type SketchDimension } from "@/lib/cad/paper-sketch-parser";
 import { freezeHash, looksLikePassportToken, stillSealed } from "@/lib/cad/passport";
+import { pickSheetImages } from "@/lib/cad/sheet-images";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +72,19 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   }
   const found = await findByToken(token);
   if (!found.row) return NextResponse.json({ success: false, error: found.error }, { status: found.status });
-  return NextResponse.json({ success: true, sheet: publicSheet(found.row) });
+
+  // The pictures are picked for the room on the drawing. When the room is one the
+  // bank has no pictures for, the general house set is sent and the flag says so,
+  // because «chosen for your room» has to be true before it is printed.
+  const picks = await pickSheetImages(found.row.room, 20);
+
+  return NextResponse.json({
+    success: true,
+    sheet: publicSheet(found.row),
+    images: picks.images,
+    images_room_type: picks.roomType,
+    images_for_his_room: picks.matched,
+  });
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {

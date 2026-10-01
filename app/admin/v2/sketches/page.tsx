@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScanLine } from 'lucide-react';
 
+import Link from 'next/link';
+
 import { arNum } from '@/lib/ops/metricLabels';
 
 type Dimension = { label: string; meters: number; confirmed: boolean };
@@ -22,6 +24,7 @@ type Reading = {
 
 type Row = {
   id: number;
+  token: string | null;
   room: string | null;
   dimensions: Dimension[];
   openings: Opening[];
@@ -50,6 +53,7 @@ function when(iso: string): string {
 export default function V2SketchesPage() {
   const [busy, setBusy] = useState(false);
   const [stage, setStage] = useState('');
+  const [passportPath, setPassportPath] = useState<string | null>(null);
   const [reading, setReading] = useState<Reading | null>(null);
   const [stored, setStored] = useState<boolean | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -98,6 +102,7 @@ export default function V2SketchesPage() {
         if (!res.ok || data?.success === false) throw new Error(data?.error || `الخادم ردّ بـ ${res.status}`);
         setReading(data.reading as Reading);
         setStored(Boolean(data.stored));
+        setPassportPath(typeof data.passport_path === 'string' ? data.passport_path : null);
         await readList();
       } catch (error) {
         setProblem(String((error as Error)?.message ?? error));
@@ -182,6 +187,15 @@ export default function V2SketchesPage() {
             قارئ البيكسلات: {reading.ocr.ran ? `${arNum(Math.round(reading.ocr.ms))} ملي ثانية بثقة ${arNum(Math.round(reading.ocr.confidence ?? 0))}٪` : `ما كملش${reading.ocr.error ? ` — ${reading.ocr.error}` : ''}`}
           </p>
           {reading.notes && <p className="mt-1 text-[11px] text-white/40">ملاحظة على الورقة: {reading.notes}</p>}
+
+          {passportPath && (
+            <Link
+              href={passportPath}
+              className="mt-3 block rounded-xl border border-emerald-500/25 bg-emerald-600/10 px-3 py-2 text-center text-[12px] font-black text-emerald-200"
+            >
+              ورقة العميل — افتحها أو ابعته إياها
+            </Link>
+          )}
         </section>
       )}
 
@@ -205,6 +219,11 @@ export default function V2SketchesPage() {
                   {` · ${arNum(row.confirmed_count)} مؤكد`}
                 </div>
                 {!row.ok && row.failure && <p className="mt-1 text-[10px] text-rose-300/80">{row.failure}</p>}
+                {row.token && (
+                  <Link href={`/passport/${row.token}`} className="mt-1.5 inline-block text-[10px] font-bold text-emerald-300">
+                    ورقة العميل
+                  </Link>
+                )}
               </li>
             ))}
           </ul>

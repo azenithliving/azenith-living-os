@@ -29,9 +29,15 @@ const OPENING_LABEL: Record<string, string> = { door: 'باب', window: 'شبا�
  * The address is read from the live path rather than a search hook so the page stays
  * prerenderable; a token that is not shaped like a token is never sent to the server.
  */
+type SheetImage = { url: string; thumb: string; style: string | null; roomType: string };
+
+const STYLE_LABEL: Record<string, string> = { modern: 'مودرن', classic: 'كلاسيك', minimal: 'مينيمال', luxury: 'فخم' };
+
 export default function PassportPage() {
   const [token, setToken] = useState('');
   const [sheet, setSheet] = useState<Sheet | null>(null);
+  const [images, setImages] = useState<SheetImage[]>([]);
+  const [imagesForHisRoom, setImagesForHisRoom] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [typed, setTyped] = useState<string[]>(['', '']);
   const [busy, setBusy] = useState(false);
@@ -47,8 +53,11 @@ export default function PassportPage() {
     fetch(`/api/passport/${match[1]}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data?.success) setSheet(data.sheet);
-        else setProblem(data?.error || 'الورقة ما جاتش');
+        if (data?.success) {
+          setSheet(data.sheet);
+          setImages(Array.isArray(data.images) ? data.images : []);
+          setImagesForHisRoom(Boolean(data.images_for_his_room));
+        } else setProblem(data?.error || 'الورقة ما جاتش');
       })
       .catch(() => setProblem('المتجر ما ردّش'));
   }, []);
@@ -157,6 +166,37 @@ export default function PassportPage() {
                   {busy ? 'بأأكد…' : 'أكّد مقاساتي'}
                 </button>
                 {news && <p className="mt-2 text-[11px] leading-relaxed text-white/60">{news}</p>}
+              </section>
+            )}
+            {images.length > 0 && (
+              <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                <h2 className="text-[12px] font-bold text-white/60">
+                  {imagesForHisRoom ? 'صور مختارة لنوع مكانك' : 'أفكار عامة من البيت — مكانك اللي على الورقة مش في بنك الصور بعد'}
+                </h2>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {images.map((img, i) => (
+                    <a key={i} href={img.url} target="_blank" rel="noopener noreferrer" className="block">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={img.thumb}
+                        alt="فكرة تصميم"
+                        loading="lazy"
+                        className="h-28 w-full rounded-xl border border-white/10 object-cover"
+                      />
+                      {img.style && STYLE_LABEL[img.style] ? (
+                        <span className="mt-1 block text-[10px] text-white/40">{STYLE_LABEL[img.style]}</span>
+                      ) : null}
+                    </a>
+                  ))}
+                </div>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(
+                    `ورقة مقاساتي وتصميمي من أزينث ليفينج: ${window.location.href}`
+                  )}`}
+                  className="mt-4 block w-full rounded-xl border border-emerald-500/30 bg-emerald-600/20 px-4 py-2.5 text-center text-[13px] font-black text-emerald-200"
+                >
+                  ابعتها على واتساب
+                </a>
               </section>
             )}
           </>
