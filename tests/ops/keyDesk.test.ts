@@ -11,7 +11,7 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { KEY_DESK_IDS, KEY_DESK_PROVIDERS, deskVerdict, keyDeskGuide } from "@/lib/ops/key-desk";
+import { DESK_NOT_A_MODEL, DESK_UNASKABLE, KEY_DESK_IDS, KEY_DESK_PROVIDERS, deskVerdict, keyDeskGuide } from "@/lib/ops/key-desk";
 import { VERIFIABLE_PROVIDERS } from "@/lib/ops/key-verify";
 
 describe("the list of free models", () => {
@@ -83,5 +83,38 @@ describe("the desk door", () => {
 
   it("caps what one press can ask", () => {
     expect(source()).toMatch(/Math\.min\(25,/);
+  });
+});
+
+describe("no provider disappears from the desk without a reason", () => {
+  const source = (path: string) => readFileSync(path, "utf8");
+
+  it("covers every name the orchestrator can call and every name the picker loads", () => {
+    const orchestrator = source("lib/ai-orchestrator.ts");
+    const picker = source("lib/api-keys-service.ts");
+
+    const union = (text: string, marker: string) => {
+      const start = text.indexOf(marker);
+      const block = text.slice(start, text.indexOf(";", start));
+      return [...block.matchAll(/"([a-z_0-9]+)"/g)].map((m) => m[1]).filter((v) => v !== marker);
+    };
+
+    const named = new Set([
+      ...union(orchestrator, "type AIProvider ="),
+      ...union(picker, "const PROVIDERS: ApiKeyProvider[] = ["),
+    ]);
+    expect(named.size, "the parse itself must keep working or this guard is theatre").toBeGreaterThan(12);
+
+    for (const provider of named) {
+      const covered = KEY_DESK_IDS.includes(provider) || provider in DESK_UNASKABLE || provider in DESK_NOT_A_MODEL;
+      expect(covered, `${provider} is callable but neither on the desk nor explained`).toBe(true);
+    }
+  });
+
+  it("explains each name it leaves off the desk", () => {
+    for (const [provider, reason] of Object.entries({ ...DESK_UNASKABLE, ...DESK_NOT_A_MODEL })) {
+      expect(reason.length, provider).toBeGreaterThan(20);
+      expect(reason, provider).not.toMatch(/[A-Za-z]{4,}/);
+    }
   });
 });

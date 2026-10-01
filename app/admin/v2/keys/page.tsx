@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { KeyRound, RefreshCw } from 'lucide-react';
+import { ExternalLink, KeyRound, RefreshCw } from 'lucide-react';
 
 import { arNum } from '@/lib/ops/metricLabels';
 
@@ -25,6 +25,15 @@ type DeskRow = {
   lastCheck: string | null;
   verdict: string;
 };
+
+/** The address he will land on, printed under the Arabic label so he recognises it. */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).host.replace(/^www./, '');
+  } catch {
+    return '';
+  }
+}
 
 type Totals = {
   keys: number;
@@ -157,20 +166,22 @@ export default function V2KeysDeskPage() {
                   <RefreshCw className="h-3 w-3" />
                   {checking === row.id ? 'باسأل المزود…' : 'تحقّق دلوقتي'}
                 </button>
-                {row.alive === 0 && (
-                  <a
-                    href={row.keysUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-xl border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold text-amber-200"
-                    data-key-get={row.id}
-                  >
-                    جيب مفتاح
-                  </a>
-                )}
+                {/* The address is always shown, not only when the provider is empty: the
+                    owner asked to see where a key comes from before he needs one, and a link
+                    that appears only after the failure is a link he never learns exists. */}
+                <a
+                  href={row.keysUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-xl border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold text-amber-200"
+                  data-key-get={row.id}
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  جيب مفتاح · {hostOf(row.keysUrl)}
+                </a>
               </div>
 
-              {row.alive === 0 && <p className="mt-2 text-[10px] leading-relaxed text-white/40">{row.steps}</p>}
+              <p className="mt-2 text-[10px] leading-relaxed text-white/40">{row.steps}</p>
             </li>
           );
         })}

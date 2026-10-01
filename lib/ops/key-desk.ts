@@ -110,6 +110,34 @@ export const KEY_DESK_PROVIDERS: KeyDeskProvider[] = [
     steps: "أنشئ حساب ثم اعمل رمز جديد بصلاحيّة قراءة. المفتاح بيبدأ بـ hf_.",
   },
   {
+    id: "aimlapi",
+    label: "إيه‑آي‑إم‑إل",
+    good: "بوّابة على نماذج مفتوحة كثيرة بمفتاح واحد؛ حسابها المجاني بيجاوب على التحية بس لحد ما يشحن.",
+    keysUrl: "https://aimlapi.com/app/keys",
+    steps: "سجّل بحساب جوجل أو بالإيميل، ثم من لوحة التحكم اضغط «API Keys» وأنشئ مفتاح جديد.",
+  },
+  {
+    id: "api_ninjas",
+    label: "نينجا للبيانات",
+    good: "مش نموذج كلام: بيانات جاهزة عن الدول والطعام والنباتات، بتدخل في وصف المنتجات.",
+    keysUrl: "https://api-ninjas.com/profile",
+    steps: "أنشئ حساب مجاني ثم انسخ المفتاح من صفحة ملفك الشخصي. الخطة المجانية بتحدد عدد الطلبات في اليوم.",
+  },
+  {
+    id: "apifreellm",
+    label: "إيه‑بي‑فري‑إل‑إم",
+    good: "مصدر مفاتيح مجانية تجريبية؛ السيرفر بتاعها بيقع كتير، فمش أساس هنا.",
+    keysUrl: "https://apifreellm.com",
+    steps: "سجّل ثم خد المفتاح من لوحة التحكم. لو ما ردّش على السؤال، سيّبه وما تبنيش عليه.",
+  },
+  {
+    id: "nvidia",
+    label: "إنفيديا",
+    good: "نماذج مفتوحة المصدر على كروت الشركة؛ قايمة نماذجها بترد من غير مفتاح، والمفتاح بييجي من حساب.",
+    keysUrl: "https://build.nvidia.com/models",
+    steps: "سجّل بحساب إنفيديا ثم من صفحة النماذج اضغط «Get API Key» واختار خطة مجانية.",
+  },
+  {
     id: "xai",
     label: "إكس‑أي",
     good: "نموذج سريع؛ حساباته الجديدة لازم تتفعّل قبل الاستخدام.",
@@ -118,7 +146,26 @@ export const KEY_DESK_PROVIDERS: KeyDeskProvider[] = [
   },
 ];
 
+/**
+ * Reachable and useful, but not a model — so it does not belong on a desk of models, and it
+ * must not vanish from the books either. Its keys are asked by the same verifier and shown on
+ * the screen that reads them.
+ */
+export const DESK_NOT_A_MODEL: Record<string, string> = {
+  pexels: "بنك صور بيجاوب على سؤال حقيقي، بس مش نموذج بيكتب — مكانه في شاشة الصور مش هنا.",
+};
+
 export const KEY_DESK_IDS = KEY_DESK_PROVIDERS.map((p) => p.id);
+
+/**
+ * Names the store can reach but this desk cannot honestly show — with the reason, measured
+ * the same night. A provider that is simply absent from a list is how a capability gets
+ * forgotten; a provider listed with its reason is a decision somebody can revisit.
+ */
+export const DESK_UNASKABLE: Record<string, string> = {
+  chutes: "عنوان قايمة النماذج بيرد ٤٠٤ — مفيش سؤال معروف نتأكد بيه، فمش هنقول إن مفاتيحه ماتت.",
+  bytez: "كل العناوين اللي جربناها على سيرفره رجعت ٤٠٤، فمفيش طريقة نسأله أصلًا.",
+};
 
 export function keyDeskGuide(id: string): KeyDeskProvider | null {
   return KEY_DESK_PROVIDERS.find((p) => p.id === id) ?? null;

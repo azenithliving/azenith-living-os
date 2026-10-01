@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-01T22:46:05.039Z",
+  "generatedAt": "2026-10-01T23:41:00.847Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
     "newPages": 13,
-    "newPageLines": 1063,
+    "newPageLines": 1089,
     "adminDoors": 117,
     "allDoors": 196,
     "outsideDoors": 8,
@@ -12,7 +12,7 @@
     "rootLibFiles": 264,
     "rootLibUsed": 70,
     "orphanDoors": 71,
-    "rootLibUsedLines": 27126,
+    "rootLibUsedLines": 27138,
     "furnitureFiles": 54,
     "furnitureLines": 14934,
     "furnitureUsedByBoth": 6,
@@ -21,7 +21,7 @@
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 63,
-    "swarmFileLines": 14634,
+    "swarmFileLines": 14801,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
@@ -140,7 +140,7 @@
     {
       "kind": "new-page",
       "id": "app/admin/v2/keys/page.tsx",
-      "lines": 166
+      "lines": 192
     },
     {
       "kind": "new-page",
@@ -956,7 +956,7 @@
     {
       "kind": "root-lib",
       "id": "lib/ai-orchestrator.ts",
-      "lines": 935,
+      "lines": 940,
       "callers": 10
     },
     {
@@ -968,7 +968,7 @@
     {
       "kind": "root-lib",
       "id": "lib/api-keys-service.ts",
-      "lines": 682,
+      "lines": 684,
       "callers": 5
     },
     {
@@ -986,7 +986,7 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/paper-sketch-parser.ts",
-      "lines": 385,
+      "lines": 390,
       "callers": 1
     },
     {
@@ -2037,7 +2037,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/key-desk.ts",
-      "lines": 135
+      "lines": 199
     },
     {
       "kind": "swarm-file",
@@ -2052,7 +2052,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/key-verify.ts",
-      "lines": 94
+      "lines": 197
     },
     {
       "kind": "swarm-file",

@@ -30,6 +30,7 @@ const NEW_ONLY = flag("new-only");
 const APPLY = flag("apply");
 const DEEP = flag("deep");
 const GREETED = flag("greeted");
+const ANY = flag("any");
 const CONCURRENCY = Number(arg("workers") ?? 3);
 
 const sql = postgres(process.env.DIRECT_URL || process.env.DATABASE_URL, { ssl: "require", max: 1 });
@@ -40,7 +41,11 @@ try {
   // spend the ceiling the pass exists to measure.
   // Three questions the owner asks of this pass: what has never been asked, what came in
   // from his folder, and what answered a hello but has never been asked to write.
-  const where = GREETED
+  // `--any` re-asks a provider's rows whatever their verdict is — that is how a check that
+  // was wrong (a URL that does not exist) stops condemning keys it never tested.
+  const where = ANY
+    ? sql`true`
+    : GREETED
     ? sql`check_state = 'alive'`
     : NEW_ONLY
       ? sql`notes like ${"intake 2026-10-02%"}`

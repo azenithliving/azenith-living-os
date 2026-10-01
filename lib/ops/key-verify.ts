@@ -46,7 +46,12 @@ const CHECKS: Record<string, Check> = {
   aimlapi: { url: "https://api.aimlapi.com/v1/models", header: bearer },
   apifreellm: { url: "https://api.apifreellm.com/v1/models", header: bearer },
   sambanova: { url: "https://api.sambanova.ai/v1/models", header: bearer },
-  pexels: { url: "https://api.pexels.com/v1/me", header: (key) => ({ Authorization: key }) },
+  // Measured, not assumed: `/v1/me` does not exist on this provider and answered 404 for all
+  // five of his working image keys, which the pass then filed as refused. The cheapest real
+  // call it does have is its curated list.
+  pexels: { url: "https://api.pexels.com/v1/curated", query: () => "?per_page=1", header: (key) => ({ Authorization: key }) },
+  // One free lookup, no key in the URL: the endpoint exists and answers 200 with his key.
+  api_ninjas: { url: "https://api.api-ninjas.com/v1/country", query: () => "?name=Egypt", header: (key) => ({ "X-Api-Key": key }) },
 };
 
 export const VERIFIABLE_PROVIDERS = Object.keys(CHECKS);
