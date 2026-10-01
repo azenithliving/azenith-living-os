@@ -97,6 +97,7 @@ describe("the keyless drill", () => {
   it("leaves no English machine prose on the owner's path", () => {
     const orchestrator = readFileSync("lib/ai-orchestrator.ts", "utf8");
     const swarm = readFileSync("lib/ops/QayyimAgentBase.ts", "utf8");
+    const brain = readFileSync("lib/admin-natural-brain.ts", "utf8");
     const returned = (source: string) =>
       source
         .split("\n")
@@ -104,5 +105,8 @@ describe("the keyless drill", () => {
     expect(returned(orchestrator), "the door may log it, not answer with it").toEqual([]);
     expect(swarm).toMatch(/modelFloorLine\(this\.capabilityId/);
     expect(swarm).not.toMatch(/خطأ تقني/);
+    // The cockpit's own brain answers a missing model with its floor, and logs the reason.
+    expect(brain).toMatch(/modelFloorLine\("chat", modelFailureReason/);
+    expect(brain).not.toMatch(/عقبة تقنية/);
   });
 });

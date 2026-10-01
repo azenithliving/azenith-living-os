@@ -44,6 +44,7 @@ import {
   runBrowserAugmentation,
 } from "./admin-browser-augmentation";
 import { initializeAdminEnv } from "./admin-env-resolver";
+import { modelFloorLine, modelFailureReason } from "@/lib/ops/capability-tiers";
 
 export type { IntentKind, ClassifiedIntent } from "./admin-intent-types";
 export { needsMultiAgentMission } from "./admin-intent-classifier";
@@ -405,7 +406,10 @@ export async function processAdminNaturalLanguage(
     }
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : "خطأ غير معروف";
-    let reply = `واجهت عقبة تقنية: ${errMsg}`;
+    console.error("[AdminNaturalBrain] the reply fell to its floor:", errMsg);
+    // The raw reason belongs in the log; what the owner reads names the floor that is still
+    // standing — «a technical obstacle» tells a man who reads Arabic nothing he can act on.
+    let reply = modelFloorLine("chat", modelFailureReason(errMsg));
     try {
       const mission = await runAdminAgentMission(message, userEmail);
       if (mission.message) reply = mission.message;
