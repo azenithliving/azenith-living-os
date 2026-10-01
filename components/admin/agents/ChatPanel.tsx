@@ -604,7 +604,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       const heard = transcriptOf(ev);
       dictationRef.current = record(dictationRef.current, heard, Date.now());
       // He reads what has been understood, including the words still being heard.
-      setInput(`${dictationRef.current.pending}${heard.interimText}`);
+      setInput([dictationRef.current.pending, heard.interimText].filter(Boolean).join(' '));
     };
     rec.onerror = (ev: any) => {
       if (ev?.error === 'not-allowed' || ev?.error === 'service-not-allowed') {

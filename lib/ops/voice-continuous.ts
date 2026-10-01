@@ -127,9 +127,17 @@ export function transcriptOf(event: unknown): Heard {
   if (!results || typeof (results as { length?: number }).length !== "number") {
     return { finalText: "", interimText: "" };
   }
+
+  // A real browser hands over the WHOLE session in every event — the list grows and
+  // `resultIndex` marks where this event's news begins. Reading from zero re-added
+  // every settled sentence, so «اعرض قائمة العملاء» arrived as «اعرض اعرض قائمة
+  // العملاء»: the owner speaks once and the machine hears itself twice.
+  const startAt = (event as { resultIndex?: unknown }).resultIndex;
+  const from = typeof startAt === "number" && startAt > 0 ? startAt : 0;
+
   let finalText = "";
   let interimText = "";
-  for (let i = 0; i < (results as ArrayLike<unknown>).length; i++) {
+  for (let i = from; i < (results as ArrayLike<unknown>).length; i++) {
     const row = (results as ArrayLike<Record<string, unknown>>)[i] as
       | { isFinal?: boolean; 0?: { transcript?: unknown } }
       | undefined;

@@ -43,6 +43,36 @@ describe("transcriptOf", () => {
     expect(transcriptOf({ results: [] })).toEqual({ finalText: "", interimText: "" });
     expect(transcriptOf({ results: [{ isFinal: true, 0: {} }] })).toEqual({ finalText: "", interimText: "" });
   });
+
+  /**
+   * The owner's own report from a handset: he said «اعرض قائمة العملاء» and the
+   * machine wrote a doubled sentence. A browser replays the whole session in every
+   * event, and the reader used to start from the top each time.
+   */
+  it("reads only what is new when the browser replays the whole session", () => {
+    const event = {
+      resultIndex: 1,
+      results: [
+        { isFinal: true, 0: { transcript: "اعرض " } },
+        { isFinal: true, 0: { transcript: "قائمة العملاء" } },
+      ],
+    };
+    expect(transcriptOf(event)).toEqual({ finalText: "قائمة العملاء", interimText: "" });
+  });
+
+  it("hears one sentence exactly once across a real session's events", () => {
+    const rows = [
+      { isFinal: false, 0: { transcript: "اعرض" } },
+      { isFinal: true, 0: { transcript: "اعرض " } },
+      { isFinal: false, 0: { transcript: "قائمة" } },
+      { isFinal: true, 0: { transcript: "قائمة العملاء" } },
+    ];
+    let d = createDictation(T0);
+    rows.forEach((_, i) => {
+      d = record(d, transcriptOf({ resultIndex: i, results: rows.slice(0, i + 1) }), T0 + i * 300);
+    });
+    expect(dueToSend(d, T0 + 5_000)).toBe("اعرض قائمة العملاء");
+  });
 });
 
 describe("the silence gate", () => {
