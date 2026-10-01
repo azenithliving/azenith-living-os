@@ -666,10 +666,18 @@ export async function publishLatestRoomDraft(
 }
 
 export function qayyimOutOfScope(topic: string): ToolExecutionResult {
+  /**
+   * Four of these trades left the store by the owner's word (٢٩ و ٣٠ سبتمبر): money,
+   * prices and orders, stock and materials, the workshop and its job tickets. The
+   * refusal is therefore not a handover to another employee or to a tab that has been
+   * erased — it names the trade as outside, and sends the customer work to the sales
+   * manager, who is the only one of them that stays.
+   */
   const map: Record<string, string> = {
-    factory: "المصنع والمخزن والخامات وأوامر التشغيل ليست اختصاص سرب أزينث. استخدمي تبويب التصنيع أو وكيل التشغيل المختص.",
-    sales: "العملاء وأوامر البيع من اختصاص Vanguard.",
-    money: "الأرقام المالية من اختصاص Analyst.",
+    factory: "المصنع والورشة والمخزن والخامات بره تجارة المتجر — مفيش تبويب تصنيع ولا أمر تشغيل.",
+    sales: "دفتر العملاء والمتابعة من اختصاص مدير المبيعات — والعربون والعقد والسعر بره المتجر.",
+    money: "الإيراد والفلوس بره تجارة المتجر — بتتم بره وبتتسجل في دفاترك انت.",
+    margin: "هوامش الربح والتسعير بره تجارة المتجر — الماكينة ما بيسعّرش ولا بيلتزم بسعر.",
     infra: "النسخ الاحتياطي وسرعة السيرفر من اختصاص Ops.",
     security: "الحماية والمفاتيح من اختصاص Security.",
     code: "صحة الـ API والكود من اختصاص Coder.",

@@ -43,7 +43,6 @@ export const AGENT_ROLES: Record<string, string[]> = {
     "احسب Luxury Score الآن للموقع كله",
     "توقع مبيعات الشهر الجاي بالأرقام",
     "اعرض أهدافي المهددة هذا الشهر",
-    "حلّل الإيرادات والمبيعات",
     "اعرض المؤشرات اللحظية للنظام",
   ],
   "ops-dev": [
@@ -59,3 +58,18 @@ export const AGENT_ROLES: Record<string, string[]> = {
     "اعرض أهدافي المهددة هذا الشهر",
   ],
 };
+
+/**
+ * The sales employee is not a ninth swarm member — the catalog above is the swarm's
+ * eight, and three guards count it. His capabilities live with his face in the chat
+ * component, and they are the ones the store can really do: read the one customer roll
+ * and reach the human behind it. Qualifying «VIP» buyers, collecting deposits, writing
+ * contracts, pricing and margins are outside the store's trade by the owner's ruling
+ * (٣٠ سبتمبر), so nothing here offers them and a chat that asks gets the written
+ * refusal instead.
+ */
+export const SALES_MANAGER_CAPABILITIES = [
+  "اعرض قائمة العملاء",
+  "اعرض العملاء المشتريين",
+  "اعرض العملاء اللي مستنيين رد",
+];

@@ -6,8 +6,9 @@
  */
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
-  Search, HardDrive, TrendingUp, Package,
+  Search, HardDrive, Package, Users,
   Loader2, CheckCircle, XCircle, ChevronDown, ChevronUp
 } from 'lucide-react';
 
@@ -23,8 +24,13 @@ interface QuickAction {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   color: string;
-  toolName: string;
-  params: Record<string, unknown>;
+  /**
+   * A door instead of a command. Where this exists the tile takes the owner to the
+   * employee who owns the number — it never counts the same thing a second time.
+   */
+  to?: string;
+  toolName?: string;
+  params?: Record<string, unknown>;
 }
 
 const ACTIONS: QuickAction[] = [
@@ -48,12 +54,13 @@ const ACTIONS: QuickAction[] = [
   },
   {
     id: 'customers',
-    label: 'قائمة العملاء',
-    description: 'اللى محتاجين رد من الدفتر الواحد',
-    icon: TrendingUp,
+    label: 'مدير المبيعات',
+    description: 'دفتر العملاء في بيته — عدد واحد من مصدر واحد',
+    icon: Users,
     color: 'amber',
-    toolName: 'lead_list',
-    params: { limit: 20 },
+    to: '/admin/v2/sales',
+    toolName: '',
+    params: {},
   },
   {
     id: 'pages',
@@ -127,12 +134,12 @@ export function QuickActionsPanel() {
   const [results, setResults] = useState<Record<string, ActionResult>>({});
 
   async function execute(action: QuickAction) {
-    if (states[action.id] === 'loading') return;
+    if (!action.toolName || states[action.id] === 'loading') return;
     setStates(s => ({ ...s, [action.id]: 'loading' }));
     setResults(s => { const n = { ...s }; delete n[action.id]; return n; });
 
     try {
-      const result = await runTool(action.toolName, action.params);
+      const result = await runTool(action.toolName, action.params ?? {});
       setResults(s => ({ ...s, [action.id]: result }));
     } catch (err) {
       setResults(s => ({ ...s, [action.id]: { success: false, message: 'خطأ في الاتصال' } }));
@@ -149,28 +156,37 @@ export function QuickActionsPanel() {
 
       <div className="grid grid-cols-2 gap-3">
         {ACTIONS.map(action => {
-          const col     = COLOR_MAP[action.color];
-          const loading = states[action.id] === 'loading';
-          const result  = results[action.id];
+          const col       = COLOR_MAP[action.color];
+          const loading   = states[action.id] === 'loading';
+          const result    = results[action.id];
+          const tileClass = `w-full flex flex-col items-center justify-center gap-2 p-5 bg-white/[0.02] border ${col.btn} rounded-2xl transition-all disabled:opacity-50 group text-center`;
 
           return (
             <div key={action.id} className="space-y-1">
-              <button
-                onClick={() => execute(action)}
-                disabled={loading}
-                className={`w-full flex flex-col items-center justify-center gap-2 p-5 bg-white/[0.02] border ${col.btn} rounded-2xl transition-all disabled:opacity-50 group`}
-              >
-                {loading
-                  ? <Loader2 className={`w-6 h-6 ${col.icon} animate-spin`} />
-                  : <action.icon className={`w-6 h-6 ${col.icon} group-hover:scale-110 transition-transform`} />
-                }
-                <span className="text-[10px] font-black uppercase tracking-widest text-white/70">
-                  {loading ? 'جاري…' : action.label}
-                </span>
-                <span className="text-[9px] text-white/30 text-center leading-tight">
-                  {action.description}
-                </span>
-              </button>
+              {action.to ? (
+                <Link href={action.to} className={tileClass}>
+                  <action.icon className={`w-6 h-6 ${col.icon} group-hover:scale-110 transition-transform`} />
+                  <span className="text-xs font-black text-white/70">{action.label}</span>
+                  <span className="text-[9px] text-white/30 leading-tight">{action.description}</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => execute(action)}
+                  disabled={loading}
+                  className={tileClass}
+                >
+                  {loading
+                    ? <Loader2 className={`w-6 h-6 ${col.icon} animate-spin`} />
+                    : <action.icon className={`w-6 h-6 ${col.icon} group-hover:scale-110 transition-transform`} />
+                  }
+                  <span className="text-xs font-black text-white/70">
+                    {loading ? 'جاري…' : action.label}
+                  </span>
+                  <span className="text-[9px] text-white/30 leading-tight">
+                    {action.description}
+                  </span>
+                </button>
+              )}
 
               {result && <ResultBox result={result} />}
             </div>

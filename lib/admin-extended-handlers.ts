@@ -360,20 +360,45 @@ export async function executeLeadList(
   const limit = Math.min(Number(params.limit) || 20, 50);
   const intent = params.intent as string | undefined;
   try {
-    let q = supabase
-      .from("users")
-      .select("id, full_name, phone, email, intent, score, room_type, budget, style, created_at")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-    if (intent && intent !== "all") q = q.eq("intent", intent);
-    const companyId = context.companyId || process.env.MASTER_COMPANY_ID;
-    if (companyId) q = q.eq("company_id", companyId);
-    const { data, error } = await q;
-    if (error) throw error;
+    /**
+     * One counting rule for the word «عميل». This tool used to read the profile ledger
+     * alone and cap it at twenty, while the sales office read the shared roll of every
+     * space a customer stands in — same word on the owner's screen, two answers, and a
+     * buyer who exists in only one of them. It now asks the same reader the office asks
+     * and reports the same number, including the ones with no way to reach them.
+     */
+    const { readCustomers } = await import("@/lib/customers/read");
+    const roll = await readCustomers(supabase as never);
+    if (roll.failures.length > 0) {
+      return {
+        success: false,
+        message: `الدفتر ما ردّش: ${roll.failures.join(" · ")}`,
+        executionId: context.executionId,
+      };
+    }
+    const wanted = intent && intent !== "all" ? intent : null;
+    const lines = (wanted ? roll.real.filter((c) => c.intent === wanted) : roll.real).slice(0, limit);
+    const filteredNote = wanted ? ` (${wanted})` : "";
+    const quiet = roll.totals.anonymous;
     return {
       success: true,
-      message: `${data?.length || 0} عميل/lead`,
-      data: { leads: data || [] },
+      message: `${lines.length} عميل${filteredNote} من الدفتر الواحد — الكل ${roll.totals.customers}، ومحتاج رد ${roll.totals.needingReply}` +
+        (quiet ? `، و${quiet} بدون وسيلة وصول` : ""),
+      data: {
+        total: roll.totals.customers,
+        needingReply: roll.totals.needingReply,
+        anonymous: roll.totals.anonymous,
+        customers: lines.map((c) => ({
+          name: c.name,
+          phone: c.phone,
+          email: c.email,
+          intent: c.intent,
+          tier: c.tier,
+          freshness: c.freshness.label,
+          needsReply: c.needsReply,
+          spaces: c.spaces,
+        })),
+      },
       executionId: context.executionId,
     };
   } catch (error) {

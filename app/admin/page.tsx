@@ -112,10 +112,11 @@ export default function AdminPage() {
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       // Fetch all APIs in parallel using allSettled so one slow route never stalls the dashboard
-      const [analyticsRes, healthRes, mastermindRes] = await Promise.allSettled([
+      const [analyticsRes, healthRes, mastermindRes, customersRes] = await Promise.allSettled([
         fetch("/api/analytics?period=30days", { signal: controller.signal }),
         fetch("/api/system-health", { cache: "no-store", signal: controller.signal }),
         fetch("/api/admin/mastermind/stats", { cache: "no-store", signal: controller.signal }),
+        fetch("/api/admin/customers", { cache: "no-store", signal: controller.signal }),
       ]);
       clearTimeout(timeoutId);
 
@@ -138,15 +139,27 @@ export default function AdminPage() {
         } catch (_) {}
       }
 
+      // The customer card reads the one roll the sales office reads, through the same
+      // door. It stays `null` when the roll does not answer, and the card says so:
+      // rendering a zero there is how a dead counter hides behind a live number.
+      let customersTotal: number | null = null;
+      if (customersRes.status === "fulfilled" && customersRes.value.ok) {
+        try {
+          const cJson = await customersRes.value.json();
+          const n = cJson?.totals?.customers;
+          if (typeof n === "number" && Number.isFinite(n)) customersTotal = n;
+        } catch (_) {}
+      }
+
       // Map real data to metrics
       const realMetrics = [
         {
-          title: "العملاء المحتملين",
-          value: analytics.metrics?.totalLeads || 0,
-          subtitle: analytics.metrics?.totalLeads ? "عميل نشط" : "لا توجد بيانات",
+          title: "العملاء",
+          value: customersTotal ?? 0,
+          subtitle: customersTotal === null ? "الدفتر ما ردّش" : "من الدفتر الواحد",
           icon: <Users className="h-6 w-6" />,
           color: "gold" as const,
-          href: "/admin/sales",
+          href: "/admin/v2/sales",
         },
         {
           title: "نسبة التحويل",
@@ -563,7 +576,7 @@ export default function AdminPage() {
                 <TrendingUp className="w-6 h-6 text-[#C5A059]" />
               </div>
               <h3 className="text-lg font-bold text-white group-hover:text-[#C5A059] transition-colors">المبيعات</h3>
-              <p className="text-sm text-white/50 mt-2">العملاء، المستأجرين، الإدارة</p>
+              <p className="text-sm text-white/50 mt-2">مركز المبيعات القديم — دفتر العميل بقى عند مدير المبيعات</p>
             </Link>
 
             <Link href="/admin/work" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">

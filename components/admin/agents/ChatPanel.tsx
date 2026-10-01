@@ -6,7 +6,7 @@ import {
   Send, Bot, User, Loader2, Sparkles, ThumbsUp, ThumbsDown, 
   Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff
 } from 'lucide-react';
-import { AGENT_ROLES } from '@/lib/ops/agent-roles';
+import { AGENT_ROLES, SALES_MANAGER_CAPABILITIES } from '@/lib/ops/agent-roles';
 import { isOpsKey, legacyToOps, senderDisplayName } from '@/lib/ops/identity';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
@@ -61,7 +61,9 @@ const AGENT_METADATA: Record<string, { name: string; role: string; icon: string;
   'ops-dev':  { name: 'وكيل التطوير',    role: 'أداء، حجم الحزمة، بوابة جودة الكود',      icon: '⚡', color: 'orange' },
   'ops-qa':   { name: 'وكيل الجودة',     role: 'اختبارات شاملة، مقارنة بصرية، وصول',        icon: '🧪', color: 'lime' },
   // ── وكلاء العمليات ──────────────────────────────────────────────
-  vanguard: { name: 'Vanguard', role: 'مدير العمليات والمبيعات', icon: '💼', color: 'emerald' },
+  // The owner reads Arabic only, so a Latin name on his screen is a defect even when
+  // the key is correct. The sales employee signs himself with his job.
+  vanguard: { name: 'مدير المبيعات', role: 'يكلم العميل، يتابع اللي مستني رد، ويفتح دفتر العملاء', icon: '💼', color: 'emerald' },
   analyst:  { name: 'Analyst',  role: 'محلل البيانات والتقارير', icon: '📊', color: 'blue' },
   coder:    { name: 'Coder',    role: 'مطور الكود والتقنية',    icon: '💻', color: 'cyan' },
   ops:      { name: 'Ops',      role: 'مراقب العمليات والنظام',  icon: '⚙️', color: 'yellow' },
@@ -69,12 +71,12 @@ const AGENT_METADATA: Record<string, { name: string; role: string; icon: string;
   learner:  { name: 'Learner',  role: 'محرك التعلم الذاتي',     icon: '🎓', color: 'indigo' },
 };
 
+// The chips are the capabilities the store can really perform, and each one is a
+// sentence the router already answers with a live tool. Nothing here may offer the
+// trades the owner put outside the store — deposits, contracts, pricing, margins,
+// stock or the workshop — not even as a suggestion.
 const AGENT_MISSIONS: Record<string, string[]> = {
-  vanguard: [
-    'اعرض قائمة العملاء',
-    'حلل فرص الإيرادات',
-    'اعرض أوامر البيع',
-  ],
+  vanguard: SALES_MANAGER_CAPABILITIES,
   analyst: [
     'تحليل هوامش الأرباح الحالية',
     'المؤشرات اللحظية في 24 ساعة',
@@ -205,6 +207,19 @@ function MarkdownContent({ content }: { content: string }) {
   });
   flushTable();
   return <div className="space-y-1">{elements}</div>;
+}
+
+/**
+ * The signature this surface prints. The swarm keys come from the identity module; the
+ * sales employee answers with the Arabic job title the owner gave him on ٣٠ سبتمبر,
+ * because `agent_messages.sender_name` keeps a Latin key upper-cased and his screen
+ * reads Arabic only. Nothing else is renamed — an unknown sender stays as it came.
+ */
+function signedAs(stored: string): string {
+  const mapped = senderDisplayName(stored);
+  if (mapped !== stored) return mapped;
+  const key = legacyToOps(String(stored || "").toLowerCase());
+  return AGENT_METADATA[key]?.name ?? stored;
 }
 
 export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, fullScreen }: ChatPanelProps) {
@@ -1080,7 +1095,7 @@ function MessageBubble({
 
         <div className="space-y-1.5">
           <p className={`text-[10px] ${isUser ? 'text-blue-400 text-left' : colors.name}`}>
-            {senderDisplayName(message.sender_name)}
+            {signedAs(message.sender_name)}
           </p>
 
           <div className={`p-3.5 rounded-2xl ${

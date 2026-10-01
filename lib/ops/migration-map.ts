@@ -39,9 +39,14 @@ export const OFFICES: Office[] = [
   },
   {
     id: "sales-office",
-    label: "مكتب المبيعات",
-    answers: "مين كلّمنا، وإيه اللي اتفقنا عليه، وإيه اللي واقف",
-    employees: ["موظف المبيعات", "موظف الإنتاج"],
+    /**
+     * Named after the employee, not the room (the owner's word, ٣٠ سبتمبر): the sales
+     * office in the new house IS «مدير المبيعات», and vanguard is his body. A room has
+     * doors you navigate; an employee is someone you ask.
+     */
+    label: "مدير المبيعات",
+    answers: "مين كلّمنا، وإيه اللي مستنيين ردّه، وإيه اللي وقف",
+    employees: ["مدير المبيعات"],
   },
   {
     id: "elite-room",
@@ -109,7 +114,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^app\/api\/admin\/(system|settings|database|keys|health|env|config)\//, office: "system-room", reason: "أبواب النظام والمفاتيح" },
 
   // The furniture that both houses stand on today: it moves to the new tree first.
-  { match: /^components\/admin\/sales\//, office: "sales-office", reason: "عفش مكتب المبيعات في البيت الجديد" },
+  { match: /^components\/admin\/sales\//, office: "sales-office", reason: "عفش مدير المبيعات في البيت الجديد" },
   { match: /^components\/admin\/agents\//, office: "swarm-house", reason: "عفش دار الموظفين" },
   { match: /^components\/admin\/ops\//, office: "swarm-house", reason: "عفش الاستوديو والمراقبة" },
   { match: /^components\/admin\/(dashboard|overview)\//, office: "decision-desk", reason: "عفش المؤشرات" },
@@ -142,7 +147,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^\/admin\/(elite)$/, office: "elite-room", reason: "النخبة" },
   { match: /^\/admin\/(agents)$/, office: "swarm-house", reason: "الوكلاء" },
   { match: /^\/admin\/(system|settings|database)$/, office: "system-room", reason: "النظام" },
-  { match: /^\/bookings$/, office: "sales-office", reason: "من هنا يبدأ طلب التسعير: أول ملمس للعميل لمكتب المبيعات" },
+  { match: /^\/bookings$/, office: "sales-office", reason: "من هنا يبدأ طلب التسعير: أول ملمس للعميل لمدير المبيعات" },
   { match: /^\/elite-intelligence$/, office: "elite-room", reason: "واجهة دعوة النخبة قدام العميل" },
 
   /**
@@ -196,7 +201,7 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "app/admin/v2/agents/ops/page.tsx", office: "swarm-house", status: "moved", reason: "محادثة الوكلاء اتنقلت فعلاً" },
   { id: "app/admin/v2/database/page.tsx", office: "system-room", status: "pending", reason: "قاعدة البيانات" },
   { id: "app/admin/v2/elite/page.tsx", office: "elite-room", status: "pending", reason: "النخبة" },
-  { id: "app/admin/v2/sales/page.tsx", office: "sales-office", status: "moved", reason: "المبيعات — أول موظف يسكن بيته" },
+  { id: "app/admin/v2/sales/page.tsx", office: "sales-office", status: "moved", reason: "مدير المبيعات — جسده وكيل المبيعات ومكتبه دفتر العميل" },
   { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "pending", reason: "الإعدادات" },
   { id: "app/admin/v2/system/page.tsx", office: "system-room", status: "pending", reason: "حالة النظام" },
   { id: "app/admin/v2/work/page.tsx", office: "records-office", status: "pending", reason: "مركز العمل" },

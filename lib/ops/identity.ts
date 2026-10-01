@@ -81,7 +81,10 @@ export function legacyToOps(key: string): OpsAgentKey {
  * render covers both the live key and the historic stamps without touching a row.
  *
  * Anything that is not a swarm key returns unchanged — his own label, the system
- * label, and the field agents, who belong to a different product.
+ * label, and the field agents, who belong to a different product. A surface that
+ * gives a field agent an Arabic name of his own says so at the render; the swarm's
+ * identity module does not decide it, because the eight keys here are the swarm and
+ * `tests/ops/senderSignature.test.ts` counts exactly those.
  */
 export function senderDisplayName(stored: string): string {
   const key = legacyToOps(String(stored || "").toLowerCase());

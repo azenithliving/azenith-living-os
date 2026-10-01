@@ -13,9 +13,9 @@ const workLinks = [
     icon: TrendingUp,
   },
   {
-    href: "/admin/sales",
-    label: "متابعة العملاء",
-    desc: "الطلبات والأسئلة المعلّقة في مركز المبيعات",
+    href: "/admin/v2/sales",
+    label: "مدير المبيعات",
+    desc: "دفتر العميل في بيته الجديد — نفس الدفتر، عدد واحد",
     icon: MessageSquare,
   },
   {

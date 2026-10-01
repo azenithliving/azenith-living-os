@@ -59,15 +59,24 @@ describe("a message is signed with the role, not the key", () => {
   /**
    * The mapping belongs to the render, not to what gets written: both chat surfaces
    * print a sender, and a surface that prints the raw column re-opens the defect.
+   *
+   * The sales surface wraps the call in its own signature line, because the owner
+   * renamed the sales employee on ٣٠ سبتمبر and that title belongs to the chat surface
+   * rather than to the swarm's eight keys. The wrapper is only legal because it delegates
+   * here first — so the guard checks the delegation instead of one exact expression.
    */
   it("is what both chat surfaces print", () => {
-    for (const file of [
-      "components/admin/agents/ChatPanel.tsx",
-      "components/admin/agents/GroupChatView.tsx",
-    ]) {
+    const prints: Record<string, RegExp> = {
+      "components/admin/agents/ChatPanel.tsx": /\{(senderDisplayName|signedAs)\(message\.sender_name\)\}/,
+      "components/admin/agents/GroupChatView.tsx": /\{senderDisplayName\(message\.sender_name\)\}/,
+    };
+    for (const [file, shape] of Object.entries(prints)) {
       const src = readFileSync(file, "utf8");
       expect(src, `${file} must import it`).toContain("senderDisplayName");
-      expect(src, `${file} must print it`).toMatch(/\{senderDisplayName\(message\.sender_name\)\}/);
+      expect(src, `${file} must print it`).toMatch(shape);
     }
+    const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+    const wrapper = panel.slice(panel.indexOf("function signedAs("));
+    expect(wrapper.slice(0, 500), "the wrapper would print a raw key").toContain("senderDisplayName(stored)");
   });
 });

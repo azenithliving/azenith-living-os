@@ -169,8 +169,13 @@ export default function AdminLayoutClient({
                     >
                       <Icon className={`w-4.5 h-4.5 transition-transform group-hover:scale-110 ${isActive ? "text-[#C5A059]" : "text-white/20 group-hover:text-white/60"}`} />
                       <span className="text-sm font-medium">{item.label}</span>
+                      {item.badge && (
+                        <span className="mr-auto text-[9px] px-1.5 py-0.5 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/25 text-[#C5A059]">
+                          {item.badge}
+                        </span>
+                      )}
                       {isActive && (
-                        <div className="mr-auto w-1.5 h-1.5 rounded-full bg-[#C5A059] animate-pulse" />
+                        <div className={`${item.badge ? "" : "mr-auto"} w-1.5 h-1.5 rounded-full bg-[#C5A059] animate-pulse`} />
                       )}
                     </Link>
                   );

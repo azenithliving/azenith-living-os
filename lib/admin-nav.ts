@@ -20,7 +20,7 @@ export type NavCategory = {
 };
 
 // Legacy (القديم) — يُقرأ من app/admin/layout-client.tsx
-export const LEGACY_NAV: NavCategory[] = [
+const BASE_NAV: NavCategory[] = [
   {
     title: "الرئيسية",
     items: [
@@ -50,15 +50,49 @@ export const LEGACY_NAV: NavCategory[] = [
   },
 ];
 
-// V2 — مطابق للقديم بالمللي — نفس القائمة الجانبية، كل صفحة فاضية
-// كما طلبت: "داشبورد مطابق للقديم بس فاضي فيه بس القائمة الجانبية"
-export const V2_NAV: NavCategory[] = JSON.parse(JSON.stringify(LEGACY_NAV.map(cat => ({
-  ...cat,
-  items: cat.items.map(it => ({
-    ...it,
-    href: it.href.replace("/admin", "/admin/v2"),
-  }))
-}))));
+/**
+ * The menu is generated from the office map, not remembered by whoever last edited it.
+ *
+ * An address in the new house carries the name of the office it belongs to — and only
+ * when the map records that page as actually moved. Until tonight the new house was a
+ * literal clone of the old labels, so «مدير المبيعات» — the employee the owner finished
+ * and moved — could not be read in the menu, and the old house carried no door to him at
+ * all: he had to type the address to reach the employee the program had just finished.
+ * The second half is what task #39 (the ledger badges in the old house) starts with.
+ */
+import { EXPLICIT, OFFICES } from "@/lib/ops/migration-map";
+
+const v2Address = (href: string) => href.replace("/admin", "/admin/v2");
+
+/** The page record behind an address, when the map carries one. */
+function pageRecord(href: string) {
+  return EXPLICIT.find((e) => e.id === `app${href}/page.tsx`) ?? null;
+}
+
+/** The office's Arabic name for an address in the new house, only once its page has moved. */
+function officeLabelFor(href: string): string | null {
+  const record = pageRecord(href);
+  if (!record || record.status !== "moved") return null;
+  return OFFICES.find((o) => o.id === record.office)?.label ?? null;
+}
+
+export const LEGACY_NAV: NavCategory[] = BASE_NAV.map((category) => ({
+  ...category,
+  items: category.items.flatMap((item) => {
+    const twin = v2Address(item.href);
+    const label = twin !== item.href ? officeLabelFor(twin) : null;
+    if (!label) return [item];
+    return [item, { href: twin, label, icon: item.icon, badge: "البيت الجديد" }];
+  }),
+}));
+
+export const V2_NAV: NavCategory[] = BASE_NAV.map((category) => ({
+  ...category,
+  items: category.items.map((item) => {
+    const href = v2Address(item.href);
+    return { ...item, href, label: officeLabelFor(href) ?? item.label };
+  }),
+}));
 
 // Helper: is active path
 export function isV2Active(pathname: string | null, href: string): boolean {
