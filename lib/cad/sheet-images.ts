@@ -12,6 +12,7 @@
  * the kind of tidy lie this store's owner asked to be rid of.
  */
 
+import { foldArabic } from "@/lib/arabic";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 export type SheetImage = { url: string; thumb: string; style: string | null; roomType: string };
@@ -57,27 +58,13 @@ const ROOM_WORDS: [string, string][] = [
   ["كورنر", "corner-sofa"],
 ];
 
-/**
- * Fold the letters that vary in handwriting and in speech-to-text to one shape:
- * أ إ آ all become ا, ة is typed ه, ى is typed ي, and the vowel marks a person
- * dictates with are dropped. Without this, «أطفال» does not match a table keyed
- * «اطفال» and a child's room silently gets a dining-room's pictures.
- */
-function normalizeArabic(value: string): string {
-  return value
-    .replace(/[\u064B-\u0652\u0640]/g, "")
-    .replace(/[أإآٱ]/g, "ا")
-    .replace(/ى/g, "ي")
-    .replace(/ة/g, "ه")
-    .toLowerCase()
-    .trim();
-}
-
 /** Which bank type a room name points at, or null when it points at none. */
 export function roomTypeFor(name: string | null | undefined): string | null {
-  const text = normalizeArabic(String(name ?? ""));
+  // The folding itself lives in `lib/arabic.ts`, next to the customer matcher: a room word
+  // and a customer name vary over the same letters, and two folds drift.
+  const text = foldArabic(String(name ?? ""));
   if (!text) return null;
-  for (const [word, type] of ROOM_WORDS) if (text.includes(normalizeArabic(word))) return type;
+  for (const [word, type] of ROOM_WORDS) if (text.includes(foldArabic(word))) return type;
   const exact = text.replace(/\s+/g, "-");
   return (ROOM_TYPES as readonly string[]).includes(exact) ? exact : null;
 }

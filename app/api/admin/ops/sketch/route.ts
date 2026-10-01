@@ -1,7 +1,10 @@
 /**
- * POST /api/admin/ops/sketch — take a hand-drawn room, keep the paper, read it with
- * both witnesses, and record what happened.
- * GET  /api/admin/ops/sketch — the readings, newest first.
+ * POST   /api/admin/ops/sketch — take a hand-drawn room, keep the paper, read it with
+ *        both witnesses, and record what happened.
+ * GET    /api/admin/ops/sketch — the readings, newest first. With `?customer_key=` it is
+ *        only that customer's readings: the question the shop asks when his number shows
+ *        up on the phone.
+ * PATCH  /api/admin/ops/sketch — say whose paper an existing reading is.
  *
  * The order matters. The paper is stored before it is read, because a reading that
  * cannot be re-opened against the original is an accusation nobody can check. If the
@@ -15,6 +18,7 @@ import { requireAdminApi } from "@/lib/admin-api-guard";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { readPaperSketch } from "@/lib/cad/paper-sketch-parser";
+import { parseSketchLink } from "@/lib/cad/sketch-link";
 import { newPassportToken } from "@/lib/cad/passport";
 import { syncLayer } from "@/lib/ops/memory/SyncLayer";
 
@@ -112,7 +116,9 @@ export async function POST(request: NextRequest) {
       // customer confirms his numbers on that page, and that confirmation is the
       // witness the store can always count on.
       token: newPassportToken(),
-      customer_key: typeof body?.customer_key === "string" ? body.customer_key.slice(0, 80) : null,
+      // A pointer at the roll, never a copy of a name: see `lib/cad/sketch-link.ts`.
+      // Anything that is not a well-formed key is dropped rather than stored half-right.
+      customer_key: parseSketchLink(body?.customer_key)?.key ?? null,
       image_path: stored ? path : null,
       room: reading.room,
       dimensions: reading.dimensions,
@@ -127,7 +133,7 @@ export async function POST(request: NextRequest) {
         mime,
       },
     })
-    .select("id, token")
+    .select("id, token, customer_key")
     .single();
 
   if (insertError) {
@@ -154,7 +160,7 @@ export async function POST(request: NextRequest) {
         ok: reading.ok,
         dimensions: reading.dimensions.length,
         confirmed: reading.confirmedCount,
-        customer_key: typeof body?.customer_key === "string" ? body.customer_key : null,
+        customer_key: parseSketchLink(body?.customer_key)?.key ?? null,
       },
     });
   } catch {
@@ -164,6 +170,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     success: true,
     id: row?.id ?? null,
+    customer_key: row?.customer_key ?? null,
     passport_path: row?.token ? `/passport/${row.token}` : null,
     stored,
     storage_error: upload.error ? String(upload.error.message ?? upload.error).slice(0, 120) : null,
@@ -171,7 +178,7 @@ export async function POST(request: NextRequest) {
   });
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const { unauthorized } = await requireAdminApi();
   if (unauthorized) return unauthorized;
 
@@ -181,16 +188,85 @@ export async function GET() {
     return NextResponse.json({ success: false, error: "المتجر غير متصل دلوقتي" }, { status: 503 });
   }
 
-  const { data, error } = await supabase
+  // `?customer_key=` answers «his number just called — what did he draw?». Only a well-formed
+  // key is honoured; a malformed one is treated as no filter rather than a silent empty list,
+  // because an empty list reads to the owner as «nothing on file».
+  const wanted = parseSketchLink(request.nextUrl.searchParams.get("customer_key"));
+
+  let query = supabase
     .from("room_sketches")
-    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,image_path,created_at,witnesses,confirmed_at,frozen_hash")
+    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,image_path,created_at,witnesses,confirmed_at,frozen_hash,customer_key")
     .eq("company_id", companyId)
     .order("created_at", { ascending: false })
     .limit(20);
+  if (wanted) query = query.eq("customer_key", wanted.key);
+
+  const { data, error } = await query;
 
   if (error) {
     return NextResponse.json({ success: false, error: "السجل ما ردّش" }, { status: 500 });
   }
 
   return NextResponse.json({ success: true, sketches: data ?? [] });
+}
+
+/**
+ * PATCH — say whose paper an existing reading is, or take the name off it.
+ *
+ * Scoped to this store by `company_id` in the same statement that does the writing: a
+ * guessing script cannot relabel another company's reading, and cannot learn whether one
+ * exists either (the row it gets back is only ever its own).
+ */
+export async function PATCH(request: NextRequest) {
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
+
+  const companyId = await resolveAdminCompanyId();
+  const supabase = getSupabaseAdminClient();
+  if (!companyId || !supabase) {
+    return NextResponse.json({ success: false, error: "المتجر غير متصل دلوقتي" }, { status: 503 });
+  }
+
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ success: false, error: "طلب غير مفهوم" }, { status: 400 });
+  }
+
+  const id = Number(body?.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return NextResponse.json({ success: false, error: "مرفق رقم الورقة" }, { status: 400 });
+  }
+
+  // Absent means «unlink»: the desk sends the field every time, so a paper can be put back
+  // to «من غير صاحب» without a second verb.
+  const unlink = body?.customer_key === null || body?.customer_key === undefined || body?.customer_key === "";
+  let key: string | null = null;
+  if (!unlink) {
+    const link = parseSketchLink(body.customer_key);
+    if (!link) {
+      return NextResponse.json(
+        { success: false, error: "المفتاح مش مفتاح عميل — اختار من الدفتر" },
+        { status: 400 }
+      );
+    }
+    key = link.key;
+  }
+
+  const { data, error } = await supabase
+    .from("room_sketches")
+    .update({ customer_key: key })
+    .eq("id", id)
+    .eq("company_id", companyId)
+    .select("id, customer_key");
+
+  if (error) {
+    return NextResponse.json({ success: false, error: "السجل رفض الربط" }, { status: 500 });
+  }
+  if (!data?.length) {
+    return NextResponse.json({ success: false, error: "مفيش ورقة بهذا الرقم" }, { status: 404 });
+  }
+
+  return NextResponse.json({ success: true, id: data[0].id, customer_key: data[0].customer_key ?? null });
 }

@@ -4,15 +4,18 @@
  *
  * GET  /api/passport/<token> — the sheet, with nothing that identifies the store or
  *      any other customer.
- * POST /api/passport/<token> — the customer's own numbers. When they match what the
- *      store read, the sheet is confirmed and sealed; the seal is over those numbers,
- *      so a later change to the reading stops matching and says so.
+ * POST /api/passport/<token> — the customer's own numbers, and optionally his own mobile.
+ *      When the numbers match what the store read, the sheet is confirmed and sealed; the
+ *      seal is over those numbers, so a later change to the reading stops matching and says
+ *      so. The mobile is stored as the roll's key, which is what makes «this number called,
+ *      what did he draw?» answerable — see `lib/cad/sketch-link.ts`.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { applyCustomerWitness, type SketchDimension } from "@/lib/cad/paper-sketch-parser";
+import { linkFromPhone } from "@/lib/cad/sketch-link";
 import { freezeHash, looksLikePassportToken, stillSealed } from "@/lib/cad/passport";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
 
@@ -31,6 +34,8 @@ type Row = {
   confirmed_at: string | null;
   frozen_hash: string | null;
   customer_dimensions: number[] | null;
+  /** Read for the write rules below. `publicSheet` never returns it: this is a public address. */
+  customer_key: string | null;
 };
 
 function publicSheet(row: Row) {
@@ -57,7 +62,7 @@ async function findByToken(token: string) {
   if (!supabase) return { error: "المتجر غير متصل دلوقتي" as const, status: 503 };
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,confirmed_at,frozen_hash,customer_dimensions")
+    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,confirmed_at,frozen_hash,customer_dimensions,customer_key")
     .eq("token", token)
     .maybeSingle();
   if (error) return { error: "السجل ما ردّش" as const, status: 500 };
@@ -117,6 +122,23 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ success: false, error: "الورقة دي اتاكدت قبل كده" }, { status: 409 });
   }
 
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return NextResponse.json({ success: false, error: "المتجر غير متصل دلوقتي" }, { status: 503 });
+
+  // His own digits are the strongest link there is — stronger than a clerk remembering whose
+  // paper this was. Claimed before the numbers are compared, because identifying yourself and
+  // agreeing with a reading are two different facts and the first one stands either way.
+  // Never over the owner's link (`.is(...)`), and never fatal: if the write fails the desk
+  // simply still says «من غير صاحب», which is the truth.
+  const claimed = linkFromPhone(body?.customer_phone);
+  if (claimed) {
+    await supabase
+      .from("room_sketches")
+      .update({ customer_key: claimed.key })
+      .eq("token", token)
+      .is("customer_key", null);
+  }
+
   const withCustomer = applyCustomerWitness(Array.isArray(row.dimensions) ? row.dimensions : [], typed);
   const confirmedCount = withCustomer.filter((d) => d.confirmed).length;
 
@@ -130,9 +152,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     });
   }
 
-  const supabase = getSupabaseAdminClient();
   const confirmedDimensions = withCustomer.filter((d) => d.confirmed);
-  const { error: updateError } = await supabase!
+  const { error: updateError } = await supabase
     .from("room_sketches")
     .update({
       dimensions: withCustomer,

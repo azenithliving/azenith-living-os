@@ -23,15 +23,24 @@ export function looksLikePassportToken(value: string): boolean {
   return /^[A-Za-z0-9_-]{20,32}$/.test(value);
 }
 
-/** The numbers only, ordered, rounded to the centimetre: what the seal is over. */
-export function agreedNumbers(dimensions: { meters: number }[]): number[] {
+/**
+ * The numbers only, ordered, rounded to the centimetre: what the seal is over.
+ *
+ * Only a number a witness vouched for is part of the agreement. Measured on a live sheet
+ * on 2026-10-01: a paper read 4.5 and 3.2, the customer confirmed one of them, and the
+ * sheet accused him of changing his own numbers the second after he signed — because the
+ * seal was taken over the agreed number and checked against every number on the paper.
+ * The two sides have to be the same set, and the set is the agreed one.
+ */
+export function agreedNumbers(dimensions: { meters: number; confirmed?: boolean }[]): number[] {
   return dimensions
+    .filter((d) => d.confirmed !== false)
     .map((d) => Math.round(Number(d.meters) * 100) / 100)
     .filter((n) => Number.isFinite(n) && n > 0)
     .sort((a, b) => a - b);
 }
 
-export function freezeHash(dimensions: { meters: number }[]): string {
+export function freezeHash(dimensions: { meters: number; confirmed?: boolean }[]): string {
   return createHash("sha256")
     .update(JSON.stringify(agreedNumbers(dimensions)))
     .digest("hex")
@@ -39,7 +48,7 @@ export function freezeHash(dimensions: { meters: number }[]): string {
 }
 
 /** Does the sheet still say what he agreed to? */
-export function stillSealed(hash: string | null | undefined, dimensions: { meters: number }[]): boolean {
+export function stillSealed(hash: string | null | undefined, dimensions: { meters: number; confirmed?: boolean }[]): boolean {
   if (!hash) return false;
   return freezeHash(dimensions) === hash;
 }

@@ -6,6 +6,7 @@ import { ScanLine } from 'lucide-react';
 import Link from 'next/link';
 
 import { arNum } from '@/lib/ops/metricLabels';
+import SketchOwner, { type RollLine } from '@/components/admin/sketches/SketchOwner';
 
 type Dimension = { label: string; meters: number; confirmed: boolean };
 type Opening = { kind: 'door' | 'window'; widthMeters: number | null };
@@ -33,6 +34,7 @@ type Row = {
   ok: boolean;
   failure: string | null;
   created_at: string;
+  customer_key: string | null;
   witnesses?: { offline?: { ran?: boolean; ms?: number; confidence?: number | null } };
 };
 
@@ -58,11 +60,16 @@ export default function V2SketchesPage() {
   const [stored, setStored] = useState<boolean | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [rows, setRows] = useState<Row[]>([]);
+  const [roll, setRoll] = useState<RollLine[] | null>(null);
+  const [readingId, setReadingId] = useState<number | null>(null);
+  const [readingOwner, setReadingOwner] = useState<string | null>(null);
+  /** Show one customer's papers only — the question «his number just called». */
+  const [only, setOnly] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const readList = useCallback(async () => {
+  const readList = useCallback(async (onlyKey: string | null) => {
     try {
-      const res = await fetch('/api/admin/ops/sketch');
+      const res = await fetch(onlyKey ? `/api/admin/ops/sketch?customer_key=${encodeURIComponent(onlyKey)}` : '/api/admin/ops/sketch');
       const data = await res.json();
       if (data?.success) setRows(Array.isArray(data.sketches) ? data.sketches : []);
     } catch {
@@ -70,9 +77,27 @@ export default function V2SketchesPage() {
     }
   }, []);
 
+  const setOwner = useCallback(
+    (sketchId: number, customerKey: string | null) => {
+      setRows((prev) => prev.map((row) => (row.id === sketchId ? { ...row, customer_key: customerKey } : row)));
+      // Re-read rather than trust the local patch: when a filter is open the row may no
+      // longer belong on the screen at all, and a stale row is a lie by then.
+      void readList(only);
+    },
+    [only, readList]
+  );
+
   useEffect(() => {
-    readList();
-  }, [readList]);
+    readList(only);
+    // The names come from the customers door — the same reading the customers screen uses,
+    // so a paper can never be filed under a name the roll does not carry.
+    fetch('/api/admin/customers')
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data?.customers)) setRoll(data.customers as RollLine[]);
+      })
+      .catch(() => setRoll(null));
+  }, [only, readList]);
 
   const onPick = useCallback(
     async (file: File | undefined) => {
@@ -80,6 +105,8 @@ export default function V2SketchesPage() {
       setBusy(true);
       setProblem(null);
       setReading(null);
+      setReadingId(null);
+      setReadingOwner(null);
       setStored(null);
       try {
         const base64 = await new Promise<string>((resolve, reject) => {
@@ -102,8 +129,12 @@ export default function V2SketchesPage() {
         if (!res.ok || data?.success === false) throw new Error(data?.error || `الخادم ردّ بـ ${res.status}`);
         setReading(data.reading as Reading);
         setStored(Boolean(data.stored));
+        setReadingId(typeof data.id === 'number' ? data.id : null);
+        setReadingOwner(typeof data.customer_key === 'string' ? data.customer_key : null);
         setPassportPath(typeof data.passport_path === 'string' ? data.passport_path : null);
-        await readList();
+        // A new paper belongs on the desk, whatever filter was open when it was photographed.
+        setOnly(null);
+        await readList(null);
       } catch (error) {
         setProblem(String((error as Error)?.message ?? error));
       } finally {
@@ -112,7 +143,7 @@ export default function V2SketchesPage() {
         if (fileRef.current) fileRef.current.value = '';
       }
     },
-    [busy, readList]
+    [busy, only, readList]
   );
 
   return (
@@ -188,6 +219,15 @@ export default function V2SketchesPage() {
           </p>
           {reading.notes && <p className="mt-1 text-[11px] text-white/40">ملاحظة على الورقة: {reading.notes}</p>}
 
+          {readingId !== null && (
+            <SketchOwner
+              sketchId={readingId}
+              customerKey={readingOwner}
+              roll={roll}
+              onLinked={(_id, key) => setReadingOwner(key)}
+            />
+          )}
+
           {passportPath && (
             <Link
               href={passportPath}
@@ -200,10 +240,17 @@ export default function V2SketchesPage() {
       )}
 
       <section>
-        <h2 className="mb-2 text-[12px] font-bold text-white/55">آخر الورقات</h2>
+        <h2 className="mb-2 flex items-center gap-2 text-[12px] font-bold text-white/55">
+          {only ? 'ورق عميل واحد' : 'آخر الورقات'}
+          {only && (
+            <button onClick={() => setOnly(null)} className="rounded-lg border border-white/10 px-2 py-0.5 text-[10px] font-bold text-white/60">
+              كل الورق
+            </button>
+          )}
+        </h2>
         {rows.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-white/10 px-4 py-3 text-[11px] text-white/40">
-            لسه مفيش ورقة اتقريت.
+            {only ? 'المتجر ما لقاش ورقة متربطة بالعميل ده.' : 'لسه مفيش ورقة اتقريت.'}
           </p>
         ) : (
           <ul className="space-y-2">
@@ -219,6 +266,16 @@ export default function V2SketchesPage() {
                   {` · ${arNum(row.confirmed_count)} مؤكد`}
                 </div>
                 {!row.ok && row.failure && <p className="mt-1 text-[10px] text-rose-300/80">{row.failure}</p>}
+                <SketchOwner sketchId={row.id} customerKey={row.customer_key} roll={roll} onLinked={setOwner} />
+                {row.customer_key && (
+                  <button
+                    onClick={() => setOnly(only === row.customer_key ? null : row.customer_key)}
+                    className="mt-1 block rounded-lg border border-white/10 px-2 py-0.5 text-[10px] font-bold text-white/60"
+                    data-sketch-only={row.customer_key}
+                  >
+                    كل ورقه
+                  </button>
+                )}
                 {row.token && (
                   <Link href={`/passport/${row.token}`} className="mt-1.5 inline-block text-[10px] font-bold text-emerald-300">
                     ورقة العميل

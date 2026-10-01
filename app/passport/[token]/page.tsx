@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { arNum } from '@/lib/ops/metricLabels';
+import { linkFromPhone } from '@/lib/cad/sketch-link';
 
 type Dimension = { label: string; meters: number; confirmed?: boolean };
 type Sheet = {
@@ -40,6 +41,7 @@ export default function PassportPage() {
   const [imagesForHisRoom, setImagesForHisRoom] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [typed, setTyped] = useState<string[]>(['', '']);
+  const [phone, setPhone] = useState('');
   const [busy, setBusy] = useState(false);
   const [news, setNews] = useState<string | null>(null);
 
@@ -69,13 +71,22 @@ export default function PassportPage() {
       setNews('اكتب مقاس واحد على الأقل بالأرقام');
       return;
     }
+    // Checked with the store's own rule, so what he is told about his number and what the
+    // shop stores for it cannot drift apart.
+    const dialed = phone.trim();
+    if (dialed && !linkFromPhone(dialed)) {
+      setNews('الرقم ده مش موبايل مصري. سيبه فاضي لو مش عايز تسيب رقم.');
+      return;
+    }
     setBusy(true);
     setNews(null);
     try {
       const res = await fetch(`/api/passport/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dimensions: numbers }),
+        // His own number, when he chooses to leave it: that is what lets the shop find this
+        // sheet again the moment he calls.
+        body: JSON.stringify({ dimensions: numbers, customer_phone: dialed || null }),
       });
       const data = await res.json();
       if (data?.success && data.sheet) setSheet(data.sheet);
@@ -85,9 +96,16 @@ export default function PassportPage() {
     } finally {
       setBusy(false);
     }
-  }, [busy, token, typed]);
+  }, [busy, phone, token, typed]);
 
   const confirmed = Boolean(sheet?.confirmed_at);
+
+  // Twenty thumbnails all wearing the same word say nothing twenty times. One style across
+  // the set belongs in the heading; the word only returns under each picture when they vary.
+  const styles = new Set(
+    images.map((img) => (img.style ? STYLE_LABEL[img.style] : null)).filter(Boolean) as string[]
+  );
+  const onlyStyle = styles.size === 1 ? ([...styles][0] as string) : null;
 
   return (
     <main dir="rtl" className="min-h-screen bg-[#0d0f12] px-5 pb-16 pt-28 text-white">
@@ -144,7 +162,15 @@ export default function PassportPage() {
                 <p className="mt-1 text-[11px] leading-relaxed text-white/45">
                   اللي انت بتكتبه هو اللي بنشتغل بيه. لو رقمك طابق اللي قريناه، الورقة تتقفل وتاتبعتلك على طول.
                 </p>
-                <div className="mt-3 grid grid-cols-2 gap-2">
+                <input
+                  inputMode="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="موبايلك — لو عايز نفضل متصلين بيك"
+                  dir="ltr"
+                  className="mt-3 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-right text-[13px] text-white placeholder-white/25 focus:border-amber-500/40 focus:outline-none"
+                />
+                <div className="mt-2 grid grid-cols-2 gap-2">
                   {typed.map((value, i) => (
                     <input
                       key={i}
@@ -172,6 +198,7 @@ export default function PassportPage() {
               <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
                 <h2 className="text-[12px] font-bold text-white/60">
                   {imagesForHisRoom ? 'صور مختارة لنوع مكانك' : 'أفكار عامة من البيت — مكانك اللي على الورقة مش في بنك الصور بعد'}
+                  {onlyStyle ? ` · ${onlyStyle}` : ''}
                 </h2>
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   {images.map((img, i) => (
@@ -183,7 +210,7 @@ export default function PassportPage() {
                         loading="lazy"
                         className="h-28 w-full rounded-xl border border-white/10 object-cover"
                       />
-                      {img.style && STYLE_LABEL[img.style] ? (
+                      {!onlyStyle && img.style && STYLE_LABEL[img.style] ? (
                         <span className="mt-1 block text-[10px] text-white/40">{STYLE_LABEL[img.style]}</span>
                       ) : null}
                     </a>
