@@ -4,13 +4,14 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Send, Bot, User, Loader2, Sparkles, ThumbsUp, ThumbsDown,
-  Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff, ShieldAlert
+  Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff, ShieldAlert, Wrench
 } from 'lucide-react';
 import { AGENT_ROLES, SALES_MANAGER_CAPABILITIES } from '@/lib/ops/agent-roles';
 import { isOpsKey, legacyToOps, senderDisplayName } from '@/lib/ops/identity';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
 import { ApprovalGate } from './ApprovalGate';
+import { QuickActionsPanel } from './QuickActionsPanel';
 import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/ops/palette';
 import type { SelfModelView } from '@/lib/ops/self-view';
 import {
@@ -235,6 +236,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   const initialTriggerRef = useRef(false);
   const [showRoles, setShowRoles] = useState(false);
   const [showDecisions, setShowDecisions] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const [pendingDecisions, setPendingDecisions] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -794,6 +796,21 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               )}
             </button>
           )}
+          {fullScreen && (
+            <button
+              data-actions-toggle=""
+              onClick={() => setShowActions((v) => !v)}
+              title="عِدّة الإجراءات: أدوات تشتغل فعلاً"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${
+                showActions
+                  ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                  : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Wrench className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">عِدّة</span>
+            </button>
+          )}
           {isOpsKey(normKey) && (
             <a
               href="/admin/v2/ops"
@@ -804,8 +821,10 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               الاستوديو
             </a>
           )}
-          <Sparkles className={`w-4 h-4 ${colors.text}`} />
-          <span className={`w-2 h-2 rounded-full ${isTyping ? `${colors.accent} animate-pulse` : 'bg-white/20'}`} />
+          <span className="hidden sm:flex items-center gap-2">
+            <Sparkles className={`w-4 h-4 ${colors.text}`} />
+            <span className={`w-2 h-2 rounded-full ${isTyping ? `${colors.accent} animate-pulse` : 'bg-white/20'}`} />
+          </span>
         </div>
       </div>
 
@@ -1060,6 +1079,41 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
         </div>
         <div className="text-[10px] text-white/20 mt-1.5 text-center">تلميح: الصق صورة بمفتاح اللصق أو اسحبها هنا — أفهمها وأحدد موقعها تلقائياً</div>
       </div>
+
+      {/* عِدّة الإجراءات — the tools that really run, one press from the cockpit. They
+          lived only in the old house, so the owner's phone had no way to reach them.
+          Anchored inside this container (it is the relative box), never as a page-level
+          overlay: a fixed layer here would fight the cockpit's own stacking order. */}
+      {fullScreen && (
+        <>
+          <div
+            data-actions-scrim=""
+            onClick={() => setShowActions(false)}
+            className={`absolute inset-0 z-20 bg-black/60 transition-opacity duration-200 ${
+              showActions ? 'opacity-100' : 'pointer-events-none opacity-0'
+            }`}
+          />
+          <aside
+            data-actions-drawer=""
+            aria-hidden={!showActions}
+            className={`absolute inset-y-0 left-0 z-30 w-[88%] max-w-sm overflow-y-auto border-r border-white/10 bg-[#0d0f12] shadow-2xl transition-transform duration-200 ease-out ${
+              showActions ? 'translate-x-0' : '-translate-x-full'
+            }`}
+          >
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-[#0d0f12]/95 px-4 py-3 backdrop-blur">
+              <span className="text-sm font-black text-white">عِدّة الإجراءات</span>
+              <button
+                onClick={() => setShowActions(false)}
+                title="إغلاق"
+                className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-white/60 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <QuickActionsPanel />
+          </aside>
+        </>
+      )}
 
       <SelfModelPanel
         open={selfOpen}

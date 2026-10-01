@@ -39,6 +39,18 @@ describe("the decisions vault speaks only the owner's language", () => {
     expect(panel).toContain("<ApprovalGate onCount={setPendingDecisions} />");
   });
 
+  it("anchors the actions drawer inside the chat, not on the page", () => {
+    const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+    const drawer = panel.slice(panel.indexOf("data-actions-drawer"));
+    expect(drawer).toBeTruthy();
+    // A page-level fixed layer fights the cockpit's own stacking order — the chat
+    // already sits above the dashboard shell, and an overlay outside it can be
+    // painted under it. Inside the relative chat box, that cannot happen.
+    expect(drawer.slice(0, 300)).toContain("absolute inset-y-0");
+    expect(drawer.slice(0, 300)).not.toContain("fixed");
+    expect(panel).toContain("<QuickActionsPanel />");
+  });
+
   it("keeps the cockpit header inside a phone's width", () => {
     const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
     // Every header word is hidden below `sm`, leaving the icon and the live badge:
