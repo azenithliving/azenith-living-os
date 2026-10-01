@@ -12,6 +12,7 @@ import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
 import { ApprovalGate } from './ApprovalGate';
 import { QuickActionsPanel } from './QuickActionsPanel';
+import { EmergencyBanner } from './EmergencyBanner';
 import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/ops/palette';
 import type { SelfModelView } from '@/lib/ops/self-view';
 import {
@@ -726,6 +727,9 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       }}
       className={`bg-white/[0.02] border ${colors.border} ${fullScreen ? 'h-full rounded-none border-0' : 'rounded-[2rem] h-[520px]'} flex flex-col overflow-hidden shadow-2xl relative`}
     >
+      {/* الشريط الأحمر للطوارئ — يقرأ من نفس دفتر الأحداث اللي بيسجّل عليه الكل */}
+      <EmergencyBanner />
+
       {/* Header */}
       <div data-chat-header="" className={`p-4 border-b ${colors.border} flex items-center justify-between ${colors.bg}`}>
         <div className="flex items-center gap-3 min-w-0 flex-1">
