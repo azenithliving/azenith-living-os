@@ -18,6 +18,12 @@ import { readPaperSketch } from "@/lib/cad/paper-sketch-parser";
 import { syncLayer } from "@/lib/ops/memory/SyncLayer";
 
 export const dynamic = "force-dynamic";
+/**
+ * The pixel witness needs room to finish. The local server never let it — but that
+ * is a different machine from the one that serves the store, so the budget is opened
+ * here and measured there rather than concluded from the dev run.
+ */
+export const maxDuration = 60;
 
 /** Same ceiling the store's other picture door carries. */
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
@@ -77,15 +83,13 @@ export async function POST(request: NextRequest) {
   });
   const stored = !upload.error;
 
-  // 2. read it. The pixel witness is not run inside this request: measured twice, it
-  //    did not finish in 40 seconds here although the same engine reads the same
-  //    image in four seconds outside the handler. The reading therefore arrives as
-  //    one witness's word, says so on the screen, and the desk answers in seconds.
+  // 2. read it with both witnesses. The pixel one runs here on purpose: the local dev
+  //    server is not the machine that serves the store, and there it never finished.
+  //    So the real function is measured with an open budget before any redesign.
   const supplied = body?.offline_reading;
   const reading = await readPaperSketch({
     base64,
     mime,
-    runOffline: false,
     offline:
       supplied && typeof supplied === 'object' && typeof supplied.ran === 'boolean'
         ? {

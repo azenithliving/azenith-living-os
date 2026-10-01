@@ -19,6 +19,17 @@ import { askGoogleVision } from '@/lib/ai-orchestrator';
 /** Shipped with the app so the reader never waits on a download to do its job. */
 const LOCAL_LANG_DIR = join(process.cwd(), 'public', 'ocr');
 
+/**
+ * Where the letter-tables come from: the file system when it is there (the local
+ * server), otherwise this site's own address. Never a third party — a customer's
+ * drawing is not fetched through somebody else's machine to be read.
+ */
+function langSource(): { langPath: string; gzip: boolean } | null {
+  if (existsSync(LOCAL_LANG_DIR)) return { langPath: LOCAL_LANG_DIR, gzip: false };
+  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, '');
+  return base ? { langPath: `${base}/ocr`, gzip: false } : null;
+}
+
 export type SketchDimension = { label: string; meters: number; confirmed: boolean };
 export type SketchOpening = { kind: 'door' | 'window'; widthMeters: number | null };
 
@@ -94,9 +105,9 @@ async function readWithOfflineEngine(
   try {
     const outcome = await Promise.race([
       import('tesseract.js').then(async ({ createWorker }) => {
-        const localTables = existsSync(LOCAL_LANG_DIR) ? LOCAL_LANG_DIR : undefined;
-        const worker = localTables
-          ? await createWorker('ara+eng', 1, { langPath: localTables, gzip: false })
+        const tables = langSource();
+        const worker = tables
+          ? await createWorker('ara+eng', 1, tables)
           : await createWorker('ara+eng');
         try {
           return await worker.recognize(imageBuffer);
