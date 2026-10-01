@@ -550,10 +550,15 @@ export async function askVisionAny(
   prompt: string,
   imageBase64: string,
   mimeType: string = "image/png",
-  options?: { maxTokens?: number }
+  options?: { maxTokens?: number; usable?: (content: string) => boolean }
 ): Promise<{ success: boolean; content: string; error?: string; reader?: string }> {
+  // A reply that cannot be used is not an answer. Without this the first reader that
+  // mutters something in prose stops the chain, and the owner's paper comes back empty
+  // while two readers who could have parsed it were never asked.
+  const usable = options?.usable ?? ((content: string) => content.trim().length > 0);
+
   const google = await askGoogleVision(prompt, imageBase64, mimeType, options);
-  if (google.success && google.content.trim()) return { ...google, reader: "google" };
+  if (google.success && usable(google.content)) return { ...google, reader: "google" };
 
   const anthropic = await askAnthropic({
     model: CONFIG.ANTHROPIC_VISION_MODEL,
@@ -566,7 +571,7 @@ export async function askVisionAny(
       ],
     }],
   });
-  if (anthropic.success && anthropic.content.trim()) return { ...anthropic, reader: "anthropic" };
+  if (anthropic.success && usable(anthropic.content)) return { ...anthropic, reader: "anthropic" };
 
   const openai = await askOpenAiCompatible(
     "openai",
@@ -581,11 +586,11 @@ export async function askVisionAny(
     }],
     { maxTokens: options?.maxTokens ?? 1500 }
   );
-  if (openai.success && openai.content.trim()) return { ...openai, reader: "openai" };
+  if (openai.success && usable(openai.content)) return { ...openai, reader: "openai" };
 
-  // Nobody read it. The first reader's reason is the one worth reporting: it is the reader
-  // this store was built on, and its failure is the news.
-  return { success: false, content: "", error: google.error || "ولا قارئ صور رد" };
+  // Nobody read it useably. The first reader's reason is the one worth reporting: it is the
+  // reader this store was built on, and its failure is the news.
+  return { success: false, content: "", error: google.error || anthropic.error || openai.error || "ولا قارئ صور رد برد مقروء" };
 }
 
 /**

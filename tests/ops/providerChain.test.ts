@@ -82,6 +82,23 @@ describe("the picture reader", () => {
     expect(answer.reader).toBe("openai");
   });
 
+  it("moves on when the first reader answers in prose instead of a reading", async () => {
+    world.answers["generativelanguage.googleapis.com"] = {
+      status: 200,
+      body: { candidates: [{ content: { parts: [{ text: "أرى مستطيلًا ومكتوبًا بجانبه أرقام" }] } }] },
+    };
+    world.answers["api.anthropic.com"] = {
+      status: 200,
+      body: { content: [{ type: "text", text: '{"room":"صالة","dimensions":[{"label":"الطول","meters":4.5}]}' }] },
+    };
+    const { askVisionAny } = await import("@/lib/ai-orchestrator");
+    const answer = await askVisionAny("اقرأ الورقة", "AA", "image/png", {
+      usable: (content) => content.trim().startsWith("{"),
+    });
+    expect(answer.reader, "a non-empty mutter is not an answer").toBe("anthropic");
+    expect(world.hosts).toContain("api.anthropic.com");
+  });
+
   it("says nobody read it, in his language, when none of the three answers", async () => {
     const { askVisionAny } = await import("@/lib/ai-orchestrator");
     const answer = await askVisionAny("اقرأ الورقة", "AA", "image/png");

@@ -195,8 +195,13 @@ export async function readPaperSketch(input: {
     if (Number.isFinite(value) && value > 0 && value < 200) ocrNumbers.push(Math.round(value * 100) / 100);
   }
 
-  // Asked of whoever can read a picture, not of one company that is often out of ceiling.
-  const model = await askVisionAny(PROMPT, input.base64, mime, { maxTokens: 700 });
+  // Asked of whoever can read a picture, not of one company that is often out of ceiling —
+  // and a reply only counts when it can actually be parsed, so a reader that answers in
+  // prose does not end the chain.
+  const model = await askVisionAny(PROMPT, input.base64, mime, {
+    maxTokens: 700,
+    usable: (content) => extractJson(content) !== null,
+  });
   const reader = typeof (model as { reader?: unknown }).reader === 'string' ? (model as { reader: string }).reader : null;
   const parsed = model.success ? extractJson(model.content) : null;
 
