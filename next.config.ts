@@ -67,6 +67,19 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        // The paper desk photographs a sheet the customer drew by hand, on the
+        // owner's phone. The site-wide rule closes the camera everywhere; this opens
+        // it for this one address and for this origin only — a camera the browser
+        // refuses is a desk nobody can fill.
+        source: "/admin/v2/sketches",
+        headers: [
+          {
+            key: "Permissions-Policy",
+            value: "camera=(self), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()",
+          },
+        ],
+      },
     ];
   },
 };

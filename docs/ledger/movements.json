@@ -33,7 +33,7 @@
       "state": "moving",
       "phase": "M2",
       "when": "2026-10-01",
-      "proof": "upload, storage and the ledger row measured working on the running app (paper stored, rows 1 and 2 recorded with their refusal reasons); the offline digit reader does not finish inside the hosted function's time budget (12s ceiling hit twice), so it moves to the browser"
+      "proof": "upload, storage and the ledger row measured working on the running app (paper stored, rows recorded with their refusal reasons, the desk answering in seconds). The pixel witness is not proven yet: the same engine that reads an image in about 4 seconds in plain Node did not finish inside a request (past 40 s), and in the browser it is refused by this site's own worker policy unless the engine ships with the site — tried, served correctly, and still did not finish. Readings therefore arrive labelled one witness until the engine is placed where it can complete"
     },
     {
       "atom": "/admin/sales#العملاء",

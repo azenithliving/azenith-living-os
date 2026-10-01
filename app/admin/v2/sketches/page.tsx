@@ -49,6 +49,7 @@ function when(iso: string): string {
  */
 export default function V2SketchesPage() {
   const [busy, setBusy] = useState(false);
+  const [stage, setStage] = useState('');
   const [reading, setReading] = useState<Reading | null>(null);
   const [stored, setStored] = useState<boolean | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -83,6 +84,11 @@ export default function V2SketchesPage() {
           reader.onerror = () => reject(new Error('الملف ما قريتش'));
           reader.readAsDataURL(file);
         });
+
+        // The pixel witness runs on the store's own server, next to the letter-tables
+        // it needs. The browser was tried first and the site's own guard rails refuse
+        // a worker from outside this origin — which is the policy working, not failing.
+        setStage('بقرا الورقة وأسجّل القراءة…');
         const res = await fetch('/api/admin/ops/sketch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -97,6 +103,7 @@ export default function V2SketchesPage() {
         setProblem(String((error as Error)?.message ?? error));
       } finally {
         setBusy(false);
+        setStage('');
         if (fileRef.current) fileRef.current.value = '';
       }
     },
@@ -124,7 +131,7 @@ export default function V2SketchesPage() {
           onChange={(e) => onPick(e.target.files?.[0])}
           className="block w-full text-[12px] text-white/60 file:ml-3 file:rounded-xl file:border-0 file:bg-amber-500/20 file:px-4 file:py-2 file:text-[12px] file:font-bold file:text-amber-200"
         />
-        {busy && <p className="mt-3 text-[11px] text-white/45">بقرا الورقة…</p>}
+        {busy && <p className="mt-3 text-[11px] text-white/45">{stage || 'بقرا الورقة…'}</p>}
         {problem && <p className="mt-3 text-[11px] text-rose-300">{problem}</p>}
         {stored === false && (
           <p className="mt-3 text-[11px] text-amber-300">القراءة تمت، بس الخزانة ما قبلتش الصورة — هتلاقي السبب تحت.</p>
@@ -172,7 +179,7 @@ export default function V2SketchesPage() {
           <p className="mt-3 text-[11px] text-white/55">
             المساحة: {reading.areaSqm ? `${arNum(reading.areaSqm)} متر مربع` : 'متحسبتش — محتاجة ضلعين مؤكدين'}
             {' · '}
-            قارئ البيكسلات: {reading.ocr.ran ? `${arNum(Math.round(reading.ocr.ms))} ملي ثانية بثقة ${arNum(Math.round(reading.ocr.confidence ?? 0))}٪` : 'ما كملش'}
+            قارئ البيكسلات: {reading.ocr.ran ? `${arNum(Math.round(reading.ocr.ms))} ملي ثانية بثقة ${arNum(Math.round(reading.ocr.confidence ?? 0))}٪` : `ما كملش${reading.ocr.error ? ` — ${reading.ocr.error}` : ''}`}
           </p>
           {reading.notes && <p className="mt-1 text-[11px] text-white/40">ملاحظة على الورقة: {reading.notes}</p>}
         </section>

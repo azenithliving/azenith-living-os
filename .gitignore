@@ -50,3 +50,4 @@ ui-test-final.png
 
 # Offline speech data the OCR probe downloads into the working tree
 *.traineddata
+!public/ocr/*.traineddata

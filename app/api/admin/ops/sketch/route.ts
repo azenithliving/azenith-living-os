@@ -77,8 +77,26 @@ export async function POST(request: NextRequest) {
   });
   const stored = !upload.error;
 
-  // 2. read it twice
-  const reading = await readPaperSketch({ base64, mime });
+  // 2. read it. The pixel witness is not run inside this request: measured twice, it
+  //    did not finish in 40 seconds here although the same engine reads the same
+  //    image in four seconds outside the handler. The reading therefore arrives as
+  //    one witness's word, says so on the screen, and the desk answers in seconds.
+  const supplied = body?.offline_reading;
+  const reading = await readPaperSketch({
+    base64,
+    mime,
+    runOffline: false,
+    offline:
+      supplied && typeof supplied === 'object' && typeof supplied.ran === 'boolean'
+        ? {
+            ran: supplied.ran,
+            text: typeof supplied.text === 'string' ? supplied.text : '',
+            confidence: typeof supplied.confidence === 'number' ? supplied.confidence : null,
+            ms: typeof supplied.ms === 'number' ? supplied.ms : 0,
+            error: typeof supplied.error === 'string' ? supplied.error : null,
+          }
+        : null,
+  });
 
   // 3. record the reading, refused ones included — a refusal is evidence
   const { data: row, error: insertError } = await supabase

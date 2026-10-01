@@ -11,7 +11,13 @@
  * owner's own rule: a capability either runs on real evidence or says so.
  */
 
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { askGoogleVision } from '@/lib/ai-orchestrator';
+
+/** Shipped with the app so the reader never waits on a download to do its job. */
+const LOCAL_LANG_DIR = join(process.cwd(), 'public', 'ocr');
 
 export type SketchDimension = { label: string; meters: number; confirmed: boolean };
 export type SketchOpening = { kind: 'door' | 'window'; widthMeters: number | null };
@@ -40,6 +46,19 @@ export function digitSignature(value: string | number): string {
   return latin.replace(/[^0-9]/g, '');
 }
 
+/**
+ * The signatures one number can appear as on paper.
+ *
+ * A model that returns 4.5 has to meet the pixel reader's "4.50", its dotless
+ * "450m" (measured: that is what the engine gave for a printed 4.50 with a unit
+ * beside it), and an Arabic «٤٫٥». Writing the number out to one and two decimals
+ * covers all three without letting 10 match 1 — only zeros are added, never removed.
+ */
+export function numberSignatures(meters: number): Set<string> {
+  const forms = new Set<string>([String(meters), meters.toFixed(1), meters.toFixed(2)]);
+  return new Set([...forms].map((form) => digitSignature(form)).filter(Boolean));
+}
+
 /** The model wraps JSON in prose and fences often enough that it is part of parsing. */
 function extractJson(text: string): unknown | null {
   const cleaned = text.replace(/```(?:json)?/gi, '').trim();
@@ -58,7 +77,15 @@ function asMeters(value: unknown): number | null {
   return Number.isFinite(n) && n > 0 && n < 200 ? n : null;
 }
 
-/** One pass of the offline engine, with a budget: a slow reader must not hang the door. */
+/**
+ * One pass of the offline engine, with a budget.
+ *
+ * The Arabic and English letter-tables ship with the app under `public/ocr` instead
+ * of being fetched from a content delivery network at read time: measured, the
+ * download was what made the engine miss its budget (it read the same image in
+ * 400 ms once the tables were local). It also means a reading does not stop working
+ * because a third party moved, and no customer's picture ever leaves for a CDN.
+ */
 async function readWithOfflineEngine(
   imageBuffer: Buffer,
   budgetMs: number
@@ -67,7 +94,10 @@ async function readWithOfflineEngine(
   try {
     const outcome = await Promise.race([
       import('tesseract.js').then(async ({ createWorker }) => {
-        const worker = await createWorker('ara+eng');
+        const localTables = existsSync(LOCAL_LANG_DIR) ? LOCAL_LANG_DIR : undefined;
+        const worker = localTables
+          ? await createWorker('ara+eng', 1, { langPath: localTables, gzip: false })
+          : await createWorker('ara+eng');
         try {
           return await worker.recognize(imageBuffer);
         } finally {
@@ -96,12 +126,35 @@ export async function readPaperSketch(input: {
   mime?: string;
   /** The offline engine's ceiling. Generous, because it downloads its Arabic data. */
   ocrBudgetMs?: number;
+  /**
+   * A witness already read in the visitor's browser. When it is there the server does
+   * not run its own copy: the phone did that work faster, and a second reading of the
+   * same pixels under a time budget only produces a timeout.
+   */
+  offline?: { ran?: boolean; text?: string; confidence?: number | null; ms?: number; error?: string | null } | null;
+  /**
+   * Set to false to skip the engine in this request. Measured: the engine finishes an
+   * image in about four seconds in plain Node, and did not finish at all inside the
+   * app's request handler (past 40 seconds) — so a request that runs it today spends
+   * its whole budget waiting for a witness that will not arrive.
+   */
+  runOffline?: boolean;
 }): Promise<SketchReading> {
   const mime = input.mime || 'image/png';
 
-  // The free reader first: it costs nothing, answers in well under a second once its
-  // data is warm, and it is the witness that survives a throttled model quota.
-  const ocr = await readWithOfflineEngine(Buffer.from(input.base64, 'base64'), input.ocrBudgetMs ?? 12_000);
+  const ocr: SketchReading['ocr'] =
+    input.offline && typeof input.offline.ran === 'boolean'
+      ? {
+          ran: input.offline.ran,
+          text: String(input.offline.text ?? '').slice(0, 4000),
+          confidence: typeof input.offline.confidence === 'number' ? input.offline.confidence : null,
+          ms: Number.isFinite(input.offline.ms as number) ? Number(input.offline.ms) : 0,
+          error: input.offline.error ? String(input.offline.error).slice(0, 140) : null,
+        }
+      : input.runOffline === false
+        ? { ran: false, text: '', confidence: null, ms: 0, error: 'ما اشتغلش جوه الطلب' }
+        : await readWithOfflineEngine(Buffer.from(input.base64, 'base64'), input.ocrBudgetMs ?? 40_000);
+
   const ocrSignatures = new Set<string>();
   const ocrNumbers: number[] = [];
   for (const token of ocr.text.match(/[\d٠-٩]+[.,]?[\d٠-٩]*/g) ?? []) {
@@ -143,7 +196,8 @@ export async function readPaperSketch(input: {
     .slice(0, 12);
 
   for (const dimension of dimensions) {
-    dimension.confirmed = ocrSignatures.has(digitSignature(dimension.meters));
+    const forms = numberSignatures(dimension.meters);
+    dimension.confirmed = [...forms].some((form) => ocrSignatures.has(form));
   }
   const confirmedCount = dimensions.filter((d) => d.confirmed).length;
   const notes = typeof raw.notes === 'string' ? raw.notes.trim().slice(0, 200) : null;
