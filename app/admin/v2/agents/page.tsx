@@ -73,15 +73,42 @@ const EMPLOYEE_ICONS: Record<string, React.ComponentType<{ className?: string }>
 export default function V2AgentsPage() {
   const [statuses, setStatuses] = useState<Record<string, AgentStatus> | null>(null);
   const [inboxes, setInboxes] = useState<Record<string, Inbox>>({});
+  const [roll, setRoll] = useState<{ customers: number | null; needingReply: number | null }>({
+    customers: null,
+    needingReply: null,
+  });
+  const [decisions, setDecisions] = useState<number | null>(null);
 
   const fetchOnce = useCallback(async () => {
-    try {
-      const statusRes = await fetch('/api/admin/agents/chat');
-      const statusData = await statusRes.json();
-      if (statusData.success && statusData.data) {
-        setStatuses(statusData.data as Record<string, AgentStatus>);
-      }
-    } catch {}
+    // Every number in the pulse comes from a door that already answers it for
+    // somebody else — the customer roll the sales office reads, the decision queue
+    // the chat's vault reads. A second counter of the same thing is how two screens
+    // start disagreeing.
+    const [statusRes, customersRes, queueRes] = await Promise.allSettled([
+      fetch('/api/admin/agents/chat'),
+      fetch('/api/admin/customers'),
+      fetch('/api/admin/agents/approval-queue'),
+    ]);
+
+    if (statusRes.status === 'fulfilled') {
+      try {
+        const d = await statusRes.value.json();
+        if (d.success && d.data) setStatuses(d.data as Record<string, AgentStatus>);
+      } catch {}
+    }
+    if (customersRes.status === 'fulfilled') {
+      try {
+        const d = await customersRes.value.json();
+        const t = d?.totals;
+        if (t) setRoll({ customers: Number(t.customers) || 0, needingReply: Number(t.needingReply) || 0 });
+      } catch {}
+    }
+    if (queueRes.status === 'fulfilled') {
+      try {
+        const d = await queueRes.value.json();
+        if (Array.isArray(d?.approvals)) setDecisions(d.approvals.length);
+      } catch {}
+    }
 
     const settled = await Promise.all(
       DEPARTMENT_KEYS.map(async (key) => {
@@ -135,12 +162,77 @@ export default function V2AgentsPage() {
         </p>
       </header>
 
+      <StorePulse
+        customers={roll.customers}
+        needingReply={roll.needingReply}
+        decisions={decisions}
+        unread={Object.values(inboxes).reduce((sum, box) => sum + (box?.unread || 0), 0)}
+        loaded={Object.keys(inboxes).length > 0}
+      />
+
       <div className="space-y-7">
         {DEPARTMENTS.map((dept) => (
           <DepartmentBlock key={dept.id} dept={dept} statuses={statuses} inboxes={inboxes} />
         ))}
       </div>
     </div>
+  );
+}
+
+/**
+ * The store's pulse: the four numbers an owner checks before he reads anything.
+ *
+ * Each one is read through a door that already answers it for another surface, and a
+ * number whose source does not exist yet is named in writing rather than shown as a
+ * zero — a zero is indistinguishable from a real measurement, and that is the exact
+ * way a dead counter passes for a live one.
+ */
+function StorePulse({
+  customers,
+  needingReply,
+  decisions,
+  unread,
+  loaded,
+}: {
+  customers: number | null;
+  needingReply: number | null;
+  decisions: number | null;
+  unread: number;
+  loaded: boolean;
+}) {
+  const items = [
+    { label: 'العملاء في الدفتر', value: customers },
+    { label: 'مستنيين رد', value: needingReply },
+    { label: 'قرارات مستنية كلمتك', value: decisions },
+    { label: 'رسائل جديدة من الموظفين', value: loaded ? unread : null },
+  ];
+
+  return (
+    <section aria-label="نبض المتجر" className="mb-6">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {items.map((item) => {
+          const value = item.value;
+          return (
+            <div
+              key={item.label}
+              className="rounded-2xl border border-white/[0.07] bg-white/[0.02] px-3 py-2.5"
+            >
+              <div className="text-[10px] leading-tight text-white/40">{item.label}</div>
+              <div
+                className={`mt-0.5 text-lg font-black ${
+                  value === null ? 'text-white/25' : value > 0 ? 'text-amber-300' : 'text-white/70'
+                }`}
+              >
+                {value === null ? 'بستنى الرد' : arNum(value)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-[10px] leading-relaxed text-white/30">
+        قارئ الورقة المرسومة باليد وعدّاد الزوار اللحظي: بابان لسه ما اتبنيتوش — ما بنطش صفر مكانهم لأن الصفر ما بيمتّزش عن رقم حقيقي.
+      </p>
+    </section>
   );
 }
 
