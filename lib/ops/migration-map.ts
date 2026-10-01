@@ -49,6 +49,18 @@ export const OFFICES: Office[] = [
     employees: ["مدير المبيعات"],
   },
   {
+    id: "paper-desk",
+    /**
+     * The desk, not an employee: what sits here is a machine that reads a hand-drawn
+     * room with two witnesses. No agent is seated here yet — the reader answers for
+     * itself, and a card for an employee who does not exist is the one thing the
+     * command canvas already refuses to show.
+     */
+    label: "ورق المقاسات",
+    answers: "الورقة اللي العميل رسمها بالقلم — إيه اللي بنأكد منه وإيه اللي لأ",
+    employees: [],
+  },
+  {
     id: "elite-room",
     label: "غرفة النخبة",
     answers: "مين لسه على قائمة الانتظار، ومين دخل بالدعوة",
@@ -202,6 +214,8 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "app/admin/v2/database/page.tsx", office: "system-room", status: "pending", reason: "قاعدة البيانات" },
   { id: "app/admin/v2/elite/page.tsx", office: "elite-room", status: "pending", reason: "النخبة" },
   { id: "app/admin/v2/sales/page.tsx", office: "sales-office", status: "moved", reason: "مدير المبيعات — جسده وكيل المبيعات ومكتبه دفتر العميل" },
+  { id: "components/admin/CockpitDoors.tsx", office: "decision-desk", status: "moved", reason: "بابا الكابينة في القائمة الجانبية: قرارات مستنية كلمتك بعددها الحيّ، والإيقاف الفوري" },
+  { id: "app/admin/v2/sketches/page.tsx", office: "paper-desk", status: "moving", reason: "طاولة الورق: الرفع والحفظ والسجل شغالين — القراءة المحلية متنقلة للمتصفح لأن سيرفر الاستضافة ما بيخلصهاش في الوقت" },
   { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "pending", reason: "الإعدادات" },
   { id: "app/admin/v2/system/page.tsx", office: "system-room", status: "pending", reason: "حالة النظام" },
   { id: "app/admin/v2/work/page.tsx", office: "records-office", status: "pending", reason: "مركز العمل" },

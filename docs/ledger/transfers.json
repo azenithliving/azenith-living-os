@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T16:45:54.291Z",
+  "generatedAt": "2026-10-01T17:06:08.684Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,9 +7,9 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 442,
-    "moved": 3,
-    "moving": 1,
+    "not-moved": 451,
+    "moved": 4,
+    "moving": 2,
     "erased": 1
   },
   "rows": [
@@ -154,6 +154,14 @@
     },
     {
       "kind": "new-page",
+      "atom": "app/admin/v2/sketches/page.tsx",
+      "state": "moving",
+      "phase": "M2",
+      "when": "2026-10-01",
+      "proof": "upload, storage and the ledger row measured working on the running app (paper stored, rows 1 and 2 recorded with their refusal reasons); the offline digit reader does not finish inside the hosted function's time budget (12s ceiling hit twice), so it moves to the browser"
+    },
+    {
+      "kind": "new-page",
       "atom": "app/admin/v2/system/page.tsx",
       "state": "not-moved"
     },
@@ -220,6 +228,11 @@
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agent/ultimate/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/agents/alerts/route.ts",
       "state": "not-moved"
     },
     {
@@ -617,6 +630,11 @@
     },
     {
       "kind": "admin-door",
+      "atom": "app/api/admin/ops/sketch/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
       "atom": "app/api/admin/ops/suggestions/route.ts",
       "state": "not-moved"
     },
@@ -913,6 +931,11 @@
     {
       "kind": "root-lib",
       "atom": "lib/azenith-prime.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/cad/paper-sketch-parser.ts",
       "state": "not-moved"
     },
     {
@@ -1497,6 +1520,11 @@
     },
     {
       "kind": "furniture",
+      "atom": "components/admin/agents/EmergencyBanner.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
       "atom": "components/admin/agents/FloatingAgentButton.tsx",
       "state": "not-moved"
     },
@@ -1569,6 +1597,14 @@
       "kind": "furniture",
       "atom": "components/admin/browser/AskQayyimAboutPage.tsx",
       "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/CockpitDoors.tsx",
+      "state": "moved",
+      "phase": "M1",
+      "when": "2026-10-01",
+      "proof": "measured on the published site at 390px: the queue answered 21 and the sidebar door shows ٢١, pressing it lands on the conversation with the vault already open, and the stop button keeps the safety door's two-press shape"
     },
     {
       "kind": "furniture",
@@ -1722,6 +1758,11 @@
     },
     {
       "kind": "swarm-file",
+      "atom": "lib/ops/alerts.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
       "atom": "lib/ops/anomaly.ts",
       "state": "not-moved"
     },
@@ -1763,6 +1804,11 @@
     {
       "kind": "swarm-file",
       "atom": "lib/ops/debate.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/departments.ts",
       "state": "not-moved"
     },
     {
@@ -1853,6 +1899,11 @@
     {
       "kind": "swarm-file",
       "atom": "lib/ops/memory/VectorStore.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/metricLabels.ts",
       "state": "not-moved"
     },
     {
@@ -1958,6 +2009,11 @@
     {
       "kind": "swarm-file",
       "atom": "lib/ops/stats.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/syncTypes.ts",
       "state": "not-moved"
     },
     {
@@ -2236,6 +2292,11 @@
     {
       "kind": "nav-entry",
       "atom": "/admin/sales",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/v2/sketches",
       "state": "not-moved"
     },
     {

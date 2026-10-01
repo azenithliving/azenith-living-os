@@ -174,6 +174,21 @@ export async function readPaperSketch(input: {
       notes,
     };
   }
+  if (!parsed) {
+    // An answer that is not JSON is a different failure from an empty sheet, and
+    // telling the owner «the paper had no numbers» would be a lie about his customer.
+    return {
+      ok: false,
+      failure: 'القارئ الذكي ردّ بصيغة مش مفهومة — مبنخترعش أرقام من رد مش مقروء',
+      room,
+      dimensions: [],
+      openings: [],
+      areaSqm: null,
+      confirmedCount: 0,
+      ocr,
+      notes,
+    };
+  }
   if (dimensions.length === 0) {
     return {
       ok: false,

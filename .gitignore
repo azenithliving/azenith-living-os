@@ -47,3 +47,6 @@ clean.js
 
 # screenshots written by scripts/qayyim-ui-test.mjs on every run
 ui-test-final.png
+
+# Offline speech data the OCR probe downloads into the working tree
+*.traineddata

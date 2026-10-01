@@ -33,6 +33,7 @@ const BASE_NAV: NavCategory[] = [
     items: [
       { href: "/admin/work", label: "مركز العمل", icon: "TrendingUp" },
       { href: "/admin/sales", label: "المبيعات", icon: "MessageSquare" },
+      { href: "/admin/v2/sketches", label: "ورق المقاسات", icon: "ScanLine" },
       { href: "/admin/elite", label: "دعوات النخبة", icon: "Crown" },
     ],
   },
@@ -62,7 +63,9 @@ const BASE_NAV: NavCategory[] = [
  */
 import { EXPLICIT, OFFICES } from "@/lib/ops/migration-map";
 
-const v2Address = (href: string) => href.replace("/admin", "/admin/v2");
+/** Already-addressed entries stay as they are, so a new-house door is not doubled. */
+const v2Address = (href: string) =>
+  href.startsWith("/admin/v2") ? href : href.replace("/admin", "/admin/v2");
 
 /** The page record behind an address, when the map carries one. */
 function pageRecord(href: string) {

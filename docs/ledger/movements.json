@@ -22,6 +22,20 @@
       "proof": "same run, and the retired agent key is rewritten at the outer gate for old links"
     },
     {
+      "atom": "components/admin/CockpitDoors.tsx",
+      "state": "moved",
+      "phase": "M1",
+      "when": "2026-10-01",
+      "proof": "measured on the published site at 390px: the queue answered 21 and the sidebar door shows ٢١, pressing it lands on the conversation with the vault already open, and the stop button keeps the safety door's two-press shape"
+    },
+    {
+      "atom": "app/admin/v2/sketches/page.tsx",
+      "state": "moving",
+      "phase": "M2",
+      "when": "2026-10-01",
+      "proof": "upload, storage and the ledger row measured working on the running app (paper stored, rows 1 and 2 recorded with their refusal reasons); the offline digit reader does not finish inside the hosted function's time budget (12s ceiling hit twice), so it moves to the browser"
+    },
+    {
       "atom": "/admin/sales#العملاء",
       "state": "erased",
       "phase": "consolidation-4",

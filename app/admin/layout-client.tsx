@@ -26,6 +26,7 @@ import {
   Sparkles,
   Cpu,
   Activity,
+  ScanLine,
 } from "lucide-react";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -46,6 +47,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Sparkles,
   Cpu,
   Activity,
+  ScanLine,
 };
 
 import { LEGACY_NAV, V2_NAV } from "@/lib/admin-nav";

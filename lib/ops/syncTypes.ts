@@ -26,6 +26,9 @@ export const SYNC_EVENT_TYPES = [
   'quality_gate_failed',
   'identity_violation',
   'scope_violation',
+  /** A customer handed over a hand-drawn room. Phase two's passport and phase four's
+   * lead temperature both hang on this one moment, so it is news, not a log line. */
+  'paper_sketch_received',
 ] as const;
 
 export type SyncEventType = (typeof SYNC_EVENT_TYPES)[number];
