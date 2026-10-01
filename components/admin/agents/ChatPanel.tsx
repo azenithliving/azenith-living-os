@@ -7,6 +7,7 @@ import {
   Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff, ShieldAlert, Wrench
 } from 'lucide-react';
 import { AGENT_ROLES, SALES_MANAGER_CAPABILITIES } from '@/lib/ops/agent-roles';
+import { DEPARTMENT_KEYS, employeeHref } from '@/lib/ops/departments';
 import { isOpsKey, legacyToOps, senderDisplayName } from '@/lib/ops/identity';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
@@ -52,6 +53,12 @@ interface ChatPanelProps {
   agentColor?: string;
   initialMessage?: string;
   fullScreen?: boolean;
+  /**
+   * The swipe walks the employees in a conversation that is not the full-screen
+   * cockpit too — the sales manager's own page has his roll under the chat, so it
+   * cannot be full screen, but a swipe must not die the moment he lands on him.
+   */
+  swipeable?: boolean;
 }
 
 const AGENT_METADATA: Record<string, { name: string; role: string; icon: string; color: string }> = {
@@ -226,7 +233,7 @@ function signedAs(stored: string): string {
   return AGENT_METADATA[key]?.name ?? stored;
 }
 
-export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, fullScreen }: ChatPanelProps) {
+export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, fullScreen, swipeable }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -246,6 +253,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
   const unreadLocatedRef = useRef(false);
   const scrolledToUnreadRef = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   // The sidebar's «قرارات مستنية كلمتك» door opens the vault with the conversation.
   useEffect(() => {
     if (!fullScreen) return;
@@ -390,6 +398,33 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       try { localStorage.setItem(lastReadKey, String(Date.now())); } catch {}
     }
   }, [lastReadKey]);
+
+  // A horizontal swipe walks the employees in the same order the canvas lists them,
+  // so the owner never has to leave the conversation to reach the next one. A right-
+  // to-left shop reads a finger travelling left as «the next one». Vertical drags are
+  // scrolling, not swiping, and any open panel owns the screen first.
+  const swipeArmed = (fullScreen || swipeable) && !showDecisions && !showActions && !showRoles && !selfOpen;
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!swipeArmed) { touchStartRef.current = null; return; }
+    const t = e.touches[0];
+    touchStartRef.current = t ? { x: t.clientX, y: t.clientY } : null;
+  }, [swipeArmed]);
+
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start || !swipeArmed) return;
+    const end = e.changedTouches[0];
+    if (!end) return;
+    const dx = end.clientX - start.x;
+    const dy = end.clientY - start.y;
+    if (Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 2) return;
+    const at = DEPARTMENT_KEYS.indexOf(agentKey);
+    if (at === -1) return;
+    const step = dx < 0 ? 1 : DEPARTMENT_KEYS.length - 1;
+    window.location.assign(employeeHref(DEPARTMENT_KEYS[(at + step) % DEPARTMENT_KEYS.length]));
+  }, [swipeArmed, agentKey]);
 
   useEffect(() => {
     if (firstUnreadId && !scrolledToUnreadRef.current && messages.some((m) => m.id === firstUnreadId)) {
@@ -893,9 +928,12 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       </div>
 
       {/* Messages Scroll Area */}
-      <div 
+      <div
         ref={messagesContainerRef}
+        data-thread-area=""
         onScroll={handleScroll}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
         className="flex-1 overflow-y-auto p-4 space-y-4"
       >
         {loading ? (

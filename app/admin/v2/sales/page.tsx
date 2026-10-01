@@ -31,7 +31,7 @@ export default function V2SalesPage() {
       </header>
       <div className="max-w-[1600px] mx-auto px-4 py-6 space-y-6">
         <section>
-          <ChatPanel agentKey="vanguard" agentName="مدير المبيعات" />
+          <ChatPanel agentKey="vanguard" agentName="مدير المبيعات" swipeable />
         </section>
         <section>
           <Suspense fallback={<p className="text-sm text-white/40 p-8">جاري تحميل كشف العملاء...</p>}>
