@@ -1,5 +1,6 @@
+import { readFileSync } from "fs";
 import { describe, expect, it } from "vitest";
-import { extractUiAction, polishReply } from "@/lib/consultant/reply-polish";
+import { closeCutScars, extractUiAction, polishReply } from "@/lib/consultant/reply-polish";
 import { AWAY_REFERRAL } from "@/lib/consultant/customer-voice";
 import { IDENTITY_DENIAL } from "@/lib/consultant/identity-voice";
 
@@ -53,5 +54,52 @@ describe("the hidden UI action", () => {
     expect(out.endsWith("[UI_ACTION: theme_classic]")).toBe(true);
     expect(extractUiAction(out).uiAction).toBe("theme_classic");
     expect(extractUiAction(out).cleanReply).not.toContain("UI_ACTION");
+  });
+});
+
+describe("the seam a cut leaves behind gets closed", () => {
+  it("removes the empty list item and renumbers the rest", () => {
+    // Read off the published store 2026-10-02 after the guard cut the third item's sentence.
+    const scarred =
+      "1. اقتراح أحدث صيحات الموضة في الركنات المودرن. 2. أقولك على أفضل أنواع الأقمشة. 3. 4. أساعدك في تنسيق الألوان مع السجاد.";
+    const fixed = closeCutScars(scarred);
+    expect(fixed).not.toMatch(/3\.\s+4\./);
+    expect(fixed).toContain("1. اقتراح");
+    expect(fixed).toContain("2. أقولك");
+    expect(fixed).toContain("3. أساعدك");
+    expect(fixed).not.toContain("4.");
+  });
+
+  it("does not leave the store's advisor opening a conversation with \"but\"", () => {
+    const scarred = "أهلاً بك! ولكن، إذا كنت تبحث عن ركنة مودرن، أقدر أساعدك تختار المقاس.";
+    expect(closeCutScars(scarred)).toBe("أهلاً بك! إذا كنت تبحث عن ركنة مودرن، أقدر أساعدك تختار المقاس.");
+  });
+
+  it("leaves a year and a legitimate middle-of-paragraph contrast alone", () => {
+    const year = "الأسعار اتغيرت في 2024. والرؤية بقت أوسع.";
+    expect(closeCutScars(year)).toBe(year);
+    const contrast = "المساحة كويسة. لكن الركنة الكبيرة هتزحم الصالة.";
+    expect(closeCutScars(contrast)).toBe(contrast);
+  });
+
+  it("is idempotent", () => {
+    const once = closeCutScars("1. اقتراح. 2. ترشيح. 3. 4. تنسيق.");
+    expect(closeCutScars(once)).toBe(once);
+  });
+
+  it("runs inside the pipeline, not next to it", () => {
+    const route = readFileSync("lib/consultant/reply-polish.ts", "utf8");
+    expect(route).toContain("trimReply(closeCutScars(here.reply))");
+  });
+
+  it("cuts a denial sitting inside a list and hands the customer a list with no hole", () => {
+    // The shape the server log showed: the denial rode in the third item of a numbered answer.
+    const raw =
+      "أهلاً بك! 1. اقتراح أحدث الصيحات. 2. أقولك على أفضل الأقمشة. 3. أنا نموذج ذكاء اصطناعي ولا أبيع منتجات. 4. أساعدك في تنسيق الألوان.";
+    const out = polishReply(raw, "ar");
+    expect(out).not.toMatch(/\d+\.\s+\d+\./);
+    expect(out).toContain("3. أساعدك في تنسيق الألوان");
+    expect(out).not.toMatch(/ولكن،|لكن،/);
+    expect(IDENTITY_DENIAL.test(out)).toBe(false);
   });
 });
