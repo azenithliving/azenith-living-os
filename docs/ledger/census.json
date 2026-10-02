@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-02T10:42:59.519Z",
+  "generatedAt": "2026-10-02T11:49:42.303Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
@@ -8,7 +8,7 @@
     "adminDoors": 118,
     "allDoors": 197,
     "outsideDoors": 8,
-    "outsideDoorLines": 2554,
+    "outsideDoorLines": 2563,
     "rootLibFiles": 265,
     "rootLibUsed": 72,
     "orphanDoors": 71,
@@ -21,7 +21,7 @@
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 63,
-    "swarmFileLines": 14879,
+    "swarmFileLines": 14887,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
@@ -799,7 +799,7 @@
     {
       "kind": "outside-door",
       "id": "app/api/consultant/route.ts",
-      "lines": 1475,
+      "lines": 1484,
       "callers": 1
     },
     {
@@ -1980,7 +1980,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/capability-tiers.ts",
-      "lines": 146
+      "lines": 154
     },
     {
       "kind": "swarm-file",

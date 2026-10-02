@@ -39,7 +39,6 @@ const PENDING_FLOOR = [
   "app/api/consultant/catalog-crawler/route.ts",
   "app/api/consultant/learnings/route.ts",
   "app/api/consultant/pending-questions/route.ts",
-  "app/api/consultant/route.ts",
   "app/api/orchestrator/route.ts",
 ];
 
@@ -56,10 +55,19 @@ describe("the model doors fall to a floor, not to machine prose", () => {
   });
 
   it("shrinks the pile it started from", () => {
-    // Measured 2026-10-02: 15 doors a human opens, 5 wired the same night. The number may only
+    // Measured 2026-10-02: 15 doors a human opens, 6 wired the same night. The number may only
     // go down, and it goes down by editing this file — which is the point of naming each one.
-    expect(doors.filter((row) => row.wired).length).toBe(5);
-    expect(PENDING_FLOOR.length).toBe(10);
+    expect(doors.filter((row) => row.wired).length).toBe(6);
+    expect(PENDING_FLOOR.length).toBe(9);
+  });
+
+  it("keeps the customer's consultant talking Arabic and never hands out a stack trace", () => {
+    const src = readFileSync("app/api/consultant/route.ts", "utf8");
+    expect(src).toContain('capabilityOf("consultant")');
+    // The dead-key path must cost a delay, not a lost buyer: the question goes to the desk.
+    expect(src).toContain("await notifyAdminUnknownQuestion(message, sessionId, userName, conversationHistory)");
+    expect(src).not.toMatch(/stack:\s*error/);
+    expect(src).not.toMatch(/error:\s*"Internal Server Error"/);
   });
 
   it("asks the chain, not one named provider, on the sales desk's doors", () => {

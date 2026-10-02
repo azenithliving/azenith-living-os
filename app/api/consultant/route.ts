@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin as supabase } from "@/lib/supabase-server";
 import { askGroq, askOrchestratorMessages } from "@/lib/ai-orchestrator";
+import { capabilityOf } from "@/lib/ops/capability-tiers";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { predatoryDefense } from "@/lib/predatory-defense";
 import { semanticCache } from "@/lib/semantic-cache";
@@ -217,9 +218,9 @@ function buildHumanPhoneConfirmation(language?: string): string {
 
 function buildHumanTemporaryFailureReply(language?: string): string {
   if (language === "en") {
-    return "I am sorry, the consultant line is under heavy load for a moment. Leave your phone number here and a senior Azenith consultant will follow up with you as soon as possible.";
+    return "I am sorry, the consultant line is under heavy load for a moment. Your question has already reached our team and will be answered here — leave your phone number and a senior Azenith consultant will follow up as soon as possible.";
   }
-  return "أعتذر لك، خط المستشار عليه ضغط لحظي الآن. اترك رقم هاتفك هنا وسيتواصل معك مستشار أزينث المختص في أقرب وقت.";
+  return "أعتذر لك، خط المستشار عليه ضغط لحظي الآن. سؤالك وصل فريقنا فعلًا وهيتم الرد عليه هنا — اترك رقم هاتفك وسيتواصل معك مستشار أزينث المختص في أقرب وقت.";
 }
 
 function polishReply(reply: string, language?: string): string {
@@ -441,9 +442,14 @@ async function markSessionHandoff(
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ConsultantResponse | { error: string }>> {
+  // Kept outside the try so the failure reply can be written in the customer's own language and
+  // land in the conversation he is already reading.
+  let language: string | undefined;
+  let knownSessionId = "";
   try {
     const body: ConsultantRequest = await request.json();
-    const { message, sessionId: providedSessionId, userName, userEmail, language } = body;
+    const { message, sessionId: providedSessionId, userName, userEmail, language: bodyLanguage } = body;
+    language = bodyLanguage;
     const clientLocation = isValidClientLocation(body.location) ? body.location : undefined;
 
     if (!message || typeof message !== "string") {
@@ -455,11 +461,14 @@ export async function POST(
 
     // Generate or use existing session ID
     const sessionId = providedSessionId || generateSessionId();
+    knownSessionId = sessionId;
     console.log(`[Consultant] Processing request for session: ${sessionId}`);
 
     if (!supabase) {
       console.error("[Consultant] Supabase client failed to initialize");
-      return NextResponse.json({ error: "DB connection failed" }, { status: 500 });
+      // No filing cabinet is news for the store, not a reason to leave a customer reading an
+      // English status word.
+      return NextResponse.json({ reply: buildHumanTemporaryFailureReply(language), sessionId });
     }
 
     // Check if in Admin Learning Mode
@@ -795,9 +804,11 @@ export async function POST(
         const failMemory = await storeMemory({
           type: "learning",
           category: "ai_failure",
-          content: `AI call failed for session ${sessionId}: ${aiResult.error}`,
+          // The capability ledger names what fell, so this record and the owner's tier board
+          // speak about the same surface in the same words.
+          content: `${capabilityOf("consultant")?.label ?? "consultant"} — AI call failed for session ${sessionId}: ${aiResult.error}`,
           priority: "high",
-          context: { sessionId, error: aiResult.error, query: message }
+          context: { sessionId, error: aiResult.error, query: message, capability: "consultant" }
         });
         if (failMemory.success && failMemory.id) {
           await learningEngine.learnFromFeedback(failMemory.id, "negative", `AI provider failure: ${aiResult.error}`);
@@ -805,6 +816,9 @@ export async function POST(
       } catch (healErr) {
         console.warn("[Consultant] Self-healing logging failed:", healErr);
       }
+      // The floor is the point, not the apology: the question goes to the pending desk and to
+      // Telegram with the customer's number, so a dead key costs a delay and never a lost buyer.
+      await notifyAdminUnknownQuestion(message, sessionId, userName, conversationHistory);
       const fallbackReply = buildHumanTemporaryFailureReply(language);
       const assistantMessage: Message = { role: "assistant", content: fallbackReply, timestamp: new Date().toISOString() };
       conversationHistory.push(assistantMessage);
@@ -1043,15 +1057,13 @@ export async function POST(
     });
 
   } catch (error: any) {
+    // A stack trace in a browser response is a map of the store handed to whoever asked. The
+    // detail stays in the log; the customer gets the same Arabic line the dead-key path gives.
     console.error("[Consultant] Detailed error:", error);
-    return NextResponse.json(
-      {
-        error: "Internal Server Error",
-        message: error?.message || "Unknown error",
-        stack: error?.stack || "No stack trace"
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      reply: buildHumanTemporaryFailureReply(language),
+      sessionId: knownSessionId || generateSessionId(),
+    });
   }
 }
 
@@ -1464,11 +1476,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   } catch (error) {
     console.error("[Consultant] GET error:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorStack = error instanceof Error ? error.stack : undefined;
-    return NextResponse.json(
-      { error: errorMessage, stack: errorStack },
-      { status: 500 }
-    );
+    // The history did not load; that is the whole news. The exception's text and stack stay in
+    // the log — a browser has no use for a map of the store.
+    return NextResponse.json({ error: "المحادثة المحفوظة ما جاتش دلوقتي" }, { status: 500 });
   }
 }
