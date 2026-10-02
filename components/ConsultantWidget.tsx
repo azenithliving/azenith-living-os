@@ -521,7 +521,8 @@ export default function ConsultantWidget() {
                     className={`flex max-w-[85%] ${msg.role === "user" ? "ml-auto" : "mr-auto"}`}
                   >
                     <div
-                      className={`rounded-2xl px-4 py-2.5 text-sm ${
+                      data-chat-bubble={msg.role}
+                      className={`whitespace-pre-line rounded-2xl px-4 py-2.5 text-sm ${
                         msg.role === "user"
                           ? "rounded-bl-lg bg-amber-500 text-white"
                           : "rounded-br-lg border border-white/10 bg-zinc-800 text-gray-100"

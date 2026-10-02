@@ -11,7 +11,7 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { IDENTITY_DENIAL, IDENTITY_LINE, enforceStoreIdentity } from "@/lib/consultant/identity-voice";
+import { IDENTITY_DENIAL, IDENTITY_LINE, denialSentences, enforceStoreIdentity } from "@/lib/consultant/identity-voice";
 
 /** Word for word what the live consultant said to a customer. */
 const LIVE_REPLY =
@@ -113,6 +113,44 @@ describe("the guard leaves a good reply alone", () => {
   });
 });
 
+describe("the guard does not cut a sentence that was selling", () => {
+  /**
+   * Five sentences the loose version of the net destroyed, found by reading the repair out of the
+   * server log on 2026-10-02. Every one of them is the store talking about itself.
+   */
+  for (const selling of [
+    "ده مشروع كبير ومحتاج شركة متخصصة تنفذه.",
+    "الركنة دي مش هتلاقي زيها في أي معرض تاني.",
+    "مش لازم تدفع دلوقتي، المحل بيقسّط على ٦ شهور.",
+    "أنا هرتب لك برنامج الشغل من أول القياس لحد التسليم.",
+    "تشطيب شقة بميزانية محدودة ذكاء وليس مجرد توفير.",
+  ]) {
+    it(`keeps ${selling.slice(0, 30)}…`, () => {
+      const { reply, repaired } = enforceStoreIdentity(selling, "ar");
+      expect(repaired).toBe(false);
+      expect(reply).toBe(selling);
+      expect(denialSentences(selling)).toEqual([]);
+    });
+  }
+
+  it("still cuts the denial read out of the server log the same day", () => {
+    const live =
+      "أنا ذكاء اصطناعي (ChatGPT)، يعني لست معرضاً للأثاث ولا أبيع منتجات بشكل مباشر. لكن أقدر أساعدك تختار الركنة المناسبة.";
+    const { reply, repaired } = enforceStoreIdentity(live, "ar");
+    expect(repaired).toBe(true);
+    expect(denialSentences(live)).toHaveLength(1);
+    expect(reply).toContain("الركنة المناسبة");
+    expect(reply).toContain(IDENTITY_LINE.ar);
+    expect(IDENTITY_DENIAL.test(reply)).toBe(false);
+  });
+
+  it("names the sentence it cut, so a repair can be audited", () => {
+    const cut = denialSentences(LIVE_REPLY);
+    expect(cut).toHaveLength(1);
+    expect(cut[0]).toContain("ذكاء اصطناعي");
+  });
+});
+
 describe("the prompt asks for what the guard enforces", () => {
   it("tells both consultant personas they are the store's advisor", () => {
     const route = readFileSync("app/api/consultant/route.ts", "utf8");
@@ -121,8 +159,12 @@ describe("the prompt asks for what the guard enforces", () => {
   });
 
   it("routes every model reply through the guard", () => {
+    const polish = readFileSync("lib/consultant/reply-polish.ts", "utf8");
+    expect(polish).toContain('from "@/lib/consultant/identity-voice"');
+    expect(polish).toContain("enforceStoreIdentity(polished, language)");
+
     const route = readFileSync("app/api/consultant/route.ts", "utf8");
-    expect(route).toContain('from "@/lib/consultant/identity-voice"');
-    expect(route).toContain("enforceStoreIdentity(polished, language)");
+    expect(route).toContain('from "@/lib/consultant/reply-polish"');
+    expect(route).toContain("polishReply(rawReply, language)");
   });
 });

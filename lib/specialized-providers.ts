@@ -15,11 +15,19 @@ import {
 
 /**
  * CEREBRAS - Ultra-fast response engine
- * Use case: Quick, short responses (< 150 tokens) for simple queries
- * Fallback: Returns null → caller uses Groq/default
+ * Use case: Quick, short responses for simple statements
+ * Fallback: Returns null → caller uses the main chain
+ *
+ * It takes the caller's own conversation, system prompt included. Measured on the published
+ * store 2026-10-02, this engine was being handed the customer's bare sentence with no persona
+ * at all, and a 8-billion-parameter model with no idea whose shop it was standing in answered
+ * as a general guide: it denied the store, printed markdown, and named other shops to buy
+ * from — IKEA, Hub Furniture, the Damietta showrooms. Speed is worth having; a fast answer
+ * from somebody else is not.
  */
 export async function tryFastResponse(
-  prompt: string
+  messages: Array<{ role: string; content: string }>,
+  options?: { maxTokens?: number }
 ): Promise<string | null> {
   try {
     const stats = await getKeyStats("cerebras");
@@ -30,9 +38,9 @@ export async function tryFastResponse(
 
     console.log("[Cerebras] Attempting ultra-fast response...");
     const result = await askCerebrasMessages(
-      [{ role: "user", content: prompt }],
+      messages,
       { 
-        maxTokens: 150, 
+        maxTokens: options?.maxTokens ?? 220, 
         model: "llama3.1-8b",
         temperature: 0.7 
       }

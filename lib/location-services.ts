@@ -20,9 +20,6 @@ export interface NearbyPlace {
   mapUrl: string;
 }
 
-const FOOD_RE = /(اكل|أكل|مطعم|مطاعم|كافيه|قهوة|غدا|غداء|عشا|عشاء|فطار|فطور|بيتزا|برجر|سوشي|restaurant|restaurants|cafe|coffee|food|eat|dinner|lunch|breakfast)/i;
-const LOCATION_RE = /(انا فين|أنا فين|موقعي|موقعى|فين حاليا|فين حاليًا|مكانى|مكاني|current location|where am i|my location)/i;
-
 export function isValidClientLocation(location: unknown): location is ClientLocation {
   if (!location || typeof location !== "object") return false;
   const candidate = location as ClientLocation;
@@ -36,14 +33,6 @@ export function isValidClientLocation(location: unknown): location is ClientLoca
     candidate.longitude >= -180 &&
     candidate.longitude <= 180
   );
-}
-
-export function isFoodNearbyRequest(message: string): boolean {
-  return FOOD_RE.test(message);
-}
-
-export function isCurrentLocationRequest(message: string): boolean {
-  return LOCATION_RE.test(message);
 }
 
 export function formatLocationContext(location: ClientLocation): string {

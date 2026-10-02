@@ -34,3 +34,35 @@ export function foldArabic(value: string): string {
 export function latinDigits(value: unknown): string {
   return String(value ?? "").replace(/[\u0660-\u0669]/g, (ch) => String(ch.charCodeAt(0) - 0x0660));
 }
+
+/**
+ * The Arabic letters themselves. The block also holds its own question mark (؟), its own comma
+ * (،) and its own digits (٠١٢٣٤٥٦٧٨٩) — and those end a word rather than continue one. Reading
+ * them as letters is what made «بكام؟» fail its own price net while «بكام» passed.
+ */
+const AR_LETTER = String.raw`[\u0621-\u064A\u0671-\u06D3\u06FB-\u06FF]`;
+/** The single letters Arabic glues onto the front of a word without a space: ب ا ل و ف ك. */
+const AR_PREFIX = String.raw`[\u0628\u0627\u0644\u0648\u0641\u0643]`;
+/** The endings Arabic glues onto the back of a word without a space. */
+const AR_SUFFIX = String.raw`(?:ها|هما|هم|هن|كم|كن|نا|ين|ات|يات|تين|يه|ي|ه)`;
+
+/**
+ * Give a pattern an Arabic word shape, so it matches a word and not a piece of a longer one.
+ *
+ * JavaScript's `\b` knows ASCII only: `/\bأكل\b/.test("أكل")` is false, so a matcher written
+ * with it never fires, and a matcher written without any boundary fires inside other words.
+ * Measured on the published store 2026-10-02, «من أول ما أكلمكم لحد ما الأثاث يوصل» — a
+ * customer asking how the work is done — was read as a food order because «أكلمكم» contains
+ * «أكل», and the customer was told to switch on location permission.
+ *
+ * Because Arabic attaches its prefixes and suffixes without a space, both sides are written
+ * out: a known single-letter prefix may precede the word, and a known ending may follow it.
+ */
+export function arabicWord(inner: string): string {
+  return String.raw`(?:(?<!${AR_LETTER})|(?<=${AR_PREFIX}))(?:${inner})(?:(?=${AR_SUFFIX}(?!${AR_LETTER}))|(?![\u0621-\u064A\u0671-\u06D3\u06FB-\u06FF]))`;
+}
+
+/** Join words into one Arabic-safe alternation. Each entry keeps its own word shape. */
+export function arabicAny(...words: string[]): RegExp {
+  return new RegExp(words.map((word) => arabicWord(word)).join("|"), "i");
+}
