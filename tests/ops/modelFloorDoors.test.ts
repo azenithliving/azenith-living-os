@@ -87,7 +87,10 @@ describe("the model doors fall to a floor, not to machine prose", () => {
       expect(src, file).toContain("مقروء");
       expect(src, file).toContain("من غير مفتاح");
     }
-    expect(readFileSync("app/api/admin/leads/analyze/route.ts", "utf8")).toContain("maxTokens: 1400");
+    // The budget is part of the honesty: measured in the production log, a reply cut off at
+    // 1294 characters opened as JSON and never closed, and the door called that «unreadable».
+    expect(readFileSync("app/api/admin/leads/analyze/route.ts", "utf8")).toContain("maxTokens: 2600");
+    expect(readFileSync("app/api/admin/leads/suggestions/route.ts", "utf8")).toContain("maxTokens: 1600");
   });
 
   it("keeps the picture door inside the store's own ceiling", () => {

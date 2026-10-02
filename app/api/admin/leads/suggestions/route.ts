@@ -70,7 +70,9 @@ Recent conversation:
 ${recentMessages || "No messages yet"}`;
 
     const answer = await askWithFloor("customer-analysis", [{ role: "user", content: prompt }], {
-      maxTokens: 800,
+      // Three Arabic replies plus a thinking pass do not fit in 800 tokens; the door fell to its
+      // templates twice on the published site before this was measured.
+      maxTokens: 1600,
       temperature: 0.35,
       jsonMode: true,
     });

@@ -61,10 +61,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const prompt = buildAnalyzePrompt(body);
 
     const answer = await askWithFloor("customer-analysis", [{ role: "user", content: prompt }], {
-      // Seven Arabic fields do not fit in 700 tokens: measured on the published site the night
-      // this was wired, a key answered and the reply arrived cut off, which is unparseable and
-      // therefore indistinguishable from silence unless the budget is honest.
-      maxTokens: 1400,
+      // Seven Arabic fields do not fit in a short budget. Measured in the production log the
+      // night this was wired: the reply arrived at 1294 characters, opened as JSON, and never
+      // closed — the reader model spends part of the budget thinking before it writes.
+      maxTokens: 2600,
       temperature: 0.5,
       jsonMode: true,
     });
