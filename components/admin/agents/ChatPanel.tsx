@@ -9,6 +9,7 @@ import {
 import { AGENT_ROLES, SALES_MANAGER_CAPABILITIES } from '@/lib/ops/agent-roles';
 import { DEPARTMENT_KEYS, employeeHref } from '@/lib/ops/departments';
 import { isOpsKey, legacyToOps, senderDisplayName } from '@/lib/ops/identity';
+import { isBulletLine, splitEmphasis, stripBullet } from '@/lib/talk/emphasis';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
 import { ApprovalGate } from './ApprovalGate';
@@ -250,7 +251,25 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
       ) : part && /^(https?:\/\/|\/[A-Za-z])/.test(part) ? (
         <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-sky-300 hover:underline" dir="ltr">{part}</a>
       ) : (
-        <span key={i}>{part}</span>
+        <span key={i}>
+          {splitEmphasis(part).map((chunk, j) =>
+            chunk.kind === "bold" ? (
+              <strong key={j} className="font-bold text-white" data-emphasis="bold">
+                {chunk.value}
+              </strong>
+            ) : chunk.kind === "em" ? (
+              <em key={j} data-emphasis="em">
+                {chunk.value}
+              </em>
+            ) : chunk.kind === "code" ? (
+              <code key={j} data-emphasis="code" className="rounded bg-black/40 px-1 py-0.5 text-[12px]" dir="ltr">
+                {chunk.value}
+              </code>
+            ) : (
+              <span key={j}>{chunk.value}</span>
+            )
+          )}
+        </span>
       )
     );
   };
@@ -277,7 +296,7 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
       flushTable();
       if (line.trim() === '') elements.push(<div key={`br-${elements.length}`} className="h-2" />);
       else if (line.trim().startsWith('#')) elements.push(<div key={`h-${elements.length}`} className="font-bold text-white mt-2">{renderInline(line.replace(/^#+\s*/, ''))}</div>);
-      else if (line.trim().startsWith('- ') || line.trim().startsWith('•')) elements.push(<div key={`li-${elements.length}`} className="mr-3">• {renderInline(line.replace(/^[-•]\s*/, ''))}</div>);
+      else if (isBulletLine(line)) elements.push(<div key={`li-${elements.length}`} className="mr-3">• {renderInline(stripBullet(line))}</div>);
       else elements.push(<div key={`p-${elements.length}`} className="whitespace-pre-wrap">{renderInline(line)}</div>);
     }
   });
