@@ -23,13 +23,17 @@ const LIVE_COMPETITORS = `### أين يمكنك البحث؟ (في مصر كمث
 const LIVE_OTHER_COMPANY = `**لو كان سؤالك موجه لشركة معينة شفت إعلانها، يفضل تتواصل معهم عبر صفحتهم الرسمية أو أرقام تليفوناتهم عشان تعرف تفاصيلهم الخاصة.**`;
 
 describe("the bubble prints plain text, so the markdown comes out", () => {
-  it("takes the asterisks and hashes out of the live guide and keeps every word of it", () => {
+  it("takes the asterisks and hashes out of the live guide and keeps its Arabic", () => {
     const plain = plainCustomerReply(LIVE_GUIDE);
     expect(plain).not.toContain("**");
     expect(plain).not.toContain("###");
     expect(plain).not.toMatch(/^\s*\*/m);
-    expect(plain).toContain("الركنة الـ (L-Shape) البسيطة:");
-    expect(plain).toContain("أماكن لشحن الموبايل (USB)");
+    // Re-labelled 2026-10-03: this line used to demand the Latin shape names survive. The owner
+    // surface rule says an Arabic line carries no Latin, and the measurement showed three of six
+    // answers doing exactly that — so the gloss goes and the Arabic sentence around it stays.
+    expect(plain).toContain("الركنة الـ");
+    expect(plain).toContain("تكون بزاويتين فقط");
+    expect(plain).not.toMatch(/L-Shape|U-Shape/);
   });
 
   it("turns a dashed bullet into a dot a phone can print", () => {
@@ -147,5 +151,36 @@ describe("the fast engine no longer answers with no idea whose shop it is in", (
   it("sends a question to the store's full advisor, and knows the Arabic question mark", () => {
     const route = readFileSync("app/api/consultant/route.ts", "utf8");
     expect(route).toContain("!/[?\\u061F]/.test(message)");
+  });
+});
+
+describe("an Arabic line does not carry a Latin gloss", () => {
+  /** Read off the published store 2026-10-03, three of six answers had one of these. */
+  const LIVE_GLOSSES =
+    'أهلاً بك! إليك أهم ما يميز الركن المودرن: 1. الركنة "المنفوخة" (Cloud Sofa): مريحة جداً. 2. الألوان (Trends): الرمادي. 3. اترك مساحة حركة (٩٠ سم) حول الركنة.';
+
+  it("drops the translation and keeps the Arabic and the measurement", () => {
+    const clean = plainCustomerReply(LIVE_GLOSSES);
+    expect(clean).not.toMatch(/\p{Script=Latin}/u);
+    expect(clean).toContain('الركنة "المنفوخة":');
+    expect(clean).toContain("(٩٠ سم)");
+    expect(clean).toContain("الرمادي");
+    expect(clean).not.toMatch(/\(\s*\)/);
+    expect(clean).not.toMatch(/ {2}/);
+  });
+
+  it("leaves an English answer's brackets alone", () => {
+    const en = "The L-shaped corner (best seller) fits a 4 m wall.";
+    expect(plainCustomerReply(en)).toBe(en);
+  });
+
+  it("is idempotent", () => {
+    const once = plainCustomerReply(LIVE_GLOSSES);
+    expect(plainCustomerReply(once)).toBe(once);
+  });
+
+  it("tells both personas not to write it in the first place", () => {
+    const route = readFileSync("app/api/consultant/route.ts", "utf8");
+    expect(route.match(/do not add the English translation in brackets/g)?.length).toBe(2);
   });
 });

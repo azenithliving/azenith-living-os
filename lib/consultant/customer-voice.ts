@@ -55,6 +55,29 @@ export function referralSentences(reply: string): string[] {
 }
 
 /**
+ * Drop a parenthesised Latin gloss from an Arabic line.
+ *
+ * Measured on the published store 2026-10-03: three of six answers carried «الركنة «المنفوخة»
+ * (Cloud Sofa)» and «أحدث الصيحات (Trends)». On a phone reading right-to-left, a Latin run in
+ * the middle of an Arabic sentence scrambles the line for the customer, and the gloss is never
+ * the reason he asked — the Arabic word next to it already says it.
+ *
+ * Only brackets holding Latin go. A bracketed measurement («٩٠ سم»), an Arabic phrase, or a
+ * whole-English reply keeps everything it had.
+ */
+export function dropLatinGlosses(reply: string): string {
+  const text = String(reply ?? "");
+  if (!/\p{Script=Arabic}/u.test(text)) return text;
+  return text
+    .replace(/\(([^()]*)\)/g, (whole, inner: string) => (/\p{Script=Latin}/u.test(inner) ? "" : whole))
+    .replace(/[“"”]\s*[“"”]/g, " ")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/[ \t]+([.,!?؟،:])/g, "$1")
+    .replace(/\(\s*\)/g, "")
+    .trim();
+}
+
+/**
  * Take the markdown out of a reply that will be printed as plain text in a chat bubble.
  *
  * Headings lose their hashes, a bullet becomes a dot, bold and italics keep their words and
@@ -63,7 +86,8 @@ export function referralSentences(reply: string): string[] {
  */
 export function plainCustomerReply(reply: string): string {
   const text = String(reply ?? "");
-  return text
+  return dropLatinGlosses(
+    text
     .replace(/```[\s\S]*?```/g, (block) => block.replace(/`/g, ""))
     .replace(/`([^`]*)`/g, "$1")
     .replace(/^\s{0,3}[-*_]{3,}\s*$/gm, "")
@@ -82,5 +106,6 @@ export function plainCustomerReply(reply: string): string {
     .replace(/[ \t]{2,}/g, " ")
     .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
-    .trim();
+    .trim()
+  );
 }
