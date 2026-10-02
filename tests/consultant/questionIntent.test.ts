@@ -8,6 +8,8 @@ import {
   asksExecution,
   asksFoodNearby,
   asksPrice,
+  asksShowroomVisit,
+  asksWorkingHours,
 } from "@/lib/consultant/question-intent";
 
 /**
@@ -165,5 +167,44 @@ describe("the coverage and execution questions are recognised", () => {
     expect(asksApproximatePrice("ممكن تكلفة تقريبية للركنة؟")).toBe(true);
     expect(asksApproximatePrice("كام تقريباً الشغل في ١٢٠ متر؟")).toBe(true);
     expect(asksApproximatePrice("كام يوم التوريد؟")).toBe(false);
+  });
+});
+
+describe("the showroom question is recognised", () => {
+  /** The live-shaped question that produced Google-Maps advice about somebody else's showroom. */
+  const LIVE_VISIT = "ممكن أزور المعرض أشوف الركنة قبل ما أطلب؟";
+
+  it("reads the question that made the advisor hunt for a showroom that does not exist", () => {
+    expect(asksShowroomVisit(LIVE_VISIT)).toBe(true);
+  });
+
+  it("reads an address question and a do-you-have-one question", () => {
+    expect(asksShowroomVisit("فين عنوان المعرض؟")).toBe(true);
+    expect(asksShowroomVisit("عندكم معرض في التجمع؟")).toBe(true);
+    expect(asksShowroomVisit("المعرض بتاعكم فين؟")).toBe(true);
+  });
+
+  it("does not read a compliment about another showroom as a visit request", () => {
+    expect(asksShowroomVisit("الركنة دي مش هتلاقي زيها في أي معرض تاني")).toBe(false);
+  });
+
+  it("does not read a request to see pictures as a visit request", () => {
+    expect(asksShowroomVisit("ممكن أشوف صور الركنات عندكم؟")).toBe(false);
+    expect(asksShowroomVisit("عايز أعرف عندكم ركن مودرن للصة؟")).toBe(false);
+  });
+});
+
+describe("the opening-hours question is recognised", () => {
+  it("reads the question the advisor answered with its own uptime", () => {
+    expect(asksWorkingHours("انتم شغالين الساعة كام في الأسبوع؟")).toBe(true);
+    expect(asksWorkingHours("مواعيد العمل عندكم إيه؟")).toBe(true);
+    expect(asksWorkingHours("بتقفلوا الساعة كام؟")).toBe(true);
+    expect(asksWorkingHours("إمتى بتشتغلوا؟")).toBe(true);
+  });
+
+  it("does not read a duration or an instalment question as opening hours", () => {
+    expect(asksWorkingHours("الشغل بيستغرق كام أسبوع؟")).toBe(false);
+    expect(asksWorkingHours("بتشتغلوا بالتقسيط؟")).toBe(false);
+    expect(asksWorkingHours("عايز ركنة مودرن للصة")).toBe(false);
   });
 });

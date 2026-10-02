@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { describe, expect, it } from "vitest";
-import { buildCoverageReply, cleanSectionName, storeFactsBlock } from "@/lib/consultant/store-facts";
+import { buildCoverageReply, buildHoursReply, buildShowroomReply, cleanSectionName, storeFactsBlock } from "@/lib/consultant/store-facts";
 
 /** The catalogue's own line names, read off the store's record on 2026-10-02. */
 const LINES = ["الصالات المودرن", "كنب الزوايا", "غرف النوم الرئيسية", "المطابخ الحديثة", "غرف الملابس"];
@@ -30,9 +30,14 @@ describe("the facts block the advisor reads about its own store", () => {
     expect(block).not.toContain("1090819584");
   });
 
+  it("states that there is no showroom, so no customer is invited to one", () => {
+    expect(block).toContain("الدار ملهاش معرض");
+    expect(block).toContain("ما تدعوش عميل يزور معرض");
+    expect(block).toContain("بيتصنّع حسب الطلب");
+  });
+
   it("names the unrecorded things so they are never invented", () => {
-    expect(block).toContain("عنوان معرض");
-    expect(block).toContain("مواعيد عمل");
+    expect(block).toContain("أي سعر جاهز");
     expect(block).toContain("متخترعش");
   });
 
@@ -79,8 +84,55 @@ describe("the advisor's door reads the record live and puts it in the persona", 
 
   it("answers a coverage question from the record instead of from a model", () => {
     expect(route).toContain("asksCoverage(message) || asksExecution(message)");
-    expect(route).toContain("buildCoverageReply(await readStoreFacts(), language)");
+    expect(route).toContain("asksShowroomVisit(message)");
+    expect(route).toContain("buildCoverageReply(facts, language)");
+    expect(route).toContain("buildShowroomReply(facts, language)");
     expect(route).toContain("asksApproximatePrice(latestUserMessage)");
+    expect(route).toContain("asksWorkingHours(message)");
+    expect(route).toContain("buildHoursReply(facts, language)");
+  });
+});
+
+describe("the store's own answer about visiting it", () => {
+  const reply = buildShowroomReply({ whatsappLocal: "1090819584", lines: LINES }, "ar");
+
+  it("says there is no showroom, and offers the real process instead", () => {
+    expect(reply).toContain("ملناش معرض");
+    expect(reply).toContain("بتتصمّم وبتتصنّع حسب الطلب");
+    expect(reply).toContain("مقاسات المكان والستايل");
+    expect(reply).toContain("١٠٩٠٨١٩٥٨٤");
+  });
+
+  it("never points the customer at a map or another shop", () => {
+    expect(reply).not.toMatch(/خرائط|جوجل|شوروم تاني|معرض تاني|أي معرض/);
+    expect(/[A-Za-z]{2,}/.test(reply)).toBe(false);
+  });
+
+  it("answers an English visitor in English", () => {
+    const en = buildShowroomReply({ whatsappLocal: "1090819584", lines: [] }, "en");
+    expect(en).toContain("keeps no showroom");
+    expect(en).toContain("to your measurements");
+  });
+});
+
+describe("the store's own answer about its hours", () => {
+  const HOURS = "مواعيد العمل: كل أيام الأسبوع من ٩ صباحًا حتى ٨ مساءً، ما عدا الجمعة.";
+
+  it("quotes the row the owner wrote, in his words, without the label", () => {
+    const reply = buildHoursReply({ whatsappLocal: "1090819584", lines: [], workingHours: HOURS }, "ar");
+    expect(reply).toContain("كل أيام الأسبوع من ٩ صباحًا حتى ٨ مساءً، ما عدا الجمعة.");
+    expect(reply).not.toMatch(/^مواعيد العمل\s*:/);
+    expect(reply).toContain("واتساب الدار ١٠٩٠٨١٩٥٨٤");
+  });
+
+  it("never answers with a chatbot's uptime", () => {
+    const reply = buildHoursReply({ whatsappLocal: null, lines: [], workingHours: HOURS }, "ar") ?? "";
+    expect(reply).not.toMatch(/24|٢٤|دائمًا|على مدار/);
+  });
+
+  it("leaves the question to the advisor when nothing is recorded, and for an English visitor", () => {
+    expect(buildHoursReply({ whatsappLocal: "1090819584", lines: [], workingHours: null }, "ar")).toBeNull();
+    expect(buildHoursReply({ whatsappLocal: "1090819584", lines: [], workingHours: HOURS }, "en")).toBeNull();
   });
 });
 
@@ -91,6 +143,7 @@ describe("the store's own coverage answer", () => {
     expect(reply).toContain("القاهرة الكبرى");
     expect(reply).toContain("التجمع");
     expect(reply).toContain("فريق الدار نفسه");
+    expect(reply).toContain("وملناش معرض");
     expect(reply).toContain("١٠٩٠٨١٩٥٨٤");
   });
 

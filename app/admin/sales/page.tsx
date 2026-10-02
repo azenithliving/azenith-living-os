@@ -347,7 +347,7 @@ function SalesManagerTab() {
               value={newInstruction}
               onChange={(e) => setNewInstruction(e.target.value)}
               rows={3}
-              placeholder="مثال: معرضنا يقع في التجمع الخامس، شارع التسعين. مواعيد العمل من 10 صباحاً حتى 10 مساءً."
+              placeholder="مثال: مواعيد الرد من ٩ صباحًا حتى ٨ مساءً ما عدا الجمعة، والشغل كله بيتصنّع حسب الطلب على مقاس العميل."
               className="w-full rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3 text-white placeholder:text-white/30 text-sm"
             />
             <button

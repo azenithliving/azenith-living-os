@@ -15,8 +15,10 @@ import {
   asksExecution,
   asksFoodNearby,
   asksPrice,
+  asksShowroomVisit,
+  asksWorkingHours,
 } from "@/lib/consultant/question-intent";
-import { buildCoverageReply, readStoreFacts, storeFactsBlock } from "@/lib/consultant/store-facts";
+import { buildCoverageReply, buildHoursReply, buildShowroomReply, readStoreFacts, storeFactsBlock } from "@/lib/consultant/store-facts";
 import { sendTelegramMessage, broadcastTelegramMessage } from "@/lib/telegram-config";
 import { storeMemory, storeUserPreference, getUserPreferences } from "@/lib/ultimate-agent/memory-store";
 import { LearningEngine } from "@/lib/ultimate-agent/learning-engine";
@@ -745,16 +747,27 @@ export async function POST(
 
     // A question whose answer is a recorded fact gets the fact, not a model's guess. Measured
     // twice on the published store, «who executes and where do you deliver» came back as an
-    // outside consultant's guide to other companies, and prompt facts did not hold it.
-    if (asksCoverage(message) || asksExecution(message)) {
-      const coverageReply = buildCoverageReply(await readStoreFacts(), language);
-      conversationHistory.push({
-        role: "assistant",
-        content: coverageReply,
-        timestamp: new Date().toISOString(),
-      });
-      await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : existingSession?.insights);
-      return NextResponse.json({ reply: coverageReply, sessionId });
+    // outside consultant's guide to other companies, and «can I visit the showroom» came back as
+    // directions to find some other showroom's address — this store has none.
+    const wantsShowroom = asksShowroomVisit(message);
+    const wantsCoverage = !wantsShowroom && (asksCoverage(message) || asksExecution(message));
+    const wantsHours = !wantsShowroom && !wantsCoverage && asksWorkingHours(message);
+    if (wantsShowroom || wantsCoverage || wantsHours) {
+      const facts = await readStoreFacts();
+      const factReply = wantsShowroom
+        ? buildShowroomReply(facts, language)
+        : wantsCoverage
+          ? buildCoverageReply(facts, language)
+          : buildHoursReply(facts, language);
+      if (factReply) {
+        conversationHistory.push({
+          role: "assistant",
+          content: factReply,
+          timestamp: new Date().toISOString(),
+        });
+        await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : existingSession?.insights);
+        return NextResponse.json({ reply: factReply, sessionId });
+      }
     }
 
     // Fetch Cairo weather and date-time context

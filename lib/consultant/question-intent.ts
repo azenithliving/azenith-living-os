@@ -119,7 +119,37 @@ export function asksFoodNearby(message: string): boolean {
   return FOOD_AR.test(text) || FOOD_EN.test(String(message ?? ""));
 }
 
-/** Asking where he is right now — the only question that needs the browser's location. */
+/**
+ * Asking to see the shop in person.
+ *
+ * Measured on the local build 2026-10-02, «ممكن أزور المعرض أشوف الركنة قبل ما أطلب؟» came back
+ * as instructions for finding some other showroom's address on Google Maps — the store has no
+ * showroom at all, the owner says so, and the advisor was sending a buyer to look for one.
+ */
+const SHOWROOM_VISIT =
+  /(?:ازور|أزور|زيارة|عايز اشوف|عايز أشوف|ممكن اشوف|ممكن أشوف|معاينة|عنوان|فين)[^.!؟?\n]{0,20}(?:معرض|معرض|شوروم|showroom)|(?:معرض|شوروم|showroom)[^.!؟?\n]{0,20}(?:عندكم|بتاعكم|بتاعنا|الدار)|(?:عندكم|ليكم)[^.!؟?\n]{0,12}(?:معرض|شوروم)/i;
+
+export function asksShowroomVisit(message: string): boolean {
+  return SHOWROOM_VISIT.test(foldArabic(message));
+}
+
+/**
+ * Asking what time the store is open — a recorded fact, not a chatbot's "always on".
+ *
+ * Spelled the way `foldArabic` leaves the customer's text (الساعه, امتي, النهارده), because a
+ * pattern written in the unfolded shape never matches a folded message — the mistake that made
+ * an earlier net here silent on «إمتى بتشتغلوا؟».
+ */
+const WORKING_HOURS =
+  /(?:مواعيد\s+(?:العمل|الخدمه|الخدمتكم|الشغل)|الساعه\s+كام|من\s+الساعه\s+كام|امت[ىي]\s+(?:بتشتغلوا|شغالين|بتفتحوا|بتقفلوا)|بتفتحوا\s+الساعه|بتقفلوا\s+الساعه|فاتحين\s+(?:لسه|لحد|النهارده|اليوم)|شغالين\s+(?:الساعه|لسه|لحد|امت[ىي]|مت[ىي]))/i;
+
+export function asksWorkingHours(message: string): boolean {
+  return WORKING_HOURS.test(foldArabic(message));
+}
+
+/**
+ * Asking where he is right now — the only question that needs the browser's location.
+ */
 const CURRENT_LOCATION_AR = anyWord("انا فين", "موقعي", "فين حاليا", "مكاني", "أنا فين");
 
 const CURRENT_LOCATION_EN = /\b(?:current location|where am i|my location)\b/i;
