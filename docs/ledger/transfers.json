@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-02T00:40:16.245Z",
+  "generatedAt": "2026-10-02T02:00:30.087Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,9 +7,9 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 463,
+    "not-moved": 465,
     "moved": 6,
-    "moving": 1,
+    "moving": 3,
     "erased": 1
   },
   "rows": [
@@ -344,6 +344,13 @@
       "kind": "admin-door",
       "atom": "app/api/admin/command/route.ts",
       "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/customers/dossier/route.ts",
+      "state": "moving",
+      "phase": "M2",
+      "when": "2026-10-02"
     },
     {
       "kind": "admin-door",
@@ -945,12 +952,22 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/cad/dossier.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/cad/paper-sketch-parser.ts",
       "state": "not-moved"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/passport.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/cad/sheet-images.ts",
       "state": "not-moved"
     },
     {
@@ -1627,6 +1644,13 @@
       "kind": "furniture",
       "atom": "components/admin/browser/AskQayyimAboutPage.tsx",
       "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/ClientPreCallDossier.tsx",
+      "state": "moving",
+      "phase": "M2",
+      "when": "2026-10-02"
     },
     {
       "kind": "furniture",

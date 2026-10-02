@@ -6,13 +6,15 @@
  * The owner's word on ٣٠ سبتمبر: the office's body is the sales agent himself — the
  * same shape, the same style and the same way of using him he built — and everything
  * else about selling sits under him. So this page opens with his face: one voice he
- * speaks into, and under it his desk, which is the customer ledger counted by the one
- * shared rule. The money, the orders, the warehouse and the workshop are outside the
- * store's trade and are not on this page.
+ * speaks into, then the file he reads before he dials a customer, and under it his
+ * desk, which is the customer ledger counted by the one shared rule. The money, the
+ * orders, the warehouse and the workshop are outside the store's trade and are not on
+ * this page.
  */
 import { Suspense } from "react";
 import { Briefcase } from "lucide-react";
 import { ChatPanel } from "@/components/admin/agents/ChatPanel";
+import ClientPreCallDossier from "@/components/admin/ClientPreCallDossier";
 import CustomersPanel from "@/components/admin/sales/CustomersPanel";
 
 export default function V2SalesPage() {
@@ -32,6 +34,9 @@ export default function V2SalesPage() {
       <div className="max-w-[1600px] mx-auto px-4 py-6 space-y-6">
         <section>
           <ChatPanel agentKey="vanguard" agentName="مدير المبيعات" swipeable />
+        </section>
+        <section>
+          <ClientPreCallDossier />
         </section>
         <section>
           <Suspense fallback={<p className="text-sm text-white/40 p-8">جاري تحميل كشف العملاء...</p>}>

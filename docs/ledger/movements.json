@@ -36,6 +36,18 @@
       "proof": "built on the new surface, not carried from the old house: it reads the people list from the customers door (the same reading the customers screen uses), stores the roll's own key on the paper, and was measured pressing it on the published site — one candidate from four digits, the name on the chip after a reload, and the paper returned to «من غير صاحب»"
     },
     {
+      "atom": "components/admin/ClientPreCallDossier.tsx",
+      "state": "moving",
+      "phase": "M2",
+      "when": "2026-10-02"
+    },
+    {
+      "atom": "app/api/admin/customers/dossier/route.ts",
+      "state": "moving",
+      "phase": "M2",
+      "when": "2026-10-02"
+    },
+    {
       "atom": "app/admin/v2/sketches/page.tsx",
       "state": "moved",
       "phase": "M2",

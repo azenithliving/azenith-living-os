@@ -130,7 +130,7 @@ export const OFFICE_RULES: OfficeRule[] = [
 
   // Service doors, grouped by their first path segment under /api/admin.
   { match: /^app\/api\/admin\/(ops|agents|assistant|mastermind)\//, office: "swarm-house", reason: "أبواب السرب" },
-  { match: /^app\/api\/admin\/(sales|leads|tenants|bookings|channels|whatsapp)\//, office: "sales-office", reason: "أبواب العملاء والطلبات" },
+  { match: /^app\/api\/admin\/(sales|leads|customers|tenants|bookings|channels|whatsapp)\//, office: "sales-office", reason: "أبواب العملاء والطلبات" },
   { match: /^app\/api\/admin\/elite\//, office: "elite-room", reason: "أبواب النخبة" },
   { match: /^app\/api\/admin\/(browser|computer|phone|sandbox|automation|simulate-scenario)\//, office: "workshop", reason: "أبواب التجربة" },
   { match: /^app\/api\/admin\/(tasks|decisions|audit|telemetry|work)\//, office: "records-office", reason: "أبواب السجلات والقرارات" },
@@ -228,6 +228,7 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "components/admin/CockpitDoors.tsx", office: "decision-desk", status: "moved", reason: "بابا الكابينة في القائمة الجانبية: قرارات مستنية كلمتك بعددها الحيّ، والإيقاف الفوري" },
   { id: "app/admin/v2/sketches/page.tsx", office: "paper-desk", status: "moved", reason: "طاولة الورق: التصوير والحفظ والقراءة والسجل والربط بصاحب الورقة من الدفتر — كلها شغالة على العنوان الجديد" },
   { id: "components/admin/sketches/SketchOwner.tsx", office: "paper-desk", status: "moved", reason: "مين صاحب الورقة: بحث في دفتر العملاء نفسه، والمفتاح المخزن هو مفتاح الدفتر مش نسخة من اسمه" },
+  { id: "components/admin/ClientPreCallDossier.tsx", office: "sales-office", status: "moving", reason: "الملف الذهبي قبل المكالمة: الدفتر + ورقاته + ألوان البنك، واللي المتجر ما يعرفوش عنه يتقال صراحة" },
   { id: "app/admin/v2/keys/page.tsx", office: "key-desk", status: "moving", reason: "مكتب المفاتيح: قايمة النماذج المجانية وعدد المفاتيح اللي بيجاوب فعلًا وخطوات جيب المفتاح" },
   { id: "app/api/admin/keys/desk/route.ts", office: "key-desk", status: "moving", reason: "بوّابة المكتب: بتقرأ السجل وبتسأل كل مزود عن مفاتيحه في دفعة محدودة" },
   { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "pending", reason: "الإعدادات" },

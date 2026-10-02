@@ -21,6 +21,18 @@ async function read(client: Client, table: string, columns: string) {
 const str = (v: unknown) => (typeof v === "string" ? v : typeof v === "number" ? String(v) : null);
 const at = (row: Record<string, unknown>) => str(row.updated_at) ?? str(row.created_at);
 
+/**
+ * What he was looking at, read off the profile that carries him. A space with nothing to
+ * say about it stays null — the dossier prints «مفيش» instead of inventing a taste.
+ */
+function lookingOf(base: Record<string, unknown>, row: Record<string, unknown> = {}) {
+  const roomType = str(base.room_type) ?? str(row.room_type);
+  const style = str(base.style) ?? str(row.style);
+  const serviceType = str(base.service_type) ?? str(row.service_type);
+  const lastPage = str(base.last_page) ?? str(row.last_page);
+  return roomType || style || serviceType || lastPage ? { roomType, style, serviceType, lastPage } : null;
+}
+
 /** A flag is not an amount: `deposit_paid` says whether the deposit arrived, `deposit_amount` says how much. */
 const money = (v: unknown): number => {
   const n = typeof v === "number" ? v : Number(v);
@@ -44,7 +56,7 @@ export type CustomersRead = {
 
 export async function readCustomers(client: Client): Promise<CustomersRead> {
   const [profiles, sessions, quotes, forms, orders, appointments, conversions] = await Promise.all([
-    read(client, "users", "id,session_id,full_name,email,phone,tier,budget,intent,score,updated_at,created_at"),
+    read(client, "users", "id,session_id,full_name,email,phone,tier,budget,intent,score,room_type,style,service_type,last_page,updated_at,created_at"),
     read(client, "consultant_sessions", "id,session_id,updated_at,created_at"),
     read(client, "requests", "id,user_id,budget,price,paid,updated_at,created_at"),
     read(client, "leads", "id,name,email,phone,status,updated_at,created_at"),
@@ -90,6 +102,7 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
       budget: str(row.budget) ?? str(base.budget),
       intent: str(row.intent) ?? str(base.intent),
       score: (row.score ?? base.score ?? null) as number | string | null,
+      looking: lookingOf(base, row),
       price: (row.total_amount ?? row.price ?? null) as number | string | null,
       paid: (row.deposit_paid ?? row.paid ?? null) as number | string | null,
     });
@@ -124,6 +137,7 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
       budget: str(owner.budget),
       price: money(o.total_amount),
       paid,
+      looking: lookingOf(owner, o),
     });
   }
   for (const b of appointments.rows) push("appointment", b, byUserId.get(String(b.user_id ?? "")));

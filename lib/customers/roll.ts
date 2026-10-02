@@ -36,6 +36,19 @@ export type RawRow = {
   budget?: string | null;
   intent?: string | null;
   score?: number | string | null;
+  /**
+   * What he was looking at, in his own words on the site: the room, the style, when he
+   * wants it, and the last page he stood on. This is the difference between a phone number
+   * and a caller — and it is stored, not modelled.
+   */
+  looking?: Looking | null;
+};
+
+export type Looking = {
+  roomType: string | null;
+  style: string | null;
+  serviceType: string | null;
+  lastPage: string | null;
 };
 
 export type CustomerRow = {
@@ -48,6 +61,8 @@ export type CustomerRow = {
   budget: string | null;
   intent: string | null;
   score: number | null;
+  /** The browsing the store kept about him — the first profile row that carried any. */
+  looking: Looking | null;
   spaces: Space[];
   /** The conversations that belong to this human, newest unknown until the door reads them. */
   sessions: string[];
@@ -102,6 +117,7 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
         tier: asTier(row.tier),
         budget: row.budget ?? null,
         intent: row.intent ?? null,
+        looking: row.looking ?? null,
         score: row.score == null ? null : num(row.score),
         spaces: [],
         sessions: [],
@@ -123,6 +139,7 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
     line.email = line.email ?? row.email?.trim() ?? null;
     line.budget = line.budget ?? row.budget ?? null;
     line.intent = line.intent ?? row.intent ?? null;
+    if (!line.looking && row.looking) line.looking = row.looking;
     if (line.score === null && row.score != null) line.score = num(row.score);
     const tier = asTier(row.tier);
     if (tier && (!line.tier || TIER_STRENGTH[tier] > TIER_STRENGTH[line.tier])) line.tier = tier;
@@ -144,7 +161,7 @@ export function rollCustomers(rows: RawRow[], now: Date = new Date()): CustomerR
   lines.sort((a, b) => (b.hoursSince ?? -1) - (a.hoursSince ?? -1));
   if (anonymous > 0) lines.push({
     key: "anonymous", kind: "none", name: null, phone: null, email: null, tier: null, budget: null,
-    intent: null, score: null, spaces: [], sessions: [], profileIds: [], money: { quoted: 0, paid: 0 }, lastTouch: null, hoursSince: null,
+    intent: null, looking: null, score: null, spaces: [], sessions: [], profileIds: [], money: { quoted: 0, paid: 0 }, lastTouch: null, hoursSince: null,
     freshness: { key: "unknown", label: "بدون تاريخ" }, needsReply: false, anonymous,
   });
   return lines;

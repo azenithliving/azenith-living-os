@@ -15,7 +15,7 @@
 import { foldArabic } from "@/lib/arabic";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
-export type SheetImage = { url: string; thumb: string; style: string | null; roomType: string };
+export type SheetImage = { url: string; thumb: string; style: string | null; roomType: string; color: string | null };
 
 /** The seven types the bank actually holds, in the order the sheet prefers them. */
 const ROOM_TYPES = [
@@ -81,7 +81,7 @@ export async function pickSheetImages(
 
   const { data, error } = await supabase
     .from("curated_images")
-    .select("url,thumbnail_url,style,room_type")
+    .select("url,thumbnail_url,style,room_type,metadata")
     .eq("room_type", roomType)
     .eq("is_active", true)
     .not("url", "is", null)
@@ -97,6 +97,9 @@ export async function pickSheetImages(
       thumb: typeof row.thumbnail_url === "string" && row.thumbnail_url ? String(row.thumbnail_url) : String(row.url),
       style: row.style ? String(row.style) : null,
       roomType: String(row.room_type),
+      // The bank stores the dominant colour of every picture — that is what lets the
+      // dossier show the palette a room is actually made of instead of a mood word.
+      color: typeof row.metadata?.avg_color === "string" ? String(row.metadata.avg_color) : null,
     }));
 
   return { images, roomType, matched: Boolean(wanted) };
