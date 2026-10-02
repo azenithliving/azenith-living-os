@@ -97,7 +97,10 @@ Return JSON ONLY with these string fields (all in Egyptian Arabic):
 Rules: علم نفس واقعي لا مبالغة، لا تخترع بيانات غير موجودة، كل الحقول إلزامية.`;
 
     const answer = await askWithFloor("customer-analysis", [{ role: "user", content: prompt }], {
-      maxTokens: 700,
+      // Seven Arabic fields do not fit in 700 tokens: measured on the published site the night
+      // this was wired, a key answered and the reply arrived cut off, which is unparseable and
+      // therefore indistinguishable from silence unless the budget is honest.
+      maxTokens: 1400,
       temperature: 0.5,
       jsonMode: true,
     });
@@ -107,12 +110,15 @@ Rules: علم نفس واقعي لا مبالغة، لا تخترع بيانات
       return NextResponse.json({ profile: parsed, generated: true, answered_by: answeredByLabel(answer.provider) });
     }
 
-    // No model, or a model that answered with something unreadable: the radar's own counts stay
-    // on the screen, and the note says which of the two happened.
+    // Two different news, and the label has to carry which one: a key that spoke and was not
+    // understood is not a key that was absent.
     const note = answer.ok
       ? "النموذج ردّ بردّ ما كانش مقروء — اللي ظاهر هنا حساب الرادار."
       : answer.floorLine;
-    return NextResponse.json({ profile: buildFallback(body, note), generated: false, answered_by: "قواعد المتجر — من غير مفتاح" });
+    const answeredBy = answer.ok
+      ? "نموذج من مفاتيحك ردّ، والظاهر هنا حساب الرادار"
+      : "قواعد المتجر — من غير مفتاح";
+    return NextResponse.json({ profile: buildFallback(body, note), generated: false, answered_by: answeredBy });
   } catch (error) {
     // The floor is also the last resort when this door itself breaks: an English status code is
     // not an answer a man reads.

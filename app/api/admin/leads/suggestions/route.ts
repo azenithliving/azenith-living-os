@@ -76,9 +76,15 @@ ${recentMessages || "No messages yet"}`;
     });
 
     const suggestions = answer.ok ? parseSuggestions(answer.content) : [];
+    // A key that spoke and was not understood is not a key that was absent — the label says which.
+    const answeredBy = suggestions.length > 0
+      ? answeredByLabel(answer.provider)
+      : answer.ok
+        ? "نموذج من مفاتيحك ردّ بردّ غير مقروء — الظاهر قوالب المحل"
+        : "قوالب المحل الجاهزة — من غير مفتاح";
     return NextResponse.json({
       suggestions: suggestions.length > 0 ? suggestions : fallbackSuggestions(lead),
-      answered_by: suggestions.length > 0 ? answeredByLabel(answer.provider) : "قوالب المحل الجاهزة — من غير مفتاح",
+      answered_by: answeredBy,
       note: suggestions.length > 0 || !answer.reason ? null : answer.floorLine,
     });
   } catch (error) {

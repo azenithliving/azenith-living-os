@@ -76,6 +76,20 @@ describe("the model doors fall to a floor, not to machine prose", () => {
     }
   });
 
+  it("tells a key that spoke from a key that was absent", () => {
+    // Measured the night of the wiring: a key answered the deep analysis and the reply arrived
+    // cut off. Printing «من غير مفتاح» over that is a lie about his own capacity.
+    for (const file of [
+      "app/api/admin/leads/analyze/route.ts",
+      "app/api/admin/leads/suggestions/route.ts",
+    ]) {
+      const src = readFileSync(file, "utf8");
+      expect(src, file).toContain("مقروء");
+      expect(src, file).toContain("من غير مفتاح");
+    }
+    expect(readFileSync("app/api/admin/leads/analyze/route.ts", "utf8")).toContain("maxTokens: 1400");
+  });
+
   it("keeps the picture door inside the store's own ceiling", () => {
     const src = readFileSync("app/api/ai/analyze-vision/route.ts", "utf8");
     expect(src).toContain("modelFloorLine");
