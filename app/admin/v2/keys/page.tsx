@@ -61,6 +61,9 @@ export default function V2KeysDeskPage() {
   const [problem, setProblem] = useState<string | null>(null);
   const [checking, setChecking] = useState<string | null>(null);
   const [news, setNews] = useState<string | null>(null);
+  const [picked, setPicked] = useState('groq');
+  const [draft, setDraft] = useState('');
+  const [adding, setAdding] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -94,9 +97,9 @@ export default function V2KeysDeskPage() {
         if (!res.ok || data?.success === false) throw new Error(data?.error || `الخادم ردّ بـ ${res.status}`);
         const states = data.states ?? {};
         setNews(
-          `سألنا ${arNum(data.checked)} مفتاح: بيجاوب ${arNum(states.alive ?? 0)} · سقفه خلص ${arNum(states.quota ?? 0)} · مرفوض ${arNum(
-            states.refused ?? 0
-          )} · ما ردّش ${arNum(states.unreachable ?? 0)}`
+          `سألنا ${arNum(data.checked)} مفتاح: كتب فعلًا ${arNum(states.writes ?? 0)} · بيرد على التحية ${arNum(states.alive ?? 0)} · سقفه خلص ${arNum(
+            states.quota ?? 0
+          )} · بلا رصيد ${arNum(states.unfunded ?? 0)} · مرفوض ${arNum(states.refused ?? 0)}`
         );
         if (Array.isArray(data.providers)) setRows(data.providers);
       } catch (error) {
@@ -107,6 +110,33 @@ export default function V2KeysDeskPage() {
     },
     []
   );
+
+  /**
+   * He said he will bring more keys himself. So the desk takes one, and the answer he gets is
+   * not «saved» — it is whether this key writes, because a saved key that cannot write is the
+   * exact thing the last hour proved a desk must not pretend about.
+   */
+  const addKey = useCallback(async () => {
+    if (adding) return;
+    setAdding(true);
+    setNews(null);
+    try {
+      const res = await fetch('/api/admin/keys/desk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add', provider: picked, key: draft }),
+      });
+      const data = await res.json();
+      if (!res.ok || data?.success === false) throw new Error(data?.error || `الخادم ردّ بـ ${res.status}`);
+      setNews(data.message);
+      setDraft('');
+      if (Array.isArray(data.providers)) setRows(data.providers);
+    } catch (error) {
+      setNews(String((error as Error)?.message ?? error));
+    } finally {
+      setAdding(false);
+    }
+  }, [adding, draft, picked]);
 
   return (
     <div className="min-h-[70vh] p-4 pt-16 sm:p-6 sm:pt-8" dir="rtl">
@@ -128,6 +158,48 @@ export default function V2KeysDeskPage() {
         {problem && <p className="mt-2 text-[11px] text-rose-300">{problem}</p>}
         {news && <p className="mt-2 text-[11px] text-emerald-300" data-key-news>{news}</p>}
       </header>
+
+      {/* He said he will keep bringing keys himself. This is where he hands one over, and the
+          line that comes back is the provider's answer, not a «saved» that hides it. */}
+      <section className="mb-4 rounded-2xl border border-amber-500/20 bg-amber-500/[0.04] p-3" data-key-add>
+        <h2 className="text-[12px] font-black text-amber-200">أضف مفتاح جبتّه دلوقتي</h2>
+        <p className="mt-1 text-[10px] leading-relaxed text-white/45">
+          المتجر بيسأل المفتاح سؤالين: المزود بيعرفك؟ وبتكتب رد فعليًا؟ التاني هو اللي بيحدّد لو هيتستخدم.
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <select
+            value={picked}
+            onChange={(e) => setPicked(e.target.value)}
+            className="rounded-xl border border-white/10 bg-black/40 px-2.5 py-2 text-[12px] text-white focus:border-amber-500/40 focus:outline-none"
+            data-key-provider
+          >
+            {(rows ?? []).map((row) => (
+              <option key={row.id} value={row.id}>
+                {row.label}
+              </option>
+            ))}
+          </select>
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="الصق المفتاح"
+            dir="ltr"
+            type="password"
+            autoComplete="off"
+            spellCheck={false}
+            className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-right text-[12px] text-white placeholder-white/25 focus:border-amber-500/40 focus:outline-none"
+            data-key-input
+          />
+          <button
+            onClick={addKey}
+            disabled={adding || draft.trim().length < 12 || !picked}
+            className="rounded-xl border border-amber-500/30 bg-amber-500/20 px-3 py-2 text-[12px] font-black text-amber-200 disabled:opacity-40"
+            data-key-add-submit
+          >
+            {adding ? 'بأسأل المزود…' : 'أضف وتحقّق'}
+          </button>
+        </div>
+      </section>
 
       {!rows && !problem && <p className="text-[12px] text-white/45">بجيب قايمة المزودات…</p>}
 

@@ -28,8 +28,11 @@ type AIProvider =
 
 const CONFIG = {
   // === The Absolute Best Models on the Market ===
-  GROQ_MODEL: "llama-3.3-70b-versatile", // Blazing fast, top tier open source
+  GROQ_MODEL: process.env.GROQ_MODEL || "openai/gpt-oss-120b", // on his account's own list; llama-3.3-70b came back «no access»
   OPENROUTER_VISION_MODEL: "anthropic/claude-opus-5", // Best vision model
+  // A free route on purpose: this provider answers with a paid-only name when the account
+  // has no credit, and the request then fails as «unavailable for free».
+  OPENROUTER_MODEL: process.env.OPENROUTER_MODEL || "apodex/apodex-1.1-mini:free",
   MISTRAL_CODE_MODEL: "codestral-latest",
   MISTRAL_GENERAL_MODEL: "mistral-large-latest",
   DEEPSEEK_MODEL: "deepseek-v4-flash", // DeepSeek V4 Flash (excellent logic, fast)
@@ -65,7 +68,7 @@ const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(r
 // Provider-specific fetch with retry logic
 async function fetchWithRetry<T>(
   provider: AIProvider,
-  fetchFn: (key: string) => Promise<Response>,
+  fetchFn: (key: string, model: string | null) => Promise<Response>,
   parseFn: (data: any) => T
 ): Promise<{ success: true; data: T } | { success: false; error: string; status?: number }> {
   const requestId = `retry_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -80,11 +83,13 @@ async function fetchWithRetry<T>(
       return { success: false, error: NO_KEY_MESSAGE };
     }
 
-    const { key } = keyData;
+    // The key carries the model its own account is allowed to use; a name we remembered
+    // is only a fallback, because a stale name fails every request to that provider.
+    const { key, model: keyModel } = keyData;
     const keyPrefix = `${key.substring(0, 8)}...`;
     
     try {
-      const response = await fetchFn(key);
+      const response = await fetchFn(key, keyModel ?? null);
       
       if (!response.ok) {
         const status = response.status;
@@ -170,13 +175,16 @@ export async function askGroqMessages(
 
   const result = await fetchWithRetry(
     "groq",
-    (key) => fetch("https://api.groq.com/openai/v1/chat/completions", {
+    (key, keyModel) => fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      // The key's own model wins: measured with the owner's new key, the name this file used
+      // to send comes back «does not exist or you do not have access», while the account
+      // writes fine with what it lists for itself.
+      body: JSON.stringify({ ...body, model: options?.model || keyModel || CONFIG.GROQ_MODEL }),
     }),
     (data) => data.choices?.[0]?.message?.content || ""
   );
@@ -214,7 +222,7 @@ export async function askOpenRouter(prompt: string, imageUrl?: string, options?:
 
   const result = await fetchWithRetry(
     "openrouter",
-    (key) => fetch("https://openrouter.ai/api/v1/chat/completions", {
+    (key, keyModel) => fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${key}`,
@@ -223,7 +231,7 @@ export async function askOpenRouter(prompt: string, imageUrl?: string, options?:
         "X-Title": "Azenith Living",
       },
       body: JSON.stringify({
-        model: options?.model || CONFIG.OPENROUTER_VISION_MODEL,
+        model: options?.model || keyModel || CONFIG.OPENROUTER_MODEL,
         messages,
         temperature: options?.temperature ?? 0.7,
         max_tokens: options?.maxTokens ?? 2048,

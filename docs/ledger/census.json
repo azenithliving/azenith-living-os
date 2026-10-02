@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-01T23:41:00.847Z",
+  "generatedAt": "2026-10-02T00:40:16.242Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
     "newPages": 13,
-    "newPageLines": 1089,
+    "newPageLines": 1161,
     "adminDoors": 117,
     "allDoors": 196,
     "outsideDoors": 8,
@@ -12,7 +12,7 @@
     "rootLibFiles": 264,
     "rootLibUsed": 70,
     "orphanDoors": 71,
-    "rootLibUsedLines": 27138,
+    "rootLibUsedLines": 27149,
     "furnitureFiles": 54,
     "furnitureLines": 14934,
     "furnitureUsedByBoth": 6,
@@ -21,7 +21,7 @@
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 63,
-    "swarmFileLines": 14801,
+    "swarmFileLines": 14860,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
@@ -140,7 +140,7 @@
     {
       "kind": "new-page",
       "id": "app/admin/v2/keys/page.tsx",
-      "lines": 192
+      "lines": 264
     },
     {
       "kind": "new-page",
@@ -956,7 +956,7 @@
     {
       "kind": "root-lib",
       "id": "lib/ai-orchestrator.ts",
-      "lines": 940,
+      "lines": 948,
       "callers": 10
     },
     {
@@ -968,7 +968,7 @@
     {
       "kind": "root-lib",
       "id": "lib/api-keys-service.ts",
-      "lines": 684,
+      "lines": 687,
       "callers": 5
     },
     {
@@ -2052,7 +2052,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/key-verify.ts",
-      "lines": 197
+      "lines": 256
     },
     {
       "kind": "swarm-file",

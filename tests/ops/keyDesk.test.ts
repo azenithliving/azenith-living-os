@@ -118,3 +118,35 @@ describe("no provider disappears from the desk without a reason", () => {
     }
   });
 });
+
+describe("adding a key from the desk", () => {
+  const door = () => readFileSync("app/api/admin/keys/desk/route.ts", "utf8");
+  const screen = () => readFileSync("app/admin/v2/keys/page.tsx", "utf8");
+
+  it("asks the two questions and never echoes the key back", () => {
+    const source = door();
+    expect(source).toMatch(/action === "add"/);
+    expect(source).toMatch(/verifyKey\(provider, keyValue\)/);
+    expect(source).toMatch(/verifyWrites\(provider, keyValue\)/);
+    // What the answer may carry: the provider, the verdict, his language. Never the key.
+    expect(source).not.toMatch(/json\(\{[^)]{0,400}\bkey:\s*keyValue/);
+    expect(source).toMatch(/write_model/);
+  });
+
+  it("gives him the field, the provider list and the answer line", () => {
+    const page = screen();
+    expect(page).toMatch(/data-key-add/);
+    expect(page).toMatch(/data-key-provider/);
+    expect(page).toMatch(/data-key-input/);
+    expect(page).toMatch(/أضف وتحقّق/);
+    // The screen must not show the pasted key as plain text once typed — it is a password field.
+    expect(page).toMatch(/type=["']password["']|autoComplete=["']off["']/);
+  });
+
+  it("does not conclude anything from a provider that did not answer", () => {
+    // An absence of evidence is not a dead key: the verdict helper returns null and the row
+    // is left alone, or the desk would kill working keys on a network blip.
+    expect(door()).toMatch(/if \(!verdict\) continue;/);
+    expect(door()).toMatch(/return null;/);
+  });
+});

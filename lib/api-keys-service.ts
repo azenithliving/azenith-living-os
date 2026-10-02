@@ -55,6 +55,8 @@ interface KeyState {
    * or null (nobody has asked it yet).
    */
   checkState?: string | null;
+  /** The model this key answered with — its account's list, not our guess. */
+  model?: string | null;
 }
 
 const keyStates: Record<string, KeyState[]> = {
@@ -98,7 +100,7 @@ export async function loadKeysFromDB(): Promise<void> {
 
     const { data, error } = await supabase
       .from("api_keys")
-      .select("provider, key, cooldown_until, total_requests, last_used_at, last_error, error_count, is_active, is_backup, check_state");
+      .select("provider, key, cooldown_until, total_requests, last_used_at, last_error, error_count, is_active, is_backup, check_state, write_model");
 
     if (error) {
       console.error("[API Keys Service] Failed to load keys from DB:", error);
@@ -138,6 +140,7 @@ export async function loadKeysFromDB(): Promise<void> {
         isDead:        false,
         lastError:     row.last_error || null,
         checkState:    row.check_state ?? null,
+        model:         row.write_model ?? null,
       });
     }
 
@@ -235,7 +238,7 @@ export function keylessDrillOn(): boolean {
  */
 export async function getNextAvailableKey(
   provider: ApiKeyProvider
-): Promise<{ key: string; index: number } | null> {
+): Promise<{ key: string; index: number; model: string | null } | null> {
   if (keylessDrillOn()) return null;
   if (!keysLoaded || (Date.now() - lastLoadTime > RELOAD_INTERVAL_MS)) {
     await loadKeysFromDB();
@@ -271,14 +274,14 @@ export async function getNextAvailableKey(
     keyEntry.totalRequests++;
     keyEntry.lastUsedAt = new Date();
 
-    return { key: keyEntry.key, index: currentIndex };
+    return { key: keyEntry.key, index: currentIndex, model: keyEntry.model ?? null };
   }
 
   // All keys in cooldown or dead - try to find any non-dead key
   const firstNonDead = pool.find(k => !k.isDead);
   if (firstNonDead) {
     keyIndices[provider] = (startIndex + 1) % pool.length;
-    return { key: firstNonDead.key, index: pool.indexOf(firstNonDead) };
+    return { key: firstNonDead.key, index: pool.indexOf(firstNonDead), model: firstNonDead.model ?? null };
   }
 
   return null; // No usable keys available
