@@ -172,6 +172,15 @@ export function keyDeskGuide(id: string): KeyDeskProvider | null {
 }
 
 /**
+ * Who answered a request, in the words a surface prints. A provider id is a machine name and
+ * never reaches the owner; an unknown one is left unnamed rather than shown raw.
+ */
+export function answeredByLabel(provider: string | null | undefined): string {
+  const named = provider ? keyDeskGuide(provider)?.label : null;
+  return named ? `نموذج من مفاتيحك — ${named}` : "نموذج من مفاتيحك";
+}
+
+/**
  * What one row of the desk means to the owner, in the words the screen prints.
  *
  * Two different facts were being collapsed into one: a key that returns its model list, and a

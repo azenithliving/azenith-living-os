@@ -153,6 +153,12 @@ export const PROTECTED_PATHS = [
 export const SENSITIVE_PATHS = [
   "/api/content-generator",
   "/api/enhance-image",
+  /**
+   * A picture door a stranger can open without an account. It was measured answering with no
+   * limit headers at all, which on a key pool means: whoever finds the address decides how fast
+   * the owner's free ceilings are spent.
+   */
+  "/api/ai/analyze-vision",
 ];
 
 /**

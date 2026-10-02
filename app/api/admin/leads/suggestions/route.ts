@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { askGroq } from "@/lib/ai-orchestrator";
+import { askWithFloor } from "@/lib/ai-orchestrator";
 import { requireAdminApi } from "@/lib/admin-api-guard";
+import { answeredByLabel } from "@/lib/ops/key-desk";
 
 interface LeadContext {
   name?: string;
@@ -68,18 +69,26 @@ Hovered elements: ${(lead.telemetry?.hovered_elements || []).join(", ") || "none
 Recent conversation:
 ${recentMessages || "No messages yet"}`;
 
-    const result = await askGroq(prompt, {
+    const answer = await askWithFloor("customer-analysis", [{ role: "user", content: prompt }], {
       maxTokens: 800,
       temperature: 0.35,
       jsonMode: true,
     });
 
-    const suggestions = result.success ? parseSuggestions(result.content) : [];
+    const suggestions = answer.ok ? parseSuggestions(answer.content) : [];
     return NextResponse.json({
       suggestions: suggestions.length > 0 ? suggestions : fallbackSuggestions(lead),
+      answered_by: suggestions.length > 0 ? answeredByLabel(answer.provider) : "قوالب المحل الجاهزة — من غير مفتاح",
+      note: suggestions.length > 0 || !answer.reason ? null : answer.floorLine,
     });
   } catch (error) {
+    // A door that cannot answer still hands over the three sentences it always could.
     console.error("[LeadSuggestions] Error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const lead = {} as LeadContext;
+    return NextResponse.json({
+      suggestions: fallbackSuggestions(lead),
+      answered_by: "قوالب المحل الجاهزة — من غير مفتاح",
+      note: "الباب ما قدرش يوصل للنموذج — اللي ظاهر هنا قوالب ثابتة.",
+    });
   }
 }

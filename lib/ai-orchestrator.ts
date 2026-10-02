@@ -6,7 +6,7 @@
 import { runMastermind } from "./mastermind-graph";
 import { routeRequest, getBestModelForTask } from "./openrouter-service";
 import { getNextAvailableKey, setKeyCooldown, incrementKeyUsage, getKeyStats } from "./api-keys-service";
-import { ALL_PROVIDERS_MESSAGE, NO_KEY_MESSAGE } from "@/lib/ops/capability-tiers";
+import { ALL_PROVIDERS_MESSAGE, NO_KEY_MESSAGE, modelFloorLine, modelFailureReason, type ModelFailureReason } from "@/lib/ops/capability-tiers";
 
 type AIProvider =
   | "groq"
@@ -657,7 +657,7 @@ export async function askGoogleMessages(messages: Array<{ role: string; content:
 export async function askOrchestratorMessages(
   messages: Array<{ role: string; content: string }>,
   options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
-): Promise<{ success: boolean; content: string; error?: string }> {
+): Promise<{ success: boolean; content: string; error?: string; provider?: string }> {
   
   const providersToTry = [
     process.env.DEFAULT_AI_PROVIDER || "groq",
@@ -729,7 +729,9 @@ export async function askOrchestratorMessages(
 
       if (result.success && result.content && result.content.trim().length > 0) {
         console.log(`[Orchestrator] ✅ Success with ${provider}`);
-        return result;
+        // Who answered travels with the answer. A surface that cannot say which tier spoke
+        // cannot say what it is standing on when the next key dies.
+        return { ...result, provider };
       } else {
         console.warn(`[Orchestrator] ⚠️ Provider ${provider} failed or returned empty content. Trying next...`);
       }
@@ -739,6 +741,44 @@ export async function askOrchestratorMessages(
   }
 
   return { success: false, content: "", error: ALL_PROVIDERS_MESSAGE };
+}
+
+/** What a floor-aware caller gets back: the answer, and who produced it. */
+export type FlooredAnswer = {
+  ok: boolean;
+  content: string;
+  /** "model" = one of his keys answered. "floor" = the store's own rules answer instead. */
+  answeredBy: "model" | "floor";
+  provider: string | null;
+  reason: ModelFailureReason | null;
+  /** Arabic, always present when `answeredBy` is "floor" — never a raw provider string. */
+  floorLine: string;
+};
+
+/**
+ * Ask the whole chain, and fall to the capability's floor when none of it answers.
+ *
+ * This exists because a door that calls one provider by name dies with that provider's key,
+ * and a door whose catch block prints `error.message` prints English machine prose to a man who
+ * reads Arabic. One call gets the chain, the reason, and the line the owner can act on.
+ */
+export async function askWithFloor(
+  capabilityId: string,
+  messages: Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number; maxTokens?: number; jsonMode?: boolean }
+): Promise<FlooredAnswer> {
+  let error: string | undefined;
+  try {
+    const result = await askOrchestratorMessages(messages, options);
+    if (result.success && result.content?.trim()) {
+      return { ok: true, content: result.content, answeredBy: "model", provider: result.provider ?? null, reason: null, floorLine: "" };
+    }
+    error = result.error;
+  } catch (thrown: any) {
+    error = String(thrown?.message ?? thrown);
+  }
+  const reason = modelFailureReason(error);
+  return { ok: false, content: "", answeredBy: "floor", provider: null, reason, floorLine: modelFloorLine(capabilityId, reason) };
 }
 
 /**

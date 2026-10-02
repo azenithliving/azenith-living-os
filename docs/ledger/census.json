@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-02T02:22:11.570Z",
+  "generatedAt": "2026-10-02T10:42:59.519Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
@@ -12,16 +12,16 @@
     "rootLibFiles": 265,
     "rootLibUsed": 72,
     "orphanDoors": 71,
-    "rootLibUsedLines": 27604,
+    "rootLibUsedLines": 27644,
     "furnitureFiles": 55,
-    "furnitureLines": 15169,
+    "furnitureLines": 15193,
     "furnitureUsedByBoth": 6,
     "furnitureBothLines": 2371,
     "furnitureNewOnly": 16,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 63,
-    "swarmFileLines": 14862,
+    "swarmFileLines": 14879,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
@@ -961,7 +961,7 @@
     {
       "kind": "root-lib",
       "id": "lib/ai-orchestrator.ts",
-      "lines": 948,
+      "lines": 988,
       "callers": 10
     },
     {
@@ -1255,7 +1255,7 @@
     {
       "kind": "orphan-door",
       "id": "app/api/ai/analyze-vision/route.ts",
-      "lines": 23
+      "lines": 90
     },
     {
       "kind": "orphan-door",
@@ -1886,7 +1886,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/sales/CustomersPanel.tsx",
-      "lines": 925,
+      "lines": 949,
       "usedBy": "new-only"
     },
     {
@@ -1980,7 +1980,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/capability-tiers.ts",
-      "lines": 138
+      "lines": 146
     },
     {
       "kind": "swarm-file",
@@ -2060,7 +2060,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/key-desk.ts",
-      "lines": 199
+      "lines": 208
     },
     {
       "kind": "swarm-file",

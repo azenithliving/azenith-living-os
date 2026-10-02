@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { askGroq } from "@/lib/ai-orchestrator";
+import { askWithFloor } from "@/lib/ai-orchestrator";
 import { requireAdminApi } from "@/lib/admin-api-guard";
+import { answeredByLabel } from "@/lib/ops/key-desk";
 import { summarizeInterest, translateTag } from "@/lib/lead-insights";
 
 interface AnalyzeRequest {
@@ -18,7 +19,7 @@ interface AnalyzeRequest {
   };
 }
 
-function buildFallback(body: AnalyzeRequest) {
+function buildFallback(body: AnalyzeRequest, note: string) {
   const telemetry = body.telemetry;
   const summary = summarizeInterest(telemetry?.hovered_elements);
   const room = body.roomType && body.roomType !== "غير محدد" ? body.roomType : "غير محدد";
@@ -37,7 +38,7 @@ function buildFallback(body: AnalyzeRequest) {
     buying_signals: "لا توجد إشارة شراء واضحة بعد.",
     recommended_approach: `اقترح بخطوة واحدة واضحة بخصوص ${room}، وتابع عبر واتساب، واطرح سؤالًا مفتوحًا.`,
     context: lastMessages ? `آخر ما قاله العميل: ${lastMessages}` : "",
-    note: "تحليل تلقائي أولي — اضغط التحليل العميق بعد توفر المزيد من البيانات.",
+    note,
   };
 }
 
@@ -45,14 +46,18 @@ function buildFallback(body: AnalyzeRequest) {
  * POST /api/admin/leads/analyze
  * Generates an Arabic psychological + sales profile for a lead from
  * conversation + radar telemetry using the AI.
+ *
+ * The chain answers, not one named provider: measured on his own pool, four companies write
+ * today, and a door that asks one of them by name goes quiet when that one's minute ceiling is
+ * spent. When none answers, the rules' reading is still returned — and the line says who spoke.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  let body: AnalyzeRequest = {};
   try {
     const { unauthorized } = await requireAdminApi();
     if (unauthorized) return unauthorized;
 
-    const body = (await request.json()) as AnalyzeRequest;
-    const fallback = buildFallback(body);
+    body = (await request.json()) as AnalyzeRequest;
 
     const telemetry = body.telemetry;
     const interest = summarizeInterest(telemetry?.hovered_elements);
@@ -91,27 +96,45 @@ Return JSON ONLY with these string fields (all in Egyptian Arabic):
 
 Rules: علم نفس واقعي لا مبالغة، لا تخترع بيانات غير موجودة، كل الحقول إلزامية.`;
 
-    const result = await askGroq(prompt, {
+    const answer = await askWithFloor("customer-analysis", [{ role: "user", content: prompt }], {
       maxTokens: 700,
       temperature: 0.5,
       jsonMode: true,
     });
 
-    if (result.success && result.content) {
-      try {
-        const jsonMatch = result.content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          return NextResponse.json({ profile: parsed, generated: true });
-        }
-      } catch {
-        // fall through to fallback
-      }
+    const parsed = answer.ok ? readProfile(answer.content) : null;
+    if (parsed) {
+      return NextResponse.json({ profile: parsed, generated: true, answered_by: answeredByLabel(answer.provider) });
     }
 
-    return NextResponse.json({ profile: fallback, generated: false });
+    // No model, or a model that answered with something unreadable: the radar's own counts stay
+    // on the screen, and the note says which of the two happened.
+    const note = answer.ok
+      ? "النموذج ردّ بردّ ما كانش مقروء — اللي ظاهر هنا حساب الرادار."
+      : answer.floorLine;
+    return NextResponse.json({ profile: buildFallback(body, note), generated: false, answered_by: "قواعد المتجر — من غير مفتاح" });
   } catch (error) {
+    // The floor is also the last resort when this door itself breaks: an English status code is
+    // not an answer a man reads.
     console.error("[LeadAnalyze] Error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({
+      profile: buildFallback(body, "الباب ما قدرش يوصل للنموذج — اللي ظاهر هنا حساب الرادار من غير مفتاح."),
+      generated: false,
+      answered_by: "قواعد المتجر — من غير مفتاح",
+    });
+  }
+}
+
+/** The model's JSON, or null when the answer is not a profile. Never a half-parsed guess. */
+function readProfile(content: string): Record<string, string> | null {
+  const found = content.match(/\{[\s\S]*\}/);
+  if (!found) return null;
+  try {
+    const parsed = JSON.parse(found[0]);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    const entries = Object.entries(parsed).filter(([, value]) => typeof value === "string" && (value as string).trim());
+    return entries.length ? Object.fromEntries(entries.map(([k, v]) => [k, String(v)])) : null;
+  } catch {
+    return null;
   }
 }

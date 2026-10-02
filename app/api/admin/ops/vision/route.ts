@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { askGoogleVision } from "@/lib/ai-orchestrator";
+import { askVisionAny } from "@/lib/ai-orchestrator";
+import { modelFloorLine, modelFailureReason } from "@/lib/ops/capability-tiers";
+import { answeredByLabel } from "@/lib/ops/key-desk";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -8,8 +10,12 @@ const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // base64 payload cap
 
 /**
  * POST /api/admin/ops/vision  { image: dataURL|string, question?: string }
- * Real vision on the uploaded screenshot (P5-M4) — proxy already gates
- * /api/admin/* behind an admin session or x-internal-key.
+ * Real vision on the uploaded screenshot (P5-M4) — the gate already holds /api/admin/* behind an
+ * admin session or the internal key.
+ *
+ * It used to ask one company's reader by name and print whatever came back, so a spent ceiling at
+ * that one company was the owner's dead end, and the provider's English sentence arrived as his
+ * answer. The chain of readers answers now, and a refusal is the capability's floor in Arabic.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -31,13 +37,18 @@ export async function POST(request: NextRequest) {
       `المطلوب: ${question}\n` +
       "أجب بالعربية المصرية في 3-6 نقاط عملية قصيرة.";
 
-    const result = await askGoogleVision(prompt, base64, mime);
-    if (!result.success || !result.content) {
-      return NextResponse.json({ success: false, error: result.error || "تعذر تحليل الصورة" }, { status: 502 });
+    const result = await askVisionAny(prompt, base64, mime);
+    if (result.success && result.content.trim()) {
+      return NextResponse.json({ success: true, analysis: result.content, answered_by: answeredByLabel(result.reader) });
     }
-    return NextResponse.json({ success: true, analysis: result.content });
-  } catch (error: any) {
+
+    console.error("[Ops Vision] no reader answered:", String(result.error ?? "").slice(0, 200));
+    return NextResponse.json(
+      { success: false, error: modelFloorLine("image-analysis", modelFailureReason(result.error)) },
+      { status: 503 }
+    );
+  } catch (error) {
     console.error("[Qayyim Vision] Error:", error);
-    return NextResponse.json({ success: false, error: error.message || "Internal error" }, { status: 500 });
+    return NextResponse.json({ success: false, error: modelFloorLine("image-analysis", "failed") }, { status: 500 });
   }
 }

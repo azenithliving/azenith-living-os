@@ -107,6 +107,21 @@ export function AestheticAdvisor({
     });
   }, []);
 
+  /**
+   * A file's bytes as a base64 body. Read in chunks: `String.fromCharCode(...bytes)` over a
+   * whole photo blows the call stack, and every analysis of a real camera picture failed there
+   * before this was measured.
+   */
+  const toBase64 = async (file: File): Promise<string> => {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const CHUNK = 0x8000;
+    let binary = "";
+    for (let offset = 0; offset < bytes.length; offset += CHUNK) {
+      binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + CHUNK, bytes.length)));
+    }
+    return btoa(binary);
+  };
+
   const analyzeImages = async () => {
     if (images.length === 0) return;
 
@@ -116,11 +131,7 @@ export function AestheticAdvisor({
     try {
       // Convert images to base64 for analysis
       const base64Images = await Promise.all(
-        images.map(async (img) => {
-          const buffer = await img.file.arrayBuffer();
-          const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-          return `data:${img.file.type};base64,${base64}`;
-        })
+        images.map(async (img) => `data:${img.file.type};base64,${await toBase64(img.file)}`)
       );
 
       const prompt = `You are an Aesthetic Advisor for Azenith Living, a luxury interior design consultancy in Egypt.

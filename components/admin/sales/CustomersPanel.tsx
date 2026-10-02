@@ -121,12 +121,16 @@ export default function CustomersPanel() {
   const [isSendingReply, setIsSendingReply] = useState(false);
   const [copilotFor, setCopilotFor] = useState<string | null>(null);
   const [copilotSuggestions, setCopilotSuggestions] = useState<string[]>([]);
+  const [copilotAnswer, setCopilotAnswer] = useState<string | null>(null);
   const [isLoadingCopilot, setIsLoadingCopilot] = useState(false);
   const [followUpFor, setFollowUpFor] = useState<string | null>(null);
   const [followUpTemplate, setFollowUpTemplate] = useState("");
+  const [followUpAnswer, setFollowUpAnswer] = useState<string | null>(null);
   const [isLoadingFollowUp, setIsLoadingFollowUp] = useState(false);
   const [analysisFor, setAnalysisFor] = useState<string | null>(null);
   const [analysisProfile, setAnalysisProfile] = useState<Record<string, string> | null>(null);
+  /** Who answered the last analysis: one of his keys, or the store's own rules. */
+  const [analysisAnswer, setAnalysisAnswer] = useState<string | null>(null);
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -223,9 +227,11 @@ export default function CustomersPanel() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load suggestions");
       setCopilotSuggestions(data.suggestions || []);
+      setCopilotAnswer(data.answered_by || null);
     } catch (err) {
       console.error("Failed to load copilot suggestions:", err);
       setCopilotSuggestions([]);
+      setCopilotAnswer(null);
       toast.error("فشل تحميل اقتراحات المساعد");
     } finally {
       setIsLoadingCopilot(false);
@@ -270,9 +276,11 @@ export default function CustomersPanel() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate follow-up");
       setFollowUpTemplate(data.template || "");
+      setFollowUpAnswer(data.answered_by || null);
     } catch (err) {
       console.error("Failed to generate follow-up:", err);
       setFollowUpTemplate("");
+      setFollowUpAnswer(null);
       toast.error("فشل توليد متابعة واتساب");
     } finally {
       setIsLoadingFollowUp(false);
@@ -287,6 +295,7 @@ export default function CustomersPanel() {
     }
     setAnalysisFor(leadKey);
     setAnalysisProfile(null);
+    setAnalysisAnswer(null);
     setIsLoadingAnalysis(true);
     try {
       const res = await fetch("/api/admin/leads/analyze", {
@@ -297,6 +306,7 @@ export default function CustomersPanel() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to analyze lead");
       setAnalysisProfile(data.profile || {});
+      setAnalysisAnswer(data.answered_by || null);
     } catch (err) {
       console.error("Failed to analyze lead:", err);
       setAnalysisProfile(null);
@@ -621,6 +631,12 @@ export default function CustomersPanel() {
                                       </div>
                                     );
                                   })}
+                                  {/* Which tier answered — the owner decides what to trust with it. */}
+                                  {analysisAnswer && (
+                                    <p className="border-t border-white/10 pt-2 text-[10px] text-white/55" data-analysis-answer>
+                                      {analysisAnswer}
+                                    </p>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -678,6 +694,9 @@ export default function CustomersPanel() {
                           value={followUpTemplate}
                           className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-white/90 min-h-[120px] outline-none"
                         />
+                        {followUpAnswer && (
+                          <p className="text-[10px] text-white/55" data-followup-answer>{followUpAnswer}</p>
+                        )}
                         <div className="flex gap-2">
                           {/^01\d{9}$/.test(lead.phone || "") ? (
                           <a
@@ -835,6 +854,11 @@ export default function CustomersPanel() {
                                 </button>
                               )}
                             </div>
+                            {copilotAnswer && (
+                              <p className="mt-2 border-t border-white/5 pt-2 text-[10px] text-white/45" data-copilot-answer>
+                                {copilotAnswer}
+                              </p>
+                            )}
                           </aside>
                         </div>
                         

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { askGroq } from "@/lib/ai-orchestrator";
+import { askWithFloor } from "@/lib/ai-orchestrator";
 import { requireAdminApi } from "@/lib/admin-api-guard";
+import { answeredByLabel } from "@/lib/ops/key-desk";
 
 interface LeadContext {
   name?: string;
@@ -46,18 +47,28 @@ Summary: ${lead.summary || "none"}
 Recent conversation:
 ${recentMessages || "No messages yet"}`;
 
-    const result = await askGroq(prompt, {
+    const answer = await askWithFloor("follow-up", [{ role: "user", content: prompt }], {
       maxTokens: 400,
       temperature: 0.35,
     });
 
-    const template = result.success && result.content.trim()
-      ? result.content.trim().replace(/^["']|["']$/g, "")
+    const template = answer.ok && answer.content.trim()
+      ? answer.content.trim().replace(/^["']|["']$/g, "")
       : fallbackTemplate(lead);
 
-    return NextResponse.json({ template });
+    return NextResponse.json({
+      template,
+      answered_by: answer.ok ? answeredByLabel(answer.provider) : "قالب المحل — من غير مفتاح",
+      note: answer.ok ? null : answer.floorLine,
+    });
   } catch (error) {
+    // The follow-up is the one thing that must not go blank: the template it always could
+    // send is sent, and the reason the model stayed out is said in his language.
     console.error("[LeadFollowUp] Error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({
+      template: fallbackTemplate({} as LeadContext),
+      answered_by: "قالب المحل — من غير مفتاح",
+      note: "الباب ما قدرش يوصل للنموذج — الرسالة اللي ظاهرة قالب ثابت.",
+    });
   }
 }
