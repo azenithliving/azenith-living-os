@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { arNum } from '@/lib/ops/metricLabels';
 import { linkFromPhone } from '@/lib/cad/sketch-link';
+import { imageKeyOf } from '@/lib/cad/vote-keys';
 
 type Dimension = { label: string; meters: number; confirmed?: boolean };
 type Sheet = {
@@ -30,7 +31,7 @@ const OPENING_LABEL: Record<string, string> = { door: 'باب', window: 'شبا�
  * The address is read from the live path rather than a search hook so the page stays
  * prerenderable; a token that is not shaped like a token is never sent to the server.
  */
-type SheetImage = { url: string; thumb: string; style: string | null; roomType: string };
+type SheetImage = { id: number | null; url: string; thumb: string; style: string | null; roomType: string };
 
 const STYLE_LABEL: Record<string, string> = { modern: 'مودرن', classic: 'كلاسيك', minimal: 'مينيمال', luxury: 'فخم' };
 
@@ -44,6 +45,10 @@ export default function PassportPage() {
   const [phone, setPhone] = useState('');
   const [busy, setBusy] = useState(false);
   const [news, setNews] = useState<string | null>(null);
+  const [tallies, setTallies] = useState<Record<string, { likes: number; voters: string[] }>>({});
+  const [people, setPeople] = useState<string[]>([]);
+  const [me, setMe] = useState('');
+  const [voting, setVoting] = useState<string | null>(null);
 
   useEffect(() => {
     const match = window.location.pathname.match(/\/passport\/([A-Za-z0-9_-]{20,32})/);
@@ -99,6 +104,102 @@ export default function PassportPage() {
   }, [busy, phone, token, typed]);
 
   const confirmed = Boolean(sheet?.confirmed_at);
+
+  const applyVotes = useCallback(
+    (data: { tallies?: Array<{ image_key: string; likes: number; voters: string[] }>; people?: string[] }) => {
+      const next: Record<string, { likes: number; voters: string[] }> = {};
+      for (const row of data.tallies ?? []) {
+        next[String(row.image_key)] = { likes: Number(row.likes) || 0, voters: Array.isArray(row.voters) ? row.voters : [] };
+      }
+      setTallies(next);
+      setPeople(Array.isArray(data.people) ? data.people : []);
+    },
+    []
+  );
+
+  // The family shares one address at the same time. Nothing is pushed to this page, so it asks
+  // every twenty seconds — but only while it is the window somebody is actually looking at, and
+  // again the moment it comes back. A poll that never sleeps spends the store's free ceilings on
+  // a closed tab.
+  useEffect(() => {
+    if (!token) return;
+    let stopped = false;
+    const load = () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      fetch(`/api/passport/${token}/votes`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (!stopped && data?.success) applyVotes(data);
+        })
+        .catch(() => {});
+    };
+    load();
+    const timer = setInterval(load, 20000);
+    const onShow = () => load();
+    document.addEventListener('visibilitychange', onShow);
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onShow);
+    };
+  }, [applyVotes, token]);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem('azenith-family-name');
+      if (saved) setMe(String(saved).slice(0, 24));
+    } catch {
+      // A browser that will not store a name is not a reason to lose the sheet.
+    }
+  }, []);
+
+  const giveName = (value: string) => {
+    const clean = value.replace(/[\u0000-\u001f<>]/g, ' ').slice(0, 24);
+    setMe(clean);
+    try {
+      window.localStorage.setItem('azenith-family-name', clean);
+    } catch {
+      // Same: the name is a convenience, the vote is the record.
+    }
+  };
+
+  const castVote = useCallback(
+    async (image: SheetImage) => {
+      if (!token || voting) return;
+      const voter = me.trim();
+      if (!voter) {
+        setNews('اكتب اسمك الأول — من غير اسم مش بنعرف الصوت لمين.');
+        return;
+      }
+      const key = imageKeyOf(image);
+      const liked = !tallies[key]?.voters.includes(voter);
+      const before = tallies;
+      const voters = (before[key]?.voters ?? []).filter((name) => name !== voter);
+      if (liked) voters.push(voter);
+      setTallies({ ...before, [key]: { likes: voters.length, voters } });
+      setVoting(key);
+      setNews(null);
+      try {
+        const res = await fetch(`/api/passport/${token}/votes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image_key: key, image_url: image.url, voter, liked }),
+        });
+        const data = await res.json();
+        if (data?.success) applyVotes(data);
+        else {
+          setTallies(before);
+          setNews(data?.error || 'المتجر ما سجلش الصوت');
+        }
+      } catch {
+        setTallies(before);
+        setNews('المتجر ما ردّش — صوتك مش مسجل');
+      } finally {
+        setVoting(null);
+      }
+    },
+    [applyVotes, me, token, tallies, voting]
+  );
 
   // Twenty thumbnails all wearing the same word say nothing twenty times. One style across
   // the set belongs in the heading; the word only returns under each picture when they vary.
@@ -195,34 +296,72 @@ export default function PassportPage() {
               </section>
             )}
             {images.length > 0 && (
-              <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+              <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4" data-family-room>
                 <h2 className="text-[12px] font-bold text-white/60">
-                  {imagesForHisRoom ? 'صور مختارة لنوع مكانك' : 'أفكار عامة من البيت — مكانك اللي على الورقة مش في بنك الصور بعد'}
+                  {imagesForHisRoom ? 'غرفة قرار العائلة · صور مختارة لنوع مكانك' : 'غرفة قرار العائلة · أفكار عامة من البيت — مكانك اللي على الورقة مش في بنك الصور بعد'}
                   {onlyStyle ? ` · ${onlyStyle}` : ''}
                 </h2>
+                <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+                  افتحوا نفس الرابط على كل التليفونات، كل واحد يكتب اسمه، واللي يعجبه يضغط. اللي بتختاروه يوصل لشيت العميل عند المتجر.
+                </p>
+                <label className="mt-3 block">
+                  <span className="text-[11px] text-white/50">اسمك أو علاقتك في البيت</span>
+                  <input
+                    value={me}
+                    onChange={(e) => giveName(e.target.value)}
+                    placeholder="مثال: أنا، ماما، أحمد"
+                    data-family-name
+                    className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[13px] text-white placeholder-white/25 focus:border-amber-500/40 focus:outline-none"
+                  />
+                </label>
+                {people.length > 0 && (
+                  <p className="mt-2 text-[11px] text-white/45" data-family-people>
+                    صوت على الورقة دي: {people.join(' · ')}
+                  </p>
+                )}
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  {images.map((img, i) => (
-                    <a key={i} href={img.url} target="_blank" rel="noopener noreferrer" className="block">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={img.thumb}
-                        alt="فكرة تصميم"
-                        loading="lazy"
-                        className="h-28 w-full rounded-xl border border-white/10 object-cover"
-                      />
-                      {!onlyStyle && img.style && STYLE_LABEL[img.style] ? (
-                        <span className="mt-1 block text-[10px] text-white/40">{STYLE_LABEL[img.style]}</span>
-                      ) : null}
-                    </a>
-                  ))}
+                  {images.map((img, i) => {
+                    const key = imageKeyOf(img);
+                    const tally = tallies[key];
+                    const mine = Boolean(me.trim() && tally?.voters.includes(me.trim()));
+                    return (
+                      <div key={i}>
+                        <a href={img.url} target="_blank" rel="noopener noreferrer" className="block">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={img.thumb}
+                            alt="فكرة تصميم"
+                            loading="lazy"
+                            className="h-28 w-full rounded-xl border border-white/10 object-cover"
+                          />
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => castVote(img)}
+                          aria-pressed={mine}
+                          data-family-vote={key}
+                          className={`mt-1 flex w-full items-center justify-between gap-2 rounded-xl border px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
+                            mine ? 'border-rose-400/50 bg-rose-500/15 text-rose-200' : 'border-white/10 bg-white/5 text-white/60'
+                          }`}
+                        >
+                          <span>{mine ? 'اخترته' : 'أحبها'}</span>
+                          <span data-family-count={key}>{tally?.likes ? arNum(tally.likes) : ''}</span>
+                        </button>
+                        {!onlyStyle && img.style && STYLE_LABEL[img.style] ? (
+                          <span className="mt-1 block text-[10px] text-white/40">{STYLE_LABEL[img.style]}</span>
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
+                {news && <p className="mt-2 text-[11px] leading-relaxed text-white/60">{news}</p>}
                 <a
                   href={`https://wa.me/?text=${encodeURIComponent(
-                    `ورقة مقاساتي وتصميمي من أزينث ليفينج: ${window.location.href}`
+                    `ورقة مقاساتي وتصميمي من أزينث ليفينج — اختاروا اللي يعجبكم من هنا: ${window.location.href}`
                   )}`}
                   className="mt-4 block w-full rounded-xl border border-emerald-500/30 bg-emerald-600/20 px-4 py-2.5 text-center text-[13px] font-black text-emerald-200"
                 >
-                  ابعتها على واتساب
+                  ابعتها على واتساب وشاركهم الرابط
                 </a>
               </section>
             )}

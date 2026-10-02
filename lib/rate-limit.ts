@@ -159,6 +159,13 @@ export const SENSITIVE_PATHS = [
    * the owner's free ceilings are spent.
    */
   "/api/ai/analyze-vision",
+  /**
+   * The customer's private sheet and the family's vote desk on top of it: a long random address
+   * is the only credential, so the doors that write behind it are limited like any other
+   * stranger-openable door. The page asks every twenty seconds while it is visible, which stays
+   * inside this ceiling for a family of five on one connection.
+   */
+  "/api/passport",
 ];
 
 /**

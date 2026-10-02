@@ -15,7 +15,7 @@
 import { foldArabic } from "@/lib/arabic";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
-export type SheetImage = { url: string; thumb: string; style: string | null; roomType: string; color: string | null };
+export type SheetImage = { id: number | null; url: string; thumb: string; style: string | null; roomType: string; color: string | null };
 
 /** The seven types the bank actually holds, in the order the sheet prefers them. */
 const ROOM_TYPES = [
@@ -81,7 +81,7 @@ export async function pickSheetImages(
 
   const { data, error } = await supabase
     .from("curated_images")
-    .select("url,thumbnail_url,style,room_type,metadata")
+    .select("id,url,thumbnail_url,style,room_type,metadata")
     .eq("room_type", roomType)
     .eq("is_active", true)
     .not("url", "is", null)
@@ -93,6 +93,7 @@ export async function pickSheetImages(
   const images = data
     .filter((row: any) => typeof row.url === "string" && row.url.startsWith("http"))
     .map((row: any) => ({
+      id: Number.isFinite(Number(row.id)) ? Number(row.id) : null,
       url: String(row.url),
       thumb: typeof row.thumbnail_url === "string" && row.thumbnail_url ? String(row.thumbnail_url) : String(row.url),
       style: row.style ? String(row.style) : null,
