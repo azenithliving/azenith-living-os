@@ -51,12 +51,26 @@ type PoolRow = { id: number; provider: string; is_active: boolean; notes: string
 async function readPool(): Promise<{ rows: PoolRow[] | null; error: string }> {
   const supabase = getSupabaseAdminClient();
   if (!supabase) return { rows: null, error: "المتجر غير متصل دلوقتي" };
-  const { data, error } = await supabase
-    .from("api_keys")
-    .select("id,provider,is_active,notes,check_state,last_checked_at")
-    .limit(5000);
-  if (error) return { rows: null, error: "السجل ما ردّش على قايمة المفاتيح" };
-  return { rows: (data ?? []) as unknown as PoolRow[], error: "" };
+
+  // The gateway answers a thousand rows at a time no matter what the caller asks for, so a
+  // single big `.limit()` silently read the first thousand keys and called it the pool — the
+  // desk printed «١٬٠٠٠ مفتاح» while the table held more than twice that. Paged, and the
+  // count is the table's.
+  const collected: PoolRow[] = [];
+  const page = 1000;
+  for (let from = 0; ; from += page) {
+    const { data, error } = await supabase
+      .from("api_keys")
+      .select("id,provider,is_active,notes,check_state,last_checked_at")
+      .order("id", { ascending: true })
+      .range(from, from + page - 1);
+    if (error) return { rows: null, error: "السجل ما ردّش على قايمة المفاتيح" };
+    const rows = (data ?? []) as unknown as PoolRow[];
+    collected.push(...rows);
+    if (rows.length < page) break;
+    if (from > 20000) break; // a runaway guard, not a cap on the store
+  }
+  return { rows: collected, error: "" };
 }
 
 function deskOf(rows: PoolRow[]) {

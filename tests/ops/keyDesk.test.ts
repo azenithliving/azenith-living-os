@@ -150,3 +150,13 @@ describe("adding a key from the desk", () => {
     expect(door()).toMatch(/return null;/);
   });
 });
+
+describe("the desk counts the whole pool", () => {
+  it("pages the key list instead of reading the first thousand", () => {
+    const door = readFileSync("app/api/admin/keys/desk/route.ts", "utf8");
+    // The gateway answers a thousand rows whatever the caller asks for; a single `.limit()`
+    // made the desk print «١٬٠٠ مفتاح» about a pool more than twice that size.
+    expect(door).toMatch(/\.range\(/);
+    expect(door).not.toMatch(/\.limit\(5000\)/);
+  });
+});
