@@ -7,6 +7,7 @@ import { predatoryDefense } from "@/lib/predatory-defense";
 import { semanticCache } from "@/lib/semantic-cache";
 import { pickFaqAnswer, type FaqRow } from "@/lib/consultant/faq-gate";
 import { extractUiAction, polishReply } from "@/lib/consultant/reply-polish";
+import { readStoreFacts, storeFactsBlock } from "@/lib/consultant/store-facts";
 import {
   asksCurrentLocation,
   asksEscalation,
@@ -318,7 +319,13 @@ async function getLearnings(): Promise<string[]> {
       return [];
     }
 
-    return (data || []).map((row: { instruction: string }) => row.instruction);
+    // The rows mined from old chats arrive shaped «سؤال: … الإجابة: …» and the prompt presents
+    // them all as management policy. Measured 2026-10-02: 32 of the 49 rows were that shape,
+    // pairs like «سؤال: زى الفل تمام / الإجابة: شكرا», teaching the advisor to answer with
+    // nothing. They stay in the table — nothing of his is deleted — but they stop being policy.
+    return (data || [])
+      .map((row: { instruction: string }) => row.instruction)
+      .filter((instruction) => !instruction.trim().startsWith("سؤال:"));
   } catch (err) {
     console.error("[Consultant] Exception fetching learnings:", err);
     return [];
@@ -737,13 +744,17 @@ export async function POST(
     const weatherDateTime = await getCairoWeatherAndDateTime();
 
     // Build messages array for Groq with system prompt and conversation history
+    // The advisor speaks from the store's own record, read live, not from a copy that rots.
+    const factsBlock = storeFactsBlock(await readStoreFacts());
+
     const groqMessages = buildGroqMessages(
       conversationHistory, 
       userName || existingSession?.insights?.userName, 
       allLearnings, 
       Object.keys(nextInsights).length ? nextInsights : existingSession?.insights,
       language,
-      weatherDateTime
+      weatherDateTime,
+      factsBlock
     );
 
     // A short statement, not a question. A question deserves the store's full advisor, and the
@@ -1139,7 +1150,8 @@ function buildGroqMessages(
   learnings: string[] = [],
   insights?: Insights,
   language?: string,
-  weatherDateTime?: any
+  weatherDateTime?: any,
+  factsBlock?: string
 ): GroqMessage[] {
 // Start with system message
   let systemContent = `${SALES_EXCELLENCE_PROMPT}\n\n${HUMAN_CONSULTANT_PROMPT}`;
@@ -1218,6 +1230,11 @@ Use this information naturally in conversation:
     systemContent += "\n\n[CRITICAL DIRECTIVE - HIGHEST PRIORITY]: The user is browsing the English version of the website. YOU MUST RESPOND ENTIRELY IN ENGLISH. Do not use Arabic words, greetings, or phrases under any circumstances. Translate your sales tactics, luxury tone, and closing statements into perfect, native-sounding English.";
   } else {
     systemContent += "\n\n[CRITICAL DIRECTIVE - HIGHEST PRIORITY]: The user is browsing the Arabic version of the website. Respond entirely in polished Egyptian Arabic unless the user writes in English.";
+  }
+
+  // The store's own record is the last thing the advisor reads, so it is the first thing it says.
+  if (factsBlock) {
+    systemContent += `\n\n${factsBlock}`;
   }
 
   const messages: GroqMessage[] = [
