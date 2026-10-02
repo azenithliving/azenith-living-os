@@ -37,15 +37,17 @@
     },
     {
       "atom": "components/admin/ClientPreCallDossier.tsx",
-      "state": "moving",
+      "state": "moved",
       "phase": "M2",
-      "when": "2026-10-02"
+      "when": "2026-10-02",
+      "proof": "built on the new surface and measured on the published site at 390px: the panel answered the roll, typing ٤٤٤ in Arabic-Indic digits returned 1 candidate, pressing it opened five sections — his line from the roll, the paper's two agreed numbers with «الورقة مختومة», the browsing or its honest absence, eight colour squares off the bank, and the photo of the paper itself loaded at 900px wide — with the sheet link, a dial link and a WhatsApp link built from his digits, and 0 Latin runs anywhere in the panel. The store was left as found: the test paper went back to «من غير صاحب» (measured: 19 papers, 0 owners tonight)"
     },
     {
       "atom": "app/api/admin/customers/dossier/route.ts",
-      "state": "moving",
+      "state": "moved",
       "phase": "M2",
-      "when": "2026-10-02"
+      "when": "2026-10-02",
+      "proof": "measured on the published site: 200 for four real roll rows with the headline in his numerals, 404 «مفيش عميل بالاسم ده في الدفتر» for a well-formed mobile the roll does not hold, and 400 «اختار العميل من الدفتر الأول» for a malformed key and for no key at all — an empty file is never returned as if it were an answer. It reads the roll through lib/customers/read.ts, the same reader the customers screen uses, and scopes his papers by company in the statement that reads them"
     },
     {
       "atom": "app/admin/v2/sketches/page.tsx",

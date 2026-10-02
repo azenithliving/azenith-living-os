@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-02T02:00:30.084Z",
+  "generatedAt": "2026-10-02T02:22:11.570Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
@@ -12,7 +12,7 @@
     "rootLibFiles": 265,
     "rootLibUsed": 72,
     "orphanDoors": 71,
-    "rootLibUsedLines": 27560,
+    "rootLibUsedLines": 27604,
     "furnitureFiles": 55,
     "furnitureLines": 15169,
     "furnitureUsedByBoth": 6,
@@ -21,7 +21,7 @@
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 63,
-    "swarmFileLines": 14861,
+    "swarmFileLines": 14862,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
@@ -991,7 +991,7 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/dossier.ts",
-      "lines": 290,
+      "lines": 334,
       "callers": 2
     },
     {
@@ -2125,7 +2125,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 333
+      "lines": 334
     },
     {
       "kind": "swarm-file",
