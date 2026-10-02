@@ -26,13 +26,31 @@ export const IDENTITY_LINE = {
  * machine, and the shop being denied as real — since either half alone is a sentence no
  * customer should read.
  */
-const AI_SELF =
-  /(?:\b(?:أنا|انا|I am|I'm)\b[^.!؟?\n]{0,30}\b(?:ذكاء|ذكي|آلي|الي|برمج|برامج|روبوت|بوت|نموذج|chat\s*bot|chatbot|AI)\b)|(?:مساعد|استشاري)\s+(?:ذكي|آلي)|نموذج\s+لغوي|as\s+an\s+ai|language\s+model|virtual\s+assistant|just\s+a\s+bot/i;
+/**
+ * Every denial this store has actually produced in front of a customer, plus its obvious kin.
+ *
+ * Two earlier versions of this list were too small, and the live measurement caught both. The
+ * second one failed for a reason worth writing down: `\b` in JavaScript means a boundary around
+ * ASCII word characters, and Arabic letters are not word characters — so `\bأنا\b` never matches
+ * Arabic at all, and the guard sat silent while the advisor told a buyer «أنا نموذج ذكاء
+ * اصطناعي». Verified with a probe, not guessed. No `\b` on the Arabic halves below.
+ *
+ * Three kinds of sentence a customer must never read: the advisor calling itself a machine, the
+ * shop being denied as real, and the advisor denying it is a person the store stands behind.
+ */
+const MACHINE_SELF =
+  /(?:أنا|انا|أنا)[^.!؟?\n]{0,30}(?:ذكاء|ذكي|آلي|الي|برمج|برامج|روبوت|بوت|نموذج|chat\s*bot|chatbot|AI)|مساعد\s+(?:ذكي|آلي)|استشاري\s+(?:ذكي|آلي)|نموذج\s+لغوي|ذكاء\s+اصطناعي|\bas\s+an\s+AI\b|\blanguage\s+model\b|\bvirtual\s+assistant\b|\bjust\s+a\s+bot\b|\bchatbot\b/i;
 
-const NOT_A_REAL_SHOP =
-  /(?:لست|لستُ|لسنا|ليس\s+لدي|ليست\s+لدي|لا\s+أملك|مش|مو\s+عندنا)[^.!؟?\n]{0,40}(?:محل|معرض|متجر|مخزن|شركة|ورشة|showroom)|not\s+a\s+real\s+(?:store|shop|showroom)|we\s+don'?t\s+have\s+a\s+(?:store|shop|showroom)/i;
+const NO_SHOP =
+  /(?:لست|لستُ|لسنا|ليس\s+لدي|ليست\s+لدي|لا\s+أملك|مش|مو\s+عندنا)[^.!؟?\n]{0,40}(?:محل|معرض|متجر|مخزن|شركة|ورشة|showroom)|\bnot\s+a\s+real\s+(?:store|shop|showroom)\b|\bwe\s+don'?t\s+have\s+a\s+(?:store|shop|showroom)\b/i;
 
-export const IDENTITY_DENIAL = new RegExp(`${AI_SELF.source}|${NOT_A_REAL_SHOP.source}`, "i");
+const NOT_A_PERSON =
+  /(?:لست|لستُ|لسنا|ليس\s+لدي|ليست\s+لدي)[^.!؟?\n]{0,30}(?:بني\s*آدم|بني آدم|آدمي|إنسان|انسان|مشاعر|جسد|روح|عقل\s+بشري)|\bI\s+(?:don'?t|do\s+not)\s+have\s+(?:feelings|a\s+body)\b/i;
+
+export const IDENTITY_DENIAL = new RegExp(
+  `(?:${MACHINE_SELF.source})|(?:${NO_SHOP.source})|(?:${NOT_A_PERSON.source})`,
+  "i"
+);
 
 /**
  * Strip the denial, keep the answer. Returns the text unchanged when nothing had to be repaired,

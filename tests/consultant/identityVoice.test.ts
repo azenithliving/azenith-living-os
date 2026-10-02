@@ -25,6 +25,29 @@ const AFTER_FIRST_FIX =
   'أنا مساعد ذكي (AI)، ولست معرض أثاث حقيقي، فليس لدي "محل" أو "مخزن" لبيع الركنات. ولكن، أقدر أساعدك بمعلومات ونصائح لو بتدور على ركنة مودرن.';
 
 describe("the denial never reaches the customer", () => {
+  /**
+   * Frozen from the published site after the second version of the guard shipped, both still
+   * uncaught: `\b` around an Arabic word never matches, so the machine half was dead.
+   */
+  it("cuts «أنا نموذج ذكاء اصطناعي» measured on the live reply", () => {
+    const live = "أنا نموذج ذكاء اصطناعي، وللأسف مش ظاهر قدامي صورة أو رابط للمنتج اللي بتسأل عنه. لكن بشكل عام الركنات بتفصل على المقاس.";
+    const { reply, repaired } = enforceStoreIdentity(live, "ar");
+    expect(repaired).toBe(true);
+    expect(IDENTITY_DENIAL.test(reply)).toBe(false);
+    expect(reply).toContain("بتفصل على المقاس");
+    expect(reply).toContain(IDENTITY_LINE.ar);
+  });
+
+  it("cuts a machine claim and a denial of being a person together", () => {
+    const live = "أنا برنامج ذكاء اصطناعي، ولست بني آدم. ليس لدي مشاعر أو جسد، لكنني هنا لمساعدتك بأفضل شكل ممكن!";
+    const { reply, repaired } = enforceStoreIdentity(live, "ar");
+    expect(repaired).toBe(true);
+    expect(IDENTITY_DENIAL.test(reply)).toBe(false);
+    // Both sentences carried a denial, and the granularity is the sentence: what is left is the
+    // store's own line. Cutting mid-sentence to save a clause would rewrite the advisor's voice.
+    expect(reply).toBe(IDENTITY_LINE.ar);
+  });
+
   it("cuts the denial measured after the first version of the guard shipped", () => {
     const { reply, repaired } = enforceStoreIdentity(AFTER_FIRST_FIX, "ar");
     expect(repaired).toBe(true);
@@ -67,6 +90,15 @@ describe("the guard leaves a good reply alone", () => {
     expect(repaired).toBe(false);
     expect(reply).toBe(clean);
   });
+
+  it("does not eat the sentence that invites a customer to the showroom", () => {
+    // The denial rule looks for a shop word; a sales copy naming the shop must pass untouched.
+    const sales = "عندنا معرض في التجمع تقدر تزوره، وممكن نبعتلك مقاسات الركنة على واتساب.";
+    const { reply, repaired } = enforceStoreIdentity(sales, "ar");
+    expect(repaired).toBe(false);
+    expect(reply).toBe(sales);
+  });
+
 
   it("never lets its own repair sentence carry the denial back in", () => {
     for (const line of [IDENTITY_LINE.ar, IDENTITY_LINE.en]) {
