@@ -17,7 +17,22 @@ import { IDENTITY_DENIAL, IDENTITY_LINE, enforceStoreIdentity } from "@/lib/cons
 const LIVE_REPLY =
   "أهلاً بك! أنا ذكاء اصطناعي، يعني مش محل موبيليا حقيقي، لكن أقدر أساعدك جداً بالمعلومات والأفكار في الركن المودرن. لو بتدور على ركنة مودرن، دي نصائح هتفيدك.";
 
+/**
+ * The same question, answered after the first guard shipped — measured 2026-10-02. Three
+ * denials the original pattern did not carry, which is why the rule is two-part now.
+ */
+const AFTER_FIRST_FIX =
+  'أنا مساعد ذكي (AI)، ولست معرض أثاث حقيقي، فليس لدي "محل" أو "مخزن" لبيع الركنات. ولكن، أقدر أساعدك بمعلومات ونصائح لو بتدور على ركنة مودرن.';
+
 describe("the denial never reaches the customer", () => {
+  it("cuts the denial measured after the first version of the guard shipped", () => {
+    const { reply, repaired } = enforceStoreIdentity(AFTER_FIRST_FIX, "ar");
+    expect(repaired).toBe(true);
+    expect(IDENTITY_DENIAL.test(reply)).toBe(false);
+    expect(reply).toContain("ركنة مودرن");
+    expect(reply).toContain(IDENTITY_LINE.ar);
+  });
+
   it("keeps the advice that stands away from the denial", () => {
     const { reply, repaired } = enforceStoreIdentity(LIVE_REPLY, "ar");
     expect(repaired).toBe(true);
