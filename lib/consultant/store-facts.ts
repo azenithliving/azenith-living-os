@@ -54,6 +54,37 @@ export async function readStoreFacts(): Promise<StoreFacts> {
 }
 
 /**
+ * The regions the store's own shipped voice names as its own, condensed to one breath.
+ * Copied from the geography block the advisor already carries, not invented here.
+ */
+const REGIONS_AR =
+  "القاهرة الكبرى (التجمع والرحاب ومدينتي والشروق ومدينة نصر ومصر الجديدة والمعادي والزمالك)، والجيزة (أكتوبر والشيخ زايد والهرم والمهندسين)، والساحل الشمالي والعين السخنة، والإسكندرية وباقي محافظات مصر";
+
+/**
+ * The store's own answer to «where do you work and who executes», built from its record.
+ *
+ * Measured twice on the published store: left to the model, this question came back as an
+ * outside consultant's guide to other companies, and once with an offer of "approximate costs"
+ * the store never recorded. A question whose answer is a fact gets the fact, not a guess.
+ */
+export function buildCoverageReply(facts: StoreFacts, language?: string): string {
+  if (language === "en") {
+    const wa = facts.whatsappLocal ? ` Our WhatsApp is ${facts.whatsappLocal}.` : "";
+    return (
+      "Azenith Living designs, executes and manufactures across Egypt: Greater Cairo (New Cairo, Rehab, Madinaty, Shorouk, Nasr City, Heliopolis, Maadi, Zamalek), Giza (October, Sheikh Zayed, Haram, Mohandessin), the North Coast, Ain Sokhna, Alexandria and the other governorates. The work is carried out by the store's own team — design by its engineers, manufacturing in its workshop, installation by its crews, until the project is handed over." +
+      wa +
+      " Tell me the space and the style and I will take it from there."
+    );
+  }
+  const wa = facts.whatsappLocal ? ` واتساب الدار على ${toArabicDigits(facts.whatsappLocal)}،` : "";
+  return [
+    `أهلاً بيك في أزينث ليفينج. الدار شغالة في ${REGIONS_AR}.`,
+    "التنفيذ بفريق الدار نفسه: التصميم من مهندسيها، والتصنيع في ورشتها، والتركيب بأطقمها، لحد ما المشروع يتسلّم وإنت مرتاح.",
+    `لو حابب نظبط تفاصيل مشروعك بالظبط،${wa} أو قولي المساحة والستايل وأكمّل معاك هنا.`,
+  ].join("\n");
+}
+
+/**
  * The facts as one block for the advisor's own prompt. Arabic only, digits in the shape this
  * owner reads, and the unrecorded things named out loud so they are never invented.
  */

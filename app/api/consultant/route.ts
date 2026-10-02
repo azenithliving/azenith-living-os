@@ -7,13 +7,16 @@ import { predatoryDefense } from "@/lib/predatory-defense";
 import { semanticCache } from "@/lib/semantic-cache";
 import { pickFaqAnswer, type FaqRow } from "@/lib/consultant/faq-gate";
 import { extractUiAction, polishReply } from "@/lib/consultant/reply-polish";
-import { readStoreFacts, storeFactsBlock } from "@/lib/consultant/store-facts";
 import {
+  asksApproximatePrice,
+  asksCoverage,
   asksCurrentLocation,
   asksEscalation,
+  asksExecution,
   asksFoodNearby,
   asksPrice,
 } from "@/lib/consultant/question-intent";
+import { buildCoverageReply, readStoreFacts, storeFactsBlock } from "@/lib/consultant/store-facts";
 import { sendTelegramMessage, broadcastTelegramMessage } from "@/lib/telegram-config";
 import { storeMemory, storeUserPreference, getUserPreferences } from "@/lib/ultimate-agent/memory-store";
 import { LearningEngine } from "@/lib/ultimate-agent/learning-engine";
@@ -231,7 +234,7 @@ function applyHumanGuardrails(
     return { reply: buildHumanEscalationReply(language), escalated: true, bookingReady: false };
   }
 
-  if (asksPrice(latestUserMessage)) {
+  if (asksPrice(latestUserMessage) || asksApproximatePrice(latestUserMessage)) {
     return { reply: buildHumanPriceReply(language), escalated: false, bookingReady: false };
   }
 
@@ -738,6 +741,20 @@ export async function POST(
     }
     if (hesitationDetected) {
       allLearnings.push("[سلوك العميل: تم رصد تردد وبطء في الكتابة. قدم الدعم المعنوي والـ Social Proof وقسّم إجابتك لتكون مبسطة جداً ولا تضغط على العميل.]");
+    }
+
+    // A question whose answer is a recorded fact gets the fact, not a model's guess. Measured
+    // twice on the published store, «who executes and where do you deliver» came back as an
+    // outside consultant's guide to other companies, and prompt facts did not hold it.
+    if (asksCoverage(message) || asksExecution(message)) {
+      const coverageReply = buildCoverageReply(await readStoreFacts(), language);
+      conversationHistory.push({
+        role: "assistant",
+        content: coverageReply,
+        timestamp: new Date().toISOString(),
+      });
+      await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : existingSession?.insights);
+      return NextResponse.json({ reply: coverageReply, sessionId });
     }
 
     // Fetch Cairo weather and date-time context

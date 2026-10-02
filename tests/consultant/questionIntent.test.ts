@@ -1,8 +1,11 @@
 import { readFileSync } from "fs";
 import { describe, expect, it } from "vitest";
 import {
+  asksApproximatePrice,
+  asksCoverage,
   asksCurrentLocation,
   asksEscalation,
+  asksExecution,
   asksFoodNearby,
   asksPrice,
 } from "@/lib/consultant/question-intent";
@@ -130,5 +133,37 @@ describe("the route asks the new module, not its own regexes", () => {
     const services = readFileSync("lib/location-services.ts", "utf8");
     expect(services).not.toContain("isFoodNearbyRequest");
     expect(services).not.toContain("isCurrentLocationRequest");
+  });
+});
+
+describe("the coverage and execution questions are recognised", () => {
+  /** The live question that produced an outsider's guide on the published store, 2026-10-02. */
+  const LIVE_COVERAGE = "بتشتغلوا في التجمع ولا القاهرة الجديدة بس؟ ومين اللي بينفّذ الشغل؟";
+
+  it("reads the live coverage question as coverage", () => {
+    expect(asksCoverage(LIVE_COVERAGE) || asksExecution(LIVE_COVERAGE)).toBe(true);
+  });
+
+  it("reads a delivery-to-city question and a who-executes question", () => {
+    expect(asksCoverage("بتوصلوا المنصورة؟")).toBe(true);
+    expect(asksCoverage("خدمتكم فين في القاهرة؟")).toBe(true);
+    expect(asksExecution("مين اللي بينفّذ الشغل عندكم؟")).toBe(true);
+    expect(asksExecution("مين الصنايعية اللي بيشتغلوا؟")).toBe(true);
+  });
+
+  it("does not read a style question that happens to name a district", () => {
+    expect(asksCoverage("عايز ركنة مودرن تناسب شقة في التجمع")).toBe(false);
+    expect(asksExecution("عايز ركنة مودرن تناسب شقة في التجمع")).toBe(false);
+  });
+
+  it("does not read an instalments or hours question as coverage", () => {
+    expect(asksCoverage("بتشتغلوا بالتقسيط؟")).toBe(false);
+    expect(asksCoverage("بتشتغلوا أيام الجمعة؟")).toBe(false);
+  });
+
+  it("catches an approximate price, because it is still a price", () => {
+    expect(asksApproximatePrice("ممكن تكلفة تقريبية للركنة؟")).toBe(true);
+    expect(asksApproximatePrice("كام تقريباً الشغل في ١٢٠ متر؟")).toBe(true);
+    expect(asksApproximatePrice("كام يوم التوريد؟")).toBe(false);
   });
 });

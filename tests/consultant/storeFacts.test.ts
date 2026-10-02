@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { describe, expect, it } from "vitest";
-import { cleanSectionName, storeFactsBlock } from "@/lib/consultant/store-facts";
+import { buildCoverageReply, cleanSectionName, storeFactsBlock } from "@/lib/consultant/store-facts";
 
 /** The catalogue's own line names, read off the store's record on 2026-10-02. */
 const LINES = ["الصالات المودرن", "كنب الزوايا", "غرف النوم الرئيسية", "المطابخ الحديثة", "غرف الملابس"];
@@ -75,5 +75,37 @@ describe("the advisor's door reads the record live and puts it in the persona", 
 
   it("stops feeding chat-mined pairs to the advisor as management policy", () => {
     expect(route).toContain('.filter((instruction) => !instruction.trim().startsWith("سؤال:"))');
+  });
+
+  it("answers a coverage question from the record instead of from a model", () => {
+    expect(route).toContain("asksCoverage(message) || asksExecution(message)");
+    expect(route).toContain("buildCoverageReply(await readStoreFacts(), language)");
+    expect(route).toContain("asksApproximatePrice(latestUserMessage)");
+  });
+});
+
+describe("the store's own coverage answer", () => {
+  const reply = buildCoverageReply({ whatsappLocal: "1090819584", lines: LINES }, "ar");
+
+  it("names the regions, the team that executes, and the way to reach a human", () => {
+    expect(reply).toContain("القاهرة الكبرى");
+    expect(reply).toContain("التجمع");
+    expect(reply).toContain("فريق الدار نفسه");
+    expect(reply).toContain("١٠٩٠٨١٩٥٨٤");
+  });
+
+  it("says nothing about other companies and nothing in Latin", () => {
+    // «ورشتها» is the store's own workshop; what must not appear is a guide to somebody else's.
+    expect(reply).not.toMatch(/شركات|مقاولات|ورش تانية|معظم|أغلب/);
+    expect(/[A-Za-z]{2,}/.test(reply)).toBe(false);
+  });
+
+  it("stands without a recorded number, and answers an English visitor in English", () => {
+    const bare = buildCoverageReply({ whatsappLocal: null, lines: [] }, "ar");
+    expect(bare).toContain("فريق الدار نفسه");
+    expect(bare).not.toContain("واتساب");
+    const en = buildCoverageReply({ whatsappLocal: "1090819584", lines: [] }, "en");
+    expect(en).toContain("Greater Cairo");
+    expect(en).toMatch(/\p{Script=Latin}/u);
   });
 });

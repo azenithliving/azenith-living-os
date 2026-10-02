@@ -128,3 +128,85 @@ export function asksCurrentLocation(message: string): boolean {
   const text = foldArabic(message);
   return CURRENT_LOCATION_AR.test(text) || CURRENT_LOCATION_EN.test(String(message ?? ""));
 }
+
+/**
+ * The regions the store's own shipped voice already names as its own. Measured on the published
+ * store 2026-10-02, the advisor answered «who executes and where do you deliver» as an outside
+ * consultant — «most reputable contracting companies in this area» — and prompt facts did not
+ * hold it, so these questions get the store's own recorded answer instead of a model's guess.
+ */
+const COVERAGE_AREAS = anyWord(
+  "مصر",
+  "التجمع",
+  "القاهرة",
+  "القاهرة الجديدة",
+  "الرحاب",
+  "مدينتي",
+  "الشروق",
+  "العاصمة الإدارية",
+  "مدينة نصر",
+  "مصر الجديدة",
+  "المعادي",
+  "الزمالك",
+  "الجيزة",
+  "أكتوبر",
+  "الشيخ زايد",
+  "الهرم",
+  "فيصل",
+  "الدقي",
+  "المهندسين",
+  "الساحل",
+  "العلمين",
+  "السخنة",
+  "الغردقة",
+  "الجونة",
+  "شرم الشيخ",
+  "الإسكندرية",
+  "المنصورة",
+  "طنطا",
+  "المحلة",
+  "الزقازيق",
+  "دمياط",
+  "بورسعيد",
+  "الإسماعيلية",
+  "السويس",
+  "الفيوم",
+  "بني سويف",
+  "المنيا",
+  "أسيوط",
+  "سوهاج",
+  "قنا",
+  "الأقصر",
+  "أسوان",
+);
+
+/** A verb of working or reaching, tied to a place or to "where", so «بتشتغلوا بالتقسيط» stays free. */
+const COVERAGE_VERB =
+  /(?:بتشتغلوا|بتوصلوا|بتغطوا|بتخدموا|شغالين|خدمتكم)|(?:فين)\s+(?:بتشتغلوا|بتوصلوا|شغالين)|مناطق\s+(?:الخدمه|الخدمة|الشغل|التوصيل)/i;
+
+/** True when the customer is asking which places the store reaches. */
+export function asksCoverage(message: string): boolean {
+  const text = foldArabic(message);
+  return COVERAGE_VERB.test(text) && COVERAGE_AREAS.test(text);
+}
+
+/** True when the customer is asking who actually does the work. */
+export function asksExecution(message: string): boolean {
+  const text = foldArabic(message);
+  return anyWord(
+    "مين اللي بينفذ",
+    "مين بينفذ",
+    "مين الصنايعية",
+    "التنفيذ عندكم",
+    "مين بيستلم الشغل",
+    "مين بيشرف على الشغل",
+  ).test(text);
+}
+
+/** An approximate price is still a price: the store does not quote numbers it has not recorded. */
+const APPROX_PRICE_AR =
+  /(?:تكلفه|تكاليف|سعر|اسعار)\s+(?:تقريبه|تقريبي|تقريبا|استرشاديه)|(?:كام|بكام)\s+تقريبا|تقدير\s+(?:التكلفه|السعر)/i;
+
+export function asksApproximatePrice(message: string): boolean {
+  return APPROX_PRICE_AR.test(foldArabic(message));
+}
