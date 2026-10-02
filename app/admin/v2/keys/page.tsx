@@ -205,16 +205,26 @@ export default function V2KeysDeskPage() {
 
       <ul className="space-y-3">
         {(rows ?? []).map((row) => {
+          // The colour follows the verdict that matters: a key that wrote. «Answers a hello»
+          // is not green — that is the number that fooled us tonight.
           const tone =
-            row.alive > 0 ? 'bg-emerald-600/20 text-emerald-300' : row.quota > 0 ? 'bg-amber-500/20 text-amber-300' : row.rows === 0 ? 'bg-white/[0.06] text-white/45' : 'bg-rose-600/20 text-rose-300';
+            row.writes > 0
+              ? 'bg-emerald-600/20 text-emerald-300'
+              : row.quota > 0
+                ? 'bg-amber-500/20 text-amber-300'
+                : row.rows === 0
+                  ? 'bg-white/[0.06] text-white/45'
+                  : 'bg-rose-600/20 text-rose-300';
           return (
-            <li key={row.id} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4" data-key-provider={row.id}>
-              <div className="flex items-start justify-between gap-2">
+            <li key={row.id} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4" data-key-card={row.id}>
+              {/* Stacked on a phone: the verdict line is long, and beside the description it
+                  squeezed the Arabic into a narrow column. */}
+              <div className="flex flex-col items-start gap-1.5 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <h2 className="truncate text-[13px] font-black text-white">{row.label}</h2>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-white/45">{row.good}</p>
                 </div>
-                <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${tone}`} data-key-verdict={row.id}>
+                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${tone}`} data-key-verdict={row.id}>
                   {row.verdict}
                 </span>
               </div>
