@@ -51,6 +51,7 @@ function sketchOf(over: Partial<DossierSketch> = {}): DossierSketch {
 }
 
 const imageOf = (color: string | null, roomType = "living-room"): SheetImage => ({
+  id: 1,
   url: "https://images.example/one.jpg",
   thumb: "https://images.example/one.jpg",
   style: "نيوكلاسيك",
@@ -402,5 +403,66 @@ describe("the dossier is wired, not decorative", () => {
     expect(screen).toContain("/api/admin/customers/dossier");
     expect(screen).toContain("الدفتر ما ردّش");
     expect(read(PAGE)).toContain("<ClientPreCallDossier");
+  });
+});
+
+describe("اللي العائلة اختارته", () => {
+  const VOTES = [
+    { image_key: "i1", image_url: "https://images.example/one.jpg", voter: "مراتي", liked: true, updated_at: NOW },
+    { image_key: "i1", image_url: "https://images.example/one.jpg", voter: "أحمد", liked: true, updated_at: NOW },
+    { image_key: "i2", image_url: "https://images.example/two.jpg", voter: "مراتي", liked: false, updated_at: NOW },
+  ];
+
+  const familyOf = (votes: typeof VOTES | undefined) =>
+    buildDossier({
+      line: lineOf(),
+      sketches: [sketchOf()],
+      images: [],
+      imagesRoomType: "living-room",
+      imagesForHisRoom: false,
+      votes,
+    }).sections.find((s) => s.id === "family");
+
+  it("names who voted and shows the picture they kept stopping on", () => {
+    const family = familyOf(VOTES);
+    expect(family?.facts.map((f) => f.value)).toContain("مراتي، أحمد");
+    expect(family?.picks).toHaveLength(1);
+    expect(family?.picks?.[0].likes).toBe(2);
+    expect(family?.missing).toBeUndefined();
+  });
+
+  it("retires the unknown line once the family has spoken", () => {
+    const file = buildDossier({
+      line: lineOf(),
+      sketches: [sketchOf()],
+      images: [],
+      imagesRoomType: "living-room",
+      imagesForHisRoom: false,
+      votes: VOTES,
+    });
+    const missing = file.sections.find((s) => s.id === "missing")?.missing ?? [];
+    expect(missing.join(" ")).not.toContain("أكثر القطع");
+  });
+
+  it("says nobody voted, and keeps the unknown line, when the room is empty", () => {
+    const family = familyOf([]);
+    expect(family?.facts).toEqual([]);
+    expect(family?.picks).toBeUndefined();
+    expect(family?.missing?.[0]).toContain("أحبها");
+    const file = buildDossier({
+      line: lineOf(),
+      sketches: [sketchOf()],
+      images: [],
+      imagesRoomType: "living-room",
+      imagesForHisRoom: false,
+    });
+    expect((file.sections.find((s) => s.id === "missing")?.missing ?? []).join(" ")).toContain("أكثر القطع");
+  });
+
+  it("prints no machine value in the family section", () => {
+    const family = familyOf(VOTES)!;
+    const printed = family.facts.map((f) => f.value).join(" ");
+    expect(printed).not.toMatch(/https?:|#[0-9a-fA-F]{6}|i\d+/);
+    expect(printed).not.toMatch(/[A-Za-z]{3,}/);
   });
 });

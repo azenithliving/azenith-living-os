@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Phone, Search } from 'lucide-react';
 
 import { matchRoll, rollLineLabel } from '@/lib/customers/match';
+import { arNum } from '@/lib/ops/metricLabels';
 import type { DossierSection } from '@/lib/cad/dossier';
 
 type RollLine = { key: string; name: string | null; phone: string | null; email?: string | null };
@@ -208,6 +209,27 @@ export default function ClientPreCallDossier() {
                       className="h-7 w-7 rounded-lg border border-white/15"
                       style={{ backgroundColor: hex }}
                     />
+                  ))}
+                </div>
+              )}
+
+              {section.picks && section.picks.length > 0 && (
+                // The picture, not a description of it: on the phone he points at the one they
+                // sent and says «دي اللي اختارتوها».
+                <div className="mt-2 grid grid-cols-3 gap-2" data-dossier-picks>
+                  {section.picks.map((pick) => (
+                    <figure key={pick.url} className="m-0" data-dossier-picked-picture={pick.url}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={pick.url}
+                        alt="القطعة اللي وقفت عليها العائلة"
+                        loading="lazy"
+                        className="h-20 w-full rounded-lg border border-white/10 object-cover"
+                      />
+                      <figcaption className="mt-1 text-[10px] leading-tight text-white/55">
+                        {arNum(pick.likes)} صوت: {pick.voters.join("، ")}
+                      </figcaption>
+                    </figure>
                   ))}
                 </div>
               )}

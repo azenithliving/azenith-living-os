@@ -55,10 +55,37 @@ export async function readVotes(sketchId: number): Promise<VoteRow[]> {
 }
 
 /**
+ * Every vote a customer's papers have collected, for the owner's desk. Read by the list of his
+ * sketch ids, because the family votes belong to a paper, and a customer may hold several.
+ */
+export async function readVotesForSketches(sketchIds: number[]): Promise<VoteRow[]> {
+  const ids = sketchIds.map(Number).filter((id) => Number.isFinite(id) && id > 0);
+  if (!ids.length) return [];
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("family_votes")
+    .select("image_key,image_url,voter,liked,updated_at")
+    .in("sketch_id", ids)
+    .order("updated_at", { ascending: true })
+    .limit(1000);
+  if (error) {
+    console.warn("[FamilyVotes] the owner's desk could not read the votes:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row: any) => ({
+    image_key: String(row.image_key),
+    image_url: row.image_url ? String(row.image_url) : null,
+    voter: cleanVoter(row.voter),
+    liked: Boolean(row.liked),
+    updated_at: String(row.updated_at),
+  }));
+}
+
+/**
  * One tap, one row. Returning false means the store's record refused, and the page has to say
  * so rather than paint a heart that nobody stored.
- */
-export async function recordVote(input: {
+ */export async function recordVote(input: {
   sketchId: number;
   imageKey: string;
   imageUrl?: string | null;

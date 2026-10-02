@@ -214,3 +214,19 @@ describe("the room is wired where the customer stands", () => {
     expect(readFileSync("lib/cad/vote-keys.ts", "utf8")).not.toMatch(/^import[^\n]*supabase/m);
   });
 });
+
+describe("the votes reach the owner's desk", () => {
+  const door = readFileSync("app/api/admin/customers/dossier/route.ts", "utf8");
+  const panel = readFileSync("components/admin/ClientPreCallDossier.tsx", "utf8");
+
+  it("reads every paper the customer owns and hands the votes to the file", () => {
+    expect(door).toContain("readVotesForSketches(papers.map(");
+    expect(door).toContain("votes,");
+  });
+
+  it("paints the chosen pictures with who chose them, under a handle an instrument can find", () => {
+    expect(panel).toContain("data-dossier-picks");
+    expect(panel).toContain("data-dossier-picked-picture={pick.url}");
+    expect(panel).toContain("القطعة اللي وقفت عليها العائلة");
+  });
+});

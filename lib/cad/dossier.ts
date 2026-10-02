@@ -31,17 +31,20 @@
 import { foldArabic } from "@/lib/arabic";
 import { arDigits, arNum } from "@/lib/ops/metricLabels";
 import type { SheetImage } from "@/lib/cad/sheet-images";
+import { tallyVotes, topPicks, type VoteRow } from "@/lib/cad/vote-keys";
 import type { SketchDimension } from "@/lib/cad/paper-sketch-parser";
 import type { CustomerRow } from "@/lib/customers/roll";
 
 export type DossierFact = { label: string; value: string };
 
 export type DossierSection = {
-  id: "who" | "paper" | "taste" | "colours" | "missing";
+  id: "who" | "paper" | "taste" | "colours" | "family" | "missing";
   title: string;
   facts: DossierFact[];
   /** Colours are swatches, not words: hex values the bank measured off the pictures. */
   swatches?: string[];
+  /** The pictures the family itself stopped on, with who stopped. */
+  picks?: Array<{ url: string; likes: number; voters: string[] }>;
   /** What this store cannot answer about him, said out loud. */
   missing?: string[];
 };
@@ -64,6 +67,8 @@ export function buildDossier(input: {
   images: SheetImage[];
   imagesRoomType: string;
   imagesForHisRoom: boolean;
+  /** The family's taps on his papers, as the vote desk recorded them. */
+  votes?: VoteRow[];
 }): { headline: string; sections: DossierSection[] } {
   const { line, sketches, images } = input;
   const newest = sketches[0] ?? null;
@@ -138,6 +143,29 @@ export function buildDossier(input: {
 
   const swatches = [...new Set(images.map((i) => i.color).filter((c): c is string => Boolean(c)))].slice(0, 8);
 
+  // The family's own taps. Printed as pictures and names, because «they liked three pieces»
+  // tells the owner nothing he can use on the phone; the picture he can point at and say
+  // «اللي بعتوه دي».
+  const votes = input.votes ?? [];
+  const tallies = tallyVotes(votes);
+  const voters = [...new Set(votes.map((vote) => vote.voter))];
+  const liked = tallies.filter((tally) => tally.likes > 0);
+  const picks = topPicks(liked, 3)
+    .filter((tally) => typeof tally.url === "string" && tally.url.startsWith("http"))
+    .map((tally) => {
+      // The bank keeps a small copy of every picture. The owner opens this file on a phone
+      // before a call, so the full-size original is the wrong thing to download three of.
+      const known = images.find((image) => image.id !== null && `i${image.id}` === tally.image_key);
+      return { url: known?.thumb?.startsWith("http") ? known.thumb : String(tally.url), likes: tally.likes, voters: tally.voters };
+    });
+  const family: DossierFact[] = voters.length
+    ? [
+        { label: "عدد اللي صوتوا", value: arNum(voters.length) },
+        { label: "أسمائهم زي ما كتبوا", value: voters.join("، ") },
+        { label: "قطع وقفوا عندها", value: arNum(liked.length) },
+      ]
+    : [];
+
   const sections: DossierSection[] = [
     { id: "who", title: "اللي هتكلّمه", facts: who },
     { id: "paper", title: "رسمته", facts: paper },
@@ -150,12 +178,21 @@ export function buildDossier(input: {
       missing: swatches.length ? undefined : ["البنك ما بيخزّنش لون مسيطر على الصور دي."],
     },
     {
+      id: "family",
+      title: voters.length ? "اللي العائلة اختارته" : "غرفة قرار العائلة — لسه محدش صوت",
+      facts: family,
+      picks: picks.length ? picks : undefined,
+      missing: voters.length ? undefined : ["حد يفتح الرابط ويضغط «أحبها» على قطعة — لسه محدش عمل ده."],
+    },
+    {
       id: "missing",
       title: "اللي مش معروف عنه",
       facts: [],
       missing: [
         "منطقته الجغرافية: مفيش عنوان بيتسجل في أي سجل من سجلات المتجر.",
-        "أكثر القطع اللي بص عليها: مفيش سجل مشاهدة — اللي موجود آخر صفحة وقف عندها بس.",
+        ...(voters.length
+          ? []
+          : ["أكثر القطع اللي بص عليها: مفيش سجل مشاهدة — اللي موجود آخر صفحة وقف عندها بس."]),
       ],
     },
   ];

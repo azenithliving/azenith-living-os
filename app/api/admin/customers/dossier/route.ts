@@ -23,6 +23,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { readCustomers } from "@/lib/customers/read";
 import { parseSketchLink } from "@/lib/cad/sketch-link";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
+import { readVotesForSketches } from "@/lib/cad/family-votes";
 import { buildDossier, paperPath, type DossierSketch } from "@/lib/cad/dossier";
 
 export const dynamic = "force-dynamic";
@@ -90,6 +91,10 @@ export async function GET(request: NextRequest) {
 
   const photo = await photoUrl(supabase, newest?.image_path);
 
+  // What his family stopped on, from the vote desk. Read over every paper he owns, because the
+  // link he shares is per paper and a man with three rooms has three links.
+  const votes = await readVotesForSketches(papers.map((paper) => paper.id));
+
   const dossier = buildDossier({
     line,
     sketches: papers.map((p) => ({
@@ -106,6 +111,7 @@ export async function GET(request: NextRequest) {
     images: picks.images,
     imagesRoomType: picks.roomType,
     imagesForHisRoom: picks.matched,
+    votes,
   });
 
   return NextResponse.json({
