@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { arNum } from '@/lib/ops/metricLabels';
 import { linkFromPhone } from '@/lib/cad/sketch-link';
@@ -49,6 +49,10 @@ export default function PassportPage() {
   const [people, setPeople] = useState<string[]>([]);
   const [me, setMe] = useState('');
   const [voting, setVoting] = useState<string | null>(null);
+  // A poll that answers while a tap is still in the air can paint the count back to what it was
+  // before the tap. Measured on the published site 2026-10-03: the first reader showed the
+  // picture with no number at all for a moment.
+  const votingRef = useRef<string | null>(null);
 
   useEffect(() => {
     const match = window.location.pathname.match(/\/passport\/([A-Za-z0-9_-]{20,32})/);
@@ -126,6 +130,7 @@ export default function PassportPage() {
     let stopped = false;
     const load = () => {
       if (typeof document !== 'undefined' && document.hidden) return;
+      if (votingRef.current) return;
       fetch(`/api/passport/${token}/votes`)
         .then((r) => r.json())
         .then((data) => {
@@ -177,6 +182,7 @@ export default function PassportPage() {
       const voters = (before[key]?.voters ?? []).filter((name) => name !== voter);
       if (liked) voters.push(voter);
       setTallies({ ...before, [key]: { likes: voters.length, voters } });
+      votingRef.current = key;
       setVoting(key);
       setNews(null);
       try {
@@ -195,6 +201,7 @@ export default function PassportPage() {
         setTallies(before);
         setNews('المتجر ما ردّش — صوتك مش مسجل');
       } finally {
+        votingRef.current = null;
         setVoting(null);
       }
     },

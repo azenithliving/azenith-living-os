@@ -187,6 +187,14 @@ describe("the room is wired where the customer stands", () => {
     expect(page).toContain("document.hidden");
   });
 
+  it("does not let a poll paint a count back to what it was while a tap is in the air", () => {
+    // Measured on the published site 2026-10-03: the first reader caught the picture with no
+    // number at all, because a poll answered before the write landed.
+    expect(page).toContain("if (votingRef.current) return;");
+    expect(page).toContain("votingRef.current = key;");
+    expect(page).toContain("votingRef.current = null;");
+  });
+
   it("stores the table with one row per sheet, picture and voter, behind row level security", () => {
     const sql = readFileSync("supabase/migrations/20261002_d_family_votes.sql", "utf8");
     expect(sql).toContain("unique (sketch_id, image_key, voter)");
