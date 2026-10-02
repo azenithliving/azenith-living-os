@@ -58,16 +58,82 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (unauthorized) return unauthorized;
 
     body = (await request.json()) as AnalyzeRequest;
+    const prompt = buildAnalyzePrompt(body);
 
-    const telemetry = body.telemetry;
-    const interest = summarizeInterest(telemetry?.hovered_elements);
-    const translatedTags = interest.all.map(translateTag).join("، ") || "لا يوجد";
-    const recentMessages = (body.messages || [])
-      .slice(-12)
-      .map((m) => `${m.role === "user" ? "العميل" : "المستشار"}: ${m.content}`)
-      .join("\n");
+    const answer = await askWithFloor("customer-analysis", [{ role: "user", content: prompt }], {
+      // Seven Arabic fields do not fit in 700 tokens: measured on the published site the night
+      // this was wired, a key answered and the reply arrived cut off, which is unparseable and
+      // therefore indistinguishable from silence unless the budget is honest.
+      maxTokens: 1400,
+      temperature: 0.5,
+      jsonMode: true,
+    });
 
-    const prompt = `You are a senior sales psychologist analyzing a visitor to Azenith Living (luxury interior design & furniture).
+    const parsed = answer.ok ? readProfile(answer.content) : null;
+    if (!parsed && answer.ok) {
+      // Which failure was it: the reply never opened as JSON, or it arrived cut off? Measured
+      // once and logged, because «ردّ غير مقروء» covers two different repairs.
+      console.error("[LeadAnalyze] unreadable reply:", JSON.stringify({
+        provider: answer.provider,
+        chars: answer.content.length,
+        braces: answer.content.includes("{"),
+        endsClosed: answer.content.trim().endsWith("}") || answer.content.trim().endsWith("```"),
+      }));
+    }
+    if (parsed) {
+      return NextResponse.json({ profile: parsed, generated: true, answered_by: answeredByLabel(answer.provider) });
+    }
+
+    // Two different news, and the label has to carry which one: a key that spoke and was not
+    // understood is not a key that was absent.
+    const note = answer.ok
+      ? "النموذج ردّ بردّ ما كانش مقروء — اللي ظاهر هنا حساب الرادار."
+      : answer.floorLine;
+    const answeredBy = answer.ok
+      ? "نموذج من مفاتيحك ردّ، والظاهر هنا حساب الرادار"
+      : "قواعد المتجر — من غير مفتاح";
+    return NextResponse.json({ profile: buildFallback(body, note), generated: false, answered_by: answeredBy });
+  } catch (error) {
+    // The floor is also the last resort when this door itself breaks: an English status code is
+    // not an answer a man reads.
+    console.error("[LeadAnalyze] Error:", error);
+    return NextResponse.json({
+      profile: buildFallback(body, "الباب ما قدرش يوصل للنموذج — اللي ظاهر هنا حساب الرادار من غير مفتاح."),
+      generated: false,
+      answered_by: "قواعد المتجر — من غير مفتاح",
+    });
+  }
+}
+
+/** The model's JSON, or null when the answer is not a profile. Never a half-parsed guess. */
+export function readProfile(content: string): Record<string, string> | null {
+  const found = content.match(/\{[\s\S]*\}/);
+  if (!found) return null;
+  try {
+    const parsed = JSON.parse(found[0]);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    const entries = Object.entries(parsed).filter(([, value]) => typeof value === "string" && (value as string).trim());
+    return entries.length ? Object.fromEntries(entries.map(([k, v]) => [k, String(v)])) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The question this door asks the model. Exported so a measurement puts the same words in front
+ * of the chain that the owner's screen puts — a test with its own invented prompt measures the
+ * invention, not the door.
+ */
+export function buildAnalyzePrompt(body: AnalyzeRequest): string {
+  const telemetry = body.telemetry;
+  const interest = summarizeInterest(telemetry?.hovered_elements);
+  const translatedTags = interest.all.map(translateTag).join("، ") || "لا يوجد";
+  const recentMessages = (body.messages || [])
+    .slice(-12)
+    .map((m) => `${m.role === "user" ? "العميل" : "المستشار"}: ${m.content}`)
+    .join("\n");
+
+  return `You are a senior sales psychologist analyzing a visitor to Azenith Living (luxury interior design & furniture).
 
 Analyze this lead and produce a PROFESSIONAL ARABIC psychological profile.
 
@@ -95,52 +161,4 @@ Return JSON ONLY with these string fields (all in Egyptian Arabic):
 }
 
 Rules: علم نفس واقعي لا مبالغة، لا تخترع بيانات غير موجودة، كل الحقول إلزامية.`;
-
-    const answer = await askWithFloor("customer-analysis", [{ role: "user", content: prompt }], {
-      // Seven Arabic fields do not fit in 700 tokens: measured on the published site the night
-      // this was wired, a key answered and the reply arrived cut off, which is unparseable and
-      // therefore indistinguishable from silence unless the budget is honest.
-      maxTokens: 1400,
-      temperature: 0.5,
-      jsonMode: true,
-    });
-
-    const parsed = answer.ok ? readProfile(answer.content) : null;
-    if (parsed) {
-      return NextResponse.json({ profile: parsed, generated: true, answered_by: answeredByLabel(answer.provider) });
-    }
-
-    // Two different news, and the label has to carry which one: a key that spoke and was not
-    // understood is not a key that was absent.
-    const note = answer.ok
-      ? "النموذج ردّ بردّ ما كانش مقروء — اللي ظاهر هنا حساب الرادار."
-      : answer.floorLine;
-    const answeredBy = answer.ok
-      ? "نموذج من مفاتيحك ردّ، والظاهر هنا حساب الرادار"
-      : "قواعد المتجر — من غير مفتاح";
-    return NextResponse.json({ profile: buildFallback(body, note), generated: false, answered_by: answeredBy });
-  } catch (error) {
-    // The floor is also the last resort when this door itself breaks: an English status code is
-    // not an answer a man reads.
-    console.error("[LeadAnalyze] Error:", error);
-    return NextResponse.json({
-      profile: buildFallback(body, "الباب ما قدرش يوصل للنموذج — اللي ظاهر هنا حساب الرادار من غير مفتاح."),
-      generated: false,
-      answered_by: "قواعد المتجر — من غير مفتاح",
-    });
-  }
-}
-
-/** The model's JSON, or null when the answer is not a profile. Never a half-parsed guess. */
-function readProfile(content: string): Record<string, string> | null {
-  const found = content.match(/\{[\s\S]*\}/);
-  if (!found) return null;
-  try {
-    const parsed = JSON.parse(found[0]);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
-    const entries = Object.entries(parsed).filter(([, value]) => typeof value === "string" && (value as string).trim());
-    return entries.length ? Object.fromEntries(entries.map(([k, v]) => [k, String(v)])) : null;
-  } catch {
-    return null;
-  }
 }
