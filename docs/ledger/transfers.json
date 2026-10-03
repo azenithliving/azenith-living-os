@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T07:42:18.504Z",
+  "generatedAt": "2026-10-03T07:56:34.761Z",
   "states": [
     "not-moved",
     "moving",
@@ -8,8 +8,8 @@
   ],
   "counts": {
     "not-moved": 467,
-    "moved": 9,
-    "moving": 8,
+    "moved": 11,
+    "moving": 6,
     "erased": 1
   },
   "rows": [
@@ -992,10 +992,10 @@
     {
       "kind": "root-lib",
       "atom": "lib/cad/sheet-images.ts",
-      "state": "moving",
+      "state": "moved",
       "phase": "capture-1",
       "when": "2026-10-03",
-      "proof": "the suggestions now walk the four styles before they repeat one: measured on the live bank, the top three bedroom pictures by quality were three rooms in the same taste, and after the change the same address showed a warm modern bedroom, a classic majlis and a canopy bed — 3 shown, 3 loaded, on a 390px phone. The room-type labels moved to their own module so the customer's page never imports the database reader"
+      "proof": "the suggestions now walk the four styles before they repeat one: measured on the live bank, the top three bedroom pictures by quality were three rooms in the same taste, and after the change the same address showed a warm modern bedroom, a classic majlis and a canopy bed — 3 shown, 3 loaded, on a 390px phone, and again on the published URL: 3 shown, 3 loaded, three different tastes. The room-type labels moved to their own module so the customer's page never imports the database reader"
     },
     {
       "kind": "root-lib",
@@ -1460,10 +1460,10 @@
     {
       "kind": "orphan-door",
       "atom": "app/api/passport/[token]/contact/route.ts",
-      "state": "moving",
+      "state": "moved",
       "phase": "capture-1",
       "when": "2026-10-03",
-      "proof": "the door behind the sheet's secret address: it refuses a number that is not an Egyptian mobile in the words he reads (measured 400 «الرقم ده مش موبايل مصري» on a paper with no owner), claims a paper only when nobody owns it, writes his area and his room type without overwriting what the store already holds, and reads the row back before it answers — the log line says what the table kept, not what the request intended. Measured on the local house at 390px with a throwaway paper: the table came back with phone:1009998877 + التجمع الخامس + نوم رئيسي, three bank pictures returned and every one of them loaded, and after a reload the sheet stopped asking for a number it already holds. The published-site proof is owed until the owner gives the word"
+      "proof": "the door behind the sheet's secret address: it refuses a number that is not an Egyptian mobile in the words he reads (measured 400 «الرقم ده مش موبايل مصري» on a paper with no owner), claims a paper only when nobody owns it, writes his area and his room type without overwriting what the store already holds, and reads the row back before it answers — the log line says what the table kept, not what the request intended. Measured on the local house at 390px with a throwaway paper: the table came back with phone:1009998877 + التجمع الخامس + نوم رئيسي, three bank pictures returned and every one of them loaded, and after a reload the sheet stopped asking for a number it already holds. and measured again on the published URL at 390px after the owner's word: the same 400 refusal in his words, three bank pictures shown and loaded, the table answering phone:1009998877 + التجمع الخامس + نوم رئيسي, and the sheet after a reload holding his number without asking again. The throwaway paper was deleted and the roll was left as found"
     },
     {
       "kind": "orphan-door",

@@ -89,7 +89,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
   return NextResponse.json({
     success: true,
-    sheet: publicSheet(found.row, Boolean(found.row.customer_key))
+    sheet: publicSheet(found.row, Boolean(found.row.customer_key)),
     images: picks.images,
     images_room_type: picks.roomType,
     images_for_his_room: picks.matched,
@@ -150,7 +150,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({
       success: true,
       matched: false,
-      sheet: publicSheet({ ...row, dimensions: withCustomer }, Boolean(row.customer_key))
+      sheet: publicSheet({ ...row, dimensions: withCustomer }, Boolean(row.customer_key)),
       error: null,
       message: "الأرقام اللي كتبتها ما طابتش اللي قريناه — كلّمنانا ونعيد القراءة سوا",
     });
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   return NextResponse.json({
     success: true,
     matched: true,
-    sheet: refreshed.row ? publicSheet(refreshed.row, Boolean(refreshed.row.customer_key)) : null
+    sheet: refreshed.row ? publicSheet(refreshed.row, Boolean(refreshed.row.customer_key)) : null,
     message: "اتأكدت. دي ورقته المعتمدة بنفس الأرقام اللي كتبها.",
   });
 }
