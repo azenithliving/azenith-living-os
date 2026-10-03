@@ -36,9 +36,10 @@ type Row = {
   customer_dimensions: number[] | null;
   /** Read for the write rules below. `publicSheet` never returns it: this is a public address. */
   customer_key: string | null;
+  customer_city: string | null;
 };
 
-function publicSheet(row: Row) {
+function publicSheet(row: Row, hasPhone: boolean) {
   const dimensions = Array.isArray(row.dimensions) ? row.dimensions : [];
   return {
     room: row.room ?? null,
@@ -54,6 +55,9 @@ function publicSheet(row: Row) {
     // the customer signed it has to say so, not look unchanged.
     unchanged: stillSealed(row.frozen_hash, dimensions),
     customer_dimensions: row.customer_dimensions ?? null,
+    // His own sheet may say the shop already holds his number; the number itself never leaves
+    // the server, and the caller passes the boolean in so this function cannot echo a key.
+    contact: { hasPhone, city: row.customer_city ?? null },
   };
 }
 
@@ -62,7 +66,7 @@ async function findByToken(token: string) {
   if (!supabase) return { error: "المتجر غير متصل دلوقتي" as const, status: 503 };
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,confirmed_at,frozen_hash,customer_dimensions,customer_key")
+    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,confirmed_at,frozen_hash,customer_dimensions,customer_key,customer_city")
     .eq("token", token)
     .maybeSingle();
   if (error) return { error: "السجل ما ردّش" as const, status: 500 };
@@ -85,7 +89,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
   return NextResponse.json({
     success: true,
-    sheet: publicSheet(found.row),
+    sheet: publicSheet(found.row, Boolean(found.row.customer_key))
     images: picks.images,
     images_room_type: picks.roomType,
     images_for_his_room: picks.matched,
@@ -146,7 +150,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({
       success: true,
       matched: false,
-      sheet: publicSheet({ ...row, dimensions: withCustomer }),
+      sheet: publicSheet({ ...row, dimensions: withCustomer }, Boolean(row.customer_key))
       error: null,
       message: "الأرقام اللي كتبتها ما طابتش اللي قريناه — كلّمنانا ونعيد القراءة سوا",
     });
@@ -174,7 +178,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   return NextResponse.json({
     success: true,
     matched: true,
-    sheet: refreshed.row ? publicSheet(refreshed.row) : null,
+    sheet: refreshed.row ? publicSheet(refreshed.row, Boolean(refreshed.row.customer_key)) : null
     message: "اتأكدت. دي ورقته المعتمدة بنفس الأرقام اللي كتبها.",
   });
 }

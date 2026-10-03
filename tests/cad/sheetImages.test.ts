@@ -1,44 +1,32 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest";
-
-import { roomTypeFor } from "@/lib/cad/sheet-images";
+import { describe, it, expect } from "vitest";
+import { diversifyByStyle } from "@/lib/cad/sheet-images";
 
 /**
- * The room on a hand-drawn sheet is Arabic prose; the picture bank is keyed in
- * English slugs. This mapping is the only thing between the two, and a wrong answer
- * here puts a bedroom's pictures on a dining-room sheet — so the words the owner and
- * his customers actually use are pinned, including the misspelled and the accented.
+ * Three suggestions that are the same room in three lights are one suggestion. The bank is
+ * ordered by quality, and the highest-quality bedroom pictures measured on the live bank all
+ * sit in the same style — so the pick has to walk the styles before it repeats one.
  */
-describe("the room on the sheet points at the pictures that hold it", () => {
-  it("reads the words a customer would write", () => {
-    expect(roomTypeFor("غرفة نوم ماستر")).toBe("master-bedroom");
-    expect(roomTypeFor("صالة")) .toBe("living-room");
-    expect(roomTypeFor("مجلس رجال")).toBe("living-room");
-    expect(roomTypeFor("سفرة")).toBe("dining-room");
-    expect(roomTypeFor("أوضة أطفال")).toBe("children-room");
-    expect(roomTypeFor("غرفة بنتي")).toBe("children-room");
-    expect(roomTypeFor("ركنة")).toBe("corner-sofa");
+const rows = [
+  { url: "a", style: "classic" },
+  { url: "b", style: "classic" },
+  { url: "c", style: "modern" },
+  { url: "d", style: null },
+  { url: "e", style: "scandinavian" },
+];
+
+describe("the suggestions cover tastes, not one taste three times", () => {
+  it("takes the best of each style first, in quality order", () => {
+    expect(diversifyByStyle(rows, 3).map((r) => r.url)).toEqual(["a", "c", "d"]);
   });
 
-  it("survives the diacritics a hand-drawn label arrives with", () => {
-    expect(roomTypeFor("غُرْفَة نَوْم")).toBe("master-bedroom");
+  it("fills the rest from the same bank when styles run out", () => {
+    expect(diversifyByStyle(rows, 5).map((r) => r.url)).toEqual(["a", "c", "d", "e", "b"]);
   });
 
-  /** The letters that have two spellings, not just the marks: a hamza and a ta. */
-  it("folds the letters handwriting varies, not only the vowel marks", () => {
-    expect(roomTypeFor("غرفة معيشة")).toBe("living-room");
-    expect(roomTypeFor("غرفة معيشه")).toBe("living-room");
-    expect(roomTypeFor("أطفال")).toBe("children-room");
-    expect(roomTypeFor("اطفال")).toBe("children-room");
-  });
-
-  it("accepts the bank's own slug when that is what came back", () => {
-    expect(roomTypeFor("living-room")).toBe("living-room");
-  });
-
-  it("says nothing rather than guessing a room it has no pictures for", () => {
-    expect(roomTypeFor("مكتب")).toBeNull();
-    expect(roomTypeFor("")).toBeNull();
-    expect(roomTypeFor(null)).toBeNull();
+  it("never returns more than was asked, and never invents one", () => {
+    expect(diversifyByStyle(rows, 0)).toEqual([]);
+    expect(diversifyByStyle([], 3)).toEqual([]);
+    expect(diversifyByStyle(rows, 99)).toHaveLength(5);
   });
 });

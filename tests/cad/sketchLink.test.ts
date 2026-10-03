@@ -67,7 +67,9 @@ describe('the customer’s own page keeps his number to itself', () => {
     const body = source.slice(source.indexOf('function publicSheet'), source.indexOf('async function findByToken'));
     expect(body).not.toMatch(/customer_key/);
     // The key is read for the write rule, and stops there.
-    expect(source).toMatch(/select\("[^"]*customer_key"\)/);
+    // The door must read the key (that is how it decides whether the paper has an owner) while
+    // never echoing it. Column order in the select is not the rule, so match the name in the list.
+    expect(source).toMatch(/select\("[^"]*\bcustomer_key\b[^"]*"\)/);
   });
 
   it('only claims a paper that has no owner yet, so a visitor cannot move the owner’s link', () => {

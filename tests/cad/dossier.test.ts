@@ -318,6 +318,15 @@ describe("the dossier refuses to invent", () => {
     expect(file.headline).toContain(`${ar(0)} ورقة`);
   });
 
+  it("carries the area he typed, and stops calling it unknown", () => {
+    const silent = buildDossier({ line: lineOf(), sketches: [sketchOf()], images: [], imagesRoomType: "living-room", imagesForHisRoom: true });
+    expect(silent.sections.find((s) => s.id === "missing")?.missing.join(" ")).toContain("منطقته الجغرافية");
+
+    const told = buildDossier({ line: lineOf(), sketches: [sketchOf({ customer_city: "التجمع الخامس" })], images: [], imagesRoomType: "living-room", imagesForHisRoom: true });
+    const paper = told.sections.find((s) => s.id === "paper")?.facts ?? [];
+    expect(paper.find((f) => f.label === "منطقته")?.value).toBe("التجمع الخامس");
+    expect(told.sections.find((s) => s.id === "missing")?.missing.join(" ")).not.toContain("منطقته الجغرافية");
+  });
   it("keeps the general house palette labelled as the general house palette", () => {
     const file = buildDossier({ line: lineOf(), sketches: [sketchOf({ room: "حديقة شتوية" })], images: [imageOf("#3b2f2a", "comprehensive-interior")], imagesRoomType: "comprehensive-interior", imagesForHisRoom: false });
     expect(file.sections.find((s) => s.id === "colours")?.title).toContain("مكانه مش في البنك");

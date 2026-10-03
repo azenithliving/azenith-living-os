@@ -14,21 +14,9 @@
 
 import { foldArabic } from "@/lib/arabic";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { GENERAL_ROOM, ROOM_TYPES } from "./room-labels";
 
 export type SheetImage = { id: number | null; url: string; thumb: string; style: string | null; roomType: string; color: string | null };
-
-/** The seven types the bank actually holds, in the order the sheet prefers them. */
-const ROOM_TYPES = [
-  "master-bedroom",
-  "living-room",
-  "dining-room",
-  "children-room",
-  "teen-room",
-  "corner-sofa",
-  "comprehensive-interior",
-] as const;
-
-const GENERAL_ROOM = "comprehensive-interior";
 
 /**
  * Arabic words a customer or the reader might use, folded to the type that holds
@@ -69,6 +57,32 @@ export function roomTypeFor(name: string | null | undefined): string | null {
   return (ROOM_TYPES as readonly string[]).includes(exact) ? exact : null;
 }
 
+/**
+ * The bank's best pictures are not the bank's most useful three.
+ *
+ * Ordered by quality alone, the first three bedroom pictures measured on the live bank were
+ * three heavy majlis rooms in the same style — a customer reading «اقتراحات» and getting one
+ * taste three times learns nothing about what the shop can do. So the list keeps its quality
+ * order and takes the best of each style before it repeats one.
+ */
+export function diversifyByStyle<T extends { style: string | null }>(rows: T[], limit: number): T[] {
+  if (limit <= 0) return [];
+  const picked: T[] = [];
+  const seen = new Set<string>();
+  for (const row of rows) {
+    const key = row.style ?? "";
+    if (seen.has(key)) continue;
+    seen.add(key);
+    picked.push(row);
+    if (picked.length === limit) return picked;
+  }
+  for (const row of rows) {
+    if (picked.length === limit) break;
+    if (!picked.includes(row)) picked.push(row);
+  }
+  return picked;
+}
+
 export async function pickSheetImages(
   roomName: string | null | undefined,
   limit = 20
@@ -86,11 +100,11 @@ export async function pickSheetImages(
     .eq("is_active", true)
     .not("url", "is", null)
     .order("quality_score", { ascending: false, nullsFirst: false })
-    .limit(limit);
+    .limit(Math.min(limit * 6, 60));
 
   if (error || !Array.isArray(data)) return { images: [], roomType, matched: false };
 
-  const images = data
+  const usable = data
     .filter((row: any) => typeof row.url === "string" && row.url.startsWith("http"))
     .map((row: any) => ({
       id: Number.isFinite(Number(row.id)) ? Number(row.id) : null,
@@ -103,5 +117,5 @@ export async function pickSheetImages(
       color: typeof row.metadata?.avg_color === "string" ? String(row.metadata.avg_color) : null,
     }));
 
-  return { images, roomType, matched: Boolean(wanted) };
+  return { images: diversifyByStyle(usable, limit), roomType, matched: Boolean(wanted) };
 }

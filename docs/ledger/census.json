@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-10-03T02:12:43.087Z",
+  "generatedAt": "2026-10-03T07:42:18.500Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
     "newPages": 13,
     "newPageLines": 833,
     "adminDoors": 118,
-    "allDoors": 198,
+    "allDoors": 199,
     "outsideDoors": 8,
     "outsideDoorLines": 2583,
-    "rootLibFiles": 273,
+    "rootLibFiles": 275,
     "rootLibUsed": 77,
-    "orphanDoors": 72,
-    "rootLibUsedLines": 28371,
+    "orphanDoors": 73,
+    "rootLibUsedLines": 28392,
     "furnitureFiles": 57,
     "furnitureLines": 15561,
     "furnitureUsedByBoth": 6,
@@ -28,7 +28,7 @@
     "navEntries": 11,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 484
+    "atoms": 485
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -991,7 +991,7 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/dossier.ts",
-      "lines": 371,
+      "lines": 378,
       "callers": 2
     },
     {
@@ -1015,7 +1015,7 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/sheet-images.ts",
-      "lines": 108,
+      "lines": 122,
       "callers": 1
     },
     {
@@ -1524,8 +1524,13 @@
     },
     {
       "kind": "orphan-door",
+      "id": "app/api/passport/[token]/contact/route.ts",
+      "lines": 97
+    },
+    {
+      "kind": "orphan-door",
       "id": "app/api/passport/[token]/route.ts",
-      "lines": 181
+      "lines": 185
     },
     {
       "kind": "orphan-door",

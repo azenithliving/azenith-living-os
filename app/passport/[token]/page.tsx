@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { arNum } from '@/lib/ops/metricLabels';
 import { linkFromPhone } from '@/lib/cad/sketch-link';
 import { imageKeyOf } from '@/lib/cad/vote-keys';
+import { ROOM_CHOICES } from '@/lib/cad/room-labels';
 
 type Dimension = { label: string; meters: number; confirmed?: boolean };
 type Sheet = {
@@ -19,6 +20,7 @@ type Sheet = {
   sealed: boolean;
   unchanged: boolean;
   customer_dimensions: number[] | null;
+  contact?: { hasPhone: boolean; city: string | null };
 };
 
 const OPENING_LABEL: Record<string, string> = { door: 'باب', window: 'شباك' };
@@ -49,6 +51,12 @@ export default function PassportPage() {
   const [people, setPeople] = useState<string[]>([]);
   const [me, setMe] = useState('');
   const [voting, setVoting] = useState<string | null>(null);
+  // The contact moment: his area, the room type when the paper never named one, and what the
+  // bank actually sent back.
+  const [city, setCity] = useState('');
+  const [roomChoice, setRoomChoice] = useState('');
+  const [offer, setOffer] = useState<{ line: string; picks: SheetImage[]; matched: boolean } | null>(null);
+  const [sending, setSending] = useState(false);
   // A poll that answers while a tap is still in the air can paint the count back to what it was
   // before the tap. Measured on the published site 2026-10-03: the first reader showed the
   // picture with no number at all for a moment.
@@ -106,6 +114,34 @@ export default function PassportPage() {
       setBusy(false);
     }
   }, [busy, phone, token, typed]);
+
+  /**
+   * Ask for the number at the moment it buys him something: he wants the suggestions on his
+   * own phone, so the shop asks for the phone and the area in the same breath. The answer is
+   * what the bank really holds — never a promise about measurements it cannot see.
+   */
+  const sendOffer = useCallback(async () => {
+    if (sending || !token) return;
+    setSending(true);
+    setNews(null);
+    try {
+      const res = await fetch(`/api/passport/${token}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, city, room: roomChoice || null }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!data?.success) {
+        setNews(String(data?.error || 'المتجر ما سجلش الرقم'));
+        return;
+      }
+      setOffer({ line: String(data.line ?? ''), picks: Array.isArray(data.picks?.images) ? data.picks.images : [], matched: Boolean(data.picks?.matched) });
+    } catch {
+      setNews('المتجر ما ردّش — جرّب تاني.');
+    } finally {
+      setSending(false);
+    }
+  }, [city, phone, roomChoice, sending, token]);
 
   const confirmed = Boolean(sheet?.confirmed_at);
 
@@ -300,6 +336,123 @@ export default function PassportPage() {
                   {busy ? 'بأأكد…' : 'أكّد مقاساتي'}
                 </button>
                 {news && <p className="mt-2 text-[11px] leading-relaxed text-white/60">{news}</p>}
+              </section>
+            )}
+            {offer ? (
+              <section
+                className="mt-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.07] p-4"
+                data-contact-offer
+                data-contact-sent
+              >
+                <h2 className="text-[12px] font-black text-emerald-200">{offer.line}</h2>
+                {offer.picks.length > 0 && (
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {offer.picks.map((pick, i) => (
+                      <img
+                        key={pick.url}
+                        src={pick.thumb}
+                        alt={`اقتراح تجهيز ${arNum(i + 1)} من المتجر`}
+                        data-offer-picture={pick.url}
+                        className="aspect-square w-full rounded-xl border border-white/10 object-cover"
+                      />
+                    ))}
+                  </div>
+                )}
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(
+                    `ورقتي من أزينث: ${typeof window !== 'undefined' ? window.location.href : ''}${
+                      offer.picks.length ? `\n${offer.picks.map((p) => p.url).join('\n')}` : ''
+                    }`
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  data-contact-share
+                  className="mt-3 block rounded-xl bg-emerald-500/20 border border-emerald-500/30 px-4 py-2.5 text-center text-[13px] font-black text-emerald-100"
+                >
+                  ابعتها على واتساب وخلي المتجر يكمل معاك
+                </a>
+                <p className="mt-2 text-[10px] leading-relaxed text-white/45">
+                  رقمك اتسجل مع الورقة دي، فالمتجر عارف صاحب الورقة مين من غير ما تسأل.
+                </p>
+              </section>
+            ) : sheet?.contact?.hasPhone ? (
+              <section className="mt-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.07] p-4" data-contact-offer data-contact-claimed>
+                <h2 className="text-[12px] font-black text-emerald-200">رقمك عندنا من ورقته دي</h2>
+                <p className="mt-1 text-[11px] leading-relaxed text-white/60">
+                  {sheet.contact.city ? `منطقتك اللي سجلتها: ${sheet.contact.city}.` : 'لسه ما سجلتش منطقتك — لو عايز اقتراحات أقرب لمكانك قولها.'}
+                  {' '}الصور اللي تحت دي من بنك المتجر لنوع مكانك، وشاركها مع أهلك في الغرفة اللي بعدها.
+                </p>
+                {!sheet.contact.city && (
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="منطقتك"
+                      data-contact-city
+                      className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[13px] text-white placeholder-white/25 focus:border-amber-500/40 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={sendOffer}
+                      disabled={sending}
+                      className="rounded-xl bg-amber-500/20 border border-amber-500/30 px-3 py-2 text-[12px] font-bold text-amber-200 disabled:opacity-50"
+                    >
+                      {sending ? 'بأضيف…' : 'أضفها'}
+                    </button>
+                  </div>
+                )}
+              </section>
+            ) : (
+              <section className="mt-4 rounded-2xl border border-amber-500/25 bg-amber-500/[0.06] p-4" data-contact-offer>
+                <h2 className="text-[13px] font-black text-amber-200">عايز ٣ اقتراحات تجهيز توصلك على واتساب؟</h2>
+                <p className="mt-1 text-[11px] leading-relaxed text-white/60">
+                  بنرشّحلك من صور المتجر على حسب نوع غرفتك، ونابعتلك اللي عجبك. رقمك بيخلي المتجر متصل بيك،
+                  ومنطقتك بتعرفنا مكانك.
+                </p>
+                <input
+                  inputMode="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="موبايلك — للاستلام على واتساب"
+                  dir="ltr"
+                  data-contact-phone
+                  className="mt-3 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-right text-[13px] text-white placeholder-white/25 focus:border-amber-500/40 focus:outline-none"
+                />
+                <input
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="منطقتك — زي التجمع أو زايد أو الإسكندرية"
+                  data-contact-city
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[13px] text-white placeholder-white/25 focus:border-amber-500/40 focus:outline-none"
+                />
+                {!sheet?.room && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {ROOM_CHOICES.map((choice) => (
+                      <button
+                        key={choice.type}
+                        type="button"
+                        onClick={() => setRoomChoice(roomChoice === choice.type ? '' : choice.type)}
+                        data-contact-room={choice.type}
+                        data-contact-room-selected={roomChoice === choice.type ? '1' : '0'}
+                        className={`rounded-full border px-3 py-1 text-[11px] ${
+                          roomChoice === choice.type
+                            ? 'border-amber-500/50 bg-amber-500/20 text-amber-100'
+                            : 'border-white/10 bg-white/5 text-white/55'
+                        }`}
+                      >
+                        {choice.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={sendOffer}
+                  disabled={sending || !phone.trim()}
+                  className="mt-3 w-full rounded-xl bg-amber-500/20 border border-amber-500/30 px-4 py-2.5 text-[13px] font-black text-amber-200 disabled:opacity-50"
+                >
+                  {sending ? 'بأجهزها…' : 'ابعتلي الاقتراحات'}
+                </button>
               </section>
             )}
             {images.length > 0 && (

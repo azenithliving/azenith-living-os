@@ -53,6 +53,8 @@ export type DossierSketch = {
   id: number;
   token: string | null;
   room: string | null;
+  /** The area in his own words, captured when he asked for his suggestions on WhatsApp. */
+  customer_city?: string | null;
   dimensions: SketchDimension[];
   area_sqm: number | string | null;
   ok: boolean;
@@ -97,6 +99,7 @@ export function buildDossier(input: {
     const area = Number(newest.area_sqm) || derivedArea(newest.dimensions);
     paper.push({ label: "عدد أوراقه", value: arNum(sketches.length) });
     paper.push({ label: "أحدث ورقة", value: roomLabel(newest.room) || "مكان من غير اسم على الورقة" });
+    if (newest.customer_city) paper.push({ label: "منطقته", value: newest.customer_city });
     paper.push({
       label: "الأبعاد",
       value: newest.dimensions.length
@@ -189,7 +192,11 @@ export function buildDossier(input: {
       title: "اللي مش معروف عنه",
       facts: [],
       missing: [
-        "منطقته الجغرافية: مفيش عنوان بيتسجل في أي سجل من سجلات المتجر.",
+        // He says his area himself when he asks for his suggestions on WhatsApp; until he
+        // does, the file admits the gap instead of guessing a delivery zone.
+        ...(sketches.some((s) => s.customer_city)
+          ? []
+          : ["منطقته الجغرافية: مفيش عنوان بيتسجل في أي سجل من سجلات المتجر."]),
         ...(voters.length
           ? []
           : ["أكثر القطع اللي بص عليها: مفيش سجل مشاهدة — اللي موجود آخر صفحة وقف عندها بس."]),

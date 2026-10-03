@@ -36,6 +36,7 @@ type PaperRow = {
   id: number;
   token: string | null;
   room: string | null;
+  customer_city?: string | null;
   dimensions: DossierSketch["dimensions"];
   area_sqm: number | string | null;
   ok: boolean;
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,token,room,dimensions,area_sqm,ok,confirmed_at,frozen_hash,created_at,image_path")
+    .select("id,token,room,customer_city,dimensions,area_sqm,ok,confirmed_at,frozen_hash,created_at,image_path")
     .eq("company_id", companyId)
     .eq("customer_key", wanted.key)
     .order("created_at", { ascending: false })
@@ -101,6 +102,7 @@ export async function GET(request: NextRequest) {
       id: p.id,
       token: p.token ?? null,
       room: p.room ?? null,
+      customer_city: p.customer_city ?? null,
       dimensions: Array.isArray(p.dimensions) ? p.dimensions : [],
       area_sqm: p.area_sqm ?? null,
       ok: Boolean(p.ok),
