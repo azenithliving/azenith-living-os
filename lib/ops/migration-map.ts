@@ -235,6 +235,8 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "app/admin/v2/keys/page.tsx", office: "key-desk", status: "moving", reason: "مكتب المفاتيح: قايمة النماذج المجانية وعدد المفاتيح اللي بيجاوب فعلًا وخطوات جيب المفتاح" },
   { id: "app/api/admin/keys/desk/route.ts", office: "key-desk", status: "moving", reason: "بوّابة المكتب: بتقرأ السجل وبتسأل كل مزود عن مفاتيحه في دفعة محدودة" },
   { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "pending", reason: "الإعدادات" },
+  { id: "app/api/passport/[token]/contact/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الرقم والمنطقة: العميل هو اللي بيديها وهي اللي بتربط الورقة بصاحبها — شغل مكتب المبيعات" },
+  { id: "lib/cad/sheet-images.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الصور اللي واقف وراها الملف الذهبي وصفحة العميل معًا — مش ملك موظف واحد" },
   { id: "app/admin/v2/system/page.tsx", office: "system-room", status: "moving", reason: "الباب بيقول الحقيقة عن نفسه دلوقت وبيفتح على الاستوديو والخزانة — النقل نفسه لسه ما كملش" },
   { id: "app/admin/v2/work/page.tsx", office: "records-office", status: "moving", reason: "الباب بيقول الحقيقة عن نفسه دلوقت وبيفتح على الورق والمبيعات والاستوديو — النقل نفسه لسه ما كملش" },
   { id: "app/admin/layout.tsx", office: "decision-desk", status: "pending", reason: "قشرة البيت القديم" },

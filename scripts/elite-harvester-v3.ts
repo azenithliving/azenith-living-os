@@ -27,7 +27,11 @@ dotenv.config({ path: ".env.local" });
 const CONFIG = {
   // API Keys (Round-robin rotation)
   PEXELS_KEYS: (process.env.PEXELS_KEYS || "").split(",").filter(Boolean),
-  GEMINI_KEYS: (process.env.GOOGLE_AI_KEYS || "").split(",").map(k => k.trim()).filter(k => k.startsWith("AIzaSy")),
+  // Any non-empty key is a key. The old rule kept only the ones starting with the prefix Google
+  // used to hand out, and silently threw away the newer-shaped ones: measured 2026-10-03 against
+  // the live pool, 30 of 141 entries were dropped by that prefix while every one of them answered
+  // a real request. A dropped key is a night of work lost for no reason.
+  GEMINI_KEYS: (process.env.GOOGLE_AI_KEYS || "").split(",").map(k => k.trim()).filter(Boolean),
   GROQ_KEYS: (process.env.GROQ_KEYS || "").split(",").filter(Boolean),
   
   // === MEGA SCALE TARGETS ===
@@ -648,7 +652,26 @@ async function runEliteHarvesterV3() {
   console.log(`   - DeepSeek:    ${(process.env.DEEPSEEK_KEYS || "").split(",").filter(Boolean).length}`);
   console.log(`   - Mistral:     ${(process.env.MISTRAL_KEYS || "").split(",").filter(Boolean).length}\n`);
   
-  // Check current state
+  // Fail loud, fail early. Nine nights in a row the scheduled run was cancelled at the six-hour
+  // ceiling having stored nothing, and the only number anyone could see was the library size. With
+  // no screening keys there is no acceptance, and with no database there is nowhere to write —
+  // both are worth a stopped run and a reason, not a silent six-hour sleep.
+  if (CONFIG.GEMINI_KEYS.length === 0) {
+    console.error("❌ مفيش مفاتيح فرز متحملة (GOOGLE_AI_KEYS فاضي أو مقروء غلط) — المكنة وقفت بدل ما تلف ست ساعات من غير ما تخزن حاجة.");
+    process.exit(1);
+  }
+  if (CONFIG.PEXELS_KEYS.length === 0) {
+    console.error("❌ مفيش مفاتيح بنك الصور (PEXELS_KEYS) — المكنة وقفت.");
+    process.exit(1);
+  }
+
+  // Stop ourselves before the runner does, so the last thing a run prints is a number, not a kill.
+  // The workflow ceiling is 360 minutes; 300 leaves room for the final writes and the report.
+  const startTime = Date.now();
+  const RUN_BUDGET_MS = 300 * 60 * 1000;
+  const runDeadline = startTime + RUN_BUDGET_MS;
+  console.log(`⏱️  هذه اللفة لها ${Math.round(RUN_BUDGET_MS / 60000)} دقيقة، وبعدها تقف لوحدها وتقول عملت إيه.\n`);
+
   const totalCount = await getCurrentImageCount();
   console.log(`💾 Current Database: ${totalCount.toLocaleString()}/${CONFIG.TARGET_FILTERED_IMAGES.toLocaleString()} images`);
   
@@ -675,8 +698,7 @@ async function runEliteHarvesterV3() {
   }
   
   let totalHarvested = 0;
-  const startTime = Date.now();
-  
+
   // Calculate deficit and prioritize combinations that need images the most
   const combinations: { category: string; style: string; needed: number; current: number }[] = [];
   for (const category of CONFIG.TARGET_CATEGORIES) {
@@ -694,6 +716,11 @@ async function runEliteHarvesterV3() {
   // Harvest each combination in priority order
   for (const { category, style, needed } of combinations) {
     if (needed <= 0) continue;
+    // Standing down on a number beats being killed at the ceiling on a spinner.
+    if (Date.now() > runDeadline) {
+      console.log(`⏱️ وقت اللفة خلص. خزّنت ${totalHarvested} صورة النهارده، وباقي ${combinations.filter((c) => c.needed > 0).length} تركيبة مستنية اللفة الجاية.`);
+      break;
+    }
 
     const count = await harvestCategory(category, style);
     totalHarvested += count;

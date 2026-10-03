@@ -30,7 +30,7 @@ async function loadActiveKeys(): Promise<{ gemini: string[]; openrouter: string[
   }
 
   // 1. Load from environment (filter valid AIzaSy keys for Google AI Studio)
-  let gemini = getEnvKeys("GOOGLE_AI_KEYS").filter((k) => k.startsWith("AIzaSy"));
+  let gemini = getEnvKeys("GOOGLE_AI_KEYS").filter((k) => k.length > 0);
   let openrouter = getEnvKeys("OPENROUTER_KEYS");
 
   // 2. Load from Supabase database to ensure maximum key arsenal
@@ -51,7 +51,7 @@ async function loadActiveKeys(): Promise<{ gemini: string[]; openrouter: string[
         const dbGemini = dbKeys
           .filter((r) => r.provider === "gemini" || r.provider === "google")
           .map((r) => r.key.trim())
-          .filter((k) => k.startsWith("AIzaSy"));
+          .filter((k) => k.length > 0);
 
         const dbOR = dbKeys
           .filter((r) => r.provider === "openrouter")
@@ -76,7 +76,7 @@ async function loadActiveKeys(): Promise<{ gemini: string[]; openrouter: string[
   cachedOpenRouterKeys = openrouter;
   lastKeyFetchTime = now;
 
-  console.log(`[Arsenal Loaded] Active AIzaSy Gemini: ${gemini.length} | OpenRouter: ${openrouter.length}`);
+  console.log(`[Arsenal Loaded] Gemini keys: ${gemini.length} | OpenRouter: ${openrouter.length}`);
   return { gemini, openrouter };
 }
 

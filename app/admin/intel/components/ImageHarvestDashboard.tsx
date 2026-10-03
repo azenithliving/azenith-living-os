@@ -6,6 +6,12 @@ import { AlertCircle, CheckCircle2, Database, Image, Loader2, Play, RefreshCw, K
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { arNum } from "@/lib/ops/metricLabels";
+import { ROOM_TYPE_LABELS } from "@/lib/cad/room-labels";
+import { STYLE_LABELS } from "@/lib/constants/rooms";
+
+/** The library the harvester is written to fill: 40 combinations × 375. */
+const HARVEST_TARGET = 15000;
 
 type DistributionEntry = {
   room_type: string;
@@ -216,7 +222,7 @@ export function ImageHarvestDashboard() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">الصور النشطة</CardTitle><Image className="h-4 w-4 text-muted-foreground" /></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{data?.stats.total.toLocaleString() ?? "—"}</div><p className="mt-1 text-xs text-muted-foreground">عدد فعلي لحظة آخر قراءة.</p></CardContent>
+          <CardContent><div className="text-2xl font-bold">{data?.stats.total ? arNum(data.stats.total) : "—"}</div><p className="mt-1 text-xs text-muted-foreground">عدد فعلي لحظة آخر قراءة، من هدف {arNum(HARVEST_TARGET)} صورة ({arNum(40)} تركيبة × {arNum(375)}).</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">تصنيفات مسجلة</CardTitle><Database className="h-4 w-4 text-muted-foreground" /></CardHeader>
@@ -226,12 +232,12 @@ export function ImageHarvestDashboard() {
 
       <Card>
         <CardHeader><CardTitle>التوزيع حسب الغرفة</CardTitle></CardHeader>
-        <CardContent>{byRoom.length ? <div className="flex flex-wrap gap-3">{byRoom.map(([room, count]) => <Badge key={room} variant="secondary">{room}: {count.toLocaleString()}</Badge>)}</div> : <p className="text-center text-sm text-muted-foreground">لا توجد صور نشطة لتجميعها.</p>}</CardContent>
+        <CardContent>{byRoom.length ? <div className="flex flex-wrap gap-3">{byRoom.map(([room, count]) => <Badge key={room} variant="secondary">{ROOM_TYPE_LABELS[room] ?? room}: {arNum(count)}</Badge>)}</div> : <p className="text-center text-sm text-muted-foreground">لا توجد صور نشطة لتجميعها.</p>}</CardContent>
       </Card>
 
       <Card>
         <CardHeader><CardTitle>التوزيع حسب الطراز</CardTitle></CardHeader>
-        <CardContent>{byStyle.length ? <div className="flex flex-wrap gap-3">{byStyle.map(([style, count]) => <Badge key={style} variant="secondary">{style}: {count.toLocaleString()}</Badge>)}</div> : <p className="text-center text-sm text-muted-foreground">لا توجد صور نشطة لتجميعها.</p>}</CardContent>
+        <CardContent>{byStyle.length ? <div className="flex flex-wrap gap-3">{byStyle.map(([style, count]) => <Badge key={style} variant="secondary">{STYLE_LABELS[style] ?? style}: {arNum(count)}</Badge>)}</div> : <p className="text-center text-sm text-muted-foreground">لا توجد صور نشطة لتجميعها.</p>}</CardContent>
       </Card>
 
       <Card>
