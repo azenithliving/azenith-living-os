@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T01:58:09.865Z",
+  "generatedAt": "2026-10-03T02:12:43.087Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
@@ -21,7 +21,7 @@
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 64,
-    "swarmFileLines": 14953,
+    "swarmFileLines": 14955,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
@@ -2177,7 +2177,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 334
+      "lines": 336
     },
     {
       "kind": "swarm-file",
