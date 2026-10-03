@@ -7,7 +7,8 @@ import { MetricCard, ActivityFeed } from "@/components/admin/master-dashboard-co
 import { ImageHarvestDashboard } from "./intel/components/ImageHarvestDashboard";
 import { AdminProactiveStrip } from "@/components/admin/AdminProactiveStrip";
 import { NotificationsPanel } from "@/components/admin/NotificationsPanel";
-import { legacyToOps } from "@/lib/ops/identity";
+import { agentLabel, legacyToOps } from "@/lib/ops/identity";
+import { arNum } from "@/lib/ops/metricLabels";
 import TelegramControlPanel from "@/components/admin/TelegramControlPanel";
 import AIKeysControlPanel from "@/components/admin/AIKeysControlPanel";
 
@@ -441,8 +442,8 @@ export default function AdminPage() {
                     <AgentStatusCard
                       key={agentKey}
                       agentKey={agentKey}
-                      agentName={agentKey === 'ops-lead' ? 'مدير تشغيل المحتوى' : agentKey === 'qayyim' ? 'مدير تشغيل المحتوى' : agentKey}
-                      agentRole={agentKey === 'ops-lead' ? 'واجهة موحدة — 7 خفيين' : 'سجل المهام الفعلي'}
+                      agentName={agentLabel(agentKey)}
+                      agentRole={agentKey === 'ops-lead' ? `واجهة موحدة — ${arNum(7)} خفيين` : 'سجل المهام الفعلي'}
                       color={agentKey === 'ops-lead' ? 'purple' : index % 2 === 0 ? 'emerald' : 'purple' as any}
                       icon={agentKey === 'ops-lead' ? "👑" : "💼"}
                       mastermindData={{ ...mastermindData, agents: merged }}
@@ -708,16 +709,16 @@ function AgentStatusCard({
 
       <div className="grid grid-cols-3 gap-3">
         <div className="text-center">
-          <p className="text-lg font-bold text-white">{tasksCompleted}</p>
+          <p className="text-lg font-bold text-white">{arNum(tasksCompleted)}</p>
           <p className="text-[9px] text-white/30">مكتمل</p>
         </div>
         <div className="text-center">
-          <p className="text-lg font-bold text-white">{successRate}%</p>
+          <p className="text-lg font-bold text-white">{arNum(successRate)}٪</p>
           <p className="text-[9px] text-white/30">نجاح</p>
         </div>
         <div className="text-center">
           <p className="text-lg font-bold text-white">
-            {avgTime > 60000 ? `${Math.round(avgTime / 60000)}m` : `${Math.round(avgTime / 1000)}s`}
+            {avgTime > 60000 ? `${arNum(Math.round(avgTime / 60000))} د` : `${arNum(Math.round(avgTime / 1000))} ث`}
           </p>
           <p className="text-[9px] text-white/30">متوسط</p>
         </div>

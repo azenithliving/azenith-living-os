@@ -54,6 +54,11 @@ describe("the decisions vault speaks only the owner's language", () => {
       ["components/admin/agents/EmergencyBanner.tsx", "arNum(count)"],
       ["components/admin/CockpitDoors.tsx", "arNum(waiting)"],
       ["components/admin/v2/CommandCanvas.tsx", "arNum(DEPARTMENT_KEYS.length)"],
+      // Measured on the published site 2026-10-03: the owner's home card painted «53», «49s»
+      // and the machine key «OPS-UX» where the swarm's own module already had the Arabic name.
+      ["app/admin/page.tsx", "arNum(tasksCompleted)"],
+      ["app/admin/page.tsx", "agentLabel(agentKey)"],
+      ["app/admin/intel/components/ImageHarvestDashboard.tsx", "arNum(data.stats.distribution.length)"],
     ];
     for (const [file, call] of surfaces) {
       expect(readFileSync(file, "utf8"), `${file} prints Latin digits at ${call}`).toContain(call);
