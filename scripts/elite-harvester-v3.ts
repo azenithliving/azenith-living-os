@@ -154,6 +154,10 @@ class APIUsageTracker {
 
 const usageTracker = new APIUsageTracker();
 
+/** How many refusals in a row end the run. Each one costs a photo and a second of the clock. */
+const EXHAUSTED_STOP = 25;
+let exhaustedStreak = 0;
+
 // ============================================
 // ROUND-ROBIN KEY ROTATION WITH FAILOVER
 // ============================================
@@ -318,6 +322,8 @@ async function fetchFromPexels(query: string, perPage: number = 80, page: number
 
 async function filterWithGemini(photos: any[], category: string, style: string): Promise<any[]> {
   if (photos.length === 0) return [];
+  // Once the pool is known dead, do not spend another call on another photo.
+  if (exhaustedStreak >= EXHAUSTED_STOP) return [];
   
   if (!usageTracker.checkGeminiLimit()) {
     console.log(`[Gemini] Daily limit reached, using quality fallback...`);
@@ -352,11 +358,22 @@ async function filterWithGemini(photos: any[], category: string, style: string):
         
         if (error) {
           console.warn(`[Gemini] Attempt ${attempts+1} failed (${error}), rotating key and cooling 1s...`);
+          // "Every provider refused" is not a bad photo and not a bad key — it is the day's free
+          // allowance spent. Measured on run 167: after ~2,500 screens the whole pool began
+          // refusing, and the run spent its remaining three hours asking again for every photo,
+          // storing nothing. Three strikes per photo was never going to end that; a streak does.
+          if (error === "ALL_PROVIDERS_EXHAUSTED") exhaustedStreak++;
+          else exhaustedStreak = 0;
+          if (exhaustedStreak >= EXHAUSTED_STOP) {
+            console.warn(`⚠️ الفرز قال «مفيش مزود فاضل» ${exhaustedStreak} مرة ورا بعض — اللفة بتوقف هنا بدال ما تلف تلات ساعات على نفس الرفض.`);
+            break;
+          }
           geminiKeyIndex++; // Rotate key immediately on error
           attempts++;
           await sleep(1000);
           continue;
         }
+        exhaustedStreak = 0;
         
         photo.aiScore = score;
         
@@ -719,6 +736,10 @@ async function runEliteHarvesterV3() {
     // Standing down on a number beats being killed at the ceiling on a spinner.
     if (Date.now() > runDeadline) {
       console.log(`⏱️ وقت اللفة خلص. خزّنت ${totalHarvested} صورة النهارده، وباقي ${combinations.filter((c) => c.needed > 0).length} تركيبة مستنية اللفة الجاية.`);
+      break;
+    }
+    if (exhaustedStreak >= EXHAUSTED_STOP) {
+      console.log(`⛔ رصيد الفرز اليومي خلص. خزّنت ${totalHarvested} صورة في اللفة دي، وباقي ${combinations.filter((c) => c.needed > 0).length} تركيبة مستنية اللفة الجاية ما المفتاح يرجع شغال.`);
       break;
     }
 
