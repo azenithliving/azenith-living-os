@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T07:56:34.757Z",
+  "generatedAt": "2026-10-03T16:56:26.662Z",
   "counts": {
     "oldPages": 17,
-    "oldPageLines": 5009,
+    "oldPageLines": 5010,
     "newPages": 13,
     "newPageLines": 833,
     "adminDoors": 118,
-    "allDoors": 199,
+    "allDoors": 200,
     "outsideDoors": 8,
     "outsideDoorLines": 2583,
-    "rootLibFiles": 275,
-    "rootLibUsed": 77,
-    "orphanDoors": 73,
-    "rootLibUsedLines": 28392,
+    "rootLibFiles": 277,
+    "rootLibUsed": 80,
+    "orphanDoors": 74,
+    "rootLibUsedLines": 29257,
     "furnitureFiles": 57,
-    "furnitureLines": 15561,
+    "furnitureLines": 15592,
     "furnitureUsedByBoth": 6,
     "furnitureBothLines": 2391,
     "furnitureNewOnly": 18,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 64,
-    "swarmFileLines": 14955,
+    "swarmFileLines": 14957,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 11,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 485
+    "atoms": 489
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -85,7 +85,7 @@
     {
       "kind": "old-page",
       "id": "app/admin/page.tsx",
-      "lines": 863
+      "lines": 864
     },
     {
       "kind": "old-page",
@@ -991,7 +991,7 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/dossier.ts",
-      "lines": 378,
+      "lines": 407,
       "callers": 2
     },
     {
@@ -1010,6 +1010,18 @@
       "kind": "root-lib",
       "id": "lib/cad/passport.ts",
       "lines": 55,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/cad/plan.ts",
+      "lines": 327,
+      "callers": 3
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/cad/room-labels.ts",
+      "lines": 45,
       "callers": 1
     },
     {
@@ -1035,6 +1047,12 @@
       "id": "lib/company-resolver.ts",
       "lines": 40,
       "callers": 4
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/constants/rooms.ts",
+      "lines": 464,
+      "callers": 1
     },
     {
       "kind": "root-lib",
@@ -1529,8 +1547,13 @@
     },
     {
       "kind": "orphan-door",
+      "id": "app/api/passport/[token]/plan/route.ts",
+      "lines": 114
+    },
+    {
+      "kind": "orphan-door",
       "id": "app/api/passport/[token]/route.ts",
-      "lines": 185
+      "lines": 206
     },
     {
       "kind": "orphan-door",
@@ -1794,7 +1817,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/ClientPreCallDossier.tsx",
-      "lines": 257,
+      "lines": 288,
       "usedBy": "new-only"
     },
     {
@@ -2182,7 +2205,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 336
+      "lines": 338
     },
     {
       "kind": "swarm-file",

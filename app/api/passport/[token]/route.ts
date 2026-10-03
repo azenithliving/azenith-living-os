@@ -18,6 +18,7 @@ import { applyCustomerWitness, type SketchDimension } from "@/lib/cad/paper-sket
 import { linkFromPhone } from "@/lib/cad/sketch-link";
 import { freezeHash, looksLikePassportToken, stillSealed } from "@/lib/cad/passport";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
+import { planFromPaper, type Plan } from "@/lib/cad/plan";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,8 @@ type Row = {
   confirmed_at: string | null;
   frozen_hash: string | null;
   customer_dimensions: number[] | null;
+  /** What the walk of this paper's numbers produced. Absent on papers read before the drawing. */
+  plan: Plan | null;
   /** Read for the write rules below. `publicSheet` never returns it: this is a public address. */
   customer_key: string | null;
   customer_city: string | null;
@@ -41,11 +44,19 @@ type Row = {
 
 function publicSheet(row: Row, hasPhone: boolean) {
   const dimensions = Array.isArray(row.dimensions) ? row.dimensions : [];
+  // The stored drawing is the answer when there is one. When a paper predates the column — or was
+  // filed before anyone picked a shape — the same builder runs, so no surface gets an empty box
+  // and no surface gets a *different* room.
+  const drawing = row.plan ? { plan: row.plan, question: null as string | null } : planFromPaper({ dimensions, openings: row.openings ?? [] });
+  const plan = drawing.plan;
   return {
     room: row.room ?? null,
     dimensions,
     openings: Array.isArray(row.openings) ? row.openings : [],
     area_sqm: row.area_sqm ?? null,
+    plan,
+    // The one thing standing between the numbers on the paper and a drawing: his own answer.
+    shape_question: plan ? null : drawing.question,
     confirmed_count: row.confirmed_count ?? 0,
     ok: Boolean(row.ok),
     failure: row.failure ?? null,
@@ -66,7 +77,7 @@ async function findByToken(token: string) {
   if (!supabase) return { error: "المتجر غير متصل دلوقتي" as const, status: 503 };
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,confirmed_at,frozen_hash,customer_dimensions,customer_key,customer_city")
+    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,confirmed_at,frozen_hash,customer_dimensions,plan,customer_key,customer_city")
     .eq("token", token)
     .maybeSingle();
   if (error) return { error: "السجل ما ردّش" as const, status: 500 };
@@ -157,6 +168,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const confirmedDimensions = withCustomer.filter((d) => d.confirmed);
+  // His agreement is what turns proposed walls into measured ones, so the drawing is re-walked
+  // from the confirmed set in the same breath the sheet is sealed. The seal itself stays over the
+  // numbers only — a shape chosen or a door dragged later must not invalidate his signature.
+  const built = planFromPaper({
+    dimensions: withCustomer,
+    openings: row.openings ?? [],
+    shape: row.plan?.shape ?? null,
+  });
   const { error: updateError } = await supabase
     .from("room_sketches")
     .update({
@@ -165,6 +184,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       confirmed_count: confirmedCount,
       confirmed_at: new Date().toISOString(),
       frozen_hash: freezeHash(confirmedDimensions),
+      plan: built.plan,
+      area_sqm: built.plan?.complete ? built.plan.areaSqm : row.area_sqm,
       ok: true,
       failure: null,
     })

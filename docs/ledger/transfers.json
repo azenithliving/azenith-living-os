@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T07:56:34.761Z",
+  "generatedAt": "2026-10-03T16:56:26.666Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,8 +7,8 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 467,
-    "moved": 11,
+    "not-moved": 466,
+    "moved": 16,
     "moving": 6,
     "erased": 1
   },
@@ -667,7 +667,10 @@
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/sketch/route.ts",
-      "state": "not-moved"
+      "state": "moved",
+      "phase": "plan-1",
+      "when": "2026-10-03",
+      "proof": "the owner sees the room the moment the paper is filed: the reading's numbers are walked on insert, the area comes from the closed polygon rather than a two-number product, and when the shape cannot be drawn the door returns the one question to ask rather than an empty frame"
     },
     {
       "kind": "admin-door",
@@ -972,7 +975,10 @@
     {
       "kind": "root-lib",
       "atom": "lib/cad/dossier.ts",
-      "state": "not-moved"
+      "state": "moved",
+      "phase": "plan-1",
+      "when": "2026-10-03",
+      "proof": "the file carries the same drawing and says what the shape is («مستطيل · أرقامه مطابقة»). Its area line now reads off the room that was drawn, which CHANGED two earlier assertions: an unnamed confirmed pair used to print «متحسبتش» while the picture above it measured itself — disclosed and re-signed, not quietly edited. 34 dossier tests"
     },
     {
       "kind": "root-lib",
@@ -987,6 +993,19 @@
     {
       "kind": "root-lib",
       "atom": "lib/cad/passport.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/cad/plan.ts",
+      "state": "moved",
+      "phase": "plan-1",
+      "when": "2026-10-03",
+      "proof": "the paper's numbers become a walked room: two numbers are a rectangle's length and width (measured: all 19 stored papers hold either no number or exactly two), four are the same rectangle wall by wall, six are the L. Opposite walls that disagree are both kept and named for the call instead of averaged, an opening wider than every wall is reported rather than squeezed, and a template with no turn table draws nothing. 17 tests, each watched failing first"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/cad/room-labels.ts",
       "state": "not-moved"
     },
     {
@@ -1010,6 +1029,11 @@
     {
       "kind": "root-lib",
       "atom": "lib/company-resolver.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/constants/rooms.ts",
       "state": "not-moved"
     },
     {
@@ -1467,8 +1491,19 @@
     },
     {
       "kind": "orphan-door",
+      "atom": "app/api/passport/[token]/plan/route.ts",
+      "state": "moved",
+      "phase": "plan-1",
+      "when": "2026-10-03",
+      "proof": "the drawing door behind the same secret address: a chosen shape and a dragged door are re-walked by the store's own builder and stored on the paper's row (plan + area only, never the numbers the seal is over). Proved on the built site at 390px: a door dragged from ١٫٨ to ٢٫٧٩٧ came back from the table after a reload, and the sheet still said «مختومة ومفيش حاجة اتغيرت بعدها». 13 storage tests"
+    },
+    {
+      "kind": "orphan-door",
       "atom": "app/api/passport/[token]/route.ts",
-      "state": "not-moved"
+      "state": "moved",
+      "phase": "plan-1",
+      "when": "2026-10-03",
+      "proof": "the sheet now answers with the room: the stored drawing is read back beside the numbers, and a paper filed before the column exists is walked by the same builder so no surface gets an empty box or a different room. The confirmation writes the drawing and the polygon's area in the same breath it seals the numbers"
     },
     {
       "kind": "orphan-door",

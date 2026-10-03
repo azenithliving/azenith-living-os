@@ -6,6 +6,8 @@ import { arNum } from '@/lib/ops/metricLabels';
 import { linkFromPhone } from '@/lib/cad/sketch-link';
 import { imageKeyOf } from '@/lib/cad/vote-keys';
 import { ROOM_CHOICES } from '@/lib/cad/room-labels';
+import { DRAWABLE_SHAPES, type Plan, type PlanOpening, type PlanShape } from '@/lib/cad/plan';
+import RoomPlan from '@/components/cad/RoomPlan';
 
 type Dimension = { label: string; meters: number; confirmed?: boolean };
 type Sheet = {
@@ -13,6 +15,9 @@ type Sheet = {
   dimensions: Dimension[];
   openings: { kind: string; widthMeters: number | null }[];
   area_sqm: number | string | null;
+  /** The room as the store walked it. Absent only on a paper whose shape is not settled. */
+  plan?: Plan | null;
+  shape_question?: string | null;
   confirmed_count: number;
   ok: boolean;
   failure: string | null;
@@ -57,6 +62,8 @@ export default function PassportPage() {
   const [roomChoice, setRoomChoice] = useState('');
   const [offer, setOffer] = useState<{ line: string; picks: SheetImage[]; matched: boolean } | null>(null);
   const [sending, setSending] = useState(false);
+  // A drag ends in one write; a second one while it is in the air would fight over the same row.
+  const [drawing, setDrawing] = useState(false);
   // A poll that answers while a tap is still in the air can paint the count back to what it was
   // before the tap. Measured on the published site 2026-10-03: the first reader showed the
   // picture with no number at all for a moment.
@@ -114,6 +121,37 @@ export default function PassportPage() {
       setBusy(false);
     }
   }, [busy, phone, token, typed]);
+
+  /**
+   * Two things he may say about his room without touching a measurement: which shape it is, and
+   * where the door sits along its wall. Both go to the store's own builder, and what comes back is
+   * what the sheet shows — a phone never keeps a drawing the record refused.
+   */
+  const sendPlan = useCallback(
+    async (patch: { shape?: PlanShape; openings?: PlanOpening[] }) => {
+      if (!token || drawing) return;
+      setDrawing(true);
+      setNews(null);
+      try {
+        const res = await fetch(`/api/passport/${token}/plan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(patch),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!data?.success) {
+          setNews(String(data?.error || 'المتجر ما سجلش الرسم'));
+          return;
+        }
+        setSheet((prev) => (prev ? { ...prev, plan: data.plan } : prev));
+      } catch {
+        setNews('المتجر ما ردّش — جرّب تاني');
+      } finally {
+        setDrawing(false);
+      }
+    },
+    [drawing, token]
+  );
 
   /**
    * Ask for the number at the moment it buys him something: he wants the suggestions on his
@@ -282,10 +320,34 @@ export default function PassportPage() {
                   الفتحات: {sheet.openings.map((o) => `${OPENING_LABEL[o.kind] ?? o.kind}${o.widthMeters ? ` ${arNum(o.widthMeters)}م` : ''}`).join(' · ')}
                 </p>
               )}
-              {sheet.area_sqm ? (
-                <p className="mt-3 text-[12px] text-white/60">المساحة الحسابية: {arNum(Number(sheet.area_sqm))} متر مربع</p>
+              {sheet.area_sqm || sheet.plan?.areaSqm ? (
+                <p className="mt-3 text-[12px] text-white/60">
+                  المساحة الحسابية: {arNum(Number(sheet.plan?.complete ? sheet.plan.areaSqm : sheet.area_sqm))} متر مربع
+                </p>
               ) : null}
               {sheet.failure && <p className="mt-3 text-[11px] leading-relaxed text-amber-300/90">{sheet.failure}</p>}
+            </section>
+
+            {/* The room the numbers describe, drawn before he signs it — the sheet he agrees to is
+                this picture, not a list of digits. */}
+            <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4" data-plan-block>
+              <div className="flex items-baseline justify-between gap-3">
+                <h2 className="text-[12px] font-bold text-white/60">رسمتك</h2>
+                {drawing && <span className="text-[10px] text-white/40">بأعدّل…</span>}
+              </div>
+              <div className="mt-3 rounded-xl border border-white/10 bg-black/25 p-2">
+                <RoomPlan
+                  plan={sheet.plan ?? null}
+                  question={sheet.shape_question}
+                  interactive
+                  shapes={sheet.dimensions.length >= 2 ? DRAWABLE_SHAPES : []}
+                  onShape={(shape) => void sendPlan({ shape })}
+                  onMove={(openings) => void sendPlan({ openings })}
+                />
+              </div>
+              <p className="mt-2 text-[10px] leading-relaxed text-white/40">
+                اسحب الباب أو الشباك على ضلعه يروح معاك — الأرقام اللي اتفقتنا عليها ما بتتغيرش بالسحب.
+              </p>
             </section>
 
             {confirmed ? (

@@ -253,7 +253,8 @@ describe("the dossier speaks only the owner's language", () => {
     });
     expect(areaOf(withNames)).toBe(`${arNum(14.4)} متر مربع`);
 
-    // The number the store really holds: two sides, both agreed, neither named. No product.
+    // The number the store really holds: two sides, both agreed, neither named. The drawing walks
+    // them as the room's length and width, and the file prints the area of what it drew.
     const blind = buildDossier({
       line: lineOf(),
       sketches: [sketchOf({
@@ -267,23 +268,39 @@ describe("the dossier speaks only the owner's language", () => {
       imagesRoomType: "living-room",
       imagesForHisRoom: false,
     });
-    expect(areaOf(blind)).toContain("متحسبتش");
+    expect(areaOf(blind)).toBe(`${arNum(14.4)} متر مربع`);
 
-    // An unnamed pair is not a length and a width even when both are confirmed.
+    // One number is not a room whatever its label says, and no area comes out of it.
     const oneSided = buildDossier({
       line: lineOf(),
       sketches: [sketchOf({
         area_sqm: null,
-        dimensions: [
-          { label: "الطول", meters: 4.5, confirmed: true },
-          { label: "الطول", meters: 3.2, confirmed: true },
-        ],
+        dimensions: [{ label: "الطول", meters: 4.5, confirmed: true }],
       })],
       images: [],
       imagesRoomType: "living-room",
       imagesForHisRoom: false,
     });
     expect(areaOf(oneSided)).toContain("متحسبتش");
+  });
+
+  it("prints the area of the room it drew, not a product of its own choosing", () => {
+    // The two surfaces must not disagree: the customer's sheet shows ١٤٫٤ under a closed drawing,
+    // so the owner's file for the same paper cannot say the area was never computed.
+    const file = buildDossier({
+      line: lineOf(),
+      sketches: [sketchOf({ area_sqm: null, dimensions: [
+        { label: "الطول", meters: 5.2, confirmed: true },
+        { label: "العرض", meters: 4.1, confirmed: false },
+      ] })],
+      images: [],
+      imagesRoomType: "living-room",
+      imagesForHisRoom: false,
+    });
+    expect(areaOf(file)).toBe(`${arNum(21.32)} متر مربع`);
+    expect(file.plan?.complete).toBe(true);
+    expect(file.sections.find((s) => s.id === "paper")?.facts.find((f) => f.label === "شكل المكان")?.value)
+      .toContain("مستطيل");
   });
 
   it("writes his digits, not the machine's", () => {

@@ -33,6 +33,7 @@ import { arDigits, arNum } from "@/lib/ops/metricLabels";
 import type { SheetImage } from "@/lib/cad/sheet-images";
 import { tallyVotes, topPicks, type VoteRow } from "@/lib/cad/vote-keys";
 import type { SketchDimension } from "@/lib/cad/paper-sketch-parser";
+import { SHAPE_LABELS, planFromPaper, type Plan } from "@/lib/cad/plan";
 import type { CustomerRow } from "@/lib/customers/roll";
 
 export type DossierFact = { label: string; value: string };
@@ -56,6 +57,10 @@ export type DossierSketch = {
   /** The area in his own words, captured when he asked for his suggestions on WhatsApp. */
   customer_city?: string | null;
   dimensions: SketchDimension[];
+  /** Doors and windows the paper mentions, as the reading stored them. */
+  openings?: { kind: string; widthMeters: number | null }[];
+  /** The room already walked from this paper's numbers, if the store ever walked it. */
+  plan?: Plan | null;
   area_sqm: number | string | null;
   ok: boolean;
   confirmed_at: string | null;
@@ -71,9 +76,18 @@ export function buildDossier(input: {
   imagesForHisRoom: boolean;
   /** The family's taps on his papers, as the vote desk recorded them. */
   votes?: VoteRow[];
-}): { headline: string; sections: DossierSection[] } {
+}): { headline: string; sections: DossierSection[]; plan: Plan | null; plan_question: string | null } {
   const { line, sketches, images } = input;
   const newest = sketches[0] ?? null;
+
+  // The owner's file and the customer's sheet must show one room, not two readings of it. The
+  // stored drawing is used where it exists; where a paper predates the column the same builder
+  // walks it, and where the numbers genuinely do not decide a shape the file says what to ask.
+  const drawing = newest
+    ? newest.plan
+      ? { plan: newest.plan, question: (newest.plan.conflicts ?? [])[0] ?? null }
+      : planFromPaper({ dimensions: newest.dimensions, openings: newest.openings ?? [] })
+    : { plan: null, question: null as string | null };
 
   const who: DossierFact[] = [];
   const name = personName(line?.name);
@@ -96,7 +110,14 @@ export function buildDossier(input: {
   const paper: DossierFact[] = [];
   if (newest) {
     const agreed = newest.dimensions.filter((d) => d.confirmed);
-    const area = Number(newest.area_sqm) || derivedArea(newest.dimensions);
+    // One source for the area: the room the store drew. `area_sqm` holds it once anyone confirms;
+    // before that a closed drawing still measures itself, and the file must not contradict the
+    // picture sitting above it. Only when there is no drawing does it fall back to the paper's own
+    // named pair, and only then say «متحسبتش».
+    const area =
+      Number(newest.area_sqm) ||
+      (drawing.plan?.complete ? Number(drawing.plan.areaSqm) : 0) ||
+      derivedArea(newest.dimensions);
     paper.push({ label: "عدد أوراقه", value: arNum(sketches.length) });
     paper.push({ label: "أحدث ورقة", value: roomLabel(newest.room) || "مكان من غير اسم على الورقة" });
     if (newest.customer_city) paper.push({ label: "منطقته", value: newest.customer_city });
@@ -109,6 +130,14 @@ export function buildDossier(input: {
     paper.push({
       label: "المساحة",
       value: area ? `${arNum(round2(area))} متر مربع` : "متحسبتش — محتاجة طول وعرض بيتفق عليهم",
+    });
+    // The room as drawn is what the two of you are actually agreeing to. When the numbers do not
+    // decide a shape, the file prints the question rather than a shape it invented.
+    paper.push({
+      label: "شكل المكان",
+      value: drawing.plan
+        ? `${SHAPE_LABELS[drawing.plan.shape]} · ${drawing.plan.complete ? "أرقامه مطابقة" : "أرقامه مش مطابقة"}`
+        : drawing.question ?? "الشكل لسه ما اتحددش — اسأله هو مرسومه إزاي",
     });
     paper.push({
       label: "اتفاقك معه",
@@ -208,7 +237,7 @@ export function buildDossier(input: {
     ? `${name || "عميل من غير اسم"}${line.phone ? ` · ${arDigits(line.phone)}` : ""} · ${arNum(sketches.length)} ورقة`
     : "اختار عميل من الدفتر الأول";
 
-  return { headline, sections };
+  return { headline, sections, plan: drawing.plan, plan_question: drawing.plan ? null : drawing.question };
 }
 
 const INTENTS: Record<string, string> = { browsing: "بيتفرج بس", interested: "مهتم", buyer: "ناوي يشتري", quote: "عايز عرض" };

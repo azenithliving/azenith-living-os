@@ -25,6 +25,7 @@ import { parseSketchLink } from "@/lib/cad/sketch-link";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
 import { readVotesForSketches } from "@/lib/cad/family-votes";
 import { buildDossier, paperPath, type DossierSketch } from "@/lib/cad/dossier";
+import type { Plan } from "@/lib/cad/plan";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,10 @@ type PaperRow = {
   room: string | null;
   customer_city?: string | null;
   dimensions: DossierSketch["dimensions"];
+  openings?: DossierSketch["openings"];
   area_sqm: number | string | null;
+  /** The room already walked from this paper's numbers — the same drawing his sheet shows. */
+  plan?: Plan | null;
   ok: boolean;
   confirmed_at: string | null;
   frozen_hash: string | null;
@@ -74,7 +78,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,token,room,customer_city,dimensions,area_sqm,ok,confirmed_at,frozen_hash,created_at,image_path")
+    .select("id,token,room,customer_city,dimensions,openings,area_sqm,plan,ok,confirmed_at,frozen_hash,created_at,image_path")
     .eq("company_id", companyId)
     .eq("customer_key", wanted.key)
     .order("created_at", { ascending: false })
@@ -104,6 +108,8 @@ export async function GET(request: NextRequest) {
       room: p.room ?? null,
       customer_city: p.customer_city ?? null,
       dimensions: Array.isArray(p.dimensions) ? p.dimensions : [],
+      openings: Array.isArray(p.openings) ? p.openings : [],
+      plan: p.plan ?? null,
       area_sqm: p.area_sqm ?? null,
       ok: Boolean(p.ok),
       confirmed_at: p.confirmed_at ?? null,

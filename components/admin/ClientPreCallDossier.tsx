@@ -6,10 +6,19 @@ import { Phone, Search } from 'lucide-react';
 import { matchRoll, rollLineLabel } from '@/lib/customers/match';
 import { arNum } from '@/lib/ops/metricLabels';
 import type { DossierSection } from '@/lib/cad/dossier';
+import type { Plan } from '@/lib/cad/plan';
+import RoomPlan from '@/components/cad/RoomPlan';
 
 type RollLine = { key: string; name: string | null; phone: string | null; email?: string | null };
 type Paper = { id: number; created_at: string; sheet_path: string | null; photo_url: string | null };
-type DossierFile = { headline: string; sections: DossierSection[]; papers: Paper[] };
+type DossierFile = {
+  headline: string;
+  sections: DossierSection[];
+  papers: Paper[];
+  /** The room the store walked from his numbers — the same picture his own sheet shows. */
+  plan?: Plan | null;
+  plan_question?: string | null;
+};
 
 /**
  * «الملف الذهبي قبل المكالمة» — the one screen the owner opens between «his number is on the
@@ -53,7 +62,13 @@ export default function ClientPreCallDossier() {
       });
       const data = await res.json();
       if (!res.ok || data?.success === false) throw new Error(data?.error || `السجل ردّ بـ ${res.status}`);
-      setFile({ headline: String(data.headline ?? ''), sections: (data.sections ?? []) as DossierSection[], papers: (data.papers ?? []) as Paper[] });
+      setFile({
+        headline: String(data.headline ?? ''),
+        sections: (data.sections ?? []) as DossierSection[],
+        papers: (data.papers ?? []) as Paper[],
+        plan: (data.plan ?? null) as Plan | null,
+        plan_question: data.plan_question ? String(data.plan_question) : null,
+      });
     } catch (error) {
       setProblem(String((error as Error)?.message ?? error));
     } finally {
@@ -177,6 +192,22 @@ export default function ClientPreCallDossier() {
                   </a>
                 </div>
               )}
+            </div>
+          )}
+
+          {file && (file.plan || file.plan_question) && (
+            // The same component his sheet runs: what the owner sees is what the customer signed,
+            // down to which wall is drawn dashed.
+            <div className="rounded-xl border border-white/[0.07] bg-black/25 p-3" data-dossier-plan>
+              <p className="text-[12px] font-black text-amber-300/90">رسمته زي ما بنشتغل بيها</p>
+              <div className="mt-2 rounded-lg border border-white/10 bg-white/[0.02] p-2">
+                <RoomPlan plan={file.plan ?? null} question={file.plan_question} />
+              </div>
+              {file.plan?.conflicts.length ? (
+                <p className="mt-2 text-[11px] leading-relaxed text-amber-200/85" data-dossier-plan-question>
+                  الرسم بيسألك — السطور تحت الرسم دي اللي هتحددوها في المكالمة.
+                </p>
+              ) : null}
             </div>
           )}
 

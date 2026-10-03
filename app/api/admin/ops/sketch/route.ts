@@ -20,6 +20,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { readPaperSketch } from "@/lib/cad/paper-sketch-parser";
 import { parseSketchLink } from "@/lib/cad/sketch-link";
 import { newPassportToken } from "@/lib/cad/passport";
+import { planFromPaper } from "@/lib/cad/plan";
 import { syncLayer } from "@/lib/ops/memory/SyncLayer";
 
 export const dynamic = "force-dynamic";
@@ -99,7 +100,10 @@ export async function POST(request: NextRequest) {
   //    with a witness that never ran. A witness now comes from the store's own code only.
   const reading = await readPaperSketch({ base64, mime, runOffline: false });
 
-  // 3. record the reading, refused ones included — a refusal is evidence
+  // 3. record the reading, refused ones included — a refusal is evidence. The drawing is walked
+  //    from the same numbers right here: the owner sees the room the paper describes the moment
+  //    the paper is filed, with every un-agreed wall marked as a proposal.
+  const drawing = planFromPaper({ dimensions: reading.dimensions, openings: reading.openings });
   const { data: row, error: insertError } = await supabase
     .from("room_sketches")
     .insert({
@@ -115,7 +119,10 @@ export async function POST(request: NextRequest) {
       room: reading.room,
       dimensions: reading.dimensions,
       openings: reading.openings,
-      area_sqm: reading.areaSqm,
+      plan: drawing.plan,
+      // The polygon's own measure when the room closes; the reader's two-number product while
+      // there is no shape to walk. A rectangle read wrong is not a floor area.
+      area_sqm: drawing.plan?.complete ? drawing.plan.areaSqm : reading.areaSqm,
       confirmed_count: reading.confirmedCount,
       ok: reading.ok,
       failure: reading.failure,
@@ -169,6 +176,10 @@ export async function POST(request: NextRequest) {
     customer_key: row?.customer_key ?? null,
     passport_path: row?.token ? `/passport/${row.token}` : null,
     stored,
+    // What the desk shows next to the numbers: the room as drawn, or the one thing the drawing
+    // still needs from him. An empty frame with no reason reads as a broken tool.
+    plan: drawing.plan,
+    plan_question: drawing.question,
     storage_error: upload.error ? String(upload.error.message ?? upload.error).slice(0, 120) : null,
     reading,
   });
@@ -191,7 +202,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from("room_sketches")
-    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,image_path,created_at,witnesses,confirmed_at,frozen_hash,customer_key")
+    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,image_path,created_at,witnesses,confirmed_at,frozen_hash,customer_key,plan")
     .eq("company_id", companyId)
     .order("created_at", { ascending: false })
     .limit(20);
