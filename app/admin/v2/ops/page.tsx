@@ -3,6 +3,8 @@
 import { StudioPanel } from '@/components/admin/ops/StudioPanel';
 import Link from 'next/link';
 import { Crown, ArrowRight } from 'lucide-react';
+import { AGENT_KEYS } from '@/lib/ops/identity';
+import { arNum } from '@/lib/ops/metricLabels';
 
 export default function OpsStudioPage() {
   return (
@@ -18,7 +20,7 @@ export default function OpsStudioPage() {
               <Crown className="w-4 h-4 text-amber-300" />
             </div>
             <span className="font-black text-sm text-white">الاستوديو</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-400 font-mono">8 وكلاء بدستور واحد</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-400">{arNum(AGENT_KEYS.length)} وكلاء بدستور واحد</span>
           </div>
         </div>
       </header>

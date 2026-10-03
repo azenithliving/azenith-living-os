@@ -194,15 +194,20 @@ describe('Load Probe Percentiles (stubbed fetch)', () => {
     vi.clearAllMocks();
   });
 
-  it('should calculate correct p50/p95/p99 from deterministic latencies', async () => {
-    // Mock fetch with deterministic delays
-    const latencies = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]; // sorted
+  it('calculates exact p50/p95/p99 from deterministic latencies', async () => {
+    // A virtual clock, not a real one. This guard exists to prove the percentile math,
+    // and with real `setTimeout` delays it measured the machine instead of the formula:
+    // it went red under a busy test run (p50 113 against a band of 90) and green when run
+    // alone — a guard whose verdict depends on what else the laptop is doing teaches
+    // nothing. The clock advances only while a request is "in flight".
+    const latencies = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     let callIndex = 0;
+    let clock = 0;
+    vi.spyOn(performance, 'now').mockImplementation(() => clock);
 
     global.fetch = vi.fn().mockImplementation(async () => {
-      const delay = latencies[callIndex % latencies.length];
+      clock += latencies[callIndex % latencies.length];
       callIndex++;
-      await new Promise(resolve => setTimeout(resolve, delay));
       return {
         ok: true,
         status: 200,
@@ -214,19 +219,18 @@ describe('Load Probe Percentiles (stubbed fetch)', () => {
     ];
 
     const result = await runLoadProbe('https://example.com', scenarios, {
-      concurrency: 2,
+      // One worker: with two, a request's measured span legitimately includes the other
+      // worker's in-flight time, and the guard would then be proving the scheduler again.
+      concurrency: 1,
       totalRequests: 10,
     });
 
-    // Sorted: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    // Real setTimeout jitter under parallel vitest load can add ±25ms per
-    // request, so the bands are deliberately wide — the point is the math,
-    // not wall-clock precision.
+    // Sorted: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] — ceil(n·p)−1 selects 50, 100, 100.
     expect(result.totalRequests).toBe(10);
     expect(result.errors).toBe(0);
-    expect(result.p50Ms).toBeGreaterThanOrEqual(30);
-    expect(result.p50Ms).toBeLessThanOrEqual(90);
-    expect(result.p95Ms).toBeGreaterThanOrEqual(80);
+    expect(result.p50Ms).toBe(50);
+    expect(result.p95Ms).toBe(100);
+    expect(result.p99Ms).toBe(100);
     expect(result.errorRate).toBe(0);
 
     vi.restoreAllMocks();

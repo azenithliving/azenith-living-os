@@ -1182,6 +1182,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           </button>
           <input
             type="text"
+            data-chat-composer
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {

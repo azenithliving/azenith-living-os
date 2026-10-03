@@ -158,6 +158,8 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^app\/api\/admin\/analyze-lead\//, office: "sales-office", reason: "تقييم العميل المحتمل" },
   { match: /^app\/api\/admin\/(live-browser|remote-browser|architect)\//, office: "workshop", reason: "أبواب التجربة على نسخة" },
   { match: /^components\/admin\/settings\//, office: "system-room", reason: "كروت الإعدادات" },
+  { match: /^components\/admin\/v2\/CommandCanvas/, office: "decision-desk", reason: "مصفوفة القيادة: أول شاشة يفتحها المالك في البيت الجديد" },
+  { match: /^components\/admin\/v2\/SectionIntake/, office: SHARED_OFFICE, reason: "باب واحد يقف وراه أكتر من مكتب — آلة مشتركة مش موظف" },
   { match: /^components\/admin\/browser\//, office: "workshop", reason: "عفش المتصفح الحي" },
   { match: /^components\/admin\/(Notification|GlobalAssistantDock|UnifiedAssistant|AssistantBrowserCopilot)/, office: "swarm-house", reason: "المساعد الموحد والجرس" },
   { match: /^components\/admin\/AIKeysControlPanel/, office: "system-room", reason: "خزان مفاتيح الذكاء" },
@@ -219,11 +221,11 @@ export const OFFICE_RULES: OfficeRule[] = [
 export type ExplicitPlacement = { id: string; office: string; status: string; reason: string };
 
 export const EXPLICIT: ExplicitPlacement[] = [
-  { id: "app/admin/v2/page.tsx", office: "decision-desk", status: "pending", reason: "صفحة الهبوط الجديدة" },
+  { id: "app/admin/v2/page.tsx", office: "decision-desk", status: "moved", reason: "مصفوفة القيادة نفسها على عنوان المالك: النبض والأقسام الستة وكروت الموظفين، من نفس الملف اللي بيقرأه عنوان السرب" },
   { id: "app/admin/v2/ops/page.tsx", office: "swarm-house", status: "moved", reason: "الاستوديو اتنقل فعلاً" },
   { id: "app/admin/v2/agents/ops/page.tsx", office: "swarm-house", status: "moved", reason: "محادثة الوكلاء اتنقلت فعلاً" },
-  { id: "app/admin/v2/database/page.tsx", office: "system-room", status: "pending", reason: "قاعدة البيانات" },
-  { id: "app/admin/v2/elite/page.tsx", office: "elite-room", status: "pending", reason: "النخبة" },
+  { id: "app/admin/v2/database/page.tsx", office: "system-room", status: "moving", reason: "الباب بيقول الحقيقة عن نفسه دلوقت وبيفتح على الشغال — النقل نفسه لسه ما كملش" },
+  { id: "app/admin/v2/elite/page.tsx", office: "elite-room", status: "moving", reason: "الباب بيقول الحقيقة عن نفسه دلوقت وبيفتح على الشغال — النقل نفسه لسه ما كملش" },
   { id: "app/admin/v2/sales/page.tsx", office: "sales-office", status: "moved", reason: "مدير المبيعات — جسده وكيل المبيعات ومكتبه دفتر العميل" },
   { id: "components/admin/CockpitDoors.tsx", office: "decision-desk", status: "moved", reason: "بابا الكابينة في القائمة الجانبية: قرارات مستنية كلمتك بعددها الحيّ، والإيقاف الفوري" },
   { id: "app/admin/v2/sketches/page.tsx", office: "paper-desk", status: "moved", reason: "طاولة الورق: التصوير والحفظ والقراءة والسجل والربط بصاحب الورقة من الدفتر — كلها شغالة على العنوان الجديد" },
@@ -233,8 +235,8 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "app/admin/v2/keys/page.tsx", office: "key-desk", status: "moving", reason: "مكتب المفاتيح: قايمة النماذج المجانية وعدد المفاتيح اللي بيجاوب فعلًا وخطوات جيب المفتاح" },
   { id: "app/api/admin/keys/desk/route.ts", office: "key-desk", status: "moving", reason: "بوّابة المكتب: بتقرأ السجل وبتسأل كل مزود عن مفاتيحه في دفعة محدودة" },
   { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "pending", reason: "الإعدادات" },
-  { id: "app/admin/v2/system/page.tsx", office: "system-room", status: "pending", reason: "حالة النظام" },
-  { id: "app/admin/v2/work/page.tsx", office: "records-office", status: "pending", reason: "مركز العمل" },
+  { id: "app/admin/v2/system/page.tsx", office: "system-room", status: "moving", reason: "الباب بيقول الحقيقة عن نفسه دلوقت وبيفتح على الاستوديو والخزانة — النقل نفسه لسه ما كملش" },
+  { id: "app/admin/v2/work/page.tsx", office: "records-office", status: "moving", reason: "الباب بيقول الحقيقة عن نفسه دلوقت وبيفتح على الورق والمبيعات والاستوديو — النقل نفسه لسه ما كملش" },
   { id: "app/admin/layout.tsx", office: "decision-desk", status: "pending", reason: "قشرة البيت القديم" },
   { id: "app/admin/layout-client.tsx", office: "decision-desk", status: "pending", reason: "قشرة البيت القديمة بمكوناتها" },
 

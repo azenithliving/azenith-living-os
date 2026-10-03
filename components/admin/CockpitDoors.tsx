@@ -68,7 +68,7 @@ export function CockpitDoors() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-cockpit-doors>
       <Link
         href="/admin/v2/agents/ops?agent=ops-lead&decisions=1"
         className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-white/60 transition hover:border-[#C5A059]/40 hover:text-white"

@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-02T11:49:42.303Z",
+  "generatedAt": "2026-10-03T01:58:09.865Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5009,
     "newPages": 13,
-    "newPageLines": 1176,
+    "newPageLines": 833,
     "adminDoors": 118,
-    "allDoors": 197,
+    "allDoors": 198,
     "outsideDoors": 8,
-    "outsideDoorLines": 2563,
-    "rootLibFiles": 265,
-    "rootLibUsed": 72,
-    "orphanDoors": 71,
-    "rootLibUsedLines": 27644,
-    "furnitureFiles": 55,
-    "furnitureLines": 15193,
+    "outsideDoorLines": 2583,
+    "rootLibFiles": 273,
+    "rootLibUsed": 77,
+    "orphanDoors": 72,
+    "rootLibUsedLines": 28371,
+    "furnitureFiles": 57,
+    "furnitureLines": 15561,
     "furnitureUsedByBoth": 6,
-    "furnitureBothLines": 2371,
-    "furnitureNewOnly": 16,
+    "furnitureBothLines": 2391,
+    "furnitureNewOnly": 18,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
-    "swarmFiles": 63,
-    "swarmFileLines": 14887,
+    "swarmFiles": 64,
+    "swarmFileLines": 14953,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 11,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 475
+    "atoms": 484
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -125,17 +125,17 @@
     {
       "kind": "new-page",
       "id": "app/admin/v2/agents/page.tsx",
-      "lines": 349
+      "lines": 11
     },
     {
       "kind": "new-page",
       "id": "app/admin/v2/database/page.tsx",
-      "lines": 16
+      "lines": 15
     },
     {
       "kind": "new-page",
       "id": "app/admin/v2/elite/page.tsx",
-      "lines": 16
+      "lines": 15
     },
     {
       "kind": "new-page",
@@ -145,17 +145,17 @@
     {
       "kind": "new-page",
       "id": "app/admin/v2/ops/page.tsx",
-      "lines": 31
+      "lines": 33
     },
     {
       "kind": "new-page",
       "id": "app/admin/v2/owner-dashboard/page.tsx",
-      "lines": 16
+      "lines": 15
     },
     {
       "kind": "new-page",
       "id": "app/admin/v2/page.tsx",
-      "lines": 15
+      "lines": 12
     },
     {
       "kind": "new-page",
@@ -175,7 +175,7 @@
     {
       "kind": "new-page",
       "id": "app/admin/v2/system/page.tsx",
-      "lines": 16
+      "lines": 15
     },
     {
       "kind": "new-page",
@@ -799,7 +799,7 @@
     {
       "kind": "outside-door",
       "id": "app/api/consultant/route.ts",
-      "lines": 1484,
+      "lines": 1504,
       "callers": 1
     },
     {
@@ -991,8 +991,14 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/dossier.ts",
-      "lines": 334,
+      "lines": 371,
       "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/cad/family-votes.ts",
+      "lines": 113,
+      "callers": 1
     },
     {
       "kind": "root-lib",
@@ -1009,7 +1015,7 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/sheet-images.ts",
-      "lines": 107,
+      "lines": 108,
       "callers": 1
     },
     {
@@ -1034,6 +1040,24 @@
       "kind": "root-lib",
       "id": "lib/consultant/faq-gate.ts",
       "lines": 174,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/consultant/question-intent.ts",
+      "lines": 243,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/consultant/reply-polish.ts",
+      "lines": 106,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/consultant/store-facts.ts",
+      "lines": 166,
       "callers": 1
     },
     {
@@ -1111,7 +1135,7 @@
     {
       "kind": "root-lib",
       "id": "lib/location-services.ts",
-      "lines": 216,
+      "lines": 205,
       "callers": 1
     },
     {
@@ -1177,7 +1201,7 @@
     {
       "kind": "root-lib",
       "id": "lib/specialized-providers.ts",
-      "lines": 295,
+      "lines": 303,
       "callers": 1
     },
     {
@@ -1203,6 +1227,12 @@
       "id": "lib/supabase-service.ts",
       "lines": 58,
       "callers": 4
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/talk/emphasis.ts",
+      "lines": 64,
+      "callers": 1
     },
     {
       "kind": "root-lib",
@@ -1499,6 +1529,11 @@
     },
     {
       "kind": "orphan-door",
+      "id": "app/api/passport/[token]/votes/route.ts",
+      "lines": 88
+    },
+    {
+      "kind": "orphan-door",
       "id": "app/api/pexels/route.ts",
       "lines": 228
     },
@@ -1634,7 +1669,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/agents/ChatPanel.tsx",
-      "lines": 1503,
+      "lines": 1523,
       "usedBy": "both"
     },
     {
@@ -1754,7 +1789,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/ClientPreCallDossier.tsx",
-      "lines": 235,
+      "lines": 257,
       "usedBy": "new-only"
     },
     {
@@ -1938,6 +1973,18 @@
       "usedBy": "old-only"
     },
     {
+      "kind": "furniture",
+      "id": "components/admin/v2/CommandCanvas.tsx",
+      "lines": 280,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/v2/SectionIntake.tsx",
+      "lines": 46,
+      "usedBy": "new-only"
+    },
+    {
       "kind": "swarm-file",
       "id": "lib/ops/ab-testing.ts",
       "lines": 335
@@ -1986,6 +2033,11 @@
       "kind": "swarm-file",
       "id": "lib/ops/chat-brain.ts",
       "lines": 90
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/command-canvas.ts",
+      "lines": 66
     },
     {
       "kind": "swarm-file",

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { previewLine } from "@/app/admin/v2/agents/page";
+import { previewLine } from "@/lib/ops/command-canvas";
 
 /**
  * The one line under the manager's name on the seed card.

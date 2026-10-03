@@ -53,7 +53,7 @@ describe("the decisions vault speaks only the owner's language", () => {
       ["components/admin/agents/ApprovalGate.tsx", "arNum(approvals.length)"],
       ["components/admin/agents/EmergencyBanner.tsx", "arNum(count)"],
       ["components/admin/CockpitDoors.tsx", "arNum(waiting)"],
-      ["app/admin/v2/agents/page.tsx", "arNum(DEPARTMENT_KEYS.length)"],
+      ["components/admin/v2/CommandCanvas.tsx", "arNum(DEPARTMENT_KEYS.length)"],
     ];
     for (const [file, call] of surfaces) {
       expect(readFileSync(file, "utf8"), `${file} prints Latin digits at ${call}`).toContain(call);

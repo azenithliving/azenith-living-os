@@ -76,6 +76,48 @@
       "phase": "consolidation-2",
       "when": "2026-09-29",
       "proof": "live on the published URL: the window shows the sales office header, the four tier counters and five real customer rows; scripts/verify-sales-office.mjs 9 of 10, and the delete panel counted and cancelled without erasing anything"
+    },
+    {
+      "atom": "app/admin/v2/page.tsx",
+      "state": "moved",
+      "phase": "cockpit-transfer-1",
+      "when": "2026-10-03",
+      "proof": "the shell that said the content would be transferred later is gone: the address now mounts the command canvas (components/admin/v2/CommandCanvas.tsx, the same module the swarm address mounts, so one counter answers both). Measured on the local house at 390px: 6 department headings in the owner's own words, 9 employee cards each named by its live role, the pulse answering ٥ عملاء and ٢ مستنيين رد and ٢١ قرار and ٠ رسائل in Arabic-Indic digits, 0 occurrences of the transfer sentence in the page text, the thumb menu opening the two sidebar doors (٢١ and the instant stop), and the first card landing on the full-screen conversation with header, composer, 75 turns, the quick-actions toggle and the decisions toggle. The published-site proof is owed until the owner gives the word to publish"
+    },
+    {
+      "atom": "app/admin/v2/work/page.tsx",
+      "state": "moving",
+      "phase": "cockpit-transfer-1",
+      "when": "2026-10-03",
+      "proof": "the page stops claiming its content is coming later: it now states what «العمل» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
+    },
+    {
+      "atom": "app/admin/v2/system/page.tsx",
+      "state": "moving",
+      "phase": "cockpit-transfer-1",
+      "when": "2026-10-03",
+      "proof": "the page stops claiming its content is coming later: it now states what «مركز النظام» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
+    },
+    {
+      "atom": "app/admin/v2/database/page.tsx",
+      "state": "moving",
+      "phase": "cockpit-transfer-1",
+      "when": "2026-10-03",
+      "proof": "the page stops claiming its content is coming later: it now states what «البيانات» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
+    },
+    {
+      "atom": "app/admin/v2/elite/page.tsx",
+      "state": "moving",
+      "phase": "cockpit-transfer-1",
+      "when": "2026-10-03",
+      "proof": "the page stops claiming its content is coming later: it now states what «دعوات النخبة» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
+    },
+    {
+      "atom": "app/admin/v2/owner-dashboard/page.tsx",
+      "state": "moving",
+      "phase": "cockpit-transfer-1",
+      "when": "2026-10-03",
+      "proof": "the page stops claiming its content is coming later: it now states what «لوحة المالك» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
     }
   ]
 }
