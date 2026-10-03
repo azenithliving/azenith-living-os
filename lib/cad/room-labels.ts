@@ -13,6 +13,12 @@ export const ROOM_TYPES = [
   "teen-room",
   "corner-sofa",
   "comprehensive-interior",
+  // Measured on the live bank 2026-10-03: the harvester has been filling these too, so the
+  // sheet and the customer's chips must know they exist.
+  "lounge",
+  "dressing-room",
+  "kitchen",
+  "home-office",
 ] as const;
 
 /** The type the bank falls back to when a room name matches nothing. */
@@ -26,6 +32,12 @@ export const ROOM_TYPE_LABELS: Record<string, string> = {
   "teen-room": "مراهقين",
   "corner-sofa": "ركنة",
   "comprehensive-interior": "بيت كامل",
+  // The four the harvester was written to fill but the sheet never carried: measured on the
+  // published panel 2026-10-03, `lounge` printed as a machine key because nothing named it.
+  lounge: "صالة صغيرة",
+  "dressing-room": "غرفة قياس",
+  kitchen: "مطبخ",
+  "home-office": "مكتب منزلي",
 };
 
 /** Offered in the order the bank is fullest. */
