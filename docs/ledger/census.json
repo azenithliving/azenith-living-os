@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T16:56:26.662Z",
+  "generatedAt": "2026-10-03T18:11:15.248Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5010,
     "newPages": 13,
     "newPageLines": 833,
     "adminDoors": 118,
-    "allDoors": 200,
+    "allDoors": 201,
     "outsideDoors": 8,
     "outsideDoorLines": 2583,
-    "rootLibFiles": 277,
-    "rootLibUsed": 80,
-    "orphanDoors": 74,
-    "rootLibUsedLines": 29257,
+    "rootLibFiles": 279,
+    "rootLibUsed": 81,
+    "orphanDoors": 75,
+    "rootLibUsedLines": 29334,
     "furnitureFiles": 57,
-    "furnitureLines": 15592,
+    "furnitureLines": 15612,
     "furnitureUsedByBoth": 6,
     "furnitureBothLines": 2391,
     "furnitureNewOnly": 18,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 64,
-    "swarmFileLines": 14957,
+    "swarmFileLines": 14962,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 11,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 489
+    "atoms": 491
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -990,8 +990,14 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/cad/colours.ts",
+      "lines": 66,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/cad/dossier.ts",
-      "lines": 407,
+      "lines": 418,
       "callers": 2
     },
     {
@@ -1542,6 +1548,11 @@
     },
     {
       "kind": "orphan-door",
+      "id": "app/api/passport/[token]/colours/route.ts",
+      "lines": 82
+    },
+    {
+      "kind": "orphan-door",
       "id": "app/api/passport/[token]/contact/route.ts",
       "lines": 97
     },
@@ -1553,7 +1564,7 @@
     {
       "kind": "orphan-door",
       "id": "app/api/passport/[token]/route.ts",
-      "lines": 206
+      "lines": 226
     },
     {
       "kind": "orphan-door",
@@ -1817,7 +1828,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/ClientPreCallDossier.tsx",
-      "lines": 288,
+      "lines": 308,
       "usedBy": "new-only"
     },
     {
@@ -2205,7 +2216,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 338
+      "lines": 343
     },
     {
       "kind": "swarm-file",

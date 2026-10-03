@@ -238,6 +238,8 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "app/api/passport/[token]/contact/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الرقم والمنطقة: العميل هو اللي بيديها وهي اللي بتربط الورقة بصاحبها — شغل مكتب المبيعات" },
   { id: "lib/cad/sheet-images.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الصور اللي واقف وراها الملف الذهبي وصفحة العميل معًا — مش ملك موظف واحد" },
   { id: "lib/cad/plan.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الرسم: ورق العميل وملفه عند المالك بيمشوا نفس الأضلاع بنفس Builder — مش ملك موظف واحد" },
+  { id: "lib/cad/colours.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة مصفوفة الألوان: نفس الصور اللي بتظهر ليه هي اللي بتحدّد الألوان اللي تتعرض، عند العميل وعند المالك" },
+  { id: "app/api/passport/[token]/colours/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الذوق: العميل هو اللي بيقف على ألوانه، والمتجر يتأكد إن البنك يقدر يوريها له قبل ما يحفظ" },
   { id: "app/api/passport/[token]/plan/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الشكل والباب: العميل هو اللي بيحدد شكل مكانه وبيحط بابه على ضلعه من عنوانه السرّي" },
   { id: "app/api/passport/[token]/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الورقة: بتقرأ الرسم وتكتبه مع الختم، وبتعِدّ الأرقام من غير ما تقول مفتاح العميل" },
   { id: "app/api/admin/ops/sketch/route.ts", office: "paper-desk", status: "moved", reason: "طاولة الورق: رفع الورقة وقراءتها وحفظها — ومن النهارده رسمها بيتحدد في نفس اللحظة" },

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T16:56:26.666Z",
+  "generatedAt": "2026-10-03T18:11:15.253Z",
   "states": [
     "not-moved",
     "moving",
@@ -8,7 +8,7 @@
   ],
   "counts": {
     "not-moved": 466,
-    "moved": 16,
+    "moved": 18,
     "moving": 6,
     "erased": 1
   },
@@ -368,8 +368,8 @@
       "atom": "app/api/admin/customers/dossier/route.ts",
       "state": "moved",
       "phase": "M2",
-      "when": "2026-10-02",
-      "proof": "measured on the published site: 200 for four real roll rows with the headline in his numerals, 404 «مفيش عميل بالاسم ده في الدفتر» for a well-formed mobile the roll does not hold, and 400 «اختار العميل من الدفتر الأول» for a malformed key and for no key at all — an empty file is never returned as if it were an answer. It reads the roll through lib/customers/read.ts, the same reader the customers screen uses, and scopes his papers by company in the statement that reads them"
+      "when": "2026-10-03",
+      "proof": "the file door reads the paper's drawing and his picks off the same row the sheet writes, so the two screens cannot disagree about who he is"
     },
     {
       "kind": "admin-door",
@@ -974,11 +974,19 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/cad/colours.ts",
+      "state": "moved",
+      "phase": "colour-1",
+      "when": "2026-10-03",
+      "proof": "the matrix a room can back: families are named off the bank's own distribution (measured over 5,909 stored colours — grey 36%, warm beige 23%, wood 13%, off-white 12%, dark wood and caramel 4% each), a pick is only kept when one of his room's pictures really carries it, and a claim whose label does not match its colour is refused. The near line is 40 of 255 because that is where the data splits: inside one family pictures sit 0-35 apart, a different family in the same room starts near 45"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/cad/dossier.ts",
       "state": "moved",
       "phase": "plan-1",
       "when": "2026-10-03",
-      "proof": "the file carries the same drawing and says what the shape is («مستطيل · أرقامه مطابقة»). Its area line now reads off the room that was drawn, which CHANGED two earlier assertions: an unnamed confirmed pair used to print «متحسبتش» while the picture above it measured itself — disclosed and re-signed, not quietly edited. 34 dossier tests"
+      "proof": "the file carries the same drawing and his own chosen colours, printed apart from the bank's palette because a colour he stopped on is his word, not the shop's. Its area line reads off the room that was drawn — which changed two earlier assertions, disclosed in the minutes"
     },
     {
       "kind": "root-lib",
@@ -1483,6 +1491,14 @@
     },
     {
       "kind": "orphan-door",
+      "atom": "app/api/passport/[token]/colours/route.ts",
+      "state": "moved",
+      "phase": "colour-1",
+      "when": "2026-10-03",
+      "proof": "the colour desk behind the same secret address: it re-reads the bank rather than trusting the screen, keeps at most three, and writes one column and nothing else — a taste can never move a sealed measurement. Proved on a built server at 390px: three taps stored and read back (#7e7165, #9f8c7b, #8d6a4e), the fourth swatch arrived disabled with the reason on the same card"
+    },
+    {
+      "kind": "orphan-door",
       "atom": "app/api/passport/[token]/contact/route.ts",
       "state": "moved",
       "phase": "capture-1",
@@ -1503,7 +1519,7 @@
       "state": "moved",
       "phase": "plan-1",
       "when": "2026-10-03",
-      "proof": "the sheet now answers with the room: the stored drawing is read back beside the numbers, and a paper filed before the column exists is walked by the same builder so no surface gets an empty box or a different room. The confirmation writes the drawing and the polygon's area in the same breath it seals the numbers"
+      "proof": "the sheet answers with the room and the palette together: the stored drawing, the matrix built from the pictures it really shows him, his picks, and the bank's list re-ordered by those picks — both the first read and the answer after he confirms go through the same builder, so his colours cannot vanish because one door forgot to compute them"
     },
     {
       "kind": "orphan-door",
@@ -1745,8 +1761,8 @@
       "atom": "components/admin/ClientPreCallDossier.tsx",
       "state": "moved",
       "phase": "M2",
-      "when": "2026-10-02",
-      "proof": "built on the new surface and measured on the published site at 390px: the panel answered the roll, typing ٤٤٤ in Arabic-Indic digits returned 1 candidate, pressing it opened five sections — his line from the roll, the paper's two agreed numbers with «الورقة مختومة», the browsing or its honest absence, eight colour squares off the bank, and the photo of the paper itself loaded at 900px wide — with the sheet link, a dial link and a WhatsApp link built from his digits, and 0 Latin runs anywhere in the panel. The store was left as found: the test paper went back to «من غير صاحب» (measured: 19 papers, 0 owners tonight)"
+      "when": "2026-10-03",
+      "proof": "the owner sees his drawing read-only and his colours as named chips: «ألوانه اللي اختارها» with the real colour beside each Arabic name"
     },
     {
       "kind": "furniture",

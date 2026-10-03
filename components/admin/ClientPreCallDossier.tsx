@@ -265,6 +265,26 @@ export default function ClientPreCallDossier() {
                 </div>
               )}
 
+              {section.chosen && section.chosen.length > 0 && (
+                // His own words, in colour: what he stopped on is not the bank's palette and must
+                // not be shown as if it were.
+                <div className="mt-2" data-dossier-colours>
+                  <p className="text-[10px] text-white/45">ألوانه اللي اختارها</p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {section.chosen.map((colour) => (
+                      <span
+                        key={colour.hex}
+                        data-dossier-chosen-colour={colour.hex}
+                        className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/[0.08] px-2 py-1 text-[10px] text-amber-100"
+                      >
+                        <span className="h-3.5 w-3.5 rounded-full border border-white/20" style={{ backgroundColor: colour.hex }} />
+                        {colour.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {section.missing?.length ? (
                 <ul className="mt-2 space-y-1">
                   {section.missing.map((line) => (

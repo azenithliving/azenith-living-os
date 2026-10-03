@@ -34,6 +34,8 @@ import type { SheetImage } from "@/lib/cad/sheet-images";
 import { tallyVotes, topPicks, type VoteRow } from "@/lib/cad/vote-keys";
 import type { SketchDimension } from "@/lib/cad/paper-sketch-parser";
 import { SHAPE_LABELS, planFromPaper, type Plan } from "@/lib/cad/plan";
+import { FAMILY_LABELS } from "@/lib/cad/palette";
+import type { ColourPick } from "@/lib/cad/colours";
 import type { CustomerRow } from "@/lib/customers/roll";
 
 export type DossierFact = { label: string; value: string };
@@ -44,6 +46,8 @@ export type DossierSection = {
   facts: DossierFact[];
   /** Colours are swatches, not words: hex values the bank measured off the pictures. */
   swatches?: string[];
+  /** The colours he himself stopped on, as the sheet recorded them. */
+  chosen?: Array<{ hex: string; label: string }>;
   /** The pictures the family itself stopped on, with who stopped. */
   picks?: Array<{ url: string; likes: number; voters: string[] }>;
   /** What this store cannot answer about him, said out loud. */
@@ -61,6 +65,8 @@ export type DossierSketch = {
   openings?: { kind: string; widthMeters: number | null }[];
   /** The room already walked from this paper's numbers, if the store ever walked it. */
   plan?: Plan | null;
+  /** The colours he chose on his own sheet — up to three, each a colour the bank really holds. */
+  colour_picks?: ColourPick[] | null;
   area_sqm: number | string | null;
   ok: boolean;
   confirmed_at: string | null;
@@ -198,6 +204,10 @@ export function buildDossier(input: {
       ]
     : [];
 
+  // His own picks, read off the newest paper that carries them. A colour he chose is a fact from
+  // him, so it is printed apart from the bank's palette rather than mixed into it.
+  const chosen = (sketches.find((sketch) => Array.isArray(sketch.colour_picks) && sketch.colour_picks.length) ?? null)?.colour_picks ?? [];
+
   const sections: DossierSection[] = [
     { id: "who", title: "اللي هتكلّمه", facts: who },
     { id: "paper", title: "رسمته", facts: paper },
@@ -207,6 +217,7 @@ export function buildDossier(input: {
       title: input.imagesForHisRoom ? "ألوان الصور اللي لمكانه" : "ألوان من البيت العام — مكانه مش في البنك",
       facts: [{ label: "عدد الصور", value: arNum(images.length) }],
       swatches,
+      chosen: chosen.map((pick) => ({ hex: pick.hex, label: FAMILY_LABELS[pick.family] ?? "لون اختاره" })),
       missing: swatches.length ? undefined : ["البنك ما بيخزّنش لون مسيطر على الصور دي."],
     },
     {

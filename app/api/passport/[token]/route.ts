@@ -19,6 +19,8 @@ import { linkFromPhone } from "@/lib/cad/sketch-link";
 import { freezeHash, looksLikePassportToken, stillSealed } from "@/lib/cad/passport";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
 import { planFromPaper, type Plan } from "@/lib/cad/plan";
+import { matrixFor, type ColourPick } from "@/lib/cad/colours";
+import { rankByPicks } from "@/lib/cad/palette";
 
 export const dynamic = "force-dynamic";
 
@@ -37,12 +39,18 @@ type Row = {
   customer_dimensions: number[] | null;
   /** What the walk of this paper's numbers produced. Absent on papers read before the drawing. */
   plan: Plan | null;
+  /** The colours he chose for his room, up to three, each a colour the bank really holds. */
+  colour_picks: ColourPick[] | null;
   /** Read for the write rules below. `publicSheet` never returns it: this is a public address. */
   customer_key: string | null;
   customer_city: string | null;
 };
 
-function publicSheet(row: Row, hasPhone: boolean) {
+function publicSheet(
+  row: Row,
+  hasPhone: boolean,
+  extras: { matrix: ReturnType<typeof matrixFor>; picks: ColourPick[] }
+) {
   const dimensions = Array.isArray(row.dimensions) ? row.dimensions : [];
   // The stored drawing is the answer when there is one. When a paper predates the column — or was
   // filed before anyone picked a shape — the same builder runs, so no surface gets an empty box
@@ -57,6 +65,9 @@ function publicSheet(row: Row, hasPhone: boolean) {
     plan,
     // The one thing standing between the numbers on the paper and a drawing: his own answer.
     shape_question: plan ? null : drawing.question,
+    // His colour matrix — the families his room's pictures really carry — and what he chose.
+    colour_matrix: extras.matrix,
+    colour_picks: extras.picks,
     confirmed_count: row.confirmed_count ?? 0,
     ok: Boolean(row.ok),
     failure: row.failure ?? null,
@@ -77,12 +88,33 @@ async function findByToken(token: string) {
   if (!supabase) return { error: "المتجر غير متصل دلوقتي" as const, status: 503 };
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,confirmed_at,frozen_hash,customer_dimensions,plan,customer_key,customer_city")
+    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,confirmed_at,frozen_hash,customer_dimensions,plan,colour_picks,customer_key,customer_city")
     .eq("token", token)
     .maybeSingle();
   if (error) return { error: "السجل ما ردّش" as const, status: 500 };
   if (!data) return { error: "مفيش ورقة بهذا العنوان" as const, status: 404 };
   return { row: data as Row, status: 200 };
+}
+
+/**
+ * The sheet as a person reads it, with his room's pictures and the colour matrix they back.
+ *
+ * Both answers — the first read and the one after he confirms — go through here, so the page never
+ * loses his matrix because one of the two doors forgot to compute it.
+ */
+async function sheetPayload(row: Row) {
+  // The pictures are picked for the room on the drawing. When the room is one the
+  // bank has no pictures for, the general house set is sent and the flag says so,
+  // because «chosen for your room» has to be true before it is printed.
+  const picks = await pickSheetImages(row.room, 20);
+  const chosen = Array.isArray(row.colour_picks) ? row.colour_picks : [];
+  return {
+    sheet: publicSheet(row, Boolean(row.customer_key), { matrix: matrixFor(picks.images), picks: chosen }),
+    // His own picks re-order the bank's list, so the first thing he sees is closest to what he said.
+    images: rankByPicks(picks.images, chosen.map((pick) => pick.hex)),
+    images_room_type: picks.roomType,
+    images_for_his_room: picks.matched,
+  };
 }
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
@@ -92,19 +124,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   }
   const found = await findByToken(token);
   if (!found.row) return NextResponse.json({ success: false, error: found.error }, { status: found.status });
-
-  // The pictures are picked for the room on the drawing. When the room is one the
-  // bank has no pictures for, the general house set is sent and the flag says so,
-  // because «chosen for your room» has to be true before it is printed.
-  const picks = await pickSheetImages(found.row.room, 20);
-
-  return NextResponse.json({
-    success: true,
-    sheet: publicSheet(found.row, Boolean(found.row.customer_key)),
-    images: picks.images,
-    images_room_type: picks.roomType,
-    images_for_his_room: picks.matched,
-  });
+  return NextResponse.json({ success: true, ...(await sheetPayload(found.row)) });
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
@@ -161,7 +181,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({
       success: true,
       matched: false,
-      sheet: publicSheet({ ...row, dimensions: withCustomer }, Boolean(row.customer_key)),
+      sheet: (await sheetPayload({ ...row, dimensions: withCustomer })).sheet,
       error: null,
       message: "الأرقام اللي كتبتها ما طابتش اللي قريناه — كلّمنانا ونعيد القراءة سوا",
     });
@@ -199,7 +219,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   return NextResponse.json({
     success: true,
     matched: true,
-    sheet: refreshed.row ? publicSheet(refreshed.row, Boolean(refreshed.row.customer_key)) : null,
+    sheet: refreshed.row ? (await sheetPayload(refreshed.row)).sheet : null,
     message: "اتأكدت. دي ورقته المعتمدة بنفس الأرقام اللي كتبها.",
   });
 }

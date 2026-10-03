@@ -8,6 +8,7 @@ import { imageKeyOf } from '@/lib/cad/vote-keys';
 import { ROOM_CHOICES } from '@/lib/cad/room-labels';
 import { DRAWABLE_SHAPES, type Plan, type PlanOpening, type PlanShape } from '@/lib/cad/plan';
 import RoomPlan from '@/components/cad/RoomPlan';
+import ColourMatrix, { type MatrixEntry, type Pick as ColourPick } from '@/components/cad/ColourMatrix';
 
 type Dimension = { label: string; meters: number; confirmed?: boolean };
 type Sheet = {
@@ -18,6 +19,9 @@ type Sheet = {
   /** The room as the store walked it. Absent only on a paper whose shape is not settled. */
   plan?: Plan | null;
   shape_question?: string | null;
+  /** The colours his room's pictures really carry, and the up-to-three he stopped on. */
+  colour_matrix?: MatrixEntry[];
+  colour_picks?: ColourPick[];
   confirmed_count: number;
   ok: boolean;
   failure: string | null;
@@ -38,7 +42,15 @@ const OPENING_LABEL: Record<string, string> = { door: 'باب', window: 'شبا�
  * The address is read from the live path rather than a search hook so the page stays
  * prerenderable; a token that is not shaped like a token is never sent to the server.
  */
-type SheetImage = { id: number | null; url: string; thumb: string; style: string | null; roomType: string };
+type SheetImage = {
+  id: number | null;
+  url: string;
+  thumb: string;
+  style: string | null;
+  roomType: string;
+  /** True when this picture is close to a colour he stopped on. */
+  near?: boolean;
+};
 
 const STYLE_LABEL: Record<string, string> = { modern: 'مودرن', classic: 'كلاسيك', minimal: 'مينيمال', luxury: 'فخم' };
 
@@ -64,19 +76,16 @@ export default function PassportPage() {
   const [sending, setSending] = useState(false);
   // A drag ends in one write; a second one while it is in the air would fight over the same row.
   const [drawing, setDrawing] = useState(false);
+  // His colour taps: the draft is what he just pressed, until the store's answer replaces it.
+  const [colourDraft, setColourDraft] = useState<ColourPick[] | null>(null);
+  const [colouring, setColouring] = useState(false);
   // A poll that answers while a tap is still in the air can paint the count back to what it was
   // before the tap. Measured on the published site 2026-10-03: the first reader showed the
   // picture with no number at all for a moment.
   const votingRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    const match = window.location.pathname.match(/\/passport\/([A-Za-z0-9_-]{20,32})/);
-    if (!match) {
-      setProblem('العنوان ده مش عنوان ورقة');
-      return;
-    }
-    setToken(match[1]);
-    fetch(`/api/passport/${match[1]}`)
+  const load = useCallback((target: string) => {
+    fetch(`/api/passport/${target}`)
       .then((r) => r.json())
       .then((data) => {
         if (data?.success) {
@@ -87,6 +96,16 @@ export default function PassportPage() {
       })
       .catch(() => setProblem('المتجر ما ردّش'));
   }, []);
+
+  useEffect(() => {
+    const match = window.location.pathname.match(/\/passport\/([A-Za-z0-9_-]{20,32})/);
+    if (!match) {
+      setProblem('العنوان ده مش عنوان ورقة');
+      return;
+    }
+    setToken(match[1]);
+    load(match[1]);
+  }, [load]);
 
   const confirm = useCallback(async () => {
     if (!token || busy) return;
@@ -151,6 +170,39 @@ export default function PassportPage() {
       }
     },
     [drawing, token]
+  );
+
+  /**
+   * His colours go to the store and come back from it. The re-order of his pictures is the store's
+   * answer rather than a local sort, so what he sees and what the owner's file shows are one order.
+   */
+  const sendColours = useCallback(
+    async (next: ColourPick[]) => {
+      if (!token || colouring) return;
+      setColourDraft(next);
+      setColouring(true);
+      setNews(null);
+      try {
+        const res = await fetch(`/api/passport/${token}/colours`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ picks: next }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!data?.success) {
+          setNews(String(data?.error || 'المتجر ما سجلش الألوان'));
+          setColourDraft(null);
+          return;
+        }
+        load(token);
+      } catch {
+        setNews('المتجر ما ردّش — جرّب تاني');
+        setColourDraft(null);
+      } finally {
+        setColouring(false);
+      }
+    },
+    [colouring, load, token]
   );
 
   /**
@@ -518,6 +570,19 @@ export default function PassportPage() {
               </section>
             )}
             {images.length > 0 && (
+              <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4" data-colour-block>
+                <h2 className="text-[12px] font-bold text-white/60">ألوان مكانك</h2>
+                <div className="mt-3">
+                  <ColourMatrix
+                    matrix={sheet.colour_matrix ?? []}
+                    picks={colourDraft ?? sheet.colour_picks ?? []}
+                    onChange={(next) => void sendColours(next)}
+                    busy={colouring}
+                  />
+                </div>
+              </section>
+            )}
+            {images.length > 0 && (
               <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4" data-family-room>
                 <h2 className="text-[12px] font-bold text-white/60">
                   {imagesForHisRoom ? 'غرفة قرار العائلة · صور مختارة لنوع مكانك' : 'غرفة قرار العائلة · أفكار عامة من البيت — مكانك اللي على الورقة مش في بنك الصور بعد'}
@@ -548,7 +613,7 @@ export default function PassportPage() {
                     const mine = Boolean(me.trim() && tally?.voters.includes(me.trim()));
                     return (
                       <div key={i}>
-                        <a href={img.url} target="_blank" rel="noopener noreferrer" className="block">
+                        <a href={img.url} target="_blank" rel="noopener noreferrer" className="relative block">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={img.thumb}
@@ -556,6 +621,14 @@ export default function PassportPage() {
                             loading="lazy"
                             className="h-28 w-full rounded-xl border border-white/10 object-cover"
                           />
+                          {img.near && (
+                            <span
+                              data-picture-near={img.url}
+                              className="absolute right-1.5 top-1.5 rounded-full border border-amber-400/50 bg-black/70 px-2 py-0.5 text-[9px] font-bold text-amber-200"
+                            >
+                              قريبة من اختيارك
+                            </span>
+                          )}
                         </a>
                         <button
                           type="button"
