@@ -121,8 +121,9 @@ export async function proxy(request: NextRequest) {
     });
   }
 
-  // 3. RATE LIMITING
-  const { shouldLimit, isSensitive } = shouldRateLimit(pathname);
+  // 3. RATE LIMITING — the verb decides the ceiling, so a family polling its own sheet is not
+  //    counted like a stranger hammering a write door.
+  const { shouldLimit, isSensitive } = shouldRateLimit(pathname, request.method);
 
   if (shouldLimit) {
     const clientIP = getClientIP(request);

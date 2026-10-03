@@ -169,15 +169,26 @@ export const SENSITIVE_PATHS = [
 ];
 
 /**
- * Check if a path should be rate limited
+ * Check if a path should be rate limited, and under which ceiling.
+ *
+ * The verb matters as much as the door: a customer's sheet re-reads its own tally every twenty
+ * seconds, and six phones on one home connection is eighteen reads a minute. Counting those reads
+ * against the twenty-a-minute write ceiling is how a family decision room starts refusing the
+ * family. A read answers from the general tier; anything that writes keeps the strict one — and so
+ * does any verb this file does not know, because an unknown verb is not a reason to loosen a door.
  */
-export function shouldRateLimit(pathname: string): {
-  shouldLimit: boolean;
-  isSensitive: boolean;
-} {
+export function shouldRateLimit(
+  pathname: string,
+  method?: string
+): { shouldLimit: boolean; isSensitive: boolean } {
+  const verb = String(method ?? "").toUpperCase();
+  // No verb at all is treated as a write: a caller that does not say what it is doing gets the
+  // strict ceiling, never the loose one.
+  const isRead = verb === "GET" || verb === "HEAD";
+
   // Check sensitive paths first (more specific)
   if (SENSITIVE_PATHS.some((path) => pathname.startsWith(path))) {
-    return { shouldLimit: true, isSensitive: true };
+    return { shouldLimit: true, isSensitive: !isRead };
   }
 
   // Check protected paths
