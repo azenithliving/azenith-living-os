@@ -806,19 +806,19 @@ function QualityMetricsPanel() {
     <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="text-center p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-          <p className="text-2xl font-bold text-emerald-400">{metrics.pass_count}</p>
+          <p className="text-2xl font-bold text-emerald-400">{arNum(metrics.pass_count)}</p>
           <p className="text-[10px] text-white/40">ناجح</p>
         </div>
         <div className="text-center p-3 bg-rose-500/10 rounded-xl border border-rose-500/20">
-          <p className="text-2xl font-bold text-rose-400">{metrics.fail_count}</p>
+          <p className="text-2xl font-bold text-rose-400">{arNum(metrics.fail_count)}</p>
           <p className="text-[10px] text-white/40">فاشل</p>
         </div>
         <div className="text-center p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
-          <p className="text-2xl font-bold text-amber-400">{metrics.conditional_count}</p>
+          <p className="text-2xl font-bold text-amber-400">{arNum(metrics.conditional_count)}</p>
           <p className="text-[10px] text-white/40">مشروط</p>
         </div>
         <div className="text-center p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
-          <p className="text-2xl font-bold text-blue-400">{metrics.pass_rate}%</p>
+          <p className="text-2xl font-bold text-blue-400">{arNum(metrics.pass_rate)}٪</p>
           <p className="text-[10px] text-white/40">نسبة النجاح</p>
         </div>
       </div>
@@ -826,7 +826,7 @@ function QualityMetricsPanel() {
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="text-white/40">معدل النجاح</span>
-          <span className="text-white font-bold">{metrics.pass_rate}%</span>
+          <span className="text-white font-bold">{arNum(metrics.pass_rate)}٪</span>
         </div>
         <div className="h-2 bg-white/5 rounded-full overflow-hidden">
           <div
@@ -838,25 +838,25 @@ function QualityMetricsPanel() {
 
       <div className="grid grid-cols-4 gap-2 text-center">
         <div>
-          <p className="text-sm font-bold text-white">{metrics.incoming_material_count}</p>
+          <p className="text-sm font-bold text-white">{arNum(metrics.incoming_material_count)}</p>
           <p className="text-[8px] text-white/30">مواد</p>
         </div>
         <div>
-          <p className="text-sm font-bold text-white">{metrics.in_process_count}</p>
+          <p className="text-sm font-bold text-white">{arNum(metrics.in_process_count)}</p>
           <p className="text-[8px] text-white/30">أثناء</p>
         </div>
         <div>
-          <p className="text-sm font-bold text-white">{metrics.pre_finish_count}</p>
+          <p className="text-sm font-bold text-white">{arNum(metrics.pre_finish_count)}</p>
           <p className="text-[8px] text-white/30">قبل تشطيب</p>
         </div>
         <div>
-          <p className="text-sm font-bold text-white">{metrics.final_count}</p>
+          <p className="text-sm font-bold text-white">{arNum(metrics.final_count)}</p>
           <p className="text-[8px] text-white/30">نهائي</p>
         </div>
       </div>
 
       <p className="text-[9px] text-white/20 text-center">
-        إجمالي: {metrics.total_checks} فحص
+        إجمالي: {arNum(metrics.total_checks)} فحص
       </p>
     </div>
   );

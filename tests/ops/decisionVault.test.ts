@@ -58,6 +58,12 @@ describe("the decisions vault speaks only the owner's language", () => {
       // and the machine key «OPS-UX» where the swarm's own module already had the Arabic name.
       ["app/admin/page.tsx", "arNum(tasksCompleted)"],
       ["app/admin/page.tsx", "agentLabel(agentKey)"],
+      // Measured on the published site 2026-10-05: the quality card on the owner's main screen
+      // painted «2», «0», «67%» in Latin digits while the same page's other card was already fixed.
+      ["app/admin/page.tsx", "arNum(metrics.pass_count)"],
+      ["app/admin/page.tsx", "arNum(metrics.pass_rate)"],
+      ["app/admin/page.tsx", "arNum(metrics.total_checks)"],
+      ["app/admin/page.tsx", "arNum(metrics.final_count)"],
       ["app/admin/intel/components/ImageHarvestDashboard.tsx", "arNum(data.stats.distribution.length)"],
     ];
     for (const [file, call] of surfaces) {
