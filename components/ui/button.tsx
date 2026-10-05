@@ -9,9 +9,9 @@ const buttonVariants = cva(
       variant: {
         default: "bg-amber-600 text-white shadow hover:bg-amber-700",
         destructive: "bg-red-600 text-white shadow-sm hover:bg-red-700",
-        outline: "border border-slate-300 bg-white shadow-sm hover:bg-slate-100 hover:text-slate-900",
-        secondary: "bg-slate-100 text-slate-900 shadow-sm hover:bg-slate-200",
-        ghost: "hover:bg-slate-100 hover:text-slate-900",
+        outline: "border border-panel-border bg-panel text-panel-fg shadow-sm hover:bg-panel-muted",
+        secondary: "bg-panel-muted text-panel-fg shadow-sm hover:bg-panel-border",
+        ghost: "hover:bg-panel-muted hover:text-panel-fg",
         link: "text-amber-600 underline-offset-4 hover:underline",
       },
       size: {

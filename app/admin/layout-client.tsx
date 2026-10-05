@@ -86,7 +86,7 @@ export default function AdminLayoutClient({
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex overflow-hidden font-outfit">
+    <div className="admin-house min-h-screen bg-[#0A0A0A] flex overflow-hidden font-outfit">
       {/* Mobile Menu Toggle */}
       <button
         onClick={() => setIsSidebarOpen(true)}

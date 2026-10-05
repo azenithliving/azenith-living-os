@@ -181,7 +181,7 @@ export function ImageHarvestDashboard() {
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white transition"
             >
-              <span>سجلات GitHub Actions</span>
+              <span>سجلات ماكينة الصور</span>
               <ExternalLink className="h-3.5 w-3.5 text-white/50" />
             </a>
           )}
@@ -195,14 +195,17 @@ export function ImageHarvestDashboard() {
             className={workflowStatus?.workflowConfigured ? "bg-emerald-600 hover:bg-emerald-700 text-white font-medium" : "bg-amber-600 hover:bg-amber-700 text-white font-medium"}
           >
             {triggering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Play className="ml-2 h-4 w-4" />}
-            {workflowStatus?.workflowConfigured ? "تشغيل الحصاد السحابي (GitHub)" : "تهيئة وتشغيل الحصاد (GitHub)"}
+            {workflowStatus?.workflowConfigured ? "شغّل حصاد الصور السحابي" : "هيّئ الحصاد وشغّله"}
           </Button>
         </div>
       </div>
 
-      {error && <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-800 dark:text-red-200">{error}</div>}
+      {/* The house never sets a dark class, so a dark-variant class here would simply not fire and
+          the message would paint dark ink on a dark panel — the sentence the owner needs most is
+          the one he could not read. */}
+      {error && <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>}
       {notice && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-800 dark:text-green-200">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
           <span>{notice}</span>
           {workflowStatus?.runsUrl && (
             <a
@@ -211,13 +214,13 @@ export function ImageHarvestDashboard() {
               rel="noreferrer"
               className="inline-flex items-center gap-1 rounded-md bg-emerald-600/20 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 transition"
             >
-              <span>متابعة سير العمل على GitHub</span>
+              <span>متابعة الشغل في ماكينة الصور</span>
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           )}
         </div>
       )}
-      {(data?.warnings ?? []).map((warning) => <div key={warning} className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">{warning}</div>)}
+      {(data?.warnings ?? []).map((warning) => <div key={warning} className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">{warning}</div>)}
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
@@ -257,8 +260,8 @@ export function ImageHarvestDashboard() {
                   <Key className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">تهيئة مفتاح GitHub للحصاد السحابي</h3>
-                  <p className="text-xs text-white/60">تشغيل سير العمل (run-harvester.yml) عن بُعد</p>
+                  <h3 className="text-lg font-bold text-white">تهيئة مفتاح الوصول للحصاد السحابي</h3>
+                  <p className="text-xs text-white/60">تشغيل ماكينة الحصاد عن بُعد</p>
                 </div>
               </div>
               <button
@@ -270,12 +273,12 @@ export function ImageHarvestDashboard() {
             </div>
 
             <p className="text-xs text-white/70 leading-relaxed">
-              يقوم روبوت الحصاد بالعمل على خوادم <b>GitHub Actions</b> المستقلة لجمع مئات الصور وفحصها بالذكاء الاصطناعي دون إجهاد سيرفر الموقع أو استهلاك وقته. لإصدار أمر التشغيل التلقائي، أدخل رمز وصول <b>GitHub Personal Access Token</b> بصلاحية <code>workflow</code> و <code>repo</code>.
+              روبوت الصور بيشتغل على ماكينة صور مستقلة بعيدًا عن سيرفر متجرك: بيلمّ مئات الصور ويفحصها بالذكاء الاصطناعي من غير ما يبطّئ الموقع ولا يستهلك وقته. عشان تعطيه أمر التشغيل، حط مفتاح وصول من حسابك، ولازم يكون مفعّل فيه الصلاحتين دول: <code>workflow</code> و <code>repo</code>.
             </p>
 
             <div className="space-y-2">
               <label className="text-xs font-semibold text-white/80 block">
-                رمز الوصول (GitHub Token):
+                مفتاح الوصول:
               </label>
               <input
                 type="password"
@@ -292,7 +295,7 @@ export function ImageHarvestDashboard() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-[11px] text-amber-400 hover:underline"
                 >
-                  <span>توليد التوكن في ثوانٍ من GitHub</span>
+                  <span>اعمل مفتاح الوصول في ثوانٍ</span>
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
@@ -307,7 +310,7 @@ export function ImageHarvestDashboard() {
               />
               <span className="text-xs text-white/80 flex items-center gap-1.5">
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                حفظ التوكن في قاعدة البيانات (api_keys) للاستخدام المستمر بنقرة واحدة
+                حفظ مفتاح الوصول في سجل المتجر للاستخدام المستمر بنقرة واحدة
               </span>
             </label>
 
