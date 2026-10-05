@@ -774,7 +774,9 @@ export default function RoomPageClient({
                     <div>
                       <h4 className="mb-3 flex items-center gap-2 font-bold text-white">
                         <MessageCircle className="h-4 w-4 text-amber-400" />
-                        {isRTL ? "بناءً على ذوقك، ممكن تعجبك:" : "Based on your taste, you might like:"}
+                        {currentAnalysis.read
+                          ? (isRTL ? "بناءً على ذوقك، ممكن تعجبك:" : "Based on your taste, you might like:")
+                          : (isRTL ? "غرف تانية من المعرض:" : "More rooms from the gallery:")}
                       </h4>
                       <div className="grid gap-3">
                         {currentAnalysis.suggestions.map((suggestion) => (
