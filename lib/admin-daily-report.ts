@@ -4,6 +4,7 @@
 
 import { getAnalyticsReport, getSystemHealth } from "@/lib/architect-tools";
 import { getCapabilityMaturityReport } from "@/lib/admin-capability-evolution";
+import { arNum } from "@/lib/ops/metricLabels";
 import { listPendingAdminProposals } from "@/lib/admin-sovereign-mind";
 import { createClient } from "@supabase/supabase-js";
 
@@ -27,17 +28,17 @@ export async function buildAdminDailyReport(): Promise<AdminDailyReport> {
   const generatedAt = new Date().toISOString();
 
   const fullTextAr = [
-    `📋 **تقرير Azenith اليومي** — ${new Date().toLocaleDateString("ar-EG")}`,
+    `📋 **تقرير أزينث ليفينج اليومي** — ${new Date().toLocaleDateString("ar-EG")}`,
     "",
     health.message || "—",
     "",
     analytics.message || "—",
     "",
-    `🧠 نضج المساعد: ${maturity.score}/100 (${maturity.tier}) — ${maturity.summaryAr}`,
+    `🧠 نضج المساعد (${arNum(maturity.score)} من ${arNum(100)}): ${maturity.summaryAr}`,
     "",
     pending.length > 0
-      ? `⏳ ${pending.length} اقتراح(ات) بانتظار موافقتك في «عقل النظام»`
-      : "✅ لا اقتراحات معلّقة",
+      ? `⏳ ${arNum(pending.length)} ${pending.length === 1 ? "اقتراح مستني" : "اقتراحات مستنية"} موافقتك في «عقل النظام»`
+      : "✅ مفيش اقتراحات مستنية",
   ].join("\n");
 
   return {

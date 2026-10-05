@@ -1,4 +1,4 @@
-import { arNum } from "./metricLabels";
+import { arDigits, arNum } from "./metricLabels";
 
 /**
  * The four numbers the owner checks before he reads anything, and the one rule that keeps
@@ -52,14 +52,42 @@ export function pulseItems(sources: PulseSources): PulseItem[] {
  * Table rows are dropped rather than flattened: the card is a sentence, and flattening a
  * table is what produced «فحصت 0 غرفة و1 منتج. | المشكلة | الرابط | ماذا أفعل؟ | | —» on
  * a phone screen.
+ *
+ * A line with no Arabic in it is dropped too, and a Latin run inside a kept line is cut out.
+ * Measured on the live store before this rule existed, the newest agent line in 10 of 10
+ * conversations carried Latin letters — the models open their reports with their own English
+ * headings («SEO Audit Results», «Quality Assurance Learnings») and put the sentence he can act
+ * on further down, so every card read as machine prose to a man who reads Arabic. Numbers become
+ * his numerals: `arDigits` rather than `arNum`, because a number read in a sentence must not grow
+ * a thousands separator.
  */
 export function previewLine(content: string): string {
   const prose = String(content ?? "")
     .split("\n")
     .map((line) => line.trim())
-    .filter((line) => line.length > 0 && !line.includes("|") && !line.startsWith("#"))
+    .filter((line) => line.length > 0 && !line.includes("|") && !line.startsWith("#") && /\p{Script=Arabic}/u.test(line))
     .join(" ");
-  const clean = prose.replace(/[*`>_]/g, "").replace(/\s+/g, " ").trim();
-  if (!clean) return "";
-  return clean.length > 130 ? `${clean.slice(0, 127).trimEnd()}…` : clean;
+  if (!prose) return "";
+  const clean = prose
+    .replace(/[*`>_]/g, "")
+    .replace(/\[([^\]]*)\]/g, "$1")
+    .replace(/\S*:\/\/\S+/g, " ")
+    .replace(/[A-Za-z][A-Za-z0-9_.+-]*/g, " ")
+    .replace(/\(\s*\)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!/\p{Script=Arabic}/u.test(clean)) return "";
+  const arabic = arDigits(clean);
+  if (arabic.length <= 130) return arabic;
+
+  // A cut that lands inside a bracket leaves the card ending on an opened clause, so the line
+  // gives back the clause rather than showing him a sentence with a hole in it.
+  let head = arabic.slice(0, 127).trimEnd();
+  const unopened = (head.match(/\(/g)?.length ?? 0) - (head.match(/\)/g)?.length ?? 0);
+  for (let cut = 0; cut < unopened; cut += 1) {
+    const at = head.lastIndexOf("(");
+    if (at < 0) break;
+    head = head.slice(0, at).trimEnd();
+  }
+  return `${head.replace(/[ +\-،:؛(]+$/, "").trimEnd()}…`;
 }

@@ -3,12 +3,11 @@
  */
 
 import { TOOL_REGISTRY } from "@/lib/agent-tools/tool-registry";
-import { ADMIN_COMMANDS } from "./admin-capability-manifest";
+import { ADMIN_COMMANDS, isLiveTool } from "./admin-capability-manifest";
+import { arNum } from "./ops/metricLabels";
 import type { ClassifiedIntent } from "./admin-intent-types";
 import { reinforceLearnedPattern, listLearnedPatternCount } from "./admin-learned-patterns";
 import type { MindProposal } from "./admin-sovereign-mind";
-
-const STUB_RE = /not yet implemented/i;
 
 export interface CapabilityMaturityReport {
   tier: "foundational" | "operational" | "advanced" | "sovereign";
@@ -21,11 +20,17 @@ export interface CapabilityMaturityReport {
   summaryAr: string;
 }
 
+/** What each maturity level is called on the owner's screen. The keys are for the code. */
+export const TIER_LABELS_AR: Record<CapabilityMaturityReport["tier"], string> = {
+  foundational: "تحت التأسيس",
+  operational: "شغّال",
+  advanced: "متقدّم",
+  sovereign: "كامل السيادة",
+};
+
 export function getCapabilityMaturityReport(): CapabilityMaturityReport {
   const tools = Object.values(TOOL_REGISTRY);
-  const toolsLive = tools.filter(
-    (t) => !STUB_RE.test(String(t.handler))
-  ).length;
+  const toolsLive = tools.filter(isLiveTool).length;
   const toolsStub = tools.length - toolsLive;
   const learnedPatterns = listLearnedPatternCount();
 
@@ -41,12 +46,10 @@ export function getCapabilityMaturityReport(): CapabilityMaturityReport {
   else if (score >= 65) tier = "advanced";
   else if (score >= 45) tier = "operational";
 
-  const summaryAr =
-    tier === "sovereign"
-      ? "المساعد يعمل بمستوى تشغيل كامل: أوامر، أدوات حية، وتعلم من التنفيذات."
-      : tier === "advanced"
-        ? `قوي جداً: ${toolsLive} أداة حية من ${tools.length}، مع تعلم مستمر.`
-        : `جيد: ${toolsStub} أداة ما زالت تحتاج تطويراً إضافياً.`;
+  const summaryAr = [
+    `${TIER_LABELS_AR[tier]}: ${arNum(toolsLive)} أداة شغّالة من ${arNum(tools.length)}، و${arNum(ADMIN_COMMANDS.length)} أمر محفوظ، و${arNum(learnedPatterns)} نمط اتتعلم من تنفيذات فعلية.`,
+    ...(toolsStub > 0 ? [`في ${arNum(toolsStub)} أداة لسه ما اشتغلتش.`] : []),
+  ].join(" ");
 
   return {
     tier,
