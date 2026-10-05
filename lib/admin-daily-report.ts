@@ -17,6 +17,13 @@ export interface AdminDailyReport {
   fullTextAr: string;
 }
 
+/** Arabic counts the way the number asks, not the way English does: ٢٧ اقتراح, not ٢٧ اقتراحات. */
+function waitingWord(count: number): string {
+  if (count === 2) return "اقتراحين مستنيين";
+  if (count >= 3 && count <= 10) return "اقتراحات مستنية";
+  return "اقتراح مستني";
+}
+
 export async function buildAdminDailyReport(): Promise<AdminDailyReport> {
   const [health, analytics, pending] = await Promise.all([
     getSystemHealth().catch(() => ({ success: false, message: "صحة: غير متاح" })),
@@ -37,7 +44,7 @@ export async function buildAdminDailyReport(): Promise<AdminDailyReport> {
     `🧠 نضج المساعد (${arNum(maturity.score)} من ${arNum(100)}): ${maturity.summaryAr}`,
     "",
     pending.length > 0
-      ? `⏳ ${arNum(pending.length)} ${pending.length === 1 ? "اقتراح مستني" : "اقتراحات مستنية"} موافقتك في «عقل النظام»`
+      ? `⏳ ${arNum(pending.length)} ${waitingWord(pending.length)} موافقتك في «عقل النظام»`
       : "✅ مفيش اقتراحات مستنية",
   ].join("\n");
 

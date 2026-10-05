@@ -20,12 +20,16 @@ export interface CapabilityMaturityReport {
   summaryAr: string;
 }
 
-/** What each maturity level is called on the owner's screen. The keys are for the code. */
+/**
+ * What each maturity level is called on the owner's screen. The keys are for the code.
+ * The top level is named for what the score measures — every registered tool answering — and not
+ * for sovereignty, which is a claim about authority the number behind it does not make.
+ */
 export const TIER_LABELS_AR: Record<CapabilityMaturityReport["tier"], string> = {
   foundational: "تحت التأسيس",
   operational: "شغّال",
   advanced: "متقدّم",
-  sovereign: "كامل السيادة",
+  sovereign: "شغّال بالكامل",
 };
 
 export function getCapabilityMaturityReport(): CapabilityMaturityReport {

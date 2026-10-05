@@ -7,6 +7,7 @@
 import { supabaseService } from "./supabase-service";
 import { getSupabaseServerClient } from "./supabase";
 import { resolvePrimaryCompanyId } from "./company-resolver";
+import { arNum } from "./ops/metricLabels";
 import { load as loadHtml } from "cheerio";
 
 // Types
@@ -378,25 +379,46 @@ export async function getAnalyticsReport(period: AnalyticsPeriod = { days: 30 })
       supabase.from("events").select("type").eq("type", "whatsapp_click").gte("created_at", startDate)
     ]);
 
-    const totalLeads = usersResult.data?.length || 0;
-    const totalRequests = requestsResult.data?.length || 0;
-    const acceptedBookings =
-      requestsResult.data?.filter((r: { status?: string }) => r.status === "accepted").length || 0;
-    const whatsappClicks = eventsResult.data?.length || 0;
-    const conversionRate = totalLeads > 0 ? ((acceptedBookings / totalLeads) * 100).toFixed(1) : "0";
+    const rowCount = (result: { data: unknown; error: unknown }): number | null =>
+      result.error || !Array.isArray(result.data) ? null : result.data.length;
+
+    const leads = rowCount(usersResult);
+    const requests = rowCount(requestsResult);
+    const accepted = Array.isArray(requestsResult.data)
+      ? requestsResult.data.filter((r: { status?: string }) => r.status === "accepted").length
+      : null;
+    const clicks = rowCount(eventsResult);
+    const rate =
+      leads === null || accepted === null ? null : leads > 0 ? (accepted / leads) * 100 : 0;
+
+    // Five numbers labelled with five emoji and written in Latin numerals is a scoreboard, not a
+    // sentence: the owner reads Arabic and has to guess what each icon was counting.
+    const item = (label: string, value: number | null) =>
+      `${label} ${value === null ? "مش معروف" : arNum(value)}`;
 
     const report = {
       period: `${days} يوم`,
-      totalLeads,
-      totalRequests,
-      acceptedBookings,
-      whatsappClicks,
-      conversionRate: `${conversionRate}%`
+      totalLeads: leads,
+      totalRequests: requests,
+      acceptedBookings: accepted,
+      whatsappClicks: clicks,
+      conversionRate: rate === null ? null : `${rate.toFixed(1)}%`,
     };
 
-    const message = `📊 تقرير (${days} يوم):\n👥: ${totalLeads} | 📋: ${totalRequests} | ✅: ${acceptedBookings} | 📈: ${conversionRate}% | 💬: ${whatsappClicks}`;
+    const message = [
+      `📊 تقرير ${arNum(days)} يوم`,
+      item("عملاء في الدفتر", leads),
+      item("طلبات", requests),
+      item("طلبات مقبولة", accepted),
+      rate === null ? "نسبة التحويل مش محسوبة" : `نسبة التحويل ${arNum(rate.toFixed(1))}٪`,
+      item("دوسات واتساب", clicks),
+    ].join(" · ");
 
-    return { success: true, data: report, message };
+    return {
+      success: leads !== null && requests !== null && clicks !== null,
+      data: report,
+      message,
+    };
   } catch (err) {
     const errorMsg = String(err);
     return { success: false, error: errorMsg, message: "❌ خطأ التقرير" };
@@ -405,16 +427,26 @@ export async function getAnalyticsReport(period: AnalyticsPeriod = { days: 30 })
 
 export async function getSystemHealth(): Promise<ToolResult> {
   const supabase = getSupabaseServerClient();
-  const status = "healthy";
-  let pendingTasks = 0;
+  // A count that never arrived is not a zero. The old line read `const status = "healthy"` and an
+  // empty catch, so a store that refused to answer told the owner the system was healthy with
+  // nothing waiting — the one reading that could never be acted on.
+  let pendingTasks: number | null = null;
   try {
-    const { count } = await supabase.from("parallel_task_queue").select("*", { count: "exact", head: true }).eq("status", "pending");
-    pendingTasks = count || 0;
-  } catch {}
+    const { count, error } = await supabase
+      .from("parallel_task_queue")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "pending");
+    if (!error) pendingTasks = count ?? 0;
+  } catch {
+    /* stays null: the read did not answer */
+  }
   return {
-    success: true,
-    data: { status, pendingTasks },
-    message: `✅ النظام ${status}\n🔄 مهام معلقة: ${pendingTasks}`
+    success: pendingTasks !== null,
+    data: { pendingTasks },
+    message:
+      pendingTasks === null
+        ? "⚠️ مافيش تأكيد إن المتجر بيرد — عدد المهام المستنية مش معروف، وده مش معناه صفر"
+        : `✅ المتجر بيرد · مهام مستنية التنفيذ ${arNum(pendingTasks)}`,
   };
 }
 
