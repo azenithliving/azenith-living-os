@@ -181,6 +181,20 @@
       "phase": "colour-1",
       "when": "2026-10-03",
       "proof": "the colour desk behind the same secret address: it re-reads the bank rather than trusting the screen, keeps at most three, and writes one column and nothing else — a taste can never move a sealed measurement. Proved on a built server at 390px: three taps stored and read back (#7e7165, #9f8c7b, #8d6a4e), the fourth swatch arrived disabled with the reason on the same card"
+    },
+    {
+      "atom": "lib/ops/inboxes.ts",
+      "state": "moved",
+      "phase": "cockpit-1",
+      "when": "2026-10-05",
+      "proof": "one read answers all nine badges: the same conversation rule the messages door uses (participant or title, newest wins), the same unread definition, and a count that comes from the record rather than the page when the page fills up. A retired key folds to its live one, and an employee with no conversation answers zero — never an error the card has to wear"
+    },
+    {
+      "atom": "app/api/admin/agents/inboxes/route.ts",
+      "state": "moved",
+      "phase": "cockpit-1",
+      "when": "2026-10-05",
+      "proof": "measured on a built server at 390px: the cockpit now opens 1 door instead of 9 per-employee reads (0 message reads, 1 inbox read), all 9 cards carry their teaser, and a missing table answers zeros rather than a failure. The whitelist is the canvas's own staff list, because the sales manager is deliberately not a swarm key — an earlier draft of this door left his card waiting forever"
     }
   ]
 }

@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T18:11:15.248Z",
+  "generatedAt": "2026-10-05T20:09:29.210Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5010,
     "newPages": 13,
     "newPageLines": 833,
-    "adminDoors": 118,
-    "allDoors": 201,
+    "adminDoors": 119,
+    "allDoors": 202,
     "outsideDoors": 8,
     "outsideDoorLines": 2583,
     "rootLibFiles": 279,
@@ -14,21 +14,21 @@
     "orphanDoors": 75,
     "rootLibUsedLines": 29334,
     "furnitureFiles": 57,
-    "furnitureLines": 15612,
+    "furnitureLines": 15629,
     "furnitureUsedByBoth": 6,
     "furnitureBothLines": 2391,
     "furnitureNewOnly": 18,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
-    "swarmFiles": 64,
-    "swarmFileLines": 14962,
+    "swarmFiles": 65,
+    "swarmFileLines": 15063,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 11,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 491
+    "atoms": 493
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -271,6 +271,11 @@
       "kind": "admin-door",
       "id": "app/api/admin/agents/events/stream/route.ts",
       "resource": "admin/agents/events/stream"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/agents/inboxes/route.ts",
+      "resource": "admin/agents/inboxes"
     },
     {
       "kind": "admin-door",
@@ -872,13 +877,13 @@
       "kind": "root-lib",
       "id": "lib/admin-company.ts",
       "lines": 32,
-      "callers": 15
+      "callers": 16
     },
     {
       "kind": "root-lib",
       "id": "lib/admin-env-resolver.ts",
       "lines": 217,
-      "callers": 1
+      "callers": 2
     },
     {
       "kind": "root-lib",
@@ -1112,7 +1117,7 @@
       "kind": "root-lib",
       "id": "lib/dal/unified-supabase.ts",
       "lines": 637,
-      "callers": 14
+      "callers": 15
     },
     {
       "kind": "root-lib",
@@ -2014,7 +2019,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/v2/CommandCanvas.tsx",
-      "lines": 280,
+      "lines": 297,
       "usedBy": "new-only"
     },
     {
@@ -2145,6 +2150,11 @@
     },
     {
       "kind": "swarm-file",
+      "id": "lib/ops/inboxes.ts",
+      "lines": 99
+    },
+    {
+      "kind": "swarm-file",
       "id": "lib/ops/index.ts",
       "lines": 57
     },
@@ -2216,7 +2226,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 343
+      "lines": 345
     },
     {
       "kind": "swarm-file",

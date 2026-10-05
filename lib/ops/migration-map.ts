@@ -239,6 +239,8 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "lib/cad/sheet-images.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الصور اللي واقف وراها الملف الذهبي وصفحة العميل معًا — مش ملك موظف واحد" },
   { id: "lib/cad/plan.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الرسم: ورق العميل وملفه عند المالك بيمشوا نفس الأضلاع بنفس Builder — مش ملك موظف واحد" },
   { id: "lib/cad/colours.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة مصفوفة الألوان: نفس الصور اللي بتظهر ليه هي اللي بتحدّد الألوان اللي تتعرض، عند العميل وعند المالك" },
+  { id: "lib/ops/inboxes.ts", office: "decision-desk", status: "moved", reason: "قارئ بريدهم الواحد: تسعة أرقام على شاشة القيادة بتيجي من مقياس واحد بنفس قاعدة باب الرسائل" },
+  { id: "app/api/admin/agents/inboxes/route.ts", office: "decision-desk", status: "moved", reason: "بوّابة البريد المجمّعة: طلب واحد يردّ على كل الموظفين بدل تسعة، وما بيخليش كارت مستني حاجة ما جاتش" },
   { id: "app/api/passport/[token]/colours/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الذوق: العميل هو اللي بيقف على ألوانه، والمتجر يتأكد إن البنك يقدر يوريها له قبل ما يحفظ" },
   { id: "app/api/passport/[token]/plan/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الشكل والباب: العميل هو اللي بيحدد شكل مكانه وبيحط بابه على ضلعه من عنوانه السرّي" },
   { id: "app/api/passport/[token]/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الورقة: بتقرأ الرسم وتكتبه مع الختم، وبتعِدّ الأرقام من غير ما تقول مفتاح العميل" },

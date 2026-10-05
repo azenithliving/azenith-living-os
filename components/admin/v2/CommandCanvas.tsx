@@ -13,7 +13,7 @@ import {
 } from '@/lib/ops/departments';
 import { SWARM_NAME } from '@/lib/ops/identity';
 import { arNum } from '@/lib/ops/metricLabels';
-import { previewLine, pulseItems } from '@/lib/ops/command-canvas';
+import { pulseItems } from '@/lib/ops/command-canvas';
 
 type AgentStatus = { agent: string; status: 'online' | 'busy' | 'offline'; taskCount: number; recentActivity: string };
 type Inbox = { unread: number; teaser: string | null };
@@ -89,23 +89,24 @@ export function CommandCanvas() {
       } catch {}
     }
 
-    const settled = await Promise.all(
-      DEPARTMENT_KEYS.map(async (key) => {
-        try {
-          const res = await fetch(`/api/admin/agents/messages?agent_key=${key}&unread=true`);
-          const data = await res.json();
-          if (!data.success) return [key, { unread: 0, teaser: null }] as const;
-          const last = (data.data || []).filter((m: any) => m.sender_type === 'agent').slice(-1)[0];
-          return [
-            key,
-            { unread: data.count || 0, teaser: last ? previewLine(String(last.content || '')) || null : null },
-          ] as const;
-        } catch {
-          return [key, { unread: 0, teaser: null }] as const;
-        }
-      })
-    );
-    setInboxes(Object.fromEntries(settled));
+    // One door for all nine badges. This used to be a read per employee: nine round trips, each
+    // behind a function that may be cold, and every card waited on the slowest of them.
+    try {
+      const res = await fetch(`/api/admin/agents/inboxes?keys=${DEPARTMENT_KEYS.join(",")}`, { cache: 'no-store' });
+      const data = await res.json();
+      if (data?.success && data.inboxes) {
+        setInboxes(
+          Object.fromEntries(
+            Object.entries(data.inboxes as Record<string, { unread?: number; teaser?: string | null }>).map(
+              ([key, box]) => [key, { unread: Number(box?.unread) || 0, teaser: box?.teaser ?? null }]
+            )
+          )
+        );
+      }
+    } catch {
+      // Nothing lands: the line above the cards says the read has not arrived, and no card claims
+      // a number it does not have.
+    }
   }, []);
 
   useEffect(() => {
@@ -131,6 +132,11 @@ export function CommandCanvas() {
     unread: Object.values(inboxes).reduce((sum, box) => sum + (box?.unread || 0), 0),
     loaded: Object.keys(inboxes).length > 0,
   });
+
+  // What has actually arrived, out of what was asked. The owner gets the truth about the read
+  // instead of nine cards that each guess their own way of looking unfinished.
+  const landed = Object.keys(inboxes).length;
+  const waitingForMail = landed === 0;
 
   return (
     <div className="min-h-[70vh] p-4 pt-16 sm:p-6 sm:pt-8" dir="rtl">
@@ -168,6 +174,12 @@ export function CommandCanvas() {
           بيمتّزش عن رقم حقيقي.
         </p>
       </section>
+
+      {waitingForMail && (
+        <p className="mb-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-[11px] leading-relaxed text-white/45" data-inboxes-loading>
+          بأقرأ بريد الموظفين ({arNum(landed)} من {arNum(DEPARTMENT_KEYS.length)}) — الأرقام بتظهر مرة واحدة.
+        </p>
+      )}
 
       <div className="space-y-7">
         {DEPARTMENTS.map((dept) => (
@@ -229,7 +241,10 @@ function EmployeeCard({
     status?.status === 'online' ? 'متصل وجاهز' : status?.status === 'busy' ? 'قيد المعالجة' : 'نشط';
   const dotColor = status?.status === 'busy' ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500';
   const unread = inbox?.unread ?? 0;
-  const teaser = inbox?.teaser ?? (inbox ? 'لا رسائل جديدة — افتح المحادثة لتكلّفه.' : 'بستنى رد السيرفر…');
+  // Three states, all of them true: his mail has arrived and is empty, it has arrived and says
+  // something, or the read has not landed yet — and while it has not, the card shows no box at all
+  // rather than a rectangle that looks broken.
+  const teaser = inbox ? inbox.teaser ?? 'لا رسائل جديدة — افتح المحادثة لتكلّفه.' : null;
 
   return (
     <Link
@@ -267,9 +282,11 @@ function EmployeeCard({
         </div>
       </div>
 
-      <p className="mt-3 line-clamp-2 rounded-xl border border-white/5 bg-black/25 px-3 py-2 text-[11px] leading-relaxed text-white/60">
-        {teaser}
-      </p>
+      {teaser && (
+        <p className="mt-3 line-clamp-2 rounded-xl border border-white/5 bg-black/25 px-3 py-2 text-[11px] leading-relaxed text-white/60">
+          {teaser}
+        </p>
+      )}
 
       <span className="mt-2.5 inline-block text-[10px] font-bold text-white/25 transition-colors group-hover:text-amber-400">
         افتح المحادثة كاملة الشاشة
