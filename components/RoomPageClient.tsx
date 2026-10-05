@@ -92,8 +92,9 @@ export default function RoomPageClient({
   const [currentAnalysis, setCurrentAnalysis] = useState<{
     photoId: number;
     photoUrl: string;
-    detectedStyle: string;
-    styleAr: string;
+    style: string | null;
+    styleAr: string | null;
+    read: boolean;
     description: string;
     suggestions: Array<{ id: string; name: string; url: string }>;
     message: string;
@@ -159,10 +160,11 @@ export default function RoomPageClient({
         setCurrentAnalysis({
           photoId: photo.id,
           photoUrl: imageUrl,
-          detectedStyle: data.analysis.detectedStyle,
-          styleAr: data.analysis.styleAr,
-          description: data.analysis.description,
-          suggestions: data.analysis.suggestions,
+          style: data.analysis.style ?? null,
+          styleAr: data.analysis.styleAr ?? null,
+          read: Boolean(data.analysis.read),
+          description: data.analysis.description || '',
+          suggestions: data.analysis.suggestions || [],
           message: data.analysis.message,
         });
       }
@@ -725,9 +727,11 @@ export default function RoomPageClient({
                       fill
                       className="object-cover"
                     />
-                    <div className="absolute left-4 top-4 rounded-full bg-amber-500/90 px-3 py-1 text-sm font-bold text-black">
-                      {currentAnalysis.styleAr}
-                    </div>
+                    {currentAnalysis.styleAr ? (
+                      <div className="absolute left-4 top-4 rounded-full bg-amber-500/90 px-3 py-1 text-sm font-bold text-black">
+                        {currentAnalysis.styleAr}
+                      </div>
+                    ) : null}
                   </div>
 
                   {/* AI Message */}
@@ -737,22 +741,30 @@ export default function RoomPageClient({
                     </p>
                   </div>
 
-                  {/* Style Suggestion */}
+                  {/* Style Suggestion — only when a picture was actually read */}
                   <div>
                     <h4 className="mb-3 flex items-center gap-2 font-bold text-white">
                       <Star className="h-4 w-4 text-amber-400" />
-                      {isRTL 
-                        ? `تحب تشوف صور أكتر من استايل ${currentAnalysis.styleAr}؟`
-                        : `Want to see more images in ${currentAnalysis.detectedStyle} style?`}
+                      {currentAnalysis.read
+                        ? (isRTL
+                          ? `تحب تشوف صور أكتر من استايل ${currentAnalysis.styleAr}؟`
+                          : `Want to see more images in ${currentAnalysis.style} style?`)
+                        : (isRTL ? 'اللي تحت من المعرض، من غير ما نقول إن الصورة دي من استايل معين.' : 'Below are gallery rooms — we did not name a style for this picture.')}
                     </h4>
                     <button
                       onClick={() => {
-                        router.push(`/rooms/${room.id}?style=${currentAnalysis.detectedStyle}`);
+                        router.push(
+                          currentAnalysis.read && currentAnalysis.style
+                            ? `/rooms/${room.id}?style=${currentAnalysis.style}`
+                            : `/rooms/${room.id}`
+                        );
                         setAnalysisModalOpen(false);
                       }}
                       className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 py-3 text-amber-400 transition-all hover:bg-amber-500/20"
                     >
-                      <span>{isRTL ? `استكشف استايل ${currentAnalysis.styleAr}` : `Explore ${currentAnalysis.detectedStyle} Style`}</span>
+                      <span>{currentAnalysis.read && currentAnalysis.styleAr
+                        ? (isRTL ? `استكشف استايل ${currentAnalysis.styleAr}` : `Explore ${currentAnalysis.style} Style`)
+                        : (isRTL ? 'تصفح باقي المعرض' : 'Browse the gallery')}</span>
                       <ExternalLink className="h-4 w-4" />
                     </button>
                   </div>
