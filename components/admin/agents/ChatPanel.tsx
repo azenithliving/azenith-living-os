@@ -20,6 +20,7 @@ import { EmergencyBanner } from './EmergencyBanner';
 import { buildPalette, isPaletteHotkey, CAPABILITY_LABELS, type PaletteCommand } from '@/lib/ops/palette';
 import { arDigits, arNum, metricLabel } from '@/lib/ops/metricLabels';
 import { locateFirstUnread, readStamp, unreadJump } from '@/lib/ops/unread-marker';
+import { ownerVoice } from '@/lib/ops/owner-voice';
 import type { SelfModelView } from '@/lib/ops/self-view';
 import {
   CONTINUOUS_SILENCE_MS,
@@ -1580,7 +1581,7 @@ function MessageBubble({
               : `${colors.bubble} border rounded-tl-md shadow-md`
           }`}>
             <div className="text-sm leading-relaxed">
-              <MarkdownContent content={message.content} onZoom={onZoom} />
+              <MarkdownContent content={isUser ? message.content : ownerVoice(message.content)} onZoom={onZoom} />
             </div>
 
             {/* القرار مطلوب من الرسالة دي نفسها — فالأزرار تحتها، مش في مكان تاني من الصفحة. */}

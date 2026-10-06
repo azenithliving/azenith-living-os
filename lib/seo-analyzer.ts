@@ -158,7 +158,7 @@ export async function analyzeSEO(
     return {
       success: true,
       executionId,
-      message: `SEO analysis completed for ${finalUrl} - Score: ${overallScore}/100`,
+      message: `تحليل الظهور في البحث خلّص لـ${finalUrl} — الدرجة: ${overallScore}/100`,
       data: result,
       executionTimeMs,
       affectedTables: ["seo_analysis_results", "agent_executions"],
@@ -185,7 +185,7 @@ export async function analyzeSEO(
     return {
       success: false,
       executionId,
-      message: `SEO analysis failed: ${errorMsg}`,
+      message: `تحليل الظهور في البحث وقع: ${errorMsg}`,
       error: errorMsg,
       executionTimeMs,
     };

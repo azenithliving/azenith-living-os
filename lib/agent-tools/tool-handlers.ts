@@ -826,7 +826,13 @@ async function fetchPageSpeedInsights(url: string, strategy: "mobile" | "desktop
   const endpoint = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=${strategy}${apiKey ? `&key=${apiKey}` : ""}`;
 
   const res = await fetch(endpoint, { signal: AbortSignal.timeout(25_000) });
-  if (!res.ok) throw new Error(`PageSpeed API ${res.status}: ${res.statusText}`);
+  // The provider's own status text is English and is never what he reads: it is logged raw
+  // and named in his words on the way out.
+  if (!res.ok) {
+    console.warn(`[PageSpeed] ${res.status} ${res.statusText}`);
+    const crowded = res.status === 429 ? " — الطلبات كانت كتير" : "";
+    throw new Error(`سرعة الصفحة الواجهة رجّعت رقم ${res.status} من مزوّد الخدمة${crowded}`);
+  }
   const json = await res.json() as PSIResponse;
   if (json.error) throw new Error(json.error.message);
 
