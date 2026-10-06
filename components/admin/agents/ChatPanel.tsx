@@ -33,7 +33,10 @@ import {
   speakableSummary,
   stopDictation as stopDictationState,
   transcriptOf,
-  voiceShortfallLine,
+  speechRequestUrl,
+  shouldUseServerVoice,
+  SERVER_VOICE,
+  SERVER_VOICE_LABEL,
   VOICE_CHOICE_KEY,
   VOICE_SAMPLE,
   arabicVoices,
@@ -408,24 +411,63 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   // Now it answers whether anything was spoken: a phone with no Arabic voice reading his
   // Arabic in an English accent is worse than the button saying it cannot.
   const savedVoiceRef = useRef<string>('');
-  const speakWith = useCallback((text: string, voice?: SpeechSynthesisVoice | null): boolean => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return false;
+  const serverAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  /**
+   * The store's own reading: audio made on our server and played from our address. Used when he
+   * picks it, and automatically when the browser has no Arabic voice to offer — his phone proved
+   * the two are not the same thing.
+   */
+  const playServerVoice = useCallback((text: string): boolean => {
+    if (typeof window === 'undefined') return false;
     try {
-      window.speechSynthesis.cancel();
-      const clean = speakableSummary(text);
-      if (!clean) return false;
-      const chosen = voice ?? pickArabicVoice(window.speechSynthesis.getVoices(), savedVoiceRef.current);
-      if (!chosen) return false;
-      const utter = new SpeechSynthesisUtterance(clean);
-      utter.lang = chosen.lang || 'ar-EG';
-      utter.rate = 0.95;
-      utter.voice = chosen;
-      window.speechSynthesis.speak(utter);
+      serverAudioRef.current?.pause();
+      const audio = new window.Audio(speechRequestUrl(text));
+      audio.onended = () => setBrief('idle');
+      audio.onerror = () => {
+        setBrief('unavailable');
+        setVoiceNote('صوت المتجر ما وصلش — جرّب تاني بعد شوية.');
+      };
+      serverAudioRef.current = audio;
+      audio.play().catch((err: unknown) => {
+        console.warn('[Voice] the store audio did not play:', String((err as Error)?.message || err).slice(0, 80));
+        setBrief('unavailable');
+        setVoiceNote('المتصفح ما سمّحش بالتشغيل — دوس الزرار تاني.');
+      });
       return true;
     } catch {
       return false;
     }
   }, []);
+
+  const speakWith = useCallback(
+    (text: string, voice?: SpeechSynthesisVoice | null): boolean => {
+      if (typeof window === 'undefined') return false;
+      const clean = speakableSummary(text);
+      if (!clean) return false;
+
+      const list = window.speechSynthesis?.getVoices?.() ?? [];
+      const arabic = pickArabicVoice(list, null);
+      if (voice?.name === SERVER_VOICE || shouldUseServerVoice(savedVoiceRef.current, Boolean(arabic))) {
+        return playServerVoice(clean);
+      }
+
+      try {
+        window.speechSynthesis.cancel();
+        const chosen = voice ?? pickArabicVoice(list, savedVoiceRef.current);
+        if (!chosen) return playServerVoice(clean);
+        const utter = new SpeechSynthesisUtterance(clean);
+        utter.lang = chosen.lang || 'ar-EG';
+        utter.rate = 0.95;
+        utter.voice = chosen;
+        window.speechSynthesis.speak(utter);
+        return true;
+      } catch {
+        return playServerVoice(clean);
+      }
+    },
+    [playServerVoice]
+  );
 
   const speak = useCallback((text: string): boolean => speakWith(text), [speakWith]);
 
@@ -454,6 +496,17 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
     return () => window.speechSynthesis.removeEventListener?.('voiceschanged', read);
   }, []);
 
+  const chooseServerVoice = useCallback(() => {
+    setVoiceChoice(SERVER_VOICE);
+    savedVoiceRef.current = SERVER_VOICE;
+    try {
+      localStorage.setItem(VOICE_CHOICE_KEY, SERVER_VOICE);
+    } catch {
+      // Same as the device voices: the choice lives for this session when storage is closed.
+    }
+    speakWith(VOICE_SAMPLE, { name: SERVER_VOICE } as SpeechSynthesisVoice);
+  }, [speakWith]);
+
   const tryVoice = useCallback(
     (voice: SpeechSynthesisVoice) => {
       setVoiceChoice(voice.name);
@@ -479,50 +532,38 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
 
   const speakBrief = useCallback(() => {
     const line = morningBrief({ decisions: pendingDecisions, unread: unreadFresh });
-    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined;
-    if (!synth) {
-      setVoiceNote('المتصفح ده ما بيعرفش ينطق.');
-      setBrief('unavailable');
-      return;
-    }
 
-    const readAloud = (): boolean => {
+    const readNow = (): boolean => {
       if (!speak(line)) return false;
       setBrief('speaking');
       window.setTimeout(() => setBrief('idle'), 12_000);
       return true;
     };
 
-    const giveUp = (total: number) => {
-      setVoiceNote(voiceShortfallLine(total));
-      setBrief('unavailable');
-    };
-
-    const list = synth.getVoices() ?? [];
-    if (nextVoiceStep({ voicesTotal: list.length, arabicFound: Boolean(pickArabicVoice(list)) }) === 'speak') {
-      if (!readAloud()) giveUp(list.length);
+    /**
+     * Chrome hands out an EMPTY voice list on the first call and fills it moments later, so an empty
+     * list is not an answer — wait for `voiceschanged` once. Whatever the phone ends up having, the
+     * reading itself falls back to the store's own voice, so a missing device voice is no longer a
+     * silent button.
+     */
+    const list = typeof window !== 'undefined' ? (window.speechSynthesis?.getVoices?.() ?? []) : [];
+    if (nextVoiceStep({ voicesTotal: list.length, arabicFound: Boolean(pickArabicVoice(list, null)) }) === 'speak') {
+      readNow();
       return;
     }
 
-    /**
-     * Chrome hands out an empty voice list on the first call and fills it a moment later. His phone
-     * said «مفيش صوت عربي» because I refused before that list existed — so wait for it once, then
-     * decide with what the phone really has.
-     */
     setBrief('waiting');
     let settled = false;
     const retry = () => {
       if (settled) return;
       settled = true;
-      synth.removeEventListener('voiceschanged', retry);
-      const now = synth.getVoices() ?? [];
-      if (nextVoiceStep({ voicesTotal: now.length, arabicFound: Boolean(pickArabicVoice(now)) }) !== 'speak') {
-        giveUp(now.length);
-        return;
+      window.speechSynthesis?.removeEventListener?.('voiceschanged', retry);
+      if (!readNow()) {
+        setVoiceNote('مفيش صوت على الجهاز ده، وصوت المتجر ما اشتغلش — جرّب تاني بعد شوية.');
+        setBrief('unavailable');
       }
-      if (!readAloud()) giveUp(now.length);
     };
-    synth.addEventListener('voiceschanged', retry);
+    window.speechSynthesis?.addEventListener?.('voiceschanged', retry);
     window.setTimeout(retry, 2500);
   }, [pendingDecisions, speak, unreadFresh]);
 
@@ -1358,10 +1399,26 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
         {/* اختيار الصوت: كل صوت يسمعك نفس الجملة، واللي يعجبك يفضل هو. */}
         {showVoices && (
           <div data-voice-picker="" className="mt-2 rounded-xl border border-white/10 bg-black/35 p-2 space-y-1.5">
+            <button
+              type="button"
+              onClick={chooseServerVoice}
+              data-voice-option={SERVER_VOICE}
+              data-voice-chosen={voiceChoice === SERVER_VOICE ? '1' : '0'}
+              className={`w-full flex items-center justify-between gap-2 rounded-lg border px-2.5 py-2 text-[11px] ${
+                voiceChoice === SERVER_VOICE
+                  ? 'border-amber-500/50 bg-amber-500/15 text-amber-100'
+                  : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'
+              }`}
+            >
+              <span>{SERVER_VOICE_LABEL}</span>
+              <span className="shrink-0 text-[10px] text-white/40">
+                {voiceChoice === SERVER_VOICE ? 'المختار' : 'جرّب'}
+              </span>
+            </button>
             {arabicVoices(deviceVoices).length === 0 ? (
               <p className="text-[11px] leading-relaxed text-white/60">
-                مفيش صوت عربي في المتصفح ده. جرّب كروم بعد ما تفعّل الأصوات، أو استخدم موبايلك —
-                وهناك اختار الصوت اللي يريح ودانك.
+                المتصفح ده ما بيديش أي صوت عربي — ده سبب إن «هودي» على الكمبيوتر وحشة، وسبب إن موبايلك
+                ما نطقش. صوت المتجر فوق ده هو الحل، وشغّال على أي جهاز.
               </p>
             ) : (
               arabicVoices(deviceVoices).map((voice) => (

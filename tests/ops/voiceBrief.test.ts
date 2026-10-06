@@ -9,6 +9,9 @@ import {
   arabicVoices,
   chosenVoice,
   morningBrief,
+  SERVER_VOICE,
+  speechRequestUrl,
+  shouldUseServerVoice,
   nextVoiceStep,
   pickArabicVoice,
   speakableSummary,
@@ -96,7 +99,7 @@ describe("the cockpit button that plays it", () => {
   });
 
   it("says why it cannot speak when the phone has no Arabic voice", () => {
-    expect(panel).toContain("مفيش صوت عربي");
+    expect(panel).toContain("ما بيديش أي صوت عربي");
   });
 
   it("stops the previous reading before starting a new one", () => {
@@ -216,5 +219,57 @@ describe("the picker is on the cockpit", () => {
     expect(panel).toContain("data-voice-option");
     expect(panel).toContain("VOICE_CHOICE_KEY");
     expect(panel).toContain("VOICE_SAMPLE");
+  });
+});
+
+/**
+ * The store's own voice. His phone settled it: the system settings show Google with العربية as the
+ * text-to-speech language, and Chrome still handed the page 122 voices with none of them Arabic —
+ * so the reading cannot depend on what one browser decides to expose.
+ */
+describe("the store's own voice", () => {
+  it("asks our own door, with the text encoded and capped", () => {
+    const url = speechRequestUrl("صباح الخير. عندك 3 قرارات");
+    expect(url.startsWith("/api/admin/speech?text=")).toBe(true);
+    expect(url).toContain(encodeURIComponent("صباح"));
+    expect(speechRequestUrl("ا".repeat(5000)).length).toBeLessThan(2100);
+  });
+
+  it("is chosen when he picks it, and whenever the device has no Arabic voice", () => {
+    expect(shouldUseServerVoice(SERVER_VOICE, true)).toBe(true);
+    expect(shouldUseServerVoice(null, false)).toBe(true);
+    expect(shouldUseServerVoice("Microsoft Hoda", true)).toBe(false);
+  });
+
+  it("is offered in the picker before any device voice", () => {
+    const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+    expect(panel).toContain("data-voice-option={SERVER_VOICE}");
+    expect(panel).toContain("SERVER_VOICE_LABEL");
+  });
+});
+
+describe("the speech door", () => {
+  const door = readFileSync("app/api/admin/speech/route.ts", "utf8");
+
+  it("sits behind the admin gate like every other admin door", () => {
+    expect(door).toBeDefined();
+    const proxy = readFileSync("proxy.ts", "utf8");
+    expect(proxy).toMatch(/pathname\.startsWith\("\/api\/admin"\)/);
+  });
+
+  it("builds one fixed upstream address — the caller's text is encoded, never a URL", () => {
+    expect(door).toContain("translate.google.com/translate_tts");
+    expect(door).toContain("new URLSearchParams");
+    expect(door).not.toMatch(/fetch\(\s*(raw|text|url)\b/);
+  });
+
+  it("refuses an empty brief and a too-small answer, and never streams an error page as audio", () => {
+    expect(door).toMatch(/status: 400/);
+    expect(door).toMatch(/MIN_AUDIO_BYTES/);
+    expect(door).toMatch(/status: 502/);
+  });
+
+  it("caps what it will speak, so it is not an open relay", () => {
+    expect(door).toMatch(/MAX_CHARS = 700/);
   });
 });

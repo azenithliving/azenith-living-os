@@ -283,3 +283,29 @@ export function chosenVoice<T extends VoiceLike>(
   if (!name) return null;
   return (Array.isArray(voices) ? voices : []).find((v) => v?.name === name) ?? null;
 }
+
+/**
+ * The store's own voice — audio made on our server and played from our address.
+ *
+ * His phone proved the browser cannot be trusted for this: the system settings show Google with
+ * العربية installed, and Chrome still listed 122 voices with no Arabic among them. So a reading that
+ * depends on one browser's mood is not a capability. This is the second source, and it is the one
+ * that always answers.
+ */
+export const SERVER_VOICE = "server";
+
+/** The label he sees for it in the picker — Arabic, because it is on his screen. */
+export const SERVER_VOICE_LABEL = "صوت المتجر من السيرفر";
+
+/** Same origin, behind the admin gate like every other `/api/admin` door. */
+export function speechRequestUrl(text: string): string {
+  // An Arabic character costs nine URL bytes once encoded, and a spoken brief is a sentence, not
+  // an article — the cap keeps the address inside what a browser will send.
+  return `/api/admin/speech?text=${encodeURIComponent(String(text ?? "").slice(0, 220))}`;
+}
+
+/** True when he picked the store's voice, or when the device simply has no Arabic voice to use. */
+export function shouldUseServerVoice(savedName: string | null | undefined, arabicFound: boolean): boolean {
+  if (String(savedName ?? "").trim() === SERVER_VOICE) return true;
+  return !arabicFound;
+}
