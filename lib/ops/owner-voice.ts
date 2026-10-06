@@ -24,6 +24,14 @@ const PROTECTED = /(https?:\/\/[^\s)>\]"'،]+|\/[A-Za-z0-9\-_./]{4,}|`[^`]*`)/g;
 const PHRASES: Array<[string, string]> = [
   ["Too Many Requests", "طلبات كتير أوي"],
   ["Accessibility Audit Report", "تقرير فحص إمكانية الوصول"],
+  ["Executive Summary", "الملخص التنفيذي"],
+  ["Severity levels", "درجات الخطورة"],
+  ["Measured Data", "البيانات المقاسة"],
+  ["Focus states", "حالات التركيز"],
+  ["Semantic HTML", "ترميز دلالي"],
+  ["Alt text", "النص البديل للصور"],
+  ["axe-core", "فاحص الوصول"],
+  ["axe core", "فاحص الوصول"],
   ["Security Headers", "ترويسات الأمان"],
   ["Rate Limiting", "تحديد المعدل"],
   ["Content-Security-Policy", "ترويسة سياسة المحتوى"],
@@ -90,6 +98,30 @@ const WORDS: Record<string, string> = {
   luxury: "الفخامة",
   standard: "المعيار",
   wcag: "معيار الوصول العالمي",
+  high: "مرتفع",
+  medium: "متوسط",
+  low: "منخفض",
+  critical: "حرج",
+  measured: "مقاس",
+  measuring: "قياس",
+  violations: "مخالفات",
+  violation: "مخالفة",
+  severity: "خطورة",
+  levels: "مستويات",
+  level: "مستوى",
+  alt: "بديل",
+  text: "نص",
+  semantic: "دلالي",
+  html: "ترميز",
+  labels: "تسميات",
+  label: "تسمية",
+  focus: "تركيز",
+  states: "حالات",
+  state: "حالة",
+  data: "بيانات",
+  summary: "ملخص",
+  executive: "تنفيذي",
+  and: "و",
 };
 
 const TOKEN = /[A-Za-z][A-Za-z0-9_.\-]*[A-Za-z0-9]|[A-Za-z]/g;
@@ -139,6 +171,19 @@ function speak(segment: string, tally: VoiceTally): string {
   });
 }
 
+/**
+ * The swarm writes an Arabic heading and then glosses it in its own English: «تقرير فحص إمكانية
+ * الوصول (Accessibility Audit Report)». Once the gloss is translated, his screen says the same
+ * words twice — so a bracketed Arabic phrase that already stands right in front of it is dropped.
+ */
+function dropDuplicatedGloss(text: string): string {
+  return text.replace(/[ \t]*[(（]([^()]{2,80})[)）]/g, (whole, inner: string, offset: number) => {
+    const value = inner.trim();
+    if (!/\p{Script=Arabic}/u.test(value)) return whole;
+    return text.slice(0, offset).includes(value) ? "" : whole;
+  });
+}
+
 function run(text: string, tally: VoiceTally): string {
   let out = "";
   let last = 0;
@@ -148,7 +193,7 @@ function run(text: string, tally: VoiceTally): string {
     last = at + m[0].length;
   }
   out += speak(text.slice(last), tally);
-  return out.replace(/[ \t]{2,}/g, " ");
+  return dropDuplicatedGloss(out.replace(/[ \t]{2,}/g, " "));
 }
 
 /** What the row says when it reaches his eyes. */

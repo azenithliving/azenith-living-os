@@ -59,6 +59,7 @@ describe("the report vocabulary", () => {
     const out = ownerVoice("(Accessibility Audit Report) المعيار: WCAG 2.1");
     expect(out).toContain("(تقرير فحص إمكانية الوصول)");
     expect(out).toContain("معيار الوصول العالمي");
+    expect(out).toContain("٢.١");
     expect(latin(out)).toEqual([]);
   });
 
@@ -66,6 +67,23 @@ describe("the report vocabulary", () => {
     expect(ownerVoice("Rate Limiting: Wildcard Credentials")).toBe(
       "تحديد المعدل: نجمي شامل بيانات اعتماد"
     );
+  });
+
+  it("reads the report's section headings in Arabic", () => {
+    expect(ownerVoice("Executive Summary — Severity levels: High, Medium, Low.")).toBe(
+      "الملخص التنفيذي — درجات الخطورة: مرتفع, متوسط, منخفض."
+    );
+  });
+
+  it("does not say a heading twice when the swarm glosses it in English", () => {
+    const out = ownerVoice("تقرير فحص إمكانية الوصول (Accessibility Audit Report) — المخالفات ٣");
+    expect((out.match(/تقرير فحص إمكانية الوصول/g) ?? []).length).toBe(1);
+    expect(out).not.toContain("Accessibility");
+    expect(out).toContain("المخالفات ٣");
+  });
+
+  it("keeps a bracket that adds something new", () => {
+    expect(ownerVoice("تقرير — (الفحص اليومي) مفصّل")).toContain("(الفحص اليومي)");
   });
 
   it("keeps an Arabic word that merely starts like a mapped one", () => {
