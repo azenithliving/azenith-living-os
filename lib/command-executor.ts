@@ -7,6 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { analyzeCommandLogs, formatEvolutionReport, executeSuggestion, logSelfExecution, type EvolutionSuggestion } from "./self-evolution";
 import { checkKeysUsage, formatKeyCheckResult, getKeyUsageSummary, addBackupKey as addBackupKeyFromMonitor } from "./key-monitor";
 import { readPage, formatPageContent } from "./web-tools";
+import { arDigits, arNum } from "@/lib/ops/metricLabels";
 import fs from "fs";
 import path from "path";
 
@@ -43,6 +44,20 @@ export interface ApiKey {
 
 // Alias for frequently used command "list_keys" (37 times today)
 // Alias for frequently used command "list_keys" (40 times today)
+
+/**
+ * What the owner's chat shows when a command's own read fails.
+ *
+ * The raw driver text used to be returned as the message — a Postgres or Node sentence in English
+ * landing in the middle of his Arabic chat, unreadable to him twice over (the words, and the Latin
+ * inside them) and impossible to act on. He gets Arabic that names the command; the technical text
+ * goes to the server log, which is where an investigation reads it.
+ */
+function commandFailed(what: string, error?: unknown): string {
+  if (error !== undefined) console.error(`[CommandExecutor] ${what}:`, error);
+  return `${what} — السجل ما ردّش. التفاصيل التقنية اتسجّلت في سجل السيرفر.`;
+}
+
 // ============================================
 // 1. ADD KEY - Add new API key
 // ============================================
@@ -54,7 +69,7 @@ export async function addKey(
   const key = keyParts.join(" ");
 
   if (!provider || !key) {
-    return { success: false, message: "Usage: add_key <provider> <key>" };
+    return { success: false, message: "لازم تقول اسم المزوّد والمفتاح نفسه." };
   }
 
   const normalizedProvider = provider.toLowerCase();
@@ -69,14 +84,14 @@ export async function addKey(
       .limit(1);
 
     if (checkError) {
-      return { success: false, message: `Failed to check existing keys: ${checkError.message}` };
+      return { success: false, message: commandFailed("ما قدرناش نتأكد من المفاتيح الموجودة", checkError.message) };
     }
 
     if (existingKeys && existingKeys.length > 0) {
       const existing = existingKeys[0];
       return {
         success: false,
-        message: `Key already exists for ${normalizedProvider} (ID: ${existing.id}, ${existing.is_active ? 'active' : 'inactive'})`,
+        message: `عندك مفتاح مسجّل قبل كده لـ${normalizedProvider} (رقم ${arDigits(existing.id)}، ${existing.is_active ? "شغّال" : "موقوف"})`,
       };
     }
 
@@ -104,7 +119,7 @@ export async function addKey(
       console.error("[addKey] Error code:", error.code);
       console.error("[addKey] Error details:", error.details);
       console.error("[addKey] Error hint:", error.hint);
-      return { success: false, message: `Failed to add key: ${error.message} (code: ${error.code})` };
+      return { success: false, message: commandFailed("ما قدرناش نسجّل المفتاح", `${error.message} (code: ${error.code})`) };
     }
 
     console.log("[addKey] Insert successful:", inserted);
@@ -121,7 +136,7 @@ export async function addKey(
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: commandFailed("ما قدرناش نسجّل المفتاح", error),
     };
   }
 }
@@ -139,7 +154,7 @@ export async function simulateKeyUsage(
   if (!provider || !keyId || !percentage) {
     return {
       success: false,
-      message: "Usage: simulate_key_usage <provider> <key_id> <percentage>\nExample: simulate_key_usage groq abc123 96",
+      message: "لازم تقول اسم المزوّد ورقم المفتاح والنسبة — من صفر لمية.",
     };
   }
 
@@ -147,7 +162,7 @@ export async function simulateKeyUsage(
   if (isNaN(usagePercent) || usagePercent < 0 || usagePercent > 100) {
     return {
       success: false,
-      message: "Percentage must be a number between 0 and 100",
+      message: "النسبة لازم تكون رقم بين صفر ومية.",
     };
   }
 
@@ -166,7 +181,7 @@ export async function simulateKeyUsage(
     if (fetchError || !key) {
       return {
         success: false,
-        message: `Key not found: ${keyId} for provider ${provider}`,
+        message: `مفيش مفتاح بالمواصفات دي عند ${provider}.`,
       };
     }
 
@@ -181,7 +196,7 @@ export async function simulateKeyUsage(
     if (updateError) {
       return {
         success: false,
-        message: `Failed to update key usage: ${updateError.message}`,
+        message: commandFailed("ما قدرناش نسخّر استخدام المفتاح", updateError.message),
       };
     }
 
@@ -235,7 +250,7 @@ export async function simulateKeyUsage(
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: commandFailed("ما قدرناش نحسّب استخدام المفتاح", error),
     };
   }
 }
@@ -250,7 +265,7 @@ export async function removeKey(
   const [provider, keyId] = args;
 
   if (!provider) {
-    return { success: false, message: "Usage: remove_key <provider> [key_id]" };
+    return { success: false, message: "لازم تقول اسم المزوّد، ومختار رقم المفتاح." };
   }
 
   try {
@@ -267,18 +282,18 @@ export async function removeKey(
     const { error, count } = await query;
 
     if (error) {
-      return { success: false, message: `Failed to remove key: ${error.message}` };
+      return { success: false, message: commandFailed("ما قدرناش نشيل المفتاح", error) };
     }
 
     return {
       success: true,
-      message: `Removed ${count || 0} key(s) for ${provider}`,
+      message: `اشيل ${arNum(count || 0)} مفتاح من ${provider}.`,
       data: { provider, removedCount: count || 0 },
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: commandFailed("ما قدرناش نشيل المفتاح", error),
     };
   }
 }
@@ -316,14 +331,14 @@ export async function listKeys(
     const { data, error } = await query.order("created_at", { ascending: false });
 
     if (error) {
-      return { success: false, message: `Failed to list keys: ${error.message}` };
+      return { success: false, message: commandFailed("ما قدرناش نقرا المفاتيح", error) };
     }
 
     const providers = [...new Set(data?.map(k => k.provider) || [])];
 
     return {
       success: true,
-      message: `Found ${data?.length || 0} key(s)`,
+      message: `عندك ${arNum(data?.length || 0)} مفتاح مسجّل.`,
       data: {
         total: data?.length || 0,
         providers,
@@ -346,7 +361,7 @@ export async function listKeys(
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: commandFailed("ما قدرناش نقرا المفاتيح", error),
     };
   }
 }
@@ -362,7 +377,7 @@ export async function rateLimit(
   const limit = parseInt(limitStr, 10);
 
   if (!endpoint || isNaN(limit)) {
-    return { success: false, message: "Usage: rate_limit <endpoint> <limit>" };
+    return { success: false, message: "لازم تقول اسم الصفحة ورقم السقف." };
   }
 
   try {
@@ -375,18 +390,18 @@ export async function rateLimit(
     }, { onConflict: "endpoint" });
 
     if (error) {
-      return { success: false, message: `Failed to update rate limit: ${error.message}` };
+      return { success: false, message: commandFailed("ما قدرناش نضبط سقف الطلبات", error) };
     }
 
     return {
       success: true,
-      message: `Rate limit updated: ${endpoint} = ${limit}/hour`,
+      message: `سقف الطلبات بقى ${arDigits(limit)} في الساعة لـ${endpoint}.`,
       data: { endpoint, limit },
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: commandFailed("ما قدرناش نضبط سقف الطلبات", error),
     };
   }
 }
@@ -401,7 +416,7 @@ export async function sendNotification(
   const message = args.join(" ");
 
   if (!message) {
-    return { success: false, message: "Usage: send_notification <message>" };
+    return { success: false, message: "اكتب الكلام اللي عايز يوصل للفريق." };
   }
 
   try {
@@ -414,17 +429,21 @@ export async function sendNotification(
       ["الوقت", telegramTime()],
     ]);
     
-    await sendSecurityAlert(notificationText);
+    const told = await sendSecurityAlert(notificationText);
 
+    // The command's own answer is whether a human was reached, not whether the code ran: an
+    // unconfigured channel used to be reported to him as «Notification sent».
     return {
-      success: true,
-      message: "Notification sent via Telegram",
-      data: { message, timestamp: new Date().toISOString() },
+      success: told,
+      message: told
+        ? "الإشعار وصل للفريق على تليجرام."
+        : "ما قدرناش نبعت الإشعار — قناة التنبيهات مقفولة أو بلا عنوان. راجع إعدادات تليجرام في اللوحة.",
+      data: { message, timestamp: new Date().toISOString(), delivered: told },
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Failed to send notification",
+      message: commandFailed("ما قدرناش نبعت الإشعار", error),
     };
   }
 }
@@ -437,7 +456,10 @@ export async function showStats(
   context: CommandContext
 ): Promise<CommandResult> {
   const [daysStr = "7"] = args;
-  const days = parseInt(daysStr, 10);
+  const parsed = parseInt(daysStr, 10);
+  // A command line typed by a model can carry anything in this slot; a NaN here would reach the
+  // store as an impossible date and answer with a driver error instead of his numbers.
+  const days = Number.isFinite(parsed) && parsed > 0 && parsed <= 365 ? parsed : 7;
 
   try {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
@@ -450,28 +472,42 @@ export async function showStats(
       .gte("executed_at", since);
 
     if (cmdError) {
-      return { success: false, message: `Failed to fetch stats: ${cmdError.message}` };
+      return { success: false, message: commandFailed("ما قدرناش نقرا إحصائيات الأوامر", cmdError.message) };
     }
 
     const total = commands?.length || 0;
     const successful = commands?.filter(c => c.status === "executed").length || 0;
     const failed = commands?.filter(c => c.status === "failed").length || 0;
+    const rate = total > 0 ? ((successful / total) * 100).toFixed(1) : null;
+
+    /**
+     * His sentence, from the rows the log actually holds. It used to answer «Statistics for last 7
+     * days» and leave the numbers in a data object his chat never showed — so the one command he
+     * asks for a read-out returned a headline with no news in it.
+     */
+    const period = `آخر ${arNum(days)} يوم`;
+    const message =
+      total === 0
+        ? `${period}: مفيش أمر متسجّل عندك.`
+        : `${period}: ${arNum(total)} أمر — ${arNum(successful)} اتنفذ، ${arNum(failed)} وقع${
+            rate === null ? "" : `، ونسبة النجاح ${arDigits(rate).replace(".", "٫")}٪`
+          }.`;
 
     return {
       success: true,
-      message: `Statistics for last ${days} days`,
+      message,
       data: {
         period: `${days} days`,
         totalCommands: total,
         successful,
         failed,
-        successRate: total > 0 ? ((successful / total) * 100).toFixed(1) + "%" : "N/A",
+        successRate: rate === null ? "N/A" : `${rate}%`,
       },
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: commandFailed("ما قدرناش نقرا إحصائيات الأوامر", error),
     };
   }
 }
@@ -505,14 +541,15 @@ export async function clearCache(
     }
 
     return {
-      success: true,
-      message: `Cache cleared: ${cleared.join(", ")}`,
+      success: false,
+      message:
+        "المتجر ما بينضّفش الذاكرة المؤقتة من الشات — هي بتتغيّر لوحدها مع كل نسخة جديدة تنزل. الطلب اتسجّل بس.",
       data: { clearedTypes: cleared, requestedType: type },
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: commandFailed("ما قدرناش ننضّف الذاكرة المؤقتة", error),
     };
   }
 }
@@ -527,7 +564,7 @@ export async function restartService(
   const [service] = args;
 
   if (!service) {
-    return { success: false, message: "Usage: restart_service <service>" };
+    return { success: false, message: "لازم تقول اسم الخدمة." };
   }
 
   const validServices = ["ai-orchestrator", "mastermind", "cache", "sessions"];
@@ -535,7 +572,7 @@ export async function restartService(
   if (!validServices.includes(service.toLowerCase())) {
     return {
       success: false,
-      message: `Unknown service. Valid: ${validServices.join(", ")}`,
+      message: `«${service}» مش من خدمات المتجر المعروفة.`,
     };
   }
 
@@ -561,14 +598,15 @@ export async function restartService(
     restartActions[service.toLowerCase()]?.();
 
     return {
-      success: true,
-      message: `Service '${service}' restarted successfully`,
+      success: false,
+      message:
+        `المتجر ما بيعيدش تشغيل خدمة من الشات — اللي بيحدّث الخدمة فعلًا هو نزول نسخة جديدة. قول «انشر» وده بيحصل.`,
       data: { service, restartedAt: new Date().toISOString() },
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: commandFailed("ما قدرناش نعيد تشغيل الخدمة", error),
     };
   }
 }
@@ -636,12 +674,12 @@ export async function backupDb(
     });
 
     if (error) {
-      return { success: false, message: `Failed to create backup: ${error.message}` };
+      return { success: false, message: commandFailed("ما قدرناش نعمل نسخة احتياطية", error) };
     }
 
     return {
       success: true,
-      message: `Database backup created: ${Object.keys(backup).length} tables`,
+      message: `النسخة الاحتياطية اتعملت من ${arNum(Object.keys(backup).length)} جدول.`,
       data: {
         tables: Object.keys(backup),
         timestamp: backupData.timestamp,
@@ -651,7 +689,7 @@ export async function backupDb(
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: commandFailed("ما قدرناش نعمل نسخة احتياطية", error),
     };
   }
 }
@@ -928,7 +966,7 @@ export async function readCommand(
   } catch (error) {
     return {
       success: false,
-      message: `خطأ في قراءة الصفحة: ${error instanceof Error ? error.message : "Unknown error"}`,
+      message: commandFailed("ما قدرناش نقرا الصفحة", error),
     };
   }
 }
@@ -944,14 +982,14 @@ export async function addBackupKeyCommand(
   const key = keyParts.join(" ");
 
   if (!provider || !key) {
-    return { success: false, message: "Usage: add_backup_key <provider> <key>" };
+    return { success: false, message: "لازم تقول اسم المزوّد والمفتاح الاحتياطي." };
   }
 
   const validProviders = ["groq", "openrouter", "mistral", "pexels"];
   if (!validProviders.includes(provider.toLowerCase())) {
     return {
       success: false,
-      message: `Invalid provider. Must be one of: ${validProviders.join(", ")}`,
+      message: `«${provider}» مش من المزوّدين اللي عندنا.`,
     };
   }
 
@@ -966,7 +1004,7 @@ export async function addBackupKeyCommand(
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: commandFailed("ما قدرناش نضيف المفتاح الاحتياطي", error),
     };
   }
 }
