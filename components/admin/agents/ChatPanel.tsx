@@ -979,7 +979,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               <span className="text-[11px] text-white/30">لا أدوار محددة</span>
             )}
           </div>
-          <div className="text-[10px] text-white/30 mt-2">تلميح: اكتب بلهجتك العادية — "الجزء اللي فوق باهت" → أفهم "الهيرو"</div>
+          <div className="text-[10px] text-white/30 mt-2">تلميح: اكتب بلهجتك العادية — «الجزء اللي فوق باهت» — أفهم "الهيرو"</div>
         </div>
       )}
 
@@ -1050,7 +1050,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               {msg.id === firstUnreadId && (
                 <div ref={firstUnreadRef} className="flex items-center gap-2 py-2">
                   <div className="flex-1 h-px bg-amber-500/40" />
-                  <span className="text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-full px-2.5 py-0.5">رسائل جديدة ↑</span>
+                  <span className="text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-full px-2.5 py-0.5">رسائل جديدة</span>
                   <div className="flex-1 h-px bg-amber-500/40" />
                 </div>
               )}

@@ -76,3 +76,41 @@ describe("the whole codebase speaks one key set", () => {
     expect(readFileSync("proxy.ts", "utf8")).toContain("retiredAgentQueryRedirect");
   });
 });
+
+/**
+ * The quick-actions drawer is the one place where the owner reads a capability as a button label
+ * and then taps it. Measured on the published site, four of those labels carried English machine
+ * words («Luxury Score», «SEO», «About», «alt text») inside an Egyptian sentence — the same defect
+ * the cockpit's cards and the daily report had, in a surface nobody had scanned.
+ *
+ * The rename is routing-safe: `admin-tool-bridge` already matches these intents on Arabic
+ * («الفخامة», «ظهور», «من نحن»), which is what the assertions below protect — a label may not
+ * become pretty and stop reaching its tool.
+ */
+describe("the quick actions the owner taps are his Arabic", () => {
+  const examples = Object.entries(AGENT_ROLES).flatMap(([key, role]) =>
+    role.map((text) => ({ key, text }))
+  );
+
+  it("carries examples for the roles at all", () => {
+    expect(examples.length).toBeGreaterThan(15);
+  });
+
+  it("names nothing in a language he does not read", () => {
+    const hits = examples.filter(({ text }) => /[A-Za-z]{3,}/.test(text));
+    expect(hits.map((h) => `${h.key}: ${h.text}`)).toEqual([]);
+  });
+
+  it("still reaches the tool each label promises after the rename", async () => {
+    const { inferUltimateTool } = await import("@/lib/admin-tool-bridge");
+    for (const label of [
+      "احسب درجة الفخامة الآن للموقع كله",
+      "أصلح مشاكل الظهور في نتائج البحث للمحتوى الحالي",
+      "راجع نص صفحة من نحن واقترح نسخة أفخم",
+    ]) {
+      const intent = inferUltimateTool(label);
+      expect(intent.toolName, label).toBeTruthy();
+      expect(intent.toolName, label).not.toBe("none");
+    }
+  });
+});
