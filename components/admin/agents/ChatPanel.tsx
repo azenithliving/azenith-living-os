@@ -19,6 +19,7 @@ import { QuickActionsPanel } from './QuickActionsPanel';
 import { EmergencyBanner } from './EmergencyBanner';
 import { buildPalette, isPaletteHotkey, CAPABILITY_LABELS, type PaletteCommand } from '@/lib/ops/palette';
 import { arDigits, arNum, metricLabel } from '@/lib/ops/metricLabels';
+import { locateFirstUnread, readStamp, unreadJump } from '@/lib/ops/unread-marker';
 import type { SelfModelView } from '@/lib/ops/self-view';
 import {
   CONTINUOUS_SILENCE_MS,
@@ -664,11 +665,19 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   }, [swipeArmed, agentKey]);
 
   useEffect(() => {
-    if (firstUnreadId && !scrolledToUnreadRef.current && messages.some((m) => m.id === firstUnreadId)) {
+    const owed = unreadJump({
+      firstUnread: firstUnreadId,
+      markerMounted: Boolean(firstUnreadRef.current),
+      alreadyJumped: scrolledToUnreadRef.current,
+    });
+    if (owed === 'jump') {
       scrolledToUnreadRef.current = true;
       firstUnreadRef.current?.scrollIntoView({ block: 'start' });
       return;
     }
+    // A jump he is still owed outranks the pull to the bottom: dragging him down now would
+    // carry him past a line he has not been shown.
+    if (owed === 'wait') return;
     if (isNearBottomRef.current) {
       scrollToBottom(false);
     }
@@ -702,14 +711,12 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           if (!unreadLocatedRef.current) {
             unreadLocatedRef.current = true;
             try {
-              const lastRead = Number(localStorage.getItem(lastReadKey) || 0);
+              const lastRead = readStamp(localStorage.getItem(lastReadKey));
               if (!lastRead) {
                 localStorage.setItem(lastReadKey, String(Date.now()));
               } else {
-                const firstUnread = formatted.find(
-                  (m: any) => m.sender_type === 'agent' && new Date(m.created_at).getTime() > lastRead
-                );
-                if (firstUnread) setFirstUnreadId(firstUnread.id);
+                const firstUnread = locateFirstUnread(formatted, lastRead);
+                if (firstUnread) setFirstUnreadId(firstUnread);
               }
             } catch {}
           }
