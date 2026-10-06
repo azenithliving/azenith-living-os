@@ -2,7 +2,18 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 
-import { BRIEF_BUDGET, morningBrief, nextVoiceStep, pickArabicVoice, voiceShortfallLine } from "@/lib/ops/voice-continuous";
+import {
+  BRIEF_BUDGET,
+  VOICE_CHOICE_KEY,
+  VOICE_SAMPLE,
+  arabicVoices,
+  chosenVoice,
+  morningBrief,
+  nextVoiceStep,
+  pickArabicVoice,
+  speakableSummary,
+  voiceShortfallLine,
+} from "@/lib/ops/voice-continuous";
 
 /**
  * Ten seconds of the store, out loud.
@@ -133,5 +144,77 @@ describe("the reason line does not live inside the button row", () => {
     const row = panel.slice(panel.indexOf("data-voice-brief"), panel.indexOf("</div>", panel.indexOf("data-voice-brief")));
     expect(row).not.toContain("data-voice-note");
     expect(panel).toContain("data-voice-note");
+  });
+});
+
+/**
+ * What the engine is handed. Measured on his Windows machine 2026-10-06: the only Arabic voice the
+ * browser exposes is «Microsoft Hoda - Arabic (Egypt)», a legacy machine voice — and he called the
+ * result bad. Two of the causes are inside our control: a voice like that reads fully-vowelled
+ * Arabic word by word instead of in phrases, and it is far likelier to skip or mangle Arabic-Indic
+ * digits than the Latin ones it was trained on. The screen keeps his numerals; the mouth gets what
+ * it pronounces.
+ */
+describe("the words handed to the voice", () => {
+  it("takes the vowel marks off, so it reads phrases and not letters", () => {
+    expect(speakableSummary("قرارًا مستني، وسجّلنا حفظًا جيدًا")).toBe("قرارا مستني، وسجلنا حفظا جيدا");
+  });
+
+  it("gives the engine digits it can say, while the screen keeps his", () => {
+    const spoken = speakableSummary(morningBrief({ decisions: 29, unread: 4 }));
+    expect(spoken).toContain("29");
+    expect(spoken).toContain("4");
+    expect(spoken.match(/[٠-٩]/g) ?? []).toEqual([]);
+    expect(morningBrief({ decisions: 29, unread: 4 })).toContain("٢");
+  });
+
+  it("leaves the hamza and the letters alone while doing it", () => {
+    expect(speakableSummary("أبدأ بالقرارات الأول؟")).toContain("أبدأ");
+  });
+});
+
+/**
+ * His ear decides which machine voice is good — so the cockpit must let him hear them and keep the
+ * one he picked, on that device. Measured on his Windows browser: exactly one Arabic voice exists
+ * («Microsoft Hoda»), which is why he called the reading bad; on his phone and on Chrome with the
+ * network voices there is usually a better one to choose.
+ */
+describe("the voice he chose is kept", () => {
+  const list = [
+    { lang: "ar-EG", name: "Microsoft Hoda" },
+    { lang: "ar-EG", name: "Google العربية" },
+    { lang: "en-US", name: "Zira" },
+  ];
+
+  it("lists only the Arabic ones for him to try", () => {
+    expect(arabicVoices(list).map((v) => v.name)).toEqual(["Microsoft Hoda", "Google العربية"]);
+  });
+
+  it("prefers his saved pick over any default ranking", () => {
+    expect(pickArabicVoice(list, "Microsoft Hoda")?.name).toBe("Microsoft Hoda");
+    expect(pickArabicVoice(list, "Google العربية")?.name).toBe("Google العربية");
+  });
+
+  it("falls back to the ranking when the saved voice is gone from the device", () => {
+    expect(chosenVoice(list, "صوت مسحوب")).toBeNull();
+    expect(pickArabicVoice(list, "صوت مسحوب")?.name).toBe("Microsoft Hoda");
+    expect(pickArabicVoice(list, null)?.name).toBe("Microsoft Hoda");
+  });
+
+  it("offers a sample with no digits and no vowel marks, so voices are compared fairly", () => {
+    expect(VOICE_SAMPLE.match(/[0-9٠-٩]/g) ?? []).toEqual([]);
+    expect(VOICE_SAMPLE.match(/[\u064B-\u0652]/g) ?? []).toEqual([]);
+    expect(VOICE_SAMPLE).toMatch(/\p{Script=Arabic}/u);
+  });
+});
+
+describe("the picker is on the cockpit", () => {
+  const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+
+  it("lets him try each voice and keep one", () => {
+    expect(panel).toContain("data-voice-picker");
+    expect(panel).toContain("data-voice-option");
+    expect(panel).toContain("VOICE_CHOICE_KEY");
+    expect(panel).toContain("VOICE_SAMPLE");
   });
 });

@@ -106,6 +106,11 @@ export function speakableSummary(text: string | null | undefined, budget = 240):
     // Latin runs are unreadable spoken inside Arabic — the URL above already
     // became «رابط». Digits stay: a number the owner cannot hear is no number.
     .replace(/[A-Za-zÀ-ÿ_.\/-]{2,}/g, " ")
+    // Two shapes a legacy machine voice (his Windows has only «Microsoft Hoda») handles badly: full
+    // vowel marks push it to spell letters instead of saying phrases, and Arabic-Indic digits are
+    // often skipped. The screen keeps his numerals — this is the mouth's copy, not the page's.
+    .replace(/[\u064B-\u0652\u0670]/g, "")
+    .replace(/[٠-٩]/g, (d) => String((d.codePointAt(0) ?? 0x0660) - 0x0660))
     .replace(/\s+/g, " ")
     .trim();
   if (!clean) return "";
@@ -211,9 +216,10 @@ export interface VoiceLike {
  * normal answer and not a failure — the caller retries and, if the phone truly has no Arabic voice,
  * says so instead of reading his Arabic with an English accent.
  */
-export function pickArabicVoice<T extends VoiceLike>(voices: T[] | null | undefined): T | null {
+export function pickArabicVoice<T extends VoiceLike>(voices: T[] | null | undefined, savedName?: string | null): T | null {
   const list = Array.isArray(voices) ? voices : [];
   return (
+    chosenVoice(list, savedName) ||
     list.find((v) => v?.lang === "ar-EG") ||
     list.find((v) => v?.lang?.startsWith("ar") && /google|microsoft|female|salma|maged|hoda/i.test(v?.name ?? "")) ||
     list.find((v) => v?.lang?.startsWith("ar")) ||
@@ -248,4 +254,32 @@ export function voiceShortfallLine(voicesTotal: number): string {
   return n === 0
     ? "مفيش صوت على الجهاز ده خالص — النطق متوقف."
     : `جهازك فيه ${arNum(n)} صوت، ولا واحد عربي — نزّل الصوت العربي من إعدادات نظامك.`;
+}
+
+/** The voice he picked on this device. Per-device on purpose: the good voice on his phone is not
+ * the only voice on his laptop, and a server-side preference would fight itself between the two. */
+export const VOICE_CHOICE_KEY = "azenith-voice-name";
+
+/** A sentence to judge a voice with — no digits, no vowel marks, so the comparison is fair. */
+export const VOICE_SAMPLE = "صباح الخير. عندك تلات قرارات مستنية، أفتحها الأول؟";
+
+/** Every Arabic voice this browser has, in the order the browser lists them. */
+export function arabicVoices<T extends VoiceLike>(voices: T[] | null | undefined): T[] {
+  return (Array.isArray(voices) ? voices : []).filter((v) => v?.lang?.startsWith("ar"));
+}
+
+/**
+ * The voice to read with.
+ *
+ * His choice wins when the phone still offers it — quality of a machine voice is his ear's call, not
+ * a ranking's. Only when he has never chosen does the old preference apply (Egyptian, then a named
+ * Arabic voice, then any Arabic one).
+ */
+export function chosenVoice<T extends VoiceLike>(
+  voices: T[] | null | undefined,
+  savedName: string | null | undefined
+): T | null {
+  const name = String(savedName ?? "").trim();
+  if (!name) return null;
+  return (Array.isArray(voices) ? voices : []).find((v) => v?.name === name) ?? null;
 }

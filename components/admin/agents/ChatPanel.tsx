@@ -34,6 +34,9 @@ import {
   stopDictation as stopDictationState,
   transcriptOf,
   voiceShortfallLine,
+  VOICE_CHOICE_KEY,
+  VOICE_SAMPLE,
+  arabicVoices,
 } from '@/lib/ops/voice-continuous';
 
 export interface Message {
@@ -404,24 +407,66 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   // audit is a voice the owner switches off after one morning.
   // Now it answers whether anything was spoken: a phone with no Arabic voice reading his
   // Arabic in an English accent is worse than the button saying it cannot.
-  const speak = useCallback((text: string): boolean => {
+  const savedVoiceRef = useRef<string>('');
+  const speakWith = useCallback((text: string, voice?: SpeechSynthesisVoice | null): boolean => {
     if (typeof window === 'undefined' || !window.speechSynthesis) return false;
     try {
       window.speechSynthesis.cancel();
       const clean = speakableSummary(text);
       if (!clean) return false;
-      const voice = pickArabicVoice(window.speechSynthesis.getVoices());
-      if (!voice) return false;
+      const chosen = voice ?? pickArabicVoice(window.speechSynthesis.getVoices(), savedVoiceRef.current);
+      if (!chosen) return false;
       const utter = new SpeechSynthesisUtterance(clean);
-      utter.lang = voice.lang || 'ar-EG';
+      utter.lang = chosen.lang || 'ar-EG';
       utter.rate = 0.95;
-      utter.voice = voice;
+      utter.voice = chosen;
       window.speechSynthesis.speak(utter);
       return true;
     } catch {
       return false;
     }
   }, []);
+
+  const speak = useCallback((text: string): boolean => speakWith(text), [speakWith]);
+
+  /**
+   * The voice is his ear's call, not a ranking's. Measured on his Windows browser: exactly one
+   * Arabic voice exists («Microsoft Hoda», a legacy machine voice) and he called it bad — on a phone
+   * or a Chrome with the network voices there is usually a better one to hear and keep. So the list
+   * is here, each one plays the same fair sample, and the pick is stored on this device only.
+   */
+  const [showVoices, setShowVoices] = useState(false);
+  const [deviceVoices, setDeviceVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [voiceChoice, setVoiceChoice] = useState('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const read = () => setDeviceVoices(window.speechSynthesis.getVoices() ?? []);
+    read();
+    window.speechSynthesis.addEventListener?.('voiceschanged', read);
+    try {
+      const saved = String(localStorage.getItem(VOICE_CHOICE_KEY) ?? '');
+      savedVoiceRef.current = saved;
+      setVoiceChoice(saved);
+    } catch {
+      // A browser that will not store a preference still speaks with the best voice it has.
+    }
+    return () => window.speechSynthesis.removeEventListener?.('voiceschanged', read);
+  }, []);
+
+  const tryVoice = useCallback(
+    (voice: SpeechSynthesisVoice) => {
+      setVoiceChoice(voice.name);
+      savedVoiceRef.current = voice.name;
+      try {
+        localStorage.setItem(VOICE_CHOICE_KEY, voice.name);
+      } catch {
+        // Same: the choice lives for this session when storage is closed.
+      }
+      speakWith(VOICE_SAMPLE, voice);
+    },
+    [speakWith]
+  );
 
   // The ten-second brief: only what waits for him, and only when he presses it.
   const [brief, setBrief] = useState<'idle' | 'waiting' | 'speaking' | 'unavailable'>('idle');
@@ -1254,6 +1299,20 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             {brief === 'speaking' ? 'بأقرأ…' : brief === 'waiting' ? 'استنى…' : 'ملخص'}
           </button>
           <button
+            type="button"
+            onClick={() => setShowVoices((v) => !v)}
+            data-voice-picker-toggle=""
+            aria-expanded={showVoices}
+            title="اختار الصوت اللي يقرألك"
+            className={`px-3 py-2.5 border rounded-xl text-[11px] font-bold ${
+              showVoices
+                ? 'bg-amber-500/25 border-amber-500/40 text-amber-200'
+                : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'
+            }`}
+          >
+            صوت
+          </button>
+          <button
             onClick={() => setTtsOn(v => !v)}
             title={ttsOn ? 'إيقاف نطق الردود' : 'انطق الردود بالعربي'}
             className={`px-3 py-2.5 border rounded-xl flex items-center justify-center ${ttsOn ? 'bg-amber-500/25 border-amber-500/40 text-amber-200' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'}`}
@@ -1296,6 +1355,40 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             {isTyping ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4 rtl:rotate-180" />}
           </button>
         </div>
+        {/* اختيار الصوت: كل صوت يسمعك نفس الجملة، واللي يعجبك يفضل هو. */}
+        {showVoices && (
+          <div data-voice-picker="" className="mt-2 rounded-xl border border-white/10 bg-black/35 p-2 space-y-1.5">
+            {arabicVoices(deviceVoices).length === 0 ? (
+              <p className="text-[11px] leading-relaxed text-white/60">
+                مفيش صوت عربي في المتصفح ده. جرّب كروم بعد ما تفعّل الأصوات، أو استخدم موبايلك —
+                وهناك اختار الصوت اللي يريح ودانك.
+              </p>
+            ) : (
+              arabicVoices(deviceVoices).map((voice) => (
+                <button
+                  key={voice.name}
+                  type="button"
+                  onClick={() => tryVoice(voice)}
+                  data-voice-option={voice.name}
+                  data-voice-chosen={voiceChoice === voice.name ? '1' : '0'}
+                  className={`w-full flex items-center justify-between gap-2 rounded-lg border px-2.5 py-2 text-[11px] ${
+                    voiceChoice === voice.name
+                      ? 'border-amber-500/50 bg-amber-500/15 text-amber-100'
+                      : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  <span className="truncate">{voice.name}</span>
+                  <span className="shrink-0 text-[10px] text-white/40">
+                    {voiceChoice === voice.name ? 'المختار' : 'جرّب'}
+                  </span>
+                </button>
+              ))
+            )}
+            <p className="text-[10px] leading-relaxed text-white/35">
+              الاختيار بيتحفظ على الجهاز ده وحده — موبايلك غير كمبيوترك.
+            </p>
+          </div>
+        )}
         {/* سطر لوحده تحت الصف: وهو جوه الصف كان بيضغط الأزرار ويطلع عمودي (مقاس من صورة المالك). */}
         {brief === 'unavailable' && voiceNote ? (
           <div data-voice-note="" className="text-[10px] leading-snug text-amber-300 mt-1.5 text-center">
