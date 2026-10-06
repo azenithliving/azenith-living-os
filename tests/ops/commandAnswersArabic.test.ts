@@ -63,11 +63,22 @@ describe("the statistics read-out is his sentence", () => {
     ];
     const res = await call(["7"]);
     expect(res.success).toBe(true);
-    expect(res.message).toContain("٤");
-    expect(res.message).toContain("٧");
+    expect(res.message).toContain("٤ أوامر");
+    expect(res.message).toContain("نجح منها ٣");
+    expect(res.message).toContain("وقع ١");
     expect(res.message).toContain("٧٥٫٠");
     expect(latin(res.message)).toEqual([]);
     expect(western(res.message)).toEqual([]);
+  });
+
+  it("agrees the count with the Arabic noun, not one shape for every number", async () => {
+    const row = { status: "executed", executed_at: "2026-10-05T10:00:00Z" };
+    world.rows = [row];
+    expect((await call(["7"])).message).toContain("أمر واحد");
+    world.rows = [row, { ...row, executed_at: "2026-10-05T11:00:00Z" }];
+    expect((await call(["7"])).message).toContain("أمران");
+    world.rows = Array.from({ length: 11 }, (_, i) => ({ ...row, executed_at: `2026-10-05T1${i % 2}:${i}:00Z` }));
+    expect((await call(["7"])).message).toContain("١١ أمر");
   });
 
   it("says there is nothing to report, instead of reporting a zero-rate", async () => {

@@ -481,6 +481,19 @@ export async function showStats(
     const rate = total > 0 ? ((successful / total) * 100).toFixed(1) : null;
 
     /**
+     * Arabic counts the way he reads them: «أمر واحد»، «أمران»، «٣ أوامر». A number glued to the
+     * singular noun every time is understood, but it is the shape of a machine writing Arabic.
+     */
+    const commandCountPhrase = (n: number) =>
+      n === 1
+        ? "أمر واحد"
+        : n === 2
+          ? "أمران"
+          : n >= 3 && n <= 10
+            ? `${arNum(n)} أوامر`
+            : `${arNum(n)} أمر`;
+
+    /**
      * His sentence, from the rows the log actually holds. It used to answer «Statistics for last 7
      * days» and leave the numbers in a data object his chat never showed — so the one command he
      * asks for a read-out returned a headline with no news in it.
@@ -489,7 +502,7 @@ export async function showStats(
     const message =
       total === 0
         ? `${period}: مفيش أمر متسجّل عندك.`
-        : `${period}: ${arNum(total)} أمر — ${arNum(successful)} اتنفذ، ${arNum(failed)} وقع${
+        : `${period}: ${commandCountPhrase(total)} — نجح منها ${arNum(successful)}، ووقع ${arNum(failed)}${
             rate === null ? "" : `، ونسبة النجاح ${arDigits(rate).replace(".", "٫")}٪`
           }.`;
 
