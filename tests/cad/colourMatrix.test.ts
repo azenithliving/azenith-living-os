@@ -137,7 +137,7 @@ describe("the matrix a room can back", () => {
 
 describe("the sheet hands over the matrix and his picks", () => {
   it("reads the stored picks and offers the matrix beside them", async () => {
-    const res = await GET({} as never, params);
+    const res = await GET(new Request("http://localhost/api/passport/x") as never, params);
     const body = await res.json();
     expect(world.state.selects.join(",")).toContain("colour_picks");
     expect(body.sheet.colour_matrix.length).toBeGreaterThan(0);
@@ -147,7 +147,7 @@ describe("the sheet hands over the matrix and his picks", () => {
 
   it("re-orders his pictures by what he chose, and marks the close ones", async () => {
     world.state.row = paper({ colour_picks: [{ family: "blue", hex: "#3E5A78" }] });
-    const res = await GET({} as never, params);
+    const res = await GET(new Request("http://localhost/api/passport/x") as never, params);
     const body = await res.json();
     // Measured distances to his blue, over the bank's own pictures: the blue one (0), the grey
     // one (54), the dark wood (91), the warm beige (120). The line the bank draws is 40, so only
@@ -161,7 +161,7 @@ describe("the sheet hands over the matrix and his picks", () => {
   });
 
   it("never lets a colour code reach the page as a word inside Arabic text", async () => {
-    const res = await GET({} as never, params);
+    const res = await GET(new Request("http://localhost/api/passport/x") as never, params);
     const text = await res.text();
     // The hexes are data for a swatch; the labels the customer reads are Arabic only.
     const body = JSON.parse(text);

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { arNum } from '@/lib/ops/metricLabels';
 import { linkFromPhone } from '@/lib/cad/sketch-link';
 import { imageKeyOf } from '@/lib/cad/vote-keys';
+import { cleanDeviceKey, newDeviceKey } from '@/lib/cad/visit-keys';
 import { ROOM_CHOICES } from '@/lib/cad/room-labels';
 import { DRAWABLE_SHAPES, type Plan, type PlanOpening, type PlanShape } from '@/lib/cad/plan';
 import RoomPlan from '@/components/cad/RoomPlan';
@@ -84,8 +85,31 @@ export default function PassportPage() {
   // picture with no number at all for a moment.
   const votingRef = useRef<string | null>(null);
 
+  /**
+   * The phone's own label for itself: generated once, kept in its own storage, sent as a header, and
+   * never a name. It is what lets the store tell «he came back to look» from «he refreshed twice»,
+   * and nothing about the person can be read from it.
+   */
+  const ensureVisitKey = useCallback(() => {
+    let saved = '';
+    try {
+      saved = String(window.localStorage.getItem('azenith-visit-key') ?? '');
+    } catch {
+      // A browser that will not store anything still gets a label for this one visit.
+    }
+    const known = cleanDeviceKey(saved);
+    if (known) return known;
+    const fresh = newDeviceKey();
+    try {
+      window.localStorage.setItem('azenith-visit-key', fresh);
+    } catch {
+      // Same: the label is a counting aid, the sheet is the record.
+    }
+    return fresh;
+  }, []);
+
   const load = useCallback((target: string) => {
-    fetch(`/api/passport/${target}`)
+    fetch(`/api/passport/${target}`, { headers: { 'x-visit-key': ensureVisitKey() } })
       .then((r) => r.json())
       .then((data) => {
         if (data?.success) {
@@ -95,7 +119,7 @@ export default function PassportPage() {
         } else setProblem(data?.error || 'الورقة ما جاتش');
       })
       .catch(() => setProblem('المتجر ما ردّش'));
-  }, []);
+  }, [ensureVisitKey]);
 
   useEffect(() => {
     const match = window.location.pathname.match(/\/passport\/([A-Za-z0-9_-]{20,32})/);

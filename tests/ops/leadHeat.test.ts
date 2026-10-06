@@ -14,6 +14,7 @@ import { heatOf, pulseFor, shouldPulse, type HeatSignals } from "@/lib/ops/lead-
  * the sheet left the customer's hands.
  */
 const base: HeatSignals = { voters: 0, hasSketch: false, returns: 0 };
+const withReturns = { voters: 1, returns: 4 };
 
 describe("the heat rule reads the three proofs", () => {
   it("is hot the moment the link reaches a second person", () => {
@@ -40,7 +41,7 @@ describe("the heat rule reads the three proofs", () => {
 
 describe("the pulse the owner receives", () => {
   it("is written in his Arabic, with his numerals", () => {
-    const line = pulseFor({ room: "living-room", city: "التجمع", voters: 2, heat: "ساخن جداً" });
+    const line = pulseFor({ room: "living-room", city: "التجمع", voters: 2, returns: 0, heat: "ساخن جداً" });
     expect(line.match(/[A-Za-z]/g) ?? []).toEqual([]);
     expect(line).toContain("٢");
     expect(line.match(/[0-9]/g) ?? []).toEqual([]);
@@ -54,21 +55,39 @@ describe("the pulse the owner receives", () => {
    */
   it("names the room the way he reads it, never the bank slug", async () => {
     const { roomLabel } = await import("@/lib/cad/dossier");
-    const line = pulseFor({ room: "living-room", city: null, voters: 3, heat: "ساخن جداً" });
+    const line = pulseFor({ room: "living-room", city: null, voters: 3, returns: 0, heat: "ساخن جداً" });
     expect(line).not.toContain("living-room");
     expect(line).toContain(String(roomLabel("living-room")));
     expect(line).toMatch(/\p{Script=Arabic}/u);
   });
 
   it("says what happened, and stays out of the forbidden domains", () => {
-    const line = pulseFor({ room: "master-bedroom", city: "الشيخ زايد", voters: 2, heat: "ساخن جداً" });
+    const line = pulseFor({ room: "master-bedroom", city: "الشيخ زايد", voters: 2, returns: 0, heat: "ساخن جداً" });
     expect(line).toMatch(/شارك|صوّت|أهله/);
     expect(line).not.toMatch(/جنيه|سعر|تكلفة|ربح|مصنع|تصنيع/);
   });
 
+  /**
+   * The third proof, measured rather than hardcoded: before the visit counter existed the votes
+   * desk passed a literal zero, so this line could never have been written from real data.
+   */
+  it("says he came back when coming back is the only proof there is", () => {
+    const line = pulseFor({ room: "living-room", city: "التجمع", ...withReturns, heat: "ساخن جداً" });
+    expect(line).toContain("٤");
+    expect(line).toMatch(/رجع|راجعة/);
+    expect(line.match(/[A-Za-z]/g) ?? []).toEqual([]);
+    expect(line.match(/[0-9]/g) ?? []).toEqual([]);
+  });
+
+  it("still names the family first, because sharing the link is the stronger proof", () => {
+    const line = pulseFor({ room: "living-room", city: null, voters: 2, returns: 9, heat: "ساخن جداً" });
+    expect(line).toMatch(/شارك|صوّت|أهله/);
+    expect(line).not.toContain("٩");
+  });
+
   it("never invents a city the sheet does not carry", async () => {
     const { roomLabel } = await import("@/lib/cad/dossier");
-    const line = pulseFor({ room: "kitchen", city: null, voters: 2, heat: "ساخن جداً" });
+    const line = pulseFor({ room: "kitchen", city: null, voters: 2, returns: 0, heat: "ساخن جداً" });
     expect(line).not.toContain("null");
     expect(line).toContain(String(roomLabel("kitchen")));
   });

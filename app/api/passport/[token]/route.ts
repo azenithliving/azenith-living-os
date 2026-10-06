@@ -9,6 +9,11 @@
  *      seal is over those numbers, so a later change to the reading stops matching and says
  *      so. The mobile is stored as the roll's key, which is what makes «this number called,
  *      what did he draw?» answerable — see `lib/cad/sketch-link.ts`.
+ *
+ * Opening the sheet is also what the return counter measures. The same read records one visit per
+ * device per window, keyed by a private label the phone keeps in its own storage and sends as a
+ * header: it names nobody, only that the same eyes came back. That count is the third heat proof,
+ * so a customer who never raised a paper and never shared the link is still visible to the owner.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -18,6 +23,8 @@ import { applyCustomerWitness, type SketchDimension } from "@/lib/cad/paper-sket
 import { linkFromPhone } from "@/lib/cad/sketch-link";
 import { freezeHash, looksLikePassportToken, stillSealed } from "@/lib/cad/passport";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
+import { recordVisit } from "@/lib/cad/sheet-visits";
+import { roomTypeName } from "@/lib/cad/room-labels";
 import { planFromPaper, type Plan } from "@/lib/cad/plan";
 import { matrixFor, type ColourPick } from "@/lib/cad/colours";
 import { rankByPicks } from "@/lib/cad/palette";
@@ -58,7 +65,10 @@ function publicSheet(
   const drawing = row.plan ? { plan: row.plan, question: null as string | null } : planFromPaper({ dimensions, openings: row.openings ?? [] });
   const plan = drawing.plan;
   return {
-    room: row.room ?? null,
+    // His heading is named in his Arabic whatever the row holds — the paper's own handwriting, a
+    // bank key written by the room chip he tapped, or nothing. The bank still matches pictures on
+    // the stored value, which is read before this line.
+    room: roomTypeName(row.room) ?? null,
     dimensions,
     openings: Array.isArray(row.openings) ? row.openings : [],
     area_sqm: row.area_sqm ?? null,
@@ -117,13 +127,16 @@ async function sheetPayload(row: Row) {
   };
 }
 
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   if (!looksLikePassportToken(token)) {
     return NextResponse.json({ success: false, error: "العنوان غير صحيح" }, { status: 400 });
   }
   const found = await findByToken(token);
   if (!found.row) return NextResponse.json({ success: false, error: found.error }, { status: found.status });
+  // Counted before the sheet is handed over, and never fatal: a visitor whose open could not be
+  // stored still reads his paper, and the counter simply says one visit fewer than it saw.
+  await recordVisit(found.row.id, request.headers.get("x-visit-key"));
   return NextResponse.json({ success: true, ...(await sheetPayload(found.row)) });
 }
 

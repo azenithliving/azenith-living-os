@@ -151,7 +151,7 @@ describe("the paper's row carries its own drawing", () => {
   });
 
   it("reads the drawing back wherever the sheet is read", async () => {
-    const res = await readSheet({} as never, params);
+    const res = await readSheet(new Request("http://localhost/api/passport/x") as never, params);
     const body = await res.json();
     expect(world.state.selects.join(",")).toContain("plan");
     expect(body.sheet.plan).toBeTruthy();
@@ -160,7 +160,7 @@ describe("the paper's row carries its own drawing", () => {
 
   it("never lets the drawing carry the customer's key onto a public address", async () => {
     world.state.row = paper({ customer_key: "01005554444", plan: { shape: "rectangle", walls: [] } });
-    const res = await readSheet({} as never, params);
+    const res = await readSheet(new Request("http://localhost/api/passport/x") as never, params);
     expect(await res.text()).not.toContain("01005554444");
   });
 });

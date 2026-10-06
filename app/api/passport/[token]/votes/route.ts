@@ -8,11 +8,15 @@
  * sheet page itself, and it only ever speaks about the one sheet it was reached by. A voter is
  * a short label they type («أنا»، «مراتي»); the row is keyed by (sheet, picture, voter) so a
  * second tap changes a mind instead of adding a second vote.
+ *
+ * This desk is also where the golden moment fires: it reads the sheet's own return count from
+ * `sheet-visits` beside the votes, so all three heat proofs are measured here and none is guessed.
  */
 import { NextRequest, NextResponse } from "next/server";
 
 import { looksLikePassportToken } from "@/lib/cad/passport";
 import { findSketchByToken, readVotes, recordVote, stampPulseSent, tallyVotes, cleanVoter } from "@/lib/cad/family-votes";
+import { countReturns } from "@/lib/cad/sheet-visits";
 import { heatOf, pulseFor, shouldPulse, type HeatSignals } from "@/lib/ops/lead-heat";
 import { sendTelegramMessage } from "@/lib/telegram-config";
 
@@ -87,15 +91,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
    * A second voter is proof the sheet left the customer's hands — the architecture's own signal
    * that the golden moment is now. The pulse is arithmetic, not a model, so it fires with zero
    * keys, and it is stamped once so the owner is not trained to ignore the bot.
+   *
+   * The return count is read only while the sheet is still unreported: once he has been told, the
+   * number cannot change what happens, and a tap should not cost an extra query for nothing.
    */
-  const signals: HeatSignals = { voters, hasSketch: found.sketch.hasPlan, returns: 0 };
+  const returns = found.sketch.pulseSentAt ? 0 : await countReturns(found.sketch.id);
+  const signals: HeatSignals = { voters, hasSketch: found.sketch.hasPlan, returns };
   if (shouldPulse(signals, found.sketch.pulseSentAt)) {
     const sent = await sendTelegramMessage(
-      pulseFor({ room: found.sketch.room, city: found.sketch.city, voters, heat: heatOf(signals) })
+      pulseFor({ room: found.sketch.room, city: found.sketch.city, voters, returns, heat: heatOf(signals) })
     );
     const stamped = sent ? await stampPulseSent(found.sketch.id) : false;
     console.log(
-      `[LeadPulse] sheet ${found.sketch.id}: voters ${voters}, heat ${heatOf(signals)}, telegram ${sent}, stamped ${stamped}`
+      `[LeadPulse] sheet ${found.sketch.id}: voters ${voters}, returns ${returns}, heat ${heatOf(signals)}, telegram ${sent}, stamped ${stamped}`
     );
   }
 

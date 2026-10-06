@@ -22,6 +22,13 @@ function fakeClient() {
           select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: world.sketch, error: null }) }) }),
         };
       }
+      // The votes desk now reads the sheet's own return count for the heat rule. This room has
+      // none: the counter's own behaviour is guarded in `sheetVisits.test.ts`.
+      if (table === "sheet_visits") {
+        return {
+          select: () => ({ eq: () => ({ limit: async () => ({ data: [], error: null }) }) }),
+        };
+      }
       return {
         select: () => ({
           eq: () => ({ order: () => ({ limit: async () => ({ data: world.votes, error: null }) }) }),

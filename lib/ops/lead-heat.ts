@@ -37,21 +37,25 @@ export function pulseFor({
   room,
   city,
   voters,
+  returns,
   heat,
 }: {
   room: string | null | undefined;
   city?: string | null;
   voters: number;
+  returns: number;
   heat: Heat;
 }): string {
   const place = roomLabel(room) ?? "مكان على الورقة";
   const where = city && city.trim() ? ` في ${city.trim()}` : "";
+  // The strongest proof there is gets said, and only that one: the owner acts on the reason, not on
+  // a list of everything the sheet happened to collect.
   const proof =
     voters >= 2
       ? `شارك رابطه مع ${arDigits(voters)} من أهله وصوّتوا على الصور`
-      : voters === 1
-        ? "اختار صور ووقف عندها"
-        : "رجع يتفرج على الصور أكتر من تلات مرات";
+      : returns > HOT_AFTER_RETURNS
+        ? `رجع يفتح صورته ${arDigits(returns)} مرات بعد أول مرة`
+        : "اختار صور ووقف عندها";
   return `🔥 عميل ${heat}: ${place}${where} — ${proof}. ملفه الذهبي مستنيك دلوقتي.`;
 }
 

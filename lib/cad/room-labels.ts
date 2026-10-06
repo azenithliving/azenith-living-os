@@ -42,3 +42,24 @@ export const ROOM_TYPE_LABELS: Record<string, string> = {
 
 /** Offered in the order the bank is fullest. */
 export const ROOM_CHOICES = ROOM_TYPES.map((type) => ({ type, label: ROOM_TYPE_LABELS[type] }));
+
+/** Every way the bank's keys are spelled, folded to one shape. */
+const FOLDED: Record<string, string> = Object.fromEntries(
+  Object.entries(ROOM_TYPE_LABELS).map(([type, label]) => [type.replace(/[_\s]+/g, "-").toLowerCase(), label])
+);
+
+/**
+ * The room as the customer's own sheet must name it.
+ *
+ * Three shapes arrive here: the bank's key (written when he taps a room chip), the handwriting the
+ * paper carried (the store's own Arabic), and nothing. A key is answered with the very word printed
+ * on the chip he tapped, Arabic is left exactly as it is, and anything else is dropped rather than
+ * printed — «living-room» at the top of his page is a machine key wearing his heading.
+ */
+export function roomTypeName(raw: string | null | undefined): string | null {
+  const text = String(raw ?? "").trim();
+  if (!text) return null;
+  const named = FOLDED[text.replace(/[_\s]+/g, "-").toLowerCase()];
+  if (named) return named;
+  return /\p{Script=Arabic}/u.test(text) && !/[A-Za-z]/.test(text) ? text : null;
+}
