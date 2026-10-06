@@ -95,4 +95,14 @@ describe("the decisions vault speaks only the owner's language", () => {
       );
     }
   });
+
+  it("counts the waiting decisions in his numerals", () => {
+    // Seen on the published cockpit at 390px 2026-10-06: the red badge over the decisions door read
+    // «30» while every other number on his screens had been moved to Arabic-Indic digits.
+    const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+    const badge = panel.slice(panel.indexOf('data-decisions-count'));
+    expect(badge.slice(0, 320)).toContain("{arDigits(pendingDecisions)}");
+    expect(badge.slice(0, 320)).not.toContain("{pendingDecisions}");
+    expect(panel).toContain("import { arDigits, arNum, metricLabel } from '@/lib/ops/metricLabels';");
+  });
 });

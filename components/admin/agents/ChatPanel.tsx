@@ -18,7 +18,7 @@ import { pendingApprovalIdFromMessage } from '@/lib/ops/proposal-card';
 import { QuickActionsPanel } from './QuickActionsPanel';
 import { EmergencyBanner } from './EmergencyBanner';
 import { buildPalette, isPaletteHotkey, CAPABILITY_LABELS, type PaletteCommand } from '@/lib/ops/palette';
-import { arNum, metricLabel } from '@/lib/ops/metricLabels';
+import { arDigits, arNum, metricLabel } from '@/lib/ops/metricLabels';
 import type { SelfModelView } from '@/lib/ops/self-view';
 import {
   CONTINUOUS_SILENCE_MS,
@@ -927,7 +927,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               <span className="hidden sm:inline">قرارات</span>
               {pendingDecisions > 0 && (
                 <span data-decisions-count="" className="min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
-                  {pendingDecisions}
+                  {arDigits(pendingDecisions)}
                 </span>
               )}
             </button>
