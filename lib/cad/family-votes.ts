@@ -20,16 +20,47 @@ import { cleanVoter, type VoteRow } from "@/lib/cad/vote-keys";
 export * from "@/lib/cad/vote-keys";
 
 /** Whose sheet is this, from the address in the bar. Only the number and the key leave here. */
-export async function findSketchByToken(token: string): Promise<{ id: number; customerKey: string | null } | null> {
+export async function findSketchByToken(token: string): Promise<SheetHead | null> {
   const supabase = getSupabaseAdminClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,customer_key")
+    .select("id,customer_key,room,customer_city,plan,pulse_sent_at")
     .eq("token", token)
     .maybeSingle();
   if (error || !data) return null;
-  return { id: Number(data.id), customerKey: data.customer_key ? String(data.customer_key) : null };
+  return {
+    id: Number(data.id),
+    customerKey: data.customer_key ? String(data.customer_key) : null,
+    room: data.room ? String(data.room) : null,
+    city: data.customer_city ? String(data.customer_city) : null,
+    hasPlan: Boolean(data.plan),
+    pulseSentAt: data.pulse_sent_at ? String(data.pulse_sent_at) : null,
+  };
+}
+
+/** The head of a sheet: what the heat rule needs, and nothing else. */
+export type SheetHead = {
+  id: number;
+  customerKey: string | null;
+  room: string | null;
+  city: string | null;
+  hasPlan: boolean;
+  pulseSentAt: string | null;
+};
+
+/**
+ * Stamps the sheet after the owner was told, and reads the stamp back from the store — a pulse
+ * that was never stamped would wake him up again on the next tap.
+ */
+export async function stampPulseSent(sketchId: number): Promise<boolean> {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return false;
+  const now = new Date().toISOString();
+  const { error } = await supabase.from("room_sketches").update({ pulse_sent_at: now }).eq("id", sketchId);
+  if (error) return false;
+  const { data } = await supabase.from("room_sketches").select("pulse_sent_at").eq("id", sketchId).maybeSingle();
+  return Boolean(data?.pulse_sent_at);
 }
 
 export async function readVotes(sketchId: number): Promise<VoteRow[]> {

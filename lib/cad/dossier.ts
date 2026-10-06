@@ -356,7 +356,7 @@ export function arabicOnly(raw: string | null | undefined): string | null {
 }
 
 /** A room name — handwriting, English spelling or bank slug — said the way he reads it. */
-function roomLabel(raw: string | null | undefined): string | null {
+export function roomLabel(raw: string | null | undefined): string | null {
   return ROOMS[keyOf(raw)] ?? arabicOnly(raw);
 }
 

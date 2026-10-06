@@ -12,7 +12,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { looksLikePassportToken } from "@/lib/cad/passport";
-import { findSketchByToken, readVotes, recordVote, tallyVotes, cleanVoter } from "@/lib/cad/family-votes";
+import { findSketchByToken, readVotes, recordVote, stampPulseSent, tallyVotes, cleanVoter } from "@/lib/cad/family-votes";
+import { heatOf, pulseFor, shouldPulse, type HeatSignals } from "@/lib/ops/lead-heat";
+import { sendTelegramMessage } from "@/lib/telegram-config";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +81,24 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const fresh = await readVotes(found.sketch.id);
+  const voters = new Set(fresh.map((row) => row.voter)).size;
+
+  /**
+   * A second voter is proof the sheet left the customer's hands — the architecture's own signal
+   * that the golden moment is now. The pulse is arithmetic, not a model, so it fires with zero
+   * keys, and it is stamped once so the owner is not trained to ignore the bot.
+   */
+  const signals: HeatSignals = { voters, hasSketch: found.sketch.hasPlan, returns: 0 };
+  if (shouldPulse(signals, found.sketch.pulseSentAt)) {
+    const sent = await sendTelegramMessage(
+      pulseFor({ room: found.sketch.room, city: found.sketch.city, voters, heat: heatOf(signals) })
+    );
+    const stamped = sent ? await stampPulseSent(found.sketch.id) : false;
+    console.log(
+      `[LeadPulse] sheet ${found.sketch.id}: voters ${voters}, heat ${heatOf(signals)}, telegram ${sent}, stamped ${stamped}`
+    );
+  }
+
   return NextResponse.json({
     success: true,
     tallies: tallyVotes(fresh),
