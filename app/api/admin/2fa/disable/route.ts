@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import speakeasy from "speakeasy";
 import { createClient } from "@/utils/supabase/server";
 import { sendSecurityAlert } from "@/lib/telegram-notify";
+import { telegramAlert, telegramTime } from "@/lib/telegram-copy";
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,10 +46,11 @@ export async function POST(request: NextRequest) {
       });
 
       await sendSecurityAlert(
-        `⚠️ INVALID 2FA DISABLE ATTEMPT\n` +
-        `User: ${user.email}\n` +
-        `Time: ${new Date().toISOString()}\n` +
-        `IP: ${request.headers.get("x-forwarded-for") || "unknown"}`
+        telegramAlert("⚠️", "محاولة إلغاء التحقق بخطوتين بكود غلط", [
+          ["المستخدم", user.email],
+          ["الوقت", telegramTime()],
+          ["العنوان", request.headers.get("x-forwarded-for") || "غير معروف"],
+        ])
       );
 
       return NextResponse.json(
@@ -91,11 +93,11 @@ export async function POST(request: NextRequest) {
 
     // إرسال إشعار أمني عالي الأهمية
     await sendSecurityAlert(
-      `🚨 2FA DISABLED - CRITICAL SECURITY ALERT\n` +
-      `User: ${user.email}\n` +
-      `Time: ${new Date().toISOString()}\n` +
-      `IP: ${request.headers.get("x-forwarded-for") || "unknown"}\n\n` +
-      `⚠️ WARNING: Account security has been reduced!`
+      telegramAlert("🚨", "التحقق بخطوتين اتقفل — خطر على الحساب", [
+        ["المستخدم", user.email],
+        ["الوقت", telegramTime()],
+        ["العنوان", request.headers.get("x-forwarded-for") || "غير معروف"],
+      ])
     );
 
     return NextResponse.json({

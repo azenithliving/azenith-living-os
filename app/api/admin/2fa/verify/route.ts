@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import speakeasy from "speakeasy";
 import { createClient } from "@/utils/supabase/server";
 import { sendSecurityAlert } from "@/lib/telegram-notify";
+import { telegramAlert, telegramTime } from "@/lib/telegram-copy";
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,10 +85,11 @@ export async function POST(request: NextRequest) {
 
       // إرسال إشعار أمني
       await sendSecurityAlert(
-        `✅ 2FA ENABLED SUCCESSFULLY\n` +
-        `User: ${user.email}\n` +
-        `Time: ${new Date().toISOString()}\n` +
-        `IP: ${request.headers.get("x-forwarded-for") || "unknown"}`
+        telegramAlert("✅", "التحقق بخطوتين اتفعّل", [
+          ["المستخدم", user.email],
+          ["الوقت", telegramTime()],
+          ["العنوان", request.headers.get("x-forwarded-for") || "غير معروف"],
+        ])
       );
 
       return NextResponse.json({
@@ -115,10 +117,11 @@ export async function POST(request: NextRequest) {
 
       // إرسال إشعار أمني
       await sendSecurityAlert(
-        `🔓 ADMIN LOGIN WITH 2FA\n` +
-        `User: ${user.email}\n` +
-        `Time: ${new Date().toISOString()}\n` +
-        `IP: ${request.headers.get("x-forwarded-for") || "unknown"}`
+        telegramAlert("🔓", "دخول المدير بخطوتين", [
+          ["المستخدم", user.email],
+          ["الوقت", telegramTime()],
+          ["العنوان", request.headers.get("x-forwarded-for") || "غير معروف"],
+        ])
       );
 
       return NextResponse.json({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { sendSecurityAlert } from "@/lib/telegram-notify";
+import { telegramAlert, telegramTime } from "@/lib/telegram-copy";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import {
   getPrimaryAdminLegacy2FASecret,
@@ -275,10 +276,11 @@ export async function POST(request: NextRequest) {
 
     if (verified && usedEnvSecret && dbSecret && dbSecret !== matchedSecret) {
       await sendSecurityAlert(
-        `🔐 PRIMARY ADMIN 2FA SYNCED FROM ENV\n` +
-          `User: ${user.email}\n` +
-          `Time: ${new Date().toISOString()}\n` +
-          `IP: ${request.headers.get("x-forwarded-for") || "unknown"}`
+        telegramAlert("🔐", "مفتاح التحقق بتاع المدير اتظبّط من البيئة", [
+          ["المستخدم", user.email],
+          ["الوقت", telegramTime()],
+          ["العنوان", request.headers.get("x-forwarded-for") || "غير معروف"],
+        ])
       );
     }
 
@@ -308,10 +310,11 @@ export async function POST(request: NextRequest) {
 
     // Send security alert
     await sendSecurityAlert(
-      `🔓 ADMIN LOGIN WITH 2FA\n` +
-      `User: ${user.email}\n` +
-      `Time: ${new Date().toISOString()}\n` +
-      `IP: ${request.headers.get("x-forwarded-for") || "unknown"}`
+      telegramAlert("🔓", "دخول المدير بخطوتين", [
+        ["المستخدم", user.email],
+        ["الوقت", telegramTime()],
+        ["العنوان", request.headers.get("x-forwarded-for") || "غير معروف"],
+      ])
     );
 
     // Return success - the Supabase session is now established via cookies

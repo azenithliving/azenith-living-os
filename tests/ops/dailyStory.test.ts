@@ -107,7 +107,11 @@ describe("renderTelegramHtml", () => {
   it("hides the link behind words and leads with the date", () => {
     const html = renderTelegramHtml(buildDailyStory({ ...base, proposalId: "abc-123" }));
     expect(html).toContain('<a href="https://azenith-living.vercel.app/admin/v2/agents/ops?proposal=abc-123">');
-    expect(html).toContain("<b>مدير تشغيل المحتوى — صباح 2026-09-26</b>");
+    // Amended 2026-10-06: the title used to be asserted with Latin digits. The owner counts in his
+    // own numerals on every surface he reads, so the message now carries them — while the address
+    // keeps its Latin digits, because «/admin/v٢/» is a link that goes nowhere.
+    expect(html).toContain("<b>مدير تشغيل المحتوى — صباح ٢٠٢٦-٠٩-٢٦</b>");
+    expect(html).not.toContain("agents/ops?proposal=abc-١٢٣");
     expect(html).not.toContain("?proposal=abc-123 افتح");
   });
 });

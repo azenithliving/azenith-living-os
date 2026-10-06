@@ -3,7 +3,8 @@
  * Sends instant alerts for security events
  */
 
-import { sendTelegramMessage, getActiveTelegramConfig } from "@/lib/telegram-config";
+import { broadcastTelegramMessage, getActiveTelegramConfig } from "@/lib/telegram-config";
+import { telegramAlert, telegramTime } from "@/lib/telegram-copy";
 
 interface SecurityEvent {
   type: "login" | "2fa" | "command" | "signature" | "alert" | "warning" | "critical";
@@ -14,16 +15,31 @@ interface SecurityEvent {
   details?: Record<string, unknown>;
 }
 
+const EVENT_TITLES: Record<SecurityEvent["type"], string> = {
+  login: "دخول",
+  "2fa": "التحقق بخطوتين",
+  command: "أمر إداري",
+  signature: "توقيع مرفوض",
+  alert: "تنبيه",
+  warning: "تحذير",
+  critical: "خطر",
+};
+
 /**
  * Send a security alert via Telegram
+ *
+ * Every admin chat he seated, not the first one — measured 2026-10-06: the login alert arrived on
+ * one of his two numbers and he had no way to know the other never saw it. And when no channel is
+ * configured, nothing was said: answering `true` there tells the caller he warned the owner, and he
+ * did not.
  */
 export async function sendSecurityAlert(message: string): Promise<boolean> {
   const cfg = await getActiveTelegramConfig();
-  if (!cfg.enabled || !cfg.botToken || !cfg.chatId) {
-    console.log("[TELEGRAM ALERT - Simulated]", message);
-    return true;
+  if (!cfg.enabled || !cfg.botToken) {
+    console.log("[Telegram] no channel configured — the security notice was not sent:", message.slice(0, 80));
+    return false;
   }
-  return sendTelegramMessage(message, { silent: false });
+  return (await broadcastTelegramMessage(message, { silent: false })) > 0;
 }
 
 /**
@@ -40,18 +56,18 @@ export async function sendSecurityEvent(event: SecurityEvent): Promise<boolean> 
     critical: "💥",
   };
 
-  const formattedMessage = `
-${icons[event.type] || "📢"} <b>SOVEREIGN SECURITY EVENT</b>
-
-<b>Type:</b> ${event.type.toUpperCase()}
-<b>Time:</b> ${event.timestamp}
-${event.user ? `<b>User:</b> ${event.user}\n` : ""}
-${event.ip ? `<b>IP:</b> ${event.ip}\n` : ""}
-<b>Message:</b>
-${event.message}
-  `.trim();
-
-  return sendSecurityAlert(formattedMessage);
+  return sendSecurityAlert(
+    telegramAlert(
+      icons[event.type] ?? "📢",
+      `أمن المتجر — ${EVENT_TITLES[event.type] ?? "تنبيه"}`,
+      [
+        ["الوقت", telegramTime(event.timestamp)],
+        ["المستخدم", event.user],
+        ["العنوان", event.ip],
+        ["التفاصيل", event.message],
+      ]
+    )
+  );
 }
 
 /**
@@ -64,12 +80,17 @@ export async function notifyFailedLogin(
 ): Promise<void> {
   if (attemptCount >= 5) {
     await sendSecurityAlert(
-      `🚨 MULTIPLE FAILED LOGIN ATTEMPTS\n` +
-      `Email: ${email}\n` +
-      `Attempts: ${attemptCount}\n` +
-      `IP: ${ip}\n` +
-      `Time: ${new Date().toISOString()}\n\n` +
-      `⚠️ Possible brute force attack!`
+      telegramAlert(
+        "🚨",
+        "محاولات دخول فاشلة وراها بعض",
+        [
+          ["البريد", email],
+          ["عدد المحاولات", attemptCount],
+          ["العنوان", ip],
+          ["الوقت", telegramTime()],
+        ],
+        "ممكن يكون حد بيجرّب يفتح الدار — راجع اللوحة."
+      )
     );
   }
 }
@@ -83,12 +104,17 @@ export async function notifyInvalidSignature(
   ip: string
 ): Promise<void> {
   await sendSecurityAlert(
-    `💥 INVALID SIGNATURE ATTEMPT\n` +
-    `User: ${user}\n` +
-    `Command: ${command}\n` +
-    `IP: ${ip}\n` +
-    `Time: ${new Date().toISOString()}\n\n` +
-    `🚨 Possible tampering attempt!`
+    telegramAlert(
+      "💥",
+      "محاولة توقيع غلط",
+      [
+        ["المستخدم", user],
+        ["الأمر", command],
+        ["العنوان", ip],
+        ["الوقت", telegramTime()],
+      ],
+      "في حد حاول يغيّر حاجة والتوقيع ما طابقش."
+    )
   );
 }
 
@@ -107,12 +133,17 @@ export async function notifyDangerousCommand(
 
   if (isDangerous) {
     await sendSecurityAlert(
-      `⚠️ DANGEROUS COMMAND EXECUTED\n` +
-      `User: ${user}\n` +
-      `Command: ${command}\n` +
-      `Result: ${result}\n` +
-      `Time: ${new Date().toISOString()}\n\n` +
-      `🔥 High risk operation performed!`
+      telegramAlert(
+        "⚠️",
+        "أمر خطر اتنفّذ",
+        [
+          ["المستخدم", user],
+          ["الأمر", command],
+          ["النتيجة", result],
+          ["الوقت", telegramTime()],
+        ],
+        "ده عملية تمسح بيانات — تأكد إنها كانت مقصودة."
+      )
     );
   }
 }

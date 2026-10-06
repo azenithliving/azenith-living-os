@@ -6,6 +6,7 @@
 
 import { createClient, supabaseAdmin as supabase } from "@/lib/supabase-server";
 import { sendSecurityAlert } from "./telegram-notify";
+import { telegramAlert, telegramTime } from "./telegram-copy";
 import fs from "fs";
 import path from "path";
 
@@ -239,11 +240,17 @@ export async function checkKeysUsage(): Promise<KeyCheckResult> {
           // Send alert for exhausted keys
           if (status === "exhausted") {
             await sendSecurityAlert(
-              `🚨 <b>Key Exhausted</b>\n\n` +
-              `Provider: ${provider.toUpperCase()}\n` +
-              `Key ID: ${key.id}\n` +
-              `Usage: ${usagePercent.toFixed(1)}% of daily limit\n\n` +
-              `⚠️ Consider adding a new key to avoid service disruption!`
+              telegramAlert(
+                "🚨",
+                "مفتاح خلاص",
+                [
+                  ["المزوّد", provider.toUpperCase()],
+                  ["رقم المفتاح", key.id],
+                  ["الاستخدام", `${usagePercent.toFixed(1)}٪ من حد النهاردة`],
+                  ["الوقت", telegramTime()],
+                ],
+                "حطّ مفتاح جديد عندنا في المكتب قبل ما الخدمة تقف."
+              )
             );
           }
 
@@ -274,9 +281,10 @@ export async function checkKeysUsage(): Promise<KeyCheckResult> {
 
     // Send error notification
     await sendSecurityAlert(
-      `❌ <b>Key Monitor Error</b>\n\n` +
-      `Error: ${error instanceof Error ? error.message : "Unknown error"}\n` +
-      `Time: ${new Date().toISOString()}`
+      telegramAlert("❌", "رقابة المفاتيح وقعت", [
+        ["الغلط", error instanceof Error ? error.message : "غلط مش معروف"],
+        ["الوقت", telegramTime()],
+      ])
     );
 
     throw error;
@@ -560,11 +568,12 @@ async function activateBackupKey(
 
     // Send notification
     await sendSecurityAlert(
-      `✅ <b>Backup Key Activated</b>\n\n` +
-      `Provider: ${provider.toUpperCase()}\n` +
-      `Exhausted Key: ${exhaustedKeyId}\n` +
-      `New Active Key: ${backupKey.id}\n\n` +
-      `🔄 Automatic failover completed successfully!`
+      telegramAlert("✅", "مفتاح احتياطي اشتغل", [
+        ["المزوّد", provider.toUpperCase()],
+        ["المفتاح اللي خلاص", exhaustedKeyId],
+        ["المفتاح الجديد", backupKey.id],
+        ["الوقت", telegramTime()],
+      ])
     );
 
     console.log(`[KeyMonitor] Backup key ${backupKey.id} activated for ${provider}`);

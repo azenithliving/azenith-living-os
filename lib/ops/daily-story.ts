@@ -11,9 +11,13 @@
  *  • failed reads are part of the story. A round that silently reports nothing
  *    is the failure mode P6 was started to kill.
  */
+import { arDigits } from "@/lib/ops/metricLabels";
 
 /** Telegram's own budget is 4096; the owner's attention is far shorter. */
 export const STORY_LIMIT = 1000;
+
+/** Letter-only, so the digit pass cannot touch it and no real message could contain it. */
+const OPEN_LINK_MARK = "OPENLINKPLACEHOLDER";
 
 const DASHBOARD_PATH = "/admin/v2/agents/ops";
 
@@ -111,6 +115,12 @@ function escapeHtml(value: string): string {
  */
 export function renderTelegramHtml(story: DailyStory): string {
   const escapedHref = escapeHtml(story.href);
-  const body = escapeHtml(story.text).replace(escapedHref, `<a href="${escapedHref}">افتح الدار</a>`);
-  return `<b>${escapeHtml(story.title)}</b>\n\n${body}`;
+  /**
+   * His numerals, everywhere he reads — but not inside the address. The link is parked behind a
+   * letter-only mark while the digits are converted, then put back whole: «/admin/v2/...» with a
+   * converted ٢ is a link that goes nowhere.
+   */
+  const plain = escapeHtml(story.text).replace(escapedHref, OPEN_LINK_MARK);
+  const body = arDigits(plain).replace(OPEN_LINK_MARK, `<a href="${escapedHref}">افتح الدار</a>`);
+  return `<b>${arDigits(escapeHtml(story.title))}</b>\n\n${body}`;
 }

@@ -407,13 +407,12 @@ export async function sendNotification(
   try {
     const { sendSecurityAlert } = await import("./telegram-notify");
     
-    const notificationText = [
-      "🤖 <b>Mastermind Admin Notification</b>",
-      "",
-      `👤 User: ${context.userEmail}`,
-      `📝 Message: ${message}`,
-      `⏰ Time: ${new Date().toISOString()}`,
-    ].join("\n");
+    const { telegramAlert, telegramTime } = await import("./telegram-copy");
+    const notificationText = telegramAlert("🤖", "إشعار من عقل النظام", [
+      ["المستخدم", context.userEmail],
+      ["الرسالة", message],
+      ["الوقت", telegramTime()],
+    ]);
     
     await sendSecurityAlert(notificationText);
 
