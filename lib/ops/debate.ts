@@ -21,13 +21,20 @@ export function isCriticVerdictOk(verdict: string): boolean {
 
 export async function critiqueAndPolish(
   userMessage: string,
-  draftReply: string
+  draftReply: string,
+  deskTruth: string
 ): Promise<{ reply: string; critiqued: boolean }> {
   try {
     const critic = await askGroqMessages(
       [
         { role: "system", content: CRITIC_SYSTEM },
-        { role: "user", content: `سؤال المستخدم:\n${userMessage.slice(0, 400)}\n\nرد الوكيل:\n${draftReply.slice(0, 2500)}` },
+        {
+          role: "user",
+          content:
+            `سؤال المستخدم:\n${userMessage.slice(0, 400)}\n\nرد الوكيل:\n${draftReply.slice(0, 2500)}\n\n` +
+            `الحقيقة الوحيدة الموثقة عندك عن التنفيذ: ${deskTruth}.\n` +
+            `لو الرد بيدّعي تنفيذ خلاف دي، دي أول عيب تصلحه — متقبّلش ادعاء مبني على ولا سجل.`,
+        },
       ],
       { temperature: 0.2, maxTokens: 200 }
     );
@@ -37,7 +44,7 @@ export async function critiqueAndPolish(
     // One polish pass by the deeper model, told exactly what the critic rejected.
     const polish = await askGoogleMessages(
       [
-        { role: "system", content: "أنت مدير تشغيل المحتوى. أعد صياغة ردك أدناه مع إصلاح ملاحظات الناقد فقط، وحافظ على كل معلومة موثقة. احذف أي رابط أو رقم غير موثق بدل تبريره." },
+        { role: "system", content: "أنت مدير تشغيل المحتوى. أعد صياغة ردك أدناه مع إصلاح ملاحظات الناقد فقط، وحافظ على كل معلومة موثقة. احذف أي رابط أو رقم غير موثق بدل تبريره، واحذف أي جملة تقول إن مكتب اشتغل وهو ما اشتغلش." },
         { role: "user", content: `الرد الأصلي:\n${draftReply.slice(0, 2500)}\n\nملاحظات الناقد:\n${critic.content.slice(0, 400)}` },
       ],
       { temperature: 0.3 }

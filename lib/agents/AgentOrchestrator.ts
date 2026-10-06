@@ -12,6 +12,7 @@ import { routeIntent, explicitIntent, TOOL_CATALOG } from "@/lib/agents/intent-r
 import { agentLabel, legacyToOps, SWARM_NAME, storedSenderName } from "@/lib/ops/identity";
 import { recallMemory, finalizeReply } from "@/lib/ops/chat-brain";
 import { critiqueAndPolish, shouldDebate } from "@/lib/ops/debate";
+import { deskTruthFor, honestDeskClaims, type DeskRecord } from "@/lib/ops/claims";
 import { withOwnerRuleOnMessages } from "@/lib/ops/owner-address";
 import { explainGap } from "@/lib/ops/gap-contract";
 import { isStaleRunning } from "@/lib/ops/task-reconcile";
@@ -498,8 +499,10 @@ export class AgentOrchestrator {
 
       // P5-M5: friendly war — a critic pass polices the leader's actionable
       // answers before the owner ever sees them (short replies skip it).
+      // The critic is handed the one fact it cannot read out of prose: whether a desk ran.
+      const desk: DeskRecord = { tool: inferredTool?.toolName ?? null, ok: toolResult?.success === true };
       if (selectedAgent === "ops-lead" && response && shouldDebate(response)) {
-        const polished = await critiqueAndPolish(message, response);
+        const polished = await critiqueAndPolish(message, response, deskTruthFor(desk));
         response = polished.reply;
       }
 
@@ -520,6 +523,14 @@ export class AgentOrchestrator {
       // unverified site paths are neutralized, imperative quotes become buttons.
       const brain = finalizeReply(response || "", process.env.NEXT_PUBLIC_SITE_URL, agentLabel(selectedAgent));
       response = brain.reply;
+
+      // Measured: 3 of 34 sentences claiming executed work had no desk record behind them. Whatever
+      // the critic decided, a claim with nothing running under it is struck before it is stored.
+      const honest = honestDeskClaims(response, desk);
+      response = honest.text;
+      if (honest.removed.length) {
+        console.warn(`[DeskClaims] struck ${honest.removed.length} unsupported claim: ${honest.removed.map((s) => s.slice(0, 70)).join(" | ")}`);
+      }
       if (brain.actions.length && !((metadata as any).suggestions?.length || (metadata as any).nextActions?.length)) {
         (metadata as any).suggestions = brain.actions;
       }
