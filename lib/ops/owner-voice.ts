@@ -32,6 +32,8 @@ const PHRASES: Array<[string, string]> = [
   ["Alt text", "النص البديل للصور"],
   ["axe-core", "فاحص الوصول"],
   ["axe core", "فاحص الوصول"],
+  ["Keyboard Navigation", "التنقل بلوحة المفاتيح"],
+  ["Contrast Ratio", "نسبة التباين"],
   ["Security Headers", "ترويسات الأمان"],
   ["Rate Limiting", "تحديد المعدل"],
   ["Content-Security-Policy", "ترويسة سياسة المحتوى"],
@@ -122,6 +124,12 @@ const WORDS: Record<string, string> = {
   summary: "ملخص",
   executive: "تنفيذي",
   and: "و",
+  keyboard: "لوحة المفاتيح",
+  navigation: "التنقل",
+  verified: "متثبت",
+  contrast: "التباين",
+  ratio: "نسبة",
+  normal: "عادي",
 };
 
 const TOKEN = /[A-Za-z][A-Za-z0-9_.\-]*[A-Za-z0-9]|[A-Za-z]/g;

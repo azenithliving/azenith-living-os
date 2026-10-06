@@ -20,6 +20,7 @@ import "server-only";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 import { currentSeason, nextSeason, type SeasonKey } from "./egypt-calendar";
 import { describeFreshness, roundFreshness } from "./round-freshness";
+import { orderStatusLabel } from "./order-status";
 
 export interface ItemLine {
   name: string;
@@ -180,7 +181,7 @@ async function readWorld(companyId: string, now: Date): Promise<Pick<WorldModel,
       topPaths: [...paths.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([path, count]) => ({ path, count })),
       adminEventsExcluded,
     };
-    if (adminEventsExcluded) coverage.push(`${adminEventsExcluded} حدث خلال 14 يومًا من صفحات الإدارة أو البوابة أو الـ API — مستثنى من عدّاد الزوار`);
+    if (adminEventsExcluded) coverage.push(`${adminEventsExcluded} حدث خلال 14 يومًا من صفحات الإدارة أو البوابة أو الواجهات الداخلية — مستثنى من عدّاد الزوار`);
   }
 
   const catalog: WorldModel["catalog"] =
@@ -256,7 +257,9 @@ export function renderWorldDigest(m: WorldModel): string {
   const L: string[] = [];
   L.push(`**عالم الدار الآن** — نافذة ${m.window.start} → ${m.window.end}`);
   if (m.revenue) {
-    const st = Object.entries(m.revenue.byStatus).map(([k, v]) => `${k} ${v}`).join(" · ");
+    // The ledger stores its states in machine words; the digest is read out to a man who reads
+    // Arabic, so the label belongs here and the raw key stays in the structured data.
+    const st = Object.entries(m.revenue.byStatus).map(([k, v]) => `${orderStatusLabel(k)} ${v}`).join(" · ");
     L.push(`• المبيعات: ${money(m.revenue.total)} من ${m.revenue.orders} طلب${m.revenue.avgOrder ? ` (متوسط ${money(m.revenue.avgOrder)})` : ""}${st ? ` — الحالات: ${st}` : ""}`);
   }
   if (m.items) {

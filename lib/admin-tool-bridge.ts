@@ -5,6 +5,7 @@
 import { executeTool, type ToolExecutionResult } from "@/lib/agent-tools/tool-registry";
 import { SovereignArchitect } from "@/lib/sovereign-architect";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
+import { draftTargetLabel, draftTypeLabel } from "@/lib/ops/draft-labels";
 
 export interface AdminToolContext {
   userId: string;
@@ -170,7 +171,10 @@ export async function runUltimateTool(
       const days = Math.floor((Date.now() - new Date(iso).getTime()) / 864e5);
       return days <= 0 ? "اليوم" : days === 1 ? "أمس" : `منذ ${days} يوم`;
     };
-    const lines = rows.map((r: any, i: number) => `• ${i + 1}) ${r.target_path || "بدون مسار"} — ${r.draft_type || "غير مصنّفة"} — v${r.version ?? "?"} — ${age(r.created_at)}`);
+    const lines = rows.map((r: any, i: number) => {
+      const kind = draftTypeLabel(r.draft_type) ?? "من غير نوع مسجّل";
+      return `• ${i + 1}) ${draftTargetLabel(r.target_path)} — ${kind} — الإصدار ${r.version ?? "?"} — ${age(r.created_at)}`;
+    });
     return {
       success: true,
       message: `المسودات المعلقة: ${rows.length}\n${lines.join("\n")}${rows.length >= 25 ? "\n(عرضت أول 25 — قد يكون هناك أكثر)" : ""}`,

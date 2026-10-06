@@ -218,9 +218,18 @@ export abstract class QayyimAgentBase {
     
     const evidenceRequirement = `
 ## متطلبات الأدلة (إلزامي)
-- كل ملاحظة يجب أن تحتوي على \`evidenceUrl\` يفتح الصفحة على العيب
+- كل ملاحظة يجب أن تحتوي على رابط الدليل اللي يفتح الصفحة على العيب (الحقل المخصص ليه في النتيجة)
 - لا أرقام من الخيال، لا إدعاءات بلا مصدر
 - إذا لم تستطع التحقق: قل "مش قادر على الصفحة دي" مش تخترع`;
+
+    // The report is read by a man who reads Arabic only, so the machine's own vocabulary has to
+    // stop at the door: it is in the structured result, and the model must not paste it into prose.
+    const languageRule = `
+## لغتك مع المالك (إلزامي)
+- المالك ما يقراش غير عربي
+- ما تكتبش حرف أو رقم لاتيني في ردّك: الأرقام بأرقامه (٠١٢٣٤٥٦٧٨٩)
+- أسماء الجداول والحقول والأدوات ما تتكتبش في الكلام — معناها بالعربي، أو اسكت عنها
+- رابط الموقع مسموح، بس عنوان لوحده بكلمة عربية قدامه`;
 
     return `## المهمة: ${task.title}
 النوع: ${task.type}
@@ -238,6 +247,7 @@ ${this.systemPrompt}
 ${capabilitiesSection}
 
 ${evidenceRequirement}
+${languageRule}
 
 ## التاريخ السابق:
 ${this.getRecentHistory()}
