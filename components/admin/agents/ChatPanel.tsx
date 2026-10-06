@@ -25,6 +25,8 @@ import {
   createDictation,
   dueToSend,
   markSent,
+  morningBrief,
+  pickArabicVoice,
   record,
   shouldRestart,
   speakableSummary,
@@ -398,24 +400,43 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   // P5-M4: speak agent replies when the speaker toggle is on (Web Speech, $0).
   // P6-M6: it reads a summary and says that it did — a voice that recites a whole
   // audit is a voice the owner switches off after one morning.
-  const speak = useCallback((text: string) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  // Now it answers whether anything was spoken: a phone with no Arabic voice reading his
+  // Arabic in an English accent is worse than the button saying it cannot.
+  const speak = useCallback((text: string): boolean => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return false;
     try {
       window.speechSynthesis.cancel();
       const clean = speakableSummary(text);
-      if (!clean) return;
+      if (!clean) return false;
+      const voice = pickArabicVoice(window.speechSynthesis.getVoices());
+      if (!voice) return false;
       const utter = new SpeechSynthesisUtterance(clean);
-      utter.lang = 'ar-EG';
+      utter.lang = voice.lang || 'ar-EG';
       utter.rate = 0.95;
-      const voices = window.speechSynthesis.getVoices();
-      const voice =
-        voices.find(v => v.lang === 'ar-EG') ||
-        voices.find(v => v.lang?.startsWith('ar') && /google|microsoft|female/i.test(v.name)) ||
-        voices.find(v => v.lang?.startsWith('ar'));
-      if (voice) utter.voice = voice;
+      utter.voice = voice;
       window.speechSynthesis.speak(utter);
-    } catch {}
+      return true;
+    } catch {
+      return false;
+    }
   }, []);
+
+  // The ten-second brief: only what waits for him, and only when he presses it.
+  const [brief, setBrief] = useState<'idle' | 'speaking' | 'unavailable'>('idle');
+  const unreadFresh = useMemo(() => {
+    if (!firstUnreadId) return 0;
+    const at = messages.findIndex((m) => m.id === firstUnreadId);
+    return at < 0 ? 0 : messages.slice(at).filter((m) => m.sender_type === 'agent').length;
+  }, [firstUnreadId, messages]);
+
+  const speakBrief = useCallback(() => {
+    const spoken = speak(morningBrief({ decisions: pendingDecisions, unread: unreadFresh }));
+    setBrief(spoken ? 'speaking' : 'unavailable');
+    if (spoken && typeof window !== 'undefined' && window.speechSynthesis) {
+      const stop = () => setBrief('idle');
+      window.setTimeout(stop, 12000);
+    }
+  }, [pendingDecisions, speak, unreadFresh]);
 
   const toggleMic = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -1175,6 +1196,25 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             {isDictating ? <MicOff className="w-3.5 h-3.5" /> : <span>🎙</span>}
             {isDictating ? 'إيقاف' : 'مستمر'}
           </button>
+          <button
+            type="button"
+            onClick={speakBrief}
+            data-voice-brief={brief}
+            title={brief === 'unavailable' ? 'مفيش صوت عربي على الجهاز ده' : 'اسمع ملخص الصبح في عشر ثواني'}
+            className={`px-3 py-2.5 border rounded-xl flex items-center gap-1 text-[11px] font-bold ${
+              brief === 'speaking'
+                ? 'bg-emerald-600/30 border-emerald-500/50 text-emerald-200'
+                : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'
+            }`}
+          >
+            <span>🗣</span>
+            {brief === 'speaking' ? 'بأقرأ…' : 'ملخص'}
+          </button>
+          {brief === 'unavailable' && (
+            <span data-voice-brief-reason="" className="text-[10px] leading-tight text-amber-300">
+              مفيش صوت عربي على الجهاز ده — النطق متوقف.
+            </span>
+          )}
           <button
             onClick={() => setTtsOn(v => !v)}
             title={ttsOn ? 'إيقاف نطق الردود' : 'انطق الردود بالعربي'}

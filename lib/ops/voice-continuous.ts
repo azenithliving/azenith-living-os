@@ -9,6 +9,7 @@
  *
  * The component owns the microphone; this owns the decision.
  */
+import { arNum } from "@/lib/ops/metricLabels";
 
 /** Long enough to be a breath between clauses, short enough to feel instant. */
 export const CONTINUOUS_SILENCE_MS = 1_200;
@@ -147,4 +148,75 @@ export function transcriptOf(event: unknown): Heard {
     else interimText += transcript;
   }
   return { finalText, interimText };
+}
+
+/**
+ * The ten-second morning brief — what the cockpit says out loud when he presses «اسمع».
+ *
+ * He reads his phone, he does not scroll it. The rule that keeps this worth listening to is the one
+ * the daily report learned the hard way: a voice that recites everything is a voice he switches off
+ * after one morning. So it names only what waits for him, in his numerals, and when nothing waits it
+ * says that instead of reading zeros.
+ */
+
+/** ≈ ten seconds of Arabic at a slowed rate. Longer and he stops pressing it. */
+export const BRIEF_BUDGET = 170;
+
+/** Arabic counts the noun after the number, so each band needs its own shape. */
+function decisionPhrase(n: number): string {
+  if (n === 1) return "قرار واحد مستني";
+  if (n === 2) return "قراران مستنيين";
+  if (n >= 3 && n <= 10) return `${arNum(n)} قرارات مستنية`;
+  return `${arNum(n)} قرار مستني`;
+}
+
+function messagePhrase(n: number): string {
+  if (n === 1) return "رسالة جديدة";
+  if (n === 2) return `${arNum(n)} رسالتين جديدتين`;
+  if (n >= 3 && n <= 10) return `${arNum(n)} رسائل جديدة`;
+  return `${arNum(n)} رسالة جديدة`;
+}
+
+/** Zero is an answer («مفيش»), a missing read is not — only a real number counts as known. */
+const readCount = (value: unknown): number | null =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+
+/**
+ * A count he never gave is left out of the sentence rather than guessed — «مفيش» is a fact, a
+ * missing read is not.
+ */
+export function morningBrief({ decisions, unread }: { decisions: unknown; unread: unknown }): string {
+  const waiting = readCount(decisions);
+  const fresh = readCount(unread);
+
+  if (waiting === null && fresh === null) return "صباح الخير. قولّي عايز تسمع إيه.";
+  if (waiting === null) return `صباح الخير. عندك ${messagePhrase(fresh!)}.`;
+  if (fresh === null) return `صباح الخير. ${decisionPhrase(waiting)}.`;
+
+  if (waiting === 0 && fresh === 0) return "صباح الخير. مفيش قرار مستني ومفيش رسالة جديدة — الدار ماشية.";
+  if (waiting === 0) return `صباح الخير. مفيش قرار مستني، وعندك ${messagePhrase(fresh)}.`;
+  if (fresh === 0) return `صباح الخير. ${decisionPhrase(waiting)}، ومفيش رسالة جديدة.`;
+  return `صباح الخير. ${decisionPhrase(waiting)}، وعندك ${messagePhrase(fresh)}. أفتح القرارات الأول؟`;
+}
+
+export interface VoiceLike {
+  lang?: string;
+  name?: string;
+}
+
+/**
+ * The voice to read with, from whatever list the phone has loaded.
+ *
+ * `getVoices()` arrives asynchronously and is often empty on the first call, so an empty list is a
+ * normal answer and not a failure — the caller retries and, if the phone truly has no Arabic voice,
+ * says so instead of reading his Arabic with an English accent.
+ */
+export function pickArabicVoice<T extends VoiceLike>(voices: T[] | null | undefined): T | null {
+  const list = Array.isArray(voices) ? voices : [];
+  return (
+    list.find((v) => v?.lang === "ar-EG") ||
+    list.find((v) => v?.lang?.startsWith("ar") && /google|microsoft|female|salma|maged|hoda/i.test(v?.name ?? "")) ||
+    list.find((v) => v?.lang?.startsWith("ar")) ||
+    null
+  );
 }
