@@ -220,3 +220,32 @@ export function pickArabicVoice<T extends VoiceLike>(voices: T[] | null | undefi
     null
   );
 }
+
+/**
+ * What to do the moment he presses the brief.
+ *
+ * Measured on his phone 2026-10-06: the button answered «مفيش صوت عربي على الجهاز ده» — and the
+ * honest cause is that Chrome hands out an EMPTY voice list on the first call and fills it a moment
+ * later through `voiceschanged`. Refusing before that list exists is my bug, not his phone's. So the
+ * three outcomes are separated: speak, wait for the list, or — only when a loaded list truly holds
+ * no Arabic voice — say so and name how many voices the phone does have.
+ */
+export function nextVoiceStep({
+  voicesTotal,
+  arabicFound,
+}: {
+  voicesTotal: number;
+  arabicFound: boolean;
+}): "speak" | "wait" | "unavailable" {
+  if (arabicFound) return "speak";
+  if (!Number.isFinite(voicesTotal) || voicesTotal <= 0) return "wait";
+  return "unavailable";
+}
+
+/** The reason line, worded by what the phone actually has — never a bare failure. */
+export function voiceShortfallLine(voicesTotal: number): string {
+  const n = Number.isFinite(voicesTotal) && voicesTotal > 0 ? voicesTotal : 0;
+  return n === 0
+    ? "مفيش صوت على الجهاز ده خالص — النطق متوقف."
+    : `جهازك فيه ${arNum(n)} صوت، ولا واحد عربي — نزّل الصوت العربي من إعدادات نظامك.`;
+}

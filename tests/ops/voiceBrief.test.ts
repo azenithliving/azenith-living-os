@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 
-import { morningBrief, pickArabicVoice, BRIEF_BUDGET } from "@/lib/ops/voice-continuous";
+import { BRIEF_BUDGET, morningBrief, nextVoiceStep, pickArabicVoice, voiceShortfallLine } from "@/lib/ops/voice-continuous";
 
 /**
  * Ten seconds of the store, out loud.
@@ -90,5 +90,48 @@ describe("the cockpit button that plays it", () => {
 
   it("stops the previous reading before starting a new one", () => {
     expect(panel).toMatch(/speechSynthesis\.cancel\(\)/);
+  });
+});
+
+/**
+ * Why his phone said «مفيش صوت عربي» (measured from his screenshot 2026-10-06): Chrome returns an
+ * empty voice list on the first call and fills it a moment later through `voiceschanged`. Refusing
+ * before that list exists is the button's bug, not the phone's.
+ */
+describe("the button waits for the phone's voices", () => {
+  it("speaks when an Arabic voice is there", () => {
+    expect(nextVoiceStep({ voicesTotal: 4, arabicFound: true })).toBe("speak");
+  });
+
+  it("waits when the list has not been handed over yet", () => {
+    expect(nextVoiceStep({ voicesTotal: 0, arabicFound: false })).toBe("wait");
+  });
+
+  it("only admits defeat on a loaded list with no Arabic voice", () => {
+    expect(nextVoiceStep({ voicesTotal: 4, arabicFound: false })).toBe("unavailable");
+  });
+});
+
+describe("the reason names what the phone has", () => {
+  it("counts the voices it looked at, in his numerals", () => {
+    const line = voiceShortfallLine(4);
+    expect(line).toContain("٤");
+    expect(line).toContain("عربي");
+    expect(line.match(/[A-Za-z0-9]/g) ?? []).toEqual([]);
+  });
+
+  it("says plainly when the device has no voice at all", () => {
+    expect(voiceShortfallLine(0)).toContain("مفيش صوت");
+  });
+});
+
+describe("the reason line does not live inside the button row", () => {
+  it("is its own note, so it cannot squeeze the buttons into a column", () => {
+    // His screenshot showed the sentence stacked one word per line: it was a flex child of the
+    // button row, and the row gave it the width left over from five buttons.
+    const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+    const row = panel.slice(panel.indexOf("data-voice-brief"), panel.indexOf("</div>", panel.indexOf("data-voice-brief")));
+    expect(row).not.toContain("data-voice-note");
+    expect(panel).toContain("data-voice-note");
   });
 });

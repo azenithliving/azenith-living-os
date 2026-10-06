@@ -26,12 +26,14 @@ import {
   dueToSend,
   markSent,
   morningBrief,
+  nextVoiceStep,
   pickArabicVoice,
   record,
   shouldRestart,
   speakableSummary,
   stopDictation as stopDictationState,
   transcriptOf,
+  voiceShortfallLine,
 } from '@/lib/ops/voice-continuous';
 
 export interface Message {
@@ -422,7 +424,8 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   }, []);
 
   // The ten-second brief: only what waits for him, and only when he presses it.
-  const [brief, setBrief] = useState<'idle' | 'speaking' | 'unavailable'>('idle');
+  const [brief, setBrief] = useState<'idle' | 'waiting' | 'speaking' | 'unavailable'>('idle');
+  const [voiceNote, setVoiceNote] = useState('');
   const unreadFresh = useMemo(() => {
     if (!firstUnreadId) return 0;
     const at = messages.findIndex((m) => m.id === firstUnreadId);
@@ -430,12 +433,52 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   }, [firstUnreadId, messages]);
 
   const speakBrief = useCallback(() => {
-    const spoken = speak(morningBrief({ decisions: pendingDecisions, unread: unreadFresh }));
-    setBrief(spoken ? 'speaking' : 'unavailable');
-    if (spoken && typeof window !== 'undefined' && window.speechSynthesis) {
-      const stop = () => setBrief('idle');
-      window.setTimeout(stop, 12000);
+    const line = morningBrief({ decisions: pendingDecisions, unread: unreadFresh });
+    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined;
+    if (!synth) {
+      setVoiceNote('المتصفح ده ما بيعرفش ينطق.');
+      setBrief('unavailable');
+      return;
     }
+
+    const readAloud = (): boolean => {
+      if (!speak(line)) return false;
+      setBrief('speaking');
+      window.setTimeout(() => setBrief('idle'), 12_000);
+      return true;
+    };
+
+    const giveUp = (total: number) => {
+      setVoiceNote(voiceShortfallLine(total));
+      setBrief('unavailable');
+    };
+
+    const list = synth.getVoices() ?? [];
+    if (nextVoiceStep({ voicesTotal: list.length, arabicFound: Boolean(pickArabicVoice(list)) }) === 'speak') {
+      if (!readAloud()) giveUp(list.length);
+      return;
+    }
+
+    /**
+     * Chrome hands out an empty voice list on the first call and fills it a moment later. His phone
+     * said «مفيش صوت عربي» because I refused before that list existed — so wait for it once, then
+     * decide with what the phone really has.
+     */
+    setBrief('waiting');
+    let settled = false;
+    const retry = () => {
+      if (settled) return;
+      settled = true;
+      synth.removeEventListener('voiceschanged', retry);
+      const now = synth.getVoices() ?? [];
+      if (nextVoiceStep({ voicesTotal: now.length, arabicFound: Boolean(pickArabicVoice(now)) }) !== 'speak') {
+        giveUp(now.length);
+        return;
+      }
+      if (!readAloud()) giveUp(now.length);
+    };
+    synth.addEventListener('voiceschanged', retry);
+    window.setTimeout(retry, 2500);
   }, [pendingDecisions, speak, unreadFresh]);
 
   const toggleMic = useCallback(() => {
@@ -1200,7 +1243,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             type="button"
             onClick={speakBrief}
             data-voice-brief={brief}
-            title={brief === 'unavailable' ? 'مفيش صوت عربي على الجهاز ده' : 'اسمع ملخص الصبح في عشر ثواني'}
+            title={brief === 'unavailable' ? 'النطق متوقف على الجهاز ده' : 'اسمع ملخص الصبح في عشر ثواني'}
             className={`px-3 py-2.5 border rounded-xl flex items-center gap-1 text-[11px] font-bold ${
               brief === 'speaking'
                 ? 'bg-emerald-600/30 border-emerald-500/50 text-emerald-200'
@@ -1208,13 +1251,8 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             }`}
           >
             <span>🗣</span>
-            {brief === 'speaking' ? 'بأقرأ…' : 'ملخص'}
+            {brief === 'speaking' ? 'بأقرأ…' : brief === 'waiting' ? 'استنى…' : 'ملخص'}
           </button>
-          {brief === 'unavailable' && (
-            <span data-voice-brief-reason="" className="text-[10px] leading-tight text-amber-300">
-              مفيش صوت عربي على الجهاز ده — النطق متوقف.
-            </span>
-          )}
           <button
             onClick={() => setTtsOn(v => !v)}
             title={ttsOn ? 'إيقاف نطق الردود' : 'انطق الردود بالعربي'}
@@ -1258,6 +1296,12 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             {isTyping ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4 rtl:rotate-180" />}
           </button>
         </div>
+        {/* سطر لوحده تحت الصف: وهو جوه الصف كان بيضغط الأزرار ويطلع عمودي (مقاس من صورة المالك). */}
+        {brief === 'unavailable' && voiceNote ? (
+          <div data-voice-note="" className="text-[10px] leading-snug text-amber-300 mt-1.5 text-center">
+            {voiceNote}
+          </div>
+        ) : null}
         <div className="text-[10px] text-white/20 mt-1.5 text-center">تلميح: الصق صورة بمفتاح اللصق أو اسحبها هنا — أفهمها وأحدد موقعها تلقائياً</div>
       </div>
 
