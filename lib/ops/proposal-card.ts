@@ -65,6 +65,28 @@ export function isExpired(proposal: ProposalRow, now: number = Date.now()): bool
   return at < now;
 }
 
+/** What the messages door writes, and what the chat reads back. */
+export interface ChatMessageLike {
+  sender_type?: string | null;
+  context?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
+}
+
+/**
+ * The decision this chat message is waiting on, if it is waiting on one.
+ *
+ * The id is stored on the agent's own row (`context.approval_id`) by the door that created the
+ * proposal, so the buttons live with the sentence that asked for them. Only an agent's message can
+ * carry one — his own words never open a decision — and the value must be shaped like an id, because
+ * it goes into a read of the queue.
+ */
+export function pendingApprovalIdFromMessage(message: ChatMessageLike): string | null {
+  if (!message || message.sender_type !== "agent") return null;
+  const raw = message.context?.approval_id ?? message.metadata?.approval_id;
+  const id = typeof raw === "string" ? raw.trim() : "";
+  return ID_SHAPE.test(id) ? id : null;
+}
+
 const STATUS_LABELS: Record<string, string> = {
   pending: "في انتظارك",
   approved: "اتنفذت",

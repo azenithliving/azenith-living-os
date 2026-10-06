@@ -13,6 +13,8 @@ import { isBulletLine, splitEmphasis, stripBullet } from '@/lib/talk/emphasis';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
 import { ApprovalGate } from './ApprovalGate';
+import { ApprovalDecisionBlock } from './ApprovalDecisionBlock';
+import { pendingApprovalIdFromMessage } from '@/lib/ops/proposal-card';
 import { QuickActionsPanel } from './QuickActionsPanel';
 import { EmergencyBanner } from './EmergencyBanner';
 import { buildPalette, isPaletteHotkey, CAPABILITY_LABELS, type PaletteCommand } from '@/lib/ops/palette';
@@ -430,7 +432,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
         setIsListening(false);
         // P5-R3 voice-note style: once speech settles, send automatically
         const finalText = text.trim();
-        if (finalText) setTimeout(() => (window as any).__qayyimSend?.(finalText), 150);
+        if (finalText) setTimeout(() => (window as any).__opsSend?.(finalText), 150);
       }
     };
     rec.onerror = () => setIsListening(false);
@@ -442,8 +444,8 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
 
   // expose for suggestion buttons
   useEffect(() => {
-    (window as any).__qayyimSend = (text: string) => sendMessage(text);
-    return () => { try { delete (window as any).__qayyimSend; } catch {} };
+    (window as any).__opsSend = (text: string) => sendMessage(text);
+    return () => { try { delete (window as any).__opsSend; } catch {} };
   }, []);
 
   // ── تسجيل التغذية الراجعة في SelfLearningEngine ──────────────────
@@ -1314,6 +1316,8 @@ function MessageBubble({
   const colors = colorClasses[agentColor] || colorClasses.purple;
   const toolData = message.metadata?.toolData || message.context?.data;
   const toolName = message.metadata?.tool || message.context?.tool;
+  // The decision this very message is waiting on, when there is one.
+  const approvalId = pendingApprovalIdFromMessage(message);
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -1338,11 +1342,21 @@ function MessageBubble({
               <MarkdownContent content={message.content} onZoom={onZoom} />
             </div>
 
+            {/* القرار مطلوب من الرسالة دي نفسها — فالأزرار تحتها، مش في مكان تاني من الصفحة. */}
+            {approvalId ? (
+              <div className="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/[0.06] p-3">
+                <ApprovalDecisionBlock
+                  approvalId={approvalId}
+                  onAskBetter={(text) => (window as any).__opsSend?.(text)}
+                />
+              </div>
+            ) : null}
+
             {/* أزرار الاقتراحات التنفيذية */}
             {(message as any).suggestions?.length > 0 || (message.metadata as any)?.suggestions?.length > 0 || (message as any).nextActions?.length > 0 || (message.metadata as any)?.nextActions?.length > 0 ? (
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {([...((message as any).suggestions || []), ...((message.metadata as any)?.suggestions || []), ...((message as any).nextActions || []), ...((message.metadata as any)?.nextActions || [])] as string[]).slice(0,3).map((s: string, i: number) => (
-                  <button key={i} onClick={() => (window as any).__qayyimSend?.(s)} className="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-300 hover:bg-amber-500/25 flex items-center gap-1">
+                  <button key={i} onClick={() => (window as any).__opsSend?.(s)} className="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-300 hover:bg-amber-500/25 flex items-center gap-1">
                     ⚡ {s.slice(0,40)}
                   </button>
                 ))}
@@ -1354,9 +1368,9 @@ function MessageBubble({
               <InlineDraftPreview
                 onZoom={onZoom}
                 previewUrl={(message as any).previewUrl || (message as any).preview_token || (message.metadata as any)?.previewUrl || (message.metadata as any)?.preview_token || (message.metadata as any)?.toolData?.preview_url || (message.metadata as any)?.toolData?.preview_token || `/api/admin/ops/preview/${(message.metadata as any)?.draft?.previewToken || (message.metadata as any)?.toolData?.draft_id || (message as any).draftId}`}
-                onApprove={() => (window as any).__qayyimSend?.(`وافق على المسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''}`)}
-                onReject={() => (window as any).__qayyimSend?.(`ارفض المسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''}`)}
-                onBetter={() => (window as any).__qayyimSend?.(`عايز حاجة أحسن للمسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''} — اقترح بديلاً أفخم`)}
+                onApprove={() => (window as any).__opsSend?.(`وافق على المسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''}`)}
+                onReject={() => (window as any).__opsSend?.(`ارفض المسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''}`)}
+                onBetter={() => (window as any).__opsSend?.(`عايز حاجة أحسن للمسودة ${(message as any).draftId || (message.metadata as any)?.toolData?.draft_id || ''} — اقترح بديلاً أفخم`)}
               />
             ) : null}
 

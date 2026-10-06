@@ -218,6 +218,17 @@ export async function POST(request: NextRequest) {
         });
 
         if (brain.reply) {
+          /**
+           * When the answer is «أحتاج موافقتك», the brain hands back the proposal it just wrote.
+           * Stored on the agent's own row, that id is what puts the three decision buttons under the
+           * sentence that asked for them — instead of the owner hunting the queue for the thing this
+           * message is about. The id comes from the store's answer, never from the browser.
+           */
+          const approvalId =
+            typeof (brain.data as { requestId?: unknown } | undefined)?.requestId === 'string'
+              ? String((brain.data as { requestId: string }).requestId)
+              : null;
+
           const { data: replyRow } = await supabaseServer
             .from('agent_messages')
             .insert({
@@ -227,6 +238,7 @@ export async function POST(request: NextRequest) {
               content: brain.reply,
               mentions: [],
               created_at: new Date().toISOString(),
+              ...(approvalId ? { requires_action: true, context: { approval_id: approvalId } } : {}),
             })
             .select()
             .single();
