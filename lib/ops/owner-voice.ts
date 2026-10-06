@@ -23,6 +23,9 @@ const PROTECTED = /(https?:\/\/[^\s)>\]"'،]+|\/[A-Za-z0-9\-_./]{4,}|`[^`]*`)/g;
 /** Multi-word report strings, matched before single tokens so the longest reading wins. */
 const PHRASES: Array<[string, string]> = [
   ["Too Many Requests", "طلبات كتير أوي"],
+  ["Accessibility Audit Report", "تقرير فحص إمكانية الوصول"],
+  ["Security Headers", "ترويسات الأمان"],
+  ["Rate Limiting", "تحديد المعدل"],
   ["Content-Security-Policy", "ترويسة سياسة المحتوى"],
   ["Strict-Transport-Security", "ترويسة النقل الآمن الصارم"],
   ["X-Content-Type-Options", "ترويسة نوع المحتوى"],
@@ -72,6 +75,21 @@ const WORDS: Record<string, string> = {
   products: "منتجات",
   site: "الموقع",
   speed: "السرعة",
+  accessibility: "إمكانية الوصول",
+  audit: "فحص",
+  report: "تقرير",
+  policy: "سياسة",
+  cookies: "ملفات التعريف",
+  credentials: "بيانات اعتماد",
+  cors: "سياسة الأصل المتقاطع",
+  ssl: "التشفير",
+  csp: "سياسة المحتوى",
+  wildcard: "نجمي شامل",
+  rate: "معدل",
+  limiting: "تحديد",
+  luxury: "الفخامة",
+  standard: "المعيار",
+  wcag: "معيار الوصول العالمي",
 };
 
 const TOKEN = /[A-Za-z][A-Za-z0-9_.\-]*[A-Za-z0-9]|[A-Za-z]/g;

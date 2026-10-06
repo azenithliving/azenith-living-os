@@ -14,6 +14,8 @@ import { ownerVoice, voiceTally } from "@/lib/ops/owner-voice";
  * echo the retired tool key (qayyim_world, qayyim_rivals). His law is Arabic on his surfaces, with a
  * web address allowed as its own element — so URLs and paths pass through untouched.
  */
+const latin = (s: string) => s.match(/[A-Za-z]{2,}/g) ?? [];
+
 describe("his numerals", () => {
   it("turns Latin digits into his", () => {
     expect(ownerVoice("الدرجة 97 من 100")).toBe("الدرجة ٩٧ من ١٠٠");
@@ -50,6 +52,19 @@ describe("the report vocabulary", () => {
   it("reads a rate limit the way he would say it", () => {
     expect(ownerVoice("PageSpeed API 429: Too Many Requests")).toBe(
       "سرعة الصفحة الواجهة ٤٢٩: طلبات كتير أوي"
+    );
+  });
+
+  it("names the accessibility report and its standard in Arabic", () => {
+    const out = ownerVoice("(Accessibility Audit Report) المعيار: WCAG 2.1");
+    expect(out).toContain("(تقرير فحص إمكانية الوصول)");
+    expect(out).toContain("معيار الوصول العالمي");
+    expect(latin(out)).toEqual([]);
+  });
+
+  it("reads the header findings line in Arabic", () => {
+    expect(ownerVoice("Rate Limiting: Wildcard Credentials")).toBe(
+      "تحديد المعدل: نجمي شامل بيانات اعتماد"
     );
   });
 
