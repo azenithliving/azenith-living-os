@@ -39,4 +39,13 @@ describe("admin-tool-bridge", () => {
     expect(inferUltimateTool("اللي بيتبيع دلوقتي إيه؟")?.toolName).toBe("ops_world");
     expect(inferUltimateTool("المبيعات الفترة دي عاملة إيه")?.toolName).toBe("ops_world");
   });
+
+  // Measured live 2026-10-07: «وريني عالم الدار» reached no tool, and the leader answered with an
+  // unmeasured status report and a table of invented states. A desk's own Arabic name has to open
+  // that desk — the name is printed in the digest the owner reads.
+  it("opens the world desk when he calls it by name", () => {
+    expect(inferUltimateTool("وريني عالم الدار")?.toolName).toBe("ops_world");
+    expect(inferUltimateTool("إيه عالم الدار دلوقتي؟")?.toolName).toBe("ops_world");
+    expect(inferUltimateTool("اعرض عالم الدار كامل")?.toolName).toBe("ops_world");
+  });
 });

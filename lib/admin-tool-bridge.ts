@@ -303,8 +303,10 @@ export function inferUltimateTool(
   // "how is the shop doing / what sells" reads the live world model. It must
   // The world model answers «how is business» with the store's own counted numbers;
   // the old money-analysis tools are gone by the owner's ruling and must not come back.
+  // «عالم الدار» is the name this desk signs its own digest with, so a request that uses it
+  // cannot be left to prose: unanswered, the model answers with an invented status table.
   if (
-    /الشغل\s+(?:ال)?(?:فترة|فتره)|المبيعات\s+(?:ال)?(?:فترة|فتره)|(?:اللي|اللى)\s?(?:بي|بت)?(?:ت?بيع)|بيتبيع|بتبيع|حجم\s+(?:ال)?(?:مبيعات|بيع)|world\s*model/i.test(
+    /عالم\s*الدار|الشغل\s+(?:ال)?(?:فترة|فتره)|المبيعات\s+(?:ال)?(?:فترة|فتره)|(?:اللي|اللى)\s?(?:بي|بت)?(?:ت?بيع)|بيتبيع|بتبيع|حجم\s+(?:ال)?(?:مبيعات|بيع)|world\s*model/i.test(
       lower
     )
   ) {
