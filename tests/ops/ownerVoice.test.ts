@@ -123,6 +123,19 @@ describe("machine identifiers", () => {
     expect(out).not.toMatch(/\s{3,}/);
     expect(out).toContain("فيه بيانات");
   });
+
+  it("names any snake_case tool by its own Arabic name, retired or live", () => {
+    const out = ownerVoice("شغّل gsc_queries و draft_list دلوقتي");
+    expect(out).toContain("كلمات البحث الحقيقية من جوجل");
+    expect(out).toContain("جرد المسودات المعلقة");
+    expect(out).not.toMatch(/[A-Za-z]/);
+  });
+
+  it("drops a table name rather than reading it out", () => {
+    const out = ownerVoice("راجع sales_orders من فضلك");
+    expect(out).not.toContain("sales_orders");
+    expect(out).toContain("من فضلك");
+  });
 });
 
 describe("the tally the writer logs", () => {

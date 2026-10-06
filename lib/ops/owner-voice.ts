@@ -130,10 +130,17 @@ const WORDS: Record<string, string> = {
   contrast: "التباين",
   ratio: "نسبة",
   normal: "عادي",
+  sms: "رسالة نصية",
+  gateway: "بوابة",
+  integration: "تكامل",
+  insights: "رؤى",
+  live: "حي",
+  evolve: "يتطوّر",
 };
 
 const TOKEN = /[A-Za-z][A-Za-z0-9_.\-]*[A-Za-z0-9]|[A-Za-z]/g;
-const MACHINE_ID = /\b(?:qayyim|ops)_[a-z0-9_]+\b/gi;
+/** Any snake_case word is a machine identifier by shape — a tool id, a table, a column. */
+const MACHINE_ID = /\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/gi;
 const DIGITS = /(?<![A-Za-z0-9])[0-9]+(?![A-Za-z0-9])/g;
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
