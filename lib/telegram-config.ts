@@ -133,24 +133,34 @@ export async function sendTelegramMessage(
 
 /**
  * بعت لكل الحسابات المضافة — للإشعارات العامة (مستشار، مبيعات، عملاء)
+ * بيرجع عدد الحسابات اللي الرسالة وصلت فعلاً — صفر معناه إن ولا حد اتنبّه.
  */
 export async function broadcastTelegramMessage(
   text: string,
   options?: { silent?: boolean }
-): Promise<void> {
+): Promise<number> {
   const cfg = await getActiveTelegramConfig();
-  if (!cfg.botToken || !cfg.enabled) return;
+  if (!cfg.botToken || !cfg.enabled) return 0;
 
   const chats = cfg.allChats.length > 0
     ? cfg.allChats
     : cfg.chatId ? [{ id: "default", chatId: cfg.chatId, label: "", isDefault: true }] : [];
 
+  let landed = 0;
   for (const chat of chats) {
-    await _sendOne(cfg.botToken, chat.chatId, text, options?.silent ?? false).catch(() => {});
+    const delivered = await _sendOne(cfg.botToken, chat.chatId, text, options?.silent ?? false).catch(() => false);
+    if (delivered) landed += 1;
   }
+  return landed;
+}
+
+/** آخر أربع خانات: المحادثة بتتقال عشان تتعرف، وعنوان كامل مش بيتنطبع في السجلّات. */
+function chatTail(chatId: string): string {
+  return `…${String(chatId).slice(-4)}`;
 }
 
 async function _sendOne(token: string, chatId: string, text: string, silent: boolean): Promise<boolean> {
+  const where = chatTail(chatId);
   try {
     const res = await fetch(
       `https://api.telegram.org/bot${token}/sendMessage`,
@@ -167,15 +177,27 @@ async function _sendOne(token: string, chatId: string, text: string, silent: boo
       }
     );
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      console.error("[Telegram] Send failed to", chatId, ":", err);
+    /**
+     * The answer is read from the body, not from the status line. The Bot API answers `200` with
+     * `ok:false` inside it when it refuses a delivery — and a refusal counted as success stamps the
+     * sheet, silences the rule, and leaves the owner believing he was woken.
+     */
+    const body = (await res.json().catch(() => null)) as
+      | { ok?: boolean; description?: string; error_code?: number; result?: { message_id?: number } }
+      | null;
+    const messageId = Number(body?.result?.message_id);
+
+    if (!body?.ok || !Number.isFinite(messageId) || messageId <= 0) {
+      console.error(
+        `[Telegram] not delivered to ${where}: http ${res.status} · ${body?.description ?? "the messenger sent no message id"}`
+      );
       return false;
     }
 
+    console.log(`[Telegram] landed in ${where} · message ${messageId}`);
     return true;
   } catch (err) {
-    console.error("[Telegram] Send error:", err);
+    console.error(`[Telegram] the messenger did not answer for ${where}:`, err);
     return false;
   }
 }

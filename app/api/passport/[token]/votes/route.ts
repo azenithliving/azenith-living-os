@@ -18,7 +18,7 @@ import { looksLikePassportToken } from "@/lib/cad/passport";
 import { findSketchByToken, readVotes, recordVote, stampPulseSent, tallyVotes, cleanVoter } from "@/lib/cad/family-votes";
 import { countReturns } from "@/lib/cad/sheet-visits";
 import { heatOf, pulseFor, shouldPulse, type HeatSignals } from "@/lib/ops/lead-heat";
-import { sendTelegramMessage } from "@/lib/telegram-config";
+import { broadcastTelegramMessage } from "@/lib/telegram-config";
 
 export const dynamic = "force-dynamic";
 
@@ -98,12 +98,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const returns = found.sketch.pulseSentAt ? 0 : await countReturns(found.sketch.id);
   const signals: HeatSignals = { voters, hasSketch: found.sketch.hasPlan, returns };
   if (shouldPulse(signals, found.sketch.pulseSentAt)) {
-    const sent = await sendTelegramMessage(
+    /**
+     * Every admin chat the owner configured, not just the first one — the same rule the golden
+     * dossier already follows («فريق المبيعات كله لازم يشوف»). Sending to the default alone left a
+     * second account of his silent, which is what «مفيش حاجة جت على تليجرام» meant.
+     */
+    const landed = await broadcastTelegramMessage(
       pulseFor({ room: found.sketch.room, city: found.sketch.city, voters, returns, heat: heatOf(signals) })
     );
-    const stamped = sent ? await stampPulseSent(found.sketch.id) : false;
+    const stamped = landed > 0 ? await stampPulseSent(found.sketch.id) : false;
     console.log(
-      `[LeadPulse] sheet ${found.sketch.id}: voters ${voters}, returns ${returns}, heat ${heatOf(signals)}, telegram ${sent}, stamped ${stamped}`
+      `[LeadPulse] sheet ${found.sketch.id}: voters ${voters}, returns ${returns}, heat ${heatOf(signals)}, chats told ${landed}, stamped ${stamped}`
     );
   }
 

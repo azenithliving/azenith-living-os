@@ -37,10 +37,14 @@ vi.mock("@/lib/cad/sheet-visits", () => ({
   countReturns: async () => store.returns,
 }));
 
-const telegram = vi.hoisted(() => vi.fn(async () => true));
+/**
+ * The messenger, counted by chats it actually reached. The door stamps only above zero — a sheet
+ * stamped while every chat refused would silence the next real signal.
+ */
+const telegram = vi.hoisted(() => vi.fn(async () => 2));
 
 vi.mock("@/lib/telegram-config", () => ({
-  sendTelegramMessage: (text: string) => telegram(text),
+  broadcastTelegramMessage: (text: string) => telegram(text),
 }));
 
 const { POST } = await import("@/app/api/passport/[token]/votes/route");
@@ -99,11 +103,17 @@ describe("the second voter wakes the owner", () => {
     expect(telegram).not.toHaveBeenCalled();
   });
 
-  it("does not stamp a pulse the messenger could not send", async () => {
+  it("does not stamp a pulse no chat received", async () => {
     store.voters = ["أنا", "مراتي"];
-    telegram.mockImplementationOnce(async () => false);
+    telegram.mockImplementationOnce(async () => 0);
     await vote("مراتي");
     expect(store.stamped).toBe(false);
+  });
+
+  it("tells every admin chat, not only the first one", async () => {
+    store.voters = ["أنا", "مراتي"];
+    await vote("مراتي");
+    expect(telegram).toHaveBeenCalledTimes(1);
   });
 
   it("stamps the sheet once the owner was told", async () => {
