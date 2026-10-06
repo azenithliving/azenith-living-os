@@ -7,6 +7,7 @@ import {
   decisionRequest,
   findProposal,
   isExpired,
+  isPending,
   proposalStatusLabel,
   riskLabel,
   type ProposalRow,
@@ -39,7 +40,7 @@ export function ApprovalDecisionBlock({
     setError(null);
     (async () => {
       try {
-        const res = await fetch('/api/admin/agents/approval-queue');
+        const res = await fetch(`/api/admin/agents/approval-queue?id=${encodeURIComponent(approvalId)}`);
         const data = await res.json();
         if (!data?.success) throw new Error(data?.error || 'رد غير مفهوم');
         if (!cancelled) setRow(findProposal(data.approvals as ProposalRow[], approvalId));
@@ -103,7 +104,7 @@ export function ApprovalDecisionBlock({
 
       {row === null && !error && (
         <div className="text-[11px] text-white/60">
-          مفيش قرار معلّق بهذا الرقم — يبقى اتاخدت فيه قرار، أو الرسالة قديمة.
+          مفيش قرار بهذا الرقم — يبقى الرسالة قديمة أو اتعملها حاجة تانية.
         </div>
       )}
 
@@ -116,7 +117,12 @@ export function ApprovalDecisionBlock({
             {proposalStatusLabel(row.status)} · درجة الخطورة: {riskLabel(row.risk_level)}
           </div>
 
-          {isExpired(row) ? (
+          {!isPending(row) ? (
+            /* قرار اتاخد: يبقى سطر يقول إيه اللي حصل، مش أزرار ضايعة. */
+            <div data-approval-settled={row.status ?? 'unknown'} className="mt-2 text-[11px] text-emerald-300/90">
+              القرار ده اتقفل: {proposalStatusLabel(row.status)}.
+            </div>
+          ) : isExpired(row) ? (
             <div className="mt-2 text-[11px] text-amber-300/80">
               انتهى وقت هذا القرار. اطلب من السرب يعيد طرحه لو لسه مهم.
             </div>

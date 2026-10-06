@@ -9,6 +9,19 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const companyId = await resolveAdminCompanyId(searchParams.get('company_id'));
 
+    // One row by id, whatever its state: a message that was already answered must be able to say
+    // «اترفضت» instead of claiming the decision never existed. The pending list stays as it was.
+    const oneApproval = searchParams.get('id');
+    if (oneApproval) {
+      const { data: single, error: singleError } = await supabaseServer
+        .from('approval_requests')
+        .select('*')
+        .eq('id', oneApproval)
+        .maybeSingle();
+      if (singleError) throw singleError;
+      return NextResponse.json({ success: true, approvals: single ? [single] : [] });
+    }
+
     let query = supabaseServer
       .from('approval_requests')
       .select('*')

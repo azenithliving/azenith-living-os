@@ -112,3 +112,10 @@ const RISK_LABELS: Record<string, string> = {
 export function riskLabel(level?: string | null): string {
   return RISK_LABELS[(level || "").trim().toLowerCase()] || "غير مصنّفة";
 }
+
+/** The states that still need him. Anything else is history, and history gets a label, not buttons. */
+const WAITING = new Set(["pending"]);
+
+export function isPending(proposal: ProposalRow | null | undefined): boolean {
+  return Boolean(proposal && WAITING.has((proposal.status || "").trim().toLowerCase()));
+}
