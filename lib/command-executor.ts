@@ -1141,7 +1141,10 @@ async function logCommandToImmutableTable(
   result: CommandResult
 ) {
   const logEntry = {
-    user_id: context.userId,
+    // The desk belongs to a signed-in admin. The natural brain's fallback id is a synthetic
+    // all-zeros UUID that exists in no user table, and the foreign key here rejects it outright —
+    // so an unattributed command is written with no owner rather than lost.
+    user_id: context.userId && !/^0{8}-0{4}-0{4}-0{4}-0{12}$/.test(context.userId) ? context.userId : null,
     command_text: commandText,
     signature: context.userEmail || null,
     executor_ip: null,
@@ -1196,6 +1199,10 @@ async function logCommandToImmutableTable(
     fs.writeFileSync(logFile, JSON.stringify(logs, null, 2));
     console.log("[CommandExecutor] Command logged to local file:", commandText.split(" ")[0]);
   } catch (e) {
-    console.error("[CommandExecutor] Exception logging to local file:", e);
+    // A serverless function has a read-only code directory, so this backup cannot exist there. The
+    // record is printed as one greppable audit line instead of vanishing behind an exception: the
+    // platform log is then the trail, and nobody has to guess whether the backup ever worked.
+    console.warn("[CommandExecutor] local backup unavailable:", (e as Error)?.message);
+    console.log(`[CommandAudit] ${JSON.stringify(logEntry)}`);
   }
 }

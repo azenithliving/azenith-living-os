@@ -1,0 +1,16 @@
+-- The admin command audit desk could not be written to at all.
+--
+-- `no_update_allowed` was created as a table-level `CHECK (false) NO INHERIT`. A table check is
+-- evaluated on every INSERT as well as every UPDATE, so no row could ever land here: measured
+-- 2026-10-06 the table held zero rows since the day it was created, the production log repeated
+-- «violates check constraint "no_update_allowed"» on every admin command, and the statistics command
+-- could only ever answer «مفيش أمر متسجّل عندك» — a capability that looked alive and was structurally
+-- dead. The owner's word to drop it was given the same day.
+--
+-- Immutability does not live in this constraint and never did. What actually protects the rows is
+-- still in place and untouched: the row-level policy «Prevent updates on command log» refuses UPDATE
+-- with USING false, there is no DELETE policy at all so row level security refuses DELETE for every
+-- non-privileged role, and the insert policy stays as it was. Dropping this check removes a bug, not
+-- a protection.
+--SPLIT--
+alter table public.immutable_command_log drop constraint if exists no_update_allowed;

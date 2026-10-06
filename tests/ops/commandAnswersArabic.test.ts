@@ -14,6 +14,7 @@ const world = vi.hoisted(() => ({
   rows: [] as Array<{ status: string; executed_at: string }>,
   readError: null as { message: string } | null,
   delivered: true,
+  inserts: [] as any[],
 }));
 
 vi.mock("@/lib/telegram-notify", () => ({
@@ -30,6 +31,10 @@ const context = {
           gte: async () => ({ data: world.rows, error: world.readError }),
         }),
       }),
+      insert: async (row: any) => {
+        world.inserts.push(row);
+        return { error: null };
+      },
     }),
   },
   userId: "u-1",
@@ -42,6 +47,7 @@ beforeEach(() => {
   world.rows = [];
   world.readError = null;
   world.delivered = true;
+  world.inserts = [];
 });
 
 const latin = (text: string) => text.match(/[A-Za-z]/g) ?? [];
@@ -157,5 +163,36 @@ describe("a command that cannot do the thing says so", () => {
     expect(res.message).toMatch(/\p{Script=Arabic}/u);
     expect(res.message).not.toMatch(/cleared|success/i);
     expect(latin(res.message)).toEqual([]);
+  });
+});
+
+/**
+ * The audit desk itself. Measured 2026-10-06: `no_update_allowed` was a table-level `CHECK (false)`,
+ * which an INSERT must also satisfy — so the table had never held a row, every command's audit write
+ * failed in production, and the statistics command could only ever answer «مفيش أمر متسجّل».
+ */
+describe("the audit row can actually be written", () => {
+  const sql = readFileSync("supabase/migrations/20261006_c_command_log_writable.sql", "utf8");
+
+  it("drops the impossible check and nothing that protects the rows", () => {
+    expect(sql).toContain("drop constraint if exists no_update_allowed");
+    expect(sql).not.toMatch(/drop policy/i);
+    expect(sql).not.toMatch(/delete from/i);
+  });
+
+  it("does not send a synthetic user id the foreign key would reject", async () => {
+    const { executeCommand } = await import("@/lib/command-executor");
+    const synthetic = { ...context, userId: "00000000-0000-0000-0000-000000000000" } as never;
+    await executeCommand("show_stats 7", synthetic);
+    const row = world.inserts.at(-1);
+    expect(row).toBeTruthy();
+    expect(row.user_id).toBeNull();
+    expect(row.status).toBe("executed");
+  });
+
+  it("keeps a real admin's id on the row", async () => {
+    const { executeCommand } = await import("@/lib/command-executor");
+    await executeCommand("show_stats 7", context);
+    expect(world.inserts.at(-1).user_id).toBe("u-1");
   });
 });
