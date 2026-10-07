@@ -8,6 +8,7 @@ import Link from "next/link";
 import { buildWhatsAppUrl } from "@/lib/conversion-engine";
 import type { RuntimeConfig } from "@/lib/runtime-config";
 import useSessionStore from "@/stores/useSessionStore";
+import { OwnSheetCard } from "@/components/cad/OwnSheetCard";
 
 type RequestPageClientProps = {
   runtimeConfig: RuntimeConfig;
@@ -722,6 +723,11 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
               )}
             </div>
           </form>
+        </section>
+
+        {/* ورقته من إيده: العنوان السرّي كان بيطلع من مكتب المالك بس، فده باب العميل لنفسه */}
+        <section className="mx-auto mt-8 max-w-3xl px-4">
+          <OwnSheetCard phone={phone} isRTL={isRTL} />
         </section>
 
         {/* Right Side: Dynamic Project Roadmap & Curation */}

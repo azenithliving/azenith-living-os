@@ -166,6 +166,8 @@ export const SENSITIVE_PATHS = [
    * inside this ceiling for a family of five on one connection.
    */
   "/api/passport",
+  // A customer filing his own paper is an anonymous write: same ceiling as the sheet doors.
+  "/api/sheet",
 ];
 
 /**
