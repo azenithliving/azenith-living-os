@@ -33,7 +33,8 @@ describe("the claim decides what may be written", () => {
     const claim = planClaim({ phone: "01001234567", city: "زايد" }, owned);
     expect(claim.refusal).toBe(null);
     expect(claim.write.customer_key).toBeUndefined();
-    expect(claim.write.customer_city).toBe("زايد");
+    // «زايد» is his short form; the record keeps the store's own spelling so the two are one area.
+    expect(claim.write.customer_city).toBe("الشيخ زايد");
   });
 
   it("lets a claimed paper add its area without repeating the number", () => {

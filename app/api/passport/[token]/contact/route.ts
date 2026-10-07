@@ -15,19 +15,26 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { looksLikePassportToken } from "@/lib/cad/passport";
 import { offerLine, planClaim } from "@/lib/cad/contact";
+import { orderForPaper } from "@/lib/cad/area-taste";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
 
-type Paper = { id: number; customer_key: string | null; customer_city: string | null; room: string | null };
+type Paper = {
+  id: number;
+  customer_key: string | null;
+  customer_city: string | null;
+  room: string | null;
+  colour_picks: { hex?: string | null }[];
+};
 
 async function findByToken(token: string): Promise<Paper | null> {
   const supabase = getSupabaseAdminClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,customer_key,customer_city,room")
+    .select("id,customer_key,customer_city,room,colour_picks")
     .eq("token", token)
     .maybeSingle();
   if (error || !data) return null;
@@ -36,6 +43,7 @@ async function findByToken(token: string): Promise<Paper | null> {
     customer_key: data.customer_key ? String(data.customer_key) : null,
     customer_city: data.customer_city ? String(data.customer_city) : null,
     room: data.room ? String(data.room) : null,
+    colour_picks: Array.isArray(data.colour_picks) ? data.colour_picks : [],
   };
 }
 
@@ -83,10 +91,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   console.log(`[PassportContact] paper ${paper.id}: asked to write ${wrote}, the table now holds ${kept.join("+") || "nothing"}`);
 
   const picks = await pickSheetImages(claim.roomFor, 3);
+  // The three pictures he is about to receive are ordered by the same rule his sheet uses, and the
+  // answer names which taste ordered them — the desk must not promise «chosen for your area» on a
+  // quality list.
+  const ordered = await orderForPaper(picks.images, {
+    id: paper.id,
+    city: stored?.customer_city ?? null,
+    picks: stored?.colour_picks ?? [],
+  });
   return NextResponse.json({
     success: true,
-    line: offerLine(picks.images.length, picks.matched),
-    picks,
+    line: offerLine(ordered.images.length, picks.matched),
+    picks: { ...picks, images: ordered.images },
+    taste: ordered.taste,
     stored: {
       hasPhone: Boolean(stored?.customer_key),
       city: stored?.customer_city ?? null,

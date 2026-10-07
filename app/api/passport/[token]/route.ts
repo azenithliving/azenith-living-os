@@ -27,7 +27,7 @@ import { recordVisit } from "@/lib/cad/sheet-visits";
 import { roomTypeName } from "@/lib/cad/room-labels";
 import { planFromPaper, type Plan } from "@/lib/cad/plan";
 import { matrixFor, type ColourPick } from "@/lib/cad/colours";
-import { rankByPicks } from "@/lib/cad/palette";
+import { orderForPaper } from "@/lib/cad/area-taste";
 
 export const dynamic = "force-dynamic";
 
@@ -118,10 +118,13 @@ async function sheetPayload(row: Row) {
   // because «chosen for your room» has to be true before it is printed.
   const picks = await pickSheetImages(row.room, 20);
   const chosen = Array.isArray(row.colour_picks) ? row.colour_picks : [];
+  // His own colours first, then his area's measured taste, then the bank's quality — and the line
+  // says which of the three ordered them, so a quality list is never shown as a personal one.
+  const ordered = await orderForPaper(picks.images, { id: row.id, city: row.customer_city, picks: chosen });
   return {
     sheet: publicSheet(row, Boolean(row.customer_key), { matrix: matrixFor(picks.images), picks: chosen }),
-    // His own picks re-order the bank's list, so the first thing he sees is closest to what he said.
-    images: rankByPicks(picks.images, chosen.map((pick) => pick.hex)),
+    images: ordered.images,
+    taste: ordered.taste,
     images_room_type: picks.roomType,
     images_for_his_room: picks.matched,
   };

@@ -7,6 +7,7 @@ import { linkFromPhone } from '@/lib/cad/sketch-link';
 import { imageKeyOf } from '@/lib/cad/vote-keys';
 import { cleanDeviceKey, newDeviceKey } from '@/lib/cad/visit-keys';
 import { ROOM_CHOICES } from '@/lib/cad/room-labels';
+import { AREA_CHIPS } from '@/lib/regions';
 import { DRAWABLE_SHAPES, type Plan, type PlanOpening, type PlanShape } from '@/lib/cad/plan';
 import RoomPlan from '@/components/cad/RoomPlan';
 import ColourMatrix, { type MatrixEntry, type Pick as ColourPick } from '@/components/cad/ColourMatrix';
@@ -53,6 +54,9 @@ type SheetImage = {
   near?: boolean;
 };
 
+/** Which taste the store's pictures were ordered by, said in words the customer reads. */
+type RegionTaste = { source: string; line: string; area: string | null; papers: number; colours: string[] };
+
 const STYLE_LABEL: Record<string, string> = { modern: 'مودرن', classic: 'كلاسيك', minimal: 'مينيمال', luxury: 'فخم' };
 
 export default function PassportPage() {
@@ -72,6 +76,9 @@ export default function PassportPage() {
   // The contact moment: his area, the room type when the paper never named one, and what the
   // bank actually sent back.
   const [city, setCity] = useState('');
+  const [taste, setTaste] = useState<RegionTaste | null>(null);
+  // Once he has started typing his area, a poll must not overwrite his letters with the stored one.
+  const cityTouchedRef = useRef(false);
   const [roomChoice, setRoomChoice] = useState('');
   const [offer, setOffer] = useState<{ line: string; picks: SheetImage[]; matched: boolean } | null>(null);
   const [sending, setSending] = useState(false);
@@ -116,6 +123,10 @@ export default function PassportPage() {
           setSheet(data.sheet);
           setImages(Array.isArray(data.images) ? data.images : []);
           setImagesForHisRoom(Boolean(data.images_for_his_room));
+          setTaste(data.taste ?? null);
+          // His recorded area is the box's starting word, so a paper that already knows it does not
+          // make him say it again.
+          if (!cityTouchedRef.current) setCity(String(data.sheet?.contact?.city ?? ''));
         } else setProblem(data?.error || 'الورقة ما جاتش');
       })
       .catch(() => setProblem('المتجر ما ردّش'));
@@ -250,6 +261,7 @@ export default function PassportPage() {
         return;
       }
       setOffer({ line: String(data.line ?? ''), picks: Array.isArray(data.picks?.images) ? data.picks.images : [], matched: Boolean(data.picks?.matched) });
+      setTaste(data.taste ?? null);
     } catch {
       setNews('المتجر ما ردّش — جرّب تاني.');
     } finally {
@@ -258,6 +270,35 @@ export default function PassportPage() {
   }, [city, phone, roomChoice, sending, token]);
 
   const confirmed = Boolean(sheet?.confirmed_at);
+
+  /**
+   * The store's own areas, offered as taps before he types a letter — the free box stays, because
+   * a customer in a district the map does not hold still gets his own word into the record rather
+   * than a pick he never said.
+   */
+  const areaChips = (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {AREA_CHIPS.map((area) => (
+        <button
+          key={area}
+          type="button"
+          onClick={() => {
+            cityTouchedRef.current = true;
+            setCity(city.trim() === area ? '' : area);
+          }}
+          data-area-chip={area}
+          data-area-chip-selected={city.trim() === area ? '1' : '0'}
+          className={`rounded-full border px-3 py-1 text-[11px] transition-colors ${
+            city.trim() === area
+              ? 'border-amber-500/50 bg-amber-500/20 text-amber-100'
+              : 'border-white/10 bg-white/5 text-white/60'
+          }`}
+        >
+          {area}
+        </button>
+      ))}
+    </div>
+  );
 
   const applyVotes = useCallback(
     (data: { tallies?: Array<{ image_key: string; likes: number; voters: string[] }>; people?: string[] }) => {
@@ -526,7 +567,10 @@ export default function PassportPage() {
                   <div className="mt-2 flex gap-2">
                     <input
                       value={city}
-                      onChange={(e) => setCity(e.target.value)}
+                      onChange={(e) => {
+                        cityTouchedRef.current = true;
+                        setCity(e.target.value);
+                      }}
                       placeholder="منطقتك"
                       data-contact-city
                       className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[13px] text-white placeholder-white/25 focus:border-amber-500/40 focus:outline-none"
@@ -541,6 +585,7 @@ export default function PassportPage() {
                     </button>
                   </div>
                 )}
+                {!sheet.contact.city && areaChips}
               </section>
             ) : (
               <section className="mt-4 rounded-2xl border border-amber-500/25 bg-amber-500/[0.06] p-4" data-contact-offer>
@@ -560,11 +605,15 @@ export default function PassportPage() {
                 />
                 <input
                   value={city}
-                  onChange={(e) => setCity(e.target.value)}
+                  onChange={(e) => {
+                    cityTouchedRef.current = true;
+                    setCity(e.target.value);
+                  }}
                   placeholder="منطقتك — زي التجمع أو زايد أو الإسكندرية"
                   data-contact-city
                   className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[13px] text-white placeholder-white/25 focus:border-amber-500/40 focus:outline-none"
                 />
+                {!sheet?.contact?.city && areaChips}
                 {!sheet?.room && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {ROOM_CHOICES.map((choice) => (
@@ -617,6 +666,11 @@ export default function PassportPage() {
                 <p className="mt-1 text-[11px] leading-relaxed text-white/45">
                   افتحوا نفس الرابط على كل التليفونات، كل واحد يكتب اسمه، واللي يعجبه يضغط. اللي بتختاروه يوصل لشيت العميل عند المتجر.
                 </p>
+                {taste?.line && (
+                  <p className="mt-1 text-[11px] leading-relaxed text-amber-200/70" data-region-line={taste.source}>
+                    {taste.line}
+                  </p>
+                )}
                 <label className="mt-3 block">
                   <span className="text-[11px] text-white/50">اسمك أو علاقتك في البيت</span>
                   <input

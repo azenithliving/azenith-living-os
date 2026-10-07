@@ -13,6 +13,7 @@
  * inventing it: an invented address is a customer standing in front of a door that is not there.
  */
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { coverageSentence } from "@/lib/regions";
 
 export type StoreFacts = {
   /** The store's WhatsApp as a local Egyptian number, digits only, without the country code. */
@@ -89,11 +90,10 @@ export async function readStoreFacts(): Promise<StoreFacts> {
 }
 
 /**
- * The regions the store's own shipped voice names as its own, condensed to one breath.
- * Copied from the geography block the advisor already carries, not invented here.
+ * The regions the store works in, spoken from the one list the store keeps (`lib/regions.ts`).
+ * Restating them here is how the advisor's sentence and the customer's area chips drifted apart.
  */
-const REGIONS_AR =
-  "القاهرة الكبرى (التجمع والرحاب ومدينتي والشروق ومدينة نصر ومصر الجديدة والمعادي والزمالك)، والجيزة (أكتوبر والشيخ زايد والهرم والمهندسين)، والساحل الشمالي والعين السخنة، والإسكندرية وباقي محافظات مصر";
+const REGIONS_AR = `${coverageSentence()}، وباقي محافظات مصر`;
 
 /**
  * The store's own answer to «where do you work and who executes», built from its record.

@@ -1,4 +1,5 @@
 import { linkFromPhone } from "./sketch-link";
+import { areaLabel } from "@/lib/regions";
 
 /**
  * The contact moment: the customer has just been shown that the store can send him three
@@ -27,7 +28,7 @@ export type Claim = {
   roomFor: string | null;
 };
 
-/** His area in his words: trimmed, one line, capped. No list is imposed on him. */
+/** His area as one line of his own words: trimmed, capped. No list is forced on him. */
 export function cleanCity(value: unknown): string {
   return String(value ?? "")
     .replace(/[\r\n\t]+/g, " ")
@@ -44,13 +45,15 @@ export function planClaim(input: ClaimInput, paper: PaperFacts): Claim {
     return { refusal: "الرقم ده مش موبايل مصري. سيبه فاضي لو مش عايز تسيب رقم.", write: {}, roomFor: paper.room ?? null };
   }
 
-  const city = cleanCity(input.city);
+  const city = areaLabel(cleanCity(input.city));
   const room = cleanCity(input.room);
   const write: Claim["write"] = {};
 
   // His digits are the strongest link there is, and the owner's link is never overwritten:
   // a second phone must not steal a paper someone else already claimed.
   if (phone && !paper.customer_key) write.customer_key = phone.key;
+  // Written in the map's spelling when his words reach it, so «زايد» and «الشيخ زايد» are one area
+  // and not two silos that no ranking can add up.
   if (city && !paper.customer_city) write.customer_city = city;
   if (room && !paper.room) write.room = room;
 
