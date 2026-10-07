@@ -19,7 +19,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-import { applyCustomerWitness, type SketchDimension } from "@/lib/cad/paper-sketch-parser";
+import { applyCustomerWitness, readerAbsent, type SketchDimension, type Witness } from "@/lib/cad/paper-sketch-parser";
 import { linkFromPhone } from "@/lib/cad/sketch-link";
 import { freezeHash, looksLikePassportToken, stillSealed } from "@/lib/cad/passport";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
@@ -189,6 +189,45 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const withCustomer = applyCustomerWitness(Array.isArray(row.dimensions) ? row.dimensions : [], typed);
   const confirmedCount = withCustomer.filter((d) => d.confirmed).length;
+
+  // Measured 2026-10-07: the cloud reader refused on the published store, so the paper carried no
+  // numbers at all and his own sheet could never seal. An absent reading is not a disagreement —
+  // when there is nothing to compare against, the customer's own digits are the witness, and the
+  // record says so plainly instead of claiming two witnesses agreed.
+  if (confirmedCount === 0 && readerAbsent(row)) {
+    const hisOwn: SketchDimension[] = typed.map((m: number) => ({
+      label: "كتبها العميل",
+      meters: m,
+      confirmed: true,
+      confirmedBy: ["customer"] as Witness[],
+    }));
+    const built = planFromPaper({ dimensions: hisOwn, openings: row.openings ?? [], shape: null });
+    const { error: sealError } = await supabase
+      .from("room_sketches")
+      .update({
+        dimensions: hisOwn,
+        customer_dimensions: typed,
+        confirmed_count: hisOwn.length,
+        confirmed_at: new Date().toISOString(),
+        frozen_hash: freezeHash(hisOwn),
+        plan: built.plan,
+        area_sqm: built.plan?.complete ? built.plan.areaSqm : row.area_sqm,
+        ok: true,
+        failure: null,
+      })
+      .eq("token", token);
+    if (sealError) {
+      return NextResponse.json({ success: false, error: "السجل رفض التأكيد" }, { status: 500 });
+    }
+    return NextResponse.json({
+      success: true,
+      matched: true,
+      sealedBy: "customer-only",
+      sheet: (await sheetPayload({ ...row, dimensions: hisOwn, confirmed_at: new Date().toISOString() })).sheet,
+      message: "الورقة اتقفلت على مقاساتك إنت — القارئ الذكي كان مرفوض، فمفيش شاهد تاني يقارن بيه",
+      error: null,
+    });
+  }
 
   if (confirmedCount === 0) {
     return NextResponse.json({

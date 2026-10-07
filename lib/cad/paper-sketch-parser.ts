@@ -387,3 +387,14 @@ export function applyCustomerWitness<
     return { ...dimension, confirmed: by.length > 0, confirmedBy: by };
   });
 }
+
+/**
+ * Was there no reading at all, as opposed to a reading that disagrees?
+ *
+ * Measured 2026-10-07: the cloud reader refused on the published store, so a paper arrived with zero
+ * numbers and its owner could never seal his own sheet. Refusing to seal a disagreement is the rule;
+ * refusing to seal an absence punishes the customer for a witness that never showed up.
+ */
+export function readerAbsent(row: { ok?: boolean | null; failure?: string | null } | null): boolean {
+  return row?.ok === false && /مرفوض|مش مفهومة/.test(String(row?.failure ?? ''));
+}
