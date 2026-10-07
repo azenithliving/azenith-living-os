@@ -1,7 +1,7 @@
 "use client";
 
 import { arabicNumerals } from "@/lib/arabic";
-
+import { parseHoursSentence, type HoursSchedule } from "@/lib/hours-sentence";
 /**
  * When the store is open, for the surfaces that must say it out loud (the qualification form and
  * the elite page).
@@ -22,6 +22,20 @@ const OFFICE_CONFIG = {
   timezone: "Africa/Cairo",
 };
 
+/**
+ * The schedule a caller was given by the store's own record. Every function here takes it as an
+ * optional last argument and falls back to `OFFICE_CONFIG` when the record is silent — a page that
+ * could not read the row still has to say something, and it says the ordered default.
+ * It is the same shape the sentence parser produces, so one type owns it.
+ */
+export type OfficeHours = HoursSchedule;
+
+const resolveHours = (override?: OfficeHours | null): Required<OfficeHours> => ({
+  openHour: override?.openHour ?? OFFICE_CONFIG.openHour,
+  closeHour: override?.closeHour ?? OFFICE_CONFIG.closeHour,
+  holidayDay: override && override.holidayDay !== undefined ? override.holidayDay : OFFICE_CONFIG.holidayDay,
+});
+
 export type OfficeStatus = {
   isOpen: boolean;
   status: "open" | "closed" | "holiday";
@@ -38,41 +52,48 @@ export function getCairoTime(): Date {
 }
 
 /**
- * The one day this store does not work.
+ * The day the store does not work — Friday unless the record names another.
  */
-export function isFriday(date: Date = getCairoTime()): boolean {
-  return date.getDay() === OFFICE_CONFIG.holidayDay; // 5 = Friday
+export function isClosedDay(date: Date = getCairoTime(), override?: OfficeHours | null): boolean {
+  return date.getDay() === resolveHours(override).holidayDay;
+}
+
+/** Kept because callers and guards speak of it by name. */
+export function isFriday(date: Date = getCairoTime(), override?: OfficeHours | null): boolean {
+  return isClosedDay(date, override);
 }
 
 /**
- * Check if current time is within working hours
+ * Is this moment inside the working window?
  */
-export function isWithinWorkingHours(date: Date = getCairoTime()): boolean {
+export function isWithinWorkingHours(date: Date = getCairoTime(), override?: OfficeHours | null): boolean {
+  const { openHour, closeHour } = resolveHours(override);
   const hour = date.getHours();
-  return hour >= OFFICE_CONFIG.openHour && hour < OFFICE_CONFIG.closeHour;
+  return hour >= openHour && hour < closeHour;
 }
 
 /**
  * The next moment the store opens: today when that hour is still ahead, otherwise the next
- * working day. Every day works — Friday is the only one this store closes.
+ * working day. Every day works except the one the record closes — Friday by default.
  */
-export function getNextOpenTime(fromDate: Date = getCairoTime()): Date {
+export function getNextOpenTime(fromDate: Date = getCairoTime(), override?: OfficeHours | null): Date {
+  const { openHour } = resolveHours(override);
   const nextOpen = new Date(fromDate);
 
-  if (isFriday(nextOpen)) {
+  if (isClosedDay(nextOpen, override)) {
     nextOpen.setDate(nextOpen.getDate() + 1);
-    nextOpen.setHours(OFFICE_CONFIG.openHour, 0, 0, 0);
+    nextOpen.setHours(openHour, 0, 0, 0);
     return nextOpen;
   }
 
-  if (nextOpen.getHours() < OFFICE_CONFIG.openHour) {
-    nextOpen.setHours(OFFICE_CONFIG.openHour, 0, 0, 0);
+  if (nextOpen.getHours() < openHour) {
+    nextOpen.setHours(openHour, 0, 0, 0);
     return nextOpen;
   }
 
   nextOpen.setDate(nextOpen.getDate() + 1);
-  if (isFriday(nextOpen)) nextOpen.setDate(nextOpen.getDate() + 1);
-  nextOpen.setHours(OFFICE_CONFIG.openHour, 0, 0, 0);
+  if (isClosedDay(nextOpen, override)) nextOpen.setDate(nextOpen.getDate() + 1);
+  nextOpen.setHours(openHour, 0, 0, 0);
   return nextOpen;
 }
 
@@ -94,51 +115,43 @@ export function formatTimeUntil(ms: number): string {
  */
 
 /** The hour the store opens, in the words its own sentences quote. */
-function openHourLabel(): string {
-  return clockLabel(OFFICE_CONFIG.openHour);
-}
-
-/** The hour the store closes, in the words its own sentences quote. */
-function closeHourLabel(): string {
-  return clockLabel(OFFICE_CONFIG.closeHour);
-}
-
 function clockLabel(hour24: number): string {
   const clock = ((hour24 + 11) % 12) + 1;
   return `${clock} ${hour24 < 12 ? "AM" : "PM"}`;
 }
 
-export function getOfficeStatus(): OfficeStatus {
+const DAY_NAMES_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+export function getOfficeStatus(override?: OfficeHours | null): OfficeStatus {
+  const { openHour, closeHour, holidayDay } = resolveHours(override);
   const now = getCairoTime();
-  const isHoliday = isFriday(now);
-  const isOpen = !isHoliday && isWithinWorkingHours(now);
-  
-  const nextOpenDate = getNextOpenTime(now);
+  const isHoliday = holidayDay !== null && now.getDay() === holidayDay;
+  const isOpen = !isHoliday && isWithinWorkingHours(now, override);
+
+  const nextOpenDate = getNextOpenTime(now, override);
   const timeUntilOpen = nextOpenDate.getTime() - now.getTime();
-  
+  const nextDay = DAY_NAMES_EN[nextOpenDate.getDay()] ?? "the next working day";
+
   let message: string;
   let status: OfficeStatus["status"];
-  
+
   if (isHoliday) {
     status = "holiday";
-    const daysUntil = nextOpenDate.getDay() === 6 ? "Saturday" : 
-                      nextOpenDate.getDay() === 0 ? "Sunday" : "Monday";
-    message = `Our consultants are observing Friday. We will review your brief as a priority at ${openHourLabel()} on ${daysUntil}.`;
+    message = `Our consultants are observing ${DAY_NAMES_EN[holidayDay ?? 5]}. We will review your brief as a priority at ${clockLabel(openHour)} on ${nextDay}.`;
   } else if (!isOpen) {
     status = "closed";
-    if (now.getHours() < OFFICE_CONFIG.openHour) {
+    if (now.getHours() < openHour) {
       const timeUntil = formatTimeUntil(timeUntilOpen);
       message = `Our consultants are currently preparing masterpieces. We open in ${timeUntil}.`;
     } else {
-      const daysUntil = nextOpenDate.toLocaleDateString("en-US", { weekday: "long" });
-      message = `Our consultants have concluded for the day. We will review your brief as a priority at ${openHourLabel()} on ${daysUntil}.`;
+      message = `Our consultants have concluded for the day. We will review your brief as a priority at ${clockLabel(openHour)} on ${nextDay}.`;
     }
   } else {
     status = "open";
-    const hoursRemaining = OFFICE_CONFIG.closeHour - now.getHours();
-    message = `Our consultants are available until ${closeHourLabel()} Cairo time (${hoursRemaining} hour${hoursRemaining > 1 ? "s" : ""} remaining).`;
+    const hoursRemaining = closeHour - now.getHours();
+    message = `Our consultants are available until ${clockLabel(closeHour)} Cairo time (${hoursRemaining} hour${hoursRemaining > 1 ? "s" : ""} remaining).`;
   }
-  
+
   return {
     isOpen,
     status,
@@ -151,13 +164,33 @@ export function getOfficeStatus(): OfficeStatus {
 /**
  * React hook for real-time office status
  */
-export function useOfficeStatus(): OfficeStatus {
-  if (typeof window === "undefined") {
-    return getOfficeStatus();
+export function useOfficeStatus(override?: OfficeHours | null): OfficeStatus {
+  return getOfficeStatus(override);
+}
+
+/**
+ * The schedule as the store's own record states it, read once by a surface that has to compute one.
+ *
+ * Null is an honest answer, not a failure to handle: no row, an unreadable door, or a sentence this
+ * parser refuses to guess at, and the caller keeps the ordered default. The reason is logged, because
+ * a silent null is how two owners of one fact disagree without anyone noticing.
+ */
+export async function fetchRecordedHours(): Promise<OfficeHours | null> {
+  try {
+    const res = await fetch("/api/cms/public-config", { cache: "no-store" });
+    if (!res.ok) {
+      console.warn(`[OfficeHours] الباب رد بـ ${res.status} — بفضّل للرقم المأمور`);
+      return null;
+    }
+    const body = (await res.json()) as { config?: { workingHours?: string | null } | null };
+    const sentence = body?.config?.workingHours;
+    const parsed = parseHoursSentence(sentence);
+    if (!parsed) console.warn("[OfficeHours] سطر المواعيد مقروءش أو مش مفهوم — بفضّل للرقم المأمور");
+    return parsed;
+  } catch (err) {
+    console.warn("[OfficeHours] الميعاد المسجل مقروءش:", String(err).slice(0, 80));
+    return null;
   }
-  
-  // For SSR compatibility, return initial status
-  return getOfficeStatus();
 }
 
 /**

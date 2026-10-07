@@ -9,7 +9,7 @@ import { EliteIntelligenceForm, FormData, LeadQualification } from "@/components
 import { AestheticAdvisor, AestheticAdvice } from "@/components/elite/AestheticAdvisor";
 import { InvestmentBrackets, InvestmentTier } from "@/components/elite/InvestmentBrackets";
 import { LanguageSwitcher } from "@/components/elite/LanguageSwitcher";
-import { getOfficeStatus, formatNextOpening, formatNextOpeningAr, OfficeStatus } from "@/lib/office-hours";
+import { getOfficeStatus, fetchRecordedHours, formatNextOpening, formatNextOpeningAr, type OfficeHours, type OfficeStatus } from "@/lib/office-hours";
 import useSessionStore from "@/stores/useSessionStore";
 import { getViewedImageUrls } from "@/lib/image-tracking";
 
@@ -52,9 +52,18 @@ function EliteIntelligenceContent() {
 
   // Initialize
   useEffect(() => {
-    setOfficeStatus(getOfficeStatus());
+    let cancelled = false;
+    let recorded: OfficeHours | null = null;
+    const refresh = () => setOfficeStatus(getOfficeStatus(recorded));
+    refresh();
+    // The schedule comes from the store's own record; the ordered default stays until it answers.
+    void fetchRecordedHours().then((hours) => {
+      if (cancelled || !hours) return;
+      recorded = hours;
+      refresh();
+    });
     setViewedImages(getViewedImageUrls());
-    
+
     // Detect language preference from URL or browser
     const langParam = searchParams?.get("lang") as Language | undefined;
     if (langParam === "ar" || langParam === "en") {
@@ -63,8 +72,11 @@ function EliteIntelligenceContent() {
       setLanguage("ar");
     }
 
-    const interval = setInterval(() => setOfficeStatus(getOfficeStatus()), 60000);
-    return () => clearInterval(interval);
+    const interval = setInterval(refresh, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [searchParams]);
 
   const handleFormComplete = async (data: FormData & { qualification: LeadQualification }) => {

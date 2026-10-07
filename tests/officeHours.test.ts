@@ -7,6 +7,7 @@ import {
   formatNextOpeningAr,
   type OfficeStatus,
 } from "@/lib/office-hours";
+import { parseHoursSentence } from "@/lib/hours-sentence";
 
 /**
  * The owner's ordered hours, pinned: every day from 9 in the morning to 8 at night, Friday closed.
@@ -76,5 +77,34 @@ describe("the store's working hours as the owner ordered them", () => {
     expect(line).toContain(`الساعة ${String.fromCodePoint(0x0660 + 9)}`);
     expect(line).toContain("صباحاً");
     expect(line).not.toMatch(/[A-Za-z]/);
+  });
+
+  it("lets the store's own record drive the arithmetic", () => {
+    // Same moment, two sentences: the answer must follow the record, not the constant in this file.
+    const tenToSix = parseHoursSentence("مواعيد العمل: كل أيام الأسبوع من ١٠ صباحًا حتى ٦ مساءً، ما عدا الجمعة.");
+    const nineToEight = parseHoursSentence("مواعيد العمل: كل أيام الأسبوع من ٩ صباحًا حتى ٨ مساءً، ما عدا الجمعة.");
+    expect(tenToSix).not.toBeNull();
+    expect(nineToEight).not.toBeNull();
+
+    const earlyMorning = at(2026, 10, 8, 9); // a Thursday at nine
+    expect(isWithinWorkingHours(earlyMorning, nineToEight)).toBe(true);
+    expect(isWithinWorkingHours(earlyMorning, tenToSix)).toBe(false);
+    expect(isWithinWorkingHours(earlyMorning)).toBe(true); // no record → the ordered default
+
+    const lateEvening = at(2026, 10, 8, 19);
+    expect(isWithinWorkingHours(lateEvening, nineToEight)).toBe(true);
+    expect(isWithinWorkingHours(lateEvening, tenToSix)).toBe(false);
+
+    // A record that closes Saturday moves the next opening; the default does not know that day.
+    const saturdayClosed = parseHoursSentence("من ٩ صباحًا حتى ٨ مساءً، ما عدا السبت.");
+    const saturdayDawn = at(2026, 10, 10, 6); // before the store opens, so the answer is the same day
+    expect(getNextOpenTime(saturdayDawn, saturdayClosed).getDay()).toBe(0); // Sunday
+    expect(getNextOpenTime(saturdayDawn, saturdayClosed).getHours()).toBe(9);
+    expect(getNextOpenTime(saturdayDawn).getDay()).toBe(6); // Saturday is a working day by default
+    expect(getNextOpenTime(saturdayDawn).getHours()).toBe(9);
+
+    // While the store is standing open, «the next opening» means tomorrow — both readings agree.
+    expect(getNextOpenTime(at(2026, 10, 10, 12)).getDay()).toBe(0);
+    expect(getNextOpenTime(at(2026, 10, 10, 12)).getHours()).toBe(9);
   });
 });

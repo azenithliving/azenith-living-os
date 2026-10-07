@@ -38,27 +38,49 @@ export function cleanSectionName(name: string): string {
     .trim();
 }
 
+/**
+ * The hours sentence the owner wrote, newest first — the only reader of it in the store.
+ *
+ * The advisor quotes this row, and the surfaces that compute a schedule (is the office open? when
+ * does it next open?) must obey the same row rather than restating its numbers in code. One reader,
+ * so the two can never disagree again.
+ */
+export async function readHoursSentence(): Promise<string | null> {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from("consultant_learnings")
+      .select("instruction")
+      .like("instruction", `${HOURS_PREFIX}%`)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) {
+      console.warn("[StoreFacts] سطر المواعيد مقروءش:", error.message);
+      return null;
+    }
+    return String(data?.[0]?.instruction ?? "").trim() || null;
+  } catch (err) {
+    console.warn("[StoreFacts] سطر المواعيد اتلف:", err);
+    return null;
+  }
+}
+
 export async function readStoreFacts(): Promise<StoreFacts> {
   const supabase = getSupabaseAdminClient();
   const empty: StoreFacts = { whatsappLocal: null, lines: [], workingHours: null };
   if (!supabase) return empty;
   try {
-    const [company, sections, hours] = await Promise.all([
+    const [company, sections, workingHours] = await Promise.all([
       supabase.from("companies").select("whatsapp").limit(1),
       supabase.from("room_sections").select("name").order("name", { ascending: true }).limit(60),
-      supabase
-        .from("consultant_learnings")
-        .select("instruction")
-        .like("instruction", `${HOURS_PREFIX}%`)
-        .order("created_at", { ascending: false })
-        .limit(1),
+      readHoursSentence(),
     ]);
     const raw = String(company.data?.[0]?.whatsapp ?? "").replace(/\D/g, "");
     const local = raw.startsWith("20") ? raw.slice(2) : raw;
     const lines = (sections.data ?? [])
       .map((row) => cleanSectionName(String(row.name ?? "")))
       .filter(Boolean);
-    const workingHours = String(hours.data?.[0]?.instruction ?? "").trim() || null;
     return { whatsappLocal: local || null, lines, workingHours };
   } catch (err) {
     console.warn("[Consultant] store facts unreadable, the advisor will speak without them:", err);

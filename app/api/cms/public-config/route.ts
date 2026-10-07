@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { readHoursSentence } from "@/lib/consultant/store-facts";
 
 // Public API to load site config - no auth required
 export async function GET() {
   try {
     const supabase = getSupabaseAdminClient();
     if (!supabase) throw new Error('Supabase not initialized');
-    
+
+    // The hours are the owner's own sentence, not a number this door invents: the surfaces that
+    // compute a schedule read it here, so a screen and the advisor cannot answer two different times.
+    // It rides every success path — a store with no site rows yet still has to know when it opens.
+    const workingHours = await readHoursSentence();
+
     // Get the first company (master tenant)
     const { data: company } = await supabase
       .from("companies")
@@ -15,7 +21,8 @@ export async function GET() {
       .single();
 
     if (!company) {
-      return NextResponse.json({ config: null });
+      console.warn("[PublicConfig] مفيش شركة مسجلة — بيوصل الميعاد بس من غير إعدادات موقع");
+      return NextResponse.json({ config: { workingHours } });
     }
 
     // Fetch all active site config for this company
@@ -26,7 +33,7 @@ export async function GET() {
       .eq("is_active", true);
 
     if (!configs || configs.length === 0) {
-      return NextResponse.json({ config: null });
+      return NextResponse.json({ config: { workingHours } });
     }
 
     // Build flat config object
@@ -58,6 +65,10 @@ export async function GET() {
           break;
       }
     }
+
+    // The hours are the owner's sentence, not a number this door invents: the surfaces that compute
+    // a schedule read it here so they can never disagree with what the advisor answers.
+    config.workingHours = workingHours;
 
     return NextResponse.json({ config });
   } catch (error) {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useOfficeStatus, getOfficeStatus, formatNextOpening, formatNextOpeningAr, OfficeStatus } from "@/lib/office-hours";
+import { getOfficeStatus, fetchRecordedHours, formatNextOpening, formatNextOpeningAr, type OfficeHours, type OfficeStatus } from "@/lib/office-hours";
 import { arabicNumerals } from "@/lib/arabic";
 import { roomNameAr } from "@/lib/rooms-catalog";
 import { 
@@ -277,11 +277,22 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
     };
   }, []);
 
-  // Update office status on client side
+  // Update office status on client side — from the store's own recorded hours when they can be read.
   useEffect(() => {
-    setOfficeStatus(getOfficeStatus());
-    const interval = setInterval(() => setOfficeStatus(getOfficeStatus()), 60000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    let override: OfficeHours | null = null;
+    const refresh = () => setOfficeStatus(getOfficeStatus(override));
+    refresh();
+    void fetchRecordedHours().then((recorded) => {
+      if (cancelled || !recorded) return;
+      override = recorded;
+      refresh();
+    });
+    const interval = setInterval(refresh, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   const qualification = calculateLeadQualification(formData.scope, formData.budget, formData.timeline);

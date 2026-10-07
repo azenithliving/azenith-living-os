@@ -23,10 +23,10 @@ const getConfig = (isRTL: boolean): SiteConfig => ({
     ? "أربع اختيارات فقط تساعدنا على تنظيم طلبك وفهم المساحة والخدمة التي تبحث عنها."
     : "Four choices help us organize your request and understand the space and service you need.",
   budgetOptions: [
-    "2,500 - 5,500  جنيه",
-    "5,500 - 12,000  جنيه",
-    "12,000 - 25,000  جنيه",
-    "25,000+  جنيه"
+    "2,500 - 5,500 جنيه",
+    "5,500 - 12,000 جنيه",
+    "12,000 - 25,000 جنيه",
+    "25,000+ جنيه"
   ],
   styleOptions: isRTL 
     ? ["مودرن دافئ", "هادئ فاخر", "عملي مع لمسة فندقية", "صناعي ناعم"]
