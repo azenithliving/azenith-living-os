@@ -14,6 +14,7 @@ import { arDigits } from "@/lib/ops/metricLabels";
  */
 export function OwnSheetCard({ phone, isRTL }: { phone: string; isRTL: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [number, setNumber] = useState(phone || "");
   const [busy, setBusy] = useState(false);
   const [link, setLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +38,7 @@ export function OwnSheetCard({ phone, isRTL }: { phone: string; isRTL: boolean }
       const res = await fetch("/api/sheet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: dataUrl, phone }),
+        body: JSON.stringify({ image: dataUrl, phone: number }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.success) {
@@ -67,6 +68,15 @@ export function OwnSheetCard({ phone, isRTL }: { phone: string; isRTL: boolean }
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
+        {/* His own number, in this card: the door below belongs to the customer, not to the form above it. */}
+        <input
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+          inputMode="tel"
+          placeholder={isRTL ? "رقم موبايلك" : "Your mobile number"}
+          data-own-sheet-phone=""
+          className="w-44 rounded-full border border-white/15 bg-[#111112] px-4 py-2.5 text-sm text-white outline-none focus:border-[#C5A059]"
+        />
         <input
           ref={fileRef}
           type="file"

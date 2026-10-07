@@ -56,3 +56,18 @@ describe("the door is reachable by a customer and still rate-limited", () => {
     expect(SENSITIVE_PATHS).toContain("/api/sheet");
   });
 });
+
+describe("the card on the customer's page is his own", () => {
+  const card = readFileSync("components/cad/OwnSheetCard.tsx", "utf8");
+
+  it("carries its own number field and posts to the customer door", () => {
+    expect(card).toContain('data-own-sheet-phone=""');
+    expect(card).toContain('data-own-sheet-send=""');
+    expect(card).toContain('fetch("/api/sheet"');
+  });
+
+  it("shows the address as a link with the number he typed, not a machine token in prose", () => {
+    expect(card).toContain("data-own-sheet-link");
+    expect(card).toContain('dir="ltr"');
+  });
+});
