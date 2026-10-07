@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 import { summarizeInterest } from "@/lib/lead-insights";
 import { LEDGER_LABELS, LEDGER_ORDER, type LedgerTotals } from "@/lib/leads-delete-guard";
 import { hoursSinceLastTouch, freshnessOf, needsReplyNow, type FreshnessKey } from "@/lib/leads-freshness";
+import { phoneForms } from "@/lib/customers/identity";
 
 /** The cold clock's colours — the badge a customer wears for how long he has waited. */
 const FRESHNESS_STYLE: Record<FreshnessKey, string> = {
@@ -236,14 +237,6 @@ export default function CustomersPanel() {
     } finally {
       setIsLoadingCopilot(false);
     }
-  };
-
-  const normalizeWhatsAppPhone = (phone: string) => {
-    const digits = (phone || "").replace(/\D/g, "");
-    if (!digits || digits.length < 10) return "";
-    if (digits.startsWith("20")) return digits;
-    if (digits.startsWith("0")) return `20${digits.slice(1)}`;
-    return digits;
   };
 
   // آخر نشاط حقيقي للعميل: آخر توقيت رسالة (ولو من المستشار/الإدارة)، وإلا تاريخ الإنشاء.
@@ -651,10 +644,10 @@ export default function CustomersPanel() {
                       </div>
                     )}
                     <div className="flex gap-2">
-                      {/^01\d{9}$/.test(lead.phone || "") ? (
-                      <a 
-                        href={`https://wa.me/20${lead.phone.startsWith('0') ? lead.phone.substring(1) : lead.phone}`} 
-                        target="_blank" 
+                      {phoneForms(lead.phone) ? (
+                      <a
+                        href={`https://wa.me/${phoneForms(lead.phone)!.whatsapp}`}
+                        target="_blank"
                         rel="noreferrer"
                         className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm rounded-lg flex items-center gap-2 transition"
                       >
@@ -698,9 +691,9 @@ export default function CustomersPanel() {
                           <p className="text-[10px] text-white/55" data-followup-answer>{followUpAnswer}</p>
                         )}
                         <div className="flex gap-2">
-                          {/^01\d{9}$/.test(lead.phone || "") ? (
+                          {phoneForms(lead.phone) ? (
                           <a
-                            href={`https://wa.me/${normalizeWhatsAppPhone(lead.phone) || lead.phone.replace(/\D/g, "")}?text=${encodeURIComponent(followUpTemplate)}`}
+                            href={`https://wa.me/${phoneForms(lead.phone)!.whatsapp}?text=${encodeURIComponent(followUpTemplate)}`}
                             target="_blank"
                             rel="noreferrer"
                             className="flex-1 text-center rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-sm font-bold text-white transition"

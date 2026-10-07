@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Phone, Search } from 'lucide-react';
 
 import { matchRoll, rollLineLabel } from '@/lib/customers/match';
+import { phoneForms } from '@/lib/customers/identity';
 import { arNum } from '@/lib/ops/metricLabels';
 import type { DossierSection } from '@/lib/cad/dossier';
 import type { Plan } from '@/lib/cad/plan';
@@ -78,7 +79,9 @@ export default function ClientPreCallDossier() {
 
   const matches = useMemo(() => (roll ? matchRoll(roll, query) : []), [roll, query]);
   const newest = file?.papers[0] ?? null;
-  const digits = picked?.phone ?? null;
+  // One shape for what he reads, one for the call button, one for WhatsApp — built from the same
+  // rule the store keys people by, so a lead's «01…» and a paper's «1…» both dial the right number.
+  const phone = phoneForms(picked?.phone ?? null);
 
   return (
     <div
@@ -131,28 +134,30 @@ export default function ClientPreCallDossier() {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-bold text-white" data-dossier-headline>{file?.headline ?? picked.name ?? 'عميل من غير اسم'}</p>
             <div className="flex items-center gap-2">
-              {digits && (
+              {phone && (
                 <a
-                  href={`tel:+20${digits}`}
+                  href={`tel:${phone.dial}`}
                   className="flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] font-bold text-amber-300"
                   data-dossier-call
+                  data-dossier-dial={phone.dial}
                 >
                   <Phone className="w-3.5 h-3.5" />
                   اتصل بيه
                 </a>
               )}
-              {digits && (
+              {phone && (
                 <a
-                  href={`https://wa.me/20${digits}`}
+                  href={`https://wa.me/${phone.whatsapp}`}
                   target="_blank"
                   rel="noreferrer"
                   className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-bold text-emerald-300"
                   data-dossier-whatsapp
+                  data-dossier-wa={phone.whatsapp}
                 >
                   واتساب
                 </a>
               )}
-              {!digits && (
+              {!phone && (
                 <p className="rounded-xl border border-white/10 px-3 py-1.5 text-[11px] text-white/45">
                   مفيش رقم مسجل عنده
                 </p>

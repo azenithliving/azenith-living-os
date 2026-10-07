@@ -37,6 +37,7 @@ import { SHAPE_LABELS, planFromPaper, type Plan } from "@/lib/cad/plan";
 import { FAMILY_LABELS } from "@/lib/cad/palette";
 import type { ColourPick } from "@/lib/cad/colours";
 import type { CustomerRow } from "@/lib/customers/roll";
+import { phoneForms } from "@/lib/customers/identity";
 
 export type DossierFact = { label: string; value: string };
 
@@ -244,8 +245,10 @@ export function buildDossier(input: {
     },
   ];
 
+  // His mobile is printed the way he dials it — the stored key drops the leading zero on purpose,
+  // and a number without it is not a number this owner can call.
   const headline = line
-    ? `${name || "عميل من غير اسم"}${line.phone ? ` · ${arDigits(line.phone)}` : ""} · ${arNum(sketches.length)} ورقة`
+    ? `${name || "عميل من غير اسم"}${phoneForms(line.phone) ? ` · ${arDigits(phoneForms(line.phone)!.display)}` : ""} · ${arNum(sketches.length)} ورقة`
     : "اختار عميل من الدفتر الأول";
 
   return { headline, sections, plan: drawing.plan, plan_question: drawing.plan ? null : drawing.question };

@@ -10,7 +10,7 @@
  * let a second ledger of people grow beside the real one.
  */
 import { foldArabic, latinDigits } from "@/lib/arabic";
-import { phoneKey } from "@/lib/customers/identity";
+import { phoneForms, phoneKey } from "@/lib/customers/identity";
 import { arDigits } from "@/lib/ops/metricLabels";
 
 export type RollLine = {
@@ -83,6 +83,9 @@ export function rollLineLabel(line: RollLine): string {
   // numerals, and `arNum` would put a thousands separator inside a phone number.
   if (name && digits.length >= 4) return `${name} · ${arDigits(digits.slice(-4))}`;
   if (name) return name;
-  if (digits) return arDigits(digits);
+  // No name at all: the number is the only way to recognise him, so print the one he can dial —
+  // the stored key drops the leading zero, and «1099999991» is not a number anyone calls.
+  const dialable = phoneForms(line.phone ?? "");
+  if (dialable) return arDigits(dialable.display);
   return String(line.email ?? "").trim() || "من غير اسم";
 }

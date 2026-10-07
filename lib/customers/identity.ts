@@ -27,6 +27,21 @@ export function phoneKey(raw: unknown): string | null {
   return national;
 }
 
+/**
+ * The three shapes one mobile is used in, from whatever spelling a table happens to hold.
+ *
+ * Measured 2026-10-07 on the pre-call file: the call button was built as `tel:+20` + the stored
+ * digits, which is right for a paper's key («1099999991») and wrong for a lead's («01005554444»
+ * becomes +2001005554444 — a number that does not connect). The screen also printed the bare
+ * national form, which is not what this owner dials. One function now answers all three, and a
+ * number it cannot read returns null so the surface says so instead of offering a dead button.
+ */
+export function phoneForms(raw: unknown): { display: string; dial: string; whatsapp: string } | null {
+  const national = phoneKey(raw);
+  if (!national) return null;
+  return { display: `0${national}`, dial: `+20${national}`, whatsapp: `20${national}` };
+}
+
 export function identityOf(record: Record<string, unknown> | null | undefined): Identity {
   if (!record) return { key: null, kind: "none" };
   const phone = phoneKey(record.phone ?? record.contactValue);
