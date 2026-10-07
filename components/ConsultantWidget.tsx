@@ -586,6 +586,7 @@ export default function ConsultantWidget() {
               />
               <button
                 type="submit"
+                data-chat-send
                 disabled={!inputMessage.trim() || isLoading}
                 className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
               >

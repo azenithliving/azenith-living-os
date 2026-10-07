@@ -4,6 +4,7 @@ import {
   AREA_CHIPS,
   coverageSentence,
   normalizeArea,
+  areaFromWords,
   areaLabel,
   nearLabel,
   tasteLine,
@@ -144,8 +145,23 @@ describe("the line says which source ordered his pictures", () => {
   });
 });
 
-describe("the store's coverage has one owner", () => {
-  it("speaks the same areas the chips offer", () => {
+describe("his own words name his area", () => {
+  it("takes the newest area he said, not the first", () => {
+    expect(areaFromWords(["اسكن في التجمع", "لأ بصراحة أقصد زايد"])).toBe("الشيخ زايد");
+  });
+
+  it("hears nothing when he named no area", () => {
+    expect(areaFromWords([])).toBeNull();
+    expect(areaFromWords(["عايز ركنة مودرن للصة", ""])).toBeNull();
+  });
+
+  it("reads only his lines — the store's own answer would name an area in every conversation", () => {
+    // This is the reason the capture door is handed the customer's messages and nothing else.
+    expect(areaFromWords([coverageSentence()])).toBe("التجمع");
+  });
+});
+
+describe("the store's coverage has one owner", () => {  it("speaks the same areas the chips offer", () => {
     const sentence = coverageSentence();
     expect(sentence).toContain("القاهرة الكبرى");
     expect(sentence).toContain("الشيخ زايد");

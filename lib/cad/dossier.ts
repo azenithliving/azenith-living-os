@@ -115,6 +115,8 @@ export function buildDossier(input: {
   if (line?.needsReply) who.push({ label: "حالًا", value: "محتاج رد — هو مستني من أكتر من يوم" });
 
   const paper: DossierFact[] = [];
+  /** His area has two doors now — his sheet and his own sentence — and the file must never blur them. */
+  let sheetArea: string | null = null;
   if (newest) {
     const agreed = newest.dimensions.filter((d) => d.confirmed);
     // One source for the area: the room the store drew. `area_sqm` holds it once anyone confirms;
@@ -127,7 +129,10 @@ export function buildDossier(input: {
       derivedArea(newest.dimensions);
     paper.push({ label: "عدد أوراقه", value: arNum(sketches.length) });
     paper.push({ label: "أحدث ورقة", value: roomLabel(newest.room) || "مكان من غير اسم على الورقة" });
-    if (newest.customer_city) paper.push({ label: "منطقته", value: newest.customer_city });
+    if (newest.customer_city) {
+      sheetArea = arabicOnly(newest.customer_city);
+      paper.push({ label: "منطقته من ورقته", value: newest.customer_city });
+    }
     paper.push({
       label: "الأبعاد",
       value: newest.dimensions.length
@@ -178,6 +183,20 @@ export function buildDossier(input: {
   // calling a service a deadline is how a file starts being disbelieved.
   if (service) taste.push({ label: "الخدمة اللي طلبها", value: service });
   if (page) taste.push({ label: "آخر صفحة وقف عندها", value: page });
+  // Two doors can name his area. When they agree the file says so once; when they do not, the
+  // disagreement is the useful thing to open a call with — not one of the two values, picked by me.
+  const saidArea = arabicOnly(looking?.area);
+  if (saidArea && sheetArea) {
+    taste.push({
+      label: "منطقته",
+      value:
+        saidArea === sheetArea
+          ? `${saidArea} — قالها في كلامه وعلى ورقته`
+          : `كلامه يقول ${saidArea} وورقته تقول ${sheetArea} — اسأله أي الاتنين صح`,
+    });
+  } else if (saidArea) {
+    taste.push({ label: "منطقته من كلامه", value: saidArea });
+  }
   const tasteMissing = taste.length ? undefined : ["المتجر ما سجلش عنه حاجة وهو بيتصفح — اسأله هو اللي بيديك أدق معلومة."];
 
   const swatches = [...new Set(images.map((i) => i.color).filter((c): c is string => Boolean(c)))].slice(0, 8);
@@ -233,11 +252,11 @@ export function buildDossier(input: {
       title: "اللي مش معروف عنه",
       facts: [],
       missing: [
-        // He says his area himself when he asks for his suggestions on WhatsApp; until he
-        // does, the file admits the gap instead of guessing a delivery zone.
-        ...(sketches.some((s) => s.customer_city)
+        // He says his area himself — on his sheet, or in his own sentence to the advisor. Until one
+        // of the two answers, the file admits the gap instead of guessing a delivery zone.
+        ...(sketches.some((s) => s.customer_city) || saidArea
           ? []
-          : ["منطقته الجغرافية: مفيش عنوان بيتسجل في أي سجل من سجلات المتجر."]),
+          : ["منطقته الجغرافية: ما قالهاش لا في ورقته ولا في كلامه مع المسترشد."]),
         ...(voters.length
           ? []
           : ["أكثر القطع اللي بص عليها: مفيش سجل مشاهدة — اللي موجود آخر صفحة وقف عندها بس."]),

@@ -1443,13 +1443,22 @@ async function saveSession(
     // contact once. Not awaited: the customer's reply is never held up by the ledger,
     // and the capture cannot throw.
     const conversation = normalizedMessages.map((m) => m.content).join("\n");
+    // Only his own lines may name an area. The store's answer to «بتوصلوا فين؟» recites every
+    // district it works in, so a matcher allowed to read the advisor would file every customer in
+    // the country under التجمع.
+    const hisWords = normalizedMessages.filter((m) => m.role === "user").map((m) => String(m.content ?? ""));
     void captureConversationContact({
       sessionId,
       text: conversation,
       name: insights?.customerName ?? null,
+      ownWords: hisWords,
     }).then((captured) => {
-      if (captured.recorded) console.log(`[Consultant] Contact captured for ${sessionId}: ${captured.reason}`);
-      else if (captured.reason === "failed") console.error(`[Consultant] Contact capture failed: ${captured.detail}`);
+      if (captured.recorded) {
+        console.log(
+          `[Consultant] Contact captured for ${sessionId}: ${captured.reason}` +
+            (captured.area ? ` · منطقته من كلامه: ${captured.area} (المحفوظ: ${captured.areaStored ?? "فاضي"})` : ""),
+        );
+      } else if (captured.reason === "failed") console.error(`[Consultant] Contact capture failed: ${captured.detail}`);
     });
   } catch (err) {
     console.error("[Consultant] Exception in saveSession:", err);

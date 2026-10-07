@@ -49,6 +49,8 @@ export type Looking = {
   style: string | null;
   serviceType: string | null;
   lastPage: string | null;
+  /** The area he named for himself in his own conversation, in the store's map spelling. */
+  area: string | null;
 };
 
 export type CustomerRow = {

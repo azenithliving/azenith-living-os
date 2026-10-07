@@ -94,6 +94,21 @@ export function areaLabel(raw: unknown): string {
   return normalizeArea(value) ?? value;
 }
 
+/**
+ * The area the customer named for himself, his newest word winning.
+ *
+ * Only his own lines may be handed to this. The store's own answer to «بتوصلوا فين؟» recites every
+ * district it works in, so a matcher allowed to read the advisor's sentences would report that every
+ * customer in the country lives in التجمع — and the region station would rank on that.
+ */
+export function areaFromWords(lines: string[]): string | null {
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const area = normalizeArea(lines[i] ?? "");
+    if (area) return area;
+  }
+  return null;
+}
+
 export type TasteSource = "own" | "area" | "quality" | "unreadable";
 
 export type AreaEvidence = {

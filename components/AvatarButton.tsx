@@ -161,6 +161,7 @@ export default function AvatarButton({ onClick, isOpen }: AvatarButtonProps) {
       {/* Main Interactive Button */}
       <motion.button
         onClick={onClick}
+        data-chat-open={isOpen ? "1" : "0"}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         variants={{

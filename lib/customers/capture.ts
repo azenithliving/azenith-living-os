@@ -15,6 +15,7 @@
  */
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { phoneKey } from "@/lib/customers/identity";
+import { areaFromWords } from "@/lib/regions";
 
 const EGYPT_PHONE = /(?:\+?20\s?)?0?1[0125][\s-]?\d{4}[\s-]?\d{4}/;
 const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
@@ -23,6 +24,9 @@ export type CaptureOutcome = {
   recorded: boolean;
   phone: string | null;
   email: string | null;
+  /** The area his own words named, and what the row really holds after the write. */
+  area: string | null;
+  areaStored: string | null;
   reason: "no-contact" | "created" | "attached" | "already-recorded" | "failed";
   detail?: string;
 };
@@ -40,10 +44,13 @@ export async function captureConversationContact(args: {
   companyId?: string | null;
   text: string;
   name?: string | null;
+  /** His own lines, oldest first. The advisor's sentences must never be passed here. */
+  ownWords?: string[];
 }): Promise<CaptureOutcome> {
   const client = getSupabaseAdminClient();
   const { phone, email } = readContactFrom(args.text ?? "");
-  const none: CaptureOutcome = { recorded: false, phone, email, reason: "no-contact" };
+  const area = areaFromWords(args.ownWords ?? []);
+  const none: CaptureOutcome = { recorded: false, phone, email, area, areaStored: null, reason: "no-contact" };
   if (!client) return { ...none, recorded: false, reason: "failed", detail: "no database client" };
   if (!phone && !email) return none;
   if (!args.sessionId) return { ...none, reason: "failed", detail: "no session id" };
@@ -55,7 +62,7 @@ export async function captureConversationContact(args: {
   try {
     const { data: profile, error: profileError } = await client
       .from("users")
-      .select("id,session_id,full_name,email,phone,company_id")
+      .select("id,session_id,full_name,email,phone,company_id,area")
       .eq("session_id", args.sessionId)
       .maybeSingle();
     if (profileError) throw new Error(profileError.message);
@@ -65,6 +72,9 @@ export async function captureConversationContact(args: {
       const patch: Record<string, unknown> = { updated_at: now };
       if (phone && !profile.phone) patch.phone = value;
       if (email && !profile.email) patch.email = value;
+      // His area is his own word, so it goes in once and is never rewritten: a customer who later
+      // says he meant somewhere else is a change the store has to see, not overwrite in silence.
+      if (area && !profile.area) patch.area = area;
       if (Object.keys(patch).length > 1) {
         const { error } = await client.from("users").update(patch).eq("id", profile.id);
         if (error) throw new Error(error.message);
@@ -77,6 +87,7 @@ export async function captureConversationContact(args: {
         full_name: args.name?.trim() || null,
         phone,
         email,
+        area,
         created_at: now,
         updated_at: now,
       });
@@ -112,8 +123,21 @@ export async function captureConversationContact(args: {
       if (error) throw new Error(error.message);
     }
 
-    return { recorded: true, phone, email, reason };
+    // Read the row back before reporting it: a desk that answers from its own intention is how a
+    // screen ends up showing an area nobody ever said.
+    const { data: stored } = await client.from("users").select("area").eq("session_id", args.sessionId).maybeSingle();
+    const areaStored = String(stored?.area ?? "") || null;
+    if (area) console.log(`[Capture] ${args.sessionId}: asked to write «${area}», the row holds «${areaStored ?? "فاضي"}»`);
+    return { recorded: true, phone, email, area, areaStored, reason };
   } catch (error) {
-    return { recorded: false, phone, email, reason: "failed", detail: error instanceof Error ? error.message : String(error) };
+    return {
+      recorded: false,
+      phone,
+      email,
+      area,
+      areaStored: null,
+      reason: "failed",
+      detail: error instanceof Error ? error.message : String(error),
+    };
   }
 }

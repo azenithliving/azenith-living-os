@@ -341,8 +341,38 @@ describe("the dossier refuses to invent", () => {
 
     const told = buildDossier({ line: lineOf(), sketches: [sketchOf({ customer_city: "التجمع الخامس" })], images: [], imagesRoomType: "living-room", imagesForHisRoom: true });
     const paper = told.sections.find((s) => s.id === "paper")?.facts ?? [];
-    expect(paper.find((f) => f.label === "منطقته")?.value).toBe("التجمع الخامس");
+    expect(paper.find((f) => f.label === "منطقته من ورقته")?.value).toBe("التجمع الخامس");
     expect(told.sections.find((s) => s.id === "missing")?.missing.join(" ")).not.toContain("منطقته الجغرافية");
+  });
+
+  it("names the door his area came from, and shows a disagreement instead of picking one", () => {
+    const said = { roomType: null, style: null, serviceType: null, lastPage: null, area: "الشيخ زايد" };
+    const onlyWords = buildDossier({ line: lineOf({ looking: said }), sketches: [sketchOf()], images: [], imagesRoomType: "living-room", imagesForHisRoom: true });
+    const taste = onlyWords.sections.find((s) => s.id === "taste")?.facts ?? [];
+    expect(taste.find((f) => f.label === "منطقته من كلامه")?.value).toBe("الشيخ زايد");
+    // His sentence alone closes the «unknown area» line: the store really does know it now.
+    expect(onlyWords.sections.find((s) => s.id === "missing")?.missing.join(" ")).not.toContain("منطقته الجغرافية");
+
+    const both = buildDossier({
+      line: lineOf({ looking: said }),
+      sketches: [sketchOf({ customer_city: "التجمع" })],
+      images: [],
+      imagesRoomType: "living-room",
+      imagesForHisRoom: true,
+    });
+    const clash = (both.sections.find((s) => s.id === "taste")?.facts ?? []).find((f) => f.label === "منطقته");
+    expect(clash?.value).toContain("كلامه يقول الشيخ زايد");
+    expect(clash?.value).toContain("اسأله");
+
+    const agree = buildDossier({
+      line: lineOf({ looking: { ...said, area: "التجمع" } }),
+      sketches: [sketchOf({ customer_city: "التجمع" })],
+      images: [],
+      imagesRoomType: "living-room",
+      imagesForHisRoom: true,
+    });
+    const same = (agree.sections.find((s) => s.id === "taste")?.facts ?? []).find((f) => f.label === "منطقته");
+    expect(same?.value).toBe("التجمع — قالها في كلامه وعلى ورقته");
   });
   it("keeps the general house palette labelled as the general house palette", () => {
     const file = buildDossier({ line: lineOf(), sketches: [sketchOf({ room: "حديقة شتوية" })], images: [imageOf("#3b2f2a", "comprehensive-interior")], imagesRoomType: "comprehensive-interior", imagesForHisRoom: false });

@@ -30,7 +30,9 @@ function lookingOf(base: Record<string, unknown>, row: Record<string, unknown> =
   const style = str(base.style) ?? str(row.style);
   const serviceType = str(base.service_type) ?? str(row.service_type);
   const lastPage = str(base.last_page) ?? str(row.last_page);
-  return roomType || style || serviceType || lastPage ? { roomType, style, serviceType, lastPage } : null;
+  // His area is his own word from the conversation desk — never the advisor's coverage answer.
+  const area = str(base.area) ?? str(row.area);
+  return roomType || style || serviceType || lastPage || area ? { roomType, style, serviceType, lastPage, area } : null;
 }
 
 /** A flag is not an amount: `deposit_paid` says whether the deposit arrived, `deposit_amount` says how much. */
@@ -56,7 +58,7 @@ export type CustomersRead = {
 
 export async function readCustomers(client: Client): Promise<CustomersRead> {
   const [profiles, sessions, quotes, forms, orders, appointments, conversions, papers] = await Promise.all([
-    read(client, "users", "id,session_id,full_name,email,phone,tier,budget,intent,score,room_type,style,service_type,last_page,updated_at,created_at"),
+    read(client, "users", "id,session_id,full_name,email,phone,tier,budget,intent,score,room_type,style,service_type,last_page,area,updated_at,created_at"),
     read(client, "consultant_sessions", "id,session_id,updated_at,created_at"),
     read(client, "requests", "id,user_id,budget,price,paid,updated_at,created_at"),
     read(client, "leads", "id,name,email,phone,status,updated_at,created_at"),
