@@ -102,6 +102,7 @@ export default function ConsultantWidget() {
       localStorage.removeItem("azenith_consultant_name");
       localStorage.removeItem("azenith_consultant_location");
       localStorage.removeItem("azenith_consultant_last_update");
+      localStorage.removeItem("azenith_consultant_session_saved");
       setSessionId(null);
       setMessages([]);
       setUserName(null);
@@ -238,7 +239,7 @@ export default function ConsultantWidget() {
     const storedSessionId = localStorage.getItem("azenith_session_id");
     const storedName = localStorage.getItem("azenith_consultant_name");
 
-    if (storedSessionId) {
+    if (storedSessionId && localStorage.getItem("azenith_consultant_session_saved") === "1") {
       const sessionMessages = await fetchSession(storedSessionId);
       if (sessionMessages && sessionMessages.length > 0) {
         // Returning user - add welcome back message
@@ -322,9 +323,12 @@ export default function ConsultantWidget() {
     return () => clearInterval(interval);
   }, [isOpen, sessionId]);
 
-  // Sync local messages with DB before sending (single source of truth = DB)
+  // Sync local messages with DB before sending (single source of truth = DB) — but only once the
+  // store has actually been told about this session. A brand-new chat has no row to read, and
+  // asking for it made every first message log a 404 on the customer's own page.
   const refreshFromDB = useCallback(async (): Promise<void> => {
     if (!sessionId) return;
+    if (localStorage.getItem("azenith_consultant_session_saved") !== "1") return;
     try {
       const response = await fetch(`/api/consultant?sessionId=${encodeURIComponent(sessionId)}`);
       if (response.ok) {
@@ -387,6 +391,8 @@ export default function ConsultantWidget() {
       // Store sessionId
       if (data.sessionId) {
         setSessionId(data.sessionId);
+        // The store knows this conversation now — from here the sync reads are worth making.
+        localStorage.setItem("azenith_consultant_session_saved", "1");
       }
 
       // Parse and execute Reality UI mutations
