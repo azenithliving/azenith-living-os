@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { arabicNumerals } from "@/lib/arabic";
 
 interface FurnitureCardProps {
   furniture: {
@@ -48,14 +49,14 @@ export default function FurnitureCard({ furniture, quoteHref, isWishlisted = fal
       </div>
       
       <div className="space-y-3">
-        <h3 className="text-xl font-semibold text-white line-clamp-2">{furniture.title}</h3>
-        <p className="text-brand-primary font-bold text-lg">{furniture.priceRange}</p>
-        <p className="text-sm leading-6 text-white/75 line-clamp-2">{furniture.description}</p>
+        <h3 className="text-xl font-semibold text-white line-clamp-2">{arabicNumerals(furniture.title)}</h3>
+        <p className="text-brand-primary font-bold text-lg">{arabicNumerals(furniture.priceRange)}</p>
+        <p className="text-sm leading-6 text-white/75 line-clamp-2">{arabicNumerals(furniture.description)}</p>
         
         <div className="flex flex-wrap gap-2">
           {furniture.features.slice(0, 3).map((feature, index) => (
             <span key={index} className="px-3 py-1 bg-brand-primary/10 text-brand-primary text-xs rounded-full font-medium">
-              {feature}
+              {arabicNumerals(feature)}
             </span>
           ))}
         </div>
@@ -65,7 +66,7 @@ export default function FurnitureCard({ furniture, quoteHref, isWishlisted = fal
             <span>المتوفر بـ:</span>
             <div className="flex gap-1 flex-wrap">
               {furniture.variations.slice(0, 2).map((variation, index) => (
-                <span key={index} className="px-2 py-1 bg-white/5 rounded-md">{variation}</span>
+                <span key={index} className="px-2 py-1 bg-white/5 rounded-md">{arabicNumerals(variation)}</span>
               ))}
             </div>
           </div>

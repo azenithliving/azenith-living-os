@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import Image from "next/image";
 import useSessionStore from "@/stores/useSessionStore";
+import { arabicNumerals } from "@/lib/arabic";
 
 interface ImageLightboxProps {
   isOpen: boolean;
@@ -235,7 +236,7 @@ export default function ImageLightbox({
 
           {/* Image counter */}
           <div className="absolute bottom-20 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-4 py-2 text-sm text-white backdrop-blur-sm">
-            {currentIndex + 1} / {images.length}
+            {arabicNumerals(`${currentIndex + 1} / ${images.length}`)}
           </div>
         </motion.div>
       )}

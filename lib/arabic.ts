@@ -36,6 +36,20 @@ export function latinDigits(value: unknown): string {
 }
 
 /**
+ * The same sentence in the digits he reads.
+ *
+ * A price is not summed off the screen: «25,000 - 45,000 جنيه» is read, so it is written ٢٥٬٠٠٠.
+ * The conversion is deliberately letter-for-letter — a thousands comma becomes its Arabic shape and
+ * nothing is re-grouped, because re-formatting would turn a phone tail into «٠١٠٬٢٣٤» and would
+ * reorder a range a customer compares with his eye.
+ */
+export function arabicNumerals(value: unknown): string {
+  return String(value ?? "")
+    .replace(/(\d),(\d{3})/g, "$1\u066C$2")
+    .replace(/[0-9]/g, (d) => String.fromCodePoint(0x0660 + Number(d)));
+}
+
+/**
  * The Arabic letters themselves. The block also holds its own question mark (؟), its own comma
  * (،) and its own digits (٠١٢٣٤٥٦٧٨٩) — and those end a word rather than continue one. Reading
  * them as letters is what made «بكام؟» fail its own price net while «بكام» passed.

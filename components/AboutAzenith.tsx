@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { arabicNumerals } from "@/lib/arabic";
 import useSessionStore from "@/stores/useSessionStore";
 
 export default function AboutAzenith() {
@@ -25,7 +26,7 @@ export default function AboutAzenith() {
           <div className="grid grid-cols-1 gap-6">
             <div className="rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent p-8 backdrop-blur-sm">
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-black text-[#C5A059] md:text-4xl">01</span>
+                <span className="text-3xl font-black text-[#C5A059] md:text-4xl">{isRTL ? arabicNumerals("01") : "01"}</span>
                 <span className="text-2xl font-bold text-[#C5A059]">{isRTL ? "فهم المساحة" : "Understand"}</span>
               </div>
               <p className="mt-3 text-lg text-white/70">{isRTL ? "نبدأ بتجميع احتياجاتك وما يهمك في المشروع." : "We start by collecting the needs that matter for your project."}</p>
@@ -33,7 +34,7 @@ export default function AboutAzenith() {
 
             <div className="rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent p-8 backdrop-blur-sm">
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-black text-[#C5A059] md:text-4xl">02</span>
+                <span className="text-3xl font-black text-[#C5A059] md:text-4xl">{isRTL ? arabicNumerals("02") : "02"}</span>
                 <span className="text-2xl font-bold text-[#C5A059]">{isRTL ? "تحديد الاتجاه" : "Define"}</span>
               </div>
               <p className="mt-3 text-lg text-white/70">{isRTL ? "نوضح اتجاه التصميم ونطاق العمل قبل أي التزام." : "We clarify the design direction and scope before any commitment."}</p>
@@ -41,7 +42,7 @@ export default function AboutAzenith() {
 
             <div className="rounded-3xl border border-[#C5A059]/30 bg-gradient-to-r from-[#C5A059]/10 to-transparent p-8 backdrop-blur-sm">
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-black text-[#C5A059] md:text-4xl">03</span>
+                <span className="text-3xl font-black text-[#C5A059] md:text-4xl">{isRTL ? arabicNumerals("03") : "03"}</span>
                 <span className="text-2xl font-bold text-[#C5A059]">{isRTL ? "خطوة تالية" : "Continue"}</span>
               </div>
               <p className="mt-3 text-lg text-white/70">{isRTL ? "تتحدد تفاصيل التنفيذ والمتابعة وفق الاتفاق المكتوب." : "Execution and follow-up details are set by the written agreement."}</p>

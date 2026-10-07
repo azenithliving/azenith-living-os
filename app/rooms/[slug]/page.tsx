@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import RoomPageClient from "@/components/RoomPageClient";
 import { resolveRoomSlug } from "@/lib/rooms-catalog";
-import { absoluteUrl, buildPageMetadata, SEO_ROOMS, SITE_NAME } from "@/lib/seo";
+import { absoluteUrl, buildPageMetadata, BRAND_NAME_AR, SEO_ROOMS, SITE_NAME } from "@/lib/seo";
 import { getRoomFallbackImages } from "@/lib/room-image-fallback";
 
 type RoomMeta = {
@@ -373,8 +373,8 @@ export default async function Page({ params, searchParams }: PageProps) {
   const roomUrl = absoluteUrl(`/rooms/${slug}`);
   const roomFaqs = [
     {
-      question: `ما الذي تقدمه ${SITE_NAME} في ${seoTitle}؟`,
-      answer: `${SITE_NAME} تقدم رؤية تصميم متكاملة تشمل توزيع المساحة، اختيار الخامات، الإضاءة، الأثاث، وحلول التخزين بما يناسب الاستخدام اليومي والطابع الفاخر للمنزل.`,
+      question: `ما الذي تقدمه ${BRAND_NAME_AR} في ${seoTitle}؟`,
+      answer: `${BRAND_NAME_AR} تقدم رؤية تصميم متكاملة تشمل توزيع المساحة، اختيار الخامات، الإضاءة، الأثاث، وحلول التخزين بما يناسب الاستخدام اليومي والطابع الفاخر للمنزل.`,
     },
     {
       question: `هل يمكن تخصيص تصميم ${seoTitle} حسب مساحة المنزل؟`,
@@ -436,7 +436,7 @@ export default async function Page({ params, searchParams }: PageProps) {
           <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 md:p-10" dir="rtl" aria-labelledby="room-seo-heading">
             <div className="max-w-4xl space-y-6">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-primary/80">
-                Azenith Living SEO Guide
+                دليل أزينث ليفينج
               </p>
               <h2 id="room-seo-heading" className="font-serif text-3xl leading-tight text-white md:text-5xl">
                 {seoTitle}

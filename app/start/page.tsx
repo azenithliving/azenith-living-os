@@ -6,6 +6,7 @@ import { ArrowLeft, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { roomDefinitions } from "@/lib/site-content";
+import { arabicNumerals } from "@/lib/arabic";
 import useSessionStore from "@/stores/useSessionStore";
 
 interface SiteConfig {
@@ -132,8 +133,8 @@ export default function StartPage() {
           <section className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-brand-primary">{isRTL ? `الخطوة ${stepIndex + 1} من ${steps.length}` : `Step ${stepIndex + 1} of ${steps.length}`}</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white md:text-3xl">{currentStep.title}</h2>
+                <p className="text-sm text-brand-primary">{arabicNumerals(isRTL ? `الخطوة ${stepIndex + 1} من ${steps.length}` : `Step ${stepIndex + 1} of ${steps.length}`)}</p>
+                <h2 className="mt-2 text-2xl font-semibold text-white md:text-3xl">{arabicNumerals(currentStep.title)}</h2>
               </div>
               {stepIndex > 0 ? (
                 <button type="button" onClick={() => setStepIndex((current) => Math.max(0, current - 1))} className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-white/70 transition hover:border-brand-primary hover:text-brand-primary">
@@ -149,7 +150,7 @@ export default function StartPage() {
                 return (
                   <button key={option} type="button" onClick={() => selectValue(option)} className={`rounded-[1.75rem] border p-5 text-right transition ${isActive ? "border-brand-primary bg-brand-primary/[0.1] text-white" : "border-white/10 bg-white/[0.03] text-white/72 hover:border-white/20"}`}>
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-base font-medium">{option}</span>
+                      <span className="text-base font-medium">{arabicNumerals(option)}</span>
                       {isActive ? (
                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary text-brand-accent">
                           <Check className="h-4 w-4" />
@@ -170,9 +171,9 @@ export default function StartPage() {
           <aside className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
             <p className="text-sm text-brand-primary">{isRTL ? "الملف الحالي" : "Current Profile"}</p>
             <div className="mt-6 space-y-5 text-sm text-white/72">
-              <div><p className="text-white/45">{isRTL ? "المساحة" : "Space"}</p><p className="mt-1 text-base text-white">{roomType || (isRTL ? "لم يتم الاختيار بعد" : "Not selected yet")}</p></div>
-              <div><p className="text-white/45">{isRTL ? "الميزانية" : "Budget"}</p><p className="mt-1 text-base text-white">{budget || (isRTL ? "لم يتم الاختيار بعد" : "Not selected yet")}</p></div>
-              <div><p className="text-white/45">{isRTL ? "الطابع" : "Style"}</p><p className="mt-1 text-base text-white">{style || (isRTL ? "لم يتم الاختيار بعد" : "Not selected yet")}</p></div>
+              <div><p className="text-white/45">{isRTL ? "المساحة" : "Space"}</p><p className="mt-1 text-base text-white">{arabicNumerals(roomType) || (isRTL ? "لم يتم الاختيار بعد" : "Not selected yet")}</p></div>
+              <div><p className="text-white/45">{isRTL ? "الميزانية" : "Budget"}</p><p className="mt-1 text-base text-white">{arabicNumerals(budget) || (isRTL ? "لم يتم الاختيار بعد" : "Not selected yet")}</p></div>
+              <div><p className="text-white/45">{isRTL ? "الطابع" : "Style"}</p><p className="mt-1 text-base text-white">{arabicNumerals(style) || (isRTL ? "لم يتم الاختيار بعد" : "Not selected yet")}</p></div>
               <div><p className="text-white/45">{isRTL ? "الخدمة" : "Service"}</p><p className="mt-1 text-base text-white">{serviceType || (isRTL ? "لم يتم الاختيار بعد" : "Not selected yet")}</p></div>
             </div>
           </aside>

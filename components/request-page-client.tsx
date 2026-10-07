@@ -6,6 +6,7 @@ import { AlertCircle, LoaderCircle, MessageCircle, ChevronLeft, ChevronRight, Ch
 import Link from "next/link";
 
 import { buildWhatsAppUrl } from "@/lib/conversion-engine";
+import { arabicNumerals } from "@/lib/arabic";
 import type { RuntimeConfig } from "@/lib/runtime-config";
 import useSessionStore from "@/stores/useSessionStore";
 import { OwnSheetCard } from "@/components/cad/OwnSheetCard";
@@ -15,6 +16,11 @@ type RequestPageClientProps = {
 };
 
 type LeadApiResponse = { ok: boolean; message?: string };
+
+/** The customer reads his own digits, so an Arabic label is written in them once, here. */
+function arLabels<T extends { labelAr: string }>(list: T[]): T[] {
+  return list.map((item) => ({ ...item, labelAr: arabicNumerals(item.labelAr) }));
+}
 
 // Choice Constants with Arabic and English Translations
 const PROPERTY_TYPES = [
@@ -40,12 +46,12 @@ const BUDGET_GRADES = [
   { value: "other", labelAr: "ميزانية محددة أخرى (اكتب يدوياً)", labelEn: "Other specification (Write manually)" }
 ];
 
-const TIMELINES = [
+const TIMELINES = arLabels([
   { value: "urgent", labelAr: "عاجل (خلال شهرين)", labelEn: "Urgent (Within 2 months)" },
   { value: "medium", labelAr: "متوسط (3 - 6 أشهر)", labelEn: "Medium (3 - 6 months)" },
   { value: "future", labelAr: "تخطيط مستقبلي (أكثر من 6 أشهر)", labelEn: "Future Planning (6+ months)" },
   { value: "other", labelAr: "موعد آخر (اكتب يدوياً)", labelEn: "Other timeline (Write manually)" }
-];
+]);
 
 const STYLES = [
   { value: "modern", labelAr: "مودرن", labelEn: "Modern" },
@@ -312,7 +318,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                     ? "bg-emerald-500 text-white"
                     : "bg-[#1C1C1E] text-white/40 border border-white/5"
                 }`}>
-                  {currentStep > step.num ? <Check className="h-4 w-4" /> : step.num}
+                  {currentStep > step.num ? <Check className="h-4 w-4" /> : arabicNumerals(step.num)}
                 </div>
                 <span className={`hidden sm:inline text-xs transition-colors duration-300 ${
                   currentStep === step.num ? "text-white font-medium" : "text-white/40"

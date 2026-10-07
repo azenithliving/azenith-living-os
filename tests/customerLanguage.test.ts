@@ -2,6 +2,7 @@
 import { describe, it, expect } from "vitest";
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { arabicNumerals } from "@/lib/arabic";
 
 /**
  * The customer's own law: an Arabic sentence on a page he can stand on carries no Latin word.
@@ -16,6 +17,11 @@ import { join } from "node:path";
  *  - a field that owns the English branch (`labelEn`, `descriptionEn`, `contentEn`, …);
  *  - markup and code — a tag, an attribute, an interpolation — which is stripped before judging;
  *  - a web address, which his own rule allows as long as it stands alone.
+ *
+ * The known limit of reading sources: a sentence built as `«ما الذي تقدمه ${BRAND}»` hides its English
+ * inside the interpolation, so this guard cannot see it. Measured 2026-10-07 that is exactly how a room
+ * page put the Latin brand mark into an Arabic question — the live walk of every station
+ * (`scratch/drive-customer-steps.mjs`) is what found it, and it stays the proof of this rule.
  */
 const CUSTOMER_TREES = ["app", "components"];
 const ADMIN_PARTS = [join("app", "admin"), join("app", "api", "admin"), join("components", "admin")];
@@ -119,5 +125,30 @@ describe("the customer's pages speak only his language", () => {
       });
     }
     expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+});
+
+/** Built from code points: a typed Arabic-Indic digit has twice lost a character in this repo. */
+const AR_DIGITS = (digits: string) =>
+  digits.replace(/[0-9]/g, (d) => String.fromCodePoint(0x0660 + Number(d)));
+
+describe("the customer's numbers are his own digits", () => {
+  it("writes a price range in Arabic-Indic digits and keeps his thousands comma", () => {
+    expect(arabicNumerals("25,000 - 45,000 جنيه")).toBe(`${AR_DIGITS("25")}\u066c${AR_DIGITS("000")} - ${AR_DIGITS("45")}\u066c${AR_DIGITS("000")} جنيه`);
+  });
+
+  it("invents no separator inside a number that is read, not summed", () => {
+    // A mobile tail or a step index must come out digit-for-digit, or «٠١٠٬٢٣٤» replaces a phone.
+    expect(arabicNumerals("01001234567")).toBe(AR_DIGITS("01001234567"));
+    expect(arabicNumerals("01")).toBe(AR_DIGITS("01"));
+    expect(arabicNumerals(3)).toBe(AR_DIGITS("3"));
+  });
+
+  it("leaves what is already his, and what is not a number", () => {
+    const already = AR_DIGITS("45000");
+    expect(arabicNumerals(already)).toBe(already);
+    expect(arabicNumerals("")).toBe("");
+    expect(arabicNumerals(null)).toBe("");
+    expect(arabicNumerals(undefined)).toBe("");
   });
 });

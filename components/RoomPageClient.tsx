@@ -12,6 +12,7 @@ import GoldPulseLoader from "./GoldPulseLoader";
 import useSessionStore, { type StylePreference } from "@/stores/useSessionStore";
 import { useImageTracking } from "@/hooks/useImageTracking";
 import { getRoomTips, type RoomDesignTip } from "@/lib/room-design-tips";
+import { arabicNumerals } from "@/lib/arabic";
 import { getRoomFallbackImages } from "@/lib/room-image-fallback";
 
 // Client-only gallery to avoid hydration issues
@@ -551,7 +552,7 @@ export default function RoomPageClient({
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 hover:opacity-100">
                             <span className="absolute bottom-3 left-3 text-xs text-white/80">
-                              {globalIndex + 1}
+                              {arabicNumerals(globalIndex + 1)}
                             </span>
                           </div>
                         </motion.div>
@@ -615,13 +616,13 @@ export default function RoomPageClient({
                     </div>
                     <div className="flex-1">
                       <span className="text-xs font-medium uppercase tracking-wider text-amber-400">
-                        {isRTL ? `معلومة تصميمية - الدفعة ${batchIndex + 1}` : `Design Tip - Batch ${batchIndex + 1}`}
+                        {arabicNumerals(isRTL ? `معلومة تصميمية - الدفعة ${batchIndex + 1}` : `Design Tip - Batch ${batchIndex + 1}`)}
                       </span>
                       <h3 className="mt-1 text-xl font-bold text-white">
-                        {isRTL ? tip.title : ((tip as any).titleEn || tip.title)}
+                        {arabicNumerals(isRTL ? tip.title : ((tip as any).titleEn || tip.title))}
                       </h3>
                       <p className="mt-2 text-base leading-relaxed text-gray-300">
-                        {isRTL ? tip.content : ((tip as any).contentEn || tip.content)}
+                        {arabicNumerals(isRTL ? tip.content : ((tip as any).contentEn || tip.content))}
                       </p>
                       <span className="mt-3 inline-block rounded-full bg-amber-500/10 px-3 py-1 text-xs text-amber-400">
                         {tip.category === "furniture" && (isRTL ? "أثاث" : "Furniture")}
@@ -656,13 +657,13 @@ export default function RoomPageClient({
             >
               <span>{isRTL ? "مشاهدة المزيد" : "View More"}</span>
               <span className="text-sm text-amber-500/60">
-                ({batchPage} من {MAX_BATCHES})
+                ({arabicNumerals(`${batchPage} من ${MAX_BATCHES}`)})
               </span>
               <ChevronDown className="h-5 w-5 transition-transform group-hover:translate-y-1" />
             </motion.button>
           )}
           <p className="text-sm text-gray-500">
-            {isRTL ? "يمكنك تحميل" : "You can load"} {MAX_BATCHES - batchPage} {isRTL ? "دفعات إضافية" : "more batches"} (30 {isRTL ? "صورة لكل دفعة" : "images per batch"})
+            {arabicNumerals(isRTL ? `يمكنك تحميل ${MAX_BATCHES - batchPage} دفعات إضافية (30 صورة لكل دفعة)` : `You can load ${MAX_BATCHES - batchPage} more batches (30 images per batch)`)}
           </p>
         </div>
       )}

@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import type { RuntimeConfig } from "@/lib/runtime-config";
+import { arabicNumerals } from "@/lib/arabic";
+import { BRAND_NAME_AR, BRAND_NAME_EN } from "@/lib/seo";
 import useSessionStore from "@/stores/useSessionStore";
 
 const containerVariants = {
@@ -124,7 +126,11 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
       <div className="border-t border-white/[0.05]">
         <div className="mx-auto max-w-7xl px-6 py-6 md:px-12 lg:px-16">
           <div className="flex flex-col items-center justify-between gap-4 text-[10px] font-mono tracking-widest md:flex-row">
-            <span className="text-gray-600">© {new Date().getFullYear()} AZENITH LIVING // ALL RIGHTS RESERVED</span>
+            <span className="text-gray-600">
+              {isRTL
+                ? arabicNumerals(`© ${new Date().getFullYear()} ${BRAND_NAME_AR} — كل الحقوق محفوظة`)
+                : `© ${new Date().getFullYear()} ${BRAND_NAME_EN} // ALL RIGHTS RESERVED`}
+            </span>
           </div>
         </div>
       </div>
