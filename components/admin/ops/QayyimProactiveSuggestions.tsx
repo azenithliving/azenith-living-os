@@ -6,6 +6,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Sparkles, Loader2, CheckCircle2, XCircle, ChevronDown, ChevronUp, Inbox } from 'lucide-react';
+import { arDigits } from '@/lib/ops/metricLabels';
+import { senderDisplayName } from '@/lib/ops/identity';
+import { ownerVoice } from '@/lib/ops/owner-voice';
 
 interface Suggestion {
   id: string;
@@ -78,7 +81,7 @@ export function QayyimProactiveSuggestions() {
     <div className="space-y-2">
       <div className="flex items-center gap-2 text-xs font-semibold text-white/60">
         <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-        اقتراحات استباقية ({suggestions.length})
+        اقتراحات استباقية ({arDigits(suggestions.length)})
       </div>
 
       {suggestions.map((s) => {
@@ -94,7 +97,7 @@ export function QayyimProactiveSuggestions() {
               <span className={`px-2 py-0.5 rounded-md border text-[10px] font-semibold shrink-0 ${ps.badge}`}>{ps.label}</span>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-white truncate">{s.title}</div>
-                <div className="text-[11px] text-white/40 truncate" dir="ltr">{s.source_agent} · {s.suggestion_type}</div>
+                <div className="text-[11px] text-white/40 truncate">{senderDisplayName(String(s.source_agent ?? ""))} · {ownerVoice(String(s.suggestion_type ?? ""))}</div>
               </div>
               {isExpanded ? <ChevronUp className="w-4 h-4 text-white/30 shrink-0" /> : <ChevronDown className="w-4 h-4 text-white/30 shrink-0" />}
             </button>

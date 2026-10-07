@@ -1,4 +1,5 @@
 import { CAPABILITY_LABELS } from "./palette";
+import { foldArabic } from "@/lib/arabic";
 
 /**
  * The employees' voice on his screen.
@@ -187,15 +188,52 @@ function speak(segment: string, tally: VoiceTally): string {
 }
 
 /**
+ * Latin glosses this store's own reports put beside their Arabic, measured on the published sales
+ * screen 2026-10-07: «العملاء المجهولون (Anonymous)», «حركة بحث (Traffic)», «درجة الحرارة
+ * (Freshness)», «قائمة العملاء (Leads)», «بانتظار رد (Needing Reply)», «النماذج (form)».
+ */
+const GLOSS_AR: Record<string, string> = {
+  anonymous: "مجهولون",
+  traffic: "حركة بحث",
+  freshness: "درجة الحرارة",
+  leads: "قائمة العملاء",
+  "needing reply": "بانتظار رد",
+  form: "نماذج",
+  forms: "نماذج",
+  vip: "كبار الشخصيات",
+};
+
+/** Folded Arabic words with the «ال» prefix loosened, so «النماذج» answers «نماذج». */
+function arWords(value: string): string[] {
+  return foldArabic(value)
+    .split(/[^\p{L}\p{M}]+/u)
+    .filter((w) => w.length > 1)
+    .map((w) => (w.startsWith("ال") && w.length > 4 ? w.slice(2) : w));
+}
+
+/**
  * The swarm writes an Arabic heading and then glosses it in its own English: «تقرير فحص إمكانية
  * الوصول (Accessibility Audit Report)». Once the gloss is translated, his screen says the same
- * words twice — so a bracketed Arabic phrase that already stands right in front of it is dropped.
+ * words twice — so a bracketed phrase that already stands right in front of it is dropped, whether
+ * the bracket was written in Arabic or in Latin. An unknown Latin gloss keeps its bracket and is
+ * translated in place: a word he cannot read is worse than a line that says the same thing twice.
  */
 function dropDuplicatedGloss(text: string): string {
   return text.replace(/[ \t]*[(（]([^()]{2,80})[)）]/g, (whole, inner: string, offset: number) => {
     const value = inner.trim();
-    if (!/\p{Script=Arabic}/u.test(value)) return whole;
-    return text.slice(0, offset).includes(value) ? "" : whole;
+    const before = text.slice(0, offset);
+    if (/\p{Script=Arabic}/u.test(value)) {
+      const gloss = arWords(value);
+      if (!gloss.length) return whole;
+      const said = new Set(arWords(before));
+      return gloss.every((w) => said.has(w)) ? "" : whole;
+    }
+    const key = foldArabic(value.toLowerCase().replace(/\s+/g, " ").trim());
+    const ar = GLOSS_AR[key];
+    if (!ar) return whole;
+    const wanted = arWords(ar);
+    const said = new Set(arWords(before));
+    return wanted.every((w) => said.has(w)) ? "" : `(${ar})`;
   });
 }
 

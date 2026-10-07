@@ -17,6 +17,7 @@ import { summarizeInterest } from "@/lib/lead-insights";
 import { LEDGER_LABELS, LEDGER_ORDER, type LedgerTotals } from "@/lib/leads-delete-guard";
 import { hoursSinceLastTouch, freshnessOf, needsReplyNow, type FreshnessKey } from "@/lib/leads-freshness";
 import { phoneForms } from "@/lib/customers/identity";
+import { arDigits } from "@/lib/ops/metricLabels";
 
 /** The cold clock's colours — the badge a customer wears for how long he has waited. */
 const FRESHNESS_STYLE: Record<FreshnessKey, string> = {
@@ -426,7 +427,7 @@ export default function CustomersPanel() {
               : "border-white/10 bg-white/[0.03] text-white/70 hover:bg-white/[0.06]"
           }`}
         >
-          محتاجين رد دلوقتى · {loading ? "--" : waitingCount}
+          محتاجين رد دلوقتى · {loading ? "--" : arDigits(waitingCount)}
         </button>
         <p className="text-[11px] text-white/35">
           البارد يعني أكثر من يوم من غير رد، والبيضيع يعني أسبوعًا. من غير تاريخ يعني ما عرفتش — مش يعني جديد.

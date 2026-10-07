@@ -21,6 +21,8 @@ import { QayyimGoalsPanel } from './QayyimGoalsPanel';
 import { QayyimQualityGate } from './QayyimQualityGate';
 import { ChatPanel } from '@/components/admin/agents/ChatPanel';
 import { AGENT_ROLES } from '@/lib/ops/agent-roles';
+import { AGENT_KEYS } from '@/lib/ops/identity';
+import { arNum } from '@/lib/ops/metricLabels';
 
 export type QayyimTab = 'overview' | 'operations' | 'improvement' | 'monitoring';
 
@@ -122,7 +124,7 @@ export function StudioPanel() {
               </div>
               <div>
                 <h2 className="text-sm font-bold text-white">مدير تشغيل المحتوى — استوديو السرب</h2>
-                <p className="text-[11px] text-white/50">8 وكلاء متخصصون بدستور واحد وذاكرة مشتركة</p>
+                <p className="text-[11px] text-white/50">{arNum(AGENT_KEYS.length)} وكلاء متخصصون بدستور واحد وذاكرة مشتركة</p>
               </div>
             </div>
             <button
@@ -175,7 +177,7 @@ export function StudioPanel() {
                           <p className="text-[10px] text-white/50 leading-snug">{agent.role}</p>
                         </div>
                       </div>
-                      <p className="text-[10px] text-white/35 mt-2">{(AGENT_ROLES[agent.key] || []).length} دورًا حقيقيًا جاهز</p>
+                      <p className="text-[10px] text-white/35 mt-2">{arNum((AGENT_ROLES[agent.key] || []).length)} دورًا حقيقيًا جاهز</p>
                       <div className="flex gap-1.5 mt-3">
                         <button onClick={() => openChat(agent.key)} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] text-white/80 font-bold">
                           <MessageSquare className="w-3 h-3" /> محادثة

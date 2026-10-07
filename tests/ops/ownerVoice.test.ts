@@ -138,6 +138,30 @@ describe("machine identifiers", () => {
   });
 });
 
+/**
+ * The four glosses measured on the published sales screen 2026-10-07, taken from the stored report
+ * text itself. The layer was already wired into this chat, and these still reached his eyes —
+ * a bracketed English word whose Arabic equivalent the very same line had already said.
+ */
+describe("an English gloss repeating the Arabic beside it", () => {
+  const cases: Array<[string, string]> = [
+    ["العملاء المجهولون (Anonymous): ١٧ مستخدماً.", "Anonymous"],
+    ["عملاء بانتظار رد (Needing Reply): ٢.", "Needing"],
+    ["درجة الحرارة (Freshness): بيضيع", "Freshness"],
+    ["تفاصيل قائمة العملاء (Leads):", "Leads"],
+    ["لا توجد حركة بحث (Traffic) مُسجلة", "Traffic"],
+    ["مساحات التفاعل: النماذج (form).", "form"],
+  ];
+  for (const [line, word] of cases) {
+    it(`keeps «${word}» off his screen: ${line.slice(0, 28)}…`, () => {
+      const out = ownerVoice(line);
+      expect(out).not.toContain(word);
+      expect(out).toMatch(/[\u0600-\u06FF]/);
+      expect(out).not.toMatch(/\(\s*\)/);
+    });
+  }
+});
+
 describe("the tally the writer logs", () => {
   it("counts what it changed instead of claiming silence", () => {
     const tally = voiceTally("Pass 429 qayyim_rivals /products/sofa-malaki");
