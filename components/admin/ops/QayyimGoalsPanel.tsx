@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Target, Loader2, RefreshCw, PlusCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { agentLabel } from '@/lib/ops/identity';
+import { arDigits } from '@/lib/ops/metricLabels';
 
 interface Goal {
   id: string;
@@ -76,7 +77,7 @@ export function QayyimGoalsPanel() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <div className="text-xs text-white/50">{goals.length} هدف</div>
+        <div className="text-xs text-white/50">{arDigits(goals.length)} هدف</div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowForm(!showForm)}

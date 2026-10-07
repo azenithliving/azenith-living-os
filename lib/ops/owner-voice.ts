@@ -230,6 +230,10 @@ function dropDuplicatedGloss(text: string): string {
     }
     const key = foldArabic(value.toLowerCase().replace(/\s+/g, " ").trim());
     const ar = GLOSS_AR[key];
+    // The pattern this store's reports write is «the Arabic word (its English twin)». When the
+    // bracket is pure Latin and Arabic stands right in front of it, the gloss repeats what he has
+    // just read — so it goes, whether or not this layer knows the word.
+    if (/^[\p{L}\p{N}\s./-]+$/u.test(value) && !/\p{Script=Arabic}/u.test(value) && /[\u0600-\u06FF]\s*$/.test(before)) return "";
     if (!ar) return whole;
     const wanted = arWords(ar);
     const said = new Set(arWords(before));
