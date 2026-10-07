@@ -452,10 +452,11 @@ export default function PassportPage() {
                   dir="ltr"
                   className="mt-3 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-right text-[13px] text-white placeholder-white/25 focus:border-amber-500/40 focus:outline-none"
                 />
-                <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className="mt-2 grid grid-cols-2 gap-2" data-dim-fields>
                   {typed.map((value, i) => (
                     <input
                       key={i}
+                      data-dim-input={i}
                       inputMode="decimal"
                       value={value}
                       onChange={(e) =>
@@ -467,13 +468,14 @@ export default function PassportPage() {
                   ))}
                 </div>
                 <button
+                  data-confirm-dims
                   onClick={confirm}
                   disabled={busy}
                   className="mt-3 w-full rounded-xl bg-amber-500/20 border border-amber-500/30 px-4 py-2.5 text-[13px] font-black text-amber-200 disabled:opacity-50"
                 >
                   {busy ? 'بأأكد…' : 'أكّد مقاساتي'}
                 </button>
-                {news && <p className="mt-2 text-[11px] leading-relaxed text-white/60">{news}</p>}
+                {news && <p data-dim-news className="mt-2 text-[11px] leading-relaxed text-white/60">{news}</p>}
               </section>
             )}
             {offer ? (
