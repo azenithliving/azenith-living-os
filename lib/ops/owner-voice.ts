@@ -59,6 +59,13 @@ const WORDS: Record<string, string> = {
   analysis: "التحليل",
   analyze: "يحلل",
   completed: "خلص",
+  // The roll's own space names, measured on the published sales screen 2026-10-07 inside
+  // «التواجد: (Profile, Conversation, Conversion)» and «لا توجد بيانات حالياً (٠ rows)».
+  profile: "الملف الشخصي",
+  conversation: "كلامه مع الموظف",
+  conversion: "تحوّل",
+  rows: "صف",
+  vip: "كبار الشخصيات",
   for: "لـ",
   hsts: "النقل الآمن الصارم",
   security: "الأمان",

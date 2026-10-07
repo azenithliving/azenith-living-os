@@ -154,6 +154,8 @@ describe("an English gloss repeating the Arabic beside it", () => {
     ["النية: تصفح (browsing).", "browsing"],
     ["مساحات التفاعل: الملف الشخصي (profile)، طلبات التسعير (quote).", "profile"],
     ["مساحات التفاعل: الملف الشخصي (profile)، طلبات التسعير (quote).", "quote"],
+    ["التواجد: (Profile, Conversation, Conversion).", "Profile"],
+    ["لا توجد بيانات حالياً (٠ rows).", "rows"],
   ];
   for (const [line, word] of cases) {
     it(`keeps «${word}» off his screen: ${line.slice(0, 28)}…`, () => {
@@ -166,9 +168,10 @@ describe("an English gloss repeating the Arabic beside it", () => {
 
   it("does not delete a Latin bracket that stands where no Arabic did", () => {
     // The rule is "the gloss repeats the Arabic in front of it". With nothing Arabic in front, the
-    // bracket is the only information he has — removing it would lose the fact, not the English.
+    // bracket is the only information he has — so the word is translated in place, not removed.
     expect(ownerVoice("(browsing) ثم رجع للكارت")).toContain("browsing");
-    expect(ownerVoice("غرفة المعيشة (VIP - فيلا ميفيدا)")).toContain("VIP");
+    expect(ownerVoice("غرفة المعيشة (VIP - فيلا ميفيدا)")).toContain("كبار الشخصيات");
+    expect(ownerVoice("غرفة المعيشة (VIP - فيلا ميفيدا)")).not.toContain("VIP");
   });
 });
 
