@@ -56,7 +56,9 @@ async function loadFromDB(): Promise<ActiveTelegramConfig | null> {
       allChats: chats,
       enabled: cfg.enabled !== false,
     };
-  } catch {
+  } catch (err: any) {
+    // A failed read is not "no config" — say which, or every later silence looks like the owner's choice.
+    console.log(`[Telegram] قراءة الإعدادات من اللوحة فشلت — راجعت البيئة بدلها: ${String(err?.message ?? err).slice(0, 120)}`);
     return null;
   }
 }
@@ -70,7 +72,10 @@ function fromEnv(): ActiveTelegramConfig {
     allChats: chatIdEnv
       ? [{ id: "env", label: "الافتراضي (env)", chatId: chatIdEnv, isDefault: true }]
       : [],
-    enabled: process.env.TELEGRAM_ENABLED === "true",
+    // The panel's own semantics: the channel is ON unless it explicitly says it is off. Reading
+    // `TELEGRAM_ENABLED === "true"` here meant a deployed app with that name unset silently
+    // disabled alerts the owner had already turned on in the panel.
+    enabled: process.env.TELEGRAM_ENABLED !== "false",
   };
 }
 
@@ -140,11 +145,23 @@ export async function broadcastTelegramMessage(
   options?: { silent?: boolean }
 ): Promise<number> {
   const cfg = await getActiveTelegramConfig();
-  if (!cfg.botToken || !cfg.enabled) return 0;
+  if (!cfg.botToken) {
+    console.log("[Telegram]broadcast: مفيش مفتاح البوت — ولا حساب اتنبّه");
+    return 0;
+  }
+  if (!cfg.enabled) {
+    console.log("[Telegram]broadcast: التنبيهات مقفولة في الإعدادات — ولا حساب اتنبّه");
+    return 0;
+  }
 
   const chats = cfg.allChats.length > 0
     ? cfg.allChats
     : cfg.chatId ? [{ id: "default", chatId: cfg.chatId, label: "", isDefault: true }] : [];
+
+  if (!chats.length) {
+    console.log("[Telegram]broadcast: مفيش حساب مضبوط في اللوحة — ولا حساب اتنبّه");
+    return 0;
+  }
 
   let landed = 0;
   for (const chat of chats) {
