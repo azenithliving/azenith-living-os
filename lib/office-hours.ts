@@ -3,15 +3,22 @@
 import { arabicNumerals } from "@/lib/arabic";
 
 /**
- * Azenith Office Hours Utility
- * Working Hours: 10 AM - 6 PM (Cairo Time)
- * Friday: Strict Holiday
+ * When the store is open, for the surfaces that must say it out loud (the qualification form and
+ * the elite page).
+ *
+ * The owner's ordered fact: every day 9 AM to 8 PM Cairo, Friday closed. Measured 2026-10-07 this
+ * module said 10 to 6 AND treated Saturday and Sunday as closed — a weekend this store does not
+ * have — while the advisor was already answering the same question correctly from the row the
+ * owner wrote in `consultant_learnings`. One fact, two owners, and the newer surface read the
+ * wrong one. The numbers are now stated once here and every sentence is built from them; the row
+ * remains the record the advisor quotes.
  */
 
 const OFFICE_CONFIG = {
-  openHour: 10,
-  closeHour: 18,
-  fridayHoliday: true,
+  openHour: 9,
+  closeHour: 20,
+  /** 5 = Friday, the only day this store does not work. */
+  holidayDay: 5,
   timezone: "Africa/Cairo",
 };
 
@@ -31,10 +38,10 @@ export function getCairoTime(): Date {
 }
 
 /**
- * Check if today is Friday
+ * The one day this store does not work.
  */
 export function isFriday(date: Date = getCairoTime()): boolean {
-  return date.getDay() === 5; // 5 = Friday
+  return date.getDay() === OFFICE_CONFIG.holidayDay; // 5 = Friday
 }
 
 /**
@@ -46,46 +53,26 @@ export function isWithinWorkingHours(date: Date = getCairoTime()): boolean {
 }
 
 /**
- * Get next working day opening time
+ * The next moment the store opens: today when that hour is still ahead, otherwise the next
+ * working day. Every day works — Friday is the only one this store closes.
  */
 export function getNextOpenTime(fromDate: Date = getCairoTime()): Date {
   const nextOpen = new Date(fromDate);
-  
-  // If currently Friday or weekend, move to Saturday/Sunday
-  const dayOfWeek = nextOpen.getDay();
-  
-  if (dayOfWeek === 5) {
-    // Friday - next open is Saturday 10 AM
+
+  if (isFriday(nextOpen)) {
     nextOpen.setDate(nextOpen.getDate() + 1);
     nextOpen.setHours(OFFICE_CONFIG.openHour, 0, 0, 0);
-  } else if (dayOfWeek === 6) {
-    // Saturday - next open is Sunday 10 AM
-    nextOpen.setDate(nextOpen.getDate() + 1);
-    nextOpen.setHours(OFFICE_CONFIG.openHour, 0, 0, 0);
-  } else if (dayOfWeek === 0) {
-    // Sunday - next open is Monday 10 AM
-    nextOpen.setDate(nextOpen.getDate() + 1);
-    nextOpen.setHours(OFFICE_CONFIG.openHour, 0, 0, 0);
-  } else {
-    // Weekday - check if before or after hours
-    const currentHour = nextOpen.getHours();
-    
-    if (currentHour < OFFICE_CONFIG.openHour) {
-      // Before opening - open today
-      nextOpen.setHours(OFFICE_CONFIG.openHour, 0, 0, 0);
-    } else {
-      // After closing - next day
-      nextOpen.setDate(nextOpen.getDate() + 1);
-      
-      // If next day is Friday, skip to Saturday
-      if (nextOpen.getDay() === 5) {
-        nextOpen.setDate(nextOpen.getDate() + 1);
-      }
-      
-      nextOpen.setHours(OFFICE_CONFIG.openHour, 0, 0, 0);
-    }
+    return nextOpen;
   }
-  
+
+  if (nextOpen.getHours() < OFFICE_CONFIG.openHour) {
+    nextOpen.setHours(OFFICE_CONFIG.openHour, 0, 0, 0);
+    return nextOpen;
+  }
+
+  nextOpen.setDate(nextOpen.getDate() + 1);
+  if (isFriday(nextOpen)) nextOpen.setDate(nextOpen.getDate() + 1);
+  nextOpen.setHours(OFFICE_CONFIG.openHour, 0, 0, 0);
   return nextOpen;
 }
 
@@ -105,6 +92,22 @@ export function formatTimeUntil(ms: number): string {
 /**
  * Get full office status with message
  */
+
+/** The hour the store opens, in the words its own sentences quote. */
+function openHourLabel(): string {
+  return clockLabel(OFFICE_CONFIG.openHour);
+}
+
+/** The hour the store closes, in the words its own sentences quote. */
+function closeHourLabel(): string {
+  return clockLabel(OFFICE_CONFIG.closeHour);
+}
+
+function clockLabel(hour24: number): string {
+  const clock = ((hour24 + 11) % 12) + 1;
+  return `${clock} ${hour24 < 12 ? "AM" : "PM"}`;
+}
+
 export function getOfficeStatus(): OfficeStatus {
   const now = getCairoTime();
   const isHoliday = isFriday(now);
@@ -120,7 +123,7 @@ export function getOfficeStatus(): OfficeStatus {
     status = "holiday";
     const daysUntil = nextOpenDate.getDay() === 6 ? "Saturday" : 
                       nextOpenDate.getDay() === 0 ? "Sunday" : "Monday";
-    message = `Our consultants are observing Friday. We will review your brief as a priority at 10 AM on ${daysUntil}.`;
+    message = `Our consultants are observing Friday. We will review your brief as a priority at ${openHourLabel()} on ${daysUntil}.`;
   } else if (!isOpen) {
     status = "closed";
     if (now.getHours() < OFFICE_CONFIG.openHour) {
@@ -128,12 +131,12 @@ export function getOfficeStatus(): OfficeStatus {
       message = `Our consultants are currently preparing masterpieces. We open in ${timeUntil}.`;
     } else {
       const daysUntil = nextOpenDate.toLocaleDateString("en-US", { weekday: "long" });
-      message = `Our consultants have concluded for the day. We will review your brief as a priority at 10 AM on ${daysUntil}.`;
+      message = `Our consultants have concluded for the day. We will review your brief as a priority at ${openHourLabel()} on ${daysUntil}.`;
     }
   } else {
     status = "open";
     const hoursRemaining = OFFICE_CONFIG.closeHour - now.getHours();
-    message = `Our consultants are available until 6 PM Cairo time (${hoursRemaining} hour${hoursRemaining > 1 ? "s" : ""} remaining).`;
+    message = `Our consultants are available until ${closeHourLabel()} Cairo time (${hoursRemaining} hour${hoursRemaining > 1 ? "s" : ""} remaining).`;
   }
   
   return {

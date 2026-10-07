@@ -764,7 +764,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
               <div className="flex gap-4 relative">
                 <div className={`z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-all ${
                   currentStep >= 1 ? "bg-[#C5A059] text-black" : "bg-[#1C1C1E] text-white/40 border border-white/5"
-                }`}>1</div>
+                }`}>{arabicNumerals("1")}</div>
                 <div>
                   <h4 className="text-sm font-semibold text-white">{isRTL ? "المعاينة الفنية ورفع المقاسات" : "Technical Survey"}</h4>
                   <p className="mt-1 text-xs text-white/50 leading-relaxed">
@@ -779,7 +779,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
               <div className="flex gap-4 relative">
                 <div className={`z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-all ${
                   currentStep >= 2 ? "bg-[#C5A059] text-black" : "bg-[#1C1C1E] text-white/40 border border-white/5"
-                }`}>2</div>
+                }`}>{arabicNumerals("2")}</div>
                 <div>
                   <h4 className="text-sm font-semibold text-white">{isRTL ? "المخططات الهندسية وتوزيع الفرش" : "2D Layouts & Planning"}</h4>
                   <p className="mt-1 text-xs text-white/50 leading-relaxed">
@@ -794,7 +794,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
               <div className="flex gap-4 relative">
                 <div className={`z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-all ${
                   currentStep >= 3 ? "bg-[#C5A059] text-black" : "bg-[#1C1C1E] text-white/40 border border-white/5"
-                }`}>3</div>
+                }`}>{arabicNumerals("3")}</div>
                 <div>
                   <h4 className="text-sm font-semibold text-white">
                     {isRTL 
@@ -813,7 +813,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
               <div className="flex gap-4 relative">
                 <div className={`z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-all ${
                   currentStep >= 4 ? "bg-[#C5A059] text-black" : "bg-[#1C1C1E] text-white/40 border border-white/5"
-                }`}>4</div>
+                }`}>{arabicNumerals("4")}</div>
                 <div>
                   <h4 className="text-sm font-semibold text-white">{isRTL ? "التنفيذ الفعلي والإشراف الهندسي" : "Turnkey Execution & Curation"}</h4>
                   <p className="mt-1 text-xs text-white/50 leading-relaxed">
