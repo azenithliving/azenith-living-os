@@ -108,6 +108,12 @@ describe("Smart Agent API Contract", () => {
       getAnalyticsReport: vi.fn(),
       getSystemHealth: vi.fn(),
     }));
+    // The guard answers from the headers alone. Without this, importing the route pulls the whole
+    // brain (keys pool, providers, database) and the transform of that graph — not the assertion —
+    // is what ran past 15 seconds when the suite ran all at once (measured 2026-10-07, twice).
+    vi.doMock("@/lib/admin-natural-brain", () => ({
+      processAdminNaturalLanguageReply: vi.fn(async () => ({ reply: "", meta: {} })),
+    }));
 
     const { POST } = await import("../app/api/admin/agent/smart/route");
     const response = await POST(
