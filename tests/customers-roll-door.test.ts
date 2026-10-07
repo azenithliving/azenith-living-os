@@ -50,6 +50,13 @@ beforeEach(() => {
     sales_orders: [{ id: "o1", customer_name: "عميل بلا وسيلة تواصل", total_amount: 1000, updated_at: "2026-09-21T07:00:00.000Z" }],
     bookings: [],
     lead_conversions: [{ id: "v1", session_id: "s9", contactMethod: "phone", contactValue: "01223334455", updated_at: "2026-09-24T07:00:00.000Z" }],
+    // A photographed paper carries its human in its own key. Measured on the published journey
+    // 2026-10-07: such a customer had a sealed sheet, votes and a pulse, and the pre-call file
+    // still said «مفيش حد بهالحرف» — because the roll did not read this table at all.
+    room_sketches: [
+      { id: "k1", customer_key: "phone:1099999991", room: "مجلس رجال", confirmed_at: "2026-10-07T18:12:40.000Z", created_at: "2026-10-07T17:50:00.000Z" },
+      { id: "k2", customer_key: "sess-abc", room: "مطبخ", created_at: "2026-10-06T09:00:00.000Z" },
+    ],
   };
 });
 
@@ -60,9 +67,19 @@ describe("the customers roll door", () => {
     expect(res.status).toBe(200);
     expect(world.state.log.sort()).toEqual([
       "select bookings", "select consultant_sessions", "select lead_conversions",
-      "select leads", "select requests", "select sales_orders", "select users",
+      "select leads", "select requests", "select room_sketches", "select sales_orders", "select users",
     ]);
     expect(writes()).toEqual([]);
+  });
+
+  it("counts a customer whose only space is his own paper", async () => {
+    const { GET } = await import("@/app/api/admin/customers/route");
+    const body = await (await GET()).json();
+    const sheetOnly = body.customers.find((c: { phone: string | null }) => String(c.phone ?? "").includes("1099999991"));
+    expect(sheetOnly, "صاحب الورقة ما دخلش الدفتر").toBeTruthy();
+    expect(sheetOnly.spaces).toEqual(["paper"]);
+    // A paper with no contact in its key stays anonymous — the roll never guesses whose sheet it is.
+    expect(body.totals.anonymous).toBeGreaterThan(0);
   });
 
   it("answers one line per human, with the money and the spaces attached", async () => {
@@ -71,7 +88,9 @@ describe("the customers roll door", () => {
     const ali = body.customers.find((c: { name: string }) => c.name === "علي سيد");
     expect(ali.spaces).toEqual(["profile", "conversation", "quote"]);
     expect(ali.money).toEqual({ quoted: 60000, paid: 15000 });
-    expect(body.totals.customers).toBe(3);
+    // Four humans now: the profile, the lead, the conversion contact, and the customer whose only
+    // space is a photographed paper (added 2026-10-07 — he used to be invisible to the roll).
+    expect(body.totals.customers).toBe(4);
     expect(body.totals.bySpace.profile).toBe(1);
     // The order with no owner is money with no human attached, so it is reported in its
     // own bucket instead of becoming a fourth customer nobody can call.
@@ -98,7 +117,9 @@ describe("the customers roll door", () => {
     expect(res.status).toBe(500);
     const body = await res.json();
     expect(body.error).toMatch(/[\u0600-\u06FF]/);
-    expect(body.failures.length).toBe(7);
+    // Eight ledgers are read now — the eighth is the papers table, added 2026-10-07 — and each one
+    // names itself in the failure list, so a half-blind roll is never presented as an empty one.
+    expect(body.failures.length).toBe(8);
     vi.doUnmock("@/lib/supabase-admin");
   });
 });

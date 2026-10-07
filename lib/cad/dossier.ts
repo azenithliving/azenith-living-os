@@ -259,6 +259,7 @@ const SPACES: Record<string, string> = {
   form: "فورم الاهتمام",
   order: "طلب",
   appointment: "موعد",
+  paper: "ورقته",
   conversion: "تحوّل",
 };
 /** The pages this store has actually recorded a customer standing on. */

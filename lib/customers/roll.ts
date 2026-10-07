@@ -18,7 +18,7 @@
 import { identityOf, phoneKey, type IdentityKind } from "@/lib/customers/identity";
 import { freshnessOf, hoursSinceLastTouch, needsReplyNow, type FreshnessKey } from "@/lib/leads-freshness";
 
-export type Space = "profile" | "conversation" | "quote" | "form" | "order" | "appointment" | "conversion";
+export type Space = "profile" | "conversation" | "quote" | "form" | "order" | "appointment" | "conversion" | "paper";
 
 export type RawRow = {
   space: Space;

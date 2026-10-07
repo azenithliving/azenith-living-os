@@ -55,7 +55,7 @@ export type CustomersRead = {
 };
 
 export async function readCustomers(client: Client): Promise<CustomersRead> {
-  const [profiles, sessions, quotes, forms, orders, appointments, conversions] = await Promise.all([
+  const [profiles, sessions, quotes, forms, orders, appointments, conversions, papers] = await Promise.all([
     read(client, "users", "id,session_id,full_name,email,phone,tier,budget,intent,score,room_type,style,service_type,last_page,updated_at,created_at"),
     read(client, "consultant_sessions", "id,session_id,updated_at,created_at"),
     read(client, "requests", "id,user_id,budget,price,paid,updated_at,created_at"),
@@ -63,9 +63,14 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
     read(client, "sales_orders", "id,user_id,customer_name,total_amount,deposit_amount,deposit_paid,updated_at,created_at"),
     read(client, "bookings", "id,user_id,status,updated_at,created_at"),
     read(client, "lead_conversions", "id,session_id,contactMethod,contactValue,status,updated_at,created_at"),
+    // A photographed paper is a human too. Measured on the published journey 2026-10-07: a customer
+    // who reached the store through his own sheet door had a sealed paper, two family votes and a
+    // pulse — and the golden pre-call file answered «مفيش حد بهالحرف», because the roll counted six
+    // other spaces and not this one.
+    read(client, "room_sketches", "id,customer_key,room,area_sqm,customer_city,confirmed_at,created_at"),
   ]);
 
-  const steps = [profiles, sessions, quotes, forms, orders, appointments, conversions];
+  const steps = [profiles, sessions, quotes, forms, orders, appointments, conversions, papers];
   const failures = steps.map((step) => step.error).filter(Boolean) as string[];
   if (failures.length > 0) {
     return {
@@ -142,6 +147,20 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
   }
   for (const b of appointments.rows) push("appointment", b, byUserId.get(String(b.user_id ?? "")));
   for (const c of conversions.rows) push("conversion", c, bySession.get(String(c.session_id ?? "")));
+  // The paper spells its human in its own key: «phone:1099999991». A key without a contact stays
+  // anonymous — the roll never guesses whose sheet it is.
+  for (const s of papers.rows) {
+    const key = String(s.customer_key ?? "");
+    const [kind, value] = key.includes(":") ? [key.slice(0, key.indexOf(":")), key.slice(key.indexOf(":") + 1)] : [null, null];
+    push("paper", {
+      created_at: s.created_at,
+      updated_at: s.confirmed_at ?? s.created_at,
+      phone: kind === "phone" ? value : null,
+      email: kind === "email" ? value : null,
+      room_type: str(s.room),
+      last_page: str(s.customer_city) ? `ورقة من ${str(s.customer_city)}` : "ورقته",
+    });
+  }
 
   const customers = rollCustomers(rows);
   const real = customers.filter((c) => c.kind !== "none");
