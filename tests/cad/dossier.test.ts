@@ -309,6 +309,9 @@ describe("the dossier speaks only the owner's language", () => {
     const phone = file.sections[0].facts.find((f) => f.label === "الموبايل")?.value ?? "";
     expect(phone).toContain(ar(1));
     expect(/[0-9]/.test(phone)).toBe(false);
+    // The trunk zero belongs to the number he dials. The stored key drops it deliberately, so a
+    // fact line that prints the key tells the owner to dial digits that never connect.
+    expect(phone).toBe(`${ar(0)}${ar(1005556677)}`);
   });
 });
 

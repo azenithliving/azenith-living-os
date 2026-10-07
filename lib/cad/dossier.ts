@@ -99,7 +99,9 @@ export function buildDossier(input: {
   const who: DossierFact[] = [];
   const name = personName(line?.name);
   if (name) who.push({ label: "الاسم", value: name });
-  if (line?.phone) who.push({ label: "الموبايل", value: arDigits(line.phone) });
+  // The number he reads here is the number he dials: the stored key drops the trunk zero on
+  // purpose, and a fact line that prints the key tells the owner to dial digits that don't connect.
+  if (line?.phone) who.push({ label: "الموبايل", value: arDigits(phoneForms(line.phone)?.display ?? line.phone) });
   const intent = intentLabel(line?.intent);
   if (intent) who.push({ label: "نيّته من كلامه", value: intent });
   const budget = budgetLabel(line?.budget);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { requireAdminApi } from "@/lib/admin-api-guard";
 import { readCustomers } from "@/lib/customers/read";
+import { phoneForms } from "@/lib/customers/identity";
 
 /**
  * The door the customers screen reads.
@@ -131,7 +132,8 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
         if (!best) return d;
         return Date.parse(String(d.created_at)) > Date.parse(String(best.created_at)) ? d : best;
       }, null);
-      const dialed = customer.phone ? `0${customer.phone}` : null;
+      // One owner for the shape of a number he can dial — the roll's key drops the trunk zero.
+      const dialed = phoneForms(customer.phone)?.display ?? null;
 
       return {
         id: customer.key,
