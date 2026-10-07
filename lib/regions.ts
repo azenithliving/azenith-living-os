@@ -158,6 +158,18 @@ export function tasteOfArea(
   return { area, papers: holders, hexes, colours };
 }
 
+/**
+ * The badge on a picture that sits close to whatever ordered the list.
+ *
+ * It used to read «قريبة من اختيارك» in every tier — so a customer was told the pictures matched a
+ * choice he never made, when what matched was his neighbours'. The label follows the tier now.
+ */
+export function nearLabel(source: TasteSource): string {
+  if (source === "area") return "قريبة من ذوق منطقتك";
+  if (source === "own") return "قريبة من اختيارك";
+  return "قريبة من لون مسجّل";
+}
+
 /** The count in the shape Arabic pluralises it, so one paper is not announced as «١ ورقات». */
 function papersPhrase(count: number): string {
   if (count === 1) return "من ورقة عميل واحد";

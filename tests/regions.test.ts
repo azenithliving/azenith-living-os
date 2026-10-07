@@ -5,6 +5,7 @@ import {
   coverageSentence,
   normalizeArea,
   areaLabel,
+  nearLabel,
   tasteLine,
   tasteOfArea,
   type AreaPaper,
@@ -129,6 +130,16 @@ describe("the line says which source ordered his pictures", () => {
   it("speaks no English to him", () => {
     for (const source of ["own", "area", "quality", "unreadable"] as const) {
       expect(tasteLine(source, evidence)).not.toMatch(/[A-Za-z]/);
+    }
+  });
+
+  it("names on the badge the taste the picture really matched", () => {
+    expect(nearLabel("own")).toBe("قريبة من اختيارك");
+    expect(nearLabel("area")).toBe("قريبة من ذوق منطقتك");
+    // A customer who chose nothing is not told a picture matched a choice he never made.
+    expect(nearLabel("area")).not.toContain("اختيارك");
+    for (const source of ["own", "area", "quality", "unreadable"] as const) {
+      expect(nearLabel(source)).not.toMatch(/[A-Za-z]/);
     }
   });
 });

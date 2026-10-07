@@ -7,7 +7,7 @@ import { linkFromPhone } from '@/lib/cad/sketch-link';
 import { imageKeyOf } from '@/lib/cad/vote-keys';
 import { cleanDeviceKey, newDeviceKey } from '@/lib/cad/visit-keys';
 import { ROOM_CHOICES } from '@/lib/cad/room-labels';
-import { AREA_CHIPS } from '@/lib/regions';
+import { AREA_CHIPS, nearLabel, type TasteSource } from '@/lib/regions';
 import { DRAWABLE_SHAPES, type Plan, type PlanOpening, type PlanShape } from '@/lib/cad/plan';
 import RoomPlan from '@/components/cad/RoomPlan';
 import ColourMatrix, { type MatrixEntry, type Pick as ColourPick } from '@/components/cad/ColourMatrix';
@@ -55,7 +55,7 @@ type SheetImage = {
 };
 
 /** Which taste the store's pictures were ordered by, said in words the customer reads. */
-type RegionTaste = { source: string; line: string; area: string | null; papers: number; colours: string[] };
+type RegionTaste = { source: TasteSource; line: string; area: string | null; papers: number; colours: string[] };
 
 const STYLE_LABEL: Record<string, string> = { modern: 'مودرن', classic: 'كلاسيك', minimal: 'مينيمال', luxury: 'فخم' };
 
@@ -706,7 +706,7 @@ export default function PassportPage() {
                               data-picture-near={img.url}
                               className="absolute right-1.5 top-1.5 rounded-full border border-amber-400/50 bg-black/70 px-2 py-0.5 text-[9px] font-bold text-amber-200"
                             >
-                              قريبة من اختيارك
+                              {nearLabel(taste?.source ?? "quality")}
                             </span>
                           )}
                         </a>

@@ -250,8 +250,13 @@ describe("the matrix where a thumb reaches it", () => {
   });
 
   it("marks the pictures that are close to what he chose", () => {
+    const regions = readFileSync("lib/regions.ts", "utf8");
     expect(page).toContain("data-picture-near={img.url}");
-    expect(page).toContain("قريبة من اختيارك");
+    // The words moved into the tier's own owner, because the badge used to say «من اختيارك» even
+    // when what matched was his neighbours' taste and he had chosen nothing.
+    expect(page).toContain('nearLabel(taste?.source ?? "quality")');
+    expect(regions).toContain("قريبة من اختيارك");
+    expect(regions).toContain("قريبة من ذوق منطقتك");
   });
 
   it("says how many of the shown pictures carry a colour, in his digits", () => {
