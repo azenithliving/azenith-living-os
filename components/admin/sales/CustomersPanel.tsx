@@ -18,6 +18,7 @@ import { LEDGER_LABELS, LEDGER_ORDER, type LedgerTotals } from "@/lib/leads-dele
 import { hoursSinceLastTouch, freshnessOf, needsReplyNow, type FreshnessKey } from "@/lib/leads-freshness";
 import { phoneForms } from "@/lib/customers/identity";
 import { arDigits } from "@/lib/ops/metricLabels";
+import { ownerVoice } from "@/lib/ops/owner-voice";
 
 /** The cold clock's colours — the badge a customer wears for how long he has waited. */
 const FRESHNESS_STYLE: Record<FreshnessKey, string> = {
@@ -475,7 +476,7 @@ export default function CustomersPanel() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-white">{lead.name}</p>
+                        <p className="font-medium text-white">{ownerVoice(lead.name)}</p>
                         {lead.ui_state?.typing_preview && (
                           <div className="flex items-center gap-1 px-1.5 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded-full animate-pulse">
                             <Brain className="w-2.5 h-2.5 text-purple-400" />
@@ -764,7 +765,7 @@ export default function CustomersPanel() {
                           <div className="mt-3 grid gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-4">
                             <div>
                               <p className="text-[10px] text-white/40">الاسم</p>
-                              <p className="text-xs font-bold text-white">{lead.name || "غير معروف"}</p>
+                              <p className="text-xs font-bold text-white">{ownerVoice(lead.name || "غير معروف")}</p>
                             </div>
                             <div>
                               <p className="text-[10px] text-white/40">الهاتف</p>
