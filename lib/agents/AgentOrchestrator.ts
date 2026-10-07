@@ -528,8 +528,8 @@ export class AgentOrchestrator {
       // the critic decided, a claim with nothing running under it is struck before it is stored.
       const honest = honestDeskClaims(response, desk);
       response = honest.text;
-      if (honest.removed.length) {
-        console.warn(`[DeskClaims] struck ${honest.removed.length} unsupported claim: ${honest.removed.map((s) => s.slice(0, 70)).join(" | ")}`);
+      if (honest.disclosed) {
+        console.warn(`[DeskClaims] no desk ran; struck ${honest.removed.length} claim(s) and disclosed the answer as unmeasured`);
       }
       if (brain.actions.length && !((metadata as any).suggestions?.length || (metadata as any).nextActions?.length)) {
         (metadata as any).suggestions = brain.actions;

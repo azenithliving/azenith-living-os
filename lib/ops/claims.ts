@@ -19,6 +19,21 @@ const CLAIM = /(فعّلنا|فعّلت|تفعيل الأدوات|تشغيل ا�
 
 const HONEST_LINE = "مفيش مكتب اتشغّل في الطلب ده — اللي فوق كلام من غير تنفيذ.";
 
+/**
+ * What a phrase list cannot catch, shape can. Live proof 2026-10-07: after the guard shipped, the
+ * leader answered «وريني إنك فعلاً شغّلت كل الأدوات» with a table of agents and their states and no
+ * desk record — none of its wording was in any list, but its SHAPE was a report. Anything that reads
+ * like evidence (a table, or a status/finding word) is therefore disclosed as unmeasured when no
+ * desk ran, whatever sentences the model chose.
+ */
+const REPORT_SHAPED = /(تقرير|بيان|حالة|حالات|تشغيل|فحص|أنجز|إنجاز|تنفيذ|منفّذ|نتيجة|مؤشر|إحصائ|رقم)/i;
+const TABLE_ROW = /\|[^|\n]+\|[^|\n]+\|/;
+
+export function looksLikeEvidence(text: string): boolean {
+  const body = String(text ?? "");
+  return TABLE_ROW.test(body) || REPORT_SHAPED.test(body);
+}
+
 /** The one fact the critic cannot infer from prose. */
 export function deskTruthFor(desk: DeskRecord): string {
   const label = desk.tool ? CAPABILITY_LABELS[desk.tool]?.split(":")[0]?.trim() || null : null;
@@ -33,11 +48,14 @@ export function deskTruthFor(desk: DeskRecord): string {
  * one sentence: the greeting, the numbers that really came from somewhere, and the question itself
  * stay where they are.
  */
-export function honestDeskClaims(text: string, desk: DeskRecord): { text: string; removed: string[] } {
+export function honestDeskClaims(
+  text: string,
+  desk: DeskRecord
+): { text: string; removed: string[]; disclosed: boolean } {
   const removed: string[] = [];
-  if (desk.tool && desk.ok !== false) return { text, removed };
-
   const source = String(text ?? "");
+  if (desk.tool && desk.ok !== false) return { text, removed, disclosed: false };
+
   const lines = source.split("\n");
   const kept = lines
     .map((line, i) => {
@@ -52,8 +70,11 @@ export function honestDeskClaims(text: string, desk: DeskRecord): { text: string
     })
     .filter((line, i) => line.length > 0 || lines[i].trim().length === 0);
 
-  if (!removed.length) return { text, removed };
-
   const body = kept.join("\n").replace(/\n{3,}/g, "\n\n").trim();
-  return { text: body ? `${body}\n\n${HONEST_LINE}` : HONEST_LINE, removed };
+  if (!removed.length) {
+    // Nothing was struck: still disclose when the answer reads like evidence without a desk.
+    if (!looksLikeEvidence(source)) return { text, removed, disclosed: false };
+    return { text: `${source.trim()}\n\n${HONEST_LINE}`, removed, disclosed: true };
+  }
+  return { text: body ? `${body}\n\n${HONEST_LINE}` : HONEST_LINE, removed, disclosed: true };
 }

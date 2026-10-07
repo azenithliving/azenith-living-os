@@ -63,6 +63,28 @@ describe("a claim with no desk behind it", () => {
     const out = honestDeskClaims("تم تنفيذ الطلب.", { tool: null });
     expect(out.text).toContain("مفيش مكتب اتشغّل");
   });
+
+  // Both fixtures are rows his chat really holds, written after the first version of this guard.
+  it("discloses a status table that no desk produced", () => {
+    const table =
+      "بناءً على التأكيد والمتابعة الميدانية، إليكم بيان بحالة تشغيل الوكلاء الحالية:\n\n| الوكيل | المهمة | الحالة |\n| :--- | :--- | :--- |\n| محتوى | ضبط النصوص | مكتمل |";
+    const out = honestDeskClaims(table, { tool: null });
+    expect(out.disclosed).toBe(true);
+    expect(out.text).toContain("مفيش مكتب اتشغّل");
+  });
+
+  it("discloses a past-tense finding with nothing behind it", () => {
+    const out = honestDeskClaims("✅ فحصت الواجهة — لا مسودة جديدة مطلوبة.", { tool: null });
+    expect(out.disclosed).toBe(true);
+    expect(out.text).toContain("مفيش مكتب اتشغّل");
+  });
+
+  it("stays out of ordinary conversation", () => {
+    const text = "أهلاً بك يا بشمهندس علاء. أنا جاهز لأي أمر.";
+    const out = honestDeskClaims(text, { tool: null });
+    expect(out.text).toBe(text);
+    expect(out.disclosed).toBe(false);
+  });
 });
 
 describe("the truth the critic is handed", () => {
