@@ -1,5 +1,7 @@
 "use client";
 
+import { arabicNumerals } from "@/lib/arabic";
+
 /**
  * Azenith Office Hours Utility
  * Working Hours: 10 AM - 6 PM (Cairo Time)
@@ -171,4 +173,28 @@ export function formatNextOpening(status: OfficeStatus): string {
   } else {
     return `${nextOpenDate.toLocaleDateString("en-US", { weekday: "long" })} at ${nextOpenDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}`;
   }
+}
+
+const DAY_NAMES_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+
+/**
+ * The same sentence in the customer's words, with his digits: «النهاردة الساعة ١٠ صباحاً».
+ *
+ * The office opens on the hour, so a minute is only printed when the store itself has one — a
+ * trailing «:٠٠» on an Arabic screen is a machine habit, not information.
+ */
+export function formatNextOpeningAr(status: OfficeStatus): string {
+  const { nextOpenDate } = status;
+  const now = getCairoTime();
+  const isToday = now.toDateString() === nextOpenDate.toDateString();
+  const isTomorrow = new Date(now.setDate(now.getDate() + 1)).toDateString() === nextOpenDate.toDateString();
+  const when = isToday ? "النهاردة" : isTomorrow ? "بكرة" : `يوم ${DAY_NAMES_AR[nextOpenDate.getDay()]}`;
+  const hour24 = nextOpenDate.getHours();
+  const clock = ((hour24 + 11) % 12) + 1;
+  const half = hour24 < 12 ? "صباحاً" : "مساءً";
+  const minutes = nextOpenDate.getMinutes();
+  const clockText = minutes
+    ? `${arabicNumerals(clock)}:${arabicNumerals(String(minutes).padStart(2, "0"))}`
+    : arabicNumerals(clock);
+  return `${when} الساعة ${clockText} ${half}`;
 }

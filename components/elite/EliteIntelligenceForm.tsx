@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useOfficeStatus, getOfficeStatus, formatNextOpening, OfficeStatus } from "@/lib/office-hours";
+import { useOfficeStatus, getOfficeStatus, formatNextOpening, formatNextOpeningAr, OfficeStatus } from "@/lib/office-hours";
+import { arabicNumerals } from "@/lib/arabic";
+import { roomNameAr } from "@/lib/rooms-catalog";
 import { 
   ALL_FURNITURE_SCOPES, 
   BUDGET_RANGES as CENTRALIZED_BUDGET_RANGES,
@@ -10,6 +12,87 @@ import {
   type FurnitureScope,
   type TimelineOption
 } from "@/lib/constants/furniture-data";
+
+/**
+ * What the qualification form says out loud. The form has always taken a `language` prop and never
+ * read it, so an Arabic customer walked from an Arabic page into an English form — measured on the
+ * published store 2026-10-07: 23 English strings, and a summary that printed the stored keys
+ * («100k-200k») instead of the range he had chosen.
+ */
+const COPY = {
+  ar: {
+    steps: ["المساحة", "الميزانية", "التوقيت", "التفاصيل", "التواصل"],
+    closedTitle: "فريقنا دلوقتي بيشتغل على مشاريعه",
+    closedLine: (when: string) => `هنراجع طلبك على الأول ${when}.`,
+    diamondTitle: "طلبك مميز",
+    diamondLine: "هيتابعى الأول من فريق التصميم.",
+    scopeTitle: "اختار المساحة اللي عايز تطوّرها",
+    scopeLine: "قولي أنهي مكان في البيت هو المطلوب",
+    budgetTitle: "نطاق الاستثمار",
+    budgetLine: (scope: string) => `الميزانية المتوقعة لـ${scope}`,
+    timelineTitle: "التوقيت",
+    timelineLine: "عايز الشغل يخلص امتى؟",
+    blueprintTitle: "عندك مخططات؟",
+    blueprintLine: "لو معاكي رسومات معمارية للمكان اذكريها.",
+    blueprintYes: "أيوه، عندي مخططات",
+    blueprintNo: "لأ، محتاج استشارة",
+    requestsTitle: "طلباتك الخاصة",
+    requestsLine: "قولي على الخامات أو الألوان أو أي تفصيل مهمك (اختياري)",
+    requestsPlaceholder: "مثلاً: رخام إيطالي، منزل ذكي، ألوان هادية…",
+    contactTitle: "بيانات التواصل",
+    contactLine: "نقدر نوصلك إزاي؟",
+    name: "الاسم بالكامل",
+    namePlaceholder: "اكتب اسمك",
+    phone: "رقم الموبايل",
+    phonePlaceholder: "مثلاً: ٠١٠٠ ١٢٣ ٤٥٦٧",
+    email: "البريد الإلكتروني (اختياري)",
+    summaryTitle: "ملخص طلبك",
+    summaryScope: "المساحة",
+    summaryBudget: "الميزانية",
+    summaryTimeline: "التوقيت",
+    back: "رجوع",
+    processing: "جارٍ الإرسال…",
+    submit: "أرسل طلبك",
+    next: "التالي",
+    none: "لسه ما اتحددتش",
+  },
+  en: {
+    steps: ["Scope", "Budget", "Timeline", "Details", "Contact"],
+    closedTitle: "Our consultants are currently preparing masterpieces.",
+    closedLine: (when: string) => `We will review your brief as a priority at ${when}.`,
+    diamondTitle: "Diamond Lead Detected",
+    diamondLine: `Priority: {priority} | Score: {score}/100`,
+    scopeTitle: "Select Your Project Scope",
+    scopeLine: "Choose the space you want to transform",
+    budgetTitle: "Investment Range",
+    budgetLine: (scope: string) => `Select your budget for ${scope}`,
+    timelineTitle: "Project Timeline",
+    timelineLine: "When do you need this completed?",
+    blueprintTitle: "Blueprint Available?",
+    blueprintLine: "Do you have architectural plans?",
+    blueprintYes: "Yes, I have plans",
+    blueprintNo: "No, need consultation",
+    requestsTitle: "Special Requests",
+    requestsLine: "Tell us about specific materials, brands, or design preferences (optional)",
+    requestsPlaceholder: "e.g., I prefer Italian marble, smart home integration, specific color scheme...",
+    contactTitle: "Contact Information",
+    contactLine: "How should we reach you?",
+    name: "Full Name *",
+    namePlaceholder: "Your name",
+    phone: "Phone Number *",
+    phonePlaceholder: "e.g., 0100 123 4567",
+    email: "Email (optional)",
+    summaryTitle: "Brief Summary",
+    summaryScope: "Scope:",
+    summaryBudget: "Budget:",
+    summaryTimeline: "Timeline:",
+    back: "Back",
+    processing: "Processing...",
+    submit: "Submit Brief",
+    next: "Continue",
+    none: "-",
+  },
+};
 
 /**
  * Azenith Elite Intelligence & Lead Qualification System
@@ -146,6 +229,8 @@ interface EliteIntelligenceFormProps {
 }
 
 export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className = "", language = "en" }: EliteIntelligenceFormProps) {
+  const ar = language !== "en";
+  const L = ar ? COPY.ar : COPY.en;
   const [step, setStep] = useState(1);
   const [officeStatus, setOfficeStatus] = useState<OfficeStatus | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -327,7 +412,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex justify-between text-sm text-white/60">
-          {["Scope", "Budget", "Timeline", "Details", "Contact"].map((label, i) => (
+          {L.steps.map((label, i) => (
             <span key={label} className={step > i ? "text-amber-400" : ""}>
               {label}
             </span>
@@ -351,9 +436,9 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
           className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4"
         >
           <p className="text-sm text-amber-200/90">
-            <span className="font-semibold">Our consultants are currently preparing masterpieces.</span>
+            <span className="font-semibold">{L.closedTitle}</span>
             <br />
-            We will review your brief as a priority at {formatNextOpening(officeStatus)}.
+            {L.closedLine(ar ? formatNextOpeningAr(officeStatus) : formatNextOpening(officeStatus))}
           </p>
         </motion.div>
       )}
@@ -368,9 +453,11 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/30 text-2xl">💎</div>
             <div>
-              <p className="font-semibold text-amber-300">Diamond Lead Detected</p>
+              <p className="font-semibold text-amber-300">{L.diamondTitle}</p>
               <p className="text-sm text-amber-200/80">
-                Priority: {qualification.priority.toUpperCase()} | Score: {qualification.score}/100
+                {ar
+                  ? L.diamondLine
+                  : `Priority: ${qualification.priority.toUpperCase()} | Score: ${qualification.score}/100`}
               </p>
             </div>
           </div>
@@ -389,8 +476,8 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
         >
           {step === 1 && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-white">Select Your Project Scope</h3>
-              <p className="text-sm text-white/60">Choose the space you want to transform</p>
+              <h3 className="text-xl font-semibold text-white">{L.scopeTitle}</h3>
+              <p className="text-sm text-white/60">{L.scopeLine}</p>
               <div className="grid gap-3 max-h-[400px] overflow-y-auto pr-2">
                 {ALL_FURNITURE_SCOPES.map((scope) => (
                   <button
@@ -405,7 +492,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
                         : "border-white/10 bg-white/[0.02] hover:border-white/20"
                     }`}
                   >
-                    <span className="font-medium text-white">{scope}</span>
+                    <span className="font-medium text-white">{ar ? roomNameAr(scope) || scope : scope}</span>
                     {formData.scope === scope && <span className="text-amber-400">✓</span>}
                   </button>
                 ))}
@@ -415,8 +502,8 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
 
           {step === 2 && formData.scope && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-white">Investment Range</h3>
-              <p className="text-sm text-white/60">Select your budget for {formData.scope}</p>
+              <h3 className="text-xl font-semibold text-white">{L.budgetTitle}</h3>
+              <p className="text-sm text-white/60">{L.budgetLine(ar ? roomNameAr(formData.scope) || formData.scope : formData.scope)}</p>
               <div className="grid gap-3">
                 {BUDGET_RANGES[formData.scope].map((budget) => (
                   <button
@@ -428,7 +515,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
                         : "border-white/10 bg-white/[0.02] hover:border-white/20"
                     }`}
                   >
-                    <span className="font-medium text-white">{budget.label}</span>
+                    <span className="font-medium text-white">{arabicNumerals(budget.label)}</span>
                     {formData.budget === budget.value && <span className="text-amber-400">✓</span>}
                   </button>
                 ))}
@@ -439,8 +526,8 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
           {step === 3 && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-white">Project Timeline</h3>
-                <p className="text-sm text-white/60">When do you need this completed?</p>
+                <h3 className="text-xl font-semibold text-white">{L.timelineTitle}</h3>
+                <p className="text-sm text-white/60">{L.timelineLine}</p>
                 <div className="mt-4 grid gap-3">
                   {TIMELINE_OPTIONS.map((option) => (
                     <button
@@ -452,7 +539,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
                           : "border-white/10 bg-white/[0.02] hover:border-white/20"
                       }`}
                     >
-                      <span className="font-medium text-white">{option.label}</span>
+                      <span className="font-medium text-white">{ar ? option.labelAr : option.label}</span>
                       {formData.timeline === option.value && <span className="text-amber-400">✓</span>}
                     </button>
                   ))}
@@ -460,8 +547,8 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-white">Blueprint Available?</h3>
-                <p className="text-sm text-white/60">Do you have architectural plans?</p>
+                <h3 className="text-lg font-semibold text-white">{L.blueprintTitle}</h3>
+                <p className="text-sm text-white/60">{L.blueprintLine}</p>
                 <div className="mt-3 flex gap-3">
                   <button
                     onClick={() => updateField("blueprintAvailable", true)}
@@ -471,7 +558,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
                         : "border-white/10 bg-white/[0.02]"
                     }`}
                   >
-                    <span className="font-medium text-white">Yes, I have plans</span>
+                    <span className="font-medium text-white">{L.blueprintYes}</span>
                   </button>
                   <button
                     onClick={() => updateField("blueprintAvailable", false)}
@@ -481,7 +568,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
                         : "border-white/10 bg-white/[0.02]"
                     }`}
                   >
-                    <span className="font-medium text-white">No, need consultation</span>
+                    <span className="font-medium text-white">{L.blueprintNo}</span>
                   </button>
                 </div>
               </div>
@@ -490,51 +577,51 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
 
           {step === 4 && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-white">Special Requests</h3>
+              <h3 className="text-xl font-semibold text-white">{L.requestsTitle}</h3>
               <p className="text-sm text-white/60">
-                Tell us about specific materials, brands, or design preferences (optional)
+                {L.requestsLine}
               </p>
               <textarea
                 value={formData.specialRequests}
                 onChange={(e) => updateField("specialRequests", e.target.value)}
-                placeholder="e.g., I prefer Italian marble, smart home integration, specific color scheme..."
+                placeholder={L.requestsPlaceholder}
                 className="min-h-[120px] w-full rounded-xl border border-white/10 bg-white/[0.05] p-4 text-white placeholder-white/30 focus:border-amber-500/50 focus:outline-none"
                 maxLength={1000}
               />
-              <p className="text-right text-xs text-white/40">{formData.specialRequests.length}/1000</p>
+              <p className="text-right text-xs text-white/40">{arabicNumerals(`${formData.specialRequests.length}/1000`)}</p>
             </div>
           )}
 
           {step === 5 && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-white">Contact Information</h3>
-              <p className="text-sm text-white/60">How should we reach you?</p>
+              <h3 className="text-xl font-semibold text-white">{L.contactTitle}</h3>
+              <p className="text-sm text-white/60">{L.contactLine}</p>
 
               <div className="space-y-4">
                 <div>
-                  <label className="mb-2 block text-sm text-white/60">Full Name *</label>
+                  <label className="mb-2 block text-sm text-white/60">{L.name}</label>
                   <input
                     type="text"
                     value={formData.fullName}
                     onChange={(e) => updateField("fullName", e.target.value)}
-                    placeholder="Your name"
+                    placeholder={L.namePlaceholder}
                     className="w-full rounded-xl border border-white/10 bg-white/[0.05] p-4 text-white placeholder-white/30 focus:border-amber-500/50 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm text-white/60">Phone Number *</label>
+                  <label className="mb-2 block text-sm text-white/60">{L.phone}</label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => updateField("phone", e.target.value)}
-                    placeholder="e.g., 0100 123 4567"
+                    placeholder={L.phonePlaceholder}
                     className="w-full rounded-xl border border-white/10 bg-white/[0.05] p-4 text-white placeholder-white/30 focus:border-amber-500/50 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm text-white/60">Email (optional)</label>
+                  <label className="mb-2 block text-sm text-white/60">{L.email}</label>
                   <input
                     type="email"
                     value={formData.email}
@@ -547,26 +634,37 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
 
               {/* Summary Preview */}
               <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                <h4 className="mb-3 text-sm font-semibold text-white/80">Brief Summary</h4>
+                <h4 className="mb-3 text-sm font-semibold text-white/80">{L.summaryTitle}</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-white/50">Scope:</span>
-                    <span className="text-white">{formData.scope || "-"}</span>
+                    <span className="text-white/50">{L.summaryScope}</span>
+                    <span className="text-white">{ar ? roomNameAr(formData.scope) || L.none : formData.scope || L.none}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/50">Budget:</span>
-                    <span className="text-white">{formData.budget || "-"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/50">Timeline:</span>
-                    <span className="text-white">{formData.timeline || "-"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/50">Lead Tier:</span>
-                    <span className={qualification.isDiamond ? "text-amber-400 font-semibold" : "text-white"}>
-                      {qualification.tier}
+                    <span className="text-white/50">{L.summaryBudget}</span>
+                    <span className="text-white">
+                      {arabicNumerals(
+                        (formData.scope && CENTRALIZED_BUDGET_RANGES[formData.scope]?.find((b) => b.value === formData.budget)?.label) || L.none,
+                      )}
                     </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50">{L.summaryTimeline}</span>
+                    <span className="text-white">
+                      {(() => {
+                        const chosen = TIMELINE_OPTIONS.find((t) => t.value === formData.timeline);
+                        return chosen ? (ar ? chosen.labelAr : chosen.label) : L.none;
+                      })()}
+                    </span>
+                  </div>
+                  {!ar && (
+                    <div className="flex justify-between">
+                      <span className="text-white/50">Lead Tier:</span>
+                      <span className={qualification.isDiamond ? "text-amber-400 font-semibold" : "text-white"}>
+                        {qualification.tier}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -581,7 +679,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
             onClick={handleBack}
             className="rounded-xl border border-white/20 bg-white/[0.05] px-6 py-3 text-white transition-colors hover:bg-white/10"
           >
-            Back
+            {L.back}
           </button>
         )}
         <button
@@ -596,12 +694,12 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
           {isSubmitting ? (
             <span className="flex items-center justify-center gap-2">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
-              Processing...
+              {L.processing}
             </span>
           ) : step === 5 ? (
-            "Submit Brief"
+            L.submit
           ) : (
-            "Continue"
+            L.next
           )}
         </button>
       </div>

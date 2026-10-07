@@ -70,7 +70,7 @@ export default async function SeoPage({ params }: SeoPageProps) {
 
       <article className="mx-auto max-w-5xl space-y-10">
         <header className="space-y-5">
-          <p className="text-sm uppercase tracking-[0.28em] text-brand-primary/70">Azenith SEO Guide</p>
+          <p className="text-sm uppercase tracking-[0.28em] text-brand-primary/70">دليل أزينث</p>
           <h1 className="font-serif text-4xl text-white md:text-6xl">{page.title}</h1>
           <p className="max-w-3xl text-base leading-8 text-white/70">{page.description}</p>
           <p className="max-w-3xl text-sm leading-7 text-white/50">{page.intent}</p>

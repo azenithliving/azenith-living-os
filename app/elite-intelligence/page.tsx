@@ -9,7 +9,8 @@ import { EliteIntelligenceForm, FormData, LeadQualification } from "@/components
 import { AestheticAdvisor, AestheticAdvice } from "@/components/elite/AestheticAdvisor";
 import { InvestmentBrackets, InvestmentTier } from "@/components/elite/InvestmentBrackets";
 import { LanguageSwitcher } from "@/components/elite/LanguageSwitcher";
-import { getOfficeStatus, formatNextOpening, OfficeStatus } from "@/lib/office-hours";
+import { getOfficeStatus, formatNextOpening, formatNextOpeningAr, OfficeStatus } from "@/lib/office-hours";
+import useSessionStore from "@/stores/useSessionStore";
 import { getViewedImageUrls } from "@/lib/image-tracking";
 
 /**
@@ -37,7 +38,11 @@ interface CompleteSubmissionData {
 function EliteIntelligenceContent() {
   const searchParams = useSearchParams();
   const [stage, setStage] = useState<SubmissionStage>("form");
-  const [language, setLanguage] = useState<Language>("en");
+  // The store's own language (Arabic until he says otherwise) opens the page; the URL and the
+  // browser only override it, and the switcher writes back so the rest of the site agrees.
+  const sessionLanguage = useSessionStore((state) => state.language);
+  const setSessionLanguage = useSessionStore((state) => state.setLanguage);
+  const [language, setLanguage] = useState<Language>(sessionLanguage);
   const [officeStatus, setOfficeStatus] = useState<OfficeStatus | null>(null);
   const [formData, setFormData] = useState<(FormData & { qualification: LeadQualification }) | null>(null);
   const [investmentTier, setInvestmentTier] = useState<InvestmentTier | null>(null);
@@ -155,7 +160,13 @@ function EliteIntelligenceContent() {
     <main className={`min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a] ${isRTL ? "rtl" : "ltr"}`}>
       {/* Language Switcher */}
       <div className="fixed right-4 top-4 z-50">
-        <LanguageSwitcher currentLang={language} onChange={setLanguage} />
+        <LanguageSwitcher
+          currentLang={language}
+          onChange={(lang) => {
+            setLanguage(lang);
+            setSessionLanguage(lang);
+          }}
+        />
       </div>
 
       <div className="mx-auto max-w-7xl px-6 py-12">
@@ -195,7 +206,7 @@ function EliteIntelligenceContent() {
               dir={language === "ar" ? "rtl" : "ltr"}
             >
               {language === "ar" 
-                ? `فريق الاستشارات يستعد للإبداع. نراجع طلبك عند ${formatNextOpening(officeStatus)}`
+                ? `فريق الاستشارات يستعد للإبداع. نراجع طلبك ${formatNextOpeningAr(officeStatus)}`
                 : officeStatus.message
               }
             </p>
