@@ -146,10 +146,12 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : "Unexpected error";
 
     if (message.includes("Supabase schema is not initialized")) {
+      // This sentence reaches the customer's screen, so the machine name stays in the log.
+      console.error("[EliteLeads] المخزن غير مهيأ بعد:", message);
       return NextResponse.json(
         {
           ok: false,
-          message: "قاعدة البيانات على Supabase لم يتم تجهيزها بعد. طبّق ملف migrations أولًا ثم أعد المحاولة.",
+          message: "في مشكلة مؤقتة في حفظ طلبك، جرّب بعد شوية.",
         },
         { status: 503 },
       );

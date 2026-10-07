@@ -582,7 +582,7 @@ export async function POST(
     if ((asksCurrentLocation(message) || asksFoodNearby(message)) && !clientLocation) {
       const noLocationReply = language === "en"
         ? "I cannot access your live location yet. Please allow location permission in the browser, then send the request again so I can use your real GPS position."
-        : "مش قادر أوصل لموقعك الحي لسه. فعّل إذن الموقع من المتصفح وابعت الطلب تاني، وساعتها هستخدم GPS الحقيقي بدل التخمين.";
+        : "مش قادر أوصل لموقعك الحي لسه. فعّل إذن الموقع من المتصفح وابعت الطلب تاني، وساعتها هستخدم موقعك الحقيقي بدل التخمين.";
       conversationHistory.push({
         role: "assistant",
         content: noLocationReply,
@@ -742,7 +742,7 @@ export async function POST(
       allLearnings.push(profileContext);
     }
     if (hesitationDetected) {
-      allLearnings.push("[سلوك العميل: تم رصد تردد وبطء في الكتابة. قدم الدعم المعنوي والـ Social Proof وقسّم إجابتك لتكون مبسطة جداً ولا تضغط على العميل.]");
+      allLearnings.push("[سلوك العميل: تم رصد تردد وبطء في الكتابة. قدم الدعم المعنوي وتجارب عملاء مثله، وقسّم إجابتك لتكون مبسطة جداً ولا تضغط على العميل.]");
     }
 
     // A question whose answer is a recorded fact gets the fact, not a model's guess. Measured

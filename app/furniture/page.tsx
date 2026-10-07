@@ -20,7 +20,7 @@ export default function FurniturePage() {
     <main className="px-6 py-12 md:px-10 lg:px-16">
       <div className="mx-auto max-w-7xl space-y-12">
         <div className="text-center space-y-6">
-          <p className="text-sm uppercase tracking-[0.3em] text-brand-primary/70">Furniture Hub</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-brand-primary/70">معرض الأثاث</p>
           <h1 className="font-serif text-5xl md:text-7xl text-white">جميع قطع الأثاث حسب الغرفة</h1>
           <p className="max-w-3xl mx-auto text-xl leading-8 text-white/80">تصفح كامل الكتالوج مقسم حسب سياق الغرفة لتجربة متكاملة.</p>
           <Link href="/rooms" className="inline-flex items-center gap-3 rounded-full border border-white/20 px-8 py-4 text-lg font-semibold text-white hover:border-brand-primary hover:text-brand-primary transition-all">

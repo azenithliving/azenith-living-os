@@ -288,7 +288,7 @@ export const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { eyebrow: s
     modern: {
       eyebrow: "تنظيم عصري",
       title: "خزائن ملابس مينيمال",
-      summary: "أدراج مخفية وإضاءة LED ذكية لتجربة ملابس منظمة وهادئة.",
+      summary: "أدراج مخفية وإضاءة مدمجة ذكية لتجربة ملابس منظمة وهادئة.",
     },
     classic: {
       eyebrow: "خزائن ملكية",

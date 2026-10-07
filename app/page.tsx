@@ -78,7 +78,7 @@ export default function Home() {
 
           <section className="relative z-20 mx-auto max-w-6xl px-6 py-16 md:px-10" aria-labelledby="seo-entry-title">
             <div className="space-y-5 border-t border-white/10 pt-10">
-              <p className="text-sm uppercase tracking-[0.28em] text-brand-primary/70">Azenith Living Search Hub</p>
+              <p className="text-sm uppercase tracking-[0.28em] text-brand-primary/70">مركز تصفّح أزينث ليفينج</p>
               <h2 id="seo-entry-title" className="font-serif text-3xl text-white md:text-5xl">
                 تصميم داخلي فاخر في مصر يبدأ من فهم المساحة قبل اختيار الشكل.
               </h2>

@@ -164,6 +164,23 @@ export const slides = [
   stats: SlideStat[];
 }>;
 
+/**
+ * `pillar` is the key the hero routes its button by, so the word itself stays Latin in the data.
+ * What the customer hears is the label: the hero's live region announces it inside an Arabic sentence.
+ */
+const PILLAR_LABELS: Record<string, string> = {
+  DISCOVERY: "الاستكشاف",
+  MATERIALS: "الخامات",
+  DESIGN: "التصميم",
+  PROCESS: "المنهج",
+  SPACES: "المساحات",
+  DETAILS: "التفاصيل",
+};
+
+export function pillarLabel(pillar: string | null | undefined): string {
+  return PILLAR_LABELS[String(pillar ?? "")] ?? "";
+}
+
 
 export default function AzenithLegacy() {
   const currentLang = useSessionStore((state) => state.language);

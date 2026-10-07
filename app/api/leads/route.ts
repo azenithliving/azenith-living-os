@@ -73,10 +73,12 @@ ${clientNotes}
     const message = error instanceof Error ? error.message : "Unexpected error";
 
     if (message.includes("Supabase schema is not initialized")) {
+      // The customer reads this sentence, so it carries no machine name; the reason stays in the log.
+      console.error("[Leads] المخزن غير مهيأ بعد:", message);
       return NextResponse.json(
         {
           ok: false,
-          message: "قاعدة البيانات على Supabase لم يتم تجهيزها بعد. طبّق ملف migrations أولًا ثم أعد المحاولة.",
+          message: "المخزن لسه ما اتجهّزش، فطلبك اتسجّل عندنا بس ما كملش. جرّب بعد شوية أو ابعتلنا على واتساب.",
         },
         { status: 503 },
       );

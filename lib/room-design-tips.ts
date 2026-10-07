@@ -87,7 +87,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "living-industrial-3",
         title: "الجدران الطوبية",
         titleEn: "Brick walls",
-        content: "جدار طوبي واحد كـ Accent Wall يكفي. يمكن دهانه بالشمع الشفاف لتقليل الغبار مع الحفاظ على المظهر الخام.",
+        content: "جدار طوبي واحد بلون مميز يكفي. يمكن دهانه بالشمع الشفاف لتقليل الغبار مع الحفاظ على المظهر الخام.",
         contentEn: "One brick wall such as Accent Wall is enough. Can be coated with clear wax to reduce dust while maintaining a raw look.",
         category: "materials"
       }
@@ -105,7 +105,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "living-scandi-2",
         title: "إضاءة هايغ",
         titleEn: "High lighting",
-        content: "الإضاءة الدافئة (2700-3000K) أساسية. استخدم مصابيح أرضية بتصميم بسيط وستائر خفيفة تسمح بالضوء.",
+        content: "الإضاءة الدافئة (2700-3000 كلفن) أساسية. استخدم مصابيح أرضية بتصميم بسيط وستائر خفيفة تسمح بالضوء.",
         contentEn: "Warm lighting (2700-3000K) is essential. Use floor lamps with a simple design and light curtains that let in the light.",
         category: "lighting"
       },
@@ -143,7 +143,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "bedroom-modern-3",
         title: "إضاءة مخفية",
         titleEn: "Hidden lighting",
-        content: "استخدم إضاءة LED مخفية خلف التسريحة أو أسفل السرير. الإضاءة الدافئة (2700K) مثالية لغرف النوم.",
+        content: "استخدم إضاءة مخفية خلف التسريحة أو أسفل السرير. الإضاءة الدافئة (2700 كلفن) مثالية لغرف النوم.",
         contentEn: "Use hidden LED lighting behind the dresser or under the bed. Warm lighting (2700K) is ideal for bedrooms.",
         category: "lighting"
       }
@@ -251,7 +251,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "kitchen-modern-3",
         title: "إضاءة المهام",
         titleEn: "Task lighting",
-        content: "إضاءة LED مخفية تحت الخزائن العلوية للإضاءة المباشرة على سطح العمل. درجة حرارة 4000K للوضوح.",
+        content: "إضاءة مخفية تحت الخزائن العلوية للإضاءة المباشرة على سطح العمل. درجة حرارة 4000 كلفن للوضوح.",
         contentEn: "LED lighting is hidden under the upper cabinets for direct illumination on the work surface. 4000K temperature for clarity.",
         category: "lighting"
       }
@@ -277,7 +277,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "kitchen-classic-3",
         title: "الإضاءة الدافئة",
         titleEn: "Warm lighting",
-        content: "ثريا مركزية فوق جزيرة الطبخ أو طاولة الطعام. إضاءة دافئة (2700-3000K) للجو العائلي.",
+        content: "ثريا مركزية فوق جزيرة الطبخ أو طاولة الطعام. إضاءة دافئة (2700-3000 كلفن) للجو العائلي.",
         contentEn: "A central chandelier above your cooking island or dining table. Warm light (2700-3000K) for family atmosphere.",
         category: "lighting"
       }
@@ -459,7 +459,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "office-modern-2",
         title: "إضاءة المهام",
         titleEn: "Task lighting",
-        content: "مصباح مكتب LED بإضاءة بيضاء (4000-5000K). ضعه على الجانب الأيسر إذا كنت أيمن لتقليل الظل.",
+        content: "مصباح مكتب بإضاءة بيضاء (4000-5000 كلفن). ضعه على الجانب الأيسر إذا كنت أيمن لتقليل الظل.",
         contentEn: "White LED desk lamp (4000-5000K). Place it on the left side if you are right-handed to reduce shadow.",
         category: "lighting"
       },
@@ -493,7 +493,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "office-classic-3",
         title: "الإضاءة الدافئة",
         titleEn: "Warm lighting",
-        content: "براني مكتب كلاسيكية مع ثريا صغيرة. إضاءة دافئة (2700-3000K) للتركيز المريح.",
+        content: "براني مكتب كلاسيكية مع ثريا صغيرة. إضاءة دافئة (2700-3000 كلفن) للتركيز المريح.",
         contentEn: "Classic desk stands with small chandelier. Warm light (2700-3000K) for comfortable focusing.",
         category: "lighting"
       }
@@ -565,9 +565,9 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
       },
       {
         id: "dressing-modern-2",
-        title: "إضاءة LED",
+        title: "إضاءة مدمجة",
         titleEn: "LED lighting",
-        content: "إضاءة LED داخل الخزائن وعلى جانبي المرايا. إضاءة بيضاء (4000K) للألوان الحقيقية.",
+        content: "إضاءة داخل الخزائن وعلى جانبي المرايا. إضاءة بيضاء (4000 كلفن) للألوان الحقيقية.",
         contentEn: "LED lighting inside the cabinets and on both sides of the mirrors. White lighting (4000K) for true colors.",
         category: "lighting"
       },
@@ -593,7 +593,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "dressing-classic-2",
         title: "الإضاءة الفاخرة",
         titleEn: "Luxurious lighting",
-        content: "ثريا صغيرة أو مصابيح جدارية كلاسيكية. إضاءة دافئة (2700K) للجو الأنيق.",
+        content: "ثريا صغيرة أو مصابيح جدارية كلاسيكية. إضاءة دافئة (2700 كلفن) للجو الأنيق.",
         contentEn: "Small chandelier or classic wall lamps. Warm lighting (2700K) for elegant atmosphere.",
         category: "lighting"
       },
@@ -645,7 +645,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "dressing-scandi-2",
         title: "الإضاءة الطبيعية",
         titleEn: "Natural lighting",
-        content: "نافذة كبيرة إن أمكن، أو إضاءة LED بيضاء نقية. مرايا تعكس الضوء الطبيعي.",
+        content: "نافذة كبيرة إن أمكن، أو إضاءة بيضاء نقية. مرايا تعكس الضوء الطبيعي.",
         contentEn: "A large window if possible, or pure white LED lighting. Mirrors reflect natural light.",
         category: "lighting"
       },
@@ -843,7 +843,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "teen-industrial-3",
         title: "الإضاءة الجريئة",
         titleEn: "الإضاءة الجريئة",
-        content: "مصابيح معلقة بتصميم صناعي. يمكن إضافة إضاءة LED ملونة للتخصيص.",
+        content: "مصابيح معلقة بتصميم صناعي. يمكن إضافة إضاءة ملونة للتخصيص.",
         contentEn: "مصابيح معلقة بتصميم صناعي. يمكن إضافة إضاءة LED ملونة للتخصيص.",
         category: "lighting"
       }
@@ -1025,7 +1025,7 @@ export const ROOM_DESIGN_TIPS: Record<string, Record<string, RoomDesignTip[]>> =
         id: "lounge-classic-2",
         title: "الإضاءة الدافئة",
         titleEn: "Warm lighting",
-        content: "براني أرضية كلاسيكية بظل قماشي. إضاءة دافئة (2700K) للاسترخاء والقراءة.",
+        content: "براني أرضية كلاسيكية بظل قماشي. إضاءة دافئة (2700 كلفن) للاسترخاء والقراءة.",
         contentEn: "Classic floor runners with fabric shade. Warm light (2700K) for relaxing and reading.",
         category: "lighting"
       },
@@ -1246,7 +1246,7 @@ function getGenericTips(count: number): RoomDesignTip[] {
       id: "generic-4",
       title: "جودة الخامات",
         titleEn: "Quality of materials",
-        content: "استثمر في الخامات الطبيعية: خشب صلب، قطن، كتان. تدوم longer وتتحسن مع الوقت.",
+        content: "استثمر في الخامات الطبيعية: خشب صلب، قطن، كتان. تدوم طويلاً وتتحسن مع الوقت.",
         contentEn: "Invest in natural materials: solid wood, cotton, linen. It lasts longer and gets better with time.",
       category: "materials"
     },

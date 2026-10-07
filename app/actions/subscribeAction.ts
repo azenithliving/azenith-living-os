@@ -169,7 +169,7 @@ async function sendWelcomeEmail(email: string): Promise<void> {
     await resend.emails.send({
       from: "Azenith Living <noreply@azenithliving.com>",
       to: email,
-      subject: "مرحبًا بك في قائمة النخبة | Azenith Living",
+      subject: "مرحبًا بك في قائمة نخبة أزينث ليفينج",
       html: `
         <!DOCTYPE html>
         <html lang="en" dir="ltr">

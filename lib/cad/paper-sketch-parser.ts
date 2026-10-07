@@ -183,7 +183,7 @@ export async function readPaperSketch(input: {
         ? await readWithOfflineEngine(Buffer.from(input.base64, 'base64'), input.ocrBudgetMs ?? 40_000)
         : // Not run, and not a failure to hide: a caller that wants this witness has to ask
           // for it by name, because by default it costs 40 seconds and returns nothing.
-          { ran: false, text: '', confidence: null, ms: 0, error: 'مطلوب صراحة (runOffline: true)' };
+          { ran: false, text: '', confidence: null, ms: 0, error: 'القارئ الذكي لم يُشغَّل — لا يتم إلا بطلب صريح' };
 
   const ocrSignatures = new Set<string>();
   const ocrNumbers: number[] = [];

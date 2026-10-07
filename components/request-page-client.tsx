@@ -34,9 +34,9 @@ const PROPERTY_STATUSES = [
 ];
 
 const BUDGET_GRADES = [
-  { value: "premium", labelAr: "فئة متميزة (Premium) - تشطيب راقٍ بميزانية مدروسة", labelEn: "Premium - Elegant design with calculated budget" },
-  { value: "luxury", labelAr: "فئة فاخرة (Luxury) - خامات وتفاصيل مخصصة مستوردة", labelEn: "Luxury - Imported materials and custom details" },
-  { value: "ultra", labelAr: "فئة النخبة (Ultra-Luxury) - فيلات وقصور ومواصفات خاصة جداً", labelEn: "Ultra-Luxury - Palaces, villas, unique specifications" },
+  { value: "premium", labelAr: "فئة متميزة - تشطيب راقٍ بميزانية مدروسة", labelEn: "Premium - Elegant design with calculated budget" },
+  { value: "luxury", labelAr: "فئة فاخرة - خامات وتفاصيل مخصصة مستوردة", labelEn: "Luxury - Imported materials and custom details" },
+  { value: "ultra", labelAr: "فئة النخبة - فيلات وقصور ومواصفات خاصة جداً", labelEn: "Ultra-Luxury - Palaces, villas, unique specifications" },
   { value: "other", labelAr: "ميزانية محددة أخرى (اكتب يدوياً)", labelEn: "Other specification (Write manually)" }
 ];
 
@@ -48,9 +48,9 @@ const TIMELINES = [
 ];
 
 const STYLES = [
-  { value: "modern", labelAr: "مودرن (Modern)", labelEn: "Modern" },
+  { value: "modern", labelAr: "مودرن", labelEn: "Modern" },
   { value: "classic", labelAr: "نيوكلاسيك / كلاسيك", labelEn: "Classic / Neo-Classic" },
-  { value: "warm_modern", labelAr: "مودرن دافئ (Warm Modern)", labelEn: "Warm Modern" },
+  { value: "warm_modern", labelAr: "مودرن دافئ", labelEn: "Warm Modern" },
   { value: "industrial", labelAr: "صناعي / بوهيمي", labelEn: "Industrial / Bohemian" },
   { value: "other", labelAr: "أسلوب وتفضيل آخر (اكتب يدوياً)", labelEn: "Other Style (Write manually)" }
 ];
@@ -284,7 +284,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
         <section className="space-y-8">
           <div className="space-y-3">
             <span className="text-xs font-bold uppercase tracking-[0.3em] text-[#C5A059]/80">
-              {isRTL ? "Interactive Project Brief Builder" : "Intelligent Intake"}
+              {isRTL ? "كراسة المشروع التفاعلية" : "Intelligent Intake"}
             </span>
             <h1 className="font-serif text-4xl text-white md:text-5xl lg:text-6xl leading-tight">
               {isRTL ? "خطّط كراسة مشروعك تفاعلياً" : "Build Your Project Brief."}
@@ -778,7 +778,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   <h4 className="text-sm font-semibold text-white">{isRTL ? "المخططات الهندسية وتوزيع الفرش" : "2D Layouts & Planning"}</h4>
                   <p className="mt-1 text-xs text-white/50 leading-relaxed">
                     {isRTL 
-                      ? "رسم مخططات التوزيع المعماري (2D Layouts) وتحديد الحركة والـ Moodboards البصرية."
+                      ? "رسم مخططات التوزيع المعماري وتحديد الحركة واللوحات المزاجية البصرية."
                       : "Drafting layout plans, furniture placement pathways, and aesthetic moodboards."}
                   </p>
                 </div>
@@ -792,12 +792,12 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                 <div>
                   <h4 className="text-sm font-semibold text-white">
                     {isRTL 
-                      ? `رندر 3D وتحديد خامات الـ ${finalStyle || "تصميم"}` 
+                      ? `صور مجسّمة وتحديد خامات ${finalStyle || "التصميم"}` 
                       : `3D Render & Materials`}
                   </h4>
                   <p className="mt-1 text-xs text-white/50 leading-relaxed">
                     {isRTL 
-                      ? "إنشاء صور ثلاثية الأبعاد كاملة، واختيار الألوان وجداول مواصفات التشطيب والكميات (BOQ)."
+                      ? "إنشاء صور ثلاثية الأبعاد كاملة، واختيار الألوان وجداول مواصفات التشطيب والكميات."
                       : "Creating hyper-realistic 3D designs, choosing finishing colors, and completing Bill of Quantities."}
                   </p>
                 </div>
@@ -827,13 +827,13 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
               {isRTL ? "معاينة كراسة الشروط" : "Brief Preview"}
             </h4>
             <div className="space-y-3 text-xs bg-[#1C1C1F]/60 rounded-2xl p-5 border border-white/5 leading-relaxed text-white/80 font-mono">
-              <div><span className="text-white/40">PROPERTY:</span> {finalPropertyType || "..."}</div>
-              <div><span className="text-white/40">STATUS:</span> {finalPropertyStatus || "..."}</div>
-              <div><span className="text-white/40">SPACES:</span> {finalSpaces || "..."}</div>
-              <div><span className="text-white/40">BUDGET LEVEL:</span> {finalBudgetGrade || "..."}</div>
-              <div><span className="text-white/40">TIMELINE:</span> {finalTimeline || "..."}</div>
-              <div><span className="text-white/40">PREFERRED STYLE:</span> {finalStyle || "..."}</div>
-              <div><span className="text-white/40">CLIENT PRIORITY:</span> {finalFocus || "..."}</div>
+              <div><span className="text-white/40">{isRTL ? "نوع العقار:" : "PROPERTY:"}</span> {finalPropertyType || "..."}</div>
+              <div><span className="text-white/40">{isRTL ? "حالة العقار:" : "STATUS:"}</span> {finalPropertyStatus || "..."}</div>
+              <div><span className="text-white/40">{isRTL ? "الفراغات المطلوبة:" : "SPACES:"}</span> {finalSpaces || "..."}</div>
+              <div><span className="text-white/40">{isRTL ? "فئة الميزانية:" : "BUDGET LEVEL:"}</span> {finalBudgetGrade || "..."}</div>
+              <div><span className="text-white/40">{isRTL ? "الجدول الزمني:" : "TIMELINE:"}</span> {finalTimeline || "..."}</div>
+              <div><span className="text-white/40">{isRTL ? "النمط المفضل:" : "PREFERRED STYLE:"}</span> {finalStyle || "..."}</div>
+              <div><span className="text-white/40">{isRTL ? "أولوية العميل:" : "CLIENT PRIORITY:"}</span> {finalFocus || "..."}</div>
             </div>
           </div>
 

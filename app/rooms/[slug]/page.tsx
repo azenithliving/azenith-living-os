@@ -228,7 +228,7 @@ const ROOM_STYLE_DESCRIPTIONS: Record<string, Record<string, { category: string;
     scandinavian: { category: "نقاء وضوء", categoryEn: "Purity & Light", description: "أبيض نقي وخشب فاتح مع إضاءة طبيعية تمنح الطاقة والنظافة.", descriptionEn: "Pure white and light wood with natural lighting providing energy and cleanliness." },
   },
   "dressing-room": {
-    modern: { category: "تنظيم عصري", categoryEn: "Modern Organization", description: "أدراج مخفية وإضاءة LED ذكية لتجربة ملابس منظمة وهادئة.", descriptionEn: "Hidden drawers and smart LED lighting for an organized and calm dressing experience." },
+    modern: { category: "تنظيم عصري", categoryEn: "Modern Organization", description: "أدراج مخفية وإضاءة مدمجة ذكية لتجربة ملابس منظمة وهادئة.", descriptionEn: "Hidden drawers and smart LED lighting for an organized and calm dressing experience." },
     classic: { category: "خزائن ملكية", categoryEn: "Royal Wardrobes", description: "مرايا مزخرفة وخزائن خشبية ثقيلة بتفاصيل ذهبية راقية.", descriptionEn: "Decorated mirrors and heavy wooden cabinets with elegant golden details." },
     industrial: { category: "عرض جريء", categoryEn: "Bold Display", description: "أنابيب معدنية ورفوف خشبية لعرض الملابس بأسلوب لوفت عصري.", descriptionEn: "Metal pipes and wooden shelves for displaying clothes in a modern loft style." },
     scandinavian: { category: "بساطة عملية", categoryEn: "Practical Simplicity", description: "تنظيم واضح وإضاءة ناعمة مع خشب فاتح لراحة يومية.", descriptionEn: "Clear organization and soft lighting with light wood for daily comfort." },

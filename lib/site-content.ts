@@ -67,7 +67,7 @@ export const roomDefinitions: RoomDefinition[] = [
         images: ["/images/master-bed-1.jpg", "/images/master-bed-2.jpg", "/images/master-bed-3.jpg"],
         video: "/videos/master-bed-tour.mp4",
         description: "سرير بتصميم مترف يجمع بين الراحة والأناقة مع خامات فندقية عالية الجودة.",
-        priceRange: "25,000 - 45,000 EGP",
+        priceRange: "25,000 - 45,000  جنيه",
         features: ["خشب طبيعي", "مراتب متقدمة", "إضاءة مدمجة"],
         variations: ["بيج كلاسيك", "رمادي مودرن", "أسود فاخر"]
       },
@@ -77,7 +77,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Nightstands",
         images: ["/images/nightstands-1.jpg", "/images/nightstands-2.jpg"],
         description: "كومودات أنيقة مع تخزين ذكي وإضاءة ليلية لتجربة نوم مثالية.",
-        priceRange: "8,000 - 15,000 EGP",
+        priceRange: "8,000 - 15,000  جنيه",
         features: ["تخزين متعدد", "إضاءة لمسة واحدة"],
         variations: ["خشبي", "معدني"]
       },
@@ -87,7 +87,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Master Bedroom Sofa",
         images: ["/images/sofa-master-1.jpg", "/images/sofa-master-2.jpg"],
         description: "كنبة أنيقة لجلسات القراءة في الغرفة الرئيسية، خامات فندقية فاخرة.",
-        priceRange: "18,000 - 30,000 EGP",
+        priceRange: "18,000 - 30,000  جنيه",
         features: ["جلد طبيعي", "تخزين داخلي", "تصميم مدمج"],
         variations: ["بيج", "رمادي", "بني"]
       }
@@ -113,7 +113,7 @@ export const roomDefinitions: RoomDefinition[] = [
         images: ["/images/living-sofa-1.jpg", "/images/living-sofa-2.jpg"],
         video: "/videos/living-sofa.mp4",
         description: "كنبة مريحة للجلسات العائلية، أقمشة مقاومة وتصميم عصري.",
-        priceRange: "22,000 - 40,000 EGP",
+        priceRange: "22,000 - 40,000  جنيه",
         features: ["أقمشة فاخرة", "إطار خشبي قوي", "وسائد إضافية"],
         variations: ["رمادي", "بيج", "أزرق بحري"]
       },
@@ -123,8 +123,8 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Living Room Corner Sofa",
         images: ["/images/corner-sofa-living-1.jpg"],
         description: "كنبة زاوية توفر مساحة ومرونة للصالات الكبيرة والصغيرة.",
-        priceRange: "35,000 - 55,000 EGP",
-        features: ["تصميم L-shape", "تخزين تحت الجلوس", "متعددة الاستخدامات"],
+        priceRange: "35,000 - 55,000  جنيه",
+        features: ["تصميم زاوية", "تخزين تحت الجلوس", "متعددة الاستخدامات"],
         variations: ["رمادي كبير", "بيج مدبب"]
       }
     ]
@@ -148,7 +148,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Small Kitchen Sofa",
         images: ["/images/kitchen-sofa-1.jpg"],
         description: "كنبة بجانب البار للجلسات السريعة في المطبخ الحديث.",
-        priceRange: "10,000 - 18,000 EGP",
+        priceRange: "10,000 - 18,000  جنيه",
         features: ["مقاومة للرطوبة", "سهلة التنظيف", "تصميم مدمج"],
         variations: ["رمادي", "أبيض"]
       }
@@ -173,7 +173,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Small Dressing Sofa",
         images: ["/images/dressing-sofa-1.jpg"],
         description: "كنبة أنيقة للجلوس أثناء التجربة في غرفة الملابس.",
-        priceRange: "9,000 - 15,000 EGP",
+        priceRange: "9,000 - 15,000  جنيه",
         features: ["جلد ناعم", "تصميم نحيف", "سهلة الحركة"],
         variations: ["أسود", "بيج"]
       }
@@ -198,7 +198,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Home Office Sofa",
         images: ["/images/office-sofa-1.jpg"],
         description: "كنبة مريحة للزوار أو استراحة العمل في المكتب المنزلي.",
-        priceRange: "14,000 - 24,000 EGP",
+        priceRange: "14,000 - 24,000  جنيه",
         features: ["دعم ظهر", "جلد أو قماش", "عجلات اختيارية"],
         variations: ["رمادي", "أسود", "بيج"]
       }
@@ -224,7 +224,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Luxury Dining Table",
         images: ["/images/dining-table-1.jpg"],
         description: "طاولة طعام من خشب طبيعي تدوم لأجيال.",
-        priceRange: "30,000 - 50,000 EGP",
+        priceRange: "30,000 - 50,000  جنيه",
         features: ["خشب طبيعي", "قابلة للتوسعة"],
         variations: ["8 مقاعد", "10 مقاعد"]
       }
@@ -263,7 +263,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Smart Kids Bed",
         images: ["/images/youth-sofa-1.jpg"],
         description: "سرير مريح وآمن مصمم خصيصًا للأطفال مع حواف دائرية وتخزين تحت السرير.",
-        priceRange: "12,000 - 22,000 EGP",
+        priceRange: "12,000 - 22,000  جنيه",
         features: ["خشب آمن", "حواف دائرية", "تخزين مدمج"],
         variations: ["أزرق باستيل", "وردي ناعم", "أبيض خشبي"]
       }
@@ -288,7 +288,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Teen Study Desk Set",
         images: ["/images/office-sofa-1.jpg"],
         description: "مكتب دراسي متكامل بتصميم مودرن مع إدارة كابلات وأرفف متعددة.",
-        priceRange: "15,000 - 28,000 EGP",
+        priceRange: "15,000 - 28,000  جنيه",
         features: ["إدارة كابلات", "أرفف قابلة للتعديل", "كرسي مريح"],
         variations: ["رمادي عصري", "أسود مات", "بلوط فاتح"]
       }
@@ -313,7 +313,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Luxury Modular Corner Sofa",
         images: ["/images/corner-sofa-living-1.jpg"],
         description: "كنبة زاوية قاطعة بتصميم إيطالي راقٍ وأنسجة مخملية ناعمة.",
-        priceRange: "38,000 - 65,000 EGP",
+        priceRange: "38,000 - 65,000  جنيه",
         features: ["تعديل مسند الرأس", "أقمشة إيطالية", "هيكل فولاذي"],
         variations: ["رمادي رماد", "بيج رملي", "أخضر زمردي"]
       }
@@ -338,7 +338,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Royal Lounge Chair Pair",
         images: ["/images/sofa-master-1.jpg"],
         description: "كراسي لاونج بتصميم مريح وأرجل معدنية مذهبة للاسترخاء التام.",
-        priceRange: "20,000 - 35,000 EGP",
+        priceRange: "20,000 - 35,000  جنيه",
         features: ["دعم قطني ممتازة", "جلد طبيعي أو مخمل", "أرجل ذهبية"],
         variations: ["أسود فاخر", "بني جلد", "أوف وايت"]
       }
@@ -363,7 +363,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Hotel Guest Bed Set",
         images: ["/images/master-bed-1.jpg"],
         description: "سرير ضيوف متين ومريح بخامات فندقية سهلة العناية والتنظيف.",
-        priceRange: "18,000 - 32,000 EGP",
+        priceRange: "18,000 - 32,000  جنيه",
         features: ["مرتبة فندقية", "قماش مقاوم", "تصميم محايد"],
         variations: ["بيج فندقي", "رمادي فاتح"]
       }
@@ -388,8 +388,8 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Integrated Study Library & Desk",
         images: ["/images/office-sofa-1.jpg"],
         description: "وحدة دراسة جدارية تضم مكتبًا واسعًا وأرفف كتب مغلقة ومفتوحة.",
-        priceRange: "22,000 - 42,000 EGP",
-        features: ["أخشاب صلبة", "إضاءة LED للمطبوعات", "خزائن مغلقة"],
+        priceRange: "22,000 - 42,000  جنيه",
+        features: ["أخشاب صلبة", "إضاءة مدمجة للمطبوعات", "خزائن مغلقة"],
         variations: ["جوز داكن", "بلوط طبيعي"]
       }
     ]
@@ -413,7 +413,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Luxury Bathroom Vanity Unit",
         images: ["/images/dressing-sofa-1.jpg"],
         description: "وحدة حوض رخام طبيعي مع أدراج مقاومة للمياه وإضاءة خلفية.",
-        priceRange: "25,000 - 48,000 EGP",
+        priceRange: "25,000 - 48,000  جنيه",
         features: ["رخام كلكتا", "خشب مقاوم للمياه", "إضاءة مدمجة"],
         variations: ["رخام أبيض", "رخام أسود مذهّب"]
       }
@@ -438,7 +438,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Elegant Powder Room Vanity",
         images: ["/images/dressing-sofa-1.jpg"],
         description: "وحدة حوض مدمجة بتصميم معماري مبتكر لحمامات الضيوف.",
-        priceRange: "16,000 - 30,000 EGP",
+        priceRange: "16,000 - 30,000  جنيه",
         features: ["تصميم نحيف", "رخام فاخر", "خلاط نحاسي"],
         variations: ["أسود مات", "ذهبي فرشي"]
       }
@@ -463,7 +463,7 @@ export const roomDefinitions: RoomDefinition[] = [
         titleEn: "Royal Entrance Console & Mirror",
         images: ["/images/living-sofa-1.jpg"],
         description: "طاولة كونسول رخام مع مرآة جدارية عملاقة بتفاصيل برونزية.",
-        priceRange: "28,000 - 52,000 EGP",
+        priceRange: "28,000 - 52,000  جنيه",
         features: ["رخام إيطالي", "مرآة برونزية", "هيكل معدني مذهب"],
         variations: ["ذهبي فاخر", "أسود ملكي"]
       }
@@ -499,10 +499,10 @@ export const seoDefinitions: SeoPageDefinition[] = [
 ];
 
 export const budgetOptions = [
-  "2,500 - 5,500 EGP",
-  "5,500 - 12,000 EGP",
-  "12,000 - 25,000 EGP",
-  "25,000+ EGP",
+  "2,500 - 5,500  جنيه",
+  "5,500 - 12,000  جنيه",
+  "12,000 - 25,000  جنيه",
+  "25,000+  جنيه",
 ];
 
 export const styleOptions = [
@@ -523,21 +523,21 @@ export const packageLadder = [
   {
     key: "basic",
     title: "الباقة الأساسية",
-    price: "2,500 EGP",
+    price: "2,500  جنيه",
     summary: "مناسبة للعميل الذي يريد اتجاهًا واضحًا وخطة تصميم أولية سريعة.",
     bullets: ["مخطط مبدئي", "لوحة خامات أساسية", "اقتراح توزيع للأثاث"],
   },
   {
     key: "full",
     title: "الباقة الكاملة",
-    price: "5,500 EGP",
+    price: "5,500  جنيه",
     summary: "حل متوازن لمن يريد تصورًا أقرب للتنفيذ مع قرارات أوضح للخامات والأثاث.",
     bullets: ["تصميم تفصيلي أكثر", "ترشيحات أثاث وخامات", "معالجة إضاءة وتشطيب"],
   },
   {
     key: "premium",
     title: "الباقة التنفيذية",
-    price: "12,000 EGP",
+    price: "12,000  جنيه",
     summary: "لمن يريد الانتقال من القرار إلى التنفيذ بثقة ومسار متابعة أدق.",
     bullets: ["تفاصيل تنفيذ", "أولوية متابعة", "توصيات مشتريات وبدائل"],
   },
@@ -546,7 +546,7 @@ export const packageLadder = [
 export const trustPoints = [
   "استشارة تصميم مبدئية حسب تفاصيل الطلب",
   "عربي أولًا مع تجربة واضحة وسريعة",
-  "توصيات قابلة للتنفيذ وليست moodboard فقط",
+  "توصيات قابلة للتنفيذ وليست لوحات مزاج فقط",
   "تركيز على المساحات السكنية الراقية في مصر",
 ];
 

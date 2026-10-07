@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle } from "lucide-react";
 import Link from "next/link";
-import { slides } from "./AzenithLegacy";
+import { slides, pillarLabel } from "./AzenithLegacy";
 
 interface ManifestoState {
   pillar: string;
@@ -232,7 +232,7 @@ export default function Hero() {
             </motion.div>
 
             <div className="sr-only" aria-live="polite">
-              <p>الركيزة الحالية: {manifestoState.pillar}</p>
+              <p>الركيزة الحالية: {pillarLabel(manifestoState.pillar)}</p>
               <p>العنوان الشعري: {manifestoState.poeticTitle}</p>
             </div>
           </motion.div>
