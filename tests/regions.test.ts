@@ -103,9 +103,9 @@ describe("the line says which source ordered his pictures", () => {
 
   it("does not announce one paper as a plural trend", () => {
     const one = tasteLine("area", tasteOfArea([PAPER(1, "التجمع", ["#8C7D73"])], "التجمع", null));
-    expect(one).toContain("ورقة واحدة");
+    expect(one).toContain("ورقة عميل واحد");
     const three = tasteLine("area", { area: "التجمع", papers: 3, hexes: [], colours: [] });
-    expect(three).toContain("٣ ورقات");
+    expect(three).toContain("٣ ورقات عملاء");
     expect(three).not.toMatch(/[0-9]/);
   });
 

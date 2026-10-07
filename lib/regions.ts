@@ -160,9 +160,9 @@ export function tasteOfArea(
 
 /** The count in the shape Arabic pluralises it, so one paper is not announced as «١ ورقات». */
 function papersPhrase(count: number): string {
-  if (count === 1) return "من ورقة واحدة";
-  if (count === 2) return "من ورقتين";
-  return `من ${arabicNumerals(count)} ورقات`;
+  if (count === 1) return "من ورقة عميل واحد";
+  if (count === 2) return "من ورقتين لعميلين";
+  return `من ${arabicNumerals(count)} ورقات عملاء`;
 }
 
 /**
@@ -177,8 +177,8 @@ function papersPhrase(count: number): string {
 export function tasteLine(source: TasteSource, evidence: AreaEvidence): string {
   if (source === "own") return "الصور المرتّبة دي على اللي إنت اختارته من ألوان، مش على ذوق منطقة.";
   if (source === "area") {
-    const colours = evidence.colours.length ? ` وألوانها ${evidence.colours.join(" و")}` : "";
-    return `دي على ذوق ${evidence.area}: محسوب ${papersPhrase(evidence.papers)} عملاء في منطقتك${colours}.`;
+    const colours = evidence.colours.length ? `، وألوانها ${evidence.colours.join(" و")}` : "";
+    return `دي على ذوق ${evidence.area}: محسوب ${papersPhrase(evidence.papers)} في منطقتك${colours}.`;
   }
   if (source === "unreadable") return "السجل ما ردّش دلوقتي — الصور المرتّبة دي على جودتها، ومحكّتهاش على منطقتك.";
   return evidence.area
