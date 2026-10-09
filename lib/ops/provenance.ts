@@ -32,11 +32,14 @@ export type RowVia =
 export const SWARM_DESK = "swarm_run";
 export const SITE_AUDIT_DESK = "site_audit";
 export const VISITOR_AUDIT_DESK = "visitor_audit";
+/** The live reading of the shop the leader is handed before it answers. */
+export const WORLD_DESK = "world_read";
 
 const DESK_LABELS: Record<string, string> = {
   [SWARM_DESK]: "سرب تعديل الصفحات",
   [SITE_AUDIT_DESK]: "الفحص الشامل للموقع",
   [VISITOR_AUDIT_DESK]: "فحص تجربة الزوار",
+  [WORLD_DESK]: "قراءة عالم الدار الحيّة",
 };
 
 /** The desk ids this module names — none of them a command the palette owns. */

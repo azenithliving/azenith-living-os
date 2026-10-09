@@ -6,6 +6,7 @@ import {
   SITE_AUDIT_DESK,
   SWARM_DESK,
   VISITOR_AUDIT_DESK,
+  WORLD_DESK,
   deskLabel,
   deskLineFor,
   deskNames,
@@ -34,6 +35,7 @@ describe("the name a desk has on his screen", () => {
     expect(deskLabel(SWARM_DESK)).toBe("سرب تعديل الصفحات");
     expect(deskLabel(SITE_AUDIT_DESK)).toBe("الفحص الشامل للموقع");
     expect(deskLabel(VISITOR_AUDIT_DESK)).toBe("فحص تجربة الزوار");
+    expect(deskLabel(WORLD_DESK)).toBe("قراءة عالم الدار الحيّة");
   });
 
   it("leaves an unnamed desk unnamed instead of printing its machine name", () => {
@@ -59,7 +61,7 @@ describe("the name a desk has on his screen", () => {
    * mean two things on two surfaces.
    */
   it("owns only the desk names the palette does not", () => {
-    expect(PROVENANCE_DESK_IDS).toEqual([SWARM_DESK, SITE_AUDIT_DESK, VISITOR_AUDIT_DESK]);
+    expect(PROVENANCE_DESK_IDS).toEqual([SWARM_DESK, SITE_AUDIT_DESK, VISITOR_AUDIT_DESK, WORLD_DESK]);
     for (const id of PROVENANCE_DESK_IDS) {
       expect(CAPABILITY_LABELS[id]).toBeUndefined();
     }

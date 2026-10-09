@@ -43,6 +43,32 @@ export function deskTruthFor(desk: DeskRecord): string {
 }
 
 /**
+ * Drop every sentence a predicate condemns, at sentence granularity, keeping the
+ * paragraph rhythm and whatever else the line carried. Owned here because two guards
+ * strike sentences the same way — an execution claim and an unmeasured condition.
+ */
+export function stripSentences(
+  source: string,
+  condemned: (sentence: string) => boolean
+): { body: string; removed: string[] } {
+  const removed: string[] = [];
+  const lines = source.split("\n");
+  const kept = lines
+    .map((line, i) => {
+      const parts = line.match(/[^.:!?؟]+[.:!?؟]?[ \t]*/g) ?? (line.trim() ? [line] : []);
+      const alive = parts.filter((part) => {
+        if (!condemned(part)) return true;
+        removed.push(part.trim());
+        return false;
+      });
+      return alive.join("").trim();
+      // A line that was empty stays empty, so the paragraph rhythm survives.
+    })
+    .filter((line, i) => line.length > 0 || lines[i].trim().length === 0);
+  return { body: kept.join("\n").replace(/\n{3,}/g, "\n\n").trim(), removed };
+}
+
+/**
  * Drop every sentence that claims executed work when no desk executed anything. The blast radius is
  * one sentence: the greeting, the numbers that really came from somewhere, and the question itself
  * stay where they are.
@@ -51,25 +77,10 @@ export function honestDeskClaims(
   text: string,
   desk: DeskRecord
 ): { text: string; removed: string[]; disclosed: boolean } {
-  const removed: string[] = [];
   const source = String(text ?? "");
-  if (desk.tool && desk.ok !== false) return { text, removed, disclosed: false };
+  if (desk.tool && desk.ok !== false) return { text, removed: [], disclosed: false };
 
-  const lines = source.split("\n");
-  const kept = lines
-    .map((line, i) => {
-      const parts = line.match(/[^.:!?؟]+[.:!?؟]?[ \t]*/g) ?? (line.trim() ? [line] : []);
-      const alive = parts.filter((part) => {
-        if (!CLAIM.test(part)) return true;
-        removed.push(part.trim());
-        return false;
-      });
-      return alive.join("").trim();
-      // A line that was empty stays empty, so the paragraph rhythm survives.
-    })
-    .filter((line, i) => line.length > 0 || lines[i].trim().length === 0);
-
-  const body = kept.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  const { body, removed } = stripSentences(source, (part) => CLAIM.test(part));
   if (!removed.length) {
     // Nothing was struck: still disclose when the answer reads like evidence without a desk.
     if (!looksLikeEvidence(source)) return { text, removed, disclosed: false };

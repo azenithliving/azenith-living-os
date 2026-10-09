@@ -13,11 +13,13 @@ import { agentLabel, legacyToOps, SWARM_NAME, storedSenderName } from "@/lib/ops
 import { recallMemory, finalizeReply } from "@/lib/ops/chat-brain";
 import { critiqueAndPolish, shouldDebate } from "@/lib/ops/debate";
 import { deskTruthFor, honestDeskClaims, type DeskRecord } from "@/lib/ops/claims";
+import { honestConditions } from "@/lib/ops/conditions";
 import {
   provenanceEnvelope,
   pickPrimaryDesk,
   SWARM_DESK,
   SITE_AUDIT_DESK,
+  WORLD_DESK,
   type DeskRun,
 } from "@/lib/ops/provenance";
 import { withOwnerRuleOnMessages } from "@/lib/ops/owner-address";
@@ -382,11 +384,16 @@ export class AgentOrchestrator {
       // does not re-read the shop on every turn. Core only — the specialist
       // agents get their own numbers from their own tools.
       if (selectedAgent === "ops-lead" && !isShortFollowUp) {
+        let worldRead = false;
         try {
           const { buildWorldModel, renderWorldDigest } = await import("@/lib/ops/world-model");
           const world = await buildWorldModel(resolvedCompanyId);
           promptWithToolContext = `${renderWorldDigest(world)}\n\n${promptWithToolContext}`;
+          worldRead = true;
         } catch {}
+        // The digest is a measurement, so it counts as a desk: a number the leader reads out of
+        // it is backed, and one it remembers is not.
+        deskRuns.push({ desk: WORLD_DESK, ok: worldRead });
 
         // Backstop for a scheduler that registers but never fires: if the last
         // recorded round is overdue, this turn kicks one off. Deliberately not
@@ -551,6 +558,16 @@ export class AgentOrchestrator {
       response = honest.text;
       if (honest.disclosed) {
         console.warn(`[DeskClaims] no desk ran; struck ${honest.removed.length} claim(s) and disclosed the answer as unmeasured`);
+      }
+
+      // A business condition — the shop is fine, a customer can see it, there is stock, these are
+      // the hours, a competitor's price — needs the desk that measures THAT condition, and the
+      // row now records which ones ran. Measured 2026-10-09: 25 rows stated a competitor fact and
+      // none of them had the rival desk's reading behind it.
+      const conditions = honestConditions(response, deskRuns);
+      response = conditions.text;
+      if (conditions.disclosed) {
+        console.warn(`[Conditions] struck ${conditions.removed.length} sentence(s) stating: ${conditions.unmeasured.join("، ")}`);
       }
       if (brain.actions.length && !((metadata as any).suggestions?.length || (metadata as any).nextActions?.length)) {
         (metadata as any).suggestions = brain.actions;
