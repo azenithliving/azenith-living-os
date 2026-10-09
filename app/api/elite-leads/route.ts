@@ -88,6 +88,9 @@ export async function POST(request: Request) {
       roomType: parsed.data.roomType,
       budget: parsed.data.budget,
       style: styleDNA?.dominantStyles.join(", ") || parsed.data.style,
+      // Measured live 2026-10-09: the brief asked his area, the chips took it, and this door — the
+      // one that rebuilds the payload field by field — dropped it on the way to the row.
+      area: parsed.data.area,
       serviceType: parsed.data.serviceType,
       score: parsed.data.qualification.score,
       intent: (parsed.data.qualification.isDiamond ? "buyer" : 
