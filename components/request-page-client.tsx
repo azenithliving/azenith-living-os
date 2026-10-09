@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { buildWhatsAppUrl } from "@/lib/conversion-engine";
 import { arabicNumerals } from "@/lib/arabic";
+import { AREA_CHIPS } from "@/lib/regions";
 import type { RuntimeConfig } from "@/lib/runtime-config";
 import useSessionStore from "@/stores/useSessionStore";
 import { OwnSheetCard } from "@/components/cad/OwnSheetCard";
@@ -121,6 +122,9 @@ export default function RequestPageClient({ runtimeConfig }: RequestPageClientPr
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  // His area, tapped from the store's own map or typed in his words — the taste answers below it
+  // are only useful to the store if the place they came from is recorded beside them.
+  const [formArea, setFormArea] = useState("");
   const [notes, setNotes] = useState("");
   
   const [statusMessage, setStatusMessage] = useState("");
@@ -252,6 +256,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
         phone,
         email,
         notes: combinedNotes,
+        area: formArea,
         roomType: finalSpaces || "غير محدد",
         budget: finalBudgetGrade || "غير محدد",
         style: finalStyle || "غير محدد",
@@ -637,6 +642,36 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                         className="w-full rounded-2xl border border-white/10 bg-[#111112] px-4 py-3.5 text-white outline-none transition focus:border-[#C5A059]" 
                       />
                     </label>
+                    <div className="space-y-2 sm:col-span-2">
+                      <span className="text-xs font-semibold text-white/60">
+                        {isRTL ? "منطقتك — اختارها أو اكتبها" : "Your area — tap or type"}
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {AREA_CHIPS.map((area) => (
+                          <button
+                            key={area}
+                            type="button"
+                            onClick={() => setFormArea(formArea.trim() === area ? "" : area)}
+                            data-area-chip={area}
+                            data-area-chip-selected={formArea.trim() === area ? "1" : "0"}
+                            className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                              formArea.trim() === area
+                                ? "border-[#C5A059] bg-[#C5A059]/20 text-[#f0dcae]"
+                                : "border-white/10 bg-[#111112] text-white/60 hover:border-[#C5A059]/50"
+                            }`}
+                          >
+                            {area}
+                          </button>
+                        ))}
+                      </div>
+                      <input
+                        value={formArea}
+                        onChange={(e) => setFormArea(e.target.value)}
+                        placeholder={isRTL ? "أو اكتبها بنفسك — زي التجمع أو زايد أو الإسكندرية" : "Or type it yourself"}
+                        data-lead-area
+                        className="w-full rounded-2xl border border-white/10 bg-[#111112] px-4 py-3.5 text-white outline-none transition focus:border-[#C5A059]"
+                      />
+                    </div>
                     <label className="space-y-2 sm:col-span-2">
                       <span className="text-xs font-semibold text-white/60">{isRTL ? "ملاحظات إضافية أو شروط خاصة" : "Additional Notes or Special Terms"}</span>
                       <textarea 

@@ -6,6 +6,7 @@ import { classifyIntent } from "@/lib/conversion-engine";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { getTenantByHost } from "@/lib/tenant";
 import { processAutomation } from "@/lib/automation";
+import { areaLabel } from "@/lib/regions";
 import { fireAndForget } from "@/lib/background-processor";
 
 export const leadSubmissionSchema = z.object({
@@ -14,6 +15,8 @@ export const leadSubmissionSchema = z.object({
   phone: z.string().min(8),
   email: z.string().email().optional().or(z.literal("")),
   notes: z.string().max(1500).optional().or(z.literal("")),
+  /** His area, tapped from the store's map or typed in his words. Optional: nobody is refused for it. */
+  area: z.string().max(60).optional().or(z.literal("")),
   roomType: z.string().min(2),
   budget: z.string().min(2),
   style: z.string().min(2),
@@ -43,13 +46,17 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
   }
   
   const intent = payload.intent ?? classifyIntent(payload.score);
+  // His words when they are off the map, the map's spelling when they reach it — the same rule the
+  // advisor's door and his sheet use, so «زايد» and «الشيخ زايد» are one area and not two silos.
+  // An empty answer stays null: a blank in a column is not «he told us nothing» to the next reader.
+  const area = areaLabel(payload.area) || null;
 
   const { data: existingUser, error: existingUserError } = await supabase
     .from("users")
-    .select("id")
+    .select("id,area")
     .eq("company_id", tenant.id)
     .eq("session_id", payload.sessionId)
-    .maybeSingle<{ id: string }>();
+    .maybeSingle<{ id: string; area: string | null }>();
 
   if (existingUserError) {
     throw new Error(`Failed to look up lead session: ${existingUserError.message}`);
@@ -58,7 +65,7 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
   const userId = existingUser?.id ?? crypto.randomUUID();
 
   if (!existingUser) {
-    const { error: insertUserError } = await supabase.from("users").insert({
+    const { data: created, error: insertUserError } = await supabase.from("users").insert({
       id: userId,
       company_id: tenant.id,
       session_id: payload.sessionId,
@@ -69,15 +76,17 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
       intent,
       tier: intent,
       last_page: payload.lastPage,
+      area,
       room_type: payload.roomType,
       budget: payload.budget,
       style: payload.style,
       service_type: payload.serviceType,
-    });
+    }).select("id,area").single<{ id: string; area: string | null }>();
 
     if (insertUserError) {
       throw new Error(`Failed to create user session: ${insertUserError.message}`);
     }
+    console.log(`[Leads] ${payload.sessionId}: منطقة مطلوبة «${area ?? "مفيش"}» والمحفوظة «${created?.area ?? "مقراش"}»`);
 
     // Trigger automation for new lead - ASYNC (non-blocking)
     fireAndForget(
@@ -98,26 +107,37 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
     );
   } else {
     // Update existing user with new session data
-    const { error: updateUserError } = await supabase
+    const patch: Record<string, unknown> = {
+      full_name: payload.fullName,
+      phone: payload.phone,
+      email: payload.email,
+      score: payload.score,
+      intent,
+      tier: intent,
+      last_page: payload.lastPage,
+      room_type: payload.roomType,
+      budget: payload.budget,
+      style: payload.style,
+      service_type: payload.serviceType,
+    };
+    // The area goes in once. A row that already knows where he lives is not asked to name it
+    // again, and a second answer would silently rewrite the first rather than show both.
+    if (area && !existingUser.area) patch.area = area;
+    const { data: updated, error: updateUserError } = await supabase
       .from("users")
-      .update({
-        full_name: payload.fullName,
-        phone: payload.phone,
-        email: payload.email,
-        score: payload.score,
-        intent,
-        tier: intent,
-        last_page: payload.lastPage,
-        room_type: payload.roomType,
-        budget: payload.budget,
-        style: payload.style,
-        service_type: payload.serviceType,
-      })
-      .eq("id", userId);
+      .update(patch)
+      .eq("id", userId)
+      .select("id,area")
+      .single<{ id: string; area: string | null }>();
 
     if (updateUserError) {
       throw new Error(`Failed to update user session: ${updateUserError.message}`);
     }
+    console.log(
+      `[Leads] ${payload.sessionId}: منطقة مطلوبة «${area ?? "مفيش"}» والمحفوظة «${updated?.area ?? "مقراش"}»${
+        area && existingUser.area && existingUser.area !== area ? " — السطر كان يعرف منطقة قبل كده، فما اتغيرتش" : ""
+      }`,
+    );
 
     // Trigger automation for updated lead - ASYNC (non-blocking)
     fireAndForget(
