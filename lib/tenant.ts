@@ -51,6 +51,9 @@ export async function getTenantByHost(host: string | null): Promise<TenantRecord
   const normalizedHost = normalizeHost(host);
 
   if (!normalizedHost) {
+    // Same rule as an unlisted host: a one-company store is that company, whoever asks.
+    const sole = await getSoleCompany(getSupabaseAdminClient());
+    if (sole) return sole;
     console.warn("[tenant] No host provided, returning default tenant");
     return DEFAULT_TENANT;
   }
@@ -85,7 +88,17 @@ export async function getTenantByHost(host: string | null): Promise<TenantRecord
       return data;
     }
 
-    // No tenant found for this host - try wildcard or return default
+    // No company carries this host's name. Measured 2026-10-09 on the published store: the only
+    // company is filed under `azenithliving.com`, while the site is served on the deployment alias,
+    // so every host-derived read fell to the placeholder company — which owns no rows. The owner's
+    // numbers door answered `0 customers` while the roll held 30. A store with one company answers
+    // for any of its own addresses; the moment a second company exists, guessing stops.
+    const sole = await getSoleCompany(supabase);
+    if (sole) {
+      console.log(`[tenant] العنوان «${normalizedHost}» مش مسجّل عند شركة، والمتجر فيه شركة واحدة — اتردّت باسمها`);
+      return sole;
+    }
+
     console.warn(`[tenant] No tenant found for host: ${normalizedHost}, using default`);
     return DEFAULT_TENANT;
 
@@ -93,6 +106,24 @@ export async function getTenantByHost(host: string | null): Promise<TenantRecord
     console.error("[tenant] Unexpected error:", err);
     return DEFAULT_TENANT;
   }
+}
+
+/**
+ * The store's only company, or null when there is none or there is more than one — in which case an
+ * unknown host must not be handed somebody's customers.
+ */
+async function getSoleCompany(supabase: ReturnType<typeof getSupabaseAdminClient>): Promise<TenantRecord | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("companies")
+    .select("id, name, domain, logo, primary_color, whatsapp")
+    .order("created_at", { ascending: true })
+    .limit(2);
+  if (error) {
+    console.warn(`[tenant] تعذّر قراءة الشركات: ${error.message}`);
+    return null;
+  }
+  return (data ?? []).length === 1 ? (data as TenantRecord[])[0] : null;
 }
 
 export async function getCurrentTenant(): Promise<TenantRecord | null> {
