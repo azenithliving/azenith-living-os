@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import RoomPageClient from "@/components/RoomPageClient";
-import { resolveRoomSlug } from "@/lib/rooms-catalog";
+import { resolveRoomSlug, roomNameAr } from "@/lib/rooms-catalog";
 import { absoluteUrl, buildPageMetadata, BRAND_NAME_AR, SEO_ROOMS, SITE_NAME } from "@/lib/seo";
 import { getRoomFallbackImages } from "@/lib/room-image-fallback";
 
@@ -21,7 +21,7 @@ type RoomMeta = {
 const ROOMS: RoomMeta[] = [
   {
     id: "master-bedroom",
-    title: "غرف النوم الرئيسية",
+    title: roomNameAr("master-bedroom"),
     titleEn: "Master Bedrooms",
     category: "خصوصية ملكية",
     categoryEn: "Royal Privacy",
@@ -31,7 +31,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "children-room",
-    title: "غرف الأطفال",
+    title: roomNameAr("children-room"),
     titleEn: "Children's Rooms",
     category: "أحلام صغيرة",
     categoryEn: "Little Dreams",
@@ -41,7 +41,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "teen-room",
-    title: "غرف المراهقين",
+    title: roomNameAr("teen-room"),
     titleEn: "Teen Rooms",
     category: "شخصية ناشئة",
     categoryEn: "Emerging Personality",
@@ -51,7 +51,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "living-room",
-    title: "غرف المعيشة",
+    title: roomNameAr("living-room"),
     titleEn: "Living Rooms",
     category: "استقبال بثقة",
     categoryEn: "Confident Reception",
@@ -61,7 +61,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "dining-room",
-    title: "غرف الطعام",
+    title: roomNameAr("dining-room"),
     titleEn: "Dining Rooms",
     category: "ولائم عائلية",
     categoryEn: "Family Feasts",
@@ -71,7 +71,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "corner-sofa",
-    title: "الكنب الزاوية",
+    title: roomNameAr("corner-sofa"),
     titleEn: "Corner Sofas",
     category: "راحة مطلقة",
     categoryEn: "Absolute Comfort",
@@ -81,7 +81,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "lounge",
-    title: "اللاونج",
+    title: roomNameAr("lounge"),
     titleEn: "Lounges",
     category: "استرخاء أنيق",
     categoryEn: "Elegant Relaxation",
@@ -91,7 +91,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "dressing-room",
-    title: "غرف الملابس",
+    title: roomNameAr("dressing-room"),
     titleEn: "Dressing Rooms",
     category: "تنظيم فاخر",
     categoryEn: "Luxury Organization",
@@ -101,7 +101,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "kitchen",
-    title: "المطابخ",
+    title: roomNameAr("kitchen"),
     titleEn: "Kitchens",
     category: "فن الطهي",
     categoryEn: "Culinary Art",
@@ -111,7 +111,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "home-office",
-    title: "المكاتب المنزلية",
+    title: roomNameAr("home-office"),
     titleEn: "Home Offices",
     category: "إنتاجية متقنة",
     categoryEn: "Refined Productivity",
@@ -121,7 +121,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "interior-design",
-    title: "التصميم الداخلي الشامل",
+    title: roomNameAr("interior-design"),
     titleEn: "Comprehensive Interior Design",
     category: "رؤية متكاملة",
     categoryEn: "Integrated Vision",
@@ -131,7 +131,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "guest-bedroom",
-    title: "غرف نوم الضيوف",
+    title: roomNameAr("guest-bedroom"),
     titleEn: "Guest Bedrooms",
     category: "ضيافة أنيقة",
     categoryEn: "Elegant Hospitality",
@@ -141,7 +141,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "study-room",
-    title: "غرف الدراسة",
+    title: roomNameAr("study-room"),
     titleEn: "Study Rooms",
     category: "تركيز وهدوء",
     categoryEn: "Focus & Calm",
@@ -151,7 +151,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "bathroom",
-    title: "الحمامات",
+    title: roomNameAr("bathroom"),
     titleEn: "Bathrooms",
     category: "رفاهية يومية",
     categoryEn: "Daily Luxury",
@@ -161,7 +161,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "guest-bathroom",
-    title: "حمامات الضيوف",
+    title: roomNameAr("guest-bathroom"),
     titleEn: "Guest Bathrooms",
     category: "ضيافة مثالية",
     categoryEn: "Perfect Hospitality",
@@ -171,7 +171,7 @@ const ROOMS: RoomMeta[] = [
   },
   {
     id: "entrance-lobby",
-    title: "المداخل",
+    title: roomNameAr("entrance-lobby"),
     titleEn: "Entrances",
     category: "انطباع أول",
     categoryEn: "First Impression",

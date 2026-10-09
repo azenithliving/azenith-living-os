@@ -1,3 +1,5 @@
+import { roomNameAr } from "@/lib/rooms-catalog";
+
 export type FurnitureDefinition = {
   slug: string;
   title: string;
@@ -49,7 +51,7 @@ export type SeoPageDefinition = {
 export const roomDefinitions: RoomDefinition[] = [
   {
     slug: "master-bedroom",
-    title: "غرف النوم الرئيسية",
+    title: roomNameAr("master-bedroom"),
     titleEn: "Master Bedrooms",
     eyebrow: "خصوصية محسوبة",
     eyebrowEn: "Calculated Privacy",
@@ -95,7 +97,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "living-room",
-    title: "غرف المعيشة",
+    title: roomNameAr("living-room"),
     titleEn: "Living Rooms",
     eyebrow: "استقبال بثقة",
     eyebrowEn: "Confident Reception",
@@ -131,7 +133,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "kitchen",
-    title: "المطابخ",
+    title: roomNameAr("kitchen"),
     titleEn: "Kitchens",
     eyebrow: "أداء يومي أنظف",
     eyebrowEn: "Cleaner Daily Performance",
@@ -156,7 +158,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "dressing-room",
-    title: "غرف الملابس",
+    title: roomNameAr("dressing-room"),
     titleEn: "Dressing Rooms",
     eyebrow: "تنظيم فاخر",
     eyebrowEn: "Luxurious Organization",
@@ -181,7 +183,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "home-office",
-    title: "المكاتب المنزلية",
+    title: roomNameAr("home-office"),
     titleEn: "Home Offices",
     eyebrow: "تركيز بدون تشويش",
     eyebrowEn: "Focus Without Distraction",
@@ -207,7 +209,7 @@ export const roomDefinitions: RoomDefinition[] = [
   
   {
     slug: "dining-room",
-    title: "غرف الطعام",
+    title: roomNameAr("dining-room"),
     titleEn: "Dining Rooms",
     eyebrow: "جلسات عائلية راقية",
     eyebrowEn: "Elegant Family Gatherings",
@@ -232,7 +234,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "interior-design",
-    title: "تصميم داخلي شامل",
+    title: roomNameAr("interior-design"),
     titleEn: "Full Interior Design",
     eyebrow: "رؤية متكاملة",
     eyebrowEn: "Integrated Vision",
@@ -246,7 +248,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "children-room",
-    title: "غرف الأطفال",
+    title: roomNameAr("children-room"),
     titleEn: "Children's Rooms",
     eyebrow: "أحلام صغيرة",
     eyebrowEn: "Little Dreams",
@@ -271,7 +273,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "teen-room",
-    title: "غرف المراهقين",
+    title: roomNameAr("teen-room"),
     titleEn: "Teen Rooms",
     eyebrow: "شخصية ناشئة",
     eyebrowEn: "Emerging Personality",
@@ -296,7 +298,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "corner-sofa",
-    title: "الكنب الزاوية",
+    title: roomNameAr("corner-sofa"),
     titleEn: "Corner Sofas",
     eyebrow: "راحة مطلقة",
     eyebrowEn: "Absolute Comfort",
@@ -321,7 +323,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "lounge",
-    title: "اللاونج",
+    title: roomNameAr("lounge"),
     titleEn: "Lounges",
     eyebrow: "استرخاء أنيق",
     eyebrowEn: "Elegant Relaxation",
@@ -346,7 +348,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "guest-bedroom",
-    title: "غرف نوم الضيوف",
+    title: roomNameAr("guest-bedroom"),
     titleEn: "Guest Bedrooms",
     eyebrow: "ضيافة أنيقة",
     eyebrowEn: "Elegant Hospitality",
@@ -371,7 +373,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "study-room",
-    title: "غرف الدراسة",
+    title: roomNameAr("study-room"),
     titleEn: "Study Rooms",
     eyebrow: "تركيز وهدوء",
     eyebrowEn: "Focus & Calm",
@@ -396,7 +398,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "bathroom",
-    title: "الحمامات",
+    title: roomNameAr("bathroom"),
     titleEn: "Bathrooms",
     eyebrow: "رفاهية يومية",
     eyebrowEn: "Daily Luxury",
@@ -421,7 +423,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "guest-bathroom",
-    title: "حمامات الضيوف",
+    title: roomNameAr("guest-bathroom"),
     titleEn: "Guest Bathrooms",
     eyebrow: "ضيافة مثالية",
     eyebrowEn: "Perfect Hospitality",
@@ -446,7 +448,7 @@ export const roomDefinitions: RoomDefinition[] = [
   },
   {
     slug: "entrance-lobby",
-    title: "المداخل",
+    title: roomNameAr("entrance-lobby"),
     titleEn: "Entrances",
     eyebrow: "انطباع أول",
     eyebrowEn: "First Impression",

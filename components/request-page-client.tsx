@@ -8,6 +8,7 @@ import Link from "next/link";
 import { buildWhatsAppUrl } from "@/lib/conversion-engine";
 import { arabicNumerals } from "@/lib/arabic";
 import { AREA_CHIPS } from "@/lib/regions";
+import { roomNameAr } from "@/lib/rooms-catalog";
 import type { RuntimeConfig } from "@/lib/runtime-config";
 import useSessionStore from "@/stores/useSessionStore";
 import { OwnSheetCard } from "@/components/cad/OwnSheetCard";
@@ -69,13 +70,16 @@ const FOCUSES = [
   { value: "other", labelAr: "أولوية وهدف آخر (اكتب يدوياً)", labelEn: "Other priority (Write manually)" }
 ];
 
+// The room's Arabic name comes from the catalog that owns it, so the same space is not
+// called one thing on the request form and another on its page. The `value` strings stay
+// untouched — they are what the stored rows and the scoring rules compare against.
 const SPACES = [
-  { value: "living", labelAr: "غرف المعيشة", labelEn: "Living Rooms" },
-  { value: "bedroom", labelAr: "غرف النوم", labelEn: "Bedrooms" },
-  { value: "kitchen", labelAr: "المطابخ", labelEn: "Kitchens" },
-  { value: "bathroom", labelAr: "الحمامات", labelEn: "Bathrooms" },
+  { value: "living", labelAr: roomNameAr("living-room"), labelEn: "Living Rooms" },
+  { value: "bedroom", labelAr: roomNameAr("bedroom"), labelEn: "Bedrooms" },
+  { value: "kitchen", labelAr: roomNameAr("kitchen"), labelEn: "Kitchens" },
+  { value: "bathroom", labelAr: roomNameAr("bathroom"), labelEn: "Bathrooms" },
   { value: "landscape", labelAr: "لاندسكيب / حديقة", labelEn: "Landscape / Garden" },
-  { value: "full_house", labelAr: "المنزل بالكامل", labelEn: "Full Home" },
+  { value: "full_house", labelAr: roomNameAr("full_house"), labelEn: "Full Home" },
   { value: "other", labelAr: "فراغات أخرى (اكتب يدوياً)", labelEn: "Other spaces (Write manually)" }
 ];
 
