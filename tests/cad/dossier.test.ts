@@ -79,7 +79,7 @@ const CORPUS = {
   roomTypes: ["Kids Bedroom", "Kitchen", "مجلس رجال", "Full Unit", "Dressing Room", "غرف النوم الرئيسية", "Guest Bedroom", "المنزل بالكامل", "Master Bedroom", "master-bedroom", "corner-sofa"],
   styles: ["elite-brief", "نيوكلاسيك", "هادئ فاخر", "مودرن (Modern)"],
   serviceTypes: ["1-3 Months", "3-6 Months", "Immediate", "Flexible", "تصميم فقط", "تصميم وتنفيذ", "فيلا"],
-  lastPages: ["/elite-brief", "/request", "/some-new-page"],
+  lastPages: ["/elite-brief", "/elite-intelligence", "/request", "/some-new-page"],
   budgets: ["120k-200k", "80k-150k", "300k+", "3M-5M", "1.5M-3M", "5,500 - 12,000 EGP", "فئة النخبة (Ultra-Luxury) - فيلات وقصور ومواصفات خاصة جداً"],
   intents: ["browsing", "buyer", "interested"],
 };
@@ -196,6 +196,13 @@ describe("the dossier speaks only the owner's language", () => {
   it("names the pages the store recorded and drops the ones it did not", () => {
     expect(tasteOf({ lastPage: "/request" }).find((f) => f.label === "آخر صفحة وقف عندها")?.value).toBe("اطلب عرض");
     expect(tasteOf({ lastPage: "/some-new-page" }).find((f) => f.label === "آخر صفحة وقف عندها")).toBeUndefined();
+    // Measured 2026-10-09: the elite door filed both of its screens under one address, so this line
+    // named the wrong screen for every brief taken on the other one.
+    const pages = ["/elite-brief", "/elite-intelligence"].map((lastPage) =>
+      tasteOf({ lastPage }).find((f) => f.label === "آخر صفحة وقف عندها")?.value,
+    );
+    expect(pages).toEqual(["ملخص النخبة", "مسار النخبة"]);
+    for (const page of pages) expect(page).toMatch(/[\u0600-\u06FF]/);
   });
 
   it("keeps the man and drops the tag the site's own form glued to his name", () => {

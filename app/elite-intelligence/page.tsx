@@ -132,6 +132,8 @@ function EliteIntelligenceContent() {
         blueprintAvailable: form.blueprintAvailable,
         specialRequests: form.specialRequests,
         score: form.qualification.score,
+        // This screen is not the brief: the pre-call paper says where he stood, so it says it here.
+        lastPage: "/elite-intelligence",
         // New Creative Visionary fields
         language,
         investmentTier: investment ? {

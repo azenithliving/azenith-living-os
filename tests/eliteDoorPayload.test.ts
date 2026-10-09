@@ -68,3 +68,31 @@ describe("the elite door carries the brief's answers to the row", () => {
     expect(world.persisted[0].style).toBe("مودرن");
   });
 });
+
+describe("each elite screen files itself, not its sister", () => {
+  it("names the brief when the caller says nothing — the shared door's default is a wrong answer here", async () => {
+    await post(brief({ area: "التجمع" }));
+    expect(world.persisted[0].lastPage).toBe("/elite-brief");
+  });
+
+  it("keeps the address the intelligence flow states", async () => {
+    await post(brief({ lastPage: "/elite-intelligence", area: "الشيخ زايد" }));
+    expect(world.persisted[0].lastPage).toBe("/elite-intelligence");
+  });
+
+  it("hands the writer both the taste and the address, so the address can veto the taste", async () => {
+    await post(brief({ lastPage: "/elite-intelligence", style: "elite-intelligence" }));
+    expect(world.persisted[0]).toMatchObject({ style: "elite-intelligence", lastPage: "/elite-intelligence" });
+    // The veto itself lives in the shared writer, and it does fire on what this door handed it.
+    const { storedTaste } = await import("@/lib/taste-words");
+    expect(storedTaste(world.persisted[0].style, world.persisted[0].lastPage)).toBeNull();
+  });
+
+  it("is stated by the page itself, not assumed by the door", async () => {
+    const { readFileSync } = await import("node:fs");
+    const intelligence = readFileSync("app/elite-intelligence/page.tsx", "utf8");
+    expect(intelligence).toContain('lastPage: "/elite-intelligence"');
+    const door = readFileSync("app/api/elite-leads/route.ts", "utf8");
+    expect(door).toContain("lastPage: parsed.data.lastPage");
+  });
+});

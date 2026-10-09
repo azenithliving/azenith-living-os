@@ -289,6 +289,7 @@ const SPACES: Record<string, string> = {
 /** The pages this store has actually recorded a customer standing on. */
 const PAGES: Record<string, string> = {
   "/elite-brief": "ملخص النخبة",
+  "/elite-intelligence": "مسار النخبة",
   "/request": "اطلب عرض",
   "/products": "المنتجات",
   "/rooms": "الغرف",

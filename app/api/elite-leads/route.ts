@@ -12,6 +12,12 @@ import { z } from "zod";
  */
 
 const eliteSubmissionSchema = leadSubmissionSchema.extend({
+  /**
+   * Which elite screen took the brief. The shared door defaults to the request page, and an elite
+   * row that says «/request» is a wrong answer rather than a missing one — so this door names its
+   * own screen and lets the caller say which of its two screens the customer stood on.
+   */
+  lastPage: z.string().min(1).default("/elite-brief"),
   viewedImages: z.array(z.string()).default([]),
   styleDNA: z.object({
     dominantStyles: z.array(z.string()),
@@ -95,7 +101,7 @@ export async function POST(request: Request) {
       score: parsed.data.qualification.score,
       intent: (parsed.data.qualification.isDiamond ? "buyer" : 
               parsed.data.qualification.tier === "Gold" ? "interested" : "browsing") as "browsing" | "interested" | "buyer",
-      lastPage: "/elite-brief",
+      lastPage: parsed.data.lastPage,
     };
 
     const result = await persistLeadSubmission(basePayload, host);
