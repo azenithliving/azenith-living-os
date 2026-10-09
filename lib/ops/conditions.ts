@@ -54,9 +54,12 @@ export type Condition = {
 export const CONDITIONS: Condition[] = [
   {
     label: "إن الشغل ماشي تمام أو مفيش مشاكل",
-    // The live wording was «الوضع العام: مستقر ومطمئن» — the state word arrives after the noun
-    // phrase, so the pair is matched as a span, not as two adjacent words.
-    topic: /(الوضع[^.\n]{0,16}(?:مستقر|مطمئن)|كله تمام|كل حاجة تمام|لا توجد مشاكل|مفيش مشاكل|لا مشاكل|بحالة جيدة|جيدة جدًا|كل شيء على ما يرام)/,
+    // The live wording never repeats itself: «الوضع العام: مستقر»، «الأمر تحت السيطرة»،
+    // «الدار في أوج عرضها»، «حالة ممتازة» (measured 2026-10-09: 25 rows carry one of these,
+    // 5 of them with no desk running). The state word is matched as a span after its anchor,
+    // so «خامات ممتازة» about a product is not mistaken for a claim about the shop.
+    topic:
+      /(الوضع|الدار|الشغل|الأمر|المحل)[^.\n]{0,18}(?:مستقر|مستقرة|تحت السيطرة|في أوج|ممتازة|تمام)|كله تمام|كل حاجة تمام|لا توجد مشاكل|مفيش مشاكل|لا مشاكل|بحالة جيدة|جيدة جدًا|كل شيء على ما يرام/,
     needsNumber: false,
     measuredBy: QA_DESKS,
   },

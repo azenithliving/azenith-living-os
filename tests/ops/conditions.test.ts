@@ -51,6 +51,24 @@ describe("a condition with no reading behind it is struck", () => {
     expect(out.text).toContain("أهلاً بك يا صاحب الدار");
   });
 
+  it("catches the paraphrases the live rows actually use", () => {
+    const labels = (line: string) => unmeasuredConditions(line, NO_DESK).map((c) => c.label);
+    const backed = (line: string) =>
+      unmeasuredConditions(line, [{ desk: "site_audit", ok: true }]).map((c) => c.label);
+    for (const line of [
+      "الأمر تحت السيطرة، والدار في أوج عرضها.",
+      "الوضع العام: مستقر ومطمئن.",
+      "حالة المحل ممتازة.",
+    ]) {
+      expect(labels(line), line).toContain("إن الشغل ماشي تمام أو مفيش مشاكل");
+      expect(backed(line), line).not.toContain("إن الشغل ماشي تمام أو مفيش مشاكل");
+    }
+  });
+
+  it("does not mistake a product's adjective for the shop's state", () => {
+    expect(unmeasuredConditions("خامات ممتازة وتشطيب نظيف.", NO_DESK)).toEqual([]);
+  });
+
   it("readies stock and opening hours have no measuring desk at all", () => {
     // The owner ordered the opposite of ready stock, and the hours live in a register no chat desk reads.
     const stock = honestConditions("عندنا مخزون جاهز للتسليم فورًا.", [WORLD[0], { desk: WORLD_DESK, ok: true }]);
