@@ -88,7 +88,7 @@ export default function CustomersPanel() {
       const response = await fetch("/api/admin/leads", { cache: "no-store" });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data || !Array.isArray(data.leads)) {
-        setLeadsError(data?.error || `باب القائمة ردّ بحالة ${response.status} من غير ما يجيب سطور`);
+        setLeadsError(data?.error || `باب القائمة ردّ بحالة ${arDigits(String(response.status))} من غير ما يجيب سطور`);
         return;
       }
       setLeads(data.leads);
@@ -96,8 +96,9 @@ export default function CustomersPanel() {
       const tally = data.totals?.taste;
       setTaste(Array.isArray(tally?.groups) ? tally.groups : []);
       setTasteSkipped(Number(tally?.skipped ?? 0));
-    } catch (error) {
-      setLeadsError(`القائمة ما جابتش رد: ${error instanceof Error ? error.message : "خطأ غير معروف"}`);
+    } catch {
+      // The transport's own sentence is English machine words; his screen gets the store's.
+      setLeadsError("القائمة ما جابتش رد — الاتصال بالباب وقّع من غير ما يوصّل.");
     } finally {
       if (!isSilent) setLoading(false);
     }

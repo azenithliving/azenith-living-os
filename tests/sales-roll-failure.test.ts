@@ -26,6 +26,14 @@ describe("the sales panel admits when the roll did not answer", () => {
     expect(panel).not.toMatch(/data-leads-error[^>]*>\s*<p[^>]*>\{[a-z]+\.message\}/);
   });
 
+  it("keeps the transport's English out of his sentence, and the status in his digits", () => {
+    // Measured on the published screen: the warning read «القائمة ما جابتش رد: Failed to fetch» —
+    // a machine phrase in Latin letters sitting in the middle of his line.
+    expect(panel).not.toContain("error.message");
+    expect(panel).toContain("الاتصال بالباب وقّع من غير ما يوصّل");
+    expect(panel).toContain("arDigits(String(response.status))");
+  });
+
   it("asks the door without a cached answer", () => {
     expect(panel).toContain('fetch("/api/admin/leads", { cache: "no-store" })');
   });
