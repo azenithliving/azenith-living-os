@@ -165,7 +165,10 @@ function EliteIntelligenceContent() {
   const isRTL = language === "ar";
 
   return (
-    <main className={`min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a] ${isRTL ? "rtl" : "ltr"}`}>
+    <main
+      dir={isRTL ? "rtl" : "ltr"}
+      className={`min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a] ${isRTL ? "rtl" : "ltr"}`}
+    >
       {/* Language Switcher */}
       <div className="fixed right-4 top-4 z-50">
         <LanguageSwitcher

@@ -122,6 +122,14 @@ describe("the language has one owner", () => {
     expect(flow).not.toContain("setLanguage(lang);");
   });
 
+  it("turns the whole page with the language, not only a paragraph", () => {
+    // The flow screen carried an `rtl`/`ltr` class that Tailwind treats as a variant, not a
+    // style — measured on the built page: with English chosen, the text was English and the
+    // direction stayed right-to-left. The direction has to be said where it is read.
+    expect(flow).toContain('dir={isRTL ? "rtl" : "ltr"}');
+    expect(brief).toContain('dir={ar ? "rtl" : "ltr"}');
+  });
+
   it("keeps the security-service wording off the customer's screens", () => {
     // The flow screen opened with «الاستخبارات المتميزة» — an intelligence-agency reading of
     // "Elite Intelligence" on a furniture brand's page.
