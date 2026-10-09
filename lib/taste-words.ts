@@ -21,7 +21,9 @@ import { STYLE_LABELS } from "@/lib/constants/rooms";
  * extra spellings are forms customers and the qualification form really write.
  */
 const STYLE_WORDS: Record<string, string[]> = Object.entries(STYLE_LABELS).reduce(
-  (all, [key, label]) => ({ ...all, [key]: [label] }),
+  // The key itself belongs in the list: this is the shape the store writes when it records a
+  // taste, so the reader must recognise its own handwriting — «modern» folded is «modern».
+  (all, [key, label]) => ({ ...all, [key]: [label, key] }),
   {} as Record<string, string[]>,
 );
 for (const [key, extra] of [

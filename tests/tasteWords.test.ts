@@ -24,6 +24,15 @@ describe("his style word becomes the bank's key", () => {
     expect(styleKey("هادئ فاخر")).toBeNull();
   });
 
+  it("recognises the shape the store itself writes", () => {
+    // The capture stores the bank's key. A reader that only knew Arabic words would call its own
+    // handwriting no taste — measured live: the visitor row said `modern` and the sheet named no style.
+    expect(styleKey("modern")).toBe("modern");
+    expect(styleKey("scandinavian")).toBe("scandinavian");
+    expect(styleKey("industrial")).toBe("industrial");
+    expect(styleKey("classic")).toBe("classic");
+  });
+
   it("refuses a screen slug and an empty line", () => {
     // «elite-brief» is a page name that landed in the style column; it is not a taste.
     expect(styleKey("elite-brief")).toBeNull();

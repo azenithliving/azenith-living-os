@@ -144,7 +144,8 @@ const styledOrder = (rows: Array<{ id: number }>) => rows.map((r) => r.id).join(
 describe("the area's taste is counted from both doors that hold it", () => {
   it("moves his area's requested style up even when no paper carries a colour", async () => {
     world.state.visitors = [
-      { area: "التجمع", style: "مودرن (Modern)" },
+      // Both shapes exist in the table: the key this store writes, and the Arabic a form stored.
+      { area: "التجمع", style: "modern" },
       { area: "الشيخ زايد", style: "كلاسيك" },
     ];
     const { images, taste } = await orderForPaper(STYLED, { id: 10, city: "التجمع", picks: [] });
