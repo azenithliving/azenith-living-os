@@ -65,7 +65,9 @@ describe("the section preview reads a register that exists", () => {
     expect(page).toContain("صورته:");
   });
 
-  it("says plainly when a section has no picture instead of showing an empty box", () => {
+  it("says plainly when a section has no picture, and when its picture does not load", () => {
     expect(page).toContain("مفيش صورة مسجّلة للقسم ده");
+    expect(page).toContain("الصورة المسجّلة للقسم ما بتحمّلتش");
+    expect(page).toContain("await pictureAnswers(row.image_url)");
   });
 });

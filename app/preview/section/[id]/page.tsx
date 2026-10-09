@@ -60,6 +60,20 @@ function ImageRow({ url }: { url: string }) {
   );
 }
 
+/**
+ * Asked whether the stored picture actually answers, because a broken image paints an empty box
+ * on his screen and hides the fact. Measured 2026-10-09: every one of the 15 sections points at
+ * the same Unsplash address, and that address answers 404 — so this page says it plainly.
+ */
+async function pictureAnswers(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: "HEAD", cache: "no-store", signal: AbortSignal.timeout(5000) });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 export default async function SectionPreviewPage({ params }: PreviewPageProps) {
   const { id } = await params;
   const supabase = await createClient();
@@ -79,6 +93,7 @@ export default async function SectionPreviewPage({ params }: PreviewPageProps) {
 
   const row = section as RoomSection;
   const title = readString(row.name) ?? "قسم بلا اسم";
+  const picture = row.image_url ? await pictureAnswers(row.image_url) : false;
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24" dir="rtl">
@@ -138,13 +153,13 @@ export default async function SectionPreviewPage({ params }: PreviewPageProps) {
         <Card className="overflow-hidden">
           <div className="bg-white">
             <section className="space-y-6 px-8 py-16">
-              {row.image_url ? (
+              {row.image_url && picture ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={row.image_url} alt={title} className="mx-auto max-h-72 w-full max-w-2xl rounded-xl object-cover" />
               ) : (
                 <p className="flex items-center justify-center gap-2 py-10 text-gray-500">
                   <ImageOff className="h-5 w-5" />
-                  مفيش صورة مسجّلة للقسم ده
+                  {row.image_url ? "الصورة المسجّلة للقسم ما بتحمّلتش — الرابط تحت." : "مفيش صورة مسجّلة للقسم ده"}
                 </p>
               )}
               <h2 className="text-center text-3xl font-bold">{title}</h2>
