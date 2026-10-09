@@ -89,6 +89,39 @@ export function storedTaste(raw: unknown, pageName?: unknown): string | null {
   return text;
 }
 
+/**
+ * The taste tally a chart should show.
+ *
+ * Measured 2026-10-09 on the live store: the analytics door grouped the taste column verbatim, so
+ * its biggest "style" was «elite-brief» (14 rows — a screen name), and one taste written three ways
+ * («مودرن», «مودرن (Modern)», «modern») took three places in a top-five list. Eight groups out of
+ * 30 rows, where the store's own reader sees three.
+ *
+ * So the tally asks the same two questions every other surface asks: is this an answer at all
+ * (`storedTaste`), and what does the bank call it (`styleKey`). His own words that no picture
+ * matches are counted together and named as what they are, and anything that is not a taste is
+ * left out — with the count of what was left out, because a chart that silently drops rows is how
+ * a number starts being disbelieved.
+ */
+export function tallyTastes(rows: { style: unknown }[]): { groups: { style: string; count: number }[]; skipped: number } {
+  const counts = new Map<string, number>();
+  let skipped = 0;
+  for (const row of rows) {
+    const kept = storedTaste(row.style);
+    if (!kept) {
+      skipped += 1;
+      continue;
+    }
+    const key = styleKey(kept);
+    const label = key ? (STYLE_LABELS[key] ?? key) : "ذوقه بكلماته";
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  }
+  const groups = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ar"))
+    .map(([style, count]) => ({ style, count }));
+  return { groups, skipped };
+}
+
 /** The style he asked for, his newest sentence winning. */
 export function styleFromWords(lines: string[]): string | null {
   for (let i = lines.length - 1; i >= 0; i--) {

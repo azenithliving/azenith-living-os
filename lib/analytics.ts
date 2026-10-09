@@ -1,5 +1,6 @@
 import { getSupabaseAdminClient } from "./supabase-admin";
 import { getCurrentTenant } from "./tenant";
+import { tallyTastes } from "./taste-words";
 
 export interface AnalyticsMetrics {
   totalLeads: number;
@@ -10,6 +11,8 @@ export interface AnalyticsMetrics {
   averageLeadScore: number;
   topRoomTypes: Array<{ type: string; count: number }>;
   topStyles: Array<{ style: string; count: number }>;
+  /** Rows the taste reader refused (a screen name, or his blank) — a chart that drops rows says how many. */
+  styleRowsSkipped: number;
   eventBreakdown: Record<string, number>;
   whatsappClicks: number;
   uniqueVisitors: number;
@@ -131,18 +134,10 @@ export async function getAnalyticsMetrics(period?: AnalyticsPeriod): Promise<Ana
       .slice(0, 5)
       .map(([type, count]) => ({ type, count }));
 
-    // Get top styles
-    const styleMap: Record<string, number> = {};
-    stylesResult.data?.forEach(user => {
-      if (user.style) {
-        styleMap[user.style] = (styleMap[user.style] || 0) + 1;
-      }
-    });
-
-    const topStyles = Object.entries(styleMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([style, count]) => ({ style, count }));
+    // Get top styles — through the store's own taste reader, so one taste written three ways is one
+    // bar and a screen's name is not a style at all.
+    const tasteTally = tallyTastes(stylesResult.data ?? []);
+    const topStyles = tasteTally.groups.slice(0, 5);
 
     // Get unique visitors (using distinct session IDs)
     const { data: uniqueVisitorsData } = await supabase
@@ -163,6 +158,7 @@ export async function getAnalyticsMetrics(period?: AnalyticsPeriod): Promise<Ana
       averageLeadScore: Math.round(averageLeadScore * 100) / 100,
       topRoomTypes,
       topStyles,
+      styleRowsSkipped: tasteTally.skipped,
       eventBreakdown,
       whatsappClicks,
       uniqueVisitors

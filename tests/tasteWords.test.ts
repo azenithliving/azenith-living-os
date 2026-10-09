@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { roomFromWords, storedTaste, styleFromWords, styleKey } from "@/lib/taste-words";
+import { roomFromWords, storedTaste, styleFromWords, styleKey, tallyTastes } from "@/lib/taste-words";
 
 /**
  * The store's own vocabulary, answered in the shapes the picture bank keys on.
@@ -77,6 +77,37 @@ describe("what the taste column is allowed to hold", () => {
     // A taste the reader knows survives even in a hyphenated shape; his words survive as written.
     expect(storedTaste("mid-century modern", "/request")).toBe("mid-century modern");
     expect(storedTaste("مودرن", "/request")).toBe("مودرن");
+  });
+});
+
+describe("the taste tally a chart is allowed to show", () => {
+  // The exact values measured in the live register on 2026-10-09 (30 visitor rows). Counted verbatim
+  // the chart made eight "styles" out of them and put a screen name first.
+  const LIVE = [
+    ...Array(14).fill({ style: "elite-brief" }),
+    ...Array(4).fill({ style: null }),
+    { style: "نيوكلاسيك" }, { style: "نيوكلاسيك" }, { style: "نيوكلاسيك" },
+    { style: "كلاسيك" },
+    { style: "مودرن" }, { style: "مودرن" }, { style: "مودرن" },
+    { style: "مودرن (Modern)" }, { style: "مودرن (Modern)" }, { style: "modern" },
+    { style: "هادئ فاخر" }, { style: "هادئ فاخر" },
+  ];
+
+  it("merges one taste written three ways and refuses a screen name", () => {
+    const { groups, skipped } = tallyTastes(LIVE);
+    expect(groups).toEqual([
+      { style: "مودرن", count: 6 },
+      { style: "كلاسيك", count: 4 },
+      { style: "ذوقه بكلماته", count: 2 },
+    ]);
+    expect(skipped).toBe(18);
+  });
+
+  it("says how many rows it left out, so a small chart is not read as an empty store", () => {
+    const { groups, skipped } = tallyTastes([{ style: "مودرن" }]);
+    expect(groups).toEqual([{ style: "مودرن", count: 1 }]);
+    expect(skipped).toBe(0);
+    expect(tallyTastes([]).groups).toEqual([]);
   });
 });
 
