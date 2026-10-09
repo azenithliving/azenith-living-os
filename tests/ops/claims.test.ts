@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 
-import { deskTruthFor, honestDeskClaims } from "@/lib/ops/claims";
+import { deskTruthFor, honestDeskClaims, stripSentences } from "@/lib/ops/claims";
 
 /**
  * A claim that a desk ran is a fact, and a fact has a record.
@@ -116,5 +116,30 @@ describe("the critic is told what actually ran", () => {
   it("the leader's path checks its claims before storing", () => {
     expect(orchestrator).toContain("honestDeskClaims(");
     expect(orchestrator).toContain("critiqueAndPolish(message, response,");
+  });
+});
+
+describe("the sentence splitter both guards share", () => {
+  /**
+   * Measured 2026-10-09 on a live row: the old splitter cut at every dot, so the currency
+   * abbreviation «ج.م» split in half and no fragment still held the money claim — the guard
+   * reported the condition and struck nothing.
+   */
+  it("keeps a dot that is not a sentence end", () => {
+    const line = "المبيعات ٧٠٫٠٠٠ ج.م من طلبين.";
+    const out = stripSentences(line, () => false);
+    expect(out.body).toBe(line);
+    expect(out.removed).toEqual([]);
+  });
+
+  it("still cuts where a terminator is followed by a space", () => {
+    const out = stripSentences("جملة أولى. جملة ثانية. ثالثة", (s) => s.includes("ثانية"));
+    expect(out.removed).toEqual(["جملة ثانية."]);
+    expect(out.body).toBe("جملة أولى. ثالثة");
+  });
+
+  it("keeps the paragraph rhythm of a line that was empty", () => {
+    const out = stripSentences("أ\n\nب", () => false);
+    expect(out.body).toBe("أ\n\nب");
   });
 });

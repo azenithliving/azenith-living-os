@@ -46,6 +46,11 @@ export function deskTruthFor(desk: DeskRecord): string {
  * Drop every sentence a predicate condemns, at sentence granularity, keeping the
  * paragraph rhythm and whatever else the line carried. Owned here because two guards
  * strike sentences the same way — an execution claim and an unmeasured condition.
+ *
+ * A terminator ends a sentence only when a space or the end of the line follows it. Measured
+ * 2026-10-09 on a live row: the first splitter cut «مبيعات بلغت 700,000 ج.م» at the dot inside
+ * the currency word, so no fragment still held the money claim and the guard struck nothing
+ * while reporting the condition. A decimal and a currency abbreviation are not sentence ends.
  */
 export function stripSentences(
   source: string,
@@ -55,13 +60,13 @@ export function stripSentences(
   const lines = source.split("\n");
   const kept = lines
     .map((line, i) => {
-      const parts = line.match(/[^.:!?؟]+[.:!?؟]?[ \t]*/g) ?? (line.trim() ? [line] : []);
+      const parts = line.split(/(?<=[.:!?؟])\s+/);
       const alive = parts.filter((part) => {
         if (!condemned(part)) return true;
         removed.push(part.trim());
         return false;
       });
-      return alive.join("").trim();
+      return alive.join(" ").trim();
       // A line that was empty stays empty, so the paragraph rhythm survives.
     })
     .filter((line, i) => line.length > 0 || lines[i].trim().length === 0);

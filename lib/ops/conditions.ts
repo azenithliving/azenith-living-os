@@ -54,7 +54,9 @@ export type Condition = {
 export const CONDITIONS: Condition[] = [
   {
     label: "إن الشغل ماشي تمام أو مفيش مشاكل",
-    topic: /(الوضع مستقر|كله تمام|كل حاجة تمام|لا توجد مشاكل|مفيش مشاكل|لا مشاكل|بحالة جيدة|جيدة جدًا|كل شيء على ما يرام)/,
+    // The live wording was «الوضع العام: مستقر ومطمئن» — the state word arrives after the noun
+    // phrase, so the pair is matched as a span, not as two adjacent words.
+    topic: /(الوضع[^.\n]{0,16}(?:مستقر|مطمئن)|كله تمام|كل حاجة تمام|لا توجد مشاكل|مفيش مشاكل|لا مشاكل|بحالة جيدة|جيدة جدًا|كل شيء على ما يرام)/,
     needsNumber: false,
     measuredBy: QA_DESKS,
   },

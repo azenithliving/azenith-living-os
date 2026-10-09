@@ -39,6 +39,18 @@ describe("a condition with no reading behind it is struck", () => {
     expect(note).not.toMatch(/[A-Za-z]/);
   });
 
+  /** Copied from the live row 9de8da97 (2026-10-09 17:50) — the wording that first beat the guard. */
+  it("catches the state word arriving after its noun phrase, and a dot inside a currency", () => {
+    const live =
+      "أهلاً بك يا صاحب الدار. إليك الموقف التشغيلي الراهن لـ «سرب أزينث» باختصار: **الوضع العام:** مستقر ومطمئن، مع مبيعات بلغت **700,000 ج.م** (متوسط 350,000 ج.م للطلب)، والسيادة المطلقة في العرض حالياً.";
+    const out = honestConditions(live, NO_DESK);
+    expect(out.disclosed).toBe(true);
+    const struck = out.removed.join(" ");
+    expect(struck).toContain("الوضع العام");
+    expect(struck).toContain("ج.م");
+    expect(out.text).toContain("أهلاً بك يا صاحب الدار");
+  });
+
   it("readies stock and opening hours have no measuring desk at all", () => {
     // The owner ordered the opposite of ready stock, and the hours live in a register no chat desk reads.
     const stock = honestConditions("عندنا مخزون جاهز للتسليم فورًا.", [WORLD[0], { desk: WORLD_DESK, ok: true }]);
