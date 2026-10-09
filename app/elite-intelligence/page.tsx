@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,7 +9,6 @@ import { EliteIntelligenceForm, FormData, LeadQualification } from "@/components
 import { AestheticAdvisor, AestheticAdvice } from "@/components/elite/AestheticAdvisor";
 import { InvestmentBrackets, InvestmentTier } from "@/components/elite/InvestmentBrackets";
 import { LanguageSwitcher } from "@/components/elite/LanguageSwitcher";
-import { getOfficeStatus, fetchRecordedHours, formatNextOpening, formatNextOpeningAr, type OfficeHours, type OfficeStatus } from "@/lib/office-hours";
 import useSessionStore from "@/stores/useSessionStore";
 import { useSiteLanguage } from "@/hooks/useSiteLanguage";
 import { getViewedImageUrls } from "@/lib/image-tracking";
@@ -37,40 +36,22 @@ interface CompleteSubmissionData {
 }
 
 function EliteIntelligenceContent() {
-  const searchParams = useSearchParams();
   const [stage, setStage] = useState<SubmissionStage>("form");
   // One owner for the language he reads in — the store's setting, which the header switcher writes
   // and every other page obeys. This screen used to keep a private copy of it, guess from the
   // browser, and let `?lang=` move only itself. See `hooks/useSiteLanguage`.
   const language = useSiteLanguage();
   const setSessionLanguage = useSessionStore((state) => state.setLanguage);
-  const [officeStatus, setOfficeStatus] = useState<OfficeStatus | null>(null);
   const [formData, setFormData] = useState<(FormData & { qualification: LeadQualification }) | null>(null);
   const [investmentTier, setInvestmentTier] = useState<InvestmentTier | null>(null);
   const [aestheticAdvice, setAestheticAdvice] = useState<AestheticAdvice | null>(null);
   const [viewedImages, setViewedImages] = useState<string[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Initialize
+  // The inspiration the gallery left behind rides along with the brief.
   useEffect(() => {
-    let cancelled = false;
-    let recorded: OfficeHours | null = null;
-    const refresh = () => setOfficeStatus(getOfficeStatus(recorded));
-    refresh();
-    // The schedule comes from the store's own record; the ordered default stays until it answers.
-    void fetchRecordedHours().then((hours) => {
-      if (cancelled || !hours) return;
-      recorded = hours;
-      refresh();
-    });
     setViewedImages(getViewedImageUrls());
-
-    const interval = setInterval(refresh, 60000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [searchParams]);
+  }, []);
 
   const handleFormComplete = async (data: FormData & { qualification: LeadQualification }) => {
     setFormData(data);
@@ -201,28 +182,8 @@ function EliteIntelligenceContent() {
           </p>
         </motion.div>
 
-        {/* Office Hours Status */}
-        {officeStatus && !officeStatus.isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mx-auto mb-8 max-w-2xl rounded-xl border border-amber-500/30 bg-amber-500/10 p-4"
-          >
-            <p 
-              className={`text-sm text-amber-200/90 ${
-                language === "ar" 
-                  ? "text-right leading-relaxed" 
-                  : "text-left leading-relaxed"
-              }`}
-              dir={language === "ar" ? "rtl" : "ltr"}
-            >
-              {language === "ar" 
-                ? `فريق الاستشارات يستعد للإبداع. نراجع طلبك ${formatNextOpeningAr(officeStatus)}`
-                : officeStatus.message
-              }
-            </p>
-          </motion.div>
-        )}
+        {/* The hours are said once, by the brief itself — this screen used to add its own card
+            above it, in a translated voice that disagreed with the store's. */}
 
         {/* Error Display */}
         {submitError && (

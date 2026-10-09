@@ -122,6 +122,17 @@ describe("the language has one owner", () => {
     expect(flow).not.toContain("setLanguage(lang);");
   });
 
+  it("says the hours once, in the store's voice, on the flow screen too", () => {
+    // Measured on the published flow screen: it carried its own status card above the brief's, in a
+    // translated voice («فريق الاستشارات يستعد للإبداع») that disagreed with the store's own
+    // («فريقنا دلوقتي بيشتغل على مشاريعه»). Same fact, twice, one screen.
+    expect(flow).not.toContain("فريق الاستشارات يستعد للإبداع");
+    expect(flow).not.toContain("@/lib/office-hours");
+    const form = readFileSync("components/elite/EliteIntelligenceForm.tsx", "utf8");
+    expect(form).toContain("فريقنا دلوقتي بيشتغل على مشاريعه");
+    expect(form).toContain("fetchRecordedHours");
+  });
+
   it("turns the whole page with the language, not only a paragraph", () => {
     // The flow screen carried an `rtl`/`ltr` class that Tailwind treats as a variant, not a
     // style — measured on the built page: with English chosen, the text was English and the
