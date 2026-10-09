@@ -83,9 +83,34 @@ export function diversifyByStyle<T extends { style: string | null }>(rows: T[], 
   return picked;
 }
 
+/** One bank row, in the shape a sheet can show. */
+function toSheetImage(row: any): SheetImage | null {
+  if (typeof row?.url !== "string" || !row.url.startsWith("http")) return null;
+  return {
+    id: Number.isFinite(Number(row.id)) ? Number(row.id) : null,
+    url: String(row.url),
+    thumb: typeof row.thumbnail_url === "string" && row.thumbnail_url ? String(row.thumbnail_url) : String(row.url),
+    style: row.style ? String(row.style) : null,
+    roomType: String(row.room_type),
+    // The bank stores the dominant colour of every picture — that is what lets the
+    // dossier show the palette a room is actually made of instead of a mood word.
+    color: typeof row.metadata?.avg_color === "string" ? String(row.metadata.avg_color) : null,
+  };
+}
+
+/**
+ * The pictures for one sheet.
+ *
+ * `preferredStyles` is not a filter: the customer is still shown his room's best work. It is a
+ * second slice, because the bank's highest-quality window can be one style end to end — measured
+ * 2026-10-08 on a sheet whose area asked for modern, where the 60 best pictures of the house set
+ * were all classic. Without the extra slice, a sentence about his area's taste has nothing behind
+ * it; with it, the style he was promised is a picture he can see.
+ */
 export async function pickSheetImages(
   roomName: string | null | undefined,
-  limit = 20
+  limit = 20,
+  preferredStyles: string[] = []
 ): Promise<{ images: SheetImage[]; roomType: string; matched: boolean }> {
   const supabase = getSupabaseAdminClient();
   const wanted = roomTypeFor(roomName);
@@ -93,29 +118,39 @@ export async function pickSheetImages(
 
   if (!supabase) return { images: [], roomType, matched: false };
 
-  const { data, error } = await supabase
-    .from("curated_images")
-    .select("id,url,thumbnail_url,style,room_type,metadata")
-    .eq("room_type", roomType)
-    .eq("is_active", true)
-    .not("url", "is", null)
+  const slice = () =>
+    supabase
+      .from("curated_images")
+      .select("id,url,thumbnail_url,style,room_type,metadata")
+      .eq("room_type", roomType)
+      .eq("is_active", true)
+      .not("url", "is", null);
+
+  const quality = await slice()
     .order("quality_score", { ascending: false, nullsFirst: false })
     .limit(Math.min(limit * 6, 60));
 
-  if (error || !Array.isArray(data)) return { images: [], roomType, matched: false };
+  let styled: { data?: unknown[] | null; error: unknown } = { data: [], error: null };
+  if (preferredStyles.length > 0) {
+    styled = await slice()
+      .in("style", preferredStyles)
+      .order("quality_score", { ascending: false, nullsFirst: false })
+      .limit(Math.min(limit * 3, 36));
+    if (styled.error) console.warn("[SheetImages] الطراز المطلوب مقراش:", (styled.error as any)?.message ?? "بلا سبب");
+  }
 
-  const usable = data
-    .filter((row: any) => typeof row.url === "string" && row.url.startsWith("http"))
-    .map((row: any) => ({
-      id: Number.isFinite(Number(row.id)) ? Number(row.id) : null,
-      url: String(row.url),
-      thumb: typeof row.thumbnail_url === "string" && row.thumbnail_url ? String(row.thumbnail_url) : String(row.url),
-      style: row.style ? String(row.style) : null,
-      roomType: String(row.room_type),
-      // The bank stores the dominant colour of every picture — that is what lets the
-      // dossier show the palette a room is actually made of instead of a mood word.
-      color: typeof row.metadata?.avg_color === "string" ? String(row.metadata.avg_color) : null,
-    }));
+  if (quality.error || !Array.isArray(quality.data)) return { images: [], roomType, matched: false };
+
+  const seen = new Set<string>();
+  const usable = [...(styled.data ?? []), ...(quality.data ?? [])]
+    .map(toSheetImage)
+    .filter((image): image is SheetImage => image !== null)
+    .filter((image) => {
+      const key = image.id !== null ? `#${image.id}` : image.url;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
   return { images: diversifyByStyle(usable, limit), roomType, matched: Boolean(wanted) };
 }

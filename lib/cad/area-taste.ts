@@ -4,11 +4,15 @@
  * Four things can order them, and the customer is told which one did: the colours he picked
  * himself, then his area's measured taste — the colours on his area's papers and the styles his
  * area's visitors asked for — or, when nothing was measured, the bank's own quality order. The
- * tier is decided here so the two doors that hand pictures to a customer (his sheet and the
- * WhatsApp delivery desk) cannot disagree about what they promised him.
+ * taste is read BEFORE the pictures are chosen, because a style nobody can show is not a promise:
+ * the bank's highest-quality window for a room can be one style end to end.
+ *
+ * Two doors hand pictures to a customer (his sheet and the WhatsApp delivery desk), and both go
+ * through here so they cannot disagree about what they told him.
  *
  * The brake: an area's taste is counted from stored rows only, never from a guess about a
- * neighbourhood, and a record that did not answer is reported as unreadable rather than as empty.
+ * neighbourhood; a record that did not answer is reported as unreadable rather than as empty; and
+ * a style that has no picture in his room is named as missing instead of claimed as the ordering.
  */
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { rankByPicks } from "@/lib/cad/palette";
@@ -22,6 +26,17 @@ export type PaperFacts = {
   picks?: { hex?: string | null }[] | null;
 };
 
+/** What his area measured, before any picture was chosen. */
+export type PaperTaste = {
+  area: string | null;
+  /** His own colour picks — the strongest signal there is, and the reason no read happens. */
+  ownHexes: string[];
+  evidence: AreaEvidence;
+  /** The bank's style keys his area asked for, most-asked first. */
+  styleKeys: string[];
+  readable: boolean;
+};
+
 /** What the surface shows next to the pictures, and nothing the customer cannot read. */
 export type SheetTaste = {
   source: TasteSource;
@@ -29,16 +44,15 @@ export type SheetTaste = {
   area: string | null;
   papers: number;
   colours: string[];
-  /** How many visitors of his area asked for a style, and the styles they said. */
   visitors: number;
   styles: string[];
 };
 
 /**
- * How many papers one read covers.
+ * How many rows one read covers.
  *
  * The area is free text on the row, so matching it to the map happens here in words, not in a
- * `where` clause — which means the newest papers are what gets searched. Four hundred is well under
+ * `where` clause — which means the newest rows are what gets searched. Four hundred is well under
  * the store's cap and well over what an area could hold this year; when the roll outgrows it the
  * line will still be true, it will just be measured on the newest of them.
  */
@@ -62,12 +76,14 @@ async function papersWithArea(): Promise<{ rows: AreaPaper[]; readable: boolean 
     );
     return { rows: [], readable: false };
   }
-  const rows: AreaPaper[] = (data ?? []).map((row: any) => ({
-    id: row.id ?? null,
-    city: row.customer_city ? String(row.customer_city) : null,
-    picks: Array.isArray(row.colour_picks) ? row.colour_picks : [],
-  }));
-  return { rows, readable: true };
+  return {
+    rows: (data as any[]).map((row) => ({
+      id: row.id ?? null,
+      city: row.customer_city ? String(row.customer_city) : null,
+      picks: Array.isArray(row.colour_picks) ? row.colour_picks : [],
+    })),
+    readable: true,
+  };
 }
 
 /**
@@ -115,20 +131,40 @@ function areaStyles(rows: { area: string; style: string | null }[], area: string
   return { visitors: holders, keys, labels: keys.map((key) => STYLE_LABELS[key]).filter(Boolean) };
 }
 
+function hexesOf(picks: AreaPaper["picks"]): string[] {
+  return (picks ?? []).map((pick) => String(pick?.hex ?? "").trim()).filter((hex) => /^#?[\da-f]{6}$/i.test(hex));
+}
+
+/**
+ * What his area measured. Read once, before the pictures are chosen, so the style his area asked
+ * for can reach the slice the bank is asked for — and so his own picks cost no read at all.
+ */
+export async function tasteForPaper(paper: PaperFacts): Promise<PaperTaste> {
+  const area = normalizeArea(paper.city ?? "");
+  const ownHexes = hexesOf(paper.picks);
+  const empty: AreaEvidence = { area, papers: 0, hexes: [], colours: [] };
+  if (ownHexes.length || !area) return { area, ownHexes, evidence: empty, styleKeys: [], readable: true };
+
+  const [papers, visitors] = await Promise.all([papersWithArea(), visitorsWithArea()]);
+  if (!papers.readable || !visitors.readable) return { area, ownHexes, evidence: empty, styleKeys: [], readable: false };
+
+  const evidence = tasteOfArea(papers.rows, area, paper.id);
+  const styles = areaStyles(visitors.rows, area);
+  evidence.visitors = styles.visitors;
+  evidence.styleLabels = styles.labels;
+  return { area, ownHexes, evidence, styleKeys: styles.keys, readable: true };
+}
+
+function plain<T>(images: T[]): Array<T & { near: boolean }> {
+  return images.map((image) => ({ ...image, near: false }));
+}
+
 /** His area's requested styles first, each group keeping the order it already had. */
 function orderByStyle<T extends { style?: string | null }>(rows: T[], keys: string[]): T[] {
   if (!keys.length) return rows;
   const wanted = rows.filter((row) => row.style && keys.includes(row.style));
   const rest = rows.filter((row) => !row.style || !keys.includes(row.style));
   return [...wanted, ...rest];
-}
-
-function hexesOf(picks: AreaPaper["picks"]): string[] {
-  return (picks ?? []).map((pick) => String(pick?.hex ?? "").trim()).filter((hex) => /^#?[\da-f]{6}$/i.test(hex));
-}
-
-function plain<T>(images: T[]): Array<T & { near: boolean }> {
-  return images.map((image) => ({ ...image, near: false }));
 }
 
 function sheetTaste(source: TasteSource, evidence: AreaEvidence): SheetTaste {
@@ -144,39 +180,36 @@ function sheetTaste(source: TasteSource, evidence: AreaEvidence): SheetTaste {
 }
 
 /**
- * His pictures, ordered by the strongest taste that actually exists for him.
+ * His pictures, ordered by the strongest taste that exists for him — and the sentence that says so.
  *
- * His own picks are never second to a neighbourhood's average. An area tier is claimed when either
- * door measured something: colours on his area's papers, or styles on his area's visitors — and a
- * customer cannot be his own evidence, so his own paper is dropped from the count.
+ * His own picks are never second to a neighbourhood's average, and a customer cannot be his own
+ * evidence. A style is only claimed as the ordering when the shown pictures really carry it: if the
+ * bank holds none of it for his room, the line says that instead.
  */
-export async function orderForPaper<T extends { color: string | null; style?: string | null }>(
+export function orderWithTaste<T extends { color: string | null; style?: string | null }>(
   images: T[],
-  paper: PaperFacts,
-): Promise<{ images: Array<T & { near: boolean }>; taste: SheetTaste }> {
-  const area = normalizeArea(paper.city ?? "");
-  const own = hexesOf(paper.picks);
-  if (own.length) {
-    return { images: rankByPicks(images, own), taste: sheetTaste("own", { area, papers: 0, hexes: own, colours: [] }) };
+  taste: PaperTaste,
+): { images: Array<T & { near: boolean }>; taste: SheetTaste } {
+  if (taste.ownHexes.length) {
+    return {
+      images: rankByPicks(images, taste.ownHexes),
+      taste: sheetTaste("own", { area: taste.area, papers: 0, hexes: taste.ownHexes, colours: [] }),
+    };
+  }
+  if (!taste.readable) {
+    return { images: plain(images), taste: sheetTaste("unreadable", { area: taste.area, papers: 0, hexes: [], colours: [] }) };
+  }
+  if (!taste.evidence.hexes.length && !taste.styleKeys.length) {
+    return { images: plain(images), taste: sheetTaste("quality", taste.evidence) };
   }
 
-  if (!area) return { images: plain(images), taste: sheetTaste("quality", { area: null, papers: 0, hexes: [], colours: [] }) };
-
-  const [papers, visitors] = await Promise.all([papersWithArea(), visitorsWithArea()]);
-  if (!papers.readable || !visitors.readable) {
-    return { images: plain(images), taste: sheetTaste("unreadable", { area, papers: 0, hexes: [], colours: [] }) };
+  const coloured = taste.evidence.hexes.length ? rankByPicks(images, taste.evidence.hexes) : plain(images);
+  const shown = orderByStyle(coloured, taste.styleKeys);
+  const honoured = taste.styleKeys.length > 0 && shown.some((image) => image.style && taste.styleKeys.includes(image.style));
+  if (!taste.evidence.hexes.length && !honoured) {
+    // Nothing moved: the area asked for a style the bank cannot show for this room. Saying the
+    // taste ordered the list would be the exact lie this store banned.
+    return { images: plain(images), taste: sheetTaste("quality", { ...taste.evidence, styleShown: false }) };
   }
-
-  const evidence = tasteOfArea(papers.rows, area, paper.id);
-  const styles = areaStyles(visitors.rows, area);
-  evidence.visitors = styles.visitors;
-  evidence.styleLabels = styles.labels;
-
-  if (!evidence.hexes.length && !styles.keys.length) {
-    return { images: plain(images), taste: sheetTaste("quality", evidence) };
-  }
-  // The style his area asked for moves the list first — it is the bigger visual difference — and
-  // the area's colours order what is left inside each style group.
-  const coloured = evidence.hexes.length ? rankByPicks(images, evidence.hexes) : plain(images);
-  return { images: orderByStyle(coloured, styles.keys), taste: sheetTaste("area", evidence) };
+  return { images: shown, taste: sheetTaste("area", { ...taste.evidence, styleShown: honoured }) };
 }

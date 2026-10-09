@@ -15,7 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { looksLikePassportToken } from "@/lib/cad/passport";
 import { offerLine, planClaim } from "@/lib/cad/contact";
-import { orderForPaper } from "@/lib/cad/area-taste";
+import { orderWithTaste, tasteForPaper } from "@/lib/cad/area-taste";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
@@ -90,15 +90,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   ].filter(Boolean);
   console.log(`[PassportContact] paper ${paper.id}: asked to write ${wrote}, the table now holds ${kept.join("+") || "nothing"}`);
 
-  const picks = await pickSheetImages(claim.roomFor, 3);
-  // The three pictures he is about to receive are ordered by the same rule his sheet uses, and the
-  // answer names which taste ordered them — the desk must not promise «chosen for your area» on a
-  // quality list.
-  const ordered = await orderForPaper(picks.images, {
+  // His area is measured first, so a style his area asked for can actually be reached in the bank.
+  const taste = await tasteForPaper({
     id: paper.id,
     city: stored?.customer_city ?? null,
     picks: stored?.colour_picks ?? [],
   });
+  const picks = await pickSheetImages(claim.roomFor, 3, taste.styleKeys);
+  // The three pictures he is about to receive are ordered by the same rule his sheet uses, and the
+  // answer names which taste ordered them — the desk must not promise «chosen for your area» on a
+  // quality list.
+  const ordered = orderWithTaste(picks.images, taste);
   return NextResponse.json({
     success: true,
     line: offerLine(ordered.images.length, picks.matched),

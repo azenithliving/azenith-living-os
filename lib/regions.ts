@@ -123,6 +123,8 @@ export type AreaEvidence = {
   /** How many visitors of his area asked for a style, and which styles they said. */
   visitors?: number;
   styleLabels?: string[];
+  /** False when the bank holds no picture of that style for his room — said out loud, not hidden. */
+  styleShown?: boolean;
 };
 
 /** One row of the papers table, as far as this file needs it. */
@@ -216,12 +218,19 @@ export function tasteLine(source: TasteSource, evidence: AreaEvidence): string {
   if (source === "area") {
     const bits: string[] = [];
     if (evidence.papers) bits.push(`ألوان ${papersPhrase(evidence.papers)}`);
-    if (evidence.visitors) bits.push(`طراز ${visitorsPhrase(evidence.visitors)}`);
+    if (evidence.visitors && evidence.styleShown !== false) bits.push(`طراز ${visitorsPhrase(evidence.visitors)}`);
     const colours = evidence.colours.length ? `، وألوانها ${evidence.colours.join(" و")}` : "";
-    const styles = evidence.styleLabels?.length ? `، وطرازهم ${evidence.styleLabels.join(" و")}` : "";
+    // A style with no picture in his room is still his area's taste — said, and marked as
+    // something this list could not honour.
+    const styles = evidence.styleLabels?.length
+      ? `، وطرازهم ${evidence.styleLabels.join(" و")}${evidence.styleShown === false ? " بس مفيش منه صورة لغرفة زي غرفتك" : ""}`
+      : "";
     return `دي على ذوق ${evidence.area}: محسوب من ${bits.join(" و")}${colours}${styles}.`;
   }
   if (source === "unreadable") return "السجل ما ردّش دلوقتي — الصور المرتّبة دي على جودتها، ومحكّتهاش على منطقتك.";
+  if (evidence.styleLabels?.length && evidence.styleShown === false) {
+    return `لسه مفيش صورة تطابق ذوق منطقة ${evidence.area} — طراز ${evidence.styleLabels.join(" و")} اللي طلبوه مالقاش صورة لغرفة زي غرفتك، فالرتبة على الجودة.`;
+  }
   return evidence.area
     ? `لسه مفيش ورق مسجّل لمنطقة ${evidence.area} — الصور المرتّبة دي على جودتها، مش على ذوق منطقتك.`
     : "لسه ما عرفت منطقتك — الصور المرتّبة دي على جودتها. اختارها فوق والاقتراحات تبقى أقربلك.";

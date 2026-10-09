@@ -27,7 +27,7 @@ import { recordVisit } from "@/lib/cad/sheet-visits";
 import { roomTypeName } from "@/lib/cad/room-labels";
 import { planFromPaper, type Plan } from "@/lib/cad/plan";
 import { matrixFor, type ColourPick } from "@/lib/cad/colours";
-import { orderForPaper } from "@/lib/cad/area-taste";
+import { orderWithTaste, tasteForPaper } from "@/lib/cad/area-taste";
 
 export const dynamic = "force-dynamic";
 
@@ -113,14 +113,17 @@ async function findByToken(token: string) {
  * loses his matrix because one of the two doors forgot to compute it.
  */
 async function sheetPayload(row: Row) {
+  const chosen = Array.isArray(row.colour_picks) ? row.colour_picks : [];
+  // His area is measured before the pictures are asked for: a style his area asked for that the
+  // bank cannot show for his room is not a promise, and the picker needs the style to reach it.
+  const taste = await tasteForPaper({ id: row.id, city: row.customer_city, picks: chosen });
   // The pictures are picked for the room on the drawing. When the room is one the
   // bank has no pictures for, the general house set is sent and the flag says so,
   // because «chosen for your room» has to be true before it is printed.
-  const picks = await pickSheetImages(row.room, 20);
-  const chosen = Array.isArray(row.colour_picks) ? row.colour_picks : [];
+  const picks = await pickSheetImages(row.room, 20, taste.styleKeys);
   // His own colours first, then his area's measured taste, then the bank's quality — and the line
   // says which of the three ordered them, so a quality list is never shown as a personal one.
-  const ordered = await orderForPaper(picks.images, { id: row.id, city: row.customer_city, picks: chosen });
+  const ordered = orderWithTaste(picks.images, taste);
   return {
     sheet: publicSheet(row, Boolean(row.customer_key), { matrix: matrixFor(picks.images), picks: chosen }),
     images: ordered.images,
