@@ -13,6 +13,13 @@ import { agentLabel, legacyToOps, SWARM_NAME, storedSenderName } from "@/lib/ops
 import { recallMemory, finalizeReply } from "@/lib/ops/chat-brain";
 import { critiqueAndPolish, shouldDebate } from "@/lib/ops/debate";
 import { deskTruthFor, honestDeskClaims, type DeskRecord } from "@/lib/ops/claims";
+import {
+  provenanceEnvelope,
+  pickPrimaryDesk,
+  SWARM_DESK,
+  SITE_AUDIT_DESK,
+  type DeskRun,
+} from "@/lib/ops/provenance";
 import { withOwnerRuleOnMessages } from "@/lib/ops/owner-address";
 import { explainGap } from "@/lib/ops/gap-contract";
 import { isStaleRunning } from "@/lib/ops/task-reconcile";
@@ -285,6 +292,10 @@ export class AgentOrchestrator {
         explicitTool ?? (isSiteAudit ? null : await routeIntent(message));
       let toolResult: any = null;
       let toolContextStr = "";
+      // Every desk this turn really asked to run, whether the router called it or
+      // the leader's own shortcuts did. Written on the row, so a claim of a deed has
+      // a record to be checked against instead of a blank.
+      const deskRuns: DeskRun[] = [];
 
       if (inferredTool) {
         try {
@@ -300,6 +311,7 @@ export class AgentOrchestrator {
         } catch (toolErr) {
           console.warn(`[AgentOrchestrator] Tool execution error:`, toolErr);
         }
+        deskRuns.push({ desk: inferredTool.toolName, ok: toolResult?.success === true });
       }
 
       // ── 3. استدعِ الوكيل بالذكاء الاصطناعي الحقيقي ───────────────
@@ -395,8 +407,10 @@ export class AgentOrchestrator {
         // keywords into short follow-ups.
         const isAuditRequest = /افحص|تقرير|دقّق|audit/i.test(message);
         if (isAuditRequest) {
+          let auditOk = false;
           try {
             const auditRes = await qayyimCoreAgent.auditFullSite({ company_id: resolvedCompanyId, page_path: '/', scope: 'full' });
+            auditOk = auditRes.success;
             if (auditRes.success) {
               response = auditRes.output;
               metadata.actionItems = auditRes.evidenceUrls;
@@ -410,6 +424,7 @@ export class AgentOrchestrator {
           } catch (auditErr: any) {
             console.warn("[AgentOrchestrator] Direct audit failed, falling back to swarm:", auditErr?.message);
           }
+          deskRuns.push({ desk: SITE_AUDIT_DESK, ok: auditOk });
         }
         // إذا لم يكن طلب تدقيق أو فشل المباشر، استخدم السرب
         // P5-M1: a successful measured tool already answers the request —
@@ -434,6 +449,7 @@ export class AgentOrchestrator {
               source:      context?.source ?? "chat",
               orchestrate: true,
             });
+            deskRuns.push({ desk: SWARM_DESK, ok: swarmResult.success });
 
             if (swarmResult.success) {
               response = swarmResult.response;
@@ -451,6 +467,7 @@ export class AgentOrchestrator {
             }
           } catch (swarmErr: any) {
             console.warn("[AgentOrchestrator] Swarm failed, falling back to core:", swarmErr?.message);
+            deskRuns.push({ desk: SWARM_DESK, ok: false });
             const agentInstance = this.agents["ops-lead"];
             response = agentInstance
               ? await agentInstance.chat(promptWithToolContext, context)
@@ -500,7 +517,11 @@ export class AgentOrchestrator {
       // P5-M5: friendly war — a critic pass polices the leader's actionable
       // answers before the owner ever sees them (short replies skip it).
       // The critic is handed the one fact it cannot read out of prose: whether a desk ran.
-      const desk: DeskRecord = { tool: inferredTool?.toolName ?? null, ok: toolResult?.success === true };
+      // Measured 2026-10-07: the router's tool was the only desk ever counted, so a turn
+      // where the swarm really wrote a page draft looked identical to a turn where nothing
+      // ran. Every desk the turn asked for is in the list now.
+      const primary = pickPrimaryDesk(deskRuns);
+      const desk: DeskRecord = { tool: primary?.desk ?? null, ok: primary?.ok ?? false };
       if (selectedAgent === "ops-lead" && response && shouldDebate(response)) {
         const polished = await critiqueAndPolish(message, response, deskTruthFor(desk));
         response = polished.reply;
@@ -515,7 +536,7 @@ export class AgentOrchestrator {
       // path to switch it on, named from the real tool catalog. Measured answers
       // get nothing appended (the contract only fires on a refusal).
       if (response) {
-        const gapNote = explainGap(response, message, { tools: TOOL_CATALOG }, { executed: toolResult?.success === true });
+        const gapNote = explainGap(response, message, { tools: TOOL_CATALOG }, { executed: primary?.ok === true });
         if (gapNote) response = `${response}${gapNote}`;
       }
 
@@ -536,21 +557,27 @@ export class AgentOrchestrator {
       }
 
       if (supabase && conversationId) {
-        await supabase.from("agent_messages").insert({
+        const { error: stored } = await supabase.from("agent_messages").insert({
           conversation_id: conversationId,
           sender_type: "agent",
           sender_name: storedSenderName(selectedAgent),
           content: response,
           created_at: new Date().toISOString(),
-          action_taken: !!toolResult,
+          action_taken: deskRuns.some((d) => d.ok),
           is_read: automated,
-          context: toolResult ? {
-            tool: inferredTool?.toolName,
-            result: toolResult.message,
-            data: toolResult.data,
-            success: toolResult.success,
-          } : {},
+          // The row says which path wrote it and every desk it asked to run, so an
+          // honest "nothing ran" is a different shape from a missing record.
+          context: {
+            ...provenanceEnvelope("orchestrator", deskRuns),
+            ...(toolResult ? { result: toolResult.message, data: toolResult.data } : {}),
+          },
         });
+        const written = deskRuns.map((d) => `${d.desk}:${d.ok ? "تم" : "فشل"}`).join(" · ") || "ولا مكتب";
+        if (stored) {
+          console.warn(`[provenance] سطر الموظف ما اتسجّلش: ${stored.message}`);
+        } else {
+          console.log(`[provenance] سطر الموظف اتكتب ومعه سجل ${deskRuns.length} مكتب — ${written}`);
+        }
 
         // حدّث last_message_at
         await supabase

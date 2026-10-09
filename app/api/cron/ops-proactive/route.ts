@@ -3,6 +3,7 @@ import { assertCronAuthorized } from "@/lib/cron-auth";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { auditVisitorExperience } from "@/lib/qayyim-ops";
+import { provenanceEnvelope, VISITOR_AUDIT_DESK } from "@/lib/ops/provenance";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -69,7 +70,15 @@ export async function GET(request: NextRequest) {
           content: `لاحظت: ${issue.detail} في **${issue.target}** (${issue.path})\nجهزت لك مسودة مقترحة — تريد أن أعرضها؟ [معاينة] [وافق]`,
           is_read: false,
           created_at: new Date().toISOString(),
-          context: { proactive: true, issue, suggestion_id: sug.id },
+          action_taken: true,
+          context: {
+            ...provenanceEnvelope("proactive-cron", [
+              { desk: VISITOR_AUDIT_DESK, ok: audit.success === true },
+            ]),
+            proactive: true,
+            issue,
+            suggestion_id: sug.id,
+          },
         });
       }
       created++;

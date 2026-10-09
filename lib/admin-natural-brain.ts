@@ -480,6 +480,12 @@ export async function processAdminNaturalLanguageReply(
   type: string;
   executed?: boolean;
   data?: unknown;
+  /**
+   * The desk the brain really ran, or null. The caller writes it on the chat row — without
+   * this the row is a blank, and a blank reads the same as "nothing ran".
+   */
+  tool?: string | null;
+  toolOk?: boolean;
 }> {
   const result = await processAdminNaturalLanguage(message, {
     sessionId: ctx.sessionId || `admin-${ctx.source || "generic"}-${Date.now()}`,
@@ -491,11 +497,15 @@ export async function processAdminNaturalLanguageReply(
     agentKey: ctx.agentKey,
   });
 
+  const commandResult = result.command?.result as { success?: boolean } | undefined;
+
   return {
     success: true,
     reply: result.message,
     type: result.type,
     executed: result.type === "mixed",
     data: result.command?.result,
+    tool: typeof result.command?.name === "string" ? result.command.name : null,
+    toolOk: result.type === "mixed" && commandResult?.success !== false,
   };
 }

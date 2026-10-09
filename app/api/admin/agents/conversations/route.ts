@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
+import { provenanceEnvelope } from '@/lib/ops/provenance';
 
 // GET - List conversations
 export async function GET(request: NextRequest) {
@@ -149,7 +150,10 @@ export async function POST(request: NextRequest) {
         conversation_id: conversation.id,
         sender_type: 'system',
         content: `👋 مرحباً! تم بدء محادثة جماعية بين: ${participants.join(', ')}`,
-        created_at: timestamp
+        created_at: timestamp,
+        // A notice, not a deed: the row says which path wrote it so no reader has to
+        // infer it from the shape of an empty object.
+        context: provenanceEnvelope('conversations-door', []),
       });
     }
 

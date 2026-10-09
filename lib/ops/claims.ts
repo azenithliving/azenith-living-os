@@ -1,4 +1,4 @@
-import { CAPABILITY_LABELS } from "./palette";
+import { deskLabel } from "./provenance";
 
 /**
  * A claim that work was done is a fact, and a fact has a record.
@@ -36,8 +36,7 @@ export function looksLikeEvidence(text: string): boolean {
 
 /** The one fact the critic cannot infer from prose. */
 export function deskTruthFor(desk: DeskRecord): string {
-  const label = desk.tool ? CAPABILITY_LABELS[desk.tool]?.split(":")[0]?.trim() || null : null;
-  const named = label ?? "مكتب من غير اسم مسجّل";
+  const named = deskLabel(desk.tool) ?? "مكتب من غير اسم مسجّل";
   if (!desk.tool) return "ولا مكتب اشتغل في الطلب ده";
   if (desk.ok === false) return `مكتب «${named}» حاول يشتغل وما نجحش`;
   return `المكتب اللي اشتغل فعلاً: ${named}`;

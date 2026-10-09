@@ -17,7 +17,8 @@ import { ApprovalDecisionBlock } from './ApprovalDecisionBlock';
 import { pendingApprovalIdFromMessage } from '@/lib/ops/proposal-card';
 import { QuickActionsPanel } from './QuickActionsPanel';
 import { EmergencyBanner } from './EmergencyBanner';
-import { buildPalette, isPaletteHotkey, CAPABILITY_LABELS, type PaletteCommand } from '@/lib/ops/palette';
+import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/ops/palette';
+import { deskNames, readDesks, type DeskRun } from '@/lib/ops/provenance';
 import { arDigits, arNum, metricLabel } from '@/lib/ops/metricLabels';
 import { locateFirstUnread, readStamp, unreadJump } from '@/lib/ops/unread-marker';
 import { ownerVoice } from '@/lib/ops/owner-voice';
@@ -1557,7 +1558,12 @@ function MessageBubble({
 
   const colors = colorClasses[agentColor] || colorClasses.purple;
   const toolData = message.metadata?.toolData || message.context?.data;
-  const toolName = message.metadata?.tool || message.context?.tool;
+  // The row's own record of what ran under it. A message the panel just sent locally
+  // carries it in metadata; a stored row carries the envelope written by the door.
+  const deskRuns: DeskRun[] = message.metadata?.tool
+    ? [{ desk: String(message.metadata.tool), ok: message.metadata.toolSuccess !== false }]
+    : readDesks(message.context);
+  const toolName = deskRuns[0]?.desk ?? "";
   // The decision this very message is waiting on, when there is one.
   const approvalId = pendingApprovalIdFromMessage(message);
 
@@ -1636,7 +1642,7 @@ function MessageBubble({
 
             {/* ── بطاقة النتائج التنفيذية المنظمة (Structured Tool Result) ── */}
             {toolName && (
-              <StructuredToolCard toolName={toolName} toolData={toolData} />
+              <StructuredToolCard toolName={toolName} toolData={toolData} desks={deskRuns} />
             )}
           </div>
 
@@ -1683,10 +1689,14 @@ function MessageBubble({
 }
 
 // ── مكون بطاقة النتائج المنظمة الغنية داخل الشات ───────────────────────
-function StructuredToolCard({ toolName, toolData }: { toolName: string; toolData?: any }) {
+function StructuredToolCard({ toolName, toolData, desks }: { toolName: string; toolData?: any; desks?: DeskRun[] }) {
   const [showJson, setShowJson] = useState(false);
 
-  if (!toolData && !toolName) return null;
+  const runs = desks && desks.length ? desks : [{ desk: toolName, ok: toolData?.success !== false }];
+  const names = deskNames(runs);
+  const anyFailed = runs.some((d) => !d.ok);
+
+  if (!toolData && !runs.length) return null;
 
   const nestedItems = Array.isArray(toolData?.items) ? toolData.items : null;
   const isArray = Array.isArray(toolData) || (nestedItems && nestedItems.length > 0);
@@ -1698,13 +1708,16 @@ function StructuredToolCard({ toolName, toolData }: { toolName: string; toolData
       <div className="flex items-center justify-between text-[11px]">
         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-bold">
           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-          {toolData?.success === false ? 'فشل التنفيذ' : 'تم التنفيذ الفعلي'}
-          {/* The tool id is a machine name and stays off his sentence; the Arabic
-              capability label says the same thing. The raw id is still one press
-              away in the data panel below. */}
-          {CAPABILITY_LABELS[toolName] ? (
-            <span className="text-[10px] text-emerald-200/80">{CAPABILITY_LABELS[toolName]}</span>
-          ) : null}
+          {anyFailed ? 'في مكتب حاول وما كملش' : 'تم التنفيذ الفعلي'}
+          {/* The tool id is a machine name and stays off his sentence; the desk's own Arabic
+              name says the same thing. A desk the palette has no command for is named from the
+              provenance module, and an unnamed desk is left unnamed rather than printed as an id.
+              The raw id is still one press away in the data panel below. */}
+          {names.map((label) => (
+            <span key={label} className="text-[10px] text-emerald-200/80" data-desk-name="1">
+              {label}
+            </span>
+          ))}
         </span>
         {toolData && (
           <button

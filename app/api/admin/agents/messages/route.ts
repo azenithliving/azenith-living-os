@@ -6,6 +6,7 @@ import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
 import { resolveMasterCompanyId } from '@/lib/admin-env-resolver';
 import { legacyToOps, storedSenderName } from '@/lib/ops/identity';
+import { provenanceEnvelope } from '@/lib/ops/provenance';
 import { z } from 'zod';
 
 const messageSchema = z.object({
@@ -229,7 +230,15 @@ export async function POST(request: NextRequest) {
               ? String((brain.data as { requestId: string }).requestId)
               : null;
 
-          const { data: replyRow } = await supabaseServer
+          // The desk the brain ran is named on the row. An answer this door wrote with no
+          // desk is stored as `desks: []` — a stated nothing, not a blank to guess at.
+          const replyContext: Record<string, unknown> = provenanceEnvelope(
+            'messages-door',
+            brain.tool ? [{ desk: brain.tool, ok: brain.toolOk !== false }] : []
+          );
+          if (approvalId) replyContext.approval_id = approvalId;
+
+          const { data: replyRow, error: replyErr } = await supabaseServer
             .from('agent_messages')
             .insert({
               conversation_id: conversationId,
@@ -238,10 +247,21 @@ export async function POST(request: NextRequest) {
               content: brain.reply,
               mentions: [],
               created_at: new Date().toISOString(),
-              ...(approvalId ? { requires_action: true, context: { approval_id: approvalId } } : {}),
+              action_taken: Boolean(brain.tool && brain.toolOk !== false),
+              context: replyContext,
+              ...(approvalId ? { requires_action: true } : {}),
             })
             .select()
             .single();
+          if (replyErr) {
+            console.warn(`[provenance] رد الباب ما اتسجّلش: ${replyErr.message}`);
+          } else {
+            console.log(
+              `[provenance] سطر ردّ الباب اتكتب — مكتب: ${brain.tool ?? "ولا مكتب"} (${
+                brain.tool ? (brain.toolOk !== false ? "خلص" : "فاشل") : "مفيش"
+              })`
+            );
+          }
           agentReply = replyRow ? { content: brain.reply } : { content: brain.reply };
         }
       } catch (brainErr) {
