@@ -11,6 +11,7 @@ import { InvestmentBrackets, InvestmentTier } from "@/components/elite/Investmen
 import { LanguageSwitcher } from "@/components/elite/LanguageSwitcher";
 import { getOfficeStatus, fetchRecordedHours, formatNextOpening, formatNextOpeningAr, type OfficeHours, type OfficeStatus } from "@/lib/office-hours";
 import useSessionStore from "@/stores/useSessionStore";
+import { useSiteLanguage } from "@/hooks/useSiteLanguage";
 import { getViewedImageUrls } from "@/lib/image-tracking";
 
 /**
@@ -38,11 +39,11 @@ interface CompleteSubmissionData {
 function EliteIntelligenceContent() {
   const searchParams = useSearchParams();
   const [stage, setStage] = useState<SubmissionStage>("form");
-  // The store's own language (Arabic until he says otherwise) opens the page; the URL and the
-  // browser only override it, and the switcher writes back so the rest of the site agrees.
-  const sessionLanguage = useSessionStore((state) => state.language);
+  // One owner for the language he reads in — the store's setting, which the header switcher writes
+  // and every other page obeys. This screen used to keep a private copy of it, guess from the
+  // browser, and let `?lang=` move only itself. See `hooks/useSiteLanguage`.
+  const language = useSiteLanguage();
   const setSessionLanguage = useSessionStore((state) => state.setLanguage);
-  const [language, setLanguage] = useState<Language>(sessionLanguage);
   const [officeStatus, setOfficeStatus] = useState<OfficeStatus | null>(null);
   const [formData, setFormData] = useState<(FormData & { qualification: LeadQualification }) | null>(null);
   const [investmentTier, setInvestmentTier] = useState<InvestmentTier | null>(null);
@@ -63,14 +64,6 @@ function EliteIntelligenceContent() {
       refresh();
     });
     setViewedImages(getViewedImageUrls());
-
-    // Detect language preference from URL or browser
-    const langParam = searchParams?.get("lang") as Language | undefined;
-    if (langParam === "ar" || langParam === "en") {
-      setLanguage(langParam);
-    } else if (typeof navigator !== "undefined" && navigator.language.startsWith("ar")) {
-      setLanguage("ar");
-    }
 
     const interval = setInterval(refresh, 60000);
     return () => {
@@ -178,7 +171,7 @@ function EliteIntelligenceContent() {
         <LanguageSwitcher
           currentLang={language}
           onChange={(lang) => {
-            setLanguage(lang);
+            // The switcher is a writer of the shared setting — not of one page's opinion.
             setSessionLanguage(lang);
           }}
         />
@@ -192,7 +185,7 @@ function EliteIntelligenceContent() {
           className="mb-12 text-center"
         >
           <p className="text-sm uppercase tracking-[0.28em] text-amber-400/70">
-            {language === "ar" ? "الاستخبارات المتميزة" : "Elite Intelligence"}
+            {language === "ar" ? "أزينث — تجربة النخبة" : "Azenith — Elite Experience"}
           </p>
           <h1 className="mt-4 font-serif text-4xl text-white md:text-5xl lg:text-6xl">
             {language === "ar" ? "صمم رؤيتك" : "Design Your Vision"}

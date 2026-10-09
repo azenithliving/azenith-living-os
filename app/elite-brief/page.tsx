@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { EliteIntelligenceForm, FormData, LeadQualification } from "@/components/elite/EliteIntelligenceForm";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import useSessionStore from "@/stores/useSessionStore";
+import { isArabic, useSiteLanguage } from "@/hooks/useSiteLanguage";
 import { arabicNumerals } from "@/lib/arabic";
 
 /**
@@ -46,16 +46,10 @@ const COPY = {
 
 function EliteBriefContent() {
   const searchParams = useSearchParams();
-  // One owner for the language he reads in: the store's own setting, which the header switcher
-  // writes and every other page obeys. Only the address (`?lang=`) may change it from here —
-  // a browser guess on this screen alone would disagree with the choice he already made.
-  const language = useSessionStore((state) => state.language);
-  const setLanguage = useSessionStore((state) => state.setLanguage);
-  useEffect(() => {
-    const wanted = searchParams?.get("lang");
-    if (wanted === "ar" || wanted === "en") setLanguage(wanted);
-  }, [searchParams, setLanguage]);
-  const ar = language !== "en";
+  // One owner for the language he reads in — the store's setting, which the header switcher writes
+  // and every other page obeys. See `hooks/useSiteLanguage`.
+  const language = useSiteLanguage();
+  const ar = isArabic(language);
   const L = ar ? COPY.ar : COPY.en;
   const [sessionId] = useState(() => crypto.randomUUID());
   const [viewedImages, setViewedImages] = useState<string[]>([]);
