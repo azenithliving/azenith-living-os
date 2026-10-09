@@ -72,19 +72,25 @@ function FreshnessBadge({ lead }: { lead: Lead }) {  const f = freshnessOf(hours
 export default function CustomersPanel() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  // A door that did not answer used to be swallowed here: the list stayed empty and only the
+  // browser log knew. An empty roll and a refused read are two different sentences to the owner.
+  const [leadsError, setLeadsError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "diamond" | "gold" | "silver" | "bronze">("all");
   const [onlyWaiting, setOnlyWaiting] = useState(false);
 
   const loadLeads = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
-      const response = await fetch("/api/admin/leads");
-      if (response.ok) {
-        const data = await response.json();
-        setLeads(data.leads || []);
+      const response = await fetch("/api/admin/leads", { cache: "no-store" });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data || !Array.isArray(data.leads)) {
+        setLeadsError(data?.error || `باب القائمة ردّ بحالة ${response.status} من غير ما يجيب سطور`);
+        return;
       }
+      setLeads(data.leads);
+      setLeadsError(null);
     } catch (error) {
-      console.error("Failed to load leads:", error);
+      setLeadsError(`القائمة ما جابتش رد: ${error instanceof Error ? error.message : "خطأ غير معروف"}`);
     } finally {
       if (!isSilent) setLoading(false);
     }
@@ -394,6 +400,15 @@ export default function CustomersPanel() {
           <p className="text-sm text-[#C5A059]">مركز التحكم الكامل بالعملاء</p>
         </div>
       </div>
+
+      {leadsError && (
+        <div data-leads-error="1" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4">
+          <p className="text-sm text-rose-200">{leadsError}</p>
+          <p className="mt-1 text-xs text-white/50">
+            الأعداد دي آخر ما وصل — مش معناه إن مفيش عملاء. المحاولة التانية نفسها بتتعمل كل تلات ثواني.
+          </p>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
