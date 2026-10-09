@@ -114,6 +114,13 @@ describe("Smart Agent API Contract", () => {
     vi.doMock("@/lib/admin-natural-brain", () => ({
       processAdminNaturalLanguageReply: vi.fn(async () => ({ reply: "", meta: {} })),
     }));
+    /**
+     * The stub above is the fix; this is the tripwire. Re-measured 2026-10-09: 56ms alone and
+     * 173–223ms inside two full runs, so the 15 seconds was the import graph, not the assertion.
+     * Any network call that comes back into this path now fails the guard instead of hiding
+     * behind a long timeout.
+     */
+    const fetchSpy = vi.spyOn(global, "fetch").mockRejectedValue(new Error("لا شبكة في حارس التوثيق"));
 
     const { POST } = await import("../app/api/admin/agent/smart/route");
     const response = await POST(
@@ -126,7 +133,9 @@ describe("Smart Agent API Contract", () => {
 
     expect(response.status).toBe(401);
     expect(json.success).toBe(false);
-  }, 15000);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
+  }, 3_000);
 
   it("returns unified success contract in fallback mode", async () => {
     // Mock admin natural brain

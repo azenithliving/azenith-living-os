@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, beforeAll } from "vitest";
 import { isGenericAiFailureMessage, formatCommandResultForUser } from "@/lib/admin-response-format";
 
 vi.mock("@/lib/admin-sovereign-mind", () => ({
@@ -56,6 +56,14 @@ vi.mock("@/lib/aaca-client", () => ({
   })),
 }));
 
+/**
+ * The browser layer is a live research mission — it fetches outside the app. The test is about
+ * which sentence the brain answers with, so the boundary is closed here and the answer is fixed.
+ */
+vi.mock("@/lib/admin-browser-augmentation", () => ({
+  runBrowserAugmentation: vi.fn(async () => null),
+}));
+
 vi.mock("@supabase/supabase-js", () => ({
   createClient: vi.fn(() => ({
     from: vi.fn(() => ({
@@ -72,14 +80,27 @@ vi.mock("@supabase/supabase-js", () => ({
 }));
 
 describe("admin assistant resilience", () => {
+  /**
+   * The brain's module graph (tools, bridge, formatters) is transformed once per file. Measured
+   * 2026-10-09: 0.8s alone, 5s when the whole suite runs at once on this machine — so the wait
+   * belongs to the setup, not to any assertion. Loading it here keeps the per-test timeouts
+   * honest: they now measure the answer, not the import.
+   */
+  let processAdminNaturalLanguage: (
+    message: string,
+    ctx: Record<string, unknown>
+  ) => Promise<{ message: string; type: string }>;
+
+  beforeAll(async () => {
+    const brain = await import("@/lib/admin-natural-brain");
+    processAdminNaturalLanguage = brain.processAdminNaturalLanguage;
+  }, 90_000);
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("never surfaces generic AI failure when command succeeded", async () => {
-    const { processAdminNaturalLanguage } = await import(
-      "@/lib/admin-natural-brain"
-    );
     const result = await processAdminNaturalLanguage("list_keys", {
       sessionId: "test-session",
       userId: "00000000-0000-0000-0000-000000000001",
@@ -90,12 +111,9 @@ describe("admin assistant resilience", () => {
 
     expect(isGenericAiFailureMessage(result.message)).toBe(false);
     expect(result.message).toMatch(/مفتاح|executed|groq/i);
-  }, 30_000);
+  }, 5_000);
 
   it("escalates unprogrammed action to agents not empty chat", async () => {
-    const { processAdminNaturalLanguage } = await import(
-      "@/lib/admin-natural-brain"
-    );
     const result = await processAdminNaturalLanguage(
       "حدّث صور غرفة الـ VIP وارفعها على الموقع",
       {
@@ -106,7 +124,7 @@ describe("admin assistant resilience", () => {
     );
 
     expect(result.message).toMatch(/أحتاج إذنك|موافقة|عقل النظام/i);
-  }, 30_000);
+  }, 5_000);
 
   it("formatCommandResultForUser handles list_keys data", () => {
     const text = formatCommandResultForUser(
