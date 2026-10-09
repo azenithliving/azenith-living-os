@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { WORDMARK_AR } from "@/lib/seo";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { GlobalAssistantDock } from "@/components/admin/GlobalAssistantDock";
@@ -121,7 +122,7 @@ export default function AdminLayoutClient({
               <div className="p-2 bg-gradient-to-br from-[#C5A059] to-[#8B7355] rounded-lg">
                 <Crown className="w-5 h-5 text-[#1a1a1a]" />
               </div>
-              <span className="text-xl font-bold tracking-tighter text-white">AZENITH <span className="text-[#C5A059] text-xs">OS</span></span>
+              <span className="text-xl font-bold tracking-tighter text-white">{WORDMARK_AR}</span>
             </div>
             <button 
               className="lg:hidden p-2 text-white/40 hover:text-white"

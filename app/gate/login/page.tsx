@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { WORDMARK_AR } from "@/lib/seo";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, AlertCircle, Shield, KeyRound } from "lucide-react";
 
@@ -86,7 +87,7 @@ export default function GateLoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <h1 className="font-serif text-3xl text-[#C5A059]">AZENITH</h1>
+          <h1 className="font-serif text-3xl text-[#C5A059]">{WORDMARK_AR}</h1>
           <p className="mt-2 text-sm text-white/50">بوابة الدخول</p>
         </div>
 

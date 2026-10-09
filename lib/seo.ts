@@ -3,6 +3,12 @@ import type { Metadata } from "next";
 export const SITE_URL = "https://azenith-living.vercel.app";
 export const SITE_NAME = "Azenith Living";
 export const BRAND_NAME_AR = "أزينث ليفينج";
+/**
+ * The short mark the owner's own screens carry, in his spelling. Decided 2026-10-09: the admin
+ * header and the gate both read this, so the house cannot be called «AZENITH OS» at the door and
+ * «سرب أزينث» inside. The Latin mark stays where it is a logo file or an email footer, not a label.
+ */
+export const WORDMARK_AR = "أزينث";
 export const BRAND_NAME_EN = "Azenith Living";
 export const CONTACT_PHONE = "+201090819584";
 export const CONTACT_EMAIL = "azenithliving@gmail.com";
