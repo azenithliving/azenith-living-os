@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
 import { roomNameAr } from "@/lib/rooms-catalog";
 import { ALL_FURNITURE_SCOPES, TIMELINE_OPTIONS } from "@/lib/constants/furniture-data";
 import { formatNextOpeningAr, type OfficeStatus } from "@/lib/office-hours";
@@ -45,5 +46,41 @@ describe("the elite form's Arabic layer", () => {
     expect(line).toContain("الساعة");
     expect(line).toMatch(/[\u0660-\u0669]/);
     expect(line).not.toMatch(/[A-Za-z]/);
+  });
+});
+
+/**
+ * The screens that mount the form.
+ *
+ * Measured 2026-10-09 on the published store: the brief screen never passed a language, so its
+ * Arabic customer read an English page — and the page's own headings, success card and buttons were
+ * English literals with no Arabic half at all. The form's floor was English too, so any future
+ * screen that forgets the prop repeats the mistake instead of failing toward his language.
+ */
+describe("the elite screens obey the store's language", () => {
+  const brief = readFileSync("app/elite-brief/page.tsx", "utf8");
+
+  it("takes the language from the store and hands it to the form", () => {
+    expect(brief).toContain("useSessionStore((state) => state.language)");
+    expect(brief).toContain("language={language}");
+  });
+
+  it("keeps the page's English words inside its English half", () => {
+    const beforeEn = brief.slice(0, brief.indexOf("  en: {"));
+    for (const english of ["Design Your Vision", "Brief Submitted Successfully", "Back to Home", "Explore More Designs"]) {
+      expect(beforeEn, `«${english}» بره النص الإنجليزي`).not.toContain(english);
+    }
+    expect(brief).toContain("صمم رؤيتك");
+    expect(brief).toContain("تم استلام طلبك بنجاح");
+  });
+
+  it("counts the pictures he saw in his digits, not Latin ones", () => {
+    expect(brief).toContain("arabicNumerals(count)");
+  });
+
+  it("opens in Arabic when a screen forgets to say otherwise", () => {
+    const form = readFileSync("components/elite/EliteIntelligenceForm.tsx", "utf8");
+    expect(form).toContain('language = "ar"');
+    expect(form).not.toContain('language = "en"');
   });
 });

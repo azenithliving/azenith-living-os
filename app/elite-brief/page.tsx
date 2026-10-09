@@ -6,6 +6,38 @@ import { motion } from "framer-motion";
 import { EliteIntelligenceForm, FormData, LeadQualification } from "@/components/elite/EliteIntelligenceForm";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import useSessionStore from "@/stores/useSessionStore";
+import { arabicNumerals } from "@/lib/arabic";
+
+/**
+ * The brief's own words. Measured 2026-10-09 on the published store: an Egyptian customer who came
+ * from an Arabic page walked into an English screen — the form underneath had an Arabic layer all
+ * along, and this page never asked the store which language he reads in.
+ */
+const COPY = {
+  ar: {
+    eyebrow: "أزينث — تجربة النخبة",
+    title: "صمم رؤيتك",
+    line: "كمّل كراسة الطلب وهنجهّز تصميم على مقاسك: المساحة والميزانية والذوق.",
+    inspiration: (count: number) => `📸 مصدر ذوقك: شفت ${arabicNumerals(count)} صورة تصميم`,
+    savedTitle: "تم استلام طلبك بنجاح",
+    savedLine: "اللي كتبته اتسجّل، وهيراجعه فريق التصميم.",
+    failed: "في مشكلة مؤقتة في حفظ طلبك، جرّب بعد شوية.",
+    home: "العودة للرئيسية",
+    rooms: "شوف المزيد من التصاميم",
+  },
+  en: {
+    eyebrow: "Azenith — Elite Experience",
+    title: "Design Your Vision",
+    line: "Complete this brief so the design team can review your space, budget, and preferences.",
+    inspiration: (count: number) => `📸 Your taste source: you viewed ${count} designs`,
+    savedTitle: "Brief Submitted Successfully",
+    savedLine: "Your brief has been saved for the design team to review.",
+    failed: "We could not save your brief just now — please try again.",
+    home: "Back to Home",
+    rooms: "Explore More Designs",
+  },
+};
 
 /**
  * Elite Brief Page
@@ -14,6 +46,17 @@ import Footer from "@/components/Footer";
 
 function EliteBriefContent() {
   const searchParams = useSearchParams();
+  // One owner for the language he reads in: the store's own setting, which the header switcher
+  // writes and every other page obeys. Only the address (`?lang=`) may change it from here —
+  // a browser guess on this screen alone would disagree with the choice he already made.
+  const language = useSessionStore((state) => state.language);
+  const setLanguage = useSessionStore((state) => state.setLanguage);
+  useEffect(() => {
+    const wanted = searchParams?.get("lang");
+    if (wanted === "ar" || wanted === "en") setLanguage(wanted);
+  }, [searchParams, setLanguage]);
+  const ar = language !== "en";
+  const L = ar ? COPY.ar : COPY.en;
   const [sessionId] = useState(() => crypto.randomUUID());
   const [viewedImages, setViewedImages] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
@@ -69,7 +112,7 @@ function EliteBriefContent() {
       const result = await response.json();
 
       if (!result.ok) {
-        throw new Error(result.message || "Failed to submit brief");
+        throw new Error(result.message || L.failed);
       }
 
       setSubmitted(true);
@@ -77,12 +120,12 @@ function EliteBriefContent() {
       // Clear viewed images after successful submission
       localStorage.removeItem("azenith_viewed_images");
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Submission failed");
+      setSubmitError(error instanceof Error ? error.message : L.failed);
     }
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a]">
+    <main dir={ar ? "rtl" : "ltr"} className={`min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a] ${ar ? "rtl" : "ltr"}`}>
       <div className="mx-auto max-w-7xl px-6 py-12">
         {/* Header */}
         <motion.div
@@ -90,15 +133,14 @@ function EliteBriefContent() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-12 text-center"
         >
-          <p className="text-sm uppercase tracking-[0.28em] text-amber-400/70">
-            Azenith Elite Intelligence
+          <p className={`text-sm text-amber-400/70 ${ar ? "text-base" : "uppercase tracking-[0.28em]"}`}>
+            {L.eyebrow}
           </p>
           <h1 className="mt-4 font-serif text-4xl text-white md:text-5xl lg:text-6xl">
-            Design Your Vision
+            {L.title}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-white/60">
-            Complete this brief so the design team can review your space, budget,
-            and preferences.
+            {L.line}
           </p>
         </motion.div>
 
@@ -109,22 +151,22 @@ function EliteBriefContent() {
             className="mx-auto max-w-xl rounded-2xl border border-amber-400/30 bg-gradient-to-b from-amber-500/10 to-yellow-400/5 p-8 text-center"
           >
             <div className="mb-4 text-6xl">✨</div>
-            <h2 className="text-2xl font-semibold text-white">Brief Submitted Successfully</h2>
+            <h2 className="text-2xl font-semibold text-white">{L.savedTitle}</h2>
             <p className="mt-4 text-white/70">
-              Your brief has been saved for the design team to review.
+              {L.savedLine}
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <a
                 href="/"
                 className="rounded-xl bg-white/10 px-6 py-3 text-white transition-colors hover:bg-white/20"
               >
-                Back to Home
+                {L.home}
               </a>
               <a
                 href="/rooms"
                 className="rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 px-6 py-3 font-medium text-black transition-all hover:from-amber-400 hover:to-yellow-300"
               >
-                Explore More Designs
+                {L.rooms}
               </a>
             </div>
           </motion.div>
@@ -148,9 +190,7 @@ function EliteBriefContent() {
                 className="mx-auto mb-8 max-w-2xl rounded-xl border border-amber-400/20 bg-amber-500/5 p-4"
               >
                 <p className="text-sm text-amber-300/80">
-                  <span className="font-semibold">📸 Saved inspiration:</span> You viewed{" "}
-                  {viewedImages.length} design images. These choices will be attached
-                  to your brief for the design team to review.
+                  {L.inspiration(viewedImages.length)}
                 </p>
               </motion.div>
             )}
@@ -158,6 +198,7 @@ function EliteBriefContent() {
             <EliteIntelligenceForm
               onSubmit={handleSubmit}
               viewedImages={viewedImages}
+              language={language}
               className="mx-auto"
             />
           </>

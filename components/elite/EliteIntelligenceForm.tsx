@@ -253,10 +253,16 @@ interface EliteIntelligenceFormProps {
   onSubmit: (data: FormData & { qualification: LeadQualification }) => Promise<void>;
   viewedImages?: string[];
   className?: string;
+  /**
+   * The customer's language, from the store's own setting. The floor is Arabic — the same default
+   * the session store opens with — so a screen that forgets to pass it fails toward his language.
+   * Measured 2026-10-09: the brief screen never passed it and the old floor was English, so an
+   * Egyptian customer walked from an Arabic page into an English form.
+   */
   language?: "ar" | "en";
 }
 
-export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className = "", language = "en" }: EliteIntelligenceFormProps) {
+export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className = "", language = "ar" }: EliteIntelligenceFormProps) {
   const ar = language !== "en";
   const L = ar ? COPY.ar : COPY.en;
   const [step, setStep] = useState(1);
