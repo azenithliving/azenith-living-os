@@ -120,6 +120,9 @@ export type AreaEvidence = {
   hexes: string[];
   /** Those same colours named in words a person reads, because a `#` code is not his language. */
   colours: string[];
+  /** How many visitors of his area asked for a style, and which styles they said. */
+  visitors?: number;
+  styleLabels?: string[];
 };
 
 /** One row of the papers table, as far as this file needs it. */
@@ -187,9 +190,16 @@ export function nearLabel(source: TasteSource): string {
 
 /** The count in the shape Arabic pluralises it, so one paper is not announced as «١ ورقات». */
 function papersPhrase(count: number): string {
-  if (count === 1) return "من ورقة عميل واحد";
-  if (count === 2) return "من ورقتين لعميلين";
-  return `من ${arabicNumerals(count)} ورقات عملاء`;
+  if (count === 1) return "ورقة عميل واحد";
+  if (count === 2) return "ورقتين لعميلين";
+  return `${arabicNumerals(count)} ورقات عملاء`;
+}
+
+/** The count of visitors in the shape Arabic counts people, so one guest is not «١ زوار». */
+function visitorsPhrase(count: number): string {
+  if (count === 1) return "زائر واحد";
+  if (count === 2) return "زائرَين";
+  return `${arabicNumerals(count)} زوار`;
 }
 
 /**
@@ -198,14 +208,18 @@ function papersPhrase(count: number): string {
  * Four tiers, named out loud: his own picks beat his area's taste, his area's taste beats the
  * bank's quality order, an area with no measured papers says so instead of dressing a quality list
  * up as a personal one, and a record that did not answer admits that rather than calling the area
- * empty when it may be full. The evidence count is printed with the claim, so a taste measured from
- * one neighbour reads like the thin thing it is.
+ * empty when it may be full. The evidence is printed with the claim — which door measured it, and
+ * how many — so a taste drawn from one neighbour reads like the thin thing it is.
  */
 export function tasteLine(source: TasteSource, evidence: AreaEvidence): string {
   if (source === "own") return "الصور المرتّبة دي على اللي إنت اختارته من ألوان، مش على ذوق منطقة.";
   if (source === "area") {
+    const bits: string[] = [];
+    if (evidence.papers) bits.push(`ألوان ${papersPhrase(evidence.papers)}`);
+    if (evidence.visitors) bits.push(`طراز ${visitorsPhrase(evidence.visitors)}`);
     const colours = evidence.colours.length ? `، وألوانها ${evidence.colours.join(" و")}` : "";
-    return `دي على ذوق ${evidence.area}: محسوب ${papersPhrase(evidence.papers)} في منطقتك${colours}.`;
+    const styles = evidence.styleLabels?.length ? `، وطرازهم ${evidence.styleLabels.join(" و")}` : "";
+    return `دي على ذوق ${evidence.area}: محسوب من ${bits.join(" و")}${colours}${styles}.`;
   }
   if (source === "unreadable") return "السجل ما ردّش دلوقتي — الصور المرتّبة دي على جودتها، ومحكّتهاش على منطقتك.";
   return evidence.area

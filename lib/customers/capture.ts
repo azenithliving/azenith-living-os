@@ -16,6 +16,8 @@
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { phoneKey } from "@/lib/customers/identity";
 import { areaFromWords } from "@/lib/regions";
+import { roomTypeFor } from "@/lib/cad/sheet-images";
+import { styleFromWords, styleKey, roomFromWords } from "@/lib/taste-words";
 
 const EGYPT_PHONE = /(?:\+?20\s?)?0?1[0125][\s-]?\d{4}[\s-]?\d{4}/;
 const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
@@ -24,9 +26,12 @@ export type CaptureOutcome = {
   recorded: boolean;
   phone: string | null;
   email: string | null;
-  /** The area his own words named, and what the row really holds after the write. */
+  /** What his own words named — the area, the room and the style. */
   area: string | null;
-  areaStored: string | null;
+  style: string | null;
+  roomType: string | null;
+  /** And what the row really holds after the write, read back from the table. */
+  stored: { area: string | null; style: string | null; roomType: string | null };
   reason: "no-contact" | "created" | "attached" | "already-recorded" | "failed";
   detail?: string;
 };
@@ -49,8 +54,13 @@ export async function captureConversationContact(args: {
 }): Promise<CaptureOutcome> {
   const client = getSupabaseAdminClient();
   const { phone, email } = readContactFrom(args.text ?? "");
-  const area = areaFromWords(args.ownWords ?? []);
-  const none: CaptureOutcome = { recorded: false, phone, email, area, areaStored: null, reason: "no-contact" };
+  const hisWords = args.ownWords ?? [];
+  const area = areaFromWords(hisWords);
+  const style = styleFromWords(hisWords);
+  const roomType = roomFromWords(hisWords);
+  const asked = { area, style, roomType };
+  const empty = { area: null, style: null, roomType: null };
+  const none: CaptureOutcome = { recorded: false, phone, email, ...asked, stored: empty, reason: "no-contact" };
   if (!client) return { ...none, recorded: false, reason: "failed", detail: "no database client" };
   if (!phone && !email) return none;
   if (!args.sessionId) return { ...none, reason: "failed", detail: "no session id" };
@@ -62,7 +72,7 @@ export async function captureConversationContact(args: {
   try {
     const { data: profile, error: profileError } = await client
       .from("users")
-      .select("id,session_id,full_name,email,phone,company_id,area")
+      .select("id,session_id,full_name,email,phone,company_id,area,style,room_type")
       .eq("session_id", args.sessionId)
       .maybeSingle();
     if (profileError) throw new Error(profileError.message);
@@ -72,9 +82,11 @@ export async function captureConversationContact(args: {
       const patch: Record<string, unknown> = { updated_at: now };
       if (phone && !profile.phone) patch.phone = value;
       if (email && !profile.email) patch.email = value;
-      // His area is his own word, so it goes in once and is never rewritten: a customer who later
-      // says he meant somewhere else is a change the store has to see, not overwrite in silence.
+      // His own words go in once and are never rewritten: a customer who later says he meant
+      // somewhere else, or wants another style, is a change the store has to see — not overwrite.
       if (area && !profile.area) patch.area = area;
+      if (style && !styleKey(profile.style)) patch.style = style;
+      if (roomType && !roomTypeFor(profile.room_type)) patch.room_type = roomType;
       if (Object.keys(patch).length > 1) {
         const { error } = await client.from("users").update(patch).eq("id", profile.id);
         if (error) throw new Error(error.message);
@@ -88,6 +100,8 @@ export async function captureConversationContact(args: {
         phone,
         email,
         area,
+        style,
+        room_type: roomType,
         created_at: now,
         updated_at: now,
       });
@@ -124,18 +138,34 @@ export async function captureConversationContact(args: {
     }
 
     // Read the row back before reporting it: a desk that answers from its own intention is how a
-    // screen ends up showing an area nobody ever said.
-    const { data: stored } = await client.from("users").select("area").eq("session_id", args.sessionId).maybeSingle();
-    const areaStored = String(stored?.area ?? "") || null;
-    if (area) console.log(`[Capture] ${args.sessionId}: asked to write «${area}», the row holds «${areaStored ?? "فاضي"}»`);
-    return { recorded: true, phone, email, area, areaStored, reason };
+    // screen ends up showing a taste nobody ever asked for.
+    const { data: held } = await client
+      .from("users")
+      .select("area,style,room_type")
+      .eq("session_id", args.sessionId)
+      .maybeSingle();
+    const stored = {
+      area: String(held?.area ?? "") || null,
+      style: String(held?.style ?? "") || null,
+      roomType: String(held?.room_type ?? "") || null,
+    };
+    if (area || style || roomType) {
+      const say = (label: string, want: string | null, got: string | null) =>
+        want ? `${label}: طُلب «${want}» والمحفوظ «${got ?? "فاضي"}»` : null;
+      console.log(
+        `[Capture] ${args.sessionId} — ${[say("منطقته", area, stored.area), say("طرازه", style, stored.style), say("غرفته", roomType, stored.roomType)]
+          .filter(Boolean)
+          .join(" · ")}`,
+      );
+    }
+    return { recorded: true, phone, email, ...asked, stored, reason };
   } catch (error) {
     return {
       recorded: false,
       phone,
       email,
-      area,
-      areaStored: null,
+      ...asked,
+      stored: empty,
       reason: "failed",
       detail: error instanceof Error ? error.message : String(error),
     };

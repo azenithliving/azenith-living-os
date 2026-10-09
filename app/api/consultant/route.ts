@@ -1454,10 +1454,12 @@ async function saveSession(
       ownWords: hisWords,
     }).then((captured) => {
       if (captured.recorded) {
-        console.log(
-          `[Consultant] Contact captured for ${sessionId}: ${captured.reason}` +
-            (captured.area ? ` · منطقته من كلامه: ${captured.area} (المحفوظ: ${captured.areaStored ?? "فاضي"})` : ""),
-        );
+        const said = [
+          captured.area ? `منطقته ${captured.area} (المحفوظ: ${captured.stored.area ?? "فاضي"})` : null,
+          captured.style ? `طرازه ${captured.style} (المحفوظ: ${captured.stored.style ?? "فاضي"})` : null,
+          captured.roomType ? `غرفته ${captured.roomType} (المحفوظ: ${captured.stored.roomType ?? "فاضي"})` : null,
+        ].filter(Boolean);
+        console.log(`[Consultant] Contact captured for ${sessionId}: ${captured.reason}${said.length ? ` · ${said.join(" · ")}` : ""}`);
       } else if (captured.reason === "failed") console.error(`[Consultant] Contact capture failed: ${captured.detail}`);
     });
   } catch (err) {

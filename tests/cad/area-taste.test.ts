@@ -10,6 +10,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const world = vi.hoisted(() => {
   const state = {
     papers: [] as any[],
+    visitors: [] as any[],
     refuse: false,
     reads: 0,
   };
@@ -37,7 +38,10 @@ const world = vi.hoisted(() => {
           return chain(() =>
             state.refuse
               ? { data: null, error: { message: "السجل ما ردّش" } }
-              : { data: table === "room_sketches" ? state.papers : [], error: null },
+              : {
+                  data: table === "room_sketches" ? state.papers : table === "users" ? state.visitors : [],
+                  error: null,
+                },
           );
         },
       };
@@ -61,6 +65,7 @@ const order = (rows: Array<{ id: number }>) => rows.map((r) => r.id).join("-");
 
 beforeEach(() => {
   world.state.papers = [];
+  world.state.visitors = [];
   world.state.refuse = false;
   world.state.reads = 0;
 });
@@ -125,5 +130,57 @@ describe("the strongest real taste wins", () => {
     expect(a.taste.papers).toBe(1);
     expect(b.taste.papers).toBe(0);
     expect(a.taste.line).not.toBe(b.taste.line);
+  });
+});
+
+/** The bank as it really is: every picture filed under one of its four style keys. */
+const STYLED = [
+  { id: 1, color: "#8C7D73", style: "classic" },
+  { id: 2, color: "#4B3A2F", style: "modern" },
+  { id: 3, color: "#8D8070", style: "classic" },
+];
+const styledOrder = (rows: Array<{ id: number }>) => rows.map((r) => r.id).join("-");
+
+describe("the area's taste is counted from both doors that hold it", () => {
+  it("moves his area's requested style up even when no paper carries a colour", async () => {
+    world.state.visitors = [
+      { area: "التجمع", style: "مودرن (Modern)" },
+      { area: "الشيخ زايد", style: "كلاسيك" },
+    ];
+    const { images, taste } = await orderForPaper(STYLED, { id: 10, city: "التجمع", picks: [] });
+    expect(taste.source).toBe("area");
+    expect(taste.visitors).toBe(1);
+    expect(taste.styles).toEqual(["مودرن"]);
+    expect(styledOrder(images)).toBe("2-1-3");
+    expect(taste.line).toContain("زائر واحد");
+    expect(taste.line).toContain("مودرن");
+
+    // The same pictures, the other area: its visitor asked for classic, so the list flips.
+    const other = await orderForPaper(STYLED, { id: 11, city: "الشيخ زايد", picks: [] });
+    expect(styledOrder(other.images)).toBe("1-3-2");
+  });
+
+  it("ignores a visitor row whose style is a screen slug, not a taste", async () => {
+    world.state.visitors = [{ area: "التجمع", style: "elite-brief" }];
+    const { taste } = await orderForPaper(STYLED, { id: 10, city: "التجمع", picks: [] });
+    expect(taste.source).toBe("quality");
+    expect(taste.visitors).toBe(0);
+    expect(taste.line).toContain("لسه مفيش ورق مسجّل لمنطقة التجمع");
+  });
+
+  it("names both doors when both measured something", async () => {
+    world.state.papers = [{ id: 21, customer_city: "التجمع", colour_picks: [{ hex: "#4B3A2F" }] }];
+    world.state.visitors = [
+      { area: "التجمع", style: "كلاسيك" },
+      { area: "التجمع", style: "كلاسيك" },
+    ];
+    const { images, taste } = await orderForPaper(STYLED, { id: 10, city: "التجمع", picks: [] });
+    expect(taste.source).toBe("area");
+    expect(taste.papers).toBe(1);
+    expect(taste.visitors).toBe(2);
+    expect(taste.line).toContain("ألوان ورقة عميل واحد");
+    expect(taste.line).toContain("طراز زائرَين");
+    // Style leads, colour orders inside it: the two classic pictures first, nearest colour first.
+    expect(styledOrder(images)).toBe("1-3-2");
   });
 });

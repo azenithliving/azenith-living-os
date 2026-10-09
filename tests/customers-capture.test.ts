@@ -130,8 +130,38 @@ describe("the conversation contact capture", () => {
     });
     expect(out.area).toBe("التجمع");
     // Reported from the row, not from the intention.
-    expect(out.areaStored).toBe("التجمع");
+    expect(out.stored.area).toBe("التجمع");
     expect(world.state.users[0]).toMatchObject({ area: "التجمع" });
+  });
+
+  it("records the room and the style he asked for, in the shapes the picture bank keys on", async () => {
+    const { captureConversationContact } = await import("@/lib/customers/capture");
+    const out = await captureConversationContact({
+      sessionId: SESSION,
+      text: "رقمي 01005554444",
+      ownWords: ["عايز ركنة مودرن للصة في التجمع", "رقمي 01005554444"],
+    });
+    expect(out.area).toBe("التجمع");
+    expect(out.style).toBe("modern");
+    expect(out.roomType).toBe("corner-sofa");
+    expect(world.state.users[0]).toMatchObject({ area: "التجمع", style: "modern", room_type: "corner-sofa" });
+    expect(out.stored).toMatchObject({ area: "التجمع", style: "modern", roomType: "corner-sofa" });
+  });
+
+  it("reads a style already stored in his words, and does not overwrite it", async () => {
+    world.state.users.push({ id: "u1", session_id: SESSION, phone: "1005554444", area: null, style: "نيوكلاسيك", room_type: "مجلس رجال" });
+    const { captureConversationContact } = await import("@/lib/customers/capture");
+    const out = await captureConversationContact({
+      sessionId: SESSION,
+      text: "01005554444",
+      ownWords: ["عايز ركنة مودرن للصة"],
+    });
+    // «نيوكلاسيك» already IS a style, so his later «مودرن» must not erase it — and the room on the
+    // row («مجلس رجال») is a living room's pictures, so it is not replaced by corner-sofa either.
+    expect(out.style).toBe("modern");
+    expect(world.state.users[0].style).toBe("نيوكلاسيك");
+    expect(world.state.users[0].room_type).toBe("مجلس رجال");
+    expect(out.stored.style).toBe("نيوكلاسيك");
   });
 
   it("takes no area from the advisor's own coverage answer", async () => {
@@ -157,7 +187,7 @@ describe("the conversation contact capture", () => {
       ownWords: ["لو ممكن نتكلم عن شقة التجمع"],
     });
     expect(out.area).toBe("التجمع");
-    expect(out.areaStored).toBe("الشيخ زايد");
+    expect(out.stored.area).toBe("الشيخ زايد");
     expect(world.state.users[0].area).toBe("الشيخ زايد");
   });
 });
