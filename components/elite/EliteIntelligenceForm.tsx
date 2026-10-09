@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getOfficeStatus, fetchRecordedHours, formatNextOpening, formatNextOpeningAr, type OfficeHours, type OfficeStatus } from "@/lib/office-hours";
 import { arabicNumerals } from "@/lib/arabic";
 import { roomNameAr } from "@/lib/rooms-catalog";
+import { AREA_CHIPS } from "@/lib/regions";
+import { STYLE_LABELS } from "@/lib/constants/rooms";
 import { 
   ALL_FURNITURE_SCOPES, 
   BUDGET_RANGES as CENTRALIZED_BUDGET_RANGES,
@@ -21,7 +23,7 @@ import {
  */
 const COPY = {
   ar: {
-    steps: ["المساحة", "الميزانية", "التوقيت", "التفاصيل", "التواصل"],
+    steps: ["المساحة", "الميزانية", "التوقيت", "الذوق والمنطقة", "التفاصيل", "التواصل"],
     closedTitle: "فريقنا دلوقتي بيشتغل على مشاريعه",
     closedLine: (when: string) => `هنراجع طلبك على الأول ${when}.`,
     diamondTitle: "طلبك مميز",
@@ -38,6 +40,11 @@ const COPY = {
     blueprintNo: "لأ، محتاج استشارة",
     requestsTitle: "طلباتك الخاصة",
     requestsLine: "قولي على الخامات أو الألوان أو أي تفصيل مهمك (اختياري)",
+    styleTitle: "ذوقك ومنطقتك",
+    styleLine: "اختار الطراز اللي بيحبك — هو اللي بيحدد الصور اللي هنجهزها لطلبك",
+    styleNone: "مش محدد دلوقتي",
+    areaTitle: "منطقتك",
+    areaLine: "هنقرب اختياراتنا من ذوق الناس في منطقتك",
     requestsPlaceholder: "مثلاً: رخام إيطالي، منزل ذكي، ألوان هادية…",
     contactTitle: "بيانات التواصل",
     contactLine: "نقدر نوصلك إزاي؟",
@@ -57,7 +64,7 @@ const COPY = {
     none: "لسه ما اتحددتش",
   },
   en: {
-    steps: ["Scope", "Budget", "Timeline", "Details", "Contact"],
+    steps: ["Scope", "Budget", "Timeline", "Taste & Area", "Details", "Contact"],
     closedTitle: "Our consultants are currently preparing masterpieces.",
     closedLine: (when: string) => `We will review your brief as a priority at ${when}.`,
     diamondTitle: "Diamond Lead Detected",
@@ -74,6 +81,11 @@ const COPY = {
     blueprintNo: "No, need consultation",
     requestsTitle: "Special Requests",
     requestsLine: "Tell us about specific materials, brands, or design preferences (optional)",
+    styleTitle: "Your taste and your area",
+    styleLine: "Pick the style you love — it decides which designs we prepare for your brief",
+    styleNone: "Not sure yet",
+    areaTitle: "Your area",
+    areaLine: "We shape the sheet around what people like in your neighbourhood",
     requestsPlaceholder: "e.g., I prefer Italian marble, smart home integration, specific color scheme...",
     contactTitle: "Contact Information",
     contactLine: "How should we reach you?",
@@ -95,6 +107,18 @@ const COPY = {
 };
 
 /**
+ * The styles the picture bank really files, in the store's own Arabic words — the same names
+ * `STYLE_LABELS` gives the catalogue, so the brief and the bank cannot drift into two vocabularies.
+ * The Arabic word is what gets stored in every language: it is the shape his own sheet and the
+ * owner's pre-call paper can print.
+ */
+const TASTE_CHIPS = Object.entries(STYLE_LABELS).map(([key, label]) => ({
+  key,
+  label,
+  en: key.replace(/^./, (letter) => letter.toUpperCase()),
+}));
+
+/**
  * Azenith Elite Intelligence & Lead Qualification System
  * Context-Aware Multi-Step Form with Egyptian Market Adaptation
  */
@@ -113,6 +137,10 @@ export type FormData = {
   scope: ScopeType | null;
   budget: string | null;
   timeline: TimelineOption | null;
+  /** His taste in the store's own Arabic word, or null when he said he is not sure. */
+  style: string | null;
+  /** His area, tapped off the store's map, or null. */
+  area: string | null;
   blueprintAvailable: boolean | null;
   specialRequests: string;
   fullName: string;
@@ -241,6 +269,8 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
     scope: null,
     budget: null,
     timeline: null,
+    style: null,
+    area: null,
     blueprintAvailable: null,
     specialRequests: "",
     fullName: "",
@@ -301,7 +331,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 5));
+  const handleNext = () => setStep((s) => Math.min(s + 1, 6));
   const handleBack = () => setStep((s) => Math.max(s - 1, 1));
 
   const handleSubmit = async () => {
@@ -327,8 +357,10 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
       case 3:
         return !!formData.timeline && formData.blueprintAvailable !== null;
       case 4:
-        return true; // Optional special requests
+        return true; // Optional taste and area — nobody is stopped for not naming them
       case 5:
+        return true; // Optional special requests
+      case 6:
         return formData.fullName.length >= 2 && formData.phone.length >= 8;
       default:
         return false;
@@ -433,7 +465,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
           <motion.div
             className="h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-400"
             initial={{ width: 0 }}
-            animate={{ width: `${(step / 5) * 100}%` }}
+            animate={{ width: `${(step / 6) * 100}%` }}
             transition={{ duration: 0.3 }}
           />
         </div>
@@ -587,6 +619,68 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
           )}
 
           {step === 4 && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold text-white">{L.styleTitle}</h3>
+                <p className="text-sm text-white/60">{L.styleLine}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {TASTE_CHIPS.map((taste) => (
+                    <button
+                      key={taste.key}
+                      type="button"
+                      onClick={() => updateField("style", formData.style === taste.label ? null : taste.label)}
+                      data-elite-taste-chip={taste.label}
+                      data-elite-taste-chip-selected={formData.style === taste.label ? "1" : "0"}
+                      className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
+                        formData.style === taste.label
+                          ? "border-amber-500/60 bg-amber-500/15 text-white"
+                          : "border-white/10 bg-white/[0.02] text-white/70 hover:border-white/30"
+                      }`}
+                    >
+                      {ar ? taste.label : taste.en}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => updateField("style", null)}
+                  data-elite-taste-none="1"
+                  className={`mt-3 rounded-full border px-4 py-2 text-sm transition-all ${
+                    formData.style === null
+                      ? "border-amber-500/40 bg-amber-500/10 text-amber-200"
+                      : "border-white/10 text-white/50 hover:border-white/25"
+                  }`}
+                >
+                  {L.styleNone}
+                </button>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold text-white">{L.areaTitle}</h4>
+                <p className="text-sm text-white/60">{L.areaLine}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {AREA_CHIPS.map((area) => (
+                    <button
+                      key={area}
+                      type="button"
+                      onClick={() => updateField("area", formData.area === area ? null : area)}
+                      data-elite-area-chip={area}
+                      data-elite-area-chip-selected={formData.area === area ? "1" : "0"}
+                      className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                        formData.area === area
+                          ? "border-amber-500/60 bg-amber-500/15 text-white"
+                          : "border-white/10 bg-white/[0.02] text-white/60 hover:border-white/25"
+                      }`}
+                    >
+                      {area}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 5 && (
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-white">{L.requestsTitle}</h3>
               <p className="text-sm text-white/60">
@@ -603,7 +697,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
             </div>
           )}
 
-          {step === 5 && (
+          {step === 6 && (
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-white">{L.contactTitle}</h3>
               <p className="text-sm text-white/60">{L.contactLine}</p>
@@ -694,7 +788,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
           </button>
         )}
         <button
-          onClick={step === 5 ? handleSubmit : handleNext}
+          onClick={step === 6 ? handleSubmit : handleNext}
           disabled={!canProceed() || isSubmitting}
           className={`flex-1 rounded-xl px-6 py-3 font-medium transition-all ${
             canProceed() && !isSubmitting
@@ -707,7 +801,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
               {L.processing}
             </span>
-          ) : step === 5 ? (
+          ) : step === 6 ? (
             L.submit
           ) : (
             L.next

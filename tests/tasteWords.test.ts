@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { roomFromWords, styleFromWords, styleKey } from "@/lib/taste-words";
+import { roomFromWords, storedTaste, styleFromWords, styleKey } from "@/lib/taste-words";
 
 /**
  * The store's own vocabulary, answered in the shapes the picture bank keys on.
@@ -43,6 +43,40 @@ describe("his style word becomes the bank's key", () => {
   it("takes his newest sentence, not the first", () => {
     expect(styleFromWords(["عايز مودرن", "بصراحة الكلاسيك أحلى"])).toBe("classic");
     expect(styleFromWords([])).toBeNull();
+  });
+});
+
+describe("what the taste column is allowed to hold", () => {
+  it("refuses the page's own name — the live defect, 14 of 27 rows", () => {
+    expect(storedTaste("elite-brief", "/elite-brief")).toBeNull();
+    expect(storedTaste("elite-intelligence", "/elite-intelligence")).toBeNull();
+    // Any path shape is a screen, whatever the caller claims about it.
+    expect(storedTaste("/request", "/elite-brief")).toBeNull();
+  });
+
+  it("refuses the words this store writes when a field was left blank", () => {
+    expect(storedTaste("غير محدد", "/request")).toBeNull();
+    expect(storedTaste("أخرى", "/request")).toBeNull();
+    expect(storedTaste("", "/request")).toBeNull();
+    expect(storedTaste("   ", "/request")).toBeNull();
+  });
+
+  it("keeps his own words even when no picture matches them", () => {
+    // Measured 2026-10-09: two rows read «هادئ فاخر». The sheet already says out loud when it
+    // cannot read a taste — the writer has no business deleting the sentence he typed.
+    expect(storedTaste("هادئ فاخر", "/request")).toBe("هادئ فاخر");
+    expect(storedTaste("مودرن (Modern)", "/request")).toBe("مودرن (Modern)");
+    expect(storedTaste("modern", "/elite-brief")).toBe("modern");
+  });
+
+  it("refuses an identifier shape from any screen, not only the one it names", async () => {
+    // The elite route files both briefs under one address, so a comparison with the page that
+    // asked would let a second form's slug through. The shape catches what the name cannot.
+    expect(storedTaste("elite-brief", "/request")).toBeNull();
+    expect(storedTaste("elite_intelligence", "/request")).toBeNull();
+    // A taste the reader knows survives even in a hyphenated shape; his words survive as written.
+    expect(storedTaste("mid-century modern", "/request")).toBe("mid-century modern");
+    expect(storedTaste("مودرن", "/request")).toBe("مودرن");
   });
 });
 

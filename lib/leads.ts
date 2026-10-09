@@ -7,6 +7,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { getTenantByHost } from "@/lib/tenant";
 import { processAutomation } from "@/lib/automation";
 import { areaLabel } from "@/lib/regions";
+import { storedTaste } from "@/lib/taste-words";
 import { fireAndForget } from "@/lib/background-processor";
 
 export const leadSubmissionSchema = z.object({
@@ -19,7 +20,11 @@ export const leadSubmissionSchema = z.object({
   area: z.string().max(60).optional().or(z.literal("")),
   roomType: z.string().min(2),
   budget: z.string().min(2),
-  style: z.string().min(2),
+  /**
+   * His taste, and allowed to be empty. A screen used to answer for him because this field refused
+   * a blank — measured 2026-10-09: 14 of 27 rows held the page's own name where his style goes.
+   */
+  style: z.string().max(120).optional().or(z.literal("")),
   serviceType: z.string().min(2),
   score: z.number().min(0).default(0),
   intent: z.enum(["browsing", "interested", "buyer"]).optional(),
@@ -50,13 +55,16 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
   // advisor's door and his sheet use, so «زايد» and «الشيخ زايد» are one area and not two silos.
   // An empty answer stays null: a blank in a column is not «he told us nothing» to the next reader.
   const area = areaLabel(payload.area) || null;
+  // A page name, the store's own word for blank, or nothing at all — none of them are a taste,
+  // and the taste column says nothing rather than filing the screen that asked.
+  const style = storedTaste(payload.style, payload.lastPage);
 
   const { data: existingUser, error: existingUserError } = await supabase
     .from("users")
-    .select("id,area")
+    .select("id,area,style")
     .eq("company_id", tenant.id)
     .eq("session_id", payload.sessionId)
-    .maybeSingle<{ id: string; area: string | null }>();
+    .maybeSingle<{ id: string; area: string | null; style: string | null }>();
 
   if (existingUserError) {
     throw new Error(`Failed to look up lead session: ${existingUserError.message}`);
@@ -79,14 +87,17 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
       area,
       room_type: payload.roomType,
       budget: payload.budget,
-      style: payload.style,
+      style,
       service_type: payload.serviceType,
-    }).select("id,area").single<{ id: string; area: string | null }>();
+    }).select("id,area,style").single<{ id: string; area: string | null; style: string | null }>();
 
     if (insertUserError) {
       throw new Error(`Failed to create user session: ${insertUserError.message}`);
     }
-    console.log(`[Leads] ${payload.sessionId}: منطقة مطلوبة «${area ?? "مفيش"}» والمحفوظة «${created?.area ?? "مقراش"}»`);
+    console.log(
+      `[Leads] ${payload.sessionId}: منطقة مطلوبة «${area ?? "مفيش"}» والمحفوظة «${created?.area ?? "مقراش"}»` +
+        ` · طراز مطلوب «${style ?? "مفيش"}» والمحفوظ «${created?.style ?? "مقراش"}»`,
+    );
 
     // Trigger automation for new lead - ASYNC (non-blocking)
     fireAndForget(
@@ -98,7 +109,7 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
           intent,
           roomType: payload.roomType,
           budget: payload.budget,
-          style: payload.style,
+          style,
           serviceType: payload.serviceType,
           isDiamond: payload.score >= 60, // Flag for Diamond leads
         }
@@ -117,26 +128,30 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
       last_page: payload.lastPage,
       room_type: payload.roomType,
       budget: payload.budget,
-      style: payload.style,
       service_type: payload.serviceType,
     };
     // The area goes in once. A row that already knows where he lives is not asked to name it
     // again, and a second answer would silently rewrite the first rather than show both.
     if (area && !existingUser.area) patch.area = area;
+    // His newest taste wins: a second brief is a newer answer, not a rival copy of the first.
+    // What never goes in is an answer that is not a taste — that is exactly how a screen's own
+    // name reached this column and became, on the owner's charts, the store's most popular style.
+    if (style) patch.style = style;
     const { data: updated, error: updateUserError } = await supabase
       .from("users")
       .update(patch)
       .eq("id", userId)
-      .select("id,area")
-      .single<{ id: string; area: string | null }>();
+      .select("id,area,style")
+      .single<{ id: string; area: string | null; style: string | null }>();
 
     if (updateUserError) {
       throw new Error(`Failed to update user session: ${updateUserError.message}`);
     }
     console.log(
-      `[Leads] ${payload.sessionId}: منطقة مطلوبة «${area ?? "مفيش"}» والمحفوظة «${updated?.area ?? "مقراش"}»${
+      `[Leads] ${payload.sessionId}: منطقة مطلوبة «${area ?? "مفيش"}» والمحفوظة «${updated?.area ?? "مقراش"}»` +
+        ` · طراز مطلوب «${style ?? "مفيش"}» والمحفوظ «${updated?.style ?? "مفيش"}»${
         area && existingUser.area && existingUser.area !== area ? " — السطر كان يعرف منطقة قبل كده، فما اتغيرتش" : ""
-      }`,
+      }${style && existingUser.style && existingUser.style !== style ? ` — كان مكتوب «${existingUser.style}»، بقى «${style}»` : ""}`,
     );
 
     // Trigger automation for updated lead - ASYNC (non-blocking)
@@ -149,7 +164,7 @@ export async function persistLeadSubmission(payload: LeadSubmission, host: strin
           intent,
           roomType: payload.roomType,
           budget: payload.budget,
-          style: payload.style,
+          style,
           serviceType: payload.serviceType,
           isDiamond: payload.score >= 60, // Flag for Diamond leads
         }

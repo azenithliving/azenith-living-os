@@ -54,6 +54,41 @@ export function styleKey(raw: unknown): string | null {
   return null;
 }
 
+/**
+ * The words this store writes itself when a field was left blank. Measured 2026-10-09 on the live
+ * store: the brief's door sends «غير محدد» for a taste nobody chose, and «أخرى» when he picked the
+ * custom box and typed nothing in it. Neither is a taste, and a reader cannot tell them from his
+ * words by looking — so the writer drops them instead of filing them.
+ */
+const BLANK_WORDS = ["غير محدد", "أخرى", "other", "none", "-", "—"].map((word) => foldArabic(word));
+
+/**
+ * What the taste column may hold, or null when the answer is not a taste at all.
+ *
+ * Measured 2026-10-09: 14 of 27 visitor rows read «elite-brief» in this column — the name of the
+ * screen that asked, written by a page that had nothing to report because the schema refused an
+ * empty answer. A page name is not a taste, and neither is the store's own word for blank. His
+ * own words («هادئ فاخر») stay exactly as he wrote them even when no picture matches them: the
+ * sheet already says out loud when it cannot read a taste.
+ *
+ * The shape rule catches what the door's own page name cannot: this route files every elite screen
+ * under one address, so a second form writing its own slug would slip past a comparison alone.
+ */
+export function storedTaste(raw: unknown, pageName?: unknown): string | null {
+  const text = String(raw ?? "").trim();
+  if (!text) return null;
+  // A path, in either shape, is a screen and not a style.
+  if (text.startsWith("/")) return null;
+  const folded = foldArabic(text.toLowerCase());
+  const page = foldArabic(String(pageName ?? "").trim().replace(/^\//, "").toLowerCase());
+  if (page && folded === page) return null;
+  if (BLANK_WORDS.includes(folded)) return null;
+  // A latin word joined by dashes or underscores is how this codebase names things, not how he
+  // describes a room — unless the taste reader knows the word behind it.
+  if (/^[a-z0-9]+([-_][a-z0-9]+)+$/.test(folded) && !styleKey(folded)) return null;
+  return text;
+}
+
 /** The style he asked for, his newest sentence winning. */
 export function styleFromWords(lines: string[]): string | null {
   for (let i = lines.length - 1; i >= 0; i--) {
