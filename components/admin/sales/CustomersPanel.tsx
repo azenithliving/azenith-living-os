@@ -75,6 +75,10 @@ export default function CustomersPanel() {
   // A door that did not answer used to be swallowed here: the list stayed empty and only the
   // browser log knew. An empty roll and a refused read are two different sentences to the owner.
   const [leadsError, setLeadsError] = useState<string | null>(null);
+  // What his customers' taste adds up to — the roll's own number, printed here because a true
+  // figure nobody can read is still a missing feature.
+  const [taste, setTaste] = useState<{ style: string; count: number }[]>([]);
+  const [tasteSkipped, setTasteSkipped] = useState(0);
   const [filter, setFilter] = useState<"all" | "diamond" | "gold" | "silver" | "bronze">("all");
   const [onlyWaiting, setOnlyWaiting] = useState(false);
 
@@ -89,6 +93,9 @@ export default function CustomersPanel() {
       }
       setLeads(data.leads);
       setLeadsError(null);
+      const tally = data.totals?.taste;
+      setTaste(Array.isArray(tally?.groups) ? tally.groups : []);
+      setTasteSkipped(Number(tally?.skipped ?? 0));
     } catch (error) {
       setLeadsError(`القائمة ما جابتش رد: ${error instanceof Error ? error.message : "خطأ غير معروف"}`);
     } finally {
@@ -407,6 +414,22 @@ export default function CustomersPanel() {
           <p className="mt-1 text-xs text-white/50">
             الأعداد دي آخر ما وصل — مش معناه إن مفيش عملاء. المحاولة التانية نفسها بتتعمل كل تلات ثواني.
           </p>
+        </div>
+      )}
+
+      {taste.length > 0 && (
+        <div data-taste-tally="1" className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-white/50">أكثر الطرازات المطلوبة:</span>
+          {taste.slice(0, 4).map((item) => (
+            <span key={item.style} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-white/80">
+              {item.style} {arDigits(String(item.count))}
+            </span>
+          ))}
+          {tasteSkipped > 0 && (
+            <span className="text-xs text-white/40">
+              ({arDigits(String(tasteSkipped))} سطر ما اتحسبش — اسمه مش طراز)
+            </span>
+          )}
         </div>
       )}
 

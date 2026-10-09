@@ -9,6 +9,7 @@
  */
 import type { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { rollCustomers, type CustomerRow, type RawRow, type Space } from "@/lib/customers/roll";
+import { tallyTastes } from "@/lib/taste-words";
 
 type Client = NonNullable<ReturnType<typeof getSupabaseAdminClient>>;
 
@@ -52,6 +53,8 @@ export type CustomersRead = {
     rowsRead: number;
     /** Orders whose money has no human attached yet — counted out loud, never dropped. */
     unowned: { orders: number; quoted: number; paid: number };
+    /** His taste added up through the store's own reader, with the rows it refused named. */
+    taste: { groups: { style: string; count: number }[]; skipped: number };
   };
   failures: string[];
 };
@@ -78,7 +81,7 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
     return {
       customers: [],
       real: [],
-      totals: { customers: 0, bySpace: {}, needingReply: 0, anonymous: 0, rowsRead: 0, unowned: { orders: 0, quoted: 0, paid: 0 } },
+      totals: { customers: 0, bySpace: {}, needingReply: 0, anonymous: 0, rowsRead: 0, unowned: { orders: 0, quoted: 0, paid: 0 }, taste: { groups: [], skipped: 0 } },
       failures,
     };
   }
@@ -181,6 +184,9 @@ export async function readCustomers(client: Client): Promise<CustomersRead> {
       anonymous,
       rowsRead: rows.length,
       unowned,
+      // What his customers' taste adds up to, counted through the store's own reader — the roll is
+      // where the rows already are, so this asks no second question of the register.
+      taste: tallyTastes(real.map((c) => ({ style: c.looking?.style ?? null }))),
     },
     failures: [],
   };

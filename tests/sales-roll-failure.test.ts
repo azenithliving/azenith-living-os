@@ -30,3 +30,26 @@ describe("the sales panel admits when the roll did not answer", () => {
     expect(panel).toContain('fetch("/api/admin/leads", { cache: "no-store" })');
   });
 });
+
+/**
+ * The taste tally, from the roll that already holds the rows to the line the owner reads.
+ *
+ * Measured 2026-10-09: the analytics door counted styles correctly after the fix, and no screen
+ * printed the number — a true figure nobody can read is still a missing feature.
+ */
+const roll = readFileSync("lib/customers/read.ts", "utf8");
+
+describe("the roll carries the taste tally to a screen", () => {
+  it("counts it through the store's reader, without asking the register again", () => {
+    expect(roll).toContain("tallyTastes(real.map");
+    expect(roll).toContain('taste: tallyTastes(');
+  });
+
+  it("prints it on the sales screen, in his digits", () => {
+    expect(panel).toContain('data-taste-tally="1"');
+    expect(panel).toContain("أكثر الطرازات المطلوبة");
+    expect(panel).toContain("arDigits(String(item.count))");
+    // and it says what it left out rather than showing a smaller number in silence
+    expect(panel).toContain("سطر ما اتحسبش");
+  });
+});
