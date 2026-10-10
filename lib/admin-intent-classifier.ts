@@ -398,7 +398,8 @@ async function aiClassifyIntent(
   );
 
   if (!result.success || !result.content) {
-    return { kind: "conversation", confidence: 0.5, reasoning: "orchestrator-fallback" };
+    // The panel prints this sentence under the proposal, so it is his language, not a machine tag.
+    return { kind: "conversation", confidence: 0.5, reasoning: "رجعنا للقاعدة لأن النموذج ما ردّش" };
   }
 
   try {

@@ -1,6 +1,7 @@
 "use server";
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { arabicNumerals } from "@/lib/arabic";
 import { askOpenRouter, askGoogle } from "@/lib/ai-orchestrator";
 
 /**
@@ -46,18 +47,31 @@ const alertStore: Map<string, SystemAlert> = new Map();
 const MAX_ALERTS = 100;
 
 /**
+ * The provider's name as the owner reads it. A machine id (groq, openrouter) never enters his
+ * sentence — these are the words he hears the service called.
+ */
+const PROVIDER_AR: Record<string, string> = {
+  groq: "غروك",
+  openrouter: "أوبن راوتر",
+  mistral: "ميسترال",
+  openai: "أوبن‌أي‌آي",
+  google: "جوجل",
+};
+
+/**
  * Monitor API key failures and auto-rotate if needed
  */
 export async function monitorAPIHealth(provider: "groq" | "openrouter" | "mistral" | "openai" | "google", errorCount: number): Promise<void> {
   if (errorCount >= 3) {
+    const name = PROVIDER_AR[provider] ?? "المزوّد";
     const alert: SystemAlert = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       severity: "warning",
       category: "api",
-      problem: `${provider.toUpperCase()} API showing high failure rate (${errorCount} errors)`,
-      rootCause: "API key may be rate-limited, expired, or service experiencing issues",
-      proposedFix: `Auto-rotate to next ${provider.toUpperCase()} key in rotation pool`,
+      problem: `${name} وراه محاولات كتير فشل (${arabicNumerals(String(errorCount))} مرة)`,
+      rootCause: "المفتاح ممكن يكون اتعدّى سقف الدقايق، أو منتهي، أو الخدمة نفسها عليها ضغط",
+      proposedFix: `نقل الطلب لمفتاح ${name} التاني في المخزون — ده بيحصل لوحده`,
       autoFixable: true,
       status: "pending",
     };
@@ -82,9 +96,9 @@ export async function monitorMemoryUsage(currentUsageMB: number, thresholdMB: nu
       timestamp: new Date().toISOString(),
       severity: percentUsed > 95 ? "critical" : "warning",
       category: "memory",
-      problem: `Memory usage at ${percentUsed.toFixed(1)}% (${currentUsageMB}MB / ${thresholdMB}MB)`,
-      rootCause: "Cached data accumulation or memory leak in image processing",
-      proposedFix: "Clear non-essential caches and trigger garbage collection",
+      problem: `الذاكرة وصلت لـ${arabicNumerals(percentUsed.toFixed(1))}٪ من حدّها`,
+      rootCause: "تجمّع بيانات مخزّنة، أو تسريب ذاكرة في معالجة الصور",
+      proposedFix: "تنضيف الكاش اللي مش لازم وتشغيل تحرير الذاكرة",
       autoFixable: percentUsed < 95, // Auto-fix only if not critical
       status: "pending",
     };
@@ -116,13 +130,14 @@ export async function monitorDatabaseHealth(error?: Error): Promise<SystemAlert 
       timestamp: new Date().toISOString(),
       severity: isConnectionError ? "critical" : "warning",
       category: "database",
-      problem: isConnectionError ? "Database connection failure" : "Database query error",
-      rootCause: isConnectionError 
-        ? "Supabase connection pool exhausted or network interruption"
-        : `Query execution failed: ${error.message}`,
+      problem: isConnectionError ? "القاعدة مش بتردّ على الاتصال" : "سؤال غلط رجع من القاعدة",
+      // The exception text belongs in `errorLog` below, not in the sentence he reads.
+      rootCause: isConnectionError
+        ? "مخزن اتصالات القاعدة اتملّى، أو الشبكة انقطعت"
+        : "السؤال اللي اتنفذ رجع بخطأ — تفاصيله في سجل الغلط",
       proposedFix: isConnectionError
-        ? "Retry with exponential backoff, alert admin if persists > 2 minutes"
-        : "Analyze query pattern, add index if needed, or optimize query structure",
+        ? "محاولة تانية بتأخير متزايد، ولو استمر أكتر من دقيقتين يتبعت تنبيه"
+        : "مراجعة شكل السؤال وإضافة فهرس أو إعادة ترتيبه",
       // A database issue needs investigation by an operator.  Marking it resolved
       // after a log statement would hide a real outage.
       autoFixable: false,
@@ -146,9 +161,9 @@ export async function monitorExternalService(service: string, error: Error): Pro
     timestamp: new Date().toISOString(),
     severity: "warning",
     category: "external",
-    problem: `${service} service unavailable or returning errors`,
-    rootCause: `External API error: ${error.message}`,
-    proposedFix: "Implement circuit breaker, fallback to cached data, or queue for retry",
+    problem: `${PROVIDER_AR[service] ?? "خدمة خارجية"} مش بترجّع شغل`,
+    rootCause: "خطأ من واجهة خارجية — تفاصيله في سجل الغلط",
+    proposedFix: "فصل مؤقت للخدمة،رجوع لآخر بيانات مخزّنة، أو الطلب يستنى دوره",
     autoFixable: true,
     status: "pending",
     errorLog: error.stack,
@@ -244,9 +259,9 @@ export async function getSystemHealth(): Promise<HealthSnapshot> {
   }
   
   const recommendations: string[] = [];
-  if (!dbHealth) recommendations.push("Database connection unstable - verify Supabase status");
-  if (criticalAlerts > 0) recommendations.push("Critical alerts require immediate attention");
-  if (warningAlerts > 5) recommendations.push("High warning rate suggests systemic issue");
+  if (!dbHealth) recommendations.push("اتصال القاعدة مش مستقر — اتأكد من حالة القاعدة");
+  if (criticalAlerts > 0) recommendations.push("في تنبيهات حرجة محتاجة عين دلوقتي");
+  if (warningAlerts > 5) recommendations.push("تنبيهات كتير ورا بعض — شكلها مشكلة في النظام نفسه مش في حاجة واحدة");
 
   const pendingCount = alerts.filter((a) => a.status === "pending").length;
   const apiAlerts = alerts.filter((a) => a.category === "api").length;
@@ -369,5 +384,5 @@ Provide a concise root cause analysis in 1-2 sentences. Focus on actionable insi
 
   return result.success 
     ? result.content.trim() 
-    : "Unable to analyze root cause automatically. Manual investigation required.";
+    : "مقدرتش أحلّل السبب آليًا — محتاج مراجعة يدوية من فريق المتجر.";
 }
