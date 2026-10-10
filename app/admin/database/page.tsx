@@ -12,13 +12,17 @@ import {
   ShieldAlert,
 } from "lucide-react";
 
+import { arabicNumerals } from "@/lib/arabic";
+
 type AlertSeverity = "info" | "warning" | "critical";
 
 type SystemAlert = {
   id: string;
   timestamp: string;
+  lastSeenAt?: string;
+  occurrences?: number;
   severity: AlertSeverity;
-  category: string;
+  categoryAr?: string;
   problem: string;
   rootCause: string;
   proposedFix: string;
@@ -31,12 +35,15 @@ type HealthResponse = {
   health?: {
     status: "healthy" | "degraded" | "critical";
     lastCheck: string;
+    logState: "recorded" | "empty" | "unreadable";
+    logNote: string;
     metrics: {
-      apiSuccessRate: number;
+      apiSuccessRate: number | null;
       dbConnectionHealth: boolean;
       memoryUsagePercent: number;
       activeAlerts: number;
       criticalAlerts: number;
+      totalLogged: number | null;
     };
     recommendations: string[];
   };
@@ -147,20 +154,26 @@ export default function DatabasePage() {
             />
             <HealthMetric
               label="نجاح واجهات البرمجة"
-              value={`${metrics.apiSuccessRate}%`}
-              tone={metrics.apiSuccessRate >= 95 ? "good" : "warning"}
+              value={metrics.apiSuccessRate === null ? "مش متقيس" : `${arabicNumerals(metrics.apiSuccessRate)}٪`}
+              tone={metrics.apiSuccessRate === null ? "neutral" : metrics.apiSuccessRate >= 95 ? "good" : "warning"}
+              hint={metrics.apiSuccessRate === null ? "مفيش سجل محاولات اتسجّل عليها" : undefined}
               icon={<ServerCog className="h-5 w-5" />}
             />
             <HealthMetric
               label="استخدام الذاكرة"
-              value={`${metrics.memoryUsagePercent}%`}
+              value={`${arabicNumerals(metrics.memoryUsagePercent)}٪`}
               tone={metrics.memoryUsagePercent < 85 ? "good" : "warning"}
               icon={<ServerCog className="h-5 w-5" />}
             />
             <HealthMetric
               label="تنبيهات نشطة"
-              value={metrics.activeAlerts}
+              value={arabicNumerals(metrics.activeAlerts)}
               tone={metrics.criticalAlerts > 0 ? "bad" : metrics.activeAlerts > 0 ? "warning" : "good"}
+              hint={
+                metrics.totalLogged === null
+                  ? "السجل ما قريتش"
+                  : `من ${arabicNumerals(metrics.totalLogged)} قراءة في السجل`
+              }
               icon={<ShieldAlert className="h-5 w-5" />}
             />
           </section>
@@ -201,7 +214,7 @@ export default function DatabasePage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-bold text-white">التنبيهات التي تحتاج قرارًا</h2>
-                <p className="mt-1 text-sm text-white/45">كل إجراء هنا يحدّث حالة التنبيه على الخادم.</p>
+                <p className="mt-1 text-sm text-white/45">{health.logNote}</p>
               </div>
               <Link href="/admin/agents?tab=assistant" className="text-sm text-[#E5C170] hover:underline">
                 فتح مركز الوكلاء
@@ -209,20 +222,25 @@ export default function DatabasePage() {
             </div>
 
             {(data.pendingAlerts?.length ?? 0) === 0 ? (
-              <div className="flex items-center gap-3 py-10 text-emerald-300">
-                <CheckCircle2 className="h-6 w-6" />
-                لا توجد تنبيهات معلّقة.
-              </div>
+              health.logState === "recorded" ? (
+                <div className="flex items-center gap-3 py-10 text-emerald-300">
+                  <CheckCircle2 className="h-6 w-6" />
+                  مفيش تنبيه مستني قرار.
+                </div>
+              ) : null
             ) : (
               <div className="mt-5 space-y-4">
                 {data.pendingAlerts?.map((alert) => (
                   <article key={alert.id} className={`rounded-2xl border p-5 ${severityClass[alert.severity]}`}>
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="max-w-3xl">
-                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider opacity-70">
-                          <span>{alert.category}</span>
+                        <div className="flex flex-wrap items-center gap-2 text-xs font-bold opacity-70">
+                          <span>{alert.categoryAr}</span>
                           <span>•</span>
-                          <span>{new Date(alert.timestamp).toLocaleString("ar-EG")}</span>
+                          <span>{new Date(alert.lastSeenAt ?? alert.timestamp).toLocaleString("ar-EG")}</span>
+                          {(alert.occurrences ?? 1) > 1 ? (
+                            <span>• متكرر {arabicNumerals(alert.occurrences ?? 1)} مرة</span>
+                          ) : null}
                         </div>
                         <h3 className="mt-2 font-bold">{alert.problem}</h3>
                         <p className="mt-2 text-sm opacity-80">السبب المحتمل: {alert.rootCause}</p>
@@ -264,17 +282,20 @@ function HealthMetric({
   label,
   value,
   tone,
+  hint,
   icon,
 }: {
   label: string;
   value: string | number;
-  tone: "good" | "warning" | "bad";
+  tone: "good" | "warning" | "bad" | "neutral";
+  hint?: string;
   icon: React.ReactNode;
 }) {
   const color = {
     good: "text-emerald-300 border-emerald-500/20 bg-emerald-500/5",
     warning: "text-amber-300 border-amber-500/20 bg-amber-500/5",
     bad: "text-rose-300 border-rose-500/20 bg-rose-500/5",
+    neutral: "text-white/70 border-white/10 bg-white/[0.03]",
   }[tone];
 
   return (
@@ -284,6 +305,7 @@ function HealthMetric({
         {icon}
       </div>
       <p className="mt-4 text-2xl font-black text-white">{value}</p>
+      {hint ? <p className="mt-2 text-xs opacity-60">{hint}</p> : null}
     </div>
   );
 }

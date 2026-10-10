@@ -31,11 +31,12 @@ interface SystemHealthData {
     memoryUsage: number;
     cpuUsage: number;
   };
+  /** The watcher's own fields: `problem` is the sentence, `rootCause` the reading behind it. */
   pendingAlerts: Array<{
     id: string;
     severity: "critical" | "warning" | "info";
-    title: string;
-    description: string;
+    problem: string;
+    rootCause: string;
   }>;
 }
 
@@ -176,7 +177,15 @@ export default function AdminPage() {
         },
         {
           title: "حالة النظام",
-          value: health.health?.status === "optimal" ? "ممتازة" : health.health?.status === "stable" ? "مستقرة" : "غير معروفة",
+          // The door answers with three states and this card must read them, not a pair of words it
+          // invented: as `optimal`/`stable` the card could only ever print «غير معروفة».
+          value: health.health?.status === "healthy"
+            ? "سليم"
+            : health.health?.status === "degraded"
+              ? "يحتاج متابعة"
+              : health.health?.status === "critical"
+                ? "حرج"
+                : "غير معروفة",
           subtitle: health.health?.uptime ? `${health.health.uptime} uptime` : "غير متاح",
           icon: <Shield className="h-6 w-6" />,
           color: health.health?.status === "optimal" ? "blue" : "blue" as const,
@@ -241,9 +250,9 @@ export default function AdminPage() {
           realAlerts.push({
             icon: alert.severity === "critical" ? AlertTriangle : CheckCircle,
             color: alert.severity === "critical" ? "rose" : alert.severity === "warning" ? "amber" : "emerald" as const,
-            text: alert.title,
-            subtext: alert.description,
-            link: "/admin/agents",
+            text: alert.problem,
+            subtext: alert.rootCause,
+            link: "/admin/database",
           });
         });
       }

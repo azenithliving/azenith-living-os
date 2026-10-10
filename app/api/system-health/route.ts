@@ -4,13 +4,16 @@ import {
   getPendingAlerts,
   confirmAndApplyFix,
   dismissAlert,
-  type SystemAlert,
 } from "@/lib/sentinel";
 import { requireAdminApi } from "@/lib/admin-api-guard";
 
 /**
  * System Health API
  * Endpoint for the Sentinel Self-Healing Architecture
+ *
+ * Opening this door is what the watcher does its readings on, and every answer it gives is written in
+ * the owner's Arabic: the two screens that call it print `message` straight into a red box, so an
+ * English failure sentence here is an English sentence on his phone.
  */
 
 export async function GET(): Promise<NextResponse> {
@@ -31,12 +34,12 @@ export async function GET(): Promise<NextResponse> {
     });
 
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unexpected error";
-    
+    console.error("[system-health] الفحص فشل:", error);
+
     return NextResponse.json(
       {
         ok: false,
-        message,
+        message: "الفحص ما كملش — الرجاء المحاولة تاني.",
       },
       { status: 500 }
     );
@@ -58,7 +61,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json(
         {
           ok: false,
-          message: "Missing alertId parameter",
+          message: "التنبيه اللي بتتكلم عنه مش محدد.",
         },
         { status: 400 }
       );
@@ -70,16 +73,16 @@ export async function POST(request: Request): Promise<NextResponse> {
       case "applyFix":
         result = await confirmAndApplyFix(alertId);
         break;
-      
+
       case "dismiss":
         result = await dismissAlert(alertId);
         break;
-      
+
       default:
         return NextResponse.json(
           {
             ok: false,
-            message: "Invalid action. Use 'applyFix' or 'dismiss'",
+            message: "إجراء مش معروف — اختَر تطبيق المقترح أو المراجعة والإخفاء.",
           },
           { status: 400 }
         );
@@ -89,7 +92,10 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json(
         {
           ok: false,
-          message: `Failed to ${action} alert`,
+          message:
+            action === "applyFix"
+              ? "الإجراء ما اتنفذش — التنبيه فضّل مستني قرار."
+              : "التنبيه ما اتقفلش — فضّل مستني قرار.",
         },
         { status: 500 }
       );
@@ -97,18 +103,18 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({
       ok: true,
-      message: `Alert ${action === "applyFix" ? "fix applied" : "dismissed"} successfully`,
+      message: action === "applyFix" ? "الإجراء اتسجّل على التنبيه." : "التنبيه اتسجّل إنه اتراجع.",
       alertId,
       action,
     });
 
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unexpected error";
-    
+    console.error("[system-health] إجراء فشل:", error);
+
     return NextResponse.json(
       {
         ok: false,
-        message,
+        message: "الإجراء ما اتنفذش — الرجاء المحاولة تاني.",
       },
       { status: 500 }
     );
