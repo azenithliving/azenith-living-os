@@ -9,9 +9,10 @@
  * run that stands on it.
  */
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 
 import { getNextAvailableKey, keylessDrillOn } from "@/lib/api-keys-service";
-import { NO_KEY_MESSAGE, modelFailureReason } from "@/lib/ops/capability-tiers";
+import { NO_KEY_MESSAGE, modelFailureReason, modelFloorLine } from "@/lib/ops/capability-tiers";
 import { anomalyFromCounts, buildDailyCounts, renderAnomalyDigest } from "@/lib/ops/anomaly";
 import { buildPalette, filterPalette } from "@/lib/ops/palette";
 import { freshnessOf, hoursSinceLastTouch } from "@/lib/leads-freshness";
@@ -93,5 +94,34 @@ describe("the floors that do not need a key", () => {
     // out loud as anonymous — the roll never invents a person and never drops one.
     expect(lines.some((l) => l.key === "name:اسم بلا وسيلة وصول" && l.kind === "weak-name")).toBe(true);
     expect(lines.find((l) => l.key === "anonymous")?.anonymous).toBe(1);
+  });
+});
+
+describe("the cockpit chat answers from the ledger when no model answers", () => {
+  const orchestrator = readFileSync("lib/agents/AgentOrchestrator.ts", "utf8");
+  const swarm = readFileSync("lib/ops/orchestrator/MasterOrchestrator.ts", "utf8");
+
+  /**
+   * Measured 2026-10-10: five doors in the owner's chat answered with a machine sentence —
+   * «خطأ في معالجة الرد: <exception>», «خطأ في السرب: <exception>», «⚠️ خطأ» — so a dead key
+   * showed him a stack phrase in an Arabic thread. The ledger's floor line replaced every one.
+   */
+  it("no exception sentence is written into his chat", () => {
+    expect(orchestrator).not.toMatch(/⚠️/);
+    expect(orchestrator).not.toMatch(/خطأ في معالجة الرد|خطأ في السرب|خطأ في تنفيذ المهمة|السرب غير متاح/);
+    expect(swarm).not.toMatch(/خطأ في السرب: \$\{/);
+  });
+
+  it("every one of those doors asks the ledger instead", () => {
+    expect(orchestrator.match(/modelFloorLine\("chat"/g)?.length).toBe(5);
+    expect(swarm).toContain('modelFloorLine("chat"');
+  });
+
+  it("and what he reads is his language, naming the floor that still stands", () => {
+    const line = modelFloorLine("chat", "no_key");
+    expect(line).toContain("مفيش مفتاح شغال دلوقتي");
+    expect(line).toContain("قواعد");
+    expect(line).not.toMatch(/Error|undefined|NaN|stack|at \w+/);
+    expect(modelFailureReason(NO_KEY_MESSAGE)).toBe("no_key");
   });
 });

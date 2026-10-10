@@ -21,6 +21,7 @@ import {
   QayyimAgentBase 
 } from "../index";
 import { keepRealEvidenceUrls } from "../url-manifest";
+import { modelFloorLine, modelFailureReason } from "../capability-tiers";
 
 // ============================================
 // State Definition (LangGraph Annotation)
@@ -796,9 +797,11 @@ export class MasterOrchestrator {
         taskId: result.taskId,
       };
     } catch (error: any) {
+      console.error("[MasterOrchestrator] Swarm run failed:", error);
       return {
         success: false,
-        response: `⚠️ خطأ في السرب: ${error.message}`,
+        // The exception belongs in the log; the owner's chat gets the ledger's floor line.
+        response: modelFloorLine("chat", modelFailureReason(error?.message)),
         evidenceUrls: [],
         version: 0,
         taskId: '',

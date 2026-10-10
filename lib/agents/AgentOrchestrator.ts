@@ -10,6 +10,7 @@ import { askGroqMessages, askGoogle, askGoogleMessages, askOpenRouter, askMistra
 import { runUltimateTool } from "@/lib/admin-tool-bridge";
 import { routeIntent, explicitIntent, TOOL_CATALOG } from "@/lib/agents/intent-router";
 import { agentLabel, legacyToOps, SWARM_NAME, storedSenderName } from "@/lib/ops/identity";
+import { modelFloorLine, modelFailureReason } from "@/lib/ops/capability-tiers";
 import { recallMemory, finalizeReply } from "@/lib/ops/chat-brain";
 import { critiqueAndPolish, shouldDebate } from "@/lib/ops/debate";
 import { deskTruthFor, honestDeskClaims, type DeskRecord } from "@/lib/ops/claims";
@@ -470,7 +471,7 @@ export class AgentOrchestrator {
               const agentInstance = this.agents["ops-lead"];
               response = agentInstance
                 ? await agentInstance.chat(promptWithToolContext, context)
-                : `⚠️ السرب غير متاح حالياً: ${swarmResult.response}`;
+                : modelFloorLine("chat", modelFailureReason(swarmResult.response));
             }
           } catch (swarmErr: any) {
             console.warn("[AgentOrchestrator] Swarm failed, falling back to core:", swarmErr?.message);
@@ -478,13 +479,13 @@ export class AgentOrchestrator {
             const agentInstance = this.agents["ops-lead"];
             response = agentInstance
               ? await agentInstance.chat(promptWithToolContext, context)
-              : `⚠️ خطأ في السرب: ${swarmErr.message}`;
+              : modelFloorLine("chat", modelFailureReason(swarmErr?.message));
           }
         }
         // Ensure response is defined
         if (!response) {
           const agentInstance = this.agents["ops-lead"];
-          response = agentInstance ? await agentInstance.chat(promptWithToolContext, context) : "⚠️ خطأ";
+          response = agentInstance ? await agentInstance.chat(promptWithToolContext, context) : modelFloorLine("chat", "no_key");
         }
       }
       // ══════════════════════════════════════════════════════════════
@@ -606,11 +607,13 @@ export class AgentOrchestrator {
       return { success: true, agentUsed: selectedAgent as AgentType, response: response || "تم تنفيذ الطلب بنجاح", metadata };
 
     } catch (error: any) {
+      // The exception stays in the log; the owner's chat gets the ledger's floor line, which says
+      // what the store can still do — not a stack sentence he has to decode.
       console.error("[AgentOrchestrator] Chat error:", error);
       return {
         success: false,
         agentUsed: selectedAgent,
-        response: `⚠️ خطأ في معالجة الرد: ${error.message || "خطأ غير معروف"}. يرجى المحاولة مرة أخرى.`,
+        response: modelFloorLine("chat", modelFailureReason(error?.message)),
       };
     }
   }
@@ -675,10 +678,11 @@ export class AgentOrchestrator {
         metadata: {},
       };
     } catch (error: any) {
+      console.error("[AgentOrchestrator] Task error:", error);
       return {
         success: false,
         agentUsed: agentKey === "auto" ? "ops-lead" : agentKey,
-        response: `⚠️ خطأ في تنفيذ المهمة: ${error.message || "خطأ غير معروف"}`,
+        response: modelFloorLine("chat", modelFailureReason(error?.message)),
       };
     }
   }
