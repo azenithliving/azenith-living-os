@@ -54,8 +54,9 @@ describe("compositeLuxury", () => {
     const withAll = compositeLuxury(full);
     const noSeo = compositeLuxury({ ...full, seoScore: null });
     // dropping the SEO signal must not drag the score toward zero: the missing
-    // weight is redistributed, and `missing` says so out loud.
-    expect(noSeo.missing.join(" ")).toContain("SEO");
+    // weight is redistributed, and `missing` says so out loud. The signal's name is the Arabic
+    // one the owner reads (2026-10-12); this assertion used to pin the English letters.
+    expect(noSeo.missing.join(" ")).toContain("الظهور في البحث");
     expect(Math.abs(noSeo.score - withAll.score)).toBeLessThan(12);
   });
 

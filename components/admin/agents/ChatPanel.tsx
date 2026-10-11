@@ -282,6 +282,19 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
               <code key={j} data-emphasis="code" className="rounded bg-black/40 px-1 py-0.5 text-[12px]" dir="ltr">
                 {chunk.value}
               </code>
+            ) : chunk.kind === "link" ? (
+              // An address the model named in Arabic gets its Arabic name on the screen and its
+              // address behind the press — a bare URL in an Arabic line reorders the whole line.
+              <a
+                key={j}
+                href={chunk.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-emphasis="link"
+                className="text-sky-300 hover:underline"
+              >
+                {chunk.value}
+              </a>
             ) : (
               <span key={j}>{chunk.value}</span>
             )
@@ -294,11 +307,15 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
     if (tableRows.length > 0) {
       const header = tableRows[0];
       const body = tableRows.slice(1).filter(r => !r.every(c => /^[-:]+$/.test(c.trim())));
+      // A cell is prose: the load report writes «| **زمن الاستجابة** | **145ms** |», and printing the
+      // row's text raw put the model's markers back on his screen after the emphasis pass had taken
+      // them off every other line. Cells get the same inline pass. They also wrap, because at his
+      // width a five-column table held on one line each is a table he has to scroll to read.
       elements.push(
         <div key={`tbl-${elements.length}`} className="my-2 overflow-x-auto rounded-lg border border-white/10">
           <table className="w-full text-[11px]">
-            <thead><tr className="bg-white/5">{header.map((c,i) => <th key={i} className="p-1.5 text-right font-bold text-white/70 whitespace-nowrap">{c.trim()}</th>)}</tr></thead>
-            <tbody>{body.map((row, ri) => <tr key={ri} className="border-t border-white/5">{row.map((c, ci) => <td key={ci} className="p-1.5 text-white/80 whitespace-nowrap">{c.trim().startsWith('/') || c.trim().startsWith('http') ? <a href={c.trim()} target="_blank" className="text-sky-300 hover:underline" dir="ltr">{c.trim()}</a> : c.trim()}</td>)}</tr>)}</tbody>
+            <thead><tr className="bg-white/5">{header.map((c,i) => <th key={i} className="p-1.5 text-right font-bold text-white/70 align-top">{renderInline(c.trim())}</th>)}</tr></thead>
+            <tbody>{body.map((row, ri) => <tr key={ri} className="border-t border-white/5">{row.map((c, ci) => <td key={ci} className="p-1.5 text-white/80 align-top">{renderInline(c.trim())}</td>)}</tr>)}</tbody>
           </table>
         </div>
       );

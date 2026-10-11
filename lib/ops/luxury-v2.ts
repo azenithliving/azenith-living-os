@@ -14,6 +14,7 @@ import "server-only";
  * score is null and the reason is named.
  */
 import { supabaseServer } from "@/lib/dal/unified-supabase";
+import { arNum } from "@/lib/ops/metricLabels";
 
 export interface LuxurySignals {
   /** share of active products that have a main image (0..1) */
@@ -53,7 +54,7 @@ const LABELS: Record<keyof LuxurySignals, string> = {
   imageCompleteness: "اكتمال صور المنتجات",
   priceDisclosed: "إظهار السعر",
   altCoverage: "نصوص بديلة للصور",
-  seoScore: "صحة SEO",
+  seoScore: "صحة الظهور في البحث",
   loadP95Ms: "سرعة التحميل",
 };
 
@@ -157,10 +158,13 @@ export function renderLuxury(r: LuxuryResult, s: LuxurySignals): string {
   if (r.score === null) return "لم أستطع قياس أي إشارة من إشارات الفخامة — لن أعطي رقمًا من عندي.";
   const lines = r.breakdown
     .filter((b) => b.value !== null)
-    .map((b) => `• ${b.label}: ${b.value}/100 (وزن ${b.weight})`);
+    .map((b) => `• ${b.label}: ${arNum(b.value ?? 0)} من ١٠٠ (وزن ${arNum(b.weight)})`);
   const missing = r.missing.length ? `\n• إشارات غير متاحة الآن: ${r.missing.join("، ")} (وزنها أُعيد توزيعته)` : "";
-  const rawLoad = s.loadP95Ms === null ? "" : ` — p95 = ${Math.round(s.loadP95Ms)}ms`;
-  return `Luxury Score مقاسة: ${r.score}/100${rawLoad}\n${lines.join("\n")}${missing}`;
+  // Said as the sentence he reads, not the metric the probe holds: «— p95 = 229ms» was one of the
+  // lines the bidi census found still scrambled on his cockpit, and it is composed here, so a render
+  // patch would only fix the one screen that happens to print it.
+  const rawLoad = s.loadP95Ms === null ? "" : ` — أقصى زمن لفتح الصفحة ${arNum(Math.round(s.loadP95Ms))} مللي ثانية`;
+  return `درجة الفخامة مقاسة: ${arNum(r.score)} من ١٠٠${rawLoad}\n${lines.join("\n")}${missing}`;
 }
 
 /** Single entry point for the chat tool and the daily round. */

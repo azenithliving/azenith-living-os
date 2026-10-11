@@ -222,6 +222,15 @@ export type VoiceTally = { digits: number; words: string[]; ids: string[] };
 function speak(segment: string, tally: VoiceTally): string {
   let out = segment;
 
+  // Two ways a tool says it measured nothing, both read off his cockpit tables: the abbreviation
+  // «N/A» and the empty array `[]` printed as it came out of the code. Neither is a word he reads,
+  // and both mean one thing to him.
+  out = out.replace(/\bN\/A\b/g, "مش مقاس").replace(/\[\s*\]/g, "—");
+
+  // A unit welded to a number stays Latin after every other pass, and the digits beside it stop
+  // converting with it: «p95 = 229ms» reached him as one unreadable clause inside an Arabic line.
+  out = out.replace(/\b(\d+(?:\.\d+)?)\s*ms\b/g, "$1 مللي ثانية");
+
   out = out.replace(MACHINE_ID, (id) => {
     const named = arabicToolName(id);
     if (!tally.ids.includes(id)) tally.ids.push(id);
@@ -330,9 +339,17 @@ function dropDuplicatedGloss(text: string): string {
 const TABLE_ROW = /^\s*\|.*\|\s*$/;
 
 function flattenInlinePipes(text: string): string {
+  // A code span is something he pastes, not something he reads: a pipe inside it is shell syntax, and
+  // turning it into a separator would hand him a command that does not run.
   return text
     .split("\n")
-    .map((line) => (TABLE_ROW.test(line) ? line : line.replace(/\s*\|\s*/g, " · ")))
+    .map((line) => {
+      if (TABLE_ROW.test(line)) return line;
+      return line
+        .split(/(`[^`\n]*`)/)
+        .map((part, i) => (i % 2 === 1 ? part : part.replace(/\s*\|\s*/g, " · ")))
+        .join("");
+    })
     .join("\n");
 }
 

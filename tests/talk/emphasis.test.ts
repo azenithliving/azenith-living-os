@@ -66,6 +66,46 @@ describe("the chat surface actually uses it", () => {
     expect(panel).toContain('data-emphasis="em"');
     expect(panel).toContain('data-emphasis="code"');
   });
+
+  it("draws a link with the same inline pass inside a table cell", () => {
+    // The employee's load report IS a table, and the cell renderer used to drop the text straight in:
+    // «| **زمن الاستجابة** | **145ms** |» reached him with its asterisks still on it.
+    expect(panel).toContain("{renderInline(c.trim())}");
+    expect(panel).toContain('data-emphasis="link"');
+  });
+});
+
+describe("a link is drawn, not printed", () => {
+  const LABELLED = "[راجع المنتجات غير الظاهرة](https://azenith-living.vercel.app/admin/products?status=hidden)";
+
+  it("splits a labelled address into its Arabic name and its address", () => {
+    const chunks = splitEmphasis(`من هنا ${LABELLED}`);
+    const link = chunks.find((c) => c.kind === "link");
+    expect(link?.value).toBe("راجع المنتجات غير الظاهرة");
+    expect(link?.href).toBe("https://azenith-living.vercel.app/admin/products?status=hidden");
+    expect(chunks[0]).toEqual({ kind: "text", value: "من هنا " });
+  });
+
+  it("keeps no bracket mark in either half", () => {
+    const joined = splitEmphasis(LABELLED)
+      .map((c) => c.value)
+      .join("");
+    expect(joined).not.toContain("[");
+    expect(joined).not.toContain("]");
+  });
+
+  it("does not make a control out of an address the model never gave", () => {
+    // Read off his cockpit: «[(رابط غير موثق)]()» — a link with nothing behind it. A press that goes
+    // nowhere is a dead control, so it is said as words instead.
+    const chunks = splitEmphasis("[(رابط غير موثق)]()");
+    expect(chunks).toEqual([{ kind: "text", value: "رابط غير موثق" }]);
+  });
+
+  it("leaves brackets that are not a link exactly where they are", () => {
+    expect(splitEmphasis("مهيأة وتعمل بنجاح (Configured).")).toEqual([
+      { kind: "text", value: "مهيأة وتعمل بنجاح (Configured)." },
+    ]);
+  });
 });
 
 describe("a line that is a list item", () => {

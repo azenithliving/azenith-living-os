@@ -18,6 +18,7 @@ import { LEDGER_LABELS, LEDGER_ORDER, type LedgerTotals } from "@/lib/leads-dele
 import { hoursSinceLastTouch, freshnessOf, needsReplyNow, type FreshnessKey } from "@/lib/leads-freshness";
 import { phoneForms } from "@/lib/customers/identity";
 import { arDigits } from "@/lib/ops/metricLabels";
+import { roomLabel } from "@/lib/cad/room-names";
 import { ownerVoice } from "@/lib/ops/owner-voice";
 
 /** The cold clock's colours — the badge a customer wears for how long he has waited. */
@@ -519,12 +520,12 @@ export default function CustomersPanel() {
                         {lead.ui_state?.typing_preview && (
                           <div className="flex items-center gap-1 px-1.5 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded-full animate-pulse">
                             <Brain className="w-2.5 h-2.5 text-purple-400" />
-                            <span className="text-[9px] text-purple-300 font-bold uppercase tracking-tighter">PRE-COG</span>
+                            <span className="text-[9px] text-purple-300 font-bold tracking-tighter">بيكتب</span>
                           </div>
                         )}
                         {lead.ui_state?.handoff_to_human && (
                           <div className="flex items-center gap-1 px-1.5 py-0.5 bg-red-500/20 border border-red-500/30 rounded-full animate-pulse">
-                            <span className="text-[9px] text-red-300 font-bold uppercase tracking-tighter">HUMAN</span>
+                            <span className="text-[9px] text-red-300 font-bold tracking-tighter">تسليم لموظف</span>
                           </div>
                         )}
                       </div>
@@ -532,7 +533,15 @@ export default function CustomersPanel() {
                         {lead.ui_state?.typing_preview ? (
                           <span className="text-purple-300 italic">" {lead.ui_state.typing_preview} ... "</span>
                         ) : (
-                          `${lead.roomType} | ${lead.phone}`
+                          // Two facts, two elements. This used to be «غير محدد | 01002345678» — one Arabic
+                          // line with a pipe welded in it, which is the shape his rule bans and the eye
+                          // reads the wrong way round. The room goes through the sheet's own namer, so the
+                          // English the form stored comes out as «ركنة».
+                          <>
+                            {roomLabel(lead.roomType) ?? "من غير طلب"}
+                            <span className="text-white/70"> · </span>
+                            <span dir="ltr">{arDigits(lead.phone)}</span>
+                          </>
                         )}
                       </p>
                     </div>
@@ -565,7 +574,7 @@ export default function CustomersPanel() {
                     <div className="grid md:grid-cols-2 gap-4 text-sm">
                       <div className="space-y-2">
                         <p className="text-white/70">الميزانية: <span className="text-white font-medium">{lead.budget || "غير محدد"}</span></p>
-                        <p className="text-white/70">الطلب: <span className="text-white font-medium">{lead.roomType || "غير محدد"}</span></p>
+                        <p className="text-white/70">الطلب: <span className="text-white font-medium">{roomLabel(lead.roomType) ?? "غير محدد"}</span></p>
                       </div>
                       <div className="space-y-2">
                         <p className="text-white/70">المكان: <span className="text-white font-medium">{lead.location || "غير محدد"}</span></p>
@@ -813,7 +822,7 @@ export default function CustomersPanel() {
                             </div>
                             <div>
                               <p className="text-[10px] text-white/70">المشروع</p>
-                              <p className="text-xs text-white/80">{lead.roomType || "غير محدد"}</p>
+                              <p className="text-xs text-white/80">{roomLabel(lead.roomType) ?? "غير محدد"}</p>
                             </div>
                             <div>
                               <p className="text-[10px] text-white/70">الميزانية</p>
@@ -853,7 +862,7 @@ export default function CustomersPanel() {
                           <aside className="rounded-xl border border-[#C5A059]/30 bg-[#C5A059]/5 p-3">
                             <div className="flex items-center justify-between gap-2">
                               <div>
-                                <p className="text-xs font-bold text-[#C5A059] uppercase tracking-wide">AI Copilot</p>
+                                <p className="text-xs font-bold text-[#C5A059] tracking-wide">مساعد الرد</p>
                                 <p className="text-[11px] text-white/70">اقتراحات الاستجابة</p>
                               </div>
                               <button

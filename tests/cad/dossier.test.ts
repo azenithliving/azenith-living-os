@@ -13,7 +13,8 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 
-import { arabicOnly, budgetLabel, buildDossier, paperPath, type DossierSketch } from "@/lib/cad/dossier";
+import { budgetLabel, buildDossier, paperPath, type DossierSketch } from "@/lib/cad/dossier";
+import { arabicOnly } from "@/lib/cad/room-names";
 import { rollCustomers, type CustomerRow, type RawRow } from "@/lib/customers/roll";
 import { arNum } from "@/lib/ops/metricLabels";
 import type { SheetImage } from "@/lib/cad/sheet-images";

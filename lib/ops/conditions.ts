@@ -107,7 +107,7 @@ export const CONDITIONS: Condition[] = [
   },
   {
     label: "درجة جودة أو مقياس فخامة",
-    topic: /(مقياس الفخامة|درجة الجودة|Luxury Score|نقاط من)/,
+    topic: /(مقياس الفخامة|درجة الفخامة|درجة الجودة|Luxury Score|نقاط من)/,
     needsNumber: true,
     measuredBy: ["ops_luxury_score", "qa_accessibility", "seo_analyze"],
   },

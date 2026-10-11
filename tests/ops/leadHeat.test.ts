@@ -54,7 +54,7 @@ describe("the pulse the owner receives", () => {
    * is filed as its own item, not hidden in a test.
    */
   it("names the room the way he reads it, never the bank slug", async () => {
-    const { roomLabel } = await import("@/lib/cad/dossier");
+    const { roomLabel } = await import("@/lib/cad/room-names");
     const line = pulseFor({ room: "living-room", city: null, voters: 3, returns: 0, heat: "ساخن جداً" });
     expect(line).not.toContain("living-room");
     expect(line).toContain(String(roomLabel("living-room")));
@@ -86,7 +86,7 @@ describe("the pulse the owner receives", () => {
   });
 
   it("never invents a city the sheet does not carry", async () => {
-    const { roomLabel } = await import("@/lib/cad/dossier");
+    const { roomLabel } = await import("@/lib/cad/room-names");
     const line = pulseFor({ room: "kitchen", city: null, voters: 2, returns: 0, heat: "ساخن جداً" });
     expect(line).not.toContain("null");
     expect(line).toContain(String(roomLabel("kitchen")));

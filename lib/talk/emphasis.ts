@@ -12,7 +12,7 @@
  * Pure, so the shape of a sentence can be tested without a browser.
  */
 
-export type EmphasisChunk = { kind: "text" | "bold" | "em" | "code"; value: string };
+export type EmphasisChunk = { kind: "text" | "bold" | "em" | "code" | "link"; value: string; href?: string };
 
 /**
  * A line that is a list item.
@@ -30,13 +30,19 @@ export function stripBullet(line: string): string {
   return String(line ?? "").replace(/^\s*[-*+•]\s+/, "");
 }
 /** Paired markers, longest first, never crossing a line break. */
-const PAIRED = /(`[^`\n]+`|\*\*[^*\n]+\*\*|__[^_\n]+__|\*[^*\s][^*\n]*?\*|_[^_\s][^_\n]*?_)/;
+const PAIRED = /(`[^`\n]+`|\[.*?\]\([^)\n]*\)|\*\*[^*\n]+\*\*|__[^_\n]+__|\*[^*\s][^*\n]*?\*|_[^_\s][^_\n]*?_)/;
+
+/** A markdown link, and the label the model wrapped in parentheses when it had no address. */
+const LINK = /^\[([^\]\n]*)\]\(([^)\n]*)\)$/;
 
 /**
- * Split a line into plain text, bold and italic runs.
+ * Split a line into plain text, bold, italic and links.
  *
  * An unpaired marker is left exactly where it is: «٣ * ٤ = ١٢» is a customer's arithmetic, not
  * a formatting mistake, and eating it would be a lie of the other kind.
+ *
+ * A link with no address behind it — «[(رابط غير موثق)]()», read off his cockpit 2026-10-12 — is
+ * said as words. A control that goes nowhere when pressed is not a link, it is a trap.
  */
 export function splitEmphasis(text: string): EmphasisChunk[] {
   const source = String(text ?? "");
@@ -48,14 +54,22 @@ export function splitEmphasis(text: string): EmphasisChunk[] {
     const found = PAIRED.exec(rest);
     if (!found || found.index === undefined) {
       chunks.push({ kind: "text", value: rest });
-      break;
+      break
     }
     if (found.index > 0) chunks.push({ kind: "text", value: rest.slice(0, found.index) });
     const mark = found[0];
+    const link = LINK.exec(mark);
     const strong = mark.startsWith("**") || mark.startsWith("__");
     const code = mark.startsWith("`");
-    const edge = strong ? 2 : 1;
-    chunks.push({ kind: code ? "code" : strong ? "bold" : "em", value: mark.slice(edge, mark.length - edge) });
+    if (link) {
+      const label = link[1].replace(/^\((.*)\)$/, "$1").trim();
+      const address = link[2].trim();
+      if (address) chunks.push({ kind: "link", value: label, href: address });
+      else if (label) chunks.push({ kind: "text", value: label });
+    } else {
+      const edge = strong ? 2 : 1;
+      chunks.push({ kind: code ? "code" : strong ? "bold" : "em", value: mark.slice(edge, mark.length - edge) });
+    }
     rest = rest.slice(found.index + mark.length);
   }
 

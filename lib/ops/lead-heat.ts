@@ -1,4 +1,4 @@
-import { roomLabel } from "@/lib/cad/dossier";
+import { roomLabel } from "@/lib/cad/room-names";
 import { arDigits } from "@/lib/ops/metricLabels";
 
 /**
