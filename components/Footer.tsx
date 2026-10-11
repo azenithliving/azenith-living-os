@@ -69,7 +69,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
           </motion.div>
 
           <motion.div variants={columnVariants} className="space-y-8">
-            <h4 className="text-xs font-light uppercase tracking-widest text-gray-500">{isRTL ? "الملاحة الذكية" : "Smart Navigation"}</h4>
+            <h2 className="text-xs font-light uppercase tracking-widest text-gray-400">{isRTL ? "الملاحة الذكية" : "Smart Navigation"}</h2>
             <ul className="space-y-4">
               {[
                 { label: isRTL ? "قصة الإرث" : "Legacy Story", href: "/about" },
@@ -90,11 +90,11 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
           </motion.div>
 
           <motion.div variants={columnVariants} className="space-y-8">
-            <h4 className="text-xs font-light uppercase tracking-widest text-gray-500">{isRTL ? "تواصل مباشر" : "Direct Contact"}</h4>
+            <h2 className="text-xs font-light uppercase tracking-widest text-gray-400">{isRTL ? "تواصل مباشر" : "Direct Contact"}</h2>
             <ul className="space-y-4">
               {email ? (
                 <li className="text-sm font-light text-gray-300">
-                  <span className="text-gray-600">{isRTL ? "البريد:" : "Email:"}</span>{" "}
+                  <span className="text-gray-400">{isRTL ? "البريد:" : "Email:"}</span>{" "}
                   <a href={`mailto:${email}`} className="transition-all duration-300 hover:text-[#C5A059]">
                     {email}
                   </a>
@@ -102,7 +102,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
               ) : null}
               {phone ? (
                 <li className="text-sm font-light text-gray-300">
-                  <span className="text-gray-600">{isRTL ? "الهاتف:" : "Phone:"}</span>{" "}
+                  <span className="text-gray-400">{isRTL ? "الهاتف:" : "Phone:"}</span>{" "}
                   <a href={`tel:${phone}`} className="transition-all duration-300 hover:text-[#C5A059]">
                     {phone}
                   </a>
@@ -110,7 +110,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
               ) : null}
               {officeAddress ? (
                 <li className="text-sm font-light text-gray-300">
-                  <span className="text-gray-600">{isRTL ? "العنوان:" : "Address:"}</span> <span>{officeAddress}</span>
+                  <span className="text-gray-400">{isRTL ? "العنوان:" : "Address:"}</span> <span>{officeAddress}</span>
                 </li>
               ) : null}
               {!email && !phone && !officeAddress ? (
@@ -126,7 +126,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
       <div className="border-t border-white/[0.05]">
         <div className="mx-auto max-w-7xl px-6 py-6 md:px-12 lg:px-16">
           <div className="flex flex-col items-center justify-between gap-4 text-[10px] font-mono tracking-widest md:flex-row">
-            <span className="text-gray-600">
+            <span className="text-gray-400">
               {isRTL
                 ? arabicNumerals(`© ${new Date().getFullYear()} ${BRAND_NAME_AR} — كل الحقوق محفوظة`)
                 : `© ${new Date().getFullYear()} ${BRAND_NAME_EN} // ALL RIGHTS RESERVED`}

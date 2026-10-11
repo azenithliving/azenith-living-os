@@ -182,7 +182,7 @@ export default function DatabasePage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-bold text-white">نتيجة آخر فحص</h2>
-                <p className="mt-1 text-sm text-white/45">
+                <p className="mt-1 text-sm text-white/70">
                   {new Date(health.lastCheck).toLocaleString("ar-EG")}
                 </p>
               </div>
@@ -214,7 +214,7 @@ export default function DatabasePage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-bold text-white">التنبيهات التي تحتاج قرارًا</h2>
-                <p className="mt-1 text-sm text-white/45">{health.logNote}</p>
+                <p className="mt-1 text-sm text-white/70">{health.logNote}</p>
               </div>
               <Link href="/admin/agents?tab=assistant" className="text-sm text-[#E5C170] hover:underline">
                 فتح مركز الوكلاء

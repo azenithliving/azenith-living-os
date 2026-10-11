@@ -124,7 +124,7 @@ export function StudioPanel() {
               </div>
               <div>
                 <h2 className="text-sm font-bold text-white">مدير تشغيل المحتوى — استوديو السرب</h2>
-                <p className="text-[11px] text-white/50">{arNum(AGENT_KEYS.length)} وكلاء متخصصون بدستور واحد وذاكرة مشتركة</p>
+                <p className="text-[11px] text-white/70">{arNum(AGENT_KEYS.length)} وكلاء متخصصون بدستور واحد وذاكرة مشتركة</p>
               </div>
             </div>
             <button

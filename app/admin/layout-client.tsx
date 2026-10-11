@@ -91,6 +91,7 @@ export default function AdminLayoutClient({
       {/* Mobile Menu Toggle */}
       <button
         onClick={() => setIsSidebarOpen(true)}
+        aria-label="افتح قائمة الأقسام"
         className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-xl bg-[#C5A059] text-[#1a1a1a] shadow-lg active:scale-95 transition-all"
       >
         <Menu className="h-6 w-6" />
@@ -126,6 +127,7 @@ export default function AdminLayoutClient({
             </div>
             <button 
               className="lg:hidden p-2 text-white/40 hover:text-white"
+              aria-label="اقفل قائمة الأقسام"
               onClick={() => setIsSidebarOpen(false)}
             >
               <X className="w-5 h-5" />

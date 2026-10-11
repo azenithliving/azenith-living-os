@@ -68,7 +68,7 @@ const AIStylePicker: React.FC<AIStylePickerProps> = ({ selectedStyle, onStyleCha
               type="button"
               onClick={() => onStyleChange(style.id)}
               className={`relative px-8 py-2.5 text-sm md:text-base transition-colors duration-300 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
-                isActive ? "text-white" : "text-white/40 hover:text-white/70"
+                isActive ? "text-white" : "text-white/70 hover:text-white"
               }`}
             >
               <span className="relative z-20 font-medium tracking-widest">

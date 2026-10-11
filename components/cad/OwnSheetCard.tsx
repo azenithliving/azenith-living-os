@@ -74,6 +74,7 @@ export function OwnSheetCard({ phone, isRTL }: { phone: string; isRTL: boolean }
           onChange={(e) => setNumber(e.target.value)}
           inputMode="tel"
           placeholder={isRTL ? "رقم موبايلك" : "Your mobile number"}
+          aria-label={isRTL ? "رقم موبايلك" : "Your mobile number"}
           data-own-sheet-phone=""
           className="w-44 rounded-full border border-white/15 bg-[#111112] px-4 py-2.5 text-sm text-white outline-none focus:border-[#C5A059]"
         />
@@ -82,6 +83,7 @@ export function OwnSheetCard({ phone, isRTL }: { phone: string; isRTL: boolean }
           type="file"
           accept="image/*"
           capture="environment"
+          aria-label={isRTL ? "ارفع صورة ورقة مقاساتك" : "Upload a photo of your measurements sheet"}
           data-own-sheet-file=""
           className="text-sm text-white/60 file:me-3 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-white"
         />

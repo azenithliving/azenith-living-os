@@ -124,8 +124,9 @@ export default function AvatarButton({ onClick, isOpen }: AvatarButtonProps) {
   };
 
   return (
-    <div 
+    <aside
       ref={containerRef}
+      aria-label={isRTL ? "مستشار الدار" : "Azenith advisor"}
       className="fixed bottom-6 right-6 z-50 flex items-center justify-end"
     >
       {/* Speech Bubble Tooltip */}
@@ -162,6 +163,8 @@ export default function AvatarButton({ onClick, isOpen }: AvatarButtonProps) {
       <motion.button
         onClick={onClick}
         data-chat-open={isOpen ? "1" : "0"}
+        aria-label={isRTL ? "افتح مستشار الدار" : "Open the Azenith advisor"}
+        aria-expanded={isOpen}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         variants={{
@@ -376,6 +379,6 @@ export default function AvatarButton({ onClick, isOpen }: AvatarButtonProps) {
           )}
         </AnimatePresence>
       </motion.button>
-    </div>
+    </aside>
   );
 }

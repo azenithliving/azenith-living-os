@@ -88,6 +88,7 @@ export function QayyimGoalsPanel() {
           <button
             onClick={fetchGoals}
             disabled={loading}
+            aria-label="اجيب الأهداف من جديد"
             className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:bg-white/5 transition-colors disabled:opacity-40"
           >
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
