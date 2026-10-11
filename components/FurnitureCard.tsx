@@ -49,7 +49,7 @@ export default function FurnitureCard({ furniture, quoteHref, isWishlisted = fal
       </div>
       
       <div className="space-y-3">
-        <h3 className="text-xl font-semibold text-white line-clamp-2">{arabicNumerals(furniture.title)}</h3>
+        <h2 className="text-xl font-semibold text-white line-clamp-2">{arabicNumerals(furniture.title)}</h2>
         <p className="text-brand-primary font-bold text-lg">{arabicNumerals(furniture.priceRange)}</p>
         <p className="text-sm leading-6 text-white/75 line-clamp-2">{arabicNumerals(furniture.description)}</p>
         

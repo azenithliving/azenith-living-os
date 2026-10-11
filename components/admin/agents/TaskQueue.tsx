@@ -85,6 +85,7 @@ export function TaskQueue() {
               setFilter(e.target.value);
               setLoading(true);
             }}
+            aria-label="فلتر المهام حسب الحالة"
             className="border rounded px-3 py-1 text-sm"
           >
             <option value="all">الكل</option>

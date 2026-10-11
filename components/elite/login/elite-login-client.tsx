@@ -12,7 +12,7 @@ import { ArrowLeft, Link2, MessageCircle, ShieldCheck } from "lucide-react";
  */
 export function EliteLoginClient() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0A0A0A] px-6 pt-20">
+    <div role="main" className="flex min-h-screen items-center justify-center bg-[#0A0A0A] px-6 pt-20">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-[#C5A059]/5 blur-3xl" />
         <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-[#E5C170]/5 blur-3xl" />

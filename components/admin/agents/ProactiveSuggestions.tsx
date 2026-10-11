@@ -118,7 +118,8 @@ export function ProactiveSuggestions() {
           <button
             onClick={fetchSuggestions}
             disabled={loading}
-            className="p-1.5 text-white/30 hover:text-white/70 transition-colors"
+            aria-label="اجيب الاقتراحات من جديد"
+            className="p-1.5 text-white/60 hover:text-white transition-colors"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>

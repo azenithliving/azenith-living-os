@@ -223,12 +223,12 @@ export default function V2SketchesPage() {
           </div>
 
           {reading.openings.length > 0 && (
-            <p className="mt-3 text-[11px] text-white/55">
+            <p className="mt-3 text-[11px] text-white/75">
               الفتحات: {reading.openings.map((o) => `${OPENING_LABEL[o.kind]}${o.widthMeters ? ` ${arNum(o.widthMeters)}م` : ''}`).join(' · ')}
             </p>
           )}
 
-          <p className="mt-3 text-[11px] text-white/55">
+          <p className="mt-3 text-[11px] text-white/75">
             المساحة: {reading.areaSqm ? `${arNum(reading.areaSqm)} متر مربع` : 'متحسبتش — محتاجة ضلعين مؤكدين'}
             {' · '}
             الشاهد التاني: العميل نفسه، لما يكتب مقاساته في ورقته
@@ -257,7 +257,7 @@ export default function V2SketchesPage() {
       )}
 
       <section>
-        <h2 className="mb-2 flex items-center gap-2 text-[12px] font-bold text-white/55">
+        <h2 className="mb-2 flex items-center gap-2 text-[12px] font-bold text-white/75">
           {only ? 'ورق عميل واحد' : 'آخر الورقات'}
           {only && (
             <button onClick={() => setOnly(null)} className="rounded-lg border border-white/10 px-2 py-0.5 text-[10px] font-bold text-white/60">
@@ -277,7 +277,7 @@ export default function V2SketchesPage() {
                   <span className="truncate text-[12px] font-bold text-white">{row.room || 'مكان من غير اسم'}</span>
                   <span className="shrink-0 text-[10px] text-white/35">{when(row.created_at)}</span>
                 </div>
-                <div className="mt-1 text-[11px] text-white/55">
+                <div className="mt-1 text-[11px] text-white/75">
                   {row.dimensions.slice(0, 4).map((d) => `${d.label} ${arNum(d.meters)}م`).join(' · ') || 'مفيش أرقام'}
                   {row.area_sqm ? ` · ${arNum(Number(row.area_sqm))} م²` : ''}
                   {` · ${arNum(row.confirmed_count)} مؤكد`}
