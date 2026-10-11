@@ -53,6 +53,17 @@ describe("the owner's screens", () => {
   it("gives the studio page a level-one heading", () => {
     expect(opsPage).toContain("<h1");
   });
+
+  /**
+   * The back control's only content was the character «→». A glyph with no word on it is what the
+   * owner's line-shape rule bans, and an instrument counting arrows on his screens can never reach
+   * zero while the shop's own chrome draws one.
+   */
+  it("draws the way back as an icon with a name, not as a bare arrow", () => {
+    const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+    expect(panel).not.toContain(">→</Link>");
+    expect(panel).toMatch(/aria-label="رجوع لمركز القيادة"/);
+  });
 });
 
 describe("the text that carries information is readable", () => {

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Send, Bot, User, Loader2, Sparkles, ThumbsUp, ThumbsDown,
-  Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff, ShieldAlert, Wrench
+  Terminal, CheckCircle2, ChevronDown, ChevronUp, Database, Table, Layers, Command, Fingerprint, MicOff, ShieldAlert, Wrench, ArrowRight
 } from 'lucide-react';
 import { AGENT_ROLES, SALES_MANAGER_CAPABILITIES } from '@/lib/ops/agent-roles';
 import { DEPARTMENT_KEYS, employeeHref } from '@/lib/ops/departments';
@@ -1027,7 +1027,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       <div data-chat-header="" className={`p-4 border-b ${colors.border} flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:gap-3 sm:items-center justify-between ${colors.bg}`}>
         <div className="flex items-center gap-3 min-w-0 flex-1">
           {fullScreen && (
-            <Link href="/admin/v2/agents" title="رجوع لمركز القيادة" className="w-9 h-9 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-white text-lg">→</Link>
+            <Link href="/admin/v2/agents" aria-label="رجوع لمركز القيادة" title="رجوع لمركز القيادة" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/70 hover:text-white"><ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
           )}
           <div className={`shrink-0 w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-white font-bold shadow-lg text-lg`}>
             {meta.icon}
