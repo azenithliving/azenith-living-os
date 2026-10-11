@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
 import { provenanceEnvelope } from '@/lib/ops/provenance';
+import { ownerVoice } from '@/lib/ops/owner-voice';
 
 // GET - List conversations
 export async function GET(request: NextRequest) {
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest) {
       await supabaseServer.from('agent_messages').insert({
         conversation_id: conversation.id,
         sender_type: 'system',
-        content: `👋 مرحباً! تم بدء محادثة جماعية بين: ${participants.join(', ')}`,
+        content: ownerVoice(`👋 مرحباً! تم بدء محادثة جماعية بين: ${participants.join(', ')}`),
         created_at: timestamp,
         // A notice, not a deed: the row says which path wrote it so no reader has to
         // infer it from the shape of an empty object.

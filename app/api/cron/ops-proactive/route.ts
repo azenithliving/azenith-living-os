@@ -4,6 +4,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { auditVisitorExperience } from "@/lib/qayyim-ops";
 import { provenanceEnvelope, VISITOR_AUDIT_DESK } from "@/lib/ops/provenance";
+import { ownerVoice } from "@/lib/ops/owner-voice";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
           conversation_id: convId,
           sender_type: "agent",
           sender_name: "مدير تشغيل المحتوى",
-          content: `لاحظت: ${issue.detail} في **${issue.target}** (${issue.path})\nجهزت لك مسودة مقترحة — تريد أن أعرضها؟ [معاينة] [وافق]`,
+          content: ownerVoice(`لاحظت: ${issue.detail} في **${issue.target}** (${issue.path})\nجهزت لك مسودة مقترحة — تريد أن أعرضها؟ [معاينة] [وافق]`),
           is_read: false,
           created_at: new Date().toISOString(),
           action_taken: true,

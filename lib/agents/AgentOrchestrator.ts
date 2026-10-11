@@ -26,6 +26,7 @@ import {
 import { withOwnerRuleOnMessages } from "@/lib/ops/owner-address";
 import { explainGap } from "@/lib/ops/gap-contract";
 import { isStaleRunning } from "@/lib/ops/task-reconcile";
+import { ownerVoice } from "@/lib/ops/owner-voice";
 import { 
   QayyimCoreAgent, qayyimCoreAgent,
   QayyimContentAgent, qayyimContentAgent,
@@ -579,7 +580,7 @@ export class AgentOrchestrator {
           conversation_id: conversationId,
           sender_type: "agent",
           sender_name: storedSenderName(selectedAgent),
-          content: response,
+          content: ownerVoice(response),
           created_at: new Date().toISOString(),
           action_taken: deskRuns.some((d) => d.ok),
           is_read: automated,
