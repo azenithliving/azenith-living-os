@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { arNum } from '@/lib/ops/metricLabels';
 import { keyDeskGuide } from '@/lib/ops/key-desk';
 import SketchOwner, { type RollLine } from '@/components/admin/sketches/SketchOwner';
+import { ownerVoice } from "@/lib/ops/owner-voice";
 
 type Dimension = { label: string; meters: number; confirmed: boolean };
 type Opening = { kind: 'door' | 'window'; widthMeters: number | null };
@@ -283,7 +284,7 @@ export default function V2SketchesPage() {
                   {row.area_sqm ? ` · ${arNum(Number(row.area_sqm))} م²` : ''}
                   {` · ${arNum(row.confirmed_count)} مؤكد`}
                 </div>
-                {!row.ok && row.failure && <p className="mt-1 text-[10px] text-rose-200">{row.failure}</p>}
+                {!row.ok && row.failure && <p className="mt-1 text-[10px] text-rose-200">{ownerVoice(row.failure)}</p>}
                 <SketchOwner sketchId={row.id} customerKey={row.customer_key} roll={roll} onLinked={setOwner} />
                 {row.customer_key && (
                   <button

@@ -117,7 +117,9 @@ describe("the owner's screens read on a phone", () => {
 
   it("opens the sales office with a heading, and never paints a task title white on white", () => {
     expect(readFileSync("app/admin/v2/sales/page.tsx", "utf8")).toContain('<h1 className="font-black text-sm text-white">مدير المبيعات</h1>');
-    expect(readFileSync("components/admin/agents/TaskQueue.tsx", "utf8")).toContain('<p className="font-medium text-gray-900">{task.title}</p>');
+    expect(readFileSync("components/admin/agents/TaskQueue.tsx", "utf8")).toContain(
+      '<p className="font-medium text-gray-900">{ownerVoice(task.title)}</p>',
+    );
   });
 
   it("steps the elite board in order: no third-level step title under the page's one top-level heading", () => {

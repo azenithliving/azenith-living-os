@@ -145,6 +145,16 @@ const WORDS: Record<string, string> = {
   insights: "رؤى",
   live: "حي",
   evolve: "يتطوّر",
+  // Nouns the house's own rows carry, measured on the published screens 2026-10-11 in stored prose
+  // («واتساب dossier», «تحليل gallery», «نشر عبر PR», «وكيل visual», «نوع الحدث: command»). Function
+  // words of an English sentence are deliberately absent: translating «is» and «currently» one by one
+  // produces Arabic fragments that read as a broken product, not as a translated one.
+  gallery: "معرض",
+  dossier: "ملف العميل",
+  pr: "طلب تعديل",
+  visual: "المرئيات",
+  command: "أمر",
+  system: "النظام",
 };
 
 const TOKEN = /[A-Za-z][A-Za-z0-9_.\-]*[A-Za-z0-9]|[A-Za-z]/g;

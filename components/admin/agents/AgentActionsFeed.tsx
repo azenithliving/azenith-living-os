@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Activity, CheckCircle, XCircle, Clock, RefreshCw, Loader2 } from 'lucide-react';
 import { legacyToOps, senderDisplayName } from '@/lib/ops/identity';
 import { eventLabel } from '@/lib/owner-labels';
+import { ownerVoice } from '@/lib/ops/owner-voice';
 
 interface FeedItem {
   id:         string;
@@ -205,7 +206,7 @@ export function AgentActionsFeed() {
                       <span className="text-[10px] text-white/70">{eventLabel(item.type)}</span>
                     )}
                   </div>
-                  <p className="text-xs text-white/80 mt-0.5 truncate">{item.title}</p>
+                  <p className="text-xs text-white/80 mt-0.5 truncate">{ownerVoice(item.title)}</p>
                   <div className="flex items-center gap-3 mt-1">
                     <div className={`flex items-center gap-1 text-[10px] ${st.text}`}>
                       {st.icon}

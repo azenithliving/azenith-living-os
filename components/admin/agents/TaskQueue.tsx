@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { agentLabel } from '@/lib/ops/identity';
+import { ownerVoice } from '@/lib/ops/owner-voice';
 
 interface Task {
   id: string;
@@ -129,7 +130,7 @@ export function TaskQueue() {
                       {task.agent_profiles?.name || agentLabel(task.agent_profiles?.agent_key ?? '')}
                     </span>
                   </div>
-                  <p className="font-medium text-gray-900">{task.title}</p>
+                  <p className="font-medium text-gray-900">{ownerVoice(task.title)}</p>
                   {task.description && (
                     <p className="text-sm text-gray-600 mt-1 line-clamp-2">{task.description}</p>
                   )}

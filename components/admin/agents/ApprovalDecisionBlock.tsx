@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { ownerVoice } from '@/lib/ops/owner-voice';
 import {
   betterRequestMessage,
   decisionRequest,
@@ -111,7 +112,7 @@ export function ApprovalDecisionBlock({
       {row && (
         <>
           <div className="text-[13px] text-white/90 leading-relaxed whitespace-pre-wrap">
-            {row.description || row.metadata?.userMessage || 'اقتراح من السرب'}
+            {ownerVoice(row.description || row.metadata?.userMessage || 'اقتراح من السرب')}
           </div>
           <div className="mt-1 text-[10px] text-white/35">
             {proposalStatusLabel(row.status)} · درجة الخطورة: {riskLabel(row.risk_level)}
