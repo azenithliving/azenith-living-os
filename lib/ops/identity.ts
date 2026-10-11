@@ -155,9 +155,15 @@ export function storedSenderName(key: string): string {
  * «الدار» is required, and the lookbehind refuses an Arabic letter in front, so
  * «تقييم الدار» and «قيّم جودتها» (a verb) and «القيّم على القسم» (a custodian) are
  * ordinary Arabic this function must never touch.
+ *
+ * One exception, measured in his stored history on 2026-10-11: nine rows said «وقيّم الدار» and
+ * «كقيّم الدار» — the dead name welded to a conjunction, which the strict lookbehind let through. The
+ * emphasis-marked spelling now also accepts the five letters that glue on in front (و ف ك ب ل); the
+ * plain spelling keeps the strict rule, because «تقييم الدار» ends in exactly the letter that would
+ * otherwise slip through it.
  */
 const RETIRED_PRODUCT_NAME =
-  /(?<![\u0600-\u06FF])(?:ال)?قيّم الدار|(?<![\u0600-\u06FF])(?:ال)?قيم الدار/g;
+  /(?:(?<=[وفكبل])|(?<![\u0600-\u06FF]))(?:ال)?قيّم الدار|(?<![\u0600-\u06FF])(?:ال)?قيم الدار/g;
 
 export function scrubRetiredProductName(text: string, replacement: string): string {
   return text.replace(RETIRED_PRODUCT_NAME, replacement);

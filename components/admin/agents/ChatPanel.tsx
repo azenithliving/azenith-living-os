@@ -21,7 +21,7 @@ import { buildPalette, isPaletteHotkey, type PaletteCommand } from '@/lib/ops/pa
 import { deskNames, readDesks, type DeskRun } from '@/lib/ops/provenance';
 import { arDigits, arNum, metricLabel } from '@/lib/ops/metricLabels';
 import { locateFirstUnread, readStamp, unreadJump } from '@/lib/ops/unread-marker';
-import { ownerVoice } from '@/lib/ops/owner-voice';
+import { ownerRowText } from '@/lib/ops/owner-voice';
 import type { SelfModelView } from '@/lib/ops/self-view';
 import {
   CONTINUOUS_SILENCE_MS,
@@ -1590,7 +1590,7 @@ function MessageBubble({
               : `${colors.bubble} border rounded-tl-md shadow-md`
           }`}>
             <div className="text-sm leading-relaxed">
-              <MarkdownContent content={isUser ? message.content : ownerVoice(message.content)} onZoom={onZoom} />
+              <MarkdownContent content={isUser ? message.content : ownerRowText(message.content, message.sender_name)} onZoom={onZoom} />
             </div>
 
             {/* القرار مطلوب من الرسالة دي نفسها — فالأزرار تحتها، مش في مكان تاني من الصفحة. */}

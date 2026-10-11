@@ -1,5 +1,6 @@
 import { CAPABILITY_LABELS } from "./palette";
-import { agentLabel, SURFACE_KEYS } from "./identity";
+import { draftTypeLabel } from "./draft-labels";
+import { agentLabel, scrubRetiredProductName, SURFACE_KEYS, SWARM_NAME } from "./identity";
 import { foldArabic } from "@/lib/arabic";
 
 /**
@@ -34,6 +35,12 @@ const PHRASES: Array<[string, string]> = [
   ["Alt text", "النص البديل للصور"],
   ["axe-core", "فاحص الوصول"],
   ["axe core", "فاحص الوصول"],
+  // Read whole, or the pass leaves half an English header behind — measured on his stored rows:
+  // «تقرير اختبار الحمل (Load Test تقرير)».
+  ["Load Test Report", "تقرير اختبار الحمل"],
+  ["SEO analysis completed for", "خلص تحليل الظهور لـ"],
+  ["Comprehensive Status Brief", "ملخص الحالة الشامل"],
+  ["Status Brief", "ملخص الحالة"],
   ["Keyboard Navigation", "التنقل بلوحة المفاتيح"],
   ["Contrast Ratio", "نسبة التباين"],
   ["Security Headers", "ترويسات الأمان"],
@@ -193,8 +200,11 @@ function namedEmployee(key: string): string {
 function arabicToolName(id: string): string | null {
   const live = id.toLowerCase().startsWith("qayyim_") ? `ops_${id.slice(id.indexOf("_") + 1)}`.toLowerCase() : id.toLowerCase();
   const label = CAPABILITY_LABELS[live];
-  if (!label) return null;
-  return label.split(":")[0].trim() || null;
+  if (label) return label.split(":")[0].trim() || null;
+  // A kind of draft is named by the drafts desk, not by the palette. Asked 2026-10-11: a stored list
+  // of his pending drafts read «— —» because the boundary dropped a kind it could not name while
+  // `draft-labels` had been saying «تنظيم المعرض» for a week.
+  return draftTypeLabel(live);
 }
 
 /**
@@ -335,6 +345,21 @@ function run(text: string, tally: VoiceTally): string {
 /** What the row says when it reaches his eyes. */
 export function ownerVoice(text: string): string {
   return run(text, { digits: 0, words: [], ids: [] });
+}
+
+/**
+ * A stored row: spoken, and scrubbed of the product name the owner retired.
+ *
+ * `finalizeReply` does that scrub on a live answer, and a guard keeps the dead name out of the source,
+ * but 156 rows written before it still sit in his history (measured 2026-10-11) — so the swarm keeps
+ * introducing itself to him by a name that no longer exists. The replacement is whoever wrote the row,
+ * taken from the module that owns the names; and when the sender is not one of them, the swarm's own
+ * name stands in, because no surface is allowed to publish the dead one.
+ */
+export function ownerRowText(content: string, senderKey: string | null | undefined): string {
+  const key = String(senderKey ?? "").trim().toLowerCase();
+  const who = key ? agentLabel(key) : "";
+  return scrubRetiredProductName(ownerVoice(content), who && who !== key ? who : SWARM_NAME);
 }
 
 /** What was changed — the read-back, so a claim about the voice can be counted, not felt. */

@@ -65,8 +65,10 @@ describe("the report vocabulary", () => {
   });
 
   it("translates the whole line a tool answers with", () => {
+    // This assertion used to pin «الظهور في البحث التحليل خلص لـ» — four glosses welded together, which
+    // reads as a broken product. The phrase now goes in whole, so the line is Arabic word order.
     expect(ownerVoice("SEO analysis completed for - Score: 97/100")).toBe(
-      "الظهور في البحث التحليل خلص لـ - الدرجة: ٩٧/١٠٠"
+      "خلص تحليل الظهور لـ - الدرجة: ٩٧/١٠٠"
     );
   });
 
@@ -213,7 +215,10 @@ describe("the chat bubble is wired to the voice", () => {
   const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
 
   it("reads an employee's report through it", () => {
-    expect(panel).toContain("ownerVoice(");
+    // The bubble now calls the row finalizer, which is the voice pass plus the retired-name scrub — a
+    // stored row is history, and history must not sign itself with a name the owner buried.
+    expect(panel).toContain("ownerRowText(");
+    expect(panel).not.toContain("ownerVoice(");
   });
 
   it("does not rewrite his own words", () => {

@@ -59,6 +59,19 @@ describe("a model cannot bring the retired name back into a reply", () => {
     }
   });
 
+  it("catches the name welded to a conjunction or a prefix letter", () => {
+    // Measured in his stored history 2026-10-11: nine rows carried «وقيّم الدار» and «كقيّم الدار»,
+    // where the strict lookbehind let the dead name through because an Arabic letter stood in front.
+    for (const line of [
+      "بصفتي «مدير تشغيل المحتوى» وقيّم الدار الحريص على رقيّ البيان",
+      "**القرار النهائي كقيّم الدار - الجودة والاختبار:**",
+    ]) {
+      const fixed = scrubRetiredProductName(line, "وكيل الجودة");
+      expect(fixed, line).not.toContain("قيّم الدار");
+      expect(fixed).toContain("وكيل الجودة");
+    }
+  });
+
   it("leaves the word alone when it is not the product name", () => {
     const verb = "افحص صور المنتجات وقيّم جودتها واتساقها";
     const custodian = "القيّم على هذا القسم يراجعه يومياً";
