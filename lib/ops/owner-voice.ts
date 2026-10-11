@@ -319,12 +319,30 @@ function dropDuplicatedGloss(text: string): string {
   });
 }
 
+/**
+ * A pipe used as a comma.
+ *
+ * Measured on his screens: 21 lines carry «|» between Arabic clauses — not a table, the model's habit
+ * of separating thoughts with a glyph that reorders the whole run. A line that begins and ends with a
+ * pipe is a table row, and the chat's markdown splits those on the pipe after this pass runs, so those
+ * separators are left exactly where they are.
+ */
+const TABLE_ROW = /^\s*\|.*\|\s*$/;
+
+function flattenInlinePipes(text: string): string {
+  return text
+    .split("\n")
+    .map((line) => (TABLE_ROW.test(line) ? line : line.replace(/\s*\|\s*/g, " · ")))
+    .join("\n");
+}
+
 function run(text: string, tally: VoiceTally): string {
+  const source = flattenInlinePipes(text);
   let out = "";
   let last = 0;
-  for (const m of text.matchAll(PROTECTED)) {
+  for (const m of source.matchAll(PROTECTED)) {
     const at = m.index ?? 0;
-    out += speak(text.slice(last, at), tally);
+    out += speak(source.slice(last, at), tally);
     const span = m[0];
     if (span.startsWith("`")) {
       // A code span used to be exempt because he copies it to a terminal. Measured on the published
@@ -344,7 +362,7 @@ function run(text: string, tally: VoiceTally): string {
     }
     last = at + span.length;
   }
-  out += speak(text.slice(last), tally);
+  out += speak(source.slice(last), tally);
   return dropDuplicatedGloss(out.replace(/[ \t]{2,}/g, " "));
 }
 

@@ -72,6 +72,26 @@ describe("the voice pass on a stray arrow", () => {  it("reads an arrow between 
     const row = "| القسم | الحالة |";
     expect(ownerVoice(row)).toBe(row);
   });
+
+  /**
+   * 21 of the lines counted on his screens carry a pipe that is not a table at all: the model uses it
+   * as a comma between Arabic clauses, and the glyph is what reorders the run. Only a line that is a
+   * table row — a pipe at each end — keeps its separators.
+   */
+  it("reads an inline pipe as the separator it is being used as", () => {
+    const out = ownerVoice("الظهور في البحث: DB + تعديل الملف | استعادة عملاء");
+    expect(out).toContain("·");
+    expect(out).not.toContain("|");
+  });
+
+  it("keeps a table and flattens the prose around it, in one message", () => {
+    const out = ownerVoice("مهام فورية | اليوم\n| القسم | الحالة |\n| المعرض | منتهي |");
+    const lines = out.split("\n");
+    expect(lines[0]).toContain("·");
+    expect(lines[0]).not.toContain("|");
+    expect(lines[1]).toBe("| القسم | الحالة |");
+    expect(lines[2]).toBe("| المعرض | منتهي |");
+  });
 });
 
 /**
