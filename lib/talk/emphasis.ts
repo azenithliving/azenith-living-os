@@ -30,7 +30,7 @@ export function stripBullet(line: string): string {
   return String(line ?? "").replace(/^\s*[-*+•]\s+/, "");
 }
 /** Paired markers, longest first, never crossing a line break. */
-const PAIRED = /(`[^`\n]+`|\[.*?\]\([^)\n]*\)|\*\*[^*\n]+\*\*|__[^_\n]+__|\*[^*\s][^*\n]*?\*|_[^_\s][^_\n]*?_)/;
+const PAIRED = /(`[^`\n]+`|\[[^\]\n]*\]\([^)\n]*\)|\*\*[^*\n]+\*\*|__[^_\n]+__|\*[^*\s][^*\n]*?\*|_[^_\s][^_\n]*?_)/;
 
 /** A markdown link, and the label the model wrapped in parentheses when it had no address. */
 const LINK = /^\[([^\]\n]*)\]\(([^)\n]*)\)$/;

@@ -101,6 +101,15 @@ describe("a link is drawn, not printed", () => {
     expect(chunks).toEqual([{ kind: "text", value: "رابط غير موثق" }]);
   });
 
+  it("does not let one bracketed word swallow the brackets beside it", () => {
+    // Read off his leader's chat 2026-10-12: three suggested actions written in brackets, the last
+    // one with empty parentheses after it. A label allowed to contain `]` matched all three as one
+    // link and printed their brackets anyway.
+    const chunks = splitEmphasis("اختار: [تحسين المحتوى] [تحسين السرعة] [تقرير ]()");
+    expect(chunks.map((c) => c.value).join("")).toBe("اختار: [تحسين المحتوى] [تحسين السرعة] تقرير");
+    expect(chunks.some((c) => c.kind === "link")).toBe(false);
+  });
+
   it("leaves brackets that are not a link exactly where they are", () => {
     expect(splitEmphasis("مهيأة وتعمل بنجاح (Configured).")).toEqual([
       { kind: "text", value: "مهيأة وتعمل بنجاح (Configured)." },
