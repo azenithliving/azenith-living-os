@@ -467,6 +467,10 @@ async function insertEliteImages(images: any[], category: string, style: string)
     },
     is_active: true,
     display_order: Math.floor(Math.random() * 1000),
+    // The verdict is asked for anyway, so it goes in the column that ranks by it. Until now the score
+    // lived only inside metadata and `quality_score` stayed 0.00 on every row, which made every
+    // "best picture" order in the store an arbitrary one.
+    quality_score: typeof photo.aiScore === "number" ? photo.aiScore : 0,
   }));
   
   try {
