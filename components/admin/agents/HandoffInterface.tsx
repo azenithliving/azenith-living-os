@@ -89,7 +89,7 @@ export function HandoffInterface() {
                 <span className={`px-2 py-1 rounded text-xs font-semibold ${getAgentColor(handoff.to_agent)}`}>
                   {handoff.to_agent}
                 </span>
-                <span className="text-xs text-gray-500 mr-auto">
+                <span className="text-xs text-gray-700 mr-auto">
                   {new Date(handoff.created_at).toLocaleTimeString('ar-EG')}
                 </span>
               </div>

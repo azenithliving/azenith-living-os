@@ -25,7 +25,7 @@ export default function V2SalesPage() {
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500/30 to-amber-700/20 border border-amber-500/30 flex items-center justify-center">
             <Briefcase className="w-4 h-4 text-amber-300" />
           </div>
-          <span className="font-black text-sm text-white">مدير المبيعات</span>
+          <h1 className="font-black text-sm text-white">مدير المبيعات</h1>
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-400">
             كلّمه هو، وهو يفتح لك دفتر العملاء
           </span>

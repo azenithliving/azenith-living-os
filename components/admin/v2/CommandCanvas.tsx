@@ -142,10 +142,10 @@ export function CommandCanvas() {
     <div className="min-h-[70vh] p-4 pt-16 sm:p-6 sm:pt-8" dir="rtl">
       <header className="mb-5">
         <h1 className="text-lg font-black text-white">{SWARM_NAME}</h1>
-        <p className="mt-0.5 text-[11px] text-white/40">
+        <p className="mt-0.5 text-[11px] text-white/70">
           {arNum(DEPARTMENT_KEYS.length)} أبواب حيّة، كل باب يفتح محادثة كاملة الشاشة مع موظف حقيقي
         </p>
-        <p className="mt-1 text-[10px] leading-relaxed text-white/25">
+        <p className="mt-1 text-[10px] leading-relaxed text-white/70">
           الأرقام هنا من سجل الرسائل نفسه: العدّاد بيتقفل لما تفتح المحادثة فعلاً.
         </p>
       </header>
@@ -154,11 +154,11 @@ export function CommandCanvas() {
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {pulse.map((item) => (
             <div key={item.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] px-3 py-2.5">
-              <div className="text-[10px] leading-tight text-white/40">{item.label}</div>
+              <div className="text-[10px] leading-tight text-white/70">{item.label}</div>
               <div
                 className={`mt-0.5 text-lg font-black ${
                   item.value === null
-                    ? 'text-white/25'
+                    ? 'text-white/70'
                     : item.value > 0
                       ? 'text-amber-300'
                       : 'text-white/70'
@@ -169,14 +169,14 @@ export function CommandCanvas() {
             </div>
           ))}
         </div>
-        <p className="mt-2 text-[10px] leading-relaxed text-white/30">
+        <p className="mt-2 text-[10px] leading-relaxed text-white/70">
           قارئ الورقة المرسومة باليد وعدّاد الزوار اللحظي: بابان لسه ما اتبنيتوش — ما بنطش صفر مكانهم لأن الصفر ما
           بيمتّزش عن رقم حقيقي.
         </p>
       </section>
 
       {waitingForMail && (
-        <p className="mb-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-[11px] leading-relaxed text-white/45" data-inboxes-loading>
+        <p className="mb-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-[11px] leading-relaxed text-white/70" data-inboxes-loading>
           بأقرأ بريد الموظفين ({arNum(landed)} من {arNum(DEPARTMENT_KEYS.length)}) — الأرقام بتظهر مرة واحدة.
         </p>
       )}
@@ -204,14 +204,14 @@ function DepartmentBlock({
   return (
     <section>
       <div className="mb-2.5 flex items-center gap-2">
-        <Icon className="w-3.5 h-3.5 text-white/35" />
-        <h2 className="text-[12px] font-bold text-white/55">{dept.title}</h2>
+        <Icon className="w-3.5 h-3.5 text-white/70" />
+        <h2 className="text-[12px] font-bold text-white/70">{dept.title}</h2>
         <span className="h-px flex-1 bg-white/[0.06]" />
       </div>
 
       {dept.members.length === 0 ? (
         dept.vacancy && (
-          <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.015] px-4 py-3 text-[11px] leading-relaxed text-white/45">
+          <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.015] px-4 py-3 text-[11px] leading-relaxed text-white/70">
             {dept.vacancy}
           </p>
         )
@@ -275,7 +275,7 @@ function EmployeeCard({
               </span>
             )}
           </div>
-          <p className="mt-0.5 truncate text-[10px] text-white/35">
+          <p className="mt-0.5 truncate text-[10px] text-white/70">
             {isLeader ? 'قائد السرب' : SWARM_NAME} · {statusText}
             {status?.taskCount ? ` · ${arNum(status.taskCount)} مهمة` : ''}
           </p>
@@ -283,12 +283,12 @@ function EmployeeCard({
       </div>
 
       {teaser && (
-        <p className="mt-3 line-clamp-2 rounded-xl border border-white/5 bg-black/25 px-3 py-2 text-[11px] leading-relaxed text-white/60">
+        <p className="mt-3 line-clamp-2 rounded-xl border border-white/5 bg-black/25 px-3 py-2 text-[11px] leading-relaxed text-white/70">
           {teaser}
         </p>
       )}
 
-      <span className="mt-2.5 inline-block text-[10px] font-bold text-white/25 transition-colors group-hover:text-amber-400">
+      <span className="mt-2.5 inline-block text-[10px] font-bold text-white/70 transition-colors group-hover:text-amber-400">
         افتح المحادثة كاملة الشاشة
       </span>
     </Link>

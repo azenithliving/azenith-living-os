@@ -45,7 +45,7 @@ export function TaskQueue() {
   
   const getPriorityColor = (p: number) => {
     if (p >= 5) return 'text-red-600 bg-red-100 border-red-300';
-    if (p >= 0) return 'text-yellow-600 bg-yellow-100 border-yellow-300';
+    if (p >= 0) return 'text-yellow-950 bg-yellow-100 border-yellow-300';
     return 'text-green-600 bg-green-100 border-green-300';
   };
   
@@ -94,7 +94,7 @@ export function TaskQueue() {
             <option value="completed">مكتمل</option>
             <option value="failed">فاشل</option>
           </select>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-700">
             ({tasks.length} مهمة)
           </span>
         </div>
@@ -105,10 +105,10 @@ export function TaskQueue() {
         {loading ? (
           <div className="text-center py-8">
             <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2" />
-            <p className="text-gray-500">جاري التحميل...</p>
+            <p className="text-gray-700">جاري التحميل...</p>
           </div>
         ) : tasks.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">لا توجد مهام</p>
+          <p className="text-center text-gray-700 py-8">لا توجد مهام</p>
         ) : (
           tasks.map((task) => (
             <div 
@@ -124,16 +124,16 @@ export function TaskQueue() {
                     <span className={`px-2 py-0.5 rounded text-xs ${getStatusColor(task.status)}`}>
                       {getStatusText(task.status)}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-700">
                       {task.agent_profiles?.name || task.agent_profiles?.agent_key}
                     </span>
                   </div>
-                  <p className="font-medium">{task.title}</p>
+                  <p className="font-medium text-gray-900">{task.title}</p>
                   {task.description && (
                     <p className="text-sm text-gray-600 mt-1 line-clamp-2">{task.description}</p>
                   )}
                 </div>
-                <span className="text-xs text-gray-400 whitespace-nowrap mr-2">
+                <span className="text-xs text-gray-700 whitespace-nowrap mr-2">
                   {new Date(task.created_at).toLocaleTimeString('ar-EG')}
                 </span>
               </div>
@@ -141,7 +141,7 @@ export function TaskQueue() {
               {/* Progress Bar */}
               {task.status === 'running' && (
                 <div className="mt-2">
-                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <div className="flex justify-between text-xs text-gray-700 mb-1">
                     <span>التقدم</span>
                     <span>{task.progress_percent}%</span>
                   </div>

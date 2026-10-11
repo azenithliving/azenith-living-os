@@ -26,7 +26,7 @@ const FRESHNESS_STYLE: Record<FreshnessKey, string> = {
   warm: "border-amber-500/30 bg-amber-500/10 text-amber-300",
   cold: "border-orange-500/30 bg-orange-500/10 text-orange-300",
   lost: "border-red-500/30 bg-red-500/10 text-red-300",
-  unknown: "border-white/10 bg-white/5 text-white/40",
+  unknown: "border-white/10 bg-white/5 text-white/70",
 };
 
 interface Lead {
@@ -412,7 +412,7 @@ export default function CustomersPanel() {
       {leadsError && (
         <div data-leads-error="1" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4">
           <p className="text-sm text-rose-200">{leadsError}</p>
-          <p className="mt-1 text-xs text-white/50">
+          <p className="mt-1 text-xs text-white/70">
             الأعداد دي آخر ما وصل — مش معناه إن مفيش عملاء. المحاولة التانية نفسها بتتعمل كل تلات ثواني.
           </p>
         </div>
@@ -420,14 +420,14 @@ export default function CustomersPanel() {
 
       {taste.length > 0 && (
         <div data-taste-tally="1" className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-white/50">أكثر الطرازات المطلوبة:</span>
+          <span className="text-white/70">أكثر الطرازات المطلوبة:</span>
           {taste.slice(0, 4).map((item) => (
             <span key={item.style} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-white/80">
               {item.style} {arDigits(String(item.count))}
             </span>
           ))}
           {tasteSkipped > 0 && (
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-white/70">
               ({arDigits(String(tasteSkipped))} سطر ما اتحسبش — اسمه مش طراز)
             </span>
           )}
@@ -451,7 +451,7 @@ export default function CustomersPanel() {
                 : "border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.05]"
             }`}
           >
-            <p className="text-sm text-white/60">{item.label}</p>
+            <p className="text-sm text-white/70">{item.label}</p>
             <p className="mt-2 text-2xl font-bold">{loading ? "--" : item.count}</p>
           </button>
         ))}
@@ -469,7 +469,7 @@ export default function CustomersPanel() {
         >
           محتاجين رد دلوقتى · {loading ? "--" : arDigits(waitingCount)}
         </button>
-        <p className="text-[11px] text-white/35">
+        <p className="text-[11px] text-white/70">
           البارد يعني أكثر من يوم من غير رد، والبيضيع يعني أسبوعًا. من غير تاريخ يعني ما عرفتش — مش يعني جديد.
         </p>
       </div>
@@ -492,9 +492,9 @@ export default function CustomersPanel() {
       {/* Leads List */}
       <div className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-white/60">جاري التحميل...</div>
+          <div className="p-8 text-center text-white/70">جاري التحميل...</div>
         ) : filteredLeads.length === 0 ? (
-          <div className="p-8 text-center text-white/60">لا يوجد عملاء في هذا التصنيف</div>
+          <div className="p-8 text-center text-white/70">لا يوجد عملاء في هذا التصنيف</div>
         ) : (
           <div className="divide-y divide-white/10">
             {filteredLeads.map((lead) => (
@@ -528,7 +528,7 @@ export default function CustomersPanel() {
                           </div>
                         )}
                       </div>
-                      <p className="text-sm text-white/50">
+                      <p className="text-sm text-white/70">
                         {lead.ui_state?.typing_preview ? (
                           <span className="text-purple-300 italic">" {lead.ui_state.typing_preview} ... "</span>
                         ) : (
@@ -542,13 +542,14 @@ export default function CustomersPanel() {
                       {lead.tier === "diamond" ? "ماسي" : lead.tier === "gold" ? "ذهبي" : lead.tier === "silver" ? "فضي" : "برونزي"}
                     </span>
                     <FreshnessBadge lead={lead} />
-                    <span className="text-sm text-white/60">{new Date(lead.created_at).toLocaleDateString("ar-EG")}</span>
+                    <span className="text-sm text-white/70">{new Date(lead.created_at).toLocaleDateString("ar-EG")}</span>
                      {!lead.session_id ? null : (
                      <button 
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteLeads([lead.session_id as string]);
                       }}
+                      aria-label="حذف هذا العميل من الدفتر"
                       className="relative z-[9999] p-3 text-red-500/40 hover:text-red-500 transition-colors"
                       style={{ cursor: 'pointer !important', pointerEvents: 'auto' }}
                     >
@@ -563,12 +564,12 @@ export default function CustomersPanel() {
                   <div className="p-4 bg-black/40 border-t border-white/5 space-y-4">
                     <div className="grid md:grid-cols-2 gap-4 text-sm">
                       <div className="space-y-2">
-                        <p className="text-white/40">الميزانية: <span className="text-white font-medium">{lead.budget || "غير محدد"}</span></p>
-                        <p className="text-white/40">الطلب: <span className="text-white font-medium">{lead.roomType || "غير محدد"}</span></p>
+                        <p className="text-white/70">الميزانية: <span className="text-white font-medium">{lead.budget || "غير محدد"}</span></p>
+                        <p className="text-white/70">الطلب: <span className="text-white font-medium">{lead.roomType || "غير محدد"}</span></p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-white/40">المكان: <span className="text-white font-medium">{lead.location || "غير محدد"}</span></p>
-                        <p className="text-white/40">وقت الاتصال: <span className="text-white font-medium">{lead.bestTime || "غير محدد"}</span></p>
+                        <p className="text-white/70">المكان: <span className="text-white font-medium">{lead.location || "غير محدد"}</span></p>
+                        <p className="text-white/70">وقت الاتصال: <span className="text-white font-medium">{lead.bestTime || "غير محدد"}</span></p>
                       </div>
                     </div>
                     {lead.summary && (
@@ -591,7 +592,7 @@ export default function CustomersPanel() {
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-sm mt-3">
                           <div>
-                            <p className="text-white/40 text-xs">معدل الانتباه (Attention)</p>
+                            <p className="text-white/70 text-xs">معدل الانتباه (Attention)</p>
                             <div className="flex items-center gap-2 mt-1">
                               <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
                                 <div 
@@ -603,7 +604,7 @@ export default function CustomersPanel() {
                             </div>
                           </div>
                           <div>
-                            <p className="text-white/40 text-xs">الصفحة الحالية</p>
+                            <p className="text-white/70 text-xs">الصفحة الحالية</p>
                             <p className="text-white/90 text-xs truncate mt-1 bg-black/30 px-2 py-1 rounded border border-white/5" dir="ltr">
                               {lead.telemetry.current_path || "/"}
                             </p>
@@ -613,7 +614,7 @@ export default function CustomersPanel() {
                           const interest = summarizeInterest(lead.telemetry.hovered_elements);
                           return (
                             <div className="mt-3 space-y-2">
-                              <p className="text-white/40 text-xs">نقاط اهتمام الرادار:</p>
+                              <p className="text-white/70 text-xs">نقاط اهتمام الرادار:</p>
                               <div className="flex flex-wrap gap-1">
                                 {interest.all.map((tag: string, idx: number) => (
                                   <span key={idx} className="px-2 py-0.5 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded text-[10px]">
@@ -667,7 +668,7 @@ export default function CustomersPanel() {
                                   })}
                                   {/* Which tier answered — the owner decides what to trust with it. */}
                                   {analysisAnswer && (
-                                    <p className="border-t border-white/10 pt-2 text-[10px] text-white/55" data-analysis-answer>
+                                    <p className="border-t border-white/10 pt-2 text-[10px] text-white/70" data-analysis-answer>
                                       {analysisAnswer}
                                     </p>
                                   )}
@@ -695,7 +696,7 @@ export default function CustomersPanel() {
                         📱 تواصل عبر واتساب
                       </a>
                       ) : (
-                        <p className="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-xs text-white/50">
+                        <p className="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-xs text-white/70">
                           {lead.email ? `مفيش رقم مسجل — البريد: ${lead.email}` : "مفيش وسيلة تواصل مسجلة — وصل من غير ما يسيب رقم"}
                         </p>
                       )}
@@ -715,7 +716,7 @@ export default function CustomersPanel() {
                           💬 {showChatFor === lead.id ? "إخفاء المحادثة" : "المحادثة الأصلية"}
                         </button>
                         ) : (
-                          <p className="px-4 py-1.5 text-xs text-white/40">مفيش محادثة — أول كلام معاه هيبدأ من عندك</p>
+                          <p className="px-4 py-1.5 text-xs text-white/70">مفيش محادثة — أول كلام معاه هيبدأ من عندك</p>
                         )}
                       </div>
                     </div>
@@ -729,7 +730,7 @@ export default function CustomersPanel() {
                           className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-white/90 min-h-[120px] outline-none"
                         />
                         {followUpAnswer && (
-                          <p className="text-[10px] text-white/55" data-followup-answer>{followUpAnswer}</p>
+                          <p className="text-[10px] text-white/70" data-followup-answer>{followUpAnswer}</p>
                         )}
                         <div className="flex gap-2">
                           {phoneForms(lead.phone) ? (
@@ -742,7 +743,7 @@ export default function CustomersPanel() {
                             فتح واتساب
                           </a>
                           ) : (
-                            <p className="flex-1 rounded-lg border border-white/10 px-4 py-2 text-center text-sm text-white/50">
+                            <p className="flex-1 rounded-lg border border-white/10 px-4 py-2 text-center text-sm text-white/70">
                               مفيش رقم يفتح واتساب — انسخ الرسالة وابعتهالها من عندك
                             </p>
                           )}
@@ -784,7 +785,7 @@ export default function CustomersPanel() {
                           </div>
                         ) : (
                           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5">
-                            <p className="text-xs text-white/50">الذكاء الاصطناعي يرد على العميل تلقائيًا.</p>
+                            <p className="text-xs text-white/70">الذكاء الاصطناعي يرد على العميل تلقائيًا.</p>
                             <button
                               onClick={() => setTakeover(lead, true)}
                               className="rounded-lg border border-[#C5A059]/40 bg-[#C5A059]/10 px-4 py-2 text-xs font-bold text-[#C5A059] hover:bg-[#C5A059]/20 transition"
@@ -797,37 +798,37 @@ export default function CustomersPanel() {
                         <div className="rounded-xl border border-[#C5A059]/40 bg-gradient-to-l from-[#C5A059]/15 to-black/30 p-4">
                           <div className="flex items-center justify-between gap-2">
                             <p className="text-xs font-bold text-[#C5A059] uppercase tracking-wide">🪪 الملف الشخصي للمشتري</p>
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lead.score && lead.score > 70 ? "bg-emerald-500/20 text-emerald-300" : lead.score && lead.score > 30 ? "bg-amber-500/20 text-amber-300" : "bg-white/10 text-white/50"}`}>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lead.score && lead.score > 70 ? "bg-emerald-500/20 text-emerald-300" : lead.score && lead.score > 30 ? "bg-amber-500/20 text-amber-300" : "bg-white/10 text-white/70"}`}>
                               نية الشراء: {lead.score ?? "—"}/100
                             </span>
                           </div>
                           <div className="mt-3 grid gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-4">
                             <div>
-                              <p className="text-[10px] text-white/40">الاسم</p>
+                              <p className="text-[10px] text-white/70">الاسم</p>
                               <p className="text-xs font-bold text-white">{ownerVoice(lead.name || "غير معروف")}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] text-white/40">الهاتف</p>
+                              <p className="text-[10px] text-white/70">الهاتف</p>
                               <p className="text-xs text-white/80" dir="ltr">{lead.phone || "—"}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] text-white/40">المشروع</p>
+                              <p className="text-[10px] text-white/70">المشروع</p>
                               <p className="text-xs text-white/80">{lead.roomType || "غير محدد"}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] text-white/40">الميزانية</p>
+                              <p className="text-[10px] text-white/70">الميزانية</p>
                               <p className="text-xs text-white/80">{lead.budget || "غير محدد"}</p>
                             </div>
                           </div>
                           {lead.location && (
                             <div className="mt-2">
-                              <p className="text-[10px] text-white/40">الموقع</p>
+                              <p className="text-[10px] text-white/70">الموقع</p>
                               <p className="text-xs text-white/80">{lead.location}</p>
                             </div>
                           )}
                           {lead.summary && (
                             <div className="mt-2 rounded-lg border border-white/10 bg-black/30 px-3 py-2">
-                              <p className="text-[10px] text-white/40 mb-0.5">خلاصة المحادثة (AI)</p>
+                              <p className="text-[10px] text-white/70 mb-0.5">خلاصة المحادثة (AI)</p>
                               <p className="text-[11px] leading-relaxed text-white/80">{lead.summary}</p>
                             </div>
                           )}
@@ -839,7 +840,7 @@ export default function CustomersPanel() {
                               {lead.messages.map((msg, idx) => (
                                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                   <div className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.role === 'user' ? 'bg-[#C5A059]/20 text-white' : isAdminMessage(msg) ? 'bg-red-500/20 text-red-100 border border-red-500/30' : 'bg-white/10 text-white/90'}`}>
-                                    <span className="block text-xs text-white/40 mb-1">
+                                    <span className="block text-xs text-white/70 mb-1">
                                       {msg.role === 'user' ? lead.name : isAdminMessage(msg) ? 'أنت (الإدارة)' : 'المستشار الذكي'}
                                     </span>
                                     {getDisplayMessage(msg)}
@@ -853,7 +854,7 @@ export default function CustomersPanel() {
                             <div className="flex items-center justify-between gap-2">
                               <div>
                                 <p className="text-xs font-bold text-[#C5A059] uppercase tracking-wide">AI Copilot</p>
-                                <p className="text-[11px] text-white/40">اقتراحات الاستجابة</p>
+                                <p className="text-[11px] text-white/70">اقتراحات الاستجابة</p>
                               </div>
                               <button
                                 onClick={() => loadCopilotSuggestions(lead)}
@@ -865,7 +866,7 @@ export default function CustomersPanel() {
                             </div>
                             <div className="mt-3 space-y-2">
                               {isLoadingCopilot ? (
-                                <div className="text-xs text-white/50">جاري توليد المقترحات...</div>
+                                <div className="text-xs text-white/70">جاري توليد المقترحات...</div>
                               ) : copilotFor === (lead.session_id || lead.id) && copilotSuggestions.length > 0 ? (
                                 copilotSuggestions.map((suggestion, idx) => (
                                   <button
@@ -889,7 +890,7 @@ export default function CustomersPanel() {
                               )}
                             </div>
                             {copilotAnswer && (
-                              <p className="mt-2 border-t border-white/5 pt-2 text-[10px] text-white/45" data-copilot-answer>
+                              <p className="mt-2 border-t border-white/5 pt-2 text-[10px] text-white/70" data-copilot-answer>
                                 {copilotAnswer}
                               </p>
                             )}
@@ -933,7 +934,7 @@ export default function CustomersPanel() {
           <div className="w-full max-w-md space-y-4 rounded-2xl border border-red-500/40 bg-[#141414] p-6">
             <p className="text-sm font-bold text-red-300">تأكيد الحذف النهائي</p>
             {!deleteAsk.ledgers ? (
-              <p className="text-sm text-white/60">جاري حساب السجلات المرتبطة...</p>
+              <p className="text-sm text-white/70">جاري حساب السجلات المرتبطة...</p>
             ) : deleteAsk.ledgers.total === 0 ? (
               <div className="space-y-4">
                 <p className="text-sm text-white/70">مفيش سجلات مطابقة — يمكن تكون اتشالت قبل كده.</p>

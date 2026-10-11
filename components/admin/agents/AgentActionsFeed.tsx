@@ -37,9 +37,9 @@ const STATUS_STYLES: Record<string, { icon: React.ReactNode; dot: string; text: 
     text: 'text-amber-400',
   },
   pending: {
-    icon: <Clock className="w-3.5 h-3.5 text-white/30" />,
+    icon: <Clock className="w-3.5 h-3.5 text-white/70" />,
     dot:  'bg-white/20',
-    text: 'text-white/40',
+    text: 'text-white/70',
   },
 };
 
@@ -126,11 +126,12 @@ export function AgentActionsFeed() {
           <Activity className="w-4 h-4 text-[#C5A059]" />
           سجل الأحداث الحي
         </h2>
-        <div className="flex items-center gap-2 text-[10px] text-white/30">
+        <div className="flex items-center gap-2 text-[10px] text-white/70">
           {lastUpdate && <span>آخر تحديث: {relativeTime(lastUpdate.toISOString())}</span>}
           <button
             onClick={() => fetchFeed()}
-            className="p-1 hover:text-white/60 transition-colors"
+            aria-label="تحديث سجل الأحداث"
+            className="p-1 hover:text-white/70 transition-colors"
           >
             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -160,7 +161,7 @@ export function AgentActionsFeed() {
                 s.color === 'emerald' ? 'text-emerald-400' :
                 s.color === 'amber'   ? 'text-amber-400'   : 'text-rose-400'
               }`}>{s.count}</p>
-              <p className="text-[9px] text-white/30 mt-0.5">{s.label}</p>
+              <p className="text-[9px] text-white/70 mt-0.5">{s.label}</p>
             </button>
           ))}
         </div>
@@ -174,8 +175,8 @@ export function AgentActionsFeed() {
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center py-10 text-center">
           <Activity className="w-10 h-10 text-white/10 mb-3" />
-          <p className="text-white/40 text-sm font-medium">لا توجد أحداث بعد</p>
-          <p className="text-white/20 text-xs mt-1">
+          <p className="text-white/70 text-sm font-medium">لا توجد أحداث بعد</p>
+          <p className="text-white/70 text-xs mt-1">
             ستظهر هنا كل إجراءات الوكلاء لحظة بلحظة
           </p>
         </div>
@@ -199,7 +200,7 @@ export function AgentActionsFeed() {
                     <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border uppercase ${agentCls}`}>
                       {senderDisplayName(item.agent)}
                     </span>
-                    <span className="text-[10px] text-white/30 font-mono">{item.type}</span>
+                    <span className="text-[10px] text-white/70 font-mono">{item.type}</span>
                   </div>
                   <p className="text-xs text-white/80 mt-0.5 truncate">{item.title}</p>
                   <div className="flex items-center gap-3 mt-1">
@@ -208,13 +209,13 @@ export function AgentActionsFeed() {
                       <span>{STATUS_LABELS[item.status]}</span>
                     </div>
                     {item.duration_ms && (
-                      <span className="text-[10px] text-white/20">
+                      <span className="text-[10px] text-white/70">
                         {item.duration_ms < 1000
                           ? `${item.duration_ms}ms`
                           : `${(item.duration_ms / 1000).toFixed(1)}s`}
                       </span>
                     )}
-                    <span className="text-[10px] text-white/20 mr-auto">
+                    <span className="text-[10px] text-white/70 mr-auto">
                       {relativeTime(item.created_at)}
                     </span>
                   </div>

@@ -525,7 +525,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
         >
           {step === 1 && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-white">{L.scopeTitle}</h3>
+              <h2 className="text-xl font-semibold text-white">{L.scopeTitle}</h2>
               <p className="text-sm text-white/60">{L.scopeLine}</p>
               <div className="grid gap-3 max-h-[400px] overflow-y-auto pr-2">
                 {ALL_FURNITURE_SCOPES.map((scope) => (
@@ -551,7 +551,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
 
           {step === 2 && formData.scope && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-white">{L.budgetTitle}</h3>
+              <h2 className="text-xl font-semibold text-white">{L.budgetTitle}</h2>
               <p className="text-sm text-white/60">{L.budgetLine(ar ? roomNameAr(formData.scope) || formData.scope : formData.scope)}</p>
               <div className="grid gap-3">
                 {BUDGET_RANGES[formData.scope].map((budget) => (
@@ -575,7 +575,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
           {step === 3 && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-white">{L.timelineTitle}</h3>
+                <h2 className="text-xl font-semibold text-white">{L.timelineTitle}</h2>
                 <p className="text-sm text-white/60">{L.timelineLine}</p>
                 <div className="mt-4 grid gap-3">
                   {TIMELINE_OPTIONS.map((option) => (
@@ -596,7 +596,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-white">{L.blueprintTitle}</h3>
+                <h2 className="text-lg font-semibold text-white">{L.blueprintTitle}</h2>
                 <p className="text-sm text-white/60">{L.blueprintLine}</p>
                 <div className="mt-3 flex gap-3">
                   <button
@@ -627,7 +627,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
           {step === 4 && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-white">{L.styleTitle}</h3>
+                <h2 className="text-xl font-semibold text-white">{L.styleTitle}</h2>
                 <p className="text-sm text-white/60">{L.styleLine}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {TASTE_CHIPS.map((taste) => (
@@ -662,7 +662,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
               </div>
 
               <div>
-                <h4 className="text-lg font-semibold text-white">{L.areaTitle}</h4>
+                <h3 className="text-lg font-semibold text-white">{L.areaTitle}</h3>
                 <p className="text-sm text-white/60">{L.areaLine}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {AREA_CHIPS.map((area) => (
@@ -688,7 +688,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
 
           {step === 5 && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-white">{L.requestsTitle}</h3>
+              <h2 className="text-xl font-semibold text-white">{L.requestsTitle}</h2>
               <p className="text-sm text-white/60">
                 {L.requestsLine}
               </p>
@@ -705,7 +705,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
 
           {step === 6 && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-white">{L.contactTitle}</h3>
+              <h2 className="text-xl font-semibold text-white">{L.contactTitle}</h2>
               <p className="text-sm text-white/60">{L.contactLine}</p>
 
               <div className="space-y-4">
@@ -745,7 +745,7 @@ export function EliteIntelligenceForm({ onSubmit, viewedImages = [], className =
 
               {/* Summary Preview */}
               <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                <h4 className="mb-3 text-sm font-semibold text-white/80">{L.summaryTitle}</h4>
+                <h3 className="mb-3 text-sm font-semibold text-white/80">{L.summaryTitle}</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-white/50">{L.summaryScope}</span>

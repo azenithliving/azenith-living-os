@@ -65,11 +65,11 @@ function AgentStatusBar({ onStatusLoad }: { onStatusLoad?: (s: Record<string, Ag
     switch (key) {
       case 'ops-lead': return { ring: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-400' };
       case 'vanguard': return { ring: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-400' };
-      case 'analyst':  return { ring: 'border-blue-500/20', bg: 'bg-blue-500/10', text: 'text-blue-400' };
-      case 'coder':    return { ring: 'border-cyan-500/20', bg: 'bg-cyan-500/10', text: 'text-cyan-400' };
-      case 'ops':      return { ring: 'border-yellow-500/20', bg: 'bg-yellow-500/10', text: 'text-yellow-400' };
-      case 'security': return { ring: 'border-red-500/20', bg: 'bg-red-500/10', text: 'text-red-400' };
-      case 'learner':  return { ring: 'border-indigo-500/20', bg: 'bg-indigo-500/10', text: 'text-indigo-400' };
+      case 'analyst':  return { ring: 'border-blue-500/20', bg: 'bg-blue-500/10', text: 'text-blue-300' };
+      case 'coder':    return { ring: 'border-cyan-500/20', bg: 'bg-cyan-500/10', text: 'text-cyan-300' };
+      case 'ops':      return { ring: 'border-yellow-500/20', bg: 'bg-yellow-500/10', text: 'text-yellow-300' };
+      case 'security': return { ring: 'border-red-500/20', bg: 'bg-red-500/10', text: 'text-red-300' };
+      case 'learner':  return { ring: 'border-indigo-500/20', bg: 'bg-indigo-500/10', text: 'text-indigo-300' };
       default:         return { ring: 'border-white/10', bg: 'bg-white/5', text: 'text-white/60' };
     }
   };

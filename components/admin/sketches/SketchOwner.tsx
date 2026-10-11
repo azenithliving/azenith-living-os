@@ -72,7 +72,7 @@ export default function SketchOwner({ sketchId, customerKey, roll, onLinked }: P
         />
         {roll === null && <p className="mt-1.5 text-[10px] text-amber-300">الدفتر ما ردّش — مش معناه إن مفيش عملاء.</p>}
         {roll !== null && query.trim() && matches.length === 0 && (
-          <p className="mt-1.5 text-[10px] text-white/45">مفيش حد في الدفتر بهالحرف. لو ده عميل جديد، سجله من باب العملاء الأول.</p>
+          <p className="mt-1.5 text-[10px] text-white/70">مفيش حد في الدفتر بهالحرف. لو ده عميل جديد، سجله من باب العملاء الأول.</p>
         )}
         <ul className="mt-1.5 space-y-1">
           {matches.map(({ line: candidate, why }) => (
@@ -83,18 +83,18 @@ export default function SketchOwner({ sketchId, customerKey, roll, onLinked }: P
                 className="flex w-full items-center justify-between gap-2 rounded-lg border border-white/5 bg-white/[0.03] px-2.5 py-1.5 text-right text-[12px] text-white disabled:opacity-50"
               >
                 <span className="truncate">{rollLineLabel(candidate)}</span>
-                <span className="shrink-0 text-[9px] text-white/35">{why}</span>
+                <span className="shrink-0 text-[9px] text-white/70">{why}</span>
               </button>
             </li>
           ))}
         </ul>
         {problem && <p className="mt-1 text-[10px] text-rose-300">{problem}</p>}
         <div className="mt-1.5 flex items-center gap-2">
-          <button onClick={() => setPicking(false)} className="text-[10px] text-white/40">
+          <button onClick={() => setPicking(false)} className="text-[10px] text-white/70">
             إلغاء
           </button>
           {customerKey && (
-            <button onClick={() => write(null)} disabled={busy} className="text-[10px] text-rose-300/80">
+            <button onClick={() => write(null)} disabled={busy} className="text-[10px] text-rose-200">
               شيل الاسم
             </button>
           )}
@@ -110,13 +110,13 @@ export default function SketchOwner({ sketchId, customerKey, roll, onLinked }: P
           {line ? rollLineLabel(line) : link.kind === 'phone' ? `مش في الدفتر · ${arDigits(link.value)}` : link.value}
         </span>
       ) : (
-        <span className="text-white/35" data-sketch-owner={sketchId}>
+        <span className="text-white/70" data-sketch-owner={sketchId}>
           {UNLINKED_LABEL}
         </span>
       )}
       <button
         onClick={() => setPicking(true)}
-        className="rounded-lg border border-white/10 px-2 py-0.5 text-[10px] font-bold text-white/60"
+        className="rounded-lg border border-white/10 px-2 py-0.5 text-[10px] font-bold text-white/70"
         data-sketch-link={sketchId}
       >
         {link ? 'غير' : 'مين صاحب الورقة؟'}

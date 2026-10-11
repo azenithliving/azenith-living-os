@@ -145,11 +145,11 @@ export default function V2KeysDeskPage() {
           <KeyRound className="h-5 w-5 text-amber-400" />
           مكتب المفاتيح
         </h1>
-        <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+        <p className="mt-1 text-[11px] leading-relaxed text-white/70">
           كل نموذج مجاني المتجر يقدر يشغل عليه، وعدادان مش واحد: اللي بيرد على التحية، واللي كتب رد فعليًا. الأرقام من ردّ المزود نفسه، مش من ورقة.
         </p>
         {totals && (
-          <p className="mt-2 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/60" data-key-totals>
+          <p className="mt-2 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/70" data-key-totals>
             {arNum(totals.keys)} مفتاح عندنا · كتب فعلًا {arNum(totals.writes)} · بيرد على التحية {arNum(totals.alive)} · حسابه بلا رصيد {arNum(totals.unfunded)} · مرفوض {arNum(totals.refused)}
             {totals.quarantined ? ` · معزول ${arNum(totals.quarantined)}` : ''}
             {` · ${arNum(totals.withLiveKey)} من ${arNum(rows?.length ?? 0)} مزودات ليها رد حي · ${arNum(totals.needingKey)} محتاج مفتاح`}
@@ -163,7 +163,7 @@ export default function V2KeysDeskPage() {
           line that comes back is the provider's answer, not a «saved» that hides it. */}
       <section className="mb-4 rounded-2xl border border-amber-500/20 bg-amber-500/[0.04] p-3" data-key-add>
         <h2 className="text-[12px] font-black text-amber-200">أضف مفتاح جبتّه دلوقتي</h2>
-        <p className="mt-1 text-[10px] leading-relaxed text-white/45">
+        <p className="mt-1 text-[10px] leading-relaxed text-white/70">
           المتجر بيسأل المفتاح سؤالين: المزود بيعرفك؟ وبتكتب رد فعليًا؟ التاني هو اللي بيحدّد لو هيتستخدم.
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -202,7 +202,7 @@ export default function V2KeysDeskPage() {
         </div>
       </section>
 
-      {!rows && !problem && <p className="text-[12px] text-white/45">بجيب قايمة المزودات…</p>}
+      {!rows && !problem && <p className="text-[12px] text-white/70">بجيب قايمة المزودات…</p>}
 
       <ul className="space-y-3">
         {(rows ?? []).map((row) => {
@@ -214,7 +214,7 @@ export default function V2KeysDeskPage() {
               : row.quota > 0
                 ? 'bg-amber-500/20 text-amber-300'
                 : row.rows === 0
-                  ? 'bg-white/[0.06] text-white/45'
+                  ? 'bg-white/[0.06] text-white/70'
                   : 'bg-rose-600/20 text-rose-300';
           return (
             <li key={row.id} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4" data-key-card={row.id}>
@@ -223,14 +223,14 @@ export default function V2KeysDeskPage() {
               <div className="flex flex-col items-start gap-1.5 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <h2 className="truncate text-[13px] font-black text-white">{row.label}</h2>
-                  <p className="mt-0.5 text-[11px] leading-relaxed text-white/45">{row.good}</p>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-white/70">{row.good}</p>
                 </div>
                 <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${tone}`} data-key-verdict={row.id}>
                   {row.verdict}
                 </span>
               </div>
 
-              <p className="mt-2 text-[11px] text-white/55">
+              <p className="mt-2 text-[11px] text-white/70">
                 {arNum(row.rows)} مفتاح · كتب {arNum(row.writes)}
                 {row.alive ? ` · تحية بس ${arNum(row.alive)}` : ''}
                 {row.unfunded ? ` · بلا رصيد ${arNum(row.unfunded)}` : ''}
@@ -264,7 +264,7 @@ export default function V2KeysDeskPage() {
                 </a>
               </div>
 
-              <p className="mt-2 text-[10px] leading-relaxed text-white/40">{row.steps}</p>
+              <p className="mt-2 text-[10px] leading-relaxed text-white/70">{row.steps}</p>
             </li>
           );
         })}

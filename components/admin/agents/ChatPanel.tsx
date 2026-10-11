@@ -155,7 +155,7 @@ function ZoomOverlay({ src, label, onClose }: { src: string; label: string; onCl
         <img src={src} alt={label} style={{ width: `${zoom}%` }} className="mx-auto rounded-xl" />
       </div>
       <div className="flex items-center gap-3 border-t border-white/10 px-4 py-3">
-        <span className="shrink-0 text-[10px] text-white/40">تكبير</span>
+        <span className="shrink-0 text-[10px] text-white/70">تكبير</span>
         <input
           data-zoom-range=""
           type="range"
@@ -234,9 +234,9 @@ function InlineDraftPreview({ previewUrl, onApprove, onReject, onBetter, onZoom 
       <div className="p-2 flex gap-1.5">
         <button onClick={onApprove} className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">✅ وافق — نشر حقيقي</button>
         <button onClick={onBetter} className="flex-1 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-xs font-bold">✏️ عايز أحسن</button>
-        <button onClick={onReject} className="flex-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 text-xs">❌ ارفض</button>
+        <button onClick={onReject} className="flex-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 text-xs">❌ ارفض</button>
       </div>
-      {data && <div className="px-3 pb-2 text-[10px] text-white/30 text-center">مسودة {data.id?.slice(0,8)} · {data.target_path} · v{data.version} — {data.status}</div>}
+      {data && <div className="px-3 pb-2 text-[10px] text-white/70 text-center">مسودة {data.id?.slice(0,8)} · {data.target_path} · v{data.version} — {data.status}</div>}
     </div>
   );
 }
@@ -295,7 +295,7 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
       elements.push(
         <div key={`tbl-${elements.length}`} className="my-2 overflow-x-auto rounded-lg border border-white/10">
           <table className="w-full text-[11px]">
-            <thead><tr className="bg-white/5">{header.map((c,i) => <th key={i} className="p-1.5 text-right font-bold text-white/60 whitespace-nowrap">{c.trim()}</th>)}</tr></thead>
+            <thead><tr className="bg-white/5">{header.map((c,i) => <th key={i} className="p-1.5 text-right font-bold text-white/70 whitespace-nowrap">{c.trim()}</th>)}</tr></thead>
             <tbody>{body.map((row, ri) => <tr key={ri} className="border-t border-white/5">{row.map((c, ci) => <td key={ci} className="p-1.5 text-white/80 whitespace-nowrap">{c.trim().startsWith('/') || c.trim().startsWith('http') ? <a href={c.trim()} target="_blank" className="text-sky-300 hover:underline" dir="ltr">{c.trim()}</a> : c.trim()}</td>)}</tr>)}</tbody>
           </table>
         </div>
@@ -1025,7 +1025,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       <div data-chat-header="" className={`p-4 border-b ${colors.border} flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:gap-3 sm:items-center justify-between ${colors.bg}`}>
         <div className="flex items-center gap-3 min-w-0 flex-1">
           {fullScreen && (
-            <Link href="/admin/v2/agents" title="رجوع لمركز القيادة" className="w-9 h-9 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white text-lg">→</Link>
+            <Link href="/admin/v2/agents" title="رجوع لمركز القيادة" className="w-9 h-9 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-white text-lg">→</Link>
           )}
           <div className={`shrink-0 w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-white font-bold shadow-lg text-lg`}>
             {meta.icon}
@@ -1040,7 +1040,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
                 متصل
               </span>
             </div>
-            <p className="text-[11px] text-white/40 truncate">
+            <p className="text-[11px] text-white/70 truncate">
               {meta.role}
             </p>
           </div>
@@ -1049,16 +1049,16 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           <button
             onClick={openPalette}
             title="قائمة الأوامر (اضغط كترل وك)"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-[11px] font-semibold transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white text-[11px] font-semibold transition-colors"
           >
             <Command className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">أوامر</span>
-            <span className="hidden text-[9px] font-mono text-white/30 sm:inline" dir="ltr">Ctrl K</span>
+            <span className="hidden text-[9px] font-mono text-white/70 sm:inline" dir="ltr">Ctrl K</span>
           </button>
           <button
             onClick={() => { setSelfOpen(true); loadSelf(true); }}
             title="اسأل عن نفسك: القدرات والحدود والعدادات"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-[11px] font-semibold transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white text-[11px] font-semibold transition-colors"
           >
             <Fingerprint className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">نفسك</span>
@@ -1066,7 +1066,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           <button
             onClick={() => setShowRoles(!showRoles)}
             title="أدوار وقدرات الوكيل"
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${showRoles ? 'bg-white/10 border-white/20 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'}`}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${showRoles ? 'bg-white/10 border-white/20 text-white' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'}`}
           >
             <Layers className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">أدوار</span>
@@ -1079,7 +1079,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               className={`relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${
                 showDecisions
                   ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
-                  : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
+                  : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
               <ShieldAlert className="w-3.5 h-3.5" />
@@ -1099,7 +1099,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${
                 showActions
                   ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
-                  : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
+                  : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
               <Wrench className="w-3.5 h-3.5" />
@@ -1125,9 +1125,9 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
 
       {showRoles && (
         <div className="px-4 py-3 bg-black/20 border-b border-white/5 animate-in fade-in">
-          <div className="text-[11px] font-bold text-white/60 mb-2 flex items-center justify-between">
+          <div className="text-[11px] font-bold text-white/70 mb-2 flex items-center justify-between">
             <span>قدرات {meta.name} — اضغط لتنفيذ</span>
-            <button onClick={() => setShowRoles(false)} className="text-white/30 hover:text-white">✕</button>
+            <button onClick={() => setShowRoles(false)} className="text-white/70 hover:text-white">✕</button>
           </div>
           <div className="grid grid-cols-2 gap-1.5">
             {missions.length > 0 ? (
@@ -1137,10 +1137,10 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
                 </button>
               ))
             ) : (
-              <span className="text-[11px] text-white/30">لا أدوار محددة</span>
+              <span className="text-[11px] text-white/70">لا أدوار محددة</span>
             )}
           </div>
-          <div className="text-[10px] text-white/30 mt-2">تلميح: اكتب بلهجتك العادية — «الجزء اللي فوق باهت» — أفهم "الهيرو"</div>
+          <div className="text-[10px] text-white/70 mt-2">تلميح: اكتب بلهجتك العادية — «الجزء اللي فوق باهت» — أفهم "الهيرو"</div>
         </div>
       )}
 
@@ -1157,15 +1157,15 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
 
       {/* Quick Action Chips Bar */}
       <div className="px-4 py-2 bg-white/[0.01] border-b border-white/5 flex items-center gap-2 overflow-x-auto scrollbar-none">
-        <span className="text-[10px] text-white/30 whitespace-nowrap flex items-center gap-1 font-bold">
-          <Terminal className="w-3 h-3 text-white/40" /> مهام فورية:
+        <span className="text-[10px] text-white/70 whitespace-nowrap flex items-center gap-1 font-bold">
+          <Terminal className="w-3 h-3 text-white/70" /> مهام فورية:
         </span>
         {missions.map((mission, idx) => (
           <button
             key={idx}
             onClick={() => sendMessage(mission)}
             disabled={isTyping}
-            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[11px] font-medium whitespace-nowrap transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40"
+            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white text-[11px] font-medium whitespace-nowrap transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40"
           >
             <span>⚡</span>
             <span>{mission}</span>
@@ -1189,8 +1189,8 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
         ) : messages.length === 0 ? (
           <div className="text-center py-12 space-y-3">
             <Bot className={`w-12 h-12 ${colors.text} mx-auto opacity-30`} />
-            <p className="text-white/40 text-sm font-bold">ابدأ محادثة تشغيلية مع {agentName || agentKey}</p>
-            <p className="text-white/25 text-xs max-w-sm mx-auto">
+            <p className="text-white/70 text-sm font-bold">ابدأ محادثة تشغيلية مع {agentName || agentKey}</p>
+            <p className="text-white/70 text-xs max-w-sm mx-auto">
               اكتب بلهجتك العادية: فحص الصفحات، صحة المحتوى، سرعة الموقع، ذاكرة الوكلاء، والقرارات اللي مستنية كلمتك.
             </p>
             <div className="flex flex-wrap justify-center gap-2 pt-2">
@@ -1312,7 +1312,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             onClick={() => fileInputRef.current?.click()}
             disabled={isTyping}
             title="إرسال صورة (تحليل رؤية حقيقي)"
-            className="px-3 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/60 hover:text-white disabled:opacity-30 flex items-center justify-center"
+            className="px-3 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/70 hover:text-white disabled:opacity-30 flex items-center justify-center"
           >
             📷
           </button>
@@ -1320,7 +1320,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             onClick={toggleMic}
             disabled={isTyping || isDictating}
             title={isListening ? 'إيقاف الاستماع' : 'تكلّم بالعامية (ارفع الميك بعد الجملة)'}
-            className={`px-3 py-2.5 border rounded-xl flex items-center justify-center disabled:opacity-30 ${isListening ? 'bg-rose-600/30 border-rose-500/50 text-rose-200 animate-pulse' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'}`}
+            className={`px-3 py-2.5 border rounded-xl flex items-center justify-center disabled:opacity-30 ${isListening ? 'bg-rose-600/30 border-rose-500/50 text-rose-200 animate-pulse' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/70 hover:text-white'}`}
           >
             🎙️
           </button>
@@ -1329,7 +1329,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             disabled={isTyping}
             title="إملاء مستمر: اتكلم براحتك، والرسالة بتتبان بعد سكوتة قصيرة"
             data-dictation={isDictating ? 'on' : 'off'}
-            className={`px-3 py-2.5 border rounded-xl flex items-center gap-1 text-[11px] font-bold disabled:opacity-30 ${isDictating ? 'bg-emerald-600/30 border-emerald-500/50 text-emerald-200' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'}`}
+            className={`px-3 py-2.5 border rounded-xl flex items-center gap-1 text-[11px] font-bold disabled:opacity-30 ${isDictating ? 'bg-emerald-600/30 border-emerald-500/50 text-emerald-200' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/70 hover:text-white'}`}
           >
             {isDictating ? <MicOff className="w-3.5 h-3.5" /> : <span>🎙</span>}
             {isDictating ? 'إيقاف' : 'مستمر'}
@@ -1342,7 +1342,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             className={`px-3 py-2.5 border rounded-xl flex items-center gap-1 text-[11px] font-bold ${
               brief === 'speaking'
                 ? 'bg-emerald-600/30 border-emerald-500/50 text-emerald-200'
-                : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'
+                : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/70 hover:text-white'
             }`}
           >
             <span>🗣</span>
@@ -1357,7 +1357,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             className={`px-3 py-2.5 border rounded-xl text-[11px] font-bold ${
               showVoices
                 ? 'bg-amber-500/25 border-amber-500/40 text-amber-200'
-                : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'
+                : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/70 hover:text-white'
             }`}
           >
             صوت
@@ -1365,7 +1365,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           <button
             onClick={() => setTtsOn(v => !v)}
             title={ttsOn ? 'إيقاف نطق الردود' : 'انطق الردود بالعربي'}
-            className={`px-3 py-2.5 border rounded-xl flex items-center justify-center ${ttsOn ? 'bg-amber-500/25 border-amber-500/40 text-amber-200' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'}`}
+            className={`px-3 py-2.5 border rounded-xl flex items-center justify-center ${ttsOn ? 'bg-amber-500/25 border-amber-500/40 text-amber-200' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/70 hover:text-white'}`}
           >
             {ttsOn ? '🔊' : '🔇'}
           </button>
@@ -1400,6 +1400,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           <button
             onClick={() => sendMessage()}
             disabled={isTyping || !input.trim()}
+            aria-label={isTyping ? "الموظف بيكتب دلوقتي" : "إرسال الرسالة"}
             className={`px-4 py-2.5 ${colors.accent} text-white rounded-xl disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md font-bold flex items-center justify-center cursor-pointer`}
           >
             {isTyping ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4 rtl:rotate-180" />}
@@ -1420,12 +1421,12 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               }`}
             >
               <span>{SERVER_VOICE_LABEL}</span>
-              <span className="shrink-0 text-[10px] text-white/40">
+              <span className="shrink-0 text-[10px] text-white/70">
                 {voiceChoice === SERVER_VOICE ? 'المختار' : 'جرّب'}
               </span>
             </button>
             {arabicVoices(deviceVoices).length === 0 ? (
-              <p className="text-[11px] leading-relaxed text-white/60">
+              <p className="text-[11px] leading-relaxed text-white/70">
                 المتصفح ده ما بيديش أي صوت عربي — ده سبب إن «هودي» على الكمبيوتر وحشة، وسبب إن موبايلك
                 ما نطقش. صوت المتجر فوق ده هو الحل، وشغّال على أي جهاز.
               </p>
@@ -1444,13 +1445,13 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
                   }`}
                 >
                   <span className="truncate">{voice.name}</span>
-                  <span className="shrink-0 text-[10px] text-white/40">
+                  <span className="shrink-0 text-[10px] text-white/70">
                     {voiceChoice === voice.name ? 'المختار' : 'جرّب'}
                   </span>
                 </button>
               ))
             )}
-            <p className="text-[10px] leading-relaxed text-white/35">
+            <p className="text-[10px] leading-relaxed text-white/70">
               الاختيار بيتحفظ على الجهاز ده وحده — موبايلك غير كمبيوترك.
             </p>
           </div>
@@ -1461,7 +1462,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             {voiceNote}
           </div>
         ) : null}
-        <div className="text-[10px] text-white/20 mt-1.5 text-center">تلميح: الصق صورة بمفتاح اللصق أو اسحبها هنا — أفهمها وأحدد موقعها تلقائياً</div>
+        <div className="text-[10px] text-white/70 mt-1.5 text-center">تلميح: الصق صورة بمفتاح اللصق أو اسحبها هنا — أفهمها وأحدد موقعها تلقائياً</div>
       </div>
 
       {/* عِدّة الإجراءات — the tools that really run, one press from the cockpit. They
@@ -1489,7 +1490,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               <button
                 onClick={() => setShowActions(false)}
                 title="إغلاق"
-                className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-white/60 hover:text-white"
+                className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-white/70 hover:text-white"
               >
                 ✕
               </button>
@@ -1539,7 +1540,7 @@ function MessageBubble({
   if (isSystem) {
     return (
       <div className="text-center">
-        <span className="text-xs text-white/40 bg-white/5 border border-white/5 px-3 py-1 rounded-full">
+        <span className="text-xs text-white/70 bg-white/5 border border-white/5 px-3 py-1 rounded-full">
           {message.content}
         </span>
       </div>
@@ -1626,12 +1627,12 @@ function MessageBubble({
             {(message as any).issues?.length > 0 || (message.metadata as any)?.issues?.length > 0 ? (
               <div className="mt-3 rounded-xl border border-white/10 overflow-hidden">
                 <table className="w-full text-[11px]">
-                  <thead><tr className="bg-white/5 text-white/40"><th className="p-1.5 text-right">المشكلة</th><th className="p-1.5">الهدف</th><th className="p-1.5">الرابط</th></tr></thead>
+                  <thead><tr className="bg-white/5 text-white/70"><th className="p-1.5 text-right">المشكلة</th><th className="p-1.5">الهدف</th><th className="p-1.5">الرابط</th></tr></thead>
                   <tbody>
                     {([...((message as any).issues || []), ...((message.metadata as any)?.issues || [])] as any[]).slice(0,5).map((iss: any, i: number) => (
                       <tr key={i} className="border-t border-white/5">
                         <td className="p-1.5 text-white/80">{iss.detail || iss.kind}</td>
-                        <td className="p-1.5 text-white/60">{iss.target}</td>
+                        <td className="p-1.5 text-white/70">{iss.target}</td>
                         <td className="p-1.5"><a href={iss.path} target="_blank" className="text-sky-300 hover:underline" dir="ltr">{iss.path}</a></td>
                       </tr>
                     ))}
@@ -1655,7 +1656,7 @@ function MessageBubble({
                 className={`p-1 rounded-lg transition-all cursor-pointer ${
                   message.feedback === 'positive'
                     ? 'text-emerald-400 bg-emerald-500/20'
-                    : 'text-white/20 hover:text-emerald-400 hover:bg-emerald-500/10'
+                    : 'text-white/70 hover:text-emerald-400 hover:bg-emerald-500/10'
                 }`}
               >
                 <ThumbsUp className="w-3 h-3" />
@@ -1666,19 +1667,19 @@ function MessageBubble({
                 className={`p-1 rounded-lg transition-all cursor-pointer ${
                   message.feedback === 'negative'
                     ? 'text-rose-400 bg-rose-500/20'
-                    : 'text-white/20 hover:text-rose-400 hover:bg-rose-500/10'
+                    : 'text-white/70 hover:text-rose-400 hover:bg-rose-500/10'
                 }`}
               >
                 <ThumbsDown className="w-3 h-3" />
               </button>
-              <span className="text-[9px] text-white/30 mr-1 font-mono">
+              <span className="text-[9px] text-white/70 mr-1 font-mono">
                 {new Date(message.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
           )}
 
           {isUser && (
-            <p className="text-[9px] text-white/30 text-left px-1 font-mono">
+            <p className="text-[9px] text-white/70 text-left px-1 font-mono">
               {new Date(message.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
             </p>
           )}
@@ -1722,7 +1723,7 @@ function StructuredToolCard({ toolName, toolData, desks }: { toolName: string; t
         {toolData && (
           <button
             onClick={() => setShowJson(!showJson)}
-            className="text-[10px] text-white/40 hover:text-white/70 flex items-center gap-1 cursor-pointer font-mono"
+            className="text-[10px] text-white/70 hover:text-white flex items-center gap-1 cursor-pointer font-mono"
           >
             {showJson ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             {showJson ? 'إخفاء البيانات' : 'فحص سجل قاعدة البيانات'}
@@ -1735,7 +1736,7 @@ function StructuredToolCard({ toolName, toolData, desks }: { toolName: string; t
         <div className="max-h-48 overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-2 text-xs">
           <table className="w-full text-right text-[11px]">
             <thead>
-              <tr className="border-b border-white/10 text-white/40">
+              <tr className="border-b border-white/10 text-white/70">
                 {Object.keys(tableRows[0]).slice(0, 4).map((k) => (
                   <th key={k} className="p-1 font-medium">{k}</th>
                 ))}
@@ -1754,7 +1755,7 @@ function StructuredToolCard({ toolName, toolData, desks }: { toolName: string; t
             </tbody>
           </table>
           {tableRows.length > 5 && (
-            <p className="text-[10px] text-white/30 text-center mt-1">
+            <p className="text-[10px] text-white/70 text-center mt-1">
               +{tableRows.length - 5} سجلات إضافية في قاعدة البيانات
             </p>
           )}
@@ -1770,7 +1771,7 @@ function StructuredToolCard({ toolName, toolData, desks }: { toolName: string; t
             if (!label) return null;
             return (
               <div key={key} className="p-2 rounded-xl bg-black/40 border border-white/5 flex flex-col">
-                <span className="text-[10px] text-white/40 truncate">{label}</span>
+                <span className="text-[10px] text-white/70 truncate">{label}</span>
                 <span className="text-xs font-bold text-white">
                   {typeof val === 'number' ? arNum(val) : String(val)}
                 </span>

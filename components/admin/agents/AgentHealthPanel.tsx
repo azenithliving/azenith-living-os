@@ -30,7 +30,7 @@ interface SystemMetrics {
 const STATUS_CONFIG: Record<string, { color: string; bg: string; dot: string; label: string }> = {
   online:  { color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', dot: 'bg-emerald-500',            label: 'متاح'     },
   busy:    { color: 'text-amber-400',   bg: 'bg-amber-500/10 border-amber-500/20',     dot: 'bg-amber-500 animate-pulse', label: 'مشغول'    },
-  offline: { color: 'text-white/30',    bg: 'bg-white/[0.03] border-white/5',          dot: 'bg-white/20',               label: 'غير متاح' },
+  offline: { color: 'text-white/70',    bg: 'bg-white/[0.03] border-white/5',          dot: 'bg-white/20',               label: 'غير متاح' },
 };
 
 function HealthBar({ value, color }: { value: number; color: string }) {
@@ -42,7 +42,7 @@ function HealthBar({ value, color }: { value: number; color: string }) {
           style={{ width: `${Math.min(value, 100)}%` }}
         />
       </div>
-      <span className="text-[10px] text-white/40 w-8 text-right">{value}%</span>
+      <span className="text-[10px] text-white/70 w-8 text-right">{value}%</span>
     </div>
   );
 }
@@ -110,7 +110,7 @@ export function AgentHealthPanel() {
     healthy: { icon: <CheckCircle className="w-4 h-4 text-emerald-400" />, text: 'النظام يعمل بكفاءة', color: 'text-emerald-400' },
     warning: { icon: <AlertTriangle className="w-4 h-4 text-amber-400" />,   text: 'يحتاج مراجعة',       color: 'text-amber-400'   },
     critical:{ icon: <AlertTriangle className="w-4 h-4 text-rose-400" />,    text: 'يحتاج تدخل فوري',   color: 'text-rose-400'    },
-    unknown: { icon: <Loader2 className="w-4 h-4 text-white/30 animate-spin" />, text: 'جاري التحقق…', color: 'text-white/30' },
+    unknown: { icon: <Loader2 className="w-4 h-4 text-white/70 animate-spin" />, text: 'جاري التحقق…', color: 'text-white/70' },
   };
 
   return (
@@ -123,11 +123,11 @@ export function AgentHealthPanel() {
         </h2>
         <div className="flex items-center gap-2">
           {lastUpdate && (
-            <span className="text-[10px] text-white/20">
+            <span className="text-[10px] text-white/70">
               {new Date(lastUpdate).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </span>
           )}
-          <button onClick={() => fetchHealth()} className="p-1 text-white/30 hover:text-white/60 transition-colors">
+          <button onClick={() => fetchHealth()} aria-label="إعادة فحص صحة النظام" className="p-1 text-white/70 hover:text-white transition-colors">
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
@@ -151,7 +151,7 @@ export function AgentHealthPanel() {
               {healthConfig[overallHealth].text}
             </span>
             {metrics && (
-              <span className="mr-auto text-xs text-white/30">
+              <span className="mr-auto text-xs text-white/70">
                 معدل النجاح: {metrics.successRate}%
               </span>
             )}
@@ -169,7 +169,7 @@ export function AgentHealthPanel() {
                 <div key={m.label} className="bg-white/[0.02] border border-white/5 rounded-xl p-3 flex items-center gap-3">
                   <span className={`${m.color} opacity-60`}>{m.icon}</span>
                   <div>
-                    <p className="text-[10px] text-white/30">{m.label}</p>
+                    <p className="text-[10px] text-white/70">{m.label}</p>
                     <p className={`text-xl font-black ${m.color}`}>{m.value}</p>
                   </div>
                 </div>
@@ -181,7 +181,7 @@ export function AgentHealthPanel() {
           {metrics && (
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
-                <span className="text-white/40">معدل نجاح الإجراءات</span>
+                <span className="text-white/70">معدل نجاح الإجراءات</span>
               </div>
               <HealthBar
                 value={metrics.successRate}
@@ -196,7 +196,7 @@ export function AgentHealthPanel() {
           {/* Agent Cards */}
           {agents.length > 0 && (
             <div className="space-y-2">
-              <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">الوكلاء</p>
+              <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold">الوكلاء</p>
               {agents.map(agent => {
                 const sc = STATUS_CONFIG[agent.status] ?? STATUS_CONFIG.offline;
                 return (
@@ -209,9 +209,9 @@ export function AgentHealthPanel() {
                       </div>
                       {agent.taskCount > 0 && (
                         <div className="flex items-center gap-3 mt-0.5">
-                          <span className="text-[10px] text-white/30">{agent.taskCount} مهمة</span>
+                          <span className="text-[10px] text-white/70">{agent.taskCount} مهمة</span>
                           {agent.avgResponseMs > 0 && (
-                            <span className="text-[10px] text-white/20">
+                            <span className="text-[10px] text-white/70">
                               متوسط الرد: {agent.avgResponseMs < 1000
                                 ? `${agent.avgResponseMs}ms`
                                 : `${(agent.avgResponseMs / 1000).toFixed(1)}s`}

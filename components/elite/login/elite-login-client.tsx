@@ -30,7 +30,7 @@ export function EliteLoginClient() {
               <MessageCircle className="h-8 w-8 text-black" />
             </div>
             <h1 className="mb-3 font-serif text-2xl font-bold text-white md:text-3xl">دخول النخبة</h1>
-            <p className="text-white/60">تُفتح تجربة النخبة برابط دعوة آمن ومستخدم لمرة واحدة.</p>
+            <p className="text-white/70">تُفتح تجربة النخبة برابط دعوة آمن ومستخدم لمرة واحدة.</p>
           </div>
 
           <div className="space-y-4">
@@ -39,7 +39,7 @@ export function EliteLoginClient() {
                 <Link2 className="h-5 w-5" />
                 <h2 className="font-semibold">لديك رابط دعوة</h2>
               </div>
-              <p className="text-sm leading-6 text-white/60">
+              <p className="text-sm leading-6 text-white/70">
                 افتح الرابط الذي أرسله فريق Azenith. يتحقق الموقع من الرابط ويبدأ جلستك تلقائيًا.
               </p>
             </div>
@@ -49,7 +49,7 @@ export function EliteLoginClient() {
                 <ShieldCheck className="h-5 w-5" />
                 <h2 className="font-semibold">تحتاج دعوة؟</h2>
               </div>
-              <p className="text-sm leading-6 text-white/60">
+              <p className="text-sm leading-6 text-white/70">
                 أرسل طلب استشارة، وسيصدر الفريق رابطًا يدويًا عند تفعيل وصولك. لا يرسل هذا الموقع رسائل واتساب تلقائيًا ما لم تُهيّأ خدمة الإرسال.
               </p>
               <Link
@@ -63,7 +63,7 @@ export function EliteLoginClient() {
           </div>
 
           <div className="mt-8 border-t border-white/10 pt-6 text-center">
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-white/70">
               ليست عضواً في النخبة؟{" "}
               <Link href="/start" className="text-[#C5A059] transition-colors hover:text-[#E5C170]">ابدأ رحلتك</Link>
             </p>
@@ -71,7 +71,7 @@ export function EliteLoginClient() {
         </div>
 
         <div className="mt-6 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-white">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm text-white/70 transition-colors hover:text-white">
             <ArrowLeft className="h-4 w-4" />
             العودة للرئيسية
           </Link>

@@ -94,19 +94,20 @@ export function CommandConsole() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">وحدة التحكم</span>
+          <span className="text-sm text-gray-200">وحدة التحكم</span>
           <select
             value={selectedAgent}
             onChange={(e) => setSelectedAgent(e.target.value)}
+            aria-label="الموظف اللي بياخد الأمر"
             className="bg-gray-700 text-white text-xs rounded px-2 py-1 border-none"
           >
             <option value="ops-lead">مدير تشغيل المحتوى</option>
-            <option value="vanguard">Vanguard (المبيعات)</option>
+            <option value="vanguard">مدير المبيعات</option>
           </select>
         </div>
         <button
           onClick={clearHistory}
-          className="text-xs text-gray-400 hover:text-white transition-colors"
+          className="text-xs text-gray-200 hover:text-white transition-colors"
         >
           مسح السجل
         </button>
@@ -115,7 +116,7 @@ export function CommandConsole() {
       {/* History */}
       <div ref={consoleContainerRef} className="h-64 overflow-y-auto p-4 space-y-1 text-sm">
         {history.length === 0 && (
-          <p className="text-gray-500 italic">اكتب أمراً للبدء...</p>
+          <p className="text-gray-300 italic">اكتب أمراً للبدء...</p>
         )}
         
         {history.map((item) => (

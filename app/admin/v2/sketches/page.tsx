@@ -165,11 +165,11 @@ export default function V2SketchesPage() {
           <ScanLine className="w-5 h-5 text-amber-400" />
           ورق المقاسات
         </h1>
-        <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+        <p className="mt-1 text-[11px] leading-relaxed text-white/70">
           صوّر الورقة اللي العميل رسمها بالقلم: قارئ ذكي بيستخرج الضلع والباب، والشاهد التاني هو
           العميل نفسه لما يكتب مقاساته في ورقته. أي رقم من غير شاهد بيتعرض اقتراح، مش منجز.
         </p>
-        <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+        <p className="mt-1 text-[11px] leading-relaxed text-white/70">
           وكل ورقة بيتحدد صاحبها من الدفتر، فاللي يتصل بيقولوا «ورقته» ويتفتح.
         </p>
       </header>
@@ -181,9 +181,10 @@ export default function V2SketchesPage() {
           accept="image/*"
           capture="environment"
           onChange={(e) => onPick(e.target.files?.[0])}
-          className="block w-full text-[12px] text-white/60 file:ml-3 file:rounded-xl file:border-0 file:bg-amber-500/20 file:px-4 file:py-2 file:text-[12px] file:font-bold file:text-amber-200"
+          aria-label="اختار صورة ورقة من الموبايل"
+          className="block w-full text-[12px] text-white/70 file:ml-3 file:rounded-xl file:border-0 file:bg-amber-500/20 file:px-4 file:py-2 file:text-[12px] file:font-bold file:text-amber-200"
         />
-        {busy && <p className="mt-3 text-[11px] text-white/45">{stage || 'بقرا الورقة…'}</p>}
+        {busy && <p className="mt-3 text-[11px] text-white/70">{stage || 'بقرا الورقة…'}</p>}
         {problem && <p className="mt-3 text-[11px] text-rose-300">{problem}</p>}
         {stored === false && (
           <p className="mt-3 text-[11px] text-amber-300">القراءة تمت، بس الخزانة ما قبلتش الصورة — هتلاقي السبب تحت.</p>
@@ -208,17 +209,17 @@ export default function V2SketchesPage() {
           <div className="mt-3 grid grid-cols-2 gap-2">
             {reading.dimensions.map((dimension, i) => (
               <div key={i} className="rounded-xl border border-white/5 bg-black/25 px-3 py-2">
-                <div className="truncate text-[10px] text-white/40">{dimension.label}</div>
+                <div className="truncate text-[10px] text-white/70">{dimension.label}</div>
                 <div className="text-sm font-black text-white">
                   {arNum(dimension.meters)} متر
-                  <span className={`mr-2 text-[10px] font-bold ${dimension.confirmed ? 'text-emerald-300' : 'text-white/30'}`}>
+                  <span className={`mr-2 text-[10px] font-bold ${dimension.confirmed ? 'text-emerald-300' : 'text-white/70'}`}>
                     {dimension.confirmed ? 'البيكسلات شافته' : 'شاهد واحد'}
                   </span>
                 </div>
               </div>
             ))}
             {reading.dimensions.length === 0 && (
-              <p className="col-span-2 text-[11px] text-white/40">مفيش رقم اتأكد — الورقة ممكن تكون بايخة أو الأرقام مش مكتوبة.</p>
+              <p className="col-span-2 text-[11px] text-white/70">مفيش رقم اتأكد — الورقة ممكن تكون بايخة أو الأرقام مش مكتوبة.</p>
             )}
           </div>
 
@@ -234,7 +235,7 @@ export default function V2SketchesPage() {
             الشاهد التاني: العميل نفسه، لما يكتب مقاساته في ورقته
             {readerLabel(reading.reader) ? ` · القارئ: ${readerLabel(reading.reader)}` : ''}
           </p>
-          {reading.notes && <p className="mt-1 text-[11px] text-white/40">ملاحظة على الورقة: {reading.notes}</p>}
+          {reading.notes && <p className="mt-1 text-[11px] text-white/70">ملاحظة على الورقة: {reading.notes}</p>}
 
           {readingId !== null && (
             <SketchOwner
@@ -260,13 +261,13 @@ export default function V2SketchesPage() {
         <h2 className="mb-2 flex items-center gap-2 text-[12px] font-bold text-white/75">
           {only ? 'ورق عميل واحد' : 'آخر الورقات'}
           {only && (
-            <button onClick={() => setOnly(null)} className="rounded-lg border border-white/10 px-2 py-0.5 text-[10px] font-bold text-white/60">
+            <button onClick={() => setOnly(null)} className="rounded-lg border border-white/10 px-2 py-0.5 text-[10px] font-bold text-white/70">
               كل الورق
             </button>
           )}
         </h2>
         {rows.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-white/10 px-4 py-3 text-[11px] text-white/40">
+          <p className="rounded-2xl border border-dashed border-white/10 px-4 py-3 text-[11px] text-white/70">
             {only ? 'المتجر ما لقاش ورقة متربطة بالعميل ده.' : 'لسه مفيش ورقة اتقريت.'}
           </p>
         ) : (
@@ -275,19 +276,19 @@ export default function V2SketchesPage() {
               <li key={row.id} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] px-4 py-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="truncate text-[12px] font-bold text-white">{row.room || 'مكان من غير اسم'}</span>
-                  <span className="shrink-0 text-[10px] text-white/35">{when(row.created_at)}</span>
+                  <span className="shrink-0 text-[10px] text-white/70">{when(row.created_at)}</span>
                 </div>
                 <div className="mt-1 text-[11px] text-white/75">
                   {row.dimensions.slice(0, 4).map((d) => `${d.label} ${arNum(d.meters)}م`).join(' · ') || 'مفيش أرقام'}
                   {row.area_sqm ? ` · ${arNum(Number(row.area_sqm))} م²` : ''}
                   {` · ${arNum(row.confirmed_count)} مؤكد`}
                 </div>
-                {!row.ok && row.failure && <p className="mt-1 text-[10px] text-rose-300/80">{row.failure}</p>}
+                {!row.ok && row.failure && <p className="mt-1 text-[10px] text-rose-200">{row.failure}</p>}
                 <SketchOwner sketchId={row.id} customerKey={row.customer_key} roll={roll} onLinked={setOwner} />
                 {row.customer_key && (
                   <button
                     onClick={() => setOnly(only === row.customer_key ? null : row.customer_key)}
-                    className="mt-1 block rounded-lg border border-white/10 px-2 py-0.5 text-[10px] font-bold text-white/60"
+                    className="mt-1 block rounded-lg border border-white/10 px-2 py-0.5 text-[10px] font-bold text-white/70"
                     data-sketch-only={row.customer_key}
                   >
                     كل ورقه

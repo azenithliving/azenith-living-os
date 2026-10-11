@@ -92,7 +92,7 @@ export default function ClientPreCallDossier() {
         <Search className="w-4 h-4 text-amber-300" />
         <h2 className="text-base font-black text-white">الملف الذهبي قبل المكالمة</h2>
       </div>
-      <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+      <p className="mt-1 text-[11px] leading-relaxed text-white/70">
         اكتب آخر رقم في الموبايل أو أول الاسم، وهو يطلّع لك رسمته ومقاساته والألوان اللي لمكانه —
         واللي ماعرفوش عنك يقولهالك صراحة.
       </p>
@@ -109,7 +109,7 @@ export default function ClientPreCallDossier() {
         <p className="mt-2 text-[11px] text-amber-300">الدفتر ما ردّش — مش معناه إن مفيش عملاء.</p>
       )}
       {roll !== null && query.trim() && matches.length === 0 && (
-        <p className="mt-2 text-[11px] text-white/45">مفيش حد في الدفتر بهالحرف.</p>
+        <p className="mt-2 text-[11px] text-white/70">مفيش حد في الدفتر بهالحرف.</p>
       )}
 
       {!picked && matches.length > 0 && (
@@ -122,7 +122,7 @@ export default function ClientPreCallDossier() {
                 data-dossier-pick={line.key}
               >
                 <span className="truncate">{rollLineLabel(line)}</span>
-                <span className="shrink-0 text-[10px] text-white/35">{why}</span>
+                <span className="shrink-0 text-[10px] text-white/70">{why}</span>
               </button>
             </li>
           ))}
@@ -158,7 +158,7 @@ export default function ClientPreCallDossier() {
                 </a>
               )}
               {!phone && (
-                <p className="rounded-xl border border-white/10 px-3 py-1.5 text-[11px] text-white/45">
+                <p className="rounded-xl border border-white/10 px-3 py-1.5 text-[11px] text-white/70">
                   مفيش رقم مسجل عنده
                 </p>
               )}
@@ -169,7 +169,7 @@ export default function ClientPreCallDossier() {
                   setProblem(null);
                   setQuery('');
                 }}
-                className="text-[11px] text-white/40"
+                className="text-[11px] text-white/70"
                 data-dossier-back
               >
                 غير العميل
@@ -177,7 +177,7 @@ export default function ClientPreCallDossier() {
             </div>
           </div>
 
-          {busy && <p className="text-[11px] text-white/45">قرايم الدفتر والورقات...</p>}
+          {busy && <p className="text-[11px] text-white/70">قرايم الدفتر والورقات...</p>}
           {problem && <p className="text-[11px] text-rose-300" data-dossier-problem>{problem}</p>}
 
           {file && newest?.photo_url && (
@@ -228,7 +228,7 @@ export default function ClientPreCallDossier() {
                 <ul className="mt-2 space-y-1.5">
                   {section.facts.map((fact) => (
                     <li key={fact.label} className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
-                      <span className="shrink-0 text-[10px] text-white/40">{fact.label}</span>
+                      <span className="shrink-0 text-[10px] text-white/70">{fact.label}</span>
                       <span className="text-[12px] leading-relaxed text-white/85 sm:text-left">{fact.value}</span>
                     </li>
                   ))}
@@ -262,7 +262,7 @@ export default function ClientPreCallDossier() {
                         loading="lazy"
                         className="h-20 w-full rounded-lg border border-white/10 object-cover"
                       />
-                      <figcaption className="mt-1 text-[10px] leading-tight text-white/55">
+                      <figcaption className="mt-1 text-[10px] leading-tight text-white/70">
                         {arNum(pick.likes)} صوت: {pick.voters.join("، ")}
                       </figcaption>
                     </figure>
@@ -274,7 +274,7 @@ export default function ClientPreCallDossier() {
                 // His own words, in colour: what he stopped on is not the bank's palette and must
                 // not be shown as if it were.
                 <div className="mt-2" data-dossier-colours>
-                  <p className="text-[10px] text-white/45">ألوانه اللي اختارها</p>
+                  <p className="text-[10px] text-white/70">ألوانه اللي اختارها</p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
                     {section.chosen.map((colour) => (
                       <span
