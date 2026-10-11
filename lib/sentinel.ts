@@ -11,6 +11,8 @@ import {
   healthStatusFor,
   logNoteFor,
   logStateFor,
+  muteIsLive,
+  muteUntilFrom,
   recommendationsFor,
   type AlertCategory,
   type AlertSeverity,
@@ -48,6 +50,7 @@ type AlertRow = {
 };
 
 const ALERTS_TABLE = "system_alerts";
+const MUTES_TABLE = "system_alert_mutes";
 
 /**
  * The provider's name as the owner reads it. A machine id (groq, openrouter) never enters his
@@ -105,6 +108,10 @@ type AlertDraft = {
  *
  * The written row is read back from the store before the caller is told anything, because silence
  * here reads as "nothing happened".
+ *
+ * A condition the owner reviewed and muted is skipped outright — not updated, not re-counted — until
+ * its window runs out. That is the difference between hiding a fault and stopping a broken record
+ * loop: the fault stays in the log where it was decided, and the ledger says out loud that it waits.
  */
 async function recordAlert(draft: AlertDraft): Promise<SystemAlert | null> {
   const supabase = getSupabaseAdminClient();
@@ -113,7 +120,19 @@ async function recordAlert(draft: AlertDraft): Promise<SystemAlert | null> {
     return null;
   }
 
-  const now = new Date().toISOString();
+  const nowDate = new Date();
+  const now = nowDate.toISOString();
+
+  const { data: mute } = await supabase
+    .from(MUTES_TABLE)
+    .select("muted_until")
+    .eq("dedupe_key", draft.dedupeKey)
+    .maybeSingle();
+  if (muteIsLive(mute?.muted_until, nowDate)) {
+    console.log(`[sentinel] ${draft.dedupeKey} is muted until ${mute?.muted_until} — nothing written`);
+    return null;
+  }
+
   const fields = {
     severity: draft.severity,
     category: draft.category,
@@ -193,6 +212,34 @@ async function readAlertLog(limit: number, onlyPending = false): Promise<AlertLo
 
   const alerts = ((data ?? []) as unknown as AlertRow[]).map(rowToAlert);
   return { readable: true, alerts, totalLogged: count ?? 0 };
+}
+
+/**
+ * Conditions the owner reviewed and asked to keep quiet, still inside their window. They are counted
+ * and named on the screen rather than left invisible: a muted fault is a real fault somebody decided
+ * not to act on yet.
+ */
+async function readActiveMutes(): Promise<{ count: number; newestUntil: string | null }> {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return { count: 0, newestUntil: null };
+
+  const { data, error } = await supabase
+    .from(MUTES_TABLE)
+    .select("muted_until")
+    .gt("muted_until", new Date().toISOString())
+    .limit(200);
+
+  if (error) {
+    console.warn(`[sentinel] mute ledger unreadable: ${error.message}`);
+    return { count: 0, newestUntil: null };
+  }
+
+  const rows = (data ?? []) as unknown as Array<{ muted_until: string }>;
+  const newest = rows.reduce<string | null>(
+    (best, row) => (!best || new Date(row.muted_until) > new Date(best) ? row.muted_until : best),
+    null,
+  );
+  return { count: rows.length, newestUntil: newest };
 }
 
 /**
@@ -488,6 +535,7 @@ export async function getSystemHealth(): Promise<HealthSnapshot> {
   await watchProviderKeys();
 
   const log = await readAlertLog(50);
+  const mutes = await readActiveMutes();
   const pending = log.alerts.filter((alert) => alert.status === "pending");
 
   const reading: LogReading = {
@@ -498,6 +546,8 @@ export async function getSystemHealth(): Promise<HealthSnapshot> {
     pendingTotal: pending.length,
     dbReachable,
     newestSeenAt: log.alerts[0]?.lastSeenAt ?? null,
+    mutedCount: mutes.count,
+    newestMuteUntil: mutes.newestUntil,
   };
 
   const state = logStateFor(reading);
@@ -558,7 +608,27 @@ export async function confirmAndApplyFix(alertId: string): Promise<boolean> {
  * Dismiss alert (admin reviewed, no action needed)
  */
 export async function dismissAlert(alertId: string): Promise<boolean> {
-  return await closeAlert(alertId, "dismissed");
+  const row = await readAlertById(alertId);
+  const closed = await closeAlert(alertId, "dismissed");
+  if (!closed || !row?.dedupe_key) return closed;
+
+  // The owner's word (2026-10-11): a reviewed condition keeps quiet for a day instead of being
+  // re-written by the next reading, which is what made the button look dead.
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return closed;
+
+  const mutedUntil = muteUntilFrom(new Date());
+  const { error } = await supabase
+    .from(MUTES_TABLE)
+    .upsert({ dedupe_key: row.dedupe_key, alert_id: alertId, muted_until: mutedUntil }, { onConflict: "dedupe_key" });
+  if (error) {
+    console.warn(`[sentinel] mute not stored for ${row.dedupe_key}: ${error.message}`);
+    return closed;
+  }
+
+  const { data } = await supabase.from(MUTES_TABLE).select("muted_until").eq("dedupe_key", row.dedupe_key).maybeSingle();
+  console.log(`[sentinel] muted ${row.dedupe_key} — stored until ${data?.muted_until ?? "unread"}`);
+  return closed;
 }
 
 /**

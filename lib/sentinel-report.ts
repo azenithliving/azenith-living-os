@@ -79,7 +79,27 @@ export type LogReading = {
   dbReachable: boolean;
   /** Newest sighting among the logged rows, or `null` when the log holds nothing. */
   newestSeenAt: string | null;
+  /** Conditions the owner reviewed and asked to keep quiet; each one is still a real fault. */
+  mutedCount: number;
+  newestMuteUntil: string | null;
 };
+
+/**
+ * How long a reviewed alert stays out of the waiting list. The owner named the length on 2026-10-11
+ * when asked whether a dismissed fault should return on the next reading or keep quiet: a day.
+ */
+export const MUTE_WINDOW_HOURS = 24;
+
+export function muteUntilFrom(now: Date): string {
+  return new Date(now.getTime() + MUTE_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+}
+
+/** A mute covers a condition only while its own clock has not run out. */
+export function muteIsLive(mutedUntil: string | null | undefined, now: Date): boolean {
+  if (!mutedUntil) return false;
+  const until = new Date(mutedUntil).getTime();
+  return Number.isFinite(until) && until > now.getTime();
+}
 
 const CATEGORY_AR: Record<AlertCategory, string> = {
   api: "واجهات المزوّدين",
@@ -115,24 +135,42 @@ function arabicDate(value: string | null): string | null {
   return date.toLocaleDateString("ar-EG");
 }
 
+/** A mute is a deadline, so it is read with its hour, not just its day. */
+function arabicDeadline(value: string | null): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString("ar-EG");
+}
+
+function mutedClause(reading: LogReading): string {
+  if (reading.mutedCount <= 0) return "";
+  const count = arabicNumerals(String(reading.mutedCount));
+  const until = arabicDeadline(reading.newestMuteUntil);
+  return until
+    ? ` و${count} تنبيه مكتوم لحد ${until} — لو السبب رجع بعدها بيتسجّل من جديد.`
+    : ` و${count} تنبيه مكتوم بعد مراجعته.`;
+}
+
 export function logNoteFor(state: LogState, reading: LogReading): string {
   if (state === "unreadable") {
     return "سجل التنبيهات ما قرئتش — أي صفر في الصفحة دي مش شهادة سلامة.";
   }
+  const muted = mutedClause(reading);
   if (state === "empty") {
-    return "سجل التنبيهات فاضي من أول الطلب — مفيش قراءة اتسجّلت، وده مش معناه إن المتجر سليمة.";
+    return `سجل التنبيهات فاضي من أول الطلب — مفيش قراءة اتسجّلت، وده مش معناه إن المتجر سليمة.${muted}`;
   }
   const seen = arabicDate(reading.newestSeenAt);
   if (reading.pendingTotal > 0) {
     const count = arabicNumerals(String(reading.pendingTotal));
     return seen
-      ? `في ${count} تنبيه مستني قرار — آخر تسجيل منهم في ${seen}.`
-      : `في ${count} تنبيه مستني قرار.`;
+      ? `في ${count} تنبيه مستني قرار — آخر تسجيل منهم في ${seen}.${muted}`
+      : `في ${count} تنبيه مستني قرار.${muted}`;
   }
   const total = arabicNumerals(String(reading.totalLogged ?? 0));
   return seen
-    ? `مفيش تنبيه مستني قرار — السجل فيه ${total} قراءة، آخرها في ${seen}.`
-    : `مفيش تنبيه مستني قرار — السجل فيه ${total} قراءة.`;
+    ? `مفيش تنبيه مستني قرار — السجل فيه ${total} قراءة، آخرها في ${seen}.${muted}`
+    : `مفيش تنبيه مستني قرار — السجل فيه ${total} قراءة.${muted}`;
 }
 
 export function recommendationsFor(reading: LogReading, state: LogState): string[] {
