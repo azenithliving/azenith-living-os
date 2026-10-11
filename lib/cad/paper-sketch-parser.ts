@@ -383,8 +383,9 @@ export function readerFailureWords(message: string | undefined | null): string {
   // Group 0, not 1: the alternation is non-capturing, so `[1]` was always undefined and no code ever
   // reached his screen. Found by the test written before this line.
   const status = text.match(/\b(?:4\d\d|5\d\d)\b/)?.[0];
-  // His digits, not the provider's: a Latin number on his screen is the same defect as a Latin word.
-  const code = status ? ` (${status.replace(/[0-9]/g, (d) => String.fromCodePoint(0x0660 + Number(d)))})` : "";
+  // His digits, not the provider's — and a dash, not brackets: the desk wraps this whole sentence in
+  // brackets, and a bracket inside a bracket is one of the shapes that reorder his line.
+  const code = status ? ` — ${status.replace(/[0-9]/g, (d) => String.fromCodePoint(0x0660 + Number(d)))}` : "";
   for (const [re, ar] of ERROR_CLASSES) if (re.test(text)) return ar + code;
   return 'سبب غير معروف';
 }

@@ -255,7 +255,7 @@ const money = (v: number) => `${v} ج.م`;
 /** Compact Arabic brief that gets injected into the commander's prompt. */
 export function renderWorldDigest(m: WorldModel): string {
   const L: string[] = [];
-  L.push(`**عالم الدار الآن** — نافذة ${m.window.start} → ${m.window.end}`);
+  L.push(`**عالم الدار الآن** — نافذة من ${m.window.start} إلى ${m.window.end}`);
   if (m.revenue) {
     // The ledger stores its states in machine words; the digest is read out to a man who reads
     // Arabic, so the label belongs here and the raw key stays in the structured data.

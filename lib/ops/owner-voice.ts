@@ -253,6 +253,12 @@ function speak(segment: string, tally: VoiceTally): string {
     return to;
   });
 
+  // An arrow between two Arabic runs is the one character that makes the bidi renderer move the whole
+  // clause — and the owner's own rule bans it between his words. The date range reads «من … إلى», and
+  // a left arrow was only ever a separator typed in the wrong alphabet. Pipes are NOT touched: the
+  // chat's markdown tables are split on them after this pass runs.
+  out = out.replace(/\s*→\s*/g, " إلى ").replace(/\s*←\s*/g, " — ");
+
   return out.replace(DIGITS, (run) => {
     tally.digits += run.length;
     return run.replace(/[0-9]/g, (d) => String.fromCodePoint(0x0660 + Number(d)));

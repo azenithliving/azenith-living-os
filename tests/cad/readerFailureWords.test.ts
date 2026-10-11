@@ -17,9 +17,25 @@ const latin = (s: string) => s.match(/[A-Za-z]{2,}/g) ?? [];
 
 describe("the paper desk's refusal", () => {
   it("names a busy model, a refused key and an empty balance in his words", () => {
-    expect(readerFailureWords("google API error: 503 - This model is currently experiencing")).toBe("الموديل مشغول دلوقتي (٥٠٣)");
-    expect(readerFailureWords("google API error: 403 - Your project has been denied access.")).toBe("المفتاح مرفوض من المزود (٤٠٣)");
-    expect(readerFailureWords("anthropic API error: 400 - Your credit balance is too low to")).toBe("رصيد المفتاح خلص (٤٠٠)");
+    expect(readerFailureWords("google API error: 503 - This model is currently experiencing")).toBe("الموديل مشغول دلوقتي — ٥٠٣");
+    expect(readerFailureWords("google API error: 403 - Your project has been denied access.")).toBe("المفتاح مرفوض من المزود — ٤٠٣");
+    expect(readerFailureWords("anthropic API error: 400 - Your credit balance is too low to")).toBe("رصيد المفتاح خلص — ٤٠٠");
+  });
+
+  /**
+   * The sentence this returns is always placed inside brackets by the desk. Wrapping the status code in
+   * brackets of its own produced «(رصيد المفتاح خلص (٤٠٠))» — a bracket inside a bracket, which is one
+   * of the two shapes that make his line reorder.
+   */
+  it("never nests a bracket inside the bracket the desk puts it in", () => {
+    for (const raw of [
+      "google API error: 503 - This model is currently experiencing",
+      "429 Too Many Requests",
+      "openai error: 401 - Incorrect API key provided",
+      "something nobody has ever seen",
+    ]) {
+      expect(readerFailureWords(raw), raw).not.toMatch(/[()]/);
+    }
   });
 
   it("says a quota, because that is the one case the desk already knew", () => {

@@ -21,6 +21,8 @@ import {
   QayyimAgentBase 
 } from "../index";
 import { keepRealEvidenceUrls } from "../url-manifest";
+import { agentLabel } from "../identity";
+import { draftTypeLabel } from "../draft-labels";
 import { modelFloorLine, modelFailureReason } from "../capability-tiers";
 
 // ============================================
@@ -722,7 +724,9 @@ export class MasterOrchestrator {
     let response = `✅ **تم — ${draft.sections.length} تغيير جاهز**\n`;
     response += `📄 ${draft.pagePath} · 🔒 ${draft.sections.every(s => s.identityCompliant) ? 'متوافق' : 'مراجعة'}\n\n`;
     for (const section of draft.sections) {
-      response += `• **${section.sectionKey}** ← ${section.agentKey.replace('ops-','')} ${section.evidenceUrls.length ? `— ${section.evidenceUrls[0]}` : ''}\n`;
+      // Named, not keyed: this line used to read «**gallery** ← visual» — a machine key, an arrow that
+      // reorders the whole clause on his phone, and the employee's name chopped to a fragment.
+      response += `• **${draftTypeLabel(section.sectionKey) ?? "قسم من غير اسم"}** — ${agentLabel(section.agentKey)} ${section.evidenceUrls.length ? `— ${section.evidenceUrls[0]}` : ''}\n`;
     }
     if (realUrls.length) {
       response += `\n🔗 أدلة:\n${realUrls.slice(0,3).map(u => `- ${u}`).join('\n')}\n`;
