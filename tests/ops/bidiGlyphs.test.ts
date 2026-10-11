@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 
 import { renderWorldDigest, type WorldModel } from "@/lib/ops/world-model";
 import { ownerVoice } from "@/lib/ops/owner-voice";
+import { buildInboxes } from "@/lib/ops/inboxes";
 
 /**
  * The glyphs that reorder his lines.
@@ -54,8 +55,7 @@ describe("the orchestrator's section list", () => {
   });
 });
 
-describe("the voice pass on a stray arrow", () => {
-  it("reads an arrow between two dates as the word it means", () => {
+describe("the voice pass on a stray arrow", () => {  it("reads an arrow between two dates as the word it means", () => {
     expect(ownerVoice("نافذة 2026-07-08 → 2026-10-06")).toContain("إلى");
     expect(ownerVoice("نافذة 2026-07-08 → 2026-10-06")).not.toContain("→");
   });
@@ -71,5 +71,24 @@ describe("the voice pass on a stray arrow", () => {
   it("leaves a table's pipes alone", () => {
     const row = "| القسم | الحالة |";
     expect(ownerVoice(row)).toBe(row);
+  });
+});
+
+/**
+ * The cockpit card's one-line preview is composed from a stored row, so it carries whatever that row
+ * holds: the last arrow measured on his screens (2026-10-11) was a date range in a teaser written
+ * before the digest stopped using one.
+ */
+describe("the cockpit's inbox teaser", () => {
+  it("speaks the row it is previewing", () => {
+    const boxes = buildInboxes({
+      keys: ["ops-lead"],
+      conversations: [{ id: "c1", title: "محادثة مع ops-lead", participants: ["ops-lead"] }],
+      unreadRows: [],
+      lastRows: [{ conversation_id: "c1", content: "**عالم الدار الآن** — نافذة 2026-07-12 → 2026-10-10" }],
+      saturated: false,
+    });
+    expect(boxes["ops-lead"].teaser).toContain("إلى");
+    expect(boxes["ops-lead"].teaser).not.toContain("→");
   });
 });

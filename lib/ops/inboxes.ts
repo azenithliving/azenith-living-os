@@ -1,5 +1,6 @@
 import { legacyToOps } from "./identity";
 import { previewLine } from "./command-canvas";
+import { ownerVoice } from "./owner-voice";
 
 /**
  * inboxes.ts — every unread badge on the owner's cockpit, answered from one read.
@@ -67,11 +68,13 @@ export function buildInboxes(input: {
     unreadByConversation.set(row.conversation_id, (unreadByConversation.get(row.conversation_id) ?? 0) + 1);
   }
 
-  // The rows arrive newest-first, so the first one seen per conversation is its last word.
+  // The rows arrive newest-first, so the first one seen per conversation is its last word. The row is
+  // spoken before it is cut: a teaser is a sentence from his chat shown on a card, and it carries
+  // whatever that row holds — including the shapes his own rule bans.
   const teaserByConversation = new Map<string, string | null>();
   for (const row of input.lastRows ?? []) {
     if (teaserByConversation.has(row.conversation_id)) continue;
-    teaserByConversation.set(row.conversation_id, previewLine(String(row.content ?? "")) || null);
+    teaserByConversation.set(row.conversation_id, previewLine(ownerVoice(String(row.content ?? ""))) || null);
   }
 
   const boxes: Record<string, InboxAnswer> = {};
