@@ -35,6 +35,27 @@ describe("his numerals", () => {
     const text = "شغّل `page.goto(url)` ثم راجع النتيجة";
     expect(ownerVoice(text)).toBe(text);
   });
+
+  // Measured on the published sales office 2026-10-11: the model wrapped a tool id in backticks and
+  // the code-span exemption printed it to him as a chip. A span that is nothing but an identifier is
+  // now spoken like any other word — named if this store names it, gone if it does not.
+  it("names a tool id written as a code span, and drops one it cannot name", () => {
+    expect(ownerVoice("شغّلت `lead_list` دلوقتي")).toBe("شغّلت `قائمة العملاء` دلوقتي");
+    expect(ownerVoice("شغّلت `show_stats` دلوقتي")).toBe("شغّلت دلوقتي");
+    expect(latin(ownerVoice("شغّلت `gsc_queries` دلوقتي"))).toEqual([]);
+  });
+
+  // The first column of a task table the owner reads on his phone, measured on the studio chat the
+  // same day: seven rows keyed by the machine name.
+  it("replaces an employee's key with his Arabic name wherever the row carries it", () => {
+    expect(ownerVoice("| ops-content | مسودة |")).toBe("| وكيل المحتوى | مسودة |");
+    expect(ownerVoice("المسؤول: vanguard")).toBe("المسؤول: مدير المبيعات");
+    expect(ownerVoice("VANGUARD خلّص الشغل")).toBe("مدير المبيعات خلّص الشغل");
+    // A retired stamp still signs old rows; it reaches him as the live employee, never as the stamp.
+    expect(ownerVoice("qayyim-core راجع")).toBe("مدير تشغيل المحتوى راجع");
+    // Ordinary English words that happen to be a retired job title are the phrase table's business.
+    expect(ownerVoice("security مهم")).toBe("الأمان مهم");
+  });
 });
 
 describe("the report vocabulary", () => {

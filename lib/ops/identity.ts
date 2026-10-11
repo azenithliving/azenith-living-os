@@ -96,9 +96,46 @@ export function opsToLegacy(key: string): string | null {
   return LEGACY[ops] ?? null;
 }
 
+/**
+ * The keys this store has put a human face on, beyond the eight swarm members.
+ *
+ * `agentLabel` deliberately returns an unknown key unchanged: a wrong key must never become a guess.
+ * That was right while only the swarm had a surface, and wrong the day the owner's own screens started
+ * printing `vanguard` as if it were a name and the old employees' house shouting ANALYST in capitals.
+ * Measured on the published screens 2026-10-11: 26 places across the sales office, the old dashboard
+ * and the retired employees' house.
+ *
+ * So each of these carries its own Arabic word, written here once. The sales employee is not a ninth
+ * swarm member and is not folded onto one; the five below are the retired house's own jobs, and are
+ * NOT aliases of the `ops-*` keys — mapping them onto the swarm would claim work the swarm never did.
+ */
+const EXTRA_LABELS: Record<string, string> = {
+  vanguard: "مدير المبيعات",
+  analyst: "محلل البيانات",
+  coder: "مطور الكود",
+  ops: "مراقب العمليات",
+  security: "حارس الأمن",
+  learner: "محرك التعلّم",
+};
+
+/**
+ * Every key a surface can meet in stored text: the live swarm, the retired stamps rows still carry,
+ * and the employees outside the swarm.
+ *
+ * A guard forbids a retired key from being spelled anywhere in the source, so anything that has to
+ * recognise one — the owner-voice pass that renames a key inside his chat — reads it here rather than
+ * writing the list again.
+ */
+export const SURFACE_KEYS: string[] = [
+  ...AGENT_KEYS,
+  ...Object.values(LEGACY),
+  "prime",
+  ...Object.keys(EXTRA_LABELS),
+];
+
 export function agentLabel(key: string): string {
   const ops = legacyToOps(key);
-  return LABELS[ops] ?? key;
+  return LABELS[ops] ?? EXTRA_LABELS[String(key || "").toLowerCase()] ?? key;
 }
 
 /** `agent_messages.sender_name` stores the key upper-cased; keep that shape. */

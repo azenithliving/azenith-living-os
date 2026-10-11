@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { AGENT_ROLES, SALES_MANAGER_CAPABILITIES } from '@/lib/ops/agent-roles';
 import { DEPARTMENT_KEYS, employeeHref } from '@/lib/ops/departments';
-import { isOpsKey, legacyToOps, senderDisplayName } from '@/lib/ops/identity';
+import { agentLabel, isOpsKey, legacyToOps, senderDisplayName } from '@/lib/ops/identity';
 import { isBulletLine, splitEmphasis, stripBullet } from '@/lib/talk/emphasis';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
@@ -91,11 +91,13 @@ const AGENT_METADATA: Record<string, { name: string; role: string; icon: string;
   // The owner reads Arabic only, so a Latin name on his screen is a defect even when
   // the key is correct. The sales employee signs himself with his job.
   vanguard: { name: 'مدير المبيعات', role: 'يكلم العميل، يتابع اللي مستني رد، ويفتح دفتر العملاء', icon: '💼', color: 'emerald' },
-  analyst:  { name: 'Analyst',  role: 'محلل البيانات والتقارير', icon: '📊', color: 'blue' },
-  coder:    { name: 'Coder',    role: 'مطور الكود والتقنية',    icon: '💻', color: 'cyan' },
-  ops:      { name: 'Ops',      role: 'مراقب العمليات والنظام',  icon: '⚙️', color: 'yellow' },
-  security: { name: 'Security', role: 'حارس الأمن والتدقيق',   icon: '🛡️', color: 'red' },
-  learner:  { name: 'Learner',  role: 'محرك التعلم الذاتي',     icon: '🎓', color: 'indigo' },
+  // The retired house's five jobs. The words come from the identity module so a second copy cannot
+  // drift — these five were printing «Analyst» and «Security» to an owner who reads Arabic only.
+  analyst:  { name: agentLabel('analyst'),  role: 'محلل البيانات والتقارير', icon: '📊', color: 'blue' },
+  coder:    { name: agentLabel('coder'),    role: 'مطور الكود والتقنية',    icon: '💻', color: 'cyan' },
+  ops:      { name: agentLabel('ops'),      role: 'مراقب العمليات والنظام',  icon: '⚙️', color: 'yellow' },
+  security: { name: agentLabel('security'), role: 'حارس الأمن والتدقيق',   icon: '🛡️', color: 'red' },
+  learner:  { name: agentLabel('learner'),  role: 'محرك التعلم الذاتي',     icon: '🎓', color: 'indigo' },
 };
 
 // The chips are the capabilities the store can really perform, and each one is a

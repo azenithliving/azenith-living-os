@@ -11,7 +11,7 @@ import { UnifiedAssistant } from '@/components/admin/UnifiedAssistant';
 
 import { Brain, MessageSquare, ShieldAlert, Activity, Terminal, Sparkles, Users, Zap, RefreshCw } from 'lucide-react';
 import { QuickActionsPanel } from '@/components/admin/agents/QuickActionsPanel';
-import { isOpsKey, legacyToOps } from '@/lib/ops/identity';
+import { agentLabel, isOpsKey, legacyToOps } from '@/lib/ops/identity';
 import { ProactiveSuggestions } from '@/components/admin/agents/ProactiveSuggestions';
 import { AgentActionsFeed } from '@/components/admin/agents/AgentActionsFeed';
 import { AgentHealthPanel } from '@/components/admin/agents/AgentHealthPanel';
@@ -88,8 +88,8 @@ function AgentStatusBar({ onStatusLoad }: { onStatusLoad?: (s: Record<string, Ag
             return (
               <div key={key} className={`px-3 py-1.5 ${col.bg} border ${col.ring} rounded-xl flex items-center gap-2`}>
                 <div className={`w-2 h-2 rounded-full ${statusColor(st?.status ?? 'offline')}`} />
-                <span className={`text-xs font-bold ${col.text} uppercase tracking-wider`}>
-                  {key.toUpperCase()}
+                <span className={`text-xs font-bold ${col.text} tracking-wider`}>
+                  {agentLabel(key)}
                 </span>
                 <span className="text-[10px] text-white/30">
                   {st ? `${statusLabel(st.status)} · ${st.taskCount}` : '—'}

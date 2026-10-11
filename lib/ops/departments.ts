@@ -13,7 +13,8 @@ import { AGENT_KEYS, agentLabel } from "./identity";
 
 /** The sales employee is not a ninth swarm member — his body is `vanguard`. */
 export const SALES_KEY = "vanguard";
-export const SALES_TITLE = "مدير المبيعات";
+/** The word he is read by lives in the identity module, so no second copy can drift. */
+export const SALES_TITLE = agentLabel(SALES_KEY);
 
 export type Department = {
   id: string;

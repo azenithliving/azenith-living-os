@@ -1,4 +1,5 @@
 import { CAPABILITY_LABELS } from "./palette";
+import { agentLabel, SURFACE_KEYS } from "./identity";
 import { foldArabic } from "@/lib/arabic";
 
 /**
@@ -154,6 +155,30 @@ const DIGITS = /(?<![A-Za-z0-9])[0-9]+(?![A-Za-z0-9])/g;
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const PHRASE_RE = PHRASES.map(([from]) => new RegExp(`(?<![\\w-])${escape(from)}(?![\\w-])`, "gi"));
 
+/**
+ * An employee's key is not his name, and a table cell is not a signature line.
+ *
+ * The chat signs its bubbles in Arabic and its sender line was fixed for that; but the swarm writes
+ * markdown tables and prose that carry the key itself — measured on the published studio chat
+ * 2026-10-11: `ops-content`, `ops-visual` and six of their brothers printed as the first column of a
+ * task table the owner reads on his phone. The retired stamps are recognised from the identity
+ * module's own list, because a guard exists that forbids spelling them anywhere else in the source.
+ *
+ * A key that is also an ordinary English word (ANALYST, OPS, SECURITY) is matched only in the
+ * all-caps shape the stored record uses — the lower-case letters belong to the phrase table above.
+ */
+const KEYPATH = SURFACE_KEYS.filter((k) => k.includes("-") || k === "vanguard" || k === "prime");
+const STAMPS = SURFACE_KEYS.map((k) => k.toUpperCase());
+const KEY_RE = new RegExp(`(?<![\\w-])${KEYPATH.map(escape).join("|")}(?![\\w-])`, "gi");
+const STAMP_RE = new RegExp(`(?<![\\w-])${STAMPS.map(escape).join("|")}(?![\\w-])`, "g");
+/** A code span that is nothing but an identifier — `lead_list`, not `page.goto(url)`. */
+const BARE_ID = /^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$/i;
+
+/** The Arabic name of an employee, from the module that owns the names — never invented here. */
+function namedEmployee(key: string): string {
+  return agentLabel(key.toLowerCase());
+}
+
 /** The live tool id behind a stored one, then the Arabic name the palette already gives it. */
 function arabicToolName(id: string): string | null {
   const live = id.toLowerCase().startsWith("qayyim_") ? `ops_${id.slice(id.indexOf("_") + 1)}`.toLowerCase() : id.toLowerCase();
@@ -179,6 +204,16 @@ function speak(segment: string, tally: VoiceTally): string {
       if (!tally.words.includes(found)) tally.words.push(found);
       return to;
     });
+  });
+
+  out = out.replace(KEY_RE, (key) => {
+    if (!tally.ids.includes(key)) tally.ids.push(key);
+    return namedEmployee(key);
+  });
+
+  out = out.replace(STAMP_RE, (key) => {
+    if (!tally.ids.includes(key)) tally.ids.push(key);
+    return namedEmployee(key);
   });
 
   out = out.replace(TOKEN, (token) => {
@@ -253,8 +288,25 @@ function run(text: string, tally: VoiceTally): string {
   let last = 0;
   for (const m of text.matchAll(PROTECTED)) {
     const at = m.index ?? 0;
-    out += speak(text.slice(last, at), tally) + m[0];
-    last = at + m[0].length;
+    out += speak(text.slice(last, at), tally);
+    const span = m[0];
+    if (span.startsWith("`")) {
+      // A code span used to be exempt because he copies it to a terminal. Measured on the published
+      // sales office, every one of them was a tool id the model wrapped in backticks — so he read
+      // `lead_list` where the desk's Arabic name belongs. Only a span that is nothing but an
+      // identifier is spoken: `page.goto(url)` is code he pastes, and translating it breaks the code.
+      const inner = span.slice(1, -1).trim();
+      if (BARE_ID.test(inner)) {
+        const named = arabicToolName(inner);
+        if (!tally.ids.includes(inner)) tally.ids.push(inner);
+        out += named ? `\`${named}\`` : "";
+      } else {
+        out += span;
+      }
+    } else {
+      out += span;
+    }
+    last = at + span.length;
   }
   out += speak(text.slice(last), tally);
   return dropDuplicatedGloss(out.replace(/[ \t]{2,}/g, " "));

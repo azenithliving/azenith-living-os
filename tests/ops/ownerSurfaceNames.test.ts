@@ -57,6 +57,39 @@ describe("the owner's surfaces name the swarm by its live roles", () => {
       expect(readFileSync(file, "utf8"), file).toContain('from \'@/lib/ops/identity\'');
     }
   });
+
+  /**
+   * The swarm is eight keys, but the owner's screens hold more employees than the swarm: the sales
+   * office, and the five jobs of the retired employees' house. `agentLabel` used to answer an unknown
+   * key with the key itself, which is how a phone screen of his read VANGUARD, ANALYST, OPS-LEAD and
+   * a card titled `vanguard` — measured on the published screens 2026-10-11, 26 places.
+   */
+  it("answers every employee the owner can meet, not only the eight swarm keys", async () => {
+    const { agentLabel, SURFACE_KEYS } = await import("@/lib/ops/identity");
+    const arabic = /^[\u0600-\u06FF]/;
+    for (const key of ["vanguard", "analyst", "coder", "ops", "security", "learner", ...SURFACE_KEYS]) {
+      const label = agentLabel(key);
+      expect(label, key).not.toBe(key);
+      expect(label, key).toMatch(arabic);
+    }
+    expect(agentLabel("vanguard")).toBe("مدير المبيعات");
+  });
+
+  it("keeps one copy of the sales employee's Arabic name", async () => {
+    const { SALES_TITLE } = await import("@/lib/ops/departments");
+    const departments = readFileSync("lib/ops/departments.ts", "utf8");
+    expect(SALES_TITLE).toBe("مدير المبيعات");
+    // The word is spelled in the identity module only; the departments file derives it.
+    expect(departments).not.toContain('SALES_TITLE = "مدير المبيعات"');
+  });
+
+  it("never prints an employee key as a heading on the old house", () => {
+    const oldHouse = readFileSync("app/admin/agents/page.tsx", "utf8");
+    expect(oldHouse).toContain("{agentLabel(key)}");
+    expect(oldHouse).not.toContain("key.toUpperCase()");
+    const dashboard = readFileSync("app/admin/page.tsx", "utf8");
+    expect(dashboard).toContain("ownerVoice((cmd.command ?? \"\").slice(0, 60))");
+  });
 });
 
 /**

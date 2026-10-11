@@ -8,6 +8,7 @@ import { ImageHarvestDashboard } from "./intel/components/ImageHarvestDashboard"
 import { AdminProactiveStrip } from "@/components/admin/AdminProactiveStrip";
 import { NotificationsPanel } from "@/components/admin/NotificationsPanel";
 import { agentLabel, legacyToOps } from "@/lib/ops/identity";
+import { ownerVoice } from "@/lib/ops/owner-voice";
 import { arNum } from "@/lib/ops/metricLabels";
 import TelegramControlPanel from "@/components/admin/TelegramControlPanel";
 import AIKeysControlPanel from "@/components/admin/AIKeysControlPanel";
@@ -224,7 +225,7 @@ export default function AdminPage() {
         id: cmd.id || `cmd-${index}`,
         type: "command" as const,
         tenantName: cmd.status === "executed" ? "أمر تنفيذي (نجح)" : cmd.status === "failed" ? "أمر تنفيذي (فشل)" : "أمر وحدة تحكم",
-        description: cmd.command?.slice(0, 60) + (cmd.command?.length > 60 ? "..." : "") || "أمر طرفية النظام",
+        description: ownerVoice((cmd.command ?? "").slice(0, 60)) || "مأمورية من غير اسم",
         timestamp: cmd.executedAt || new Date().toISOString(),
       })) || [];
 

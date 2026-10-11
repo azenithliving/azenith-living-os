@@ -359,12 +359,32 @@ export async function readPaperSketch(input: {
   };
 }
 
-/** A quota message is 200 characters of provider prose; the owner needs its first clause. */
+/**
+ * What the owner reads when a reader refuses.
+ *
+ * The provider's own sentence is 200 characters of English prose, and the owner reads Arabic only:
+ * measured on his paper desk 2026-10-11, three failure lines carried «google API error: 503 - This
+ * model is currently experiencing», «403 - Your project has been denied access» and «400 - Your credit
+ * balance is too low». Each is one of a few facts he can act on, so the class is named in Arabic and
+ * the raw text is not printed at all — a code he cannot read is not a clue.
+ */
+const ERROR_CLASSES: Array<[RegExp, string]> = [
+  [/429|quota|rate limit|too many/i, "سقف الدقايق خلص"],
+  [/credit|balance|billing|payment required|funds|top ?up/i, "رصيد المفتاح خلص"],
+  [/403|denied access|permission/i, "المفتاح مرفوض من المزود"],
+  [/401|invalid (api )?key|unauthorized|authentication/i, "المفتاح غير مقبول"],
+  [/503|overloaded|experiencing|capacity|unavailable|timed? ?out/i, "الموديل مشغول دلوقتي"],
+  [/5\d\d|internal|server error/i, "المزود وقع منه خطأ"],
+];
+
 function shortError(message: string | undefined | null): string {
   const text = String(message ?? '').replace(/\s+/g, ' ').trim();
   if (!text) return 'سبب غير معروف';
-  if (/429|quota|rate/i.test(text)) return 'سقف الدقايق خلص';
-  return text.slice(0, 60);
+  const status = text.match(/\b(?:4\d\d|5\d\d)\b/)?.[1];
+  // His digits, not the provider's: a Latin number on his screen is the same defect as a Latin word.
+  const code = status ? ` (${status.replace(/[0-9]/g, (d) => String.fromCodePoint(0x0660 + Number(d)))})` : "";
+  for (const [re, ar] of ERROR_CLASSES) if (re.test(text)) return ar + code;
+  return 'سبب غير معروف';
 }
 
 /**
