@@ -30,6 +30,29 @@ type HomePageClientProps = {
 // In-memory cache to prevent refetching images for the same style during a session
 const imageCache: Record<string, Record<string, string>> = {};
 
+/**
+ * The store's own picture bank, asked once for the whole page.
+ *
+ * The bank answers every style in one call and gives the same room the same picture every time, which
+ * is exactly what the per-room external query could not promise: it asked for a random page on every
+ * visit, so one visitor saw one living room and the next saw another.
+ */
+let coversPromise: Promise<Record<string, Record<string, string>>> | null = null;
+
+function loadRoomCovers(): Promise<Record<string, Record<string, string>>> {
+  if (!coversPromise) {
+    coversPromise = fetch("/api/room-covers")
+      .then((res) => (res.ok ? res.json() : { covers: {} }))
+      .then((body: { covers?: Record<string, Record<string, string>> }) => body.covers ?? {})
+      .catch(() => {
+        // A bank that did not answer must not be cached as an empty one; the next attempt retries.
+        coversPromise = null;
+        return {};
+      });
+  }
+  return coversPromise;
+}
+
 export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }: HomePageClientProps) {
   const router = useRouter();
   const intent = useSessionStore((state) => state.intent);
@@ -164,40 +187,23 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
     const controller = new AbortController();
 
     const fetchRoomImages = async () => {
-      setRoomImages({});
       setLoading(true);
 
       try {
-        // Step 1: Try to fetch CMS images from database first
-        const cmsImages: Record<string, string> = {};
-        try {
-          const cmsRes = await fetch('/api/room-sections', {
-            signal: controller.signal,
-          });
-          if (cmsRes.ok) {
-            const cmsData = await cmsRes.json();
-            if (cmsData.sections) {
-              cmsData.sections.forEach((section: { slug: string; cmsImageUrl: string | null }) => {
-                if (section.cmsImageUrl) {
-                  cmsImages[section.slug] = section.cmsImageUrl;
-                }
-              });
-            }
-          }
-        } catch (cmsError) {
-          // React Strict Mode aborts the first development-only request while
-          // remounting the component. That is expected, not a CMS failure.
-          if (!controller.signal.aborted) {
-            console.warn('[CMS] Failed to fetch CMS images, falling back to Pexels:', cmsError);
-          }
+        // Step 1: the store's own bank. It answers every style in one call and gives the same room the
+        // same picture every time it is asked.
+        const bankCovers = await loadRoomCovers();
+        const bankForStyle = bankCovers[displayStyle] ?? {};
+        if (!controller.signal.aborted && Object.keys(bankForStyle).length > 0) {
+          setRoomImages((current) => ({ ...current, ...bankForStyle }));
         }
 
-        // Step 2: For rooms without CMS images, fetch from Pexels API
+        // Step 2: the rooms the bank does not hold keep the external query as the named fallback.
         const allRooms = [...roomList, { slug: "interior-design", title: "Comprehensive Interior Design" }];
         const imagePromises = allRooms.map(async (room, index) => {
-          // If CMS image exists, use it
-          if (cmsImages[room.slug]) {
-            return { [room.slug]: cmsImages[room.slug] };
+          // If the bank has this room in this style, that picture is the answer.
+          if (bankForStyle[room.slug]) {
+            return { [room.slug]: bankForStyle[room.slug] };
           }
 
           // Otherwise, fall back to Pexels API

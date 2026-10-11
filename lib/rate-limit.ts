@@ -143,6 +143,7 @@ export function isRateLimitingEnabled(): boolean {
 export const PROTECTED_PATHS = [
   "/api/pexels",
   "/api/room-sections",
+  "/api/room-covers",
   "/api/curate-images",
   "/api/elite-gallery",
 ];
