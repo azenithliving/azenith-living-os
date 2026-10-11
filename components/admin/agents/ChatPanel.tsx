@@ -1706,8 +1706,8 @@ function StructuredToolCard({ toolName, toolData, desks }: { toolName: string; t
 
   return (
     <div className="mt-3 pt-3 border-t border-white/10 space-y-2">
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-bold">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
+        <span className="inline-flex max-w-full flex-wrap items-center gap-x-1.5 gap-y-0.5 rounded-md border border-emerald-500/30 bg-emerald-500/20 px-2 py-0.5 font-bold text-emerald-300">
           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
           {anyFailed ? 'في مكتب حاول وما كملش' : 'تم التنفيذ الفعلي'}
           {/* The tool id is a machine name and stays off his sentence; the desk's own Arabic
