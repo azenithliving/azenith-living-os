@@ -187,6 +187,16 @@ function arabicToolName(id: string): string | null {
   return label.split(":")[0].trim() || null;
 }
 
+/**
+ * What a tool is called on his screen, from the palette that owns the capability list.
+ *
+ * A surface that has to name a tool in a sentence asks here. An id the palette does not know answers
+ * with an empty string, which is the same rule the scrubber follows: silence beats a machine word.
+ */
+export function toolDisplayName(id: string | null | undefined): string {
+  return arabicToolName(String(id ?? "").trim().toLowerCase()) ?? "";
+}
+
 export type VoiceTally = { digits: number; words: string[]; ids: string[] };
 
 function speak(segment: string, tally: VoiceTally): string {

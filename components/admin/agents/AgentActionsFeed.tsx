@@ -9,6 +9,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Activity, CheckCircle, XCircle, Clock, RefreshCw, Loader2 } from 'lucide-react';
 import { legacyToOps, senderDisplayName } from '@/lib/ops/identity';
+import { eventLabel } from '@/lib/owner-labels';
 
 interface FeedItem {
   id:         string;
@@ -200,7 +201,9 @@ export function AgentActionsFeed() {
                     <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border uppercase ${agentCls}`}>
                       {senderDisplayName(item.agent)}
                     </span>
-                    <span className="text-[10px] text-white/70 font-mono">{item.type}</span>
+                    {eventLabel(item.type) && (
+                      <span className="text-[10px] text-white/70">{eventLabel(item.type)}</span>
+                    )}
                   </div>
                   <p className="text-xs text-white/80 mt-0.5 truncate">{item.title}</p>
                   <div className="flex items-center gap-3 mt-1">

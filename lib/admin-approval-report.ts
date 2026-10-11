@@ -1,4 +1,6 @@
 import type { ClassifiedIntent } from "./admin-intent-types";
+import { commandLabel } from "./owner-labels";
+import { toolDisplayName } from "./ops/owner-voice";
 
 export interface AdminApprovalReport {
   title: string;
@@ -15,10 +17,12 @@ function actionLabelFor(intent: ClassifiedIntent): string {
   if (intent.kind === "command" && (intent.command === "evolve" || intent.commandLine?.startsWith("evolve"))) {
     return "مراجعة وتطوير آمن للموقع";
   }
-  if (intent.kind === "command") return `تنفيذ أمر إداري: ${intent.commandLine || intent.command}`;
-  if (intent.kind === "genesis") return "إنشاء/تكوين محتوى جديد عبر Genesis";
-  if (intent.kind === "agents") return "مهمة فحص وتحليل بواسطة الوكلاء";
-  if (intent.kind === "ultimate_tool") return `تشغيل أداة: ${intent.toolName}`;
+  // The command's own name, not its machine line: «تنفيذ أمر إداري: send_notification x» is a
+  // sentence he cannot read, measured on his approval card 2026-10-11.
+  if (intent.kind === "command") return `تنفيذ أمر إداري: ${commandLabel(intent.commandLine || intent.command)}`;
+  if (intent.kind === "genesis") return "إنشاء وتكوين محتوى جديد";
+  if (intent.kind === "agents") return "مهمة فحص وتحليل بواسطة الموظفين";
+  if (intent.kind === "ultimate_tool") return `تشغيل أداة: ${toolDisplayName(intent.toolName) || "أداة"}`;
   return "إجراء إداري";
 }
 
@@ -27,7 +31,7 @@ function resultLocationFor(intent: ClassifiedIntent): string {
     return "ستظهر نتيجة الفحص أو الاقتراح داخل محادثة المساعد وداخل دفتر الأدلة. لو نتج عنه تعديل كود، سيظهر كطلب موافقة منفصل قبل تطبيقه.";
   }
   if (intent.kind === "genesis") {
-    return "ستظهر نتيجة Genesis في محادثة المساعد، وأي تعديل فعلي سيظهر في دفتر الأدلة وسجل الموافقات.";
+    return "ستظهر نتيجة التكوين في محادثة المساعد، وأي تعديل فعلي سيظهر في دفتر الأدلة وسجل الموافقات.";
   }
   if (intent.kind === "agents") {
     return "ستظهر نتيجة المهمة في محادثة المساعد، وسجل التنفيذ، ودفتر الأدلة.";

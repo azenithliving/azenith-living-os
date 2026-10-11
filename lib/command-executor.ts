@@ -8,6 +8,7 @@ import { analyzeCommandLogs, formatEvolutionReport, executeSuggestion, logSelfEx
 import { checkKeysUsage, formatKeyCheckResult, getKeyUsageSummary, addBackupKey as addBackupKeyFromMonitor } from "./key-monitor";
 import { readPage, formatPageContent } from "./web-tools";
 import { arDigits, arNum } from "@/lib/ops/metricLabels";
+import { COMMAND_LABELS } from "./owner-labels";
 import fs from "fs";
 import path from "path";
 
@@ -1029,26 +1030,29 @@ export async function help(
   args: string[],
   context: CommandContext
 ): Promise<CommandResult> {
-  const commands = [
-    { cmd: "add_key <provider> <key>", desc: "إضافة مفتاح API جديد" },
-    { cmd: "remove_key <provider> [key_id]", desc: "حذف مفتاح API" },
-    { cmd: "list_keys [provider]", desc: "عرض المفاتيح (مقنعة)" },
-    { cmd: "rate_limit <endpoint> <limit>", desc: "تحديث حد الطلبات" },
-    { cmd: "send_notification <message>", desc: "إرسال إشعار Telegram" },
-    { cmd: "show_stats [days]", desc: "عرض إحصائيات الأداء" },
-    { cmd: "clear_cache [type]", desc: "مسح الذاكرة المؤقتة" },
-    { cmd: "restart_service <service>", desc: "إعادة تشغيل خدمة" },
-    { cmd: "backup_db", desc: "إنشاء نسخة احتياطية" },
-    { cmd: "evolve", desc: "تحليل التطور الذاتي واقتراح تحسينات" },
-    { cmd: "check_keys", desc: "مراقبة استخدام المفاتيح وتفعيل الاحتياطية" },
-    { cmd: "add_backup_key <provider> <key>", desc: "إضافة مفتاح احتياطي" },
-    { cmd: "read <url>", desc: "قراءة وملخص محتوى صفحة ويب" },
-    { cmd: "help", desc: "عرض هذه القائمة" },
+  // The shapes stay here (they say what arguments a command takes); the words the owner reads come
+  // from the one table in `owner-labels`, so a renamed command cannot keep an old sentence beside it.
+  const shapes = [
+    "add_key <provider> <key>",
+    "remove_key <provider> [key_id]",
+    "list_keys [provider]",
+    "rate_limit <endpoint> <limit>",
+    "send_notification <message>",
+    "show_stats [days]",
+    "clear_cache [type]",
+    "restart_service <service>",
+    "backup_db",
+    "evolve",
+    "check_keys",
+    "add_backup_key <provider> <key>",
+    "read <url>",
+    "help",
   ];
+  const commands = shapes.map((cmd) => ({ cmd, desc: COMMAND_LABELS[cmd.split(" ")[0]] ?? "أمر إداري" }));
 
   const helpText = commands
-    .map(c => `• ${c.cmd}\n  ${c.desc}`)
-    .join("\n\n");
+    .map(c => `• ${c.desc}`)
+    .join("\n");
 
   return {
     success: true,

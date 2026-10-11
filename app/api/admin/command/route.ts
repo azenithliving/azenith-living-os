@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { sendSecurityAlert, notifyInvalidSignature, notifyDangerousCommand } from "@/lib/telegram-notify";
 import { verifyCommandWithPublicKeyBase64 } from "@/lib/crypto-keys";
+import { commandLabel } from "@/lib/owner-labels";
 import crypto from "crypto";
 
 // قائمة الأوامر المسموح بها (whitelist)
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
       );
 
       return NextResponse.json(
-        { error: "Unauthorized - Authentication required" },
+        { error: "لازم تسجّل الدخول الأول" },
         { status: 401 }
       );
     }
@@ -62,14 +63,14 @@ export async function POST(request: NextRequest) {
 
     if (!command || typeof command !== "string") {
       return NextResponse.json(
-        { error: "Command is required" },
+        { error: "مفيش أمر مكتوب" },
         { status: 400 }
       );
     }
 
     if (!signature || typeof signature !== "string") {
       return NextResponse.json(
-        { error: "Digital signature is required" },
+        { error: "التوقيع الرقمي مطلوب" },
         { status: 400 }
       );
     }
@@ -82,16 +83,18 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (faError || !user2FA?.is_enabled) {
+      // He reads this on Telegram. It was an English alert naming the account, the command and the
+      // time — the same class the site watcher was fixed for: an alert in a language he does not read.
       await sendSecurityAlert(
-        `⚠️ COMMAND ATTEMPT WITHOUT 2FA\n` +
-        `User: ${user.email}\n` +
-        `Command: ${command}\n` +
-        `Time: ${new Date().toISOString()}\n` +
-        `IP: ${request.headers.get("x-forwarded-for") || "unknown"}`
+        `⚠️ محاولة تنفيذ أمر من غير التحقق الثنائي\n` +
+        `الحساب: ${user.email}\n` +
+        `الأمر: ${commandLabel(command)}\n` +
+        `الوقت: ${new Date().toLocaleString("ar-EG", { timeZone: "Africa/Cairo" })}\n` +
+        `العنوان: ${request.headers.get("x-forwarded-for") || "غير معروف"}`
       );
 
       return NextResponse.json(
-        { error: "2FA must be enabled to execute commands" },
+        { error: "لازم تشغّل التحقق الثنائي قبل تنفيذ الأوامر" },
         { status: 403 }
       );
     }
@@ -105,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     if (keyError || !publicKeyData) {
       return NextResponse.json(
-        { error: "No public key found. Please setup digital signatures first." },
+        { error: "مفيش مفتاح عام مسجّل — ظبّط التواقيع الرقمية الأول" },
         { status: 400 }
       );
     }
@@ -136,7 +139,7 @@ export async function POST(request: NextRequest) {
       );
 
       return NextResponse.json(
-        { error: "Invalid digital signature. This incident has been logged." },
+        { error: "التوقيع الرقمي غير سليم — والمحاولة اتسجّلت" },
         { status: 403 }
       );
     }
@@ -156,7 +159,7 @@ export async function POST(request: NextRequest) {
       );
 
       return NextResponse.json(
-        { error: "Command not allowed. Contact system administrator." },
+        { error: "الأمر ده مش مسموح — كلّم مسؤول النظام" },
         { status: 403 }
       );
     }
@@ -240,7 +243,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Command Execution Error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "حصل خطأ في السيرفر" },
       { status: 500 }
     );
   }
@@ -365,7 +368,7 @@ export async function GET(request: NextRequest) {
     
     if (authError || !user) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: "لازم تسجّل الدخول" },
         { status: 401 }
       );
     }
@@ -379,7 +382,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       return NextResponse.json(
-        { error: "Failed to fetch command history" },
+        { error: "سجل الأوامر ما جاش" },
         { status: 500 }
       );
     }
@@ -392,7 +395,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Get Commands Error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "حصل خطأ في السيرفر" },
       { status: 500 }
     );
   }

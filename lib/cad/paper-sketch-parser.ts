@@ -279,7 +279,7 @@ export async function readPaperSketch(input: {
     if (customerNumbers.length) oneSided.push('كلام العميل');
     return {
       ok: false,
-      failure: `القارئ الذكي مرفوض دلوقتي (${shortError(model.error)}) — ${
+      failure: `القارئ الذكي مرفوض دلوقتي (${readerFailureWords(model.error)}) — ${
         oneSided.length ? `الأرقام دي من ${oneSided.join(' و ')}، وشاهد واحد ما بيكفيش` : 'مفيش رقم جه من شاهد تاني'
       }`,
       room,
@@ -377,10 +377,12 @@ const ERROR_CLASSES: Array<[RegExp, string]> = [
   [/5\d\d|internal|server error/i, "المزود وقع منه خطأ"],
 ];
 
-function shortError(message: string | undefined | null): string {
+export function readerFailureWords(message: string | undefined | null): string {
   const text = String(message ?? '').replace(/\s+/g, ' ').trim();
   if (!text) return 'سبب غير معروف';
-  const status = text.match(/\b(?:4\d\d|5\d\d)\b/)?.[1];
+  // Group 0, not 1: the alternation is non-capturing, so `[1]` was always undefined and no code ever
+  // reached his screen. Found by the test written before this line.
+  const status = text.match(/\b(?:4\d\d|5\d\d)\b/)?.[0];
   // His digits, not the provider's: a Latin number on his screen is the same defect as a Latin word.
   const code = status ? ` (${status.replace(/[0-9]/g, (d) => String.fromCodePoint(0x0660 + Number(d)))})` : "";
   for (const [re, ar] of ERROR_CLASSES) if (re.test(text)) return ar + code;

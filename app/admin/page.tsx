@@ -193,7 +193,7 @@ export default function AdminPage() {
           href: "/admin/agents",
         },
         {
-          title: "تفاعلات AI",
+          title: "تفاعلات المساعد",
           value: mastermind.commands?.total || 0,
           subtitle: mastermind.commands?.last24h ? `${mastermind.commands.last24h} في آخر 24 ساعة` : "هذا الشهر",
           icon: <Brain className="h-6 w-6" />,
@@ -579,7 +579,7 @@ export default function AdminPage() {
                 <Brain className="w-6 h-6 text-amber-300" />
               </div>
               <h3 className="text-lg font-bold text-white group-hover:text-amber-300 transition-colors">استوديو سرب أزينث</h3>
-              <p className="text-sm text-white/60 mt-2">8 وكلاء متخصصون: تدقيق، مسودات، تجارب A/B، جودة ومراقبة</p>
+              <p className="text-sm text-white/60 mt-2">{arNum(8)} موظفين متخصصين: تدقيق، مسودات، تجارب مقارنة، جودة ومراقبة</p>
             </Link>
 
             <Link href="/admin/sales" className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-[#C5A059]/30 hover:bg-white/[0.05]">
