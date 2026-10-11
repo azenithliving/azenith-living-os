@@ -61,10 +61,18 @@ describe("the chat surface actually uses it", () => {
 
   it("imports the splitter and marks what it drew", () => {
     expect(panel).toContain('from \'@/lib/talk/emphasis\'');
-    expect(panel).toContain("splitEmphasis(part)");
+    expect(panel).toContain("splitEmphasis(text)");
     expect(panel).toContain('data-emphasis="bold"');
     expect(panel).toContain('data-emphasis="em"');
     expect(panel).toContain('data-emphasis="code"');
+  });
+
+  it("reads the markers before it cuts the line on a bare address", () => {
+    // The defect this guard exists for: the chat used to split prose on every URL first, so half a
+    // markdown link reached the splitter («[اسم](») and his screen printed its brackets. Measured on
+    // his leader's chat 2026-10-12, and no test of the splitter alone could see it.
+    const inline = panel.slice(panel.indexOf("const renderInline"));
+    expect(inline.indexOf("splitEmphasis(text)")).toBeLessThan(inline.indexOf("split(INLINE_LINK)"));
   });
 
   it("draws a link with the same inline pass inside a table cell", () => {

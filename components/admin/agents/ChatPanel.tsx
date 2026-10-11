@@ -250,59 +250,63 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
   // P5-M2: any site path or URL inside prose becomes a real clickable link
   const INLINE_LINK = /(https?:\/\/[^\s)>\]"'،]+|(?<![\w/])\/[A-Za-z0-9\-_./%]+[A-Za-z0-9\-_/])/g;
   const IMAGE_URL = /\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i;
-  const renderInline = (text: string) => {
-    const parts = text.split(INLINE_LINK);
-    return parts.map((part, i) =>
-      part && IMAGE_URL.test(part) && onZoom ? (
-        // Any picture named in the conversation is pressable: one press opens it over
-        // the thread with a zoom, one press puts it back. A link he has to leave the
-        // chat to look at is not a preview.
-        <button
+  // Emphasis first, bare addresses second. The order is the whole rule: this used to cut the line on
+  // every URL BEFORE the markers were read, so «[اسم](https://…/x)» came apart as «[اسم](» + a live
+  // address + «)», no piece of it looked like a link any more, and his screen kept the brackets. A
+  // test on the splitter alone could not see it — only this function's order can.
+  const renderInline = (text: string) =>
+    splitEmphasis(text).map((chunk, i) =>
+      chunk.kind === "bold" ? (
+        <strong key={i} className="font-bold text-white" data-emphasis="bold">
+          {chunk.value}
+        </strong>
+      ) : chunk.kind === "em" ? (
+        <em key={i} data-emphasis="em">
+          {chunk.value}
+        </em>
+      ) : chunk.kind === "code" ? (
+        <code key={i} data-emphasis="code" className="rounded bg-black/40 px-1 py-0.5 text-[12px]" dir="ltr">
+          {chunk.value}
+        </code>
+      ) : chunk.kind === "link" ? (
+        // An address the model named in Arabic gets its Arabic name on the screen and its address
+        // behind the press — a bare URL inside an Arabic line reorders the whole line.
+        <a
           key={i}
-          data-image-preview={part}
-          onClick={() => onZoom(part, 'صورة من المحادثة')}
-          className="my-1 block text-right"
+          href={chunk.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-emphasis="link"
+          className="text-sky-300 hover:underline"
         >
-          <img src={part} alt="صورة مرفقة" className="max-h-40 rounded-lg border border-white/10 object-contain" />
-        </button>
-      ) : part && /^(https?:\/\/|\/[A-Za-z])/.test(part) ? (
-        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-sky-300 hover:underline" dir="ltr">{part}</a>
+          {chunk.value}
+        </a>
       ) : (
         <span key={i}>
-          {splitEmphasis(part).map((chunk, j) =>
-            chunk.kind === "bold" ? (
-              <strong key={j} className="font-bold text-white" data-emphasis="bold">
-                {chunk.value}
-              </strong>
-            ) : chunk.kind === "em" ? (
-              <em key={j} data-emphasis="em">
-                {chunk.value}
-              </em>
-            ) : chunk.kind === "code" ? (
-              <code key={j} data-emphasis="code" className="rounded bg-black/40 px-1 py-0.5 text-[12px]" dir="ltr">
-                {chunk.value}
-              </code>
-            ) : chunk.kind === "link" ? (
-              // An address the model named in Arabic gets its Arabic name on the screen and its
-              // address behind the press — a bare URL in an Arabic line reorders the whole line.
-              <a
-                key={j}
-                href={chunk.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-emphasis="link"
-                className="text-sky-300 hover:underline"
-              >
-                {chunk.value}
-              </a>
-            ) : (
-              <span key={j}>{chunk.value}</span>
-            )
-          )}
+          {String(chunk.value)
+            .split(INLINE_LINK)
+            .map((part, j) =>
+              part && IMAGE_URL.test(part) && onZoom ? (
+                // Any picture named in the conversation is pressable: one press opens it over
+                // the thread with a zoom, one press puts it back. A link he has to leave the
+                // chat to look at is not a preview.
+                <button
+                  key={`${i}-${j}`}
+                  data-image-preview={part}
+                  onClick={() => onZoom(part, 'صورة من المحادثة')}
+                  className="my-1 block text-right"
+                >
+                  <img src={part} alt="صورة مرفقة" className="max-h-40 rounded-lg border border-white/10 object-contain" />
+                </button>
+              ) : part && /^(https?:\/\/|\/[A-Za-z])/.test(part) ? (
+                <a key={`${i}-${j}`} href={part} target="_blank" rel="noopener noreferrer" className="text-sky-300 hover:underline" dir="ltr">{part}</a>
+              ) : (
+                <span key={`${i}-${j}`}>{part}</span>
+              )
+            )}
         </span>
       )
     );
-  };
   const flushTable = () => {
     if (tableRows.length > 0) {
       const header = tableRows[0];
