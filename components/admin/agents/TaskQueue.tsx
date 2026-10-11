@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { agentLabel } from '@/lib/ops/identity';
 
 interface Task {
   id: string;
@@ -125,7 +126,7 @@ export function TaskQueue() {
                       {getStatusText(task.status)}
                     </span>
                     <span className="text-xs text-gray-700">
-                      {task.agent_profiles?.name || task.agent_profiles?.agent_key}
+                      {task.agent_profiles?.name || agentLabel(task.agent_profiles?.agent_key ?? '')}
                     </span>
                   </div>
                   <p className="font-medium text-gray-900">{task.title}</p>

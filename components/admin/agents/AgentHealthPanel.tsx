@@ -9,6 +9,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Heart, Cpu, Zap, TrendingUp, AlertTriangle, CheckCircle, RefreshCw, Loader2 } from 'lucide-react';
+import { agentLabel } from '@/lib/ops/identity';
 
 interface AgentHealth {
   agent:          string;
@@ -204,7 +205,7 @@ export function AgentHealthPanel() {
                     <div className={`w-2 h-2 rounded-full ${sc.dot} shrink-0`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold uppercase">{agent.agent}</span>
+                        <span className="text-xs font-bold">{agentLabel(agent.agent)}</span>
                         <span className={`text-[10px] ${sc.color}`}>{sc.label}</span>
                       </div>
                       {agent.taskCount > 0 && (

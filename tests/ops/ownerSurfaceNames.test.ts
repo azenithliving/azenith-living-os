@@ -88,7 +88,15 @@ describe("the owner's surfaces name the swarm by its live roles", () => {
     expect(oldHouse).toContain("{agentLabel(key)}");
     expect(oldHouse).not.toContain("key.toUpperCase()");
     const dashboard = readFileSync("app/admin/page.tsx", "utf8");
-    expect(dashboard).toContain("ownerVoice((cmd.command ?? \"\").slice(0, 60))");
+    expect(dashboard).toContain('ownerVoice((cmd.command ?? "").slice(0, 60))');
+    // Measured on the same screen after the first pass: the health panel's rows and the task queue's
+    // owner column were still printing the key straight out of the row.
+    const health = readFileSync("components/admin/agents/AgentHealthPanel.tsx", "utf8");
+    expect(health).toContain("{agentLabel(agent.agent)}");
+    // The only raw key left in the file is React's list key, which renders nothing.
+    expect(health).not.toContain(">{agent.agent}<");
+    const queue = readFileSync("components/admin/agents/TaskQueue.tsx", "utf8");
+    expect(queue).toContain("agentLabel(task.agent_profiles?.agent_key ?? '')");
   });
 });
 
