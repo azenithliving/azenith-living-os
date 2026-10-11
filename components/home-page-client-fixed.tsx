@@ -338,7 +338,7 @@ export default function HomePageClient({ runtimeConfig, initialRoomImages = {} }
                   <Sparkles className="h-4 w-4 animate-pulse text-[#C5A059]" />
                   <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C5A059] animate-pulse">{isRTL ? "الخطوة الحصرية" : "EXCLUSIVE STEP"}</span>
                 </div>
-                <h4 className="mb-4 text-xl font-bold text-white">{isRTL ? "جاهز لتصميم مساحتك؟" : "Ready to design your space?"}</h4>
+                <h3 className="mb-4 text-xl font-bold text-white">{isRTL ? "جاهز لتصميم مساحتك؟" : "Ready to design your space?"}</h3>
                 <p className="mb-6 text-sm leading-tight text-white/80">{isRTL ? "ابدأ الآن مسار تصميم مخصص يناسب ذوقك واحتياجك الحقيقي." : "Start a custom design path tailored to your taste and real needs."}</p>
                 <Link
                   href="/start"

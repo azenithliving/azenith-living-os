@@ -618,9 +618,9 @@ export default function RoomPageClient({
                       <span className="text-xs font-medium uppercase tracking-wider text-amber-400">
                         {arabicNumerals(isRTL ? `معلومة تصميمية - الدفعة ${batchIndex + 1}` : `Design Tip - Batch ${batchIndex + 1}`)}
                       </span>
-                      <h3 className="mt-1 text-xl font-bold text-white">
+                      <h2 className="mt-1 text-xl font-bold text-white">
                         {arabicNumerals(isRTL ? tip.title : ((tip as any).titleEn || tip.title))}
-                      </h3>
+                      </h2>
                       <p className="mt-2 text-base leading-relaxed text-gray-300">
                         {arabicNumerals(isRTL ? tip.content : ((tip as any).contentEn || tip.content))}
                       </p>

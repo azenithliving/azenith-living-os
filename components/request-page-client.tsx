@@ -349,7 +349,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   className="space-y-6"
                 >
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white">{isRTL ? "أولاً: ما هو نوع العقار المستهدف؟" : "1. What type of property is this?"}</h3>
+                    <h2 className="text-lg font-semibold text-white">{isRTL ? "أولاً: ما هو نوع العقار المستهدف؟" : "1. What type of property is this?"}</h2>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                       {PROPERTY_TYPES.map(type => (
                         <button
@@ -382,7 +382,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   </div>
 
                   <div className="space-y-4 pt-4 border-t border-white/5">
-                    <h3 className="text-lg font-semibold text-white">{isRTL ? "ثانياً: ما هي الحالة الإنشائية الحالية للموقع؟" : "2. What is the current status of the site?"}</h3>
+                    <h2 className="text-lg font-semibold text-white">{isRTL ? "ثانياً: ما هي الحالة الإنشائية الحالية للموقع؟" : "2. What is the current status of the site?"}</h2>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
                       {PROPERTY_STATUSES.map(status => (
                         <button
@@ -415,7 +415,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   </div>
 
                   <div className="space-y-4 pt-4 border-t border-white/5">
-                    <h3 className="text-lg font-semibold text-white">{isRTL ? "ثالثاً: ما هي الفراغات المطلوب تصميمها وتجهيزها؟ (اختيارات متعددة)" : "3. Which spaces need design work? (Multi-select)"}</h3>
+                    <h2 className="text-lg font-semibold text-white">{isRTL ? "ثالثاً: ما هي الفراغات المطلوب تصميمها وتجهيزها؟ (اختيارات متعددة)" : "3. Which spaces need design work? (Multi-select)"}</h2>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                       {SPACES.map(space => {
                         const isSelected = selectedSpaces.includes(space.value);
@@ -462,7 +462,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   className="space-y-6"
                 >
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white">{isRTL ? "رابعاً: ما هي فئة الميزانية والتشطيب المستهدفة؟" : "4. What is your target budget grade?"}</h3>
+                    <h2 className="text-lg font-semibold text-white">{isRTL ? "رابعاً: ما هي فئة الميزانية والتشطيب المستهدفة؟" : "4. What is your target budget grade?"}</h2>
                     <div className="flex flex-col gap-3">
                       {BUDGET_GRADES.map(grade => (
                         <button
@@ -496,7 +496,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   </div>
 
                   <div className="space-y-4 pt-4 border-t border-white/5">
-                    <h3 className="text-lg font-semibold text-white">{isRTL ? "خامساً: ما هو الجدول الزمني المستهدف لتسليم المشروع؟" : "5. What is your target timeline for execution?"}</h3>
+                    <h2 className="text-lg font-semibold text-white">{isRTL ? "خامساً: ما هو الجدول الزمني المستهدف لتسليم المشروع؟" : "5. What is your target timeline for execution?"}</h2>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       {TIMELINES.map(time => (
                         <button
@@ -540,7 +540,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   className="space-y-6"
                 >
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white">{isRTL ? "سادساً: ما هو الأسلوب المعماري والنمط المفضل لديك؟" : "6. What is your preferred design style?"}</h3>
+                    <h2 className="text-lg font-semibold text-white">{isRTL ? "سادساً: ما هو الأسلوب المعماري والنمط المفضل لديك؟" : "6. What is your preferred design style?"}</h2>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
                       {STYLES.map(style => (
                         <button
@@ -573,7 +573,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   </div>
 
                   <div className="space-y-4 pt-4 border-t border-white/5">
-                    <h3 className="text-lg font-semibold text-white">{isRTL ? "سابعاً: ما هي الأولوية والهدف الأكبر لك في هذا المشروع؟" : "7. What is your primary priority/goal for this project?"}</h3>
+                    <h2 className="text-lg font-semibold text-white">{isRTL ? "سابعاً: ما هي الأولوية والهدف الأكبر لك في هذا المشروع؟" : "7. What is your primary priority/goal for this project?"}</h2>
                     <div className="flex flex-col gap-3">
                       {FOCUSES.map(focus => (
                         <button
@@ -617,7 +617,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   exit={{ opacity: 0, x: isRTL ? -20 : 20 }}
                   className="space-y-6"
                 >
-                  <h3 className="text-lg font-semibold text-white">{isRTL ? "ثامناً: بيانات الاتصال لتسجيل المتطلبات وحجز الجلسة المعمارية" : "8. Contact Details to Save Your Brief"}</h3>
+                  <h2 className="text-lg font-semibold text-white">{isRTL ? "ثامناً: بيانات الاتصال لتسجيل المتطلبات وحجز الجلسة المعمارية" : "8. Contact Details to Save Your Brief"}</h2>
                   <div className="grid gap-5 sm:grid-cols-2">
                     <label className="space-y-2">
                       <span className="text-xs font-semibold text-white/60">{isRTL ? "الاسم الكامل" : "Full Name"}</span>
@@ -805,7 +805,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   currentStep >= 1 ? "bg-[#C5A059] text-black" : "bg-[#1C1C1E] text-white/40 border border-white/5"
                 }`}>{arabicNumerals("1")}</div>
                 <div>
-                  <h4 className="text-sm font-semibold text-white">{isRTL ? "المعاينة الفنية ورفع المقاسات" : "Technical Survey"}</h4>
+                  <h3 className="text-sm font-semibold text-white">{isRTL ? "المعاينة الفنية ورفع المقاسات" : "Technical Survey"}</h3>
                   <p className="mt-1 text-xs text-white/50 leading-relaxed">
                     {isRTL 
                       ? "زيارة مهندسينا لرفع المقاسات الدقيقة وفحص الحالة الإنشائية وجدول المناسيب."
@@ -820,7 +820,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   currentStep >= 2 ? "bg-[#C5A059] text-black" : "bg-[#1C1C1E] text-white/40 border border-white/5"
                 }`}>{arabicNumerals("2")}</div>
                 <div>
-                  <h4 className="text-sm font-semibold text-white">{isRTL ? "المخططات الهندسية وتوزيع الفرش" : "2D Layouts & Planning"}</h4>
+                  <h3 className="text-sm font-semibold text-white">{isRTL ? "المخططات الهندسية وتوزيع الفرش" : "2D Layouts & Planning"}</h3>
                   <p className="mt-1 text-xs text-white/50 leading-relaxed">
                     {isRTL 
                       ? "رسم مخططات التوزيع المعماري وتحديد الحركة واللوحات المزاجية البصرية."
@@ -835,11 +835,11 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   currentStep >= 3 ? "bg-[#C5A059] text-black" : "bg-[#1C1C1E] text-white/40 border border-white/5"
                 }`}>{arabicNumerals("3")}</div>
                 <div>
-                  <h4 className="text-sm font-semibold text-white">
+                  <h3 className="text-sm font-semibold text-white">
                     {isRTL 
                       ? `صور مجسّمة وتحديد خامات ${finalStyle || "التصميم"}` 
                       : `3D Render & Materials`}
-                  </h4>
+                  </h3>
                   <p className="mt-1 text-xs text-white/50 leading-relaxed">
                     {isRTL 
                       ? "إنشاء صور ثلاثية الأبعاد كاملة، واختيار الألوان وجداول مواصفات التشطيب والكميات."
@@ -854,7 +854,7 @@ ${telemetrySummary ? `\n${telemetrySummary}` : ""}
                   currentStep >= 4 ? "bg-[#C5A059] text-black" : "bg-[#1C1C1E] text-white/40 border border-white/5"
                 }`}>{arabicNumerals("4")}</div>
                 <div>
-                  <h4 className="text-sm font-semibold text-white">{isRTL ? "التنفيذ الفعلي والإشراف الهندسي" : "Turnkey Execution & Curation"}</h4>
+                  <h3 className="text-sm font-semibold text-white">{isRTL ? "التنفيذ الفعلي والإشراف الهندسي" : "Turnkey Execution & Curation"}</h3>
                   <p className="mt-1 text-xs text-white/50 leading-relaxed">
                     {isRTL 
                       ? "البدء الفعلي للتشطيب ومطابقة المواصفات مع جدول تسليم المفتاح النهائي."
