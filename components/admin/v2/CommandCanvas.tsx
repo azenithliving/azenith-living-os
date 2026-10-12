@@ -291,7 +291,7 @@ function EmployeeCard({
               draws it the right way; the card was still printing it raw. */}
           {splitInline(teaser).map((chunk, i) =>
             chunk.kind === "math" ? (
-              <span key={i} data-inline="math" dir="ltr" className="whitespace-nowrap">
+              <span key={i} data-inline="math" dir="ltr" className="whitespace-nowrap" style={{ unicodeBidi: "isolate-override" }}>
                 {chunk.value}
               </span>
             ) : (

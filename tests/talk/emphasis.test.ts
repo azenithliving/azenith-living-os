@@ -217,6 +217,10 @@ describe("the chat surface draws both", () => {
   it("puts the equation in its own direction and the list through the bullet rule", () => {
     expect(panel).toContain('data-inline="math"');
     expect(panel).toContain("bracketListItems(line)");
+    // `dir="ltr"` was measured NOT to be enough: the isolated run still laid its Arabic-Indic digits
+    // out right-to-left. Of the seven ways tried on this browser, only `isolate-override` put the
+    // first character on the left (scratch/which-css-orders-math.mjs).
+    expect(panel).toContain('unicodeBidi: "isolate-override"');
   });
 
   it("draws the equation on the cockpit card too, where the row is printed as one line", () => {
@@ -225,5 +229,6 @@ describe("the chat surface draws both", () => {
     const canvas = readFileSync("components/admin/v2/CommandCanvas.tsx", "utf8");
     expect(canvas).toContain("splitInline(teaser)");
     expect(canvas).toContain('data-inline="math"');
+    expect(canvas).toContain('unicodeBidi: "isolate-override"');
   });
 });

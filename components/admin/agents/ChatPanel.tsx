@@ -272,7 +272,18 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
         // «٢× = ٥٤٠٠٠» in a right-to-left sentence is shown with its two sides swapped: each number
         // keeps its own order, and the mark between them follows the line. The run gets its own
         // direction — the word order is not touched, only which way it reads.
-        <span key={i} data-inline="math" dir="ltr" className="whitespace-nowrap">
+        //
+        // Measured on this browser 2026-10-12, `dir="ltr"` alone does NOT do it: the run is isolated
+        // and still laid out right-to-left (Arabic-Indic digits are resolved by the surrounding
+        // paragraph). `isolate-override` is the one of the seven ways tried that puts the first
+        // character on the left, and the run never contains an Arabic word to override.
+        <span
+          key={i}
+          data-inline="math"
+          dir="ltr"
+          className="whitespace-nowrap"
+          style={{ unicodeBidi: "isolate-override" }}
+        >
           {chunk.value}
         </span>
       ) : chunk.kind === "link" ? (
