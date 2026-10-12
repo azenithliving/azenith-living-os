@@ -23,8 +23,8 @@ export function SectionIntake({
     <div className="min-h-[70vh] p-4 pt-16 sm:p-6 sm:pt-8" dir="rtl">
       <div className="mx-auto max-w-xl">
         <h1 className="text-xl font-black text-white">{title}</h1>
-        <p className="mt-2 text-[12px] leading-relaxed text-white/45">{purpose}</p>
-        <p className="mt-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.015] px-4 py-3 text-[11px] leading-relaxed text-white/45">
+        <p className="mt-2 text-[12px] leading-relaxed text-white/70">{purpose}</p>
+        <p className="mt-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.015] px-4 py-3 text-[11px] leading-relaxed text-white/70">
           نقل هذا القسم لسه ما اكتملش. السجل هو العدد: كل ذرة هنا ليها سطر، والسطر بيتقفل
           ببرهان من شاشة الموبايل مش بكتابة الملف.
         </p>

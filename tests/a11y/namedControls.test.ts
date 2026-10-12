@@ -109,6 +109,9 @@ const ownerScreens = [
   "components/admin/agents/SelfModelPanel.tsx",
   "components/admin/agents/ApprovalDecisionBlock.tsx",
   "components/admin/agents/CommandPalette.tsx",
+  // The one section header five cockpit screens share. Its two faint lines measured 4.48 against the
+  // 4.5 floor — a hair under, and under is under.
+  "components/admin/v2/SectionIntake.tsx",
 ];
 
 const FAINT = /(?<![\w-])text-white\/(?:20|25|30|35|40|45|50|55|60)\b/g;
