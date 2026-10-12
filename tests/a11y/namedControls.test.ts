@@ -112,6 +112,9 @@ const ownerScreens = [
   // The one section header five cockpit screens share. Its two faint lines measured 4.48 against the
   // 4.5 floor — a hair under, and under is under.
   "components/admin/v2/SectionIntake.tsx",
+  // The shelf desk the owner types a ready piece into, and the page a visitor reads it on.
+  "components/admin/shop/ShopDesk.tsx",
+  "app/shop/page.tsx",
 ];
 
 const FAINT = /(?<![\w-])text-white\/(?:20|25|30|35|40|45|50|55|60)\b/g;

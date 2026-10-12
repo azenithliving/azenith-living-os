@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/`, lastModified, changeFrequency: "weekly", priority: 1 },
     { url: `${siteUrl}/about`, lastModified, changeFrequency: "monthly", priority: 0.8 },
     { url: `${siteUrl}/rooms`, lastModified, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${siteUrl}/shop`, lastModified, changeFrequency: "weekly", priority: 0.85 },
     { url: `${siteUrl}/request`, lastModified, changeFrequency: "weekly", priority: 0.7 },
     { url: `${siteUrl}/start`, lastModified, changeFrequency: "weekly", priority: 0.9 },
     { url: `${siteUrl}/furniture`, lastModified, changeFrequency: "weekly", priority: 0.75 },

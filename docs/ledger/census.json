@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-05T20:09:29.210Z",
+  "generatedAt": "2026-10-12T23:48:18.116Z",
   "counts": {
     "oldPages": 17,
-    "oldPageLines": 5010,
-    "newPages": 13,
-    "newPageLines": 833,
-    "adminDoors": 119,
-    "allDoors": 202,
+    "oldPageLines": 5042,
+    "newPages": 14,
+    "newPageLines": 842,
+    "adminDoors": 121,
+    "allDoors": 206,
     "outsideDoors": 8,
-    "outsideDoorLines": 2583,
-    "rootLibFiles": 279,
-    "rootLibUsed": 81,
-    "orphanDoors": 75,
-    "rootLibUsedLines": 29334,
-    "furnitureFiles": 57,
-    "furnitureLines": 15629,
-    "furnitureUsedByBoth": 6,
-    "furnitureBothLines": 2391,
-    "furnitureNewOnly": 18,
+    "outsideDoorLines": 2600,
+    "rootLibFiles": 292,
+    "rootLibUsed": 89,
+    "orphanDoors": 77,
+    "rootLibUsedLines": 31009,
+    "furnitureFiles": 59,
+    "furnitureLines": 16410,
+    "furnitureUsedByBoth": 7,
+    "furnitureBothLines": 2896,
+    "furnitureNewOnly": 19,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
-    "swarmFiles": 65,
-    "swarmFileLines": 15063,
+    "swarmFiles": 73,
+    "swarmFileLines": 16469,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
-    "navEntries": 11,
+    "navEntries": 12,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 493
+    "atoms": 517
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -55,7 +55,7 @@
     {
       "kind": "old-page",
       "id": "app/admin/database/page.tsx",
-      "lines": 290
+      "lines": 312
     },
     {
       "kind": "old-page",
@@ -85,7 +85,7 @@
     {
       "kind": "old-page",
       "id": "app/admin/page.tsx",
-      "lines": 864
+      "lines": 874
     },
     {
       "kind": "old-page",
@@ -140,7 +140,7 @@
     {
       "kind": "new-page",
       "id": "app/admin/v2/keys/page.tsx",
-      "lines": 274
+      "lines": 275
     },
     {
       "kind": "new-page",
@@ -169,8 +169,13 @@
     },
     {
       "kind": "new-page",
+      "id": "app/admin/v2/shop/page.tsx",
+      "lines": 6
+    },
+    {
+      "kind": "new-page",
       "id": "app/admin/v2/sketches/page.tsx",
-      "lines": 309
+      "lines": 311
     },
     {
       "kind": "new-page",
@@ -739,6 +744,11 @@
     },
     {
       "kind": "admin-door",
+      "id": "app/api/admin/shop/route.ts",
+      "resource": "admin/shop"
+    },
+    {
+      "kind": "admin-door",
       "id": "app/api/admin/silent/route.ts",
       "resource": "admin/silent"
     },
@@ -746,6 +756,11 @@
       "kind": "admin-door",
       "id": "app/api/admin/sovereign/pulse/route.ts",
       "resource": "admin/sovereign/pulse"
+    },
+    {
+      "kind": "admin-door",
+      "id": "app/api/admin/speech/route.ts",
+      "resource": "admin/speech"
     },
     {
       "kind": "admin-door",
@@ -804,7 +819,7 @@
     {
       "kind": "outside-door",
       "id": "app/api/consultant/route.ts",
-      "lines": 1504,
+      "lines": 1515,
       "callers": 1
     },
     {
@@ -816,7 +831,7 @@
     {
       "kind": "outside-door",
       "id": "app/api/system-health/route.ts",
-      "lines": 117,
+      "lines": 123,
       "callers": 2
     },
     {
@@ -841,7 +856,7 @@
       "kind": "root-lib",
       "id": "lib/admin-api-auth.ts",
       "lines": 45,
-      "callers": 10
+      "callers": 11
     },
     {
       "kind": "root-lib",
@@ -900,13 +915,13 @@
     {
       "kind": "root-lib",
       "id": "lib/admin-natural-brain.ts",
-      "lines": 502,
+      "lines": 512,
       "callers": 4
     },
     {
       "kind": "root-lib",
       "id": "lib/admin-nav.ts",
-      "lines": 115,
+      "lines": 116,
       "callers": 1
     },
     {
@@ -954,7 +969,7 @@
     {
       "kind": "root-lib",
       "id": "lib/agents/AgentOrchestrator.ts",
-      "lines": 867,
+      "lines": 927,
       "callers": 1
     },
     {
@@ -972,7 +987,7 @@
     {
       "kind": "root-lib",
       "id": "lib/analytics.ts",
-      "lines": 236,
+      "lines": 232,
       "callers": 1
     },
     {
@@ -983,8 +998,14 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/arabic.ts",
+      "lines": 83,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/architect-tools.ts",
-      "lines": 1211,
+      "lines": 1243,
       "callers": 1
     },
     {
@@ -1002,19 +1023,19 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/dossier.ts",
-      "lines": 418,
+      "lines": 394,
       "callers": 2
     },
     {
       "kind": "root-lib",
       "id": "lib/cad/family-votes.ts",
-      "lines": 113,
+      "lines": 144,
       "callers": 1
     },
     {
       "kind": "root-lib",
       "id": "lib/cad/paper-sketch-parser.ts",
-      "lines": 390,
+      "lines": 424,
       "callers": 1
     },
     {
@@ -1032,13 +1053,19 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/room-labels.ts",
-      "lines": 45,
+      "lines": 92,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/cad/room-names.ts",
+      "lines": 70,
       "callers": 1
     },
     {
       "kind": "root-lib",
       "id": "lib/cad/sheet-images.ts",
-      "lines": 122,
+      "lines": 226,
       "callers": 1
     },
     {
@@ -1050,14 +1077,14 @@
     {
       "kind": "root-lib",
       "id": "lib/command-executor.ts",
-      "lines": 1165,
+      "lines": 1226,
       "callers": 2
     },
     {
       "kind": "root-lib",
       "id": "lib/company-resolver.ts",
       "lines": 40,
-      "callers": 4
+      "callers": 5
     },
     {
       "kind": "root-lib",
@@ -1086,7 +1113,7 @@
     {
       "kind": "root-lib",
       "id": "lib/consultant/store-facts.ts",
-      "lines": 166,
+      "lines": 188,
       "callers": 1
     },
     {
@@ -1098,19 +1125,25 @@
     {
       "kind": "root-lib",
       "id": "lib/customers/capture.ts",
-      "lines": 120,
+      "lines": 174,
       "callers": 1
     },
     {
       "kind": "root-lib",
+      "id": "lib/customers/identity.ts",
+      "lines": 93,
+      "callers": 3
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/customers/match.ts",
-      "lines": 89,
+      "lines": 92,
       "callers": 2
     },
     {
       "kind": "root-lib",
       "id": "lib/customers/read.ts",
-      "lines": 167,
+      "lines": 194,
       "callers": 3
     },
     {
@@ -1170,8 +1203,14 @@
     {
       "kind": "root-lib",
       "id": "lib/mastermind-ai.ts",
-      "lines": 895,
+      "lines": 896,
       "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/owner-labels.ts",
+      "lines": 61,
+      "callers": 2
     },
     {
       "kind": "root-lib",
@@ -1218,7 +1257,25 @@
     {
       "kind": "root-lib",
       "id": "lib/sentinel.ts",
-      "lines": 374,
+      "lines": 668,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/seo.ts",
+      "lines": 335,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/shop/rule.ts",
+      "lines": 46,
+      "callers": 1
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/shop/words.ts",
+      "lines": 19,
       "callers": 1
     },
     {
@@ -1237,7 +1294,7 @@
       "kind": "root-lib",
       "id": "lib/supabase-admin.ts",
       "lines": 21,
-      "callers": 32
+      "callers": 33
     },
     {
       "kind": "root-lib",
@@ -1260,19 +1317,25 @@
     {
       "kind": "root-lib",
       "id": "lib/talk/emphasis.ts",
-      "lines": 64,
-      "callers": 1
+      "lines": 146,
+      "callers": 2
     },
     {
       "kind": "root-lib",
       "id": "lib/telegram-config.ts",
-      "lines": 182,
+      "lines": 221,
+      "callers": 3
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/telegram-copy.ts",
+      "lines": 63,
       "callers": 3
     },
     {
       "kind": "root-lib",
       "id": "lib/telegram-notify.ts",
-      "lines": 142,
+      "lines": 173,
       "callers": 6
     },
     {
@@ -1324,7 +1387,7 @@
     {
       "kind": "orphan-door",
       "id": "app/api/analyze-image/route.ts",
-      "lines": 152
+      "lines": 185
     },
     {
       "kind": "orphan-door",
@@ -1384,7 +1447,7 @@
     {
       "kind": "orphan-door",
       "id": "app/api/cms/public-config/route.ts",
-      "lines": 71
+      "lines": 82
     },
     {
       "kind": "orphan-door",
@@ -1459,7 +1522,7 @@
     {
       "kind": "orphan-door",
       "id": "app/api/cron/ops-proactive/route.ts",
-      "lines": 86
+      "lines": 96
     },
     {
       "kind": "orphan-door",
@@ -1489,7 +1552,7 @@
     {
       "kind": "orphan-door",
       "id": "app/api/elite-leads/route.ts",
-      "lines": 168
+      "lines": 179
     },
     {
       "kind": "orphan-door",
@@ -1504,7 +1567,7 @@
     {
       "kind": "orphan-door",
       "id": "app/api/leads/route.ts",
-      "lines": 94
+      "lines": 96
     },
     {
       "kind": "orphan-door",
@@ -1559,7 +1622,7 @@
     {
       "kind": "orphan-door",
       "id": "app/api/passport/[token]/contact/route.ts",
-      "lines": 97
+      "lines": 116
     },
     {
       "kind": "orphan-door",
@@ -1569,12 +1632,12 @@
     {
       "kind": "orphan-door",
       "id": "app/api/passport/[token]/route.ts",
-      "lines": 226
+      "lines": 284
     },
     {
       "kind": "orphan-door",
       "id": "app/api/passport/[token]/votes/route.ts",
-      "lines": 88
+      "lines": 121
     },
     {
       "kind": "orphan-door",
@@ -1593,8 +1656,18 @@
     },
     {
       "kind": "orphan-door",
+      "id": "app/api/room-covers/route.ts",
+      "lines": 31
+    },
+    {
+      "kind": "orphan-door",
       "id": "app/api/room-sections/route.ts",
       "lines": 57
+    },
+    {
+      "kind": "orphan-door",
+      "id": "app/api/sheet/route.ts",
+      "lines": 119
     },
     {
       "kind": "orphan-door",
@@ -1695,14 +1768,20 @@
     {
       "kind": "furniture",
       "id": "components/admin/agents/AgentActionsFeed.tsx",
-      "lines": 230,
+      "lines": 235,
       "usedBy": "old-only"
     },
     {
       "kind": "furniture",
       "id": "components/admin/agents/AgentHealthPanel.tsx",
-      "lines": 234,
+      "lines": 235,
       "usedBy": "old-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/agents/ApprovalDecisionBlock.tsx",
+      "lines": 167,
+      "usedBy": "both"
     },
     {
       "kind": "furniture",
@@ -1713,13 +1792,13 @@
     {
       "kind": "furniture",
       "id": "components/admin/agents/ChatPanel.tsx",
-      "lines": 1523,
+      "lines": 1861,
       "usedBy": "both"
     },
     {
       "kind": "furniture",
       "id": "components/admin/agents/CommandConsole.tsx",
-      "lines": 172,
+      "lines": 173,
       "usedBy": "old-only"
     },
     {
@@ -1767,13 +1846,13 @@
     {
       "kind": "furniture",
       "id": "components/admin/agents/ProactiveSuggestions.tsx",
-      "lines": 240,
+      "lines": 241,
       "usedBy": "old-only"
     },
     {
       "kind": "furniture",
       "id": "components/admin/agents/ProposalDecisionCard.tsx",
-      "lines": 187,
+      "lines": 62,
       "usedBy": "new-only"
     },
     {
@@ -1797,7 +1876,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/agents/TaskQueue.tsx",
-      "lines": 162,
+      "lines": 165,
       "usedBy": "old-only"
     },
     {
@@ -1833,7 +1912,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/ClientPreCallDossier.tsx",
-      "lines": 308,
+      "lines": 313,
       "usedBy": "new-only"
     },
     {
@@ -1929,7 +2008,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/ops/QayyimGoalsPanel.tsx",
-      "lines": 193,
+      "lines": 195,
       "usedBy": "new-only"
     },
     {
@@ -1941,7 +2020,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/ops/QayyimProactiveSuggestions.tsx",
-      "lines": 136,
+      "lines": 139,
       "usedBy": "new-only"
     },
     {
@@ -1959,13 +2038,13 @@
     {
       "kind": "furniture",
       "id": "components/admin/ops/StudioPanel.tsx",
-      "lines": 346,
+      "lines": 348,
       "usedBy": "new-only"
     },
     {
       "kind": "furniture",
       "id": "components/admin/sales/CustomersPanel.tsx",
-      "lines": 949,
+      "lines": 1011,
       "usedBy": "new-only"
     },
     {
@@ -1978,6 +2057,12 @@
       "kind": "furniture",
       "id": "components/admin/settings/ConsultantFaqCard.tsx",
       "lines": 165,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
+      "id": "components/admin/shop/ShopDesk.tsx",
+      "lines": 303,
       "usedBy": "new-only"
     },
     {
@@ -2019,7 +2104,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/v2/CommandCanvas.tsx",
-      "lines": 297,
+      "lines": 310,
       "usedBy": "new-only"
     },
     {
@@ -2080,8 +2165,18 @@
     },
     {
       "kind": "swarm-file",
+      "id": "lib/ops/claims.ts",
+      "lines": 96
+    },
+    {
+      "kind": "swarm-file",
       "id": "lib/ops/command-canvas.ts",
-      "lines": 66
+      "lines": 94
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/conditions.ts",
+      "lines": 171
     },
     {
       "kind": "swarm-file",
@@ -2091,17 +2186,22 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/daily-story.ts",
-      "lines": 117
+      "lines": 127
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/debate.ts",
-      "lines": 59
+      "lines": 66
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/departments.ts",
-      "lines": 91
+      "lines": 92
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/draft-labels.ts",
+      "lines": 128
     },
     {
       "kind": "swarm-file",
@@ -2146,12 +2246,12 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/identity.ts",
-      "lines": 128
+      "lines": 171
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/inboxes.ts",
-      "lines": 99
+      "lines": 102
     },
     {
       "kind": "swarm-file",
@@ -2180,13 +2280,18 @@
     },
     {
       "kind": "swarm-file",
+      "id": "lib/ops/lead-heat.ts",
+      "lines": 70
+    },
+    {
+      "kind": "swarm-file",
       "id": "lib/ops/legacy-address-table.ts",
       "lines": 84
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/luxury-v2.ts",
-      "lines": 182
+      "lines": 186
     },
     {
       "kind": "swarm-file",
@@ -2226,17 +2331,27 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 345
+      "lines": 366
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/orchestrator/MasterOrchestrator.ts",
-      "lines": 842
+      "lines": 849
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/order-status.ts",
+      "lines": 28
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/owner-address.ts",
       "lines": 57
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/owner-voice.ts",
+      "lines": 412
     },
     {
       "kind": "swarm-file",
@@ -2246,7 +2361,12 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/proposal-card.ts",
-      "lines": 93
+      "lines": 122
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/provenance.ts",
+      "lines": 123
     },
     {
       "kind": "swarm-file",
@@ -2256,7 +2376,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/QayyimAgentBase.ts",
-      "lines": 490
+      "lines": 500
     },
     {
       "kind": "swarm-file",
@@ -2340,18 +2460,23 @@
     },
     {
       "kind": "swarm-file",
+      "id": "lib/ops/unread-marker.ts",
+      "lines": 51
+    },
+    {
+      "kind": "swarm-file",
       "id": "lib/ops/url-manifest.ts",
       "lines": 166
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/voice-continuous.ts",
-      "lines": 151
+      "lines": 312
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/world-model.ts",
-      "lines": 294
+      "lines": 297
     },
     {
       "kind": "view",
@@ -2697,6 +2822,10 @@
     {
       "kind": "nav-entry",
       "id": "/admin/v2/sketches"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/v2/shop"
     },
     {
       "kind": "nav-entry",

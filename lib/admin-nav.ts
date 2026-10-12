@@ -34,6 +34,7 @@ const BASE_NAV: NavCategory[] = [
       { href: "/admin/work", label: "مركز العمل", icon: "TrendingUp" },
       { href: "/admin/sales", label: "المبيعات", icon: "MessageSquare" },
       { href: "/admin/v2/sketches", label: "ورق المقاسات", icon: "ScanLine" },
+      { href: "/admin/v2/shop", label: "رفّ الجاهز", icon: "Store" },
       { href: "/admin/elite", label: "دعوات النخبة", icon: "Crown" },
     ],
   },

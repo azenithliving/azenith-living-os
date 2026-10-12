@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T20:09:29.213Z",
+  "generatedAt": "2026-10-12T23:48:18.133Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,8 +7,8 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 466,
-    "moved": 20,
+    "not-moved": 487,
+    "moved": 23,
     "moving": 6,
     "erased": 1
   },
@@ -168,6 +168,14 @@
       "kind": "new-page",
       "atom": "app/admin/v2/settings/page.tsx",
       "state": "not-moved"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/shop/page.tsx",
+      "state": "moved",
+      "phase": "shelf-1",
+      "when": "2026-10-13",
+      "proof": "the shelf desk mounted in the new house at its own address, named from the office map and reachable from the cockpit menu under العمل"
     },
     {
       "kind": "new-page",
@@ -762,12 +770,25 @@
     },
     {
       "kind": "admin-door",
+      "atom": "app/api/admin/shop/route.ts",
+      "state": "moved",
+      "phase": "shelf-1",
+      "when": "2026-10-13",
+      "proof": "one door writes and reads the products row, and it applies the same isDisplayable rule the visitor page reads, so the desk and the shelf cannot disagree; cost, stock and workshop columns are named in no file of this office"
+    },
+    {
+      "kind": "admin-door",
       "atom": "app/api/admin/silent/route.ts",
       "state": "not-moved"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/sovereign/pulse/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/speech/route.ts",
       "state": "not-moved"
     },
     {
@@ -972,6 +993,11 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/arabic.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/architect-tools.ts",
       "state": "not-moved"
     },
@@ -1022,6 +1048,11 @@
     {
       "kind": "root-lib",
       "atom": "lib/cad/room-labels.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/cad/room-names.ts",
       "state": "not-moved"
     },
     {
@@ -1080,6 +1111,11 @@
     {
       "kind": "root-lib",
       "atom": "lib/customers/capture.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/customers/identity.ts",
       "state": "not-moved"
     },
     {
@@ -1144,6 +1180,11 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/owner-labels.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/pdf-generator.ts",
       "state": "not-moved"
     },
@@ -1184,6 +1225,21 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/seo.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/shop/rule.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/shop/words.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/sovereign-os.ts",
       "state": "not-moved"
     },
@@ -1220,6 +1276,11 @@
     {
       "kind": "root-lib",
       "atom": "lib/telegram-config.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/telegram-copy.ts",
       "state": "not-moved"
     },
     {
@@ -1551,7 +1612,17 @@
     },
     {
       "kind": "orphan-door",
+      "atom": "app/api/room-covers/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
       "atom": "app/api/room-sections/route.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "orphan-door",
+      "atom": "app/api/sheet/route.ts",
       "state": "not-moved"
     },
     {
@@ -1657,6 +1728,11 @@
     {
       "kind": "furniture",
       "atom": "components/admin/agents/AgentHealthPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/agents/ApprovalDecisionBlock.tsx",
       "state": "not-moved"
     },
     {
@@ -1897,6 +1973,14 @@
     },
     {
       "kind": "furniture",
+      "atom": "components/admin/shop/ShopDesk.tsx",
+      "state": "moved",
+      "phase": "shelf-1",
+      "when": "2026-10-13",
+      "proof": "his own form: name, price in the currency word, one line, more detail, his photograph from the phone or a link; every row answers with what is missing (السعر، الصورة، موافقته) instead of a blank card, and hiding is reversible because erase is his word, never a button"
+    },
+    {
+      "kind": "furniture",
       "atom": "components/admin/sketches/SketchOwner.tsx",
       "state": "moved",
       "phase": "M2",
@@ -1990,7 +2074,17 @@
     },
     {
       "kind": "swarm-file",
+      "atom": "lib/ops/claims.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
       "atom": "lib/ops/command-canvas.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/conditions.ts",
       "state": "not-moved"
     },
     {
@@ -2011,6 +2105,11 @@
     {
       "kind": "swarm-file",
       "atom": "lib/ops/departments.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/draft-labels.ts",
       "state": "not-moved"
     },
     {
@@ -2093,6 +2192,11 @@
     },
     {
       "kind": "swarm-file",
+      "atom": "lib/ops/lead-heat.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
       "atom": "lib/ops/legacy-address-table.ts",
       "state": "not-moved"
     },
@@ -2148,7 +2252,17 @@
     },
     {
       "kind": "swarm-file",
+      "atom": "lib/ops/order-status.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
       "atom": "lib/ops/owner-address.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/owner-voice.ts",
       "state": "not-moved"
     },
     {
@@ -2159,6 +2273,11 @@
     {
       "kind": "swarm-file",
       "atom": "lib/ops/proposal-card.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/provenance.ts",
       "state": "not-moved"
     },
     {
@@ -2249,6 +2368,11 @@
     {
       "kind": "swarm-file",
       "atom": "lib/ops/task-reconcile.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/unread-marker.ts",
       "state": "not-moved"
     },
     {
@@ -2527,6 +2651,11 @@
     {
       "kind": "nav-entry",
       "atom": "/admin/v2/sketches",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/v2/shop",
       "state": "not-moved"
     },
     {

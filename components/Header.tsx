@@ -42,6 +42,9 @@ export default function Header() {
         className="fixed left-0 top-0 z-[100] flex h-20 w-full items-center justify-between overflow-visible px-6 md:h-24 md:px-12"
       >
         <nav dir="rtl" className="hidden items-center gap-8 text-sm font-medium text-white md:flex">
+          <Link href="/shop" className="transition-colors hover:text-[#C5A059]">
+            {!mounted ? 'المتجر' : (currentLang === 'ar' ? 'المتجر' : 'Shop')}
+          </Link>
           <Link href="/about" className="transition-colors hover:text-[#C5A059]">
             {!mounted ? 'من نحن' : (currentLang === 'ar' ? 'من نحن' : 'About Us')}
           </Link>
@@ -105,6 +108,9 @@ export default function Header() {
             className="fixed left-0 right-0 top-20 z-40 h-[calc(100dvh-5rem)] w-full overflow-y-auto backdrop-blur-lg md:hidden"
           >
             <div className="flex flex-col items-end space-y-6 px-6 py-8" dir="rtl">
+              <Link href="/shop" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
+                {!mounted ? 'المتجر' : (currentLang === 'ar' ? 'المتجر' : 'Shop')}
+              </Link>
               <Link href="/about" onClick={closeMobileMenu} className="text-lg font-light text-white transition-colors hover:text-[#C5A059]">
                 {!mounted ? 'من نحن' : (currentLang === 'ar' ? 'من نحن' : 'About Us')}
               </Link>

@@ -78,6 +78,17 @@ export const OFFICES: Office[] = [
     employees: ["موظف النخبة"],
   },
   {
+    id: "shelf-desk",
+    /**
+     * The ready-products shelf. Not an employee: the owner's business is made-to-order, so what
+     * stands here is his own decision to put an executed piece in front of a customer, and the
+     * desk only ever answers «إيه اللي على الرفّ وإيه اللي ناقص».
+     */
+    label: "رفّ الجاهز",
+    answers: "إيه القطعة اللي الجايز يلاقيها الزائر دلوقتي، وإيه اللي ناقص قبل ما يظهر",
+    employees: [],
+  },
+  {
     id: "records-office",
     label: "مكتب السجلات",
     answers: "إيه اللي اتعمل، ومين عمله، وهل اتنقل فعلاً ولا لأ",
@@ -141,6 +152,10 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^components\/admin\/agents\//, office: "swarm-house", reason: "عفش دار الموظفين" },
   { match: /^components\/admin\/ops\//, office: "swarm-house", reason: "عفش الاستوديو والمراقبة" },
   { match: /^components\/admin\/(dashboard|overview)\//, office: "decision-desk", reason: "عفش المؤشرات" },
+  { match: /^components\/admin\/shop\//, office: "shelf-desk", reason: "عفش الرفّ: اسمه وسعره وصورته وكلمة ظهوره" },
+  { match: /^app\/admin\/v2\/shop\//, office: "shelf-desk", reason: "طاولة الرفّ في البيت الجديد" },
+  { match: /^app\/api\/admin\/shop\//, office: "shelf-desk", reason: "بوّابة الرفّ: بتكتب منه وبتقرأ منه بنفس القاعدة" },
+  { match: /^lib\/shop\//, office: SHARED_OFFICE, reason: "قاعدة الرفّ نفسها: بيقرا منها صفحة الزائر وطاولة المالك معًا — مش ملك سطح واحد" },
   { match: /^lib\/ops\//, office: "swarm-house", reason: "جسم السرب نفسه" },
 
   // Second pass: the doors and furniture the first rules did not reach.
@@ -188,6 +203,7 @@ export const OFFICE_RULES: OfficeRule[] = [
    */
   { match: /^\/admin\/v2\/(agents|ops)\b/, office: "swarm-house", reason: "دار الموظفين في البيت الجديد" },
   { match: /^\/admin\/v2\/sales\b/, office: "sales-office", reason: "المبيعات في البيت الجديد" },
+  { match: /^\/admin\/v2\/shop\b/, office: "shelf-desk", reason: "رفّ الجاهز في البيت الجديد" },
   { match: /^\/admin\/v2\/elite\b/, office: "elite-room", reason: "النخبة في البيت الجديد" },
   { match: /^\/admin\/v2\/work\b/, office: "records-office", reason: "المتابعة في البيت الجديد" },
   { match: /^\/admin\/v2\/(system|settings|database)\b/, office: "system-room", reason: "النظام في البيت الجديد" },
@@ -229,6 +245,9 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "app/admin/v2/sales/page.tsx", office: "sales-office", status: "moved", reason: "مدير المبيعات — جسده وكيل المبيعات ومكتبه دفتر العميل" },
   { id: "components/admin/CockpitDoors.tsx", office: "decision-desk", status: "moved", reason: "بابا الكابينة في القائمة الجانبية: قرارات مستنية كلمتك بعددها الحيّ، والإيقاف الفوري" },
   { id: "app/admin/v2/sketches/page.tsx", office: "paper-desk", status: "moved", reason: "طاولة الورق: التصوير والحفظ والقراءة والسجل والربط بصاحب الورقة من الدفتر — كلها شغالة على العنوان الجديد" },
+  { id: "app/admin/v2/shop/page.tsx", office: "shelf-desk", status: "moved", reason: "طاولة الرفّ: يضيف القطعة باسمها وسعرها وصورته، ويخبّيها، ومن نفس السطر صفحة الزائر بتقرأ" },
+  { id: "components/admin/shop/ShopDesk.tsx", office: "shelf-desk", status: "moved", reason: "جسم الطاولة: بيقول الناقص في كل قطعة بدل ما يوري كارت فاضي" },
+  { id: "app/api/admin/shop/route.ts", office: "shelf-desk", status: "moved", reason: "بوّابة الرفّ: كتابة وقراءة بنفس قاعدة الظهور، وبلا زر مسح — المسح كلمة المالك" },
   { id: "components/admin/sketches/SketchOwner.tsx", office: "paper-desk", status: "moved", reason: "مين صاحب الورقة: بحث في دفتر العملاء نفسه، والمفتاح المخزن هو مفتاح الدفتر مش نسخة من اسمه" },
   { id: "components/admin/ClientPreCallDossier.tsx", office: "sales-office", status: "moved", reason: "الملف الذهبي قبل المكالمة: الدفتر + ورقاته + ألوان البنك، واللي المتجر ما يعرفوش عنه يتقال صراحة" },
   { id: "app/api/admin/customers/dossier/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الملف: بتقرأ الدفتر بنفس القارئ اللي بتاع شاشة العملاء، وورقاته المرتبطة بمفتاحه، وألوان البنك" },
