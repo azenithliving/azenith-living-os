@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 
 import { bankTypeForRoom } from "@/lib/cad/sheet-images";
+import { ROOM_CHOICES } from "@/lib/cad/room-labels";
 import { BASE_ROOMS, STYLE_LABELS } from "@/lib/constants/rooms";
 
 /**
@@ -34,11 +35,12 @@ describe("which rooms the bank really stands behind", () => {
     expect(bankTypeForRoom("interior-design")).toBe("comprehensive-interior");
   });
 
-  it("refuses to dress a room it does not hold in a house picture", () => {
-    // These five are named by the storefront and absent from the bank's vocabulary: the page must
-    // fall back for them, not borrow a picture of something else.
+  it("answers the storefront's six in their own name, never as a house picture", () => {
+    // Harvested into the bank 2026-10-12 (the same provider, the same scorer, the same bar of 85 as the
+    // other ten), so the cards stop borrowing a random live-search picture. They are answered by their
+    // OWN key — the whole-house set is still only what `interior-design` stands on.
     for (const room of ["guest-bedroom", "study-room", "bathroom", "guest-bathroom", "entrance-lobby"]) {
-      expect(bankTypeForRoom(room), room).toBeNull();
+      expect(bankTypeForRoom(room), room).toBe(room);
     }
   });
 
@@ -52,14 +54,28 @@ describe("which rooms the bank really stands behind", () => {
       "dining-room",
       "kitchen",
       "master-bedroom",
+      "guest-bedroom",
       "children-room",
       "teen-room",
       "dressing-room",
       "home-office",
+      "study-room",
+      "bathroom",
+      "guest-bathroom",
+      "entrance-lobby",
       "corner-sofa",
       "lounge",
       "interior-design",
     ]);
+    expect(covered.length).toBe(HOME_ROOMS.length);
+  });
+
+  it("does not put the five new rooms on the customer's chips", () => {
+    // A picture job must not decide what a customer is invited to choose. The sheet's chips stay the
+    // eleven the owner set; the storefront-only rooms live in `BANK_ROOM_ONLY_TYPES`.
+    expect(ROOM_CHOICES).toHaveLength(11);
+    expect(ROOM_CHOICES.map((c) => c.type)).not.toContain("bathroom");
+    expect(bankTypeForRoom("bathroom")).toBe("bathroom");
   });
 
   it("names the styles the storefront switches between in the same words the bank stores", () => {

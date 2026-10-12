@@ -24,6 +24,22 @@ export const ROOM_TYPES = [
 /** The type the bank falls back to when a room name matches nothing. */
 export const GENERAL_ROOM = "comprehensive-interior";
 
+/**
+ * Rooms the bank holds pictures for, but the customer's chips do not offer.
+ *
+ * The storefront advertises sixteen rooms; the family's decision sheet offers the eleven above. The
+ * five here were harvested into the bank on 2026-10-12 so their cards stop borrowing a random picture
+ * from a live search on every visit — but adding a room to what a CUSTOMER is invited to pick is the
+ * owner's decision, not a side effect of a picture job, so they stay out of ROOM_CHOICES.
+ */
+export const BANK_ROOM_ONLY_TYPES = [
+  "guest-bedroom",
+  "study-room",
+  "bathroom",
+  "guest-bathroom",
+  "entrance-lobby",
+] as const;
+
 export const ROOM_TYPE_LABELS: Record<string, string> = {
   "master-bedroom": "نوم رئيسي",
   "living-room": "صالة معيشة",
@@ -38,10 +54,20 @@ export const ROOM_TYPE_LABELS: Record<string, string> = {
   "dressing-room": "غرفة قياس",
   kitchen: "مطبخ",
   "home-office": "مكتب منزلي",
+  // Named for the paper and the cards, not offered as a chip: a customer who wrote «حمام» on his
+  // sheet must read his own word back, not a machine key.
+  "guest-bedroom": "غرفة ضيوف",
+  "study-room": "غرفة دراسة",
+  bathroom: "حمام",
+  "guest-bathroom": "حمام ضيوف",
+  "entrance-lobby": "صالة دخول",
 };
 
 /** Offered in the order the bank is fullest. */
 export const ROOM_CHOICES = ROOM_TYPES.map((type) => ({ type, label: ROOM_TYPE_LABELS[type] }));
+
+/** Every room the bank may answer a picture for — the chips' list plus the storefront-only five. */
+export const BANK_TYPES: readonly string[] = [...ROOM_TYPES, ...BANK_ROOM_ONLY_TYPES];
 
 /** Every way the bank's keys are spelled, folded to one shape. */
 const FOLDED: Record<string, string> = Object.fromEntries(

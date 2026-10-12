@@ -20,7 +20,7 @@
 
 import { foldArabic } from "@/lib/arabic";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-import { GENERAL_ROOM, ROOM_TYPES } from "./room-labels";
+import { BANK_TYPES, GENERAL_ROOM } from "./room-labels";
 
 export type SheetImage = { id: number | null; url: string; thumb: string; style: string | null; roomType: string; color: string | null };
 
@@ -60,7 +60,7 @@ export function roomTypeFor(name: string | null | undefined): string | null {
   if (!text) return null;
   for (const [word, type] of ROOM_WORDS) if (text.includes(foldArabic(word))) return type;
   const exact = text.replace(/\s+/g, "-");
-  return (ROOM_TYPES as readonly string[]).includes(exact) ? exact : null;
+  return BANK_TYPES.includes(exact) ? exact : null;
 }
 
 /**
