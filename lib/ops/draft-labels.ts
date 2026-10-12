@@ -8,6 +8,8 @@
  * A kind this shop has never used returns null: the desk then says the draft has no named kind,
  * rather than printing a key the owner has to decode.
  */
+import { roomLabel } from "@/lib/cad/room-names";
+
 const PARTS: Record<string, string> = {
   fix: "تصحيح",
   curate: "تنظيم",
@@ -87,4 +89,39 @@ export function draftTargetLabel(raw: string | null | undefined): string {
   if (key.startsWith("products/")) return "صفحة منتج";
   if (key.startsWith("collections/")) return "صفحة مجموعة";
   return PLACES[key] ?? "مكان من غير اسم";
+}
+
+/** The pages the storefront itself links to, counted in his chat 2026-10-12. */
+const PAGES: Record<string, string> = {
+  ...PLACES,
+  request: "اطلب عرض",
+  contact: "التواصل",
+  leads: "عملاء مهتمون",
+  "elite-brief": "ملخص النخبة",
+  "elite-intelligence": "مسار النخبة",
+  products: "المنتجات",
+};
+
+/**
+ * Where a site address leads, said in the words he reads.
+ *
+ * The chat turns every path it finds into a link and prints the path as the label, so his thread
+ * reads «/products/sofa-malaki-١٧…» — counted: 172 product pages, 88 `/rooms`, 81 `/furniture`, and
+ * the drafts desk's own preview door. A web address is allowed on his screens as its own element; a
+ * path inside an Arabic sentence is not. The address stays behind the press.
+ *
+ * A room page borrows the shop's one room vocabulary, so «/rooms/kitchen» is «المطبخ» here and on his
+ * sheet and in his roll — one name, three surfaces.
+ */
+export function chatPlaceLabel(raw: string | null | undefined): string {
+  const value = String(raw ?? "").trim();
+  if (!value) return "مكان من غير اسم";
+  if (value.startsWith("/api/")) return value.includes("/preview/") ? "معاينة المسودة" : "مكان من غير اسم";
+  const [path, anchor] = value.split("#");
+  const key = (anchor ?? path).replace(/^\/+|\/+$/g, "").toLowerCase();
+  if (!key) return PAGES[""];
+  if (key.startsWith("products/")) return "صفحة منتج";
+  if (key.startsWith("collections/")) return "صفحة مجموعة";
+  if (key.startsWith("rooms/")) return roomLabel(key.slice("rooms/".length)) ?? PAGES.rooms;
+  return PAGES[key] ?? "مكان من غير اسم";
 }

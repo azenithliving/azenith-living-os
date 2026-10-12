@@ -9,6 +9,7 @@ import {
 import { AGENT_ROLES, SALES_MANAGER_CAPABILITIES } from '@/lib/ops/agent-roles';
 import { DEPARTMENT_KEYS, employeeHref } from '@/lib/ops/departments';
 import { agentLabel, isOpsKey, legacyToOps, senderDisplayName } from '@/lib/ops/identity';
+import { chatPlaceLabel } from '@/lib/ops/draft-labels';
 import { bracketListItems, isBulletLine, splitInline, stripBullet } from '@/lib/talk/emphasis';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
@@ -316,8 +317,12 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
                 >
                   <img src={part} alt="صورة مرفقة" className="max-h-40 rounded-lg border border-white/10 object-contain" />
                 </button>
-              ) : part && /^(https?:\/\/|\/[A-Za-z])/.test(part) ? (
+              ) : part && /^https?:\/\//.test(part) ? (
                 <a key={`${i}-${j}`} href={part} target="_blank" rel="noopener noreferrer" className="text-sky-300 hover:underline" dir="ltr">{part}</a>
+              ) : part && /^\/[A-Za-z]/.test(part) ? (
+                // A path is an address inside his sentence; the place it leads to is the thing he can
+                // read. The address stays where it belongs — behind the press.
+                <a key={`${i}-${j}`} href={part} target="_blank" rel="noopener noreferrer" className="text-sky-300 hover:underline">{chatPlaceLabel(part)}</a>
               ) : (
                 <span key={`${i}-${j}`}>{part}</span>
               )

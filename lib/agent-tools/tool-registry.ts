@@ -788,8 +788,8 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
 
   deploy_trigger: {
     name: "deploy_trigger",
-    displayName: "نشر Vercel",
-    description: "تشغيل deploy hook",
+    displayName: "نشر الموقع",
+    description: "يطلب نسخة جديدة من الموقع",
     category: "system",
     riskLevel: "high",
     requiresApproval: true,

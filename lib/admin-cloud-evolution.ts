@@ -140,9 +140,9 @@ export async function triggerVercelDeploy(): Promise<{ success: boolean; message
   }
   const res = await fetch(hook, { method: "POST" });
   if (!res.ok) {
-    return { success: false, message: `فشل deploy hook: ${res.status}` };
+    return { success: false, message: `النشر ما تمّش: المزود ردّ بكود ${res.status}` };
   }
-  return { success: true, message: "تم طلب نشر Vercel — راقب لوحة Vercel خلال دقائق" };
+  return { success: true, message: "تم طلب النشر — هيظهر على موقعك خلال دقائق" };
 }
 
 export async function applyCloudEvolutionFromApproval(metadata: {
