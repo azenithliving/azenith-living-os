@@ -59,14 +59,14 @@ export function SelfModelPanel({ open, model, loading, error, onClose }: SelfMod
             <div className="text-sm font-bold text-white">
               {model ? `${model.title} — ${model.brand}` : 'اسأل عن نفسك'}
             </div>
-            <div className="text-[10px] text-white/35">
+            <div className="text-[10px] text-white/70">
               {model ? `مبني من السجلات الحيّة لحظة ${new Date(model.generatedAt).toLocaleTimeString('ar-EG')}` : ' '}
             </div>
           </div>
           <button
             onClick={onClose}
             title="إغلاق"
-            className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-white/50 hover:text-white flex items-center justify-center"
+            className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-white/70 hover:text-white flex items-center justify-center"
           >
             <X className="w-4 h-4" />
           </button>
@@ -74,7 +74,7 @@ export function SelfModelPanel({ open, model, loading, error, onClose }: SelfMod
 
         <div className="max-h-[70vh] overflow-y-auto p-4 space-y-4">
           {loading && !model && (
-            <div className="flex items-center gap-2 text-white/50 text-xs py-8 justify-center">
+            <div className="flex items-center gap-2 text-white/70 text-xs py-8 justify-center">
               <Loader2 className="w-4 h-4 animate-spin" /> بقرا عن نفسي…
             </div>
           )}
@@ -93,7 +93,7 @@ export function SelfModelPanel({ open, model, loading, error, onClose }: SelfMod
                   {model.agents.map((a) => (
                     <div key={a.key} className="rounded-xl bg-white/5 border border-white/10 px-2.5 py-2">
                       <div className="text-[12px] font-bold text-white">{a.name}</div>
-                      <div className="text-[10px] text-white/35">{a.roles} أدوار</div>
+                      <div className="text-[10px] text-white/70">{a.roles} أدوار</div>
                     </div>
                   ))}
                 </div>
@@ -115,7 +115,7 @@ export function SelfModelPanel({ open, model, loading, error, onClose }: SelfMod
                   </div>
                 )}
                 {unnamed.length > 0 && (
-                  <div className="text-[9px] text-white/25 font-mono leading-relaxed" dir="ltr">
+                  <div className="text-[9px] text-white/70 font-mono leading-relaxed" dir="ltr">
                     {unnamed.map((t) => t.name).join(", ")}
                   </div>
                 )}
@@ -130,7 +130,7 @@ export function SelfModelPanel({ open, model, loading, error, onClose }: SelfMod
                         <div className="text-lg font-black text-amber-300 font-mono">
                           {c.value === null ? '؟' : c.value}
                         </div>
-                        <div className="text-[10px] text-white/40">{c.label}</div>
+                        <div className="text-[10px] text-white/70">{c.label}</div>
                       </div>
                     ))}
                   </div>
@@ -144,7 +144,7 @@ export function SelfModelPanel({ open, model, loading, error, onClose }: SelfMod
                     {model.dataGaps.map((g) => (
                       <li key={g.label} className="text-[11px] text-white/70">
                         <span className="text-rose-300">• {g.label}</span>
-                        <div className="text-[9px] text-white/30 font-mono" dir="ltr">{g.reason}</div>
+                        <div className="text-[9px] text-white/70 font-mono" dir="ltr">{g.reason}</div>
                       </li>
                     ))}
                   </ul>
@@ -157,7 +157,7 @@ export function SelfModelPanel({ open, model, loading, error, onClose }: SelfMod
                   {model.organs.map((o) => (
                     <li key={o.label} className="flex items-center justify-between text-[11px]">
                       <span className="text-white/75">{o.label}</span>
-                      <span className="text-white/35">{o.cadence}</span>
+                      <span className="text-white/70">{o.cadence}</span>
                     </li>
                   ))}
                 </ul>
@@ -167,7 +167,7 @@ export function SelfModelPanel({ open, model, loading, error, onClose }: SelfMod
                 <SectionTitle icon={<ShieldAlert className="w-3.5 h-3.5" />} text="حدودي" />
                 <ul className="space-y-1">
                   {model.limits.map((l) => (
-                    <li key={l} className="text-[11px] text-white/60">• {l}</li>
+                    <li key={l} className="text-[11px] text-white/70">• {l}</li>
                   ))}
                 </ul>
               </section>

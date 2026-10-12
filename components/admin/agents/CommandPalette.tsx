@@ -90,11 +90,11 @@ export function CommandPalette({ commands, loading, error, onPick, onClose }: Co
             data-palette-input=""
             className="flex-1 bg-transparent text-white text-sm placeholder-white/30 focus:outline-none"
           />
-          <span className="text-[10px] text-white/30 font-mono" dir="ltr">esc</span>
+          <span className="text-[10px] text-white/70 font-mono" dir="ltr">esc</span>
         </div>
 
         {loading && (
-          <div className="px-4 py-6 flex items-center gap-2 text-white/50 text-xs">
+          <div className="px-4 py-6 flex items-center gap-2 text-white/70 text-xs">
             <Loader2 className="w-4 h-4 animate-spin" /> بقرا القدرات الحيّة…
           </div>
         )}
@@ -104,7 +104,7 @@ export function CommandPalette({ commands, loading, error, onPick, onClose }: Co
         )}
 
         {!loading && !error && flat.length === 0 && (
-          <div className="px-4 py-6 text-xs text-white/40">
+          <div className="px-4 py-6 text-xs text-white/70">
             مفيش قدرة بهذا الاسم. دي مش قائمة مقترحات عامة — دي حاجات أقدر أنفذها فعلاً.
           </div>
         )}
@@ -133,14 +133,14 @@ export function CommandPalette({ commands, loading, error, onPick, onClose }: Co
                     <span className="flex items-center gap-2 shrink-0">
                       {item.hint && (
                         <span
-                          className={`text-[10px] font-mono ${/^[ا-ي]/.test(item.hint) ? 'text-white/35 font-sans' : 'text-sky-300/60'}`}
+                          className={`text-[10px] font-mono ${/^[ا-ي]/.test(item.hint) ? 'text-white/70 font-sans' : 'text-sky-300/60'}`}
                           dir={/^[ا-ي]/.test(item.hint) ? 'rtl' : 'ltr'}
                         >
                           {item.hint}
                         </span>
                       )}
                       {runnable && index === cursor && (
-                        <CornerDownLeft className="w-3 h-3 text-white/40" />
+                        <CornerDownLeft className="w-3 h-3 text-white/70" />
                       )}
                     </span>
                   </button>
@@ -150,7 +150,7 @@ export function CommandPalette({ commands, loading, error, onPick, onClose }: Co
           ))}
         </div>
 
-        <div className="px-4 py-2 border-t border-white/10 text-[10px] text-white/30 flex items-center gap-3">
+        <div className="px-4 py-2 border-t border-white/10 text-[10px] text-white/70 flex items-center gap-3">
           <span>أسهم للتنقل، إنتر للتنفيذ</span>
         </div>
       </div>

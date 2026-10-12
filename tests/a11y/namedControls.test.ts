@@ -103,6 +103,12 @@ const ownerScreens = [
   "components/admin/sketches/SketchOwner.tsx",
   "app/admin/v2/keys/page.tsx",
   "components/elite/login/elite-login-client.tsx",
+  // Added 2026-10-12 by the thirty-screen sweep: these four panels were never in the guard, which is
+  // exactly why they still carried text between twenty and sixty percent white on gradient cards.
+  "components/admin/ops/StudioPanel.tsx",
+  "components/admin/agents/SelfModelPanel.tsx",
+  "components/admin/agents/ApprovalDecisionBlock.tsx",
+  "components/admin/agents/CommandPalette.tsx",
 ];
 
 const FAINT = /(?<![\w-])text-white\/(?:20|25|30|35|40|45|50|55|60)\b/g;
@@ -141,5 +147,13 @@ describe("the owner's screens read on a phone", () => {
 
   it("keeps the old employees' house from printing an employee's machine key as his name", () => {
     expect(readFileSync("components/admin/agents/CommandConsole.tsx", "utf8")).toContain('<option value="vanguard">مدير المبيعات</option>');
+  });
+
+  it("puts the unread count on a red his phone can read", () => {
+    // Measured on the published cockpit 2026-10-12: white on rose-500 is 3.75 to 1 at nine pixels —
+    // under the floor for text this small. rose-700 is the same red at about 6.3 to 1.
+    const chat = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+    expect(chat).toContain("min-w-[16px] h-4 px-1 rounded-full bg-rose-700 text-white text-[9px] font-bold");
+    expect(chat).not.toContain("min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white");
   });
 });

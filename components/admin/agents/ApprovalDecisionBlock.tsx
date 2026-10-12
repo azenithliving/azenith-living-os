@@ -96,7 +96,7 @@ export function ApprovalDecisionBlock({
   return (
     <div data-approval-block={approvalId}>
       {row === undefined && !error && (
-        <div className="flex items-center gap-2 text-[11px] text-white/50">
+        <div className="flex items-center gap-2 text-[11px] text-white/70">
           <Loader2 className="w-3.5 h-3.5 animate-spin" /> بقرا الاقتراح…
         </div>
       )}
@@ -104,7 +104,7 @@ export function ApprovalDecisionBlock({
       {error && <div className="text-[11px] text-rose-300">{error}</div>}
 
       {row === null && !error && (
-        <div className="text-[11px] text-white/60">
+        <div className="text-[11px] text-white/70">
           مفيش قرار بهذا الرقم — يبقى الرسالة قديمة أو اتعملها حاجة تانية.
         </div>
       )}
@@ -114,7 +114,7 @@ export function ApprovalDecisionBlock({
           <div className="text-[13px] text-white/90 leading-relaxed whitespace-pre-wrap">
             {ownerVoice(row.description || row.metadata?.userMessage || 'اقتراح من السرب')}
           </div>
-          <div className="mt-1 text-[10px] text-white/35">
+          <div className="mt-1 text-[10px] text-white/70">
             {proposalStatusLabel(row.status)} · درجة الخطورة: {riskLabel(row.risk_level)}
           </div>
 

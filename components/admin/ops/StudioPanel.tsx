@@ -130,7 +130,7 @@ export function StudioPanel() {
             <button
               onClick={fetchOverview}
               disabled={loadingStats}
-              className="p-2 rounded-lg border border-white/10 text-white/60 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-40"
+              className="p-2 rounded-lg border border-white/10 text-white/70 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-40"
               title="تحديث"
             >
               {loadingStats ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
@@ -149,7 +149,7 @@ export function StudioPanel() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                     isActive
                       ? 'bg-amber-500/20 text-amber-200 border border-amber-500/30'
-                      : 'text-white/50 hover:text-white hover:bg-white/5 border border-transparent'
+                      : 'text-white/70 hover:text-white hover:bg-white/5 border border-transparent'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -158,7 +158,7 @@ export function StudioPanel() {
               );
             })}
           </div>
-          <div className="px-5 py-2 text-[11px] text-white/40 border-b border-white/5 bg-white/[0.01]">
+          <div className="px-5 py-2 text-[11px] text-white/70 border-b border-white/5 bg-white/[0.01]">
             {TABS.find(t => t.key === activeTab)?.hint}
           </div>
 
@@ -174,10 +174,10 @@ export function StudioPanel() {
                         <span className="text-2xl">{agent.icon}</span>
                         <div className="min-w-0">
                           <h3 className="text-sm font-black text-white truncate">{agent.name}</h3>
-                          <p className="text-[10px] text-white/50 leading-snug">{agent.role}</p>
+                          <p className="text-[10px] text-white/70 leading-snug">{agent.role}</p>
                         </div>
                       </div>
-                      <p className="text-[10px] text-white/35 mt-2">{arNum((AGENT_ROLES[agent.key] || []).length)} دورًا حقيقيًا جاهز</p>
+                      <p className="text-[10px] text-white/70 mt-2">{arNum((AGENT_ROLES[agent.key] || []).length)} دورًا حقيقيًا جاهز</p>
                       <div className="flex gap-1.5 mt-3">
                         <button onClick={() => openChat(agent.key)} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] text-white/80 font-bold">
                           <MessageSquare className="w-3 h-3" /> محادثة
@@ -205,11 +205,11 @@ export function StudioPanel() {
 
             {activeTab === 'operations' && (
               <div className="space-y-4">
-                <details className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs text-white/50" open>
+                <details className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs text-white/70" open>
                   <summary className="cursor-pointer font-bold text-white/70">تدقيق شامل</summary>
                   <div className="mt-3"><QayyimAuditReport /></div>
                 </details>
-                <details className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs text-white/50" open>
+                <details className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs text-white/70" open>
                   <summary className="cursor-pointer font-bold text-white/70">المسودات وبوابة الجودة</summary>
                   <div className="mt-3 space-y-4">
                     <QayyimQualityGate result={null} />
@@ -264,7 +264,7 @@ function StatCard({ label, value, icon: Icon, tone }: { label: string; value: st
   return (
     <div className={`rounded-xl border bg-gradient-to-br p-3 ${tones[tone]}`}>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[11px] text-white/60">{label}</span>
+        <span className="text-[11px] text-white/70">{label}</span>
         <Icon className="w-4 h-4 opacity-70" />
       </div>
       <div className="text-xl font-bold text-white">{value}</div>
@@ -313,12 +313,12 @@ function LiveEventsPanel() {
           <h3 className="text-sm font-semibold text-white">أحداث السرب الحية</h3>
           <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
         </div>
-        <span className="text-xs text-white/40">{events.length} حدث</span>
+        <span className="text-xs text-white/70">{events.length} حدث</span>
       </div>
 
       <div className="space-y-2 max-h-96 overflow-y-auto">
         {events.length === 0 && (
-          <div className="text-xs text-white/40 text-center py-8">
+          <div className="text-xs text-white/70 text-center py-8">
             {isConnected ? 'في انتظار الأحداث...' : 'غير متصل'}
           </div>
         )}
@@ -327,15 +327,15 @@ function LiveEventsPanel() {
           <div key={idx} className="text-xs p-2 rounded bg-white/5 border border-white/5">
             <div className="flex items-center justify-between mb-1">
               <span className="font-mono text-amber-400">{event.event_type}</span>
-              <span className="text-white/40">
+              <span className="text-white/70">
                 {event.created_at ? new Date(event.created_at).toLocaleTimeString('ar-EG') : ''}
               </span>
             </div>
-            <div className="text-white/60">
+            <div className="text-white/70">
               من: <span className="text-sky-400">{event.source_agent}</span>
             </div>
             {event.payload && Object.keys(event.payload).length > 0 && (
-              <div className="mt-1 text-white/40 truncate">
+              <div className="mt-1 text-white/70 truncate">
                 {JSON.stringify(event.payload).slice(0, 100)}...
               </div>
             )}
