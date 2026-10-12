@@ -12,7 +12,11 @@
  * Pure, so the shape of a sentence can be tested without a browser.
  */
 
-export type EmphasisChunk = { kind: "text" | "bold" | "em" | "code" | "link"; value: string; href?: string };
+export type EmphasisChunk = {
+  kind: "text" | "bold" | "em" | "code" | "link" | "math";
+  value: string;
+  href?: string;
+};
 
 /**
  * A line that is a list item.
@@ -74,4 +78,61 @@ export function splitEmphasis(text: string): EmphasisChunk[] {
   }
 
   return chunks;
+}
+
+/**
+ * A number-operator-number run.
+ *
+ * Counted on his stored rows 2026-10-12: 223 of them («٢× = ٥٤٠٠٠٠ ج.م», «٥١/١٠٠», «p95 = ٢٣٧»).
+ * In a right-to-left line each number keeps its own order but the operator between two of them is
+ * neutral, so the equation is displayed with its sides swapped. Nothing here rewrites a word — the
+ * run is only told which way to go, which is the same thing the chat already does for an address.
+ *
+ * No hyphen: the measured shapes are `= × + * /`, and a date is a record, not a sum. Arabic words
+ * sit outside every class here, which is what stops «٣ مقاعد + ٢ فوتيه» from becoming one run.
+ */
+const MATH = /(?:[A-Za-z][A-Za-z0-9_]*)?[0-9\u0660-\u0669][0-9\u0660-\u0669.,]*(?:[ \t]*[=×+*/][ \t]*[0-9\u0660-\u0669.,]*)+/g;
+
+/** Emphasis, links and code first — and then the plain text they left between them. */
+export function splitInline(text: string): EmphasisChunk[] {
+  const out: EmphasisChunk[] = [];
+  for (const chunk of splitEmphasis(text)) {
+    if (chunk.kind !== "text") {
+      out.push(chunk);
+      continue;
+    }
+    const found = [...chunk.value.matchAll(MATH)];
+    if (!found.length) {
+      out.push(chunk);
+      continue;
+    }
+    let last = 0;
+    for (const run of found) {
+      const at = run.index ?? 0;
+      if (at > last) out.push({ kind: "text", value: chunk.value.slice(last, at) });
+      out.push({ kind: "math", value: run[0] });
+      last = at + run[0].length;
+    }
+    if (last < chunk.value.length) out.push({ kind: "text", value: chunk.value.slice(last) });
+  }
+  return out;
+}
+
+const BRACKET_ITEM = /\[([^\][\n]{2,40})\]/g;
+
+/**
+ * A line that is nothing but a bracketed list: «[افتح التقرير] [راجع السجل] [طبّق التحسينات]».
+ *
+ * Thirteen such lines in his history, all of them the employees offering next steps. The words are
+ * his language and the shape is a machine's; the chat already draws a list, so the brackets become a
+ * list and nothing else changes. A line that is only partly brackets, a markdown link, or a table row
+ * is left exactly as it is — this rule is for the whole line, or it is guessing.
+ */
+export function bracketListItems(line: string): string[] | null {
+  const text = String(line ?? "").trim();
+  if (!text || text.includes("](") || text.includes("|")) return null;
+  const items = [...text.matchAll(BRACKET_ITEM)].map((m) => String(m[1]).trim()).filter(Boolean);
+  if (items.length < 2) return null;
+  if (items.map((item) => `[${item}]`).join(" ") !== text.replace(/\s+/g, " ")) return null;
+  return items;
 }

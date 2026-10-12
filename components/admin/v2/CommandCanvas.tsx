@@ -13,6 +13,7 @@ import {
 } from '@/lib/ops/departments';
 import { SWARM_NAME } from '@/lib/ops/identity';
 import { arNum } from '@/lib/ops/metricLabels';
+import { splitInline } from '@/lib/talk/emphasis';
 import { pulseItems } from '@/lib/ops/command-canvas';
 
 type AgentStatus = { agent: string; status: 'online' | 'busy' | 'offline'; taskCount: number; recentActivity: string };
@@ -284,7 +285,19 @@ function EmployeeCard({
 
       {teaser && (
         <p className="mt-3 line-clamp-2 rounded-xl border border-white/5 bg-black/25 px-3 py-2 text-[11px] leading-relaxed text-white/70">
-          {teaser}
+          {/* The card's one line is the last stored row, and that row can carry a sum
+              («٢× = ٥٤٠٠٠٠ ج.م»). In this right-to-left line the two numbers keep their own order and
+              the mark between them follows the sentence, so the sum reads backwards. The chat already
+              draws it the right way; the card was still printing it raw. */}
+          {splitInline(teaser).map((chunk, i) =>
+            chunk.kind === "math" ? (
+              <span key={i} data-inline="math" dir="ltr" className="whitespace-nowrap">
+                {chunk.value}
+              </span>
+            ) : (
+              <span key={i}>{chunk.value}</span>
+            )
+          )}
         </p>
       )}
 

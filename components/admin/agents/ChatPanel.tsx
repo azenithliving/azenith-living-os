@@ -9,7 +9,7 @@ import {
 import { AGENT_ROLES, SALES_MANAGER_CAPABILITIES } from '@/lib/ops/agent-roles';
 import { DEPARTMENT_KEYS, employeeHref } from '@/lib/ops/departments';
 import { agentLabel, isOpsKey, legacyToOps, senderDisplayName } from '@/lib/ops/identity';
-import { isBulletLine, splitEmphasis, stripBullet } from '@/lib/talk/emphasis';
+import { bracketListItems, isBulletLine, splitInline, stripBullet } from '@/lib/talk/emphasis';
 import { CommandPalette } from './CommandPalette';
 import { SelfModelPanel } from './SelfModelPanel';
 import { ApprovalGate } from './ApprovalGate';
@@ -255,7 +255,7 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
   // address + «)», no piece of it looked like a link any more, and his screen kept the brackets. A
   // test on the splitter alone could not see it — only this function's order can.
   const renderInline = (text: string) =>
-    splitEmphasis(text).map((chunk, i) =>
+    splitInline(text).map((chunk, i) =>
       chunk.kind === "bold" ? (
         <strong key={i} className="font-bold text-white" data-emphasis="bold">
           {chunk.value}
@@ -268,6 +268,13 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
         <code key={i} data-emphasis="code" className="rounded bg-black/40 px-1 py-0.5 text-[12px]" dir="ltr">
           {chunk.value}
         </code>
+      ) : chunk.kind === "math" ? (
+        // «٢× = ٥٤٠٠٠» in a right-to-left sentence is shown with its two sides swapped: each number
+        // keeps its own order, and the mark between them follows the line. The run gets its own
+        // direction — the word order is not touched, only which way it reads.
+        <span key={i} data-inline="math" dir="ltr" className="whitespace-nowrap">
+          {chunk.value}
+        </span>
       ) : chunk.kind === "link" ? (
         // An address the model named in Arabic gets its Arabic name on the screen and its address
         // behind the press — a bare URL inside an Arabic line reorders the whole line.
@@ -332,9 +339,19 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
       tableRows.push(cells);
     } else {
       flushTable();
+      const bracketList = bracketListItems(line);
       if (line.trim() === '') elements.push(<div key={`br-${elements.length}`} className="h-2" />);
       else if (line.trim().startsWith('#')) elements.push(<div key={`h-${elements.length}`} className="font-bold text-white mt-2">{renderInline(line.replace(/^#+\s*/, ''))}</div>);
       else if (isBulletLine(line)) elements.push(<div key={`li-${elements.length}`} className="mr-3">• {renderInline(stripBullet(line))}</div>);
+      // The employees offer next steps as «[افتح التقرير] [راجع السجل]». Those are list items wearing
+      // brackets; the chat draws them as the list they are and keeps every word.
+      else if (bracketList) elements.push(
+        <div key={`bl-${elements.length}`} className="mr-3" data-inline="bracket-list">
+          {bracketList.map((item, j) => (
+            <div key={j}>• {renderInline(item)}</div>
+          ))}
+        </div>
+      );
       else elements.push(<div key={`p-${elements.length}`} className="whitespace-pre-wrap">{renderInline(line)}</div>);
     }
   });

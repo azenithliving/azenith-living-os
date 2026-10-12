@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { describe, expect, it } from "vitest";
-import { isBulletLine, splitEmphasis, stripBullet } from "@/lib/talk/emphasis";
+import { bracketListItems, isBulletLine, splitEmphasis, splitInline, stripBullet } from "@/lib/talk/emphasis";
 
 /** Read off the owner's own sales screen 2026-10-03, word for word. */
 const LIVE =
@@ -61,7 +61,9 @@ describe("the chat surface actually uses it", () => {
 
   it("imports the splitter and marks what it drew", () => {
     expect(panel).toContain('from \'@/lib/talk/emphasis\'');
-    expect(panel).toContain("splitEmphasis(text)");
+    // The panel calls `splitInline`, which is `splitEmphasis` plus the equation pass — the markers are
+    // still read first, and the address split still happens inside the plain-text chunks.
+    expect(panel).toContain("splitInline(text)");
     expect(panel).toContain('data-emphasis="bold"');
     expect(panel).toContain('data-emphasis="em"');
     expect(panel).toContain('data-emphasis="code"');
@@ -72,7 +74,7 @@ describe("the chat surface actually uses it", () => {
     // markdown link reached the splitter («[اسم](») and his screen printed its brackets. Measured on
     // his leader's chat 2026-10-12, and no test of the splitter alone could see it.
     const inline = panel.slice(panel.indexOf("const renderInline"));
-    expect(inline.indexOf("splitEmphasis(text)")).toBeLessThan(inline.indexOf("split(INLINE_LINK)"));
+    expect(inline.indexOf("splitInline(text)")).toBeLessThan(inline.indexOf("split(INLINE_LINK)"));
   });
 
   it("draws a link with the same inline pass inside a table cell", () => {
@@ -146,5 +148,82 @@ describe("the chat surface uses the bullet rule", () => {
   it("draws a star line as a dot, not as punctuation", () => {
     expect(panel).toContain("isBulletLine(line)");
     expect(panel).toContain("stripBullet(line)");
+  });
+});
+
+/**
+ * Counted on his own stored rows 2026-10-12: 223 equation runs across 103 lines («٢× = ٥٤٠٠٠٠ ج.م»,
+ * «٥١/١٠٠», «p95 = ٢٣٧ مللي ثانية») and 13 lines that are a list written as brackets
+ * («[افتح التقرير] [راجع السجل] [طبّق التحسينات]»). Neither is a word with a synonym: the first is a
+ * number order the right-to-left line reverses, the second is a list printed as its own markup.
+ */
+describe("an equation keeps the order it was written in", () => {
+  it("takes the bestseller line the shop's own report writes", () => {
+    const chunks = splitInline("الأكثر مبيعًا: صالون (كنبة ٣ مقاعد + ٢ فوتيه + بوف) (٢× = ٥٤٠٠٠٠ ج.م)");
+    const math = chunks.filter((c) => c.kind === "math").map((c) => c.value);
+    expect(math).toEqual(["٢× = ٥٤٠٠٠٠"]);
+    // The Arabic around it is untouched, and the words between two numbers never join the run.
+    expect(chunks.map((c) => c.value).join("")).toBe("الأكثر مبيعًا: صالون (كنبة ٣ مقاعد + ٢ فوتيه + بوف) (٢× = ٥٤٠٠٠٠ ج.م)");
+  });
+
+  it("takes the metric with its own letters, and the ratio with its slash", () => {
+    const chunks = splitInline("درجة الفخامة مقاسة: ٥١/١٠٠ — p95 = ٢٣٧ مللي ثانية");
+    expect(chunks.filter((c) => c.kind === "math").map((c) => c.value)).toEqual(["٥١/١٠٠", "p95 = ٢٣٧"]);
+  });
+
+  it("does not mistake a date or a phone for a sum", () => {
+    // A date is already read left to right and a phone has no operator: wrapping them would move
+    // nothing and claim a rule that was never measured.
+    expect(splitInline("نافذة من ٢٠٢٦-٠٦-٢٨ إلى ٢٠٢٦-٠٩-٢٦").filter((c) => c.kind === "math")).toEqual([]);
+    expect(splitInline("موبايل ٠١٠٠٢٣٤٥٦٧٨ متاح").filter((c) => c.kind === "math")).toEqual([]);
+  });
+
+  it("leaves a plain Arabic sentence exactly as it was", () => {
+    const line = "المحتوى راجع والوكلاء شغالين.";
+    expect(splitInline(line)).toEqual([{ kind: "text", value: line }]);
+  });
+
+  it("keeps emphasis and links that splitInline did not touch", () => {
+    const chunks = splitInline("**حالة الجدول:** ناجح — ٣× = ١٢");
+    expect(chunks[0]).toEqual({ kind: "bold", value: "حالة الجدول:" });
+    expect(chunks.some((c) => c.kind === "math" && c.value === "٣× = ١٢")).toBe(true);
+  });
+});
+
+describe("a list written in brackets is drawn as a list", () => {
+  it("reads the three suggestions the leader actually sends", () => {
+    expect(bracketListItems("[افتح التقرير] [راجع السجل] [طبّق التحسينات]")).toEqual([
+      "افتح التقرير",
+      "راجع السجل",
+      "طبّق التحسينات",
+    ]);
+  });
+
+  it("needs two of them, and a line that is nothing else", () => {
+    expect(bracketListItems("[تقرير]")).toBeNull();
+    expect(bracketListItems("راجع [تقرير] ثم قارن [سجل] قبل النشر وبعده")).toBeNull();
+    expect(bracketListItems("")).toBeNull();
+  });
+
+  it("does not eat a markdown link or a table row", () => {
+    expect(bracketListItems("[راجع المنتجات](https://azenith-living.vercel.app/admin/products)")).toBeNull();
+    expect(bracketListItems("| القسم | الحالة |")).toBeNull();
+  });
+});
+
+describe("the chat surface draws both", () => {
+  const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+
+  it("puts the equation in its own direction and the list through the bullet rule", () => {
+    expect(panel).toContain('data-inline="math"');
+    expect(panel).toContain("bracketListItems(line)");
+  });
+
+  it("draws the equation on the cockpit card too, where the row is printed as one line", () => {
+    // The census found the bestseller sum five times on the cockpit screen — not in the chat, but in
+    // the cards' teaser line, which used to print the stored row raw.
+    const canvas = readFileSync("components/admin/v2/CommandCanvas.tsx", "utf8");
+    expect(canvas).toContain("splitInline(teaser)");
+    expect(canvas).toContain('data-inline="math"');
   });
 });
