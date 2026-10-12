@@ -13,7 +13,7 @@
  */
 
 export type EmphasisChunk = {
-  kind: "text" | "bold" | "em" | "code" | "link" | "math";
+  kind: "text" | "bold" | "em" | "code" | "link" | "math" | "email";
   value: string;
   href?: string;
 };
@@ -93,6 +93,9 @@ export function splitEmphasis(text: string): EmphasisChunk[] {
  */
 const MATH = /(?:[A-Za-z][A-Za-z0-9_]*)?[0-9\u0660-\u0669][0-9\u0660-\u0669.,]*(?:[ \t]*[=×+*/][ \t]*[0-9\u0660-\u0669.,]*)+/g;
 
+/** An e-mail address, including the Arabic-Indic digits the elite form puts inside one. */
+const EMAIL = /[A-Za-z0-9\u0660-\u0669._%+-]+@[A-Za-z0-9\u0660-\u0669.-]+\.[A-Za-z]{2,}/g;
+
 /** Emphasis, links and code first — and then the plain text they left between them. */
 export function splitInline(text: string): EmphasisChunk[] {
   const out: EmphasisChunk[] = [];
@@ -101,17 +104,21 @@ export function splitInline(text: string): EmphasisChunk[] {
       out.push(chunk);
       continue;
     }
-    const found = [...chunk.value.matchAll(MATH)];
+    const found: Array<{ at: number; value: string; kind: "math" | "email" }> = [
+      ...[...chunk.value.matchAll(MATH)].map((m) => ({ at: m.index ?? 0, value: m[0], kind: "math" as const })),
+      ...[...chunk.value.matchAll(EMAIL)].map((m) => ({ at: m.index ?? 0, value: m[0], kind: "email" as const })),
+    ]
+      .sort((a, b) => a.at - b.at)
+      .filter((run, i, all) => i === 0 || run.at >= all[i - 1].at + all[i - 1].value.length);
     if (!found.length) {
       out.push(chunk);
       continue;
     }
     let last = 0;
     for (const run of found) {
-      const at = run.index ?? 0;
-      if (at > last) out.push({ kind: "text", value: chunk.value.slice(last, at) });
-      out.push({ kind: "math", value: run[0] });
-      last = at + run[0].length;
+      if (run.at > last) out.push({ kind: "text", value: chunk.value.slice(last, run.at) });
+      out.push({ kind: run.kind, value: run.value });
+      last = run.at + run.value.length;
     }
     if (last < chunk.value.length) out.push({ kind: "text", value: chunk.value.slice(last) });
   }

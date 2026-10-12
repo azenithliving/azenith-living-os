@@ -122,4 +122,12 @@ describe("the sales roll draws its rows instead of printing their marks", () => 
   it("counts his phone digits the way he reads them", () => {
     expect(panel).toMatch(/arDigits\(lead\.phone\)|toArabicDigits\(lead\.phone\)/);
   });
+
+  it("gives a customer's address its own element and its own direction", () => {
+    // When there is no phone the e-mail is the only way to reach him — it must stay whole, pressable,
+    // and not move inside the Arabic sentence around it.
+    expect(panel).toContain("mailto:${lead.email}");
+    expect(panel).toContain('unicodeBidi: "isolate-override"');
+    expect(panel).not.toContain("البريد: ${lead.email}");
+  });
 });

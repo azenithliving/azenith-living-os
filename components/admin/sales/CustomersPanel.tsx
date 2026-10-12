@@ -706,7 +706,25 @@ export default function CustomersPanel() {
                       </a>
                       ) : (
                         <p className="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-xs text-white/70">
-                          {lead.email ? `مفيش رقم مسجل — البريد: ${lead.email}` : "مفيش وسيلة تواصل مسجلة — وصل من غير ما يسيب رقم"}
+                          {lead.email ? (
+                            // The address is the one thing he can act on when there is no phone, so it
+                            // stays whole and pressable — and it gets its own direction, because the
+                            // elite form writes Arabic-Indic digits inside it and a right-to-left line
+                            // moves those.
+                            <>
+                              مفيش رقم مسجل — بريده:{" "}
+                              <a
+                                href={`mailto:${lead.email}`}
+                                dir="ltr"
+                                className="whitespace-nowrap text-sky-300 hover:underline"
+                                style={{ unicodeBidi: "isolate-override" }}
+                              >
+                                {lead.email}
+                              </a>
+                            </>
+                          ) : (
+                            "مفيش وسيلة تواصل مسجلة — وصل من غير ما يسيب رقم"
+                          )}
                         </p>
                       )}
                       <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">

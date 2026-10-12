@@ -190,6 +190,35 @@ describe("an equation keeps the order it was written in", () => {
   });
 });
 
+describe("an e-mail keeps its own order too", () => {
+  it("isolates an address inside an Arabic sentence", () => {
+    const chunks = splitInline("تواصل مع ahmed.mansour@example.com للمتابعة");
+    const mail = chunks.filter((c) => c.kind === "email").map((c) => c.value);
+    expect(mail).toEqual(["ahmed.mansour@example.com"]);
+    expect(chunks.map((c) => c.value).join("")).toBe("تواصل مع ahmed.mansour@example.com للمتابعة");
+  });
+
+  it("reads the stored line the sales office actually wrote", () => {
+    const chunks = splitInline("أحمد منصور (ahmed.mansour@example.com):");
+    expect(chunks.filter((c) => c.kind === "email").map((c) => c.value)).toEqual(["ahmed.mansour@example.com"]);
+    // The brackets are his sentence's punctuation; only the address gets its own direction.
+    expect(chunks.map((c) => c.value).join("")).toBe("أحمد منصور (ahmed.mansour@example.com):");
+  });
+
+  it("takes the address the elite form writes, digits and all", () => {
+    // Measured on his sales screen: the form puts Arabic-Indic digits inside the address, and those
+    // are exactly the characters a right-to-left line moves.
+    const chunks = splitInline("البريد tarek.eldessouky.٩٦٥@azenith-vip.com للتواصل");
+    expect(chunks.filter((c) => c.kind === "email").map((c) => c.value)).toEqual(["tarek.eldessouky.٩٦٥@azenith-vip.com"]);
+  });
+
+  it("does not cut an address out of a link it already drew", () => {
+    const chunks = splitInline("[افتح التقرير](https://azenith-living.vercel.app/admin/report?to=a@b.com)");
+    expect(chunks.filter((c) => c.kind === "email")).toEqual([]);
+    expect(chunks.filter((c) => c.kind === "link").length).toBe(1);
+  });
+});
+
 describe("a list written in brackets is drawn as a list", () => {
   it("reads the three suggestions the leader actually sends", () => {
     expect(bracketListItems("[افتح التقرير] [راجع السجل] [طبّق التحسينات]")).toEqual([
@@ -216,6 +245,7 @@ describe("the chat surface draws both", () => {
 
   it("puts the equation in its own direction and the list through the bullet rule", () => {
     expect(panel).toContain('data-inline="math"');
+    expect(panel).toContain('data-inline="email"');
     expect(panel).toContain("bracketListItems(line)");
     // `dir="ltr"` was measured NOT to be enough: the isolated run still laid its Arabic-Indic digits
     // out right-to-left. Of the seven ways tried on this browser, only `isolate-override` put the
@@ -228,7 +258,7 @@ describe("the chat surface draws both", () => {
     // the cards' teaser line, which used to print the stored row raw.
     const canvas = readFileSync("components/admin/v2/CommandCanvas.tsx", "utf8");
     expect(canvas).toContain("splitInline(teaser)");
-    expect(canvas).toContain('data-inline="math"');
+    expect(canvas).toContain("data-inline={chunk.kind}");
     expect(canvas).toContain('unicodeBidi: "isolate-override"');
   });
 });

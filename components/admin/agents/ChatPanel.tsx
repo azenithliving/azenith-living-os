@@ -287,6 +287,18 @@ function MarkdownContent({ content, onZoom }: { content: string; onZoom?: (src: 
         >
           {chunk.value}
         </span>
+      ) : chunk.kind === "email" ? (
+        // An address is one thing he copies or dials, and the elite form writes Arabic-Indic digits
+        // inside it — the exact characters a right-to-left line moves.
+        <span
+          key={i}
+          data-inline="email"
+          dir="ltr"
+          className="whitespace-nowrap"
+          style={{ unicodeBidi: "isolate-override" }}
+        >
+          {chunk.value}
+        </span>
       ) : chunk.kind === "link" ? (
         // An address the model named in Arabic gets its Arabic name on the screen and its address
         // behind the press — a bare URL inside an Arabic line reorders the whole line.
