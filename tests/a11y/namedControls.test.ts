@@ -115,6 +115,11 @@ const ownerScreens = [
   // The shelf desk the owner types a ready piece into, and the page a visitor reads it on.
   "components/admin/shop/ShopDesk.tsx",
   "app/shop/page.tsx",
+  // The settings office in the new house, with the two cards that were already standing in it.
+  "app/admin/v2/settings/page.tsx",
+  "components/admin/settings/SettingsFactsDesk.tsx",
+  "components/admin/settings/AdsSettingsCard.tsx",
+  "components/admin/settings/ConsultantFaqCard.tsx",
 ];
 
 const FAINT = /(?<![\w-])text-white\/(?:20|25|30|35|40|45|50|55|60)\b/g;

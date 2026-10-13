@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T23:48:18.133Z",
+  "generatedAt": "2026-10-13T02:12:56.229Z",
   "states": [
     "not-moved",
     "moving",
@@ -8,7 +8,7 @@
   ],
   "counts": {
     "not-moved": 487,
-    "moved": 23,
+    "moved": 25,
     "moving": 6,
     "erased": 1
   },
@@ -167,7 +167,10 @@
     {
       "kind": "new-page",
       "atom": "app/admin/v2/settings/page.tsx",
-      "state": "not-moved"
+      "state": "moved",
+      "phase": "settings-1",
+      "when": "2026-10-13",
+      "proof": "the settings office in the new house reads the store record on the server and hands the desk only what it renders: three facts with a live reader, the rest counted as residue, and no credential in the page"
     },
     {
       "kind": "new-page",
@@ -175,7 +178,7 @@
       "state": "moved",
       "phase": "shelf-1",
       "when": "2026-10-13",
-      "proof": "the shelf desk mounted in the new house at its own address, named from the office map and reachable from the cockpit menu under العمل"
+      "proof": "the shelf desk mounted in the new house at its own address, named from the office map and reachable from the cockpit menu under العمل Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors."
     },
     {
       "kind": "new-page",
@@ -774,7 +777,7 @@
       "state": "moved",
       "phase": "shelf-1",
       "when": "2026-10-13",
-      "proof": "one door writes and reads the products row, and it applies the same isDisplayable rule the visitor page reads, so the desk and the shelf cannot disagree; cost, stock and workshop columns are named in no file of this office"
+      "proof": "one door writes and reads the products row, and it applies the same isDisplayable rule the visitor page reads, so the desk and the shelf cannot disagree; cost, stock and workshop columns are named in no file of this office Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors."
     },
     {
       "kind": "admin-door",
@@ -1226,6 +1229,11 @@
     {
       "kind": "root-lib",
       "atom": "lib/seo.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/settings/facts.ts",
       "state": "not-moved"
     },
     {
@@ -1973,11 +1981,19 @@
     },
     {
       "kind": "furniture",
+      "atom": "components/admin/settings/SettingsFactsDesk.tsx",
+      "state": "moved",
+      "phase": "settings-1",
+      "when": "2026-10-13",
+      "proof": "measured 2026-10-13 with the census script and a reader grep over the repository: the settings table holds 17 keys, 3 are read by something that renders (theme and seo in the site shell, telegram_config in the alert door), 14 are read by nothing but the old desk generic editor — so the new desk names the three, counts the fourteen as unread residue, and offers no erase"
+    },
+    {
+      "kind": "furniture",
       "atom": "components/admin/shop/ShopDesk.tsx",
       "state": "moved",
       "phase": "shelf-1",
       "when": "2026-10-13",
-      "proof": "his own form: name, price in the currency word, one line, more detail, his photograph from the phone or a link; every row answers with what is missing (السعر، الصورة، موافقته) instead of a blank card, and hiding is reversible because erase is his word, never a button"
+      "proof": "his own form: name, price in the currency word, one line, more detail, his photograph from the phone or a link; every row answers with what is missing (السعر، الصورة، موافقته) instead of a blank card, and hiding is reversible because erase is his word, never a button Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors."
     },
     {
       "kind": "furniture",

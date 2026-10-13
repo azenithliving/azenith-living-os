@@ -86,11 +86,11 @@ export default function ConsultantFaqCard() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-bold text-white">الكلام اللي المستشار بيقوله لوحده</h2>
-          <p className="mt-1 text-xs text-white/45">
+          <p className="mt-1 text-xs text-white/70">
             السطر ده بيتقال للزائر زي ما هو، لما سؤاله يشابه السؤال المسجل. من غير توقيعك ما بيتقالش.
           </p>
         </div>
-        <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-white/50">
+        <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-white/70">
           {rows === null ? (error ? "حصل خطأ" : "برضه يستنى…") : `${rows.length} سطر`}
         </span>
       </div>
@@ -99,7 +99,7 @@ export default function ConsultantFaqCard() {
 
       <div className="mt-5 space-y-3">
         {rows?.length === 0 ? (
-          <p className="text-sm text-white/40">مفيش سطر جاهز دلوقتي — كل أسئلة الزوار بتروح للمحادثة العادية.</p>
+          <p className="text-sm text-white/70">مفيش سطر جاهز دلوقتي — كل أسئلة الزوار بتروح للمحادثة العادية.</p>
         ) : null}
 
         {rows?.map((row) => (
@@ -107,8 +107,8 @@ export default function ConsultantFaqCard() {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-white">{row.question}</p>
-                <p className="mt-1 text-xs leading-6 text-white/55">{row.answer}</p>
-                <p className="mt-2 text-[11px] text-white/35">
+                <p className="mt-1 text-xs leading-6 text-white/70">{row.answer}</p>
+                <p className="mt-2 text-[11px] text-white/70">
                   {row.approved_by ? `بتوقيع ${row.approved_by}` : "من غير توقيع — ما بيتقالش للزوار"}
                 </p>
               </div>
@@ -119,7 +119,7 @@ export default function ConsultantFaqCard() {
                   className={`rounded-xl border px-3 py-1 text-[11px] transition disabled:opacity-50 ${
                     row.is_active
                       ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-200"
-                      : "border-white/15 text-white/50"
+                      : "border-white/15 text-white/70"
                   }`}
                 >
                   {row.is_active ? "شغال" : "مقفول"}
@@ -142,14 +142,14 @@ export default function ConsultantFaqCard() {
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="السؤال زي ما الزائر بيقوله"
-          className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder:text-white/25 focus:border-[#C5A059] focus:outline-none"
+          className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder:text-white/70 focus:border-[#C5A059] focus:outline-none"
         />
         <textarea
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
           rows={3}
           placeholder="الرد اللي عايزه يتقال حرفيًا"
-          className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm leading-7 text-white placeholder:text-white/25 focus:border-[#C5A059] focus:outline-none"
+          className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm leading-7 text-white placeholder:text-white/70 focus:border-[#C5A059] focus:outline-none"
         />
         <button
           onClick={add}

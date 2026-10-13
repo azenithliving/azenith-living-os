@@ -216,6 +216,20 @@
       "phase": "shelf-1",
       "when": "2026-10-13",
       "proof": "one door writes and reads the products row, and it applies the same isDisplayable rule the visitor page reads, so the desk and the shelf cannot disagree; cost, stock and workshop columns are named in no file of this office Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors."
+    },
+    {
+      "atom": "app/admin/v2/settings/page.tsx",
+      "state": "moved",
+      "phase": "settings-1",
+      "when": "2026-10-13",
+      "proof": "the settings office in the new house reads the store record on the server and hands the desk only what it renders: three facts with a live reader, the rest counted as residue, and no credential in the page"
+    },
+    {
+      "atom": "components/admin/settings/SettingsFactsDesk.tsx",
+      "state": "moved",
+      "phase": "settings-1",
+      "when": "2026-10-13",
+      "proof": "measured 2026-10-13 with the census script and a reader grep over the repository: the settings table holds 17 keys, 3 are read by something that renders (theme and seo in the site shell, telegram_config in the alert door), 14 are read by nothing but the old desk generic editor — so the new desk names the three, counts the fourteen as unread residue, and offers no erase"
     }
   ]
 }

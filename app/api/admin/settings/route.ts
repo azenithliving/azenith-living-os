@@ -7,8 +7,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminApi } from "@/lib/admin-api-guard";
+import { SECRET_MASK } from "@/lib/settings/facts";
 
 export const dynamic = "force-dynamic";
+
+/** Keys whose value carries a credential. The browser never sees the value. */
+const SECRET_KEYS = new Set(["telegram_config"]);
+
+function maskSecret(setting: SiteSetting): SiteSetting {
+  if (!SECRET_KEYS.has(setting.key) || typeof setting.value !== "object" || setting.value === null) {
+    return setting;
+  }
+  const value = setting.value as Record<string, unknown>;
+  const cleaned: Record<string, unknown> = { ...value };
+  for (const field of ["botToken", "token", "secret", "password"]) {
+    if (cleaned[field]) cleaned[field] = SECRET_MASK;
+  }
+  return { ...setting, value: cleaned };
+}
+
+function carriesMask(value: unknown): boolean {
+  return JSON.stringify(value ?? "").includes(SECRET_MASK);
+}
 
 interface SiteSetting {
   key: string;
@@ -69,7 +89,7 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      return NextResponse.json({ success: true, setting: data as SiteSetting });
+      return NextResponse.json({ success: true, setting: maskSecret(data as SiteSetting) });
     } else {
       // Get all settings
       const { data, error } = await supabaseService
@@ -87,11 +107,12 @@ export async function GET(request: NextRequest) {
 
       // Convert to key-value object for easier frontend use
       const settings: Record<string, unknown> = {};
-      (data as SiteSetting[]).forEach((item) => {
+      const rawMasked = (data as SiteSetting[]).map(maskSecret);
+      rawMasked.forEach((item) => {
         settings[item.key] = item.value;
       });
 
-      return NextResponse.json({ success: true, settings, raw: data });
+      return NextResponse.json({ success: true, settings, raw: rawMasked });
     }
   } catch (error) {
     console.error("[Settings API] Error:", error);
@@ -117,6 +138,15 @@ export async function POST(request: NextRequest) {
     if (!key || value === undefined) {
       return NextResponse.json(
         { success: false, error: "Missing required fields: key and value are required" },
+        { status: 400 }
+      );
+    }
+
+    // The desk is handed a mask instead of a credential, so a save that carries the mask back would
+    // overwrite the real key with a sentence. Refuse it, and say what to do instead.
+    if (carriesMask(value)) {
+      return NextResponse.json(
+        { success: false, error: "مفيش مفتاح بيتكتب على الشاشة — غيّر من لوحته الخاص" },
         { status: 400 }
       );
     }

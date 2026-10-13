@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-12T23:48:18.116Z",
+  "generatedAt": "2026-10-13T02:12:56.193Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5042,
     "newPages": 14,
-    "newPageLines": 842,
+    "newPageLines": 863,
     "adminDoors": 121,
     "allDoors": 206,
     "outsideDoors": 8,
     "outsideDoorLines": 2600,
-    "rootLibFiles": 292,
-    "rootLibUsed": 89,
+    "rootLibFiles": 293,
+    "rootLibUsed": 90,
     "orphanDoors": 77,
-    "rootLibUsedLines": 31009,
-    "furnitureFiles": 59,
-    "furnitureLines": 16410,
+    "rootLibUsedLines": 31095,
+    "furnitureFiles": 60,
+    "furnitureLines": 16492,
     "furnitureUsedByBoth": 7,
     "furnitureBothLines": 2896,
-    "furnitureNewOnly": 19,
+    "furnitureNewOnly": 20,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 73,
-    "swarmFileLines": 16469,
+    "swarmFileLines": 16471,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 12,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 517
+    "atoms": 519
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -165,7 +165,7 @@
     {
       "kind": "new-page",
       "id": "app/admin/v2/settings/page.tsx",
-      "lines": 27
+      "lines": 48
     },
     {
       "kind": "new-page",
@@ -1268,6 +1268,12 @@
     },
     {
       "kind": "root-lib",
+      "id": "lib/settings/facts.ts",
+      "lines": 86,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
       "id": "lib/shop/rule.ts",
       "lines": 46,
       "callers": 1
@@ -1312,7 +1318,7 @@
       "kind": "root-lib",
       "id": "lib/supabase-service.ts",
       "lines": 58,
-      "callers": 4
+      "callers": 5
     },
     {
       "kind": "root-lib",
@@ -2061,8 +2067,14 @@
     },
     {
       "kind": "furniture",
+      "id": "components/admin/settings/SettingsFactsDesk.tsx",
+      "lines": 74,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
       "id": "components/admin/shop/ShopDesk.tsx",
-      "lines": 303,
+      "lines": 311,
       "usedBy": "new-only"
     },
     {
@@ -2331,7 +2343,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 366
+      "lines": 368
     },
     {
       "kind": "swarm-file",

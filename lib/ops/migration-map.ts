@@ -156,6 +156,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^app\/admin\/v2\/shop\//, office: "shelf-desk", reason: "طاولة الرفّ في البيت الجديد" },
   { match: /^app\/api\/admin\/shop\//, office: "shelf-desk", reason: "بوّابة الرفّ: بتكتب منه وبتقرأ منه بنفس القاعدة" },
   { match: /^lib\/shop\//, office: SHARED_OFFICE, reason: "قاعدة الرفّ نفسها: بيقرا منها صفحة الزائر وطاولة المالك معًا — مش ملك سطح واحد" },
+  { match: /^lib\/settings\//, office: SHARED_OFFICE, reason: "سجلّ حقائق الإعدادات: بيقرا منه المكتب والباب معًا — آلة مشتركة مش موظف" },
   { match: /^lib\/ops\//, office: "swarm-house", reason: "جسم السرب نفسه" },
 
   // Second pass: the doors and furniture the first rules did not reach.
@@ -253,7 +254,8 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "app/api/admin/customers/dossier/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الملف: بتقرأ الدفتر بنفس القارئ اللي بتاع شاشة العملاء، وورقاته المرتبطة بمفتاحه، وألوان البنك" },
   { id: "app/admin/v2/keys/page.tsx", office: "key-desk", status: "moving", reason: "مكتب المفاتيح: قايمة النماذج المجانية وعدد المفاتيح اللي بيجاوب فعلًا وخطوات جيب المفتاح" },
   { id: "app/api/admin/keys/desk/route.ts", office: "key-desk", status: "moving", reason: "بوّابة المكتب: بتقرأ السجل وبتسأل كل مزود عن مفاتيحه في دفعة محدودة" },
-  { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "pending", reason: "الإعدادات" },
+  { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "moved", reason: "مكتب الإعدادات في البيت الجديد: بيقول الحقائق اللي ليها قارئ حيّ، وبيعدّ الباقي مهمل، والمفتاح السرّي مش بيطلع على الشاشة" },
+  { id: "components/admin/settings/SettingsFactsDesk.tsx", office: "system-room", status: "moved", reason: "سطح المكتب نفسه: تلات كروت بتتحكم في حاجة، وعدّاد للأربع عشر اللي ما بيقرأهاش حد" },
   { id: "app/api/passport/[token]/contact/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الرقم والمنطقة: العميل هو اللي بيديها وهي اللي بتربط الورقة بصاحبها — شغل مكتب المبيعات" },
   { id: "lib/cad/sheet-images.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الصور اللي واقف وراها الملف الذهبي وصفحة العميل معًا — مش ملك موظف واحد" },
   { id: "lib/cad/plan.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الرسم: ورق العميل وملفه عند المالك بيمشوا نفس الأضلاع بنفس Builder — مش ملك موظف واحد" },

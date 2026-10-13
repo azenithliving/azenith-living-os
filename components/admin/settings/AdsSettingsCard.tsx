@@ -78,15 +78,15 @@ export default function AdsSettingsCard() {
 
   const field = (key: string, label: string, hint: string, placeholder: string) => (
     <label className="block">
-      <span className="text-xs text-white/55">{label}</span>
+      <span className="text-xs text-white/70">{label}</span>
       <input
         dir="ltr"
-        className="mt-1 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 font-mono text-sm text-white placeholder:text-white/25 focus:border-[#C5A059] focus:outline-none"
+        className="mt-1 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 font-mono text-sm text-white placeholder:text-white/70 focus:border-[#C5A059] focus:outline-none"
         value={String((seo?.[key] as string) ?? "")}
         placeholder={placeholder}
         onChange={(e) => set(key, e.target.value.trim())}
       />
-      <span className="mt-1 block text-[11px] text-white/35">{hint}</span>
+      <span className="mt-1 block text-[11px] text-white/70">{hint}</span>
     </label>
   );
 
@@ -95,15 +95,15 @@ export default function AdsSettingsCard() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-bold text-white">الإعلانات والقياس</h2>
-          <p className="mt-1 text-xs text-white/45">كل مفتاح لوحده — ومفيش أي بيانات بتروحات لجوجل غير لما تفتحه انت.</p>
+          <p className="mt-1 text-xs text-white/70">كل مفتاح لوحده — ومفيش أي بيانات بتروحات لجوجل غير لما تفتحه انت.</p>
         </div>
-        <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-white/50">
+        <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-white/70">
           {status === "loading" ? "برضه يستنى…" : status === "saving" ? "بيحفظ…" : status === "saved" ? "اتحفظ ✓" : status === "error" ? "حصل خطأ" : "جاهز"}
         </span>
       </div>
 
       {!seo && status !== "error" ? (
-        <p className="mt-6 text-sm text-white/40">…</p>
+        <p className="mt-6 text-sm text-white/70">…</p>
       ) : seo ? (
         <div className="mt-5 space-y-6">
           <div className="rounded-2xl border border-white/10 p-4">
@@ -116,7 +116,7 @@ export default function AdsSettingsCard() {
               />
               <span>
                 <span className="block text-sm font-semibold text-white">إعلانات جوجل تُعرض عندك (انت بتكسب)</span>
-                <span className="mt-0.5 block text-xs text-white/45">
+                <span className="mt-0.5 block text-xs text-white/70">
                   جوجل يحط إعلانات في صفحات الموقع، والحساب بتاعك في برنامج إعلانات جوجل هو اللي بيستقبل الأرباح.
                 </span>
               </span>
@@ -128,12 +128,12 @@ export default function AdsSettingsCard() {
 
           <div className="rounded-2xl border border-white/10 p-4">
             <div className="flex items-start gap-3">
-              <span className="mt-1 inline-flex h-4 w-4 items-center justify-center rounded bg-white/10 text-[10px] text-white/60">
+              <span className="mt-1 inline-flex h-4 w-4 items-center justify-center rounded bg-white/10 text-[10px] text-white/70">
                 {gtagOn ? "✓" : ""}
               </span>
               <span>
                 <span className="block text-sm font-semibold text-white">متابعة حملتك على جوجل (انت بتدفع لجوجل)</span>
-                <span className="mt-0.5 block text-xs text-white/45">
+                <span className="mt-0.5 block text-xs text-white/70">
                   لو عامل إعلان مدفوع على جوجل، الكود ده يقول لهم إن اللي دخل من إعلانهم فعلاً طلب من موقعك.
                   الكود بيتعمل من لوحة إعلانات جوجل، وكل رقم تحطيه بيشتغل لوحده.
                 </span>
@@ -154,12 +154,12 @@ export default function AdsSettingsCard() {
               {status === "saving" ? "بيحفظ…" : "احفظ"}
             </button>
             {STARTERS.every(([k, prefix]) => !String(seo?.[k] ?? "").startsWith(prefix)) ? (
-              <span className="text-[11px] text-white/35">مللحوظة: دلوقتي مفيش أي مفتاح شغال — الصفحة ما بتبعتش حاجة لجوج.</span>
+              <span className="text-[11px] text-white/70">مللحوظة: دلوقتي مفيش أي مفتاح شغال — الصفحة ما بتبعتش حاجة لجوج.</span>
             ) : null}
           </div>
 
           {error ? <p className="text-xs text-rose-300">{error}</p> : null}
-          <p className="text-[11px] leading-6 text-white/35">
+          <p className="text-[11px] leading-6 text-white/70">
             بعد الحفظ، الصفحة الرئيسية بتتحدّث لوحدها. لو لسه ظاهر لك القديم، جدّد بعد ثانية — التحزين على السيرفر بيخلص
             ترتيبه.
           </p>
