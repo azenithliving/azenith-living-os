@@ -61,6 +61,13 @@ describe("the credential never reaches a screen", () => {
 
 describe("the desk shows controls only for what answers", () => {
   const desk = read("components/admin/settings/SettingsFactsDesk.tsx");
+  const page = read("app/admin/v2/settings/page.tsx");
+
+  it("starts below the floating menu button, so the first line is not eaten", () => {
+    // Measured on the published site at 390px: the cockpit's gold menu button sits over the page's
+    // first line, and «الإعدادات — البيت الجديد» was cut to «ت — البيت الجديد».
+    expect(page).toContain("pt-20");
+  });
 
   it("names the residue and counts it, instead of offering fourteen dead switches", () => {
     expect(desk).toContain("وما بيقرأهاش أي سطح");

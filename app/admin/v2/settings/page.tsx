@@ -17,7 +17,7 @@ export default async function V2SettingsPage() {
   );
 
   return (
-    <div className="min-h-[60vh] px-5 py-10 md:px-10" dir="rtl">
+    <div className="min-h-[60vh] px-5 pt-20 pb-10 md:px-10" dir="rtl">
       <div className="mx-auto max-w-3xl space-y-8">
         <header className="space-y-1">
           <p className="text-[11px] text-white/70">الإعدادات — البيت الجديد</p>
