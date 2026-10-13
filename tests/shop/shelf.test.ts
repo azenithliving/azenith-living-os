@@ -91,6 +91,21 @@ describe("the owner's desk puts a piece on the shelf without touching the worksh
     expect(door).toContain("isDisplayable");
     expect(read("lib/shop/shelf.ts")).toContain("isDisplayable");
   });
+
+  it("keeps the database's own English off his screen", () => {
+    // Measured live 2026-10-13: the first insert was refused by a foreign key and the desk printed
+    // «insert or update on table "products" violates foreign key constraint…» to the owner.
+    expect(door).toContain("arabicReason");
+    expect(door).not.toMatch(/error:[^,\n]*\$\{error\??\.message/);
+    expect(door).not.toMatch(/error:.*\$\{upload\.error\.message/);
+  });
+
+  it("does not assume the sign-in account is filed as staff", () => {
+    // `products.created_by` points at the staff register, and the register holds no row for the
+    // owner's login (measured: 0 rows in `users` for the gate email).
+    expect(door).toContain('from("users")');
+    expect(door).toContain("created_by: staff?.data?.id ?? null");
+  });
 });
 
 describe("the price is written the way the owner reads it", () => {

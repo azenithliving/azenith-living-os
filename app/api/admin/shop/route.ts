@@ -37,6 +37,22 @@ function missingFor(row: Record<string, unknown>): string[] {
   return missing;
 }
 
+/**
+ * What the owner reads when the record refuses. The database answers in machine English
+ * («insert or update on table "products" violates foreign key constraint…»); his screen carries
+ * Arabic only, so the reason is translated by kind and the raw text is never pasted. When nothing
+ * matches, the desk says it was refused and leaves the detail to the watcher rather than dressing
+ * the owner in a constraint name.
+ */
+function arabicReason(message: string | undefined): string {
+  const m = (message ?? "").toLowerCase();
+  if (m.includes("foreign key")) return "المتجر ما عرفش يربط السطر بصاحبه — السطر ما اتسجلّش";
+  if (m.includes("null value")) return "في خانة ضرورية فاضية — السطر ما اتسجلّش";
+  if (m.includes("unique") || m.includes("duplicate")) return "في سطر بنفس الاسم أو الرمز اتسجل قبل كده";
+  if (m.includes("permission") || m.includes("row-level")) return "الصلاحية مانعة الكتابة دلوقتي";
+  return "السجل رفض السطر — السبب اتسجّل في مراقبة الموقع";
+}
+
 function unauthorized(error: unknown) {
   if (error instanceof AdminApiAuthError) {
     return NextResponse.json({ success: false, error: "لازم تكون داخل بحسابك عشان تعدّل الرفّ" }, { status: error.status });
@@ -92,7 +108,7 @@ export async function GET(request: NextRequest) {
     .limit(60);
 
   if (error) {
-    return NextResponse.json({ success: false, error: `السجل ما رجّعش حاجة: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ success: false, error: `السجل ما رجّعش حاجة — ${arabicReason(error.message)}` }, { status: 500 });
   }
 
   const rows: DeskRow[] = (data as Record<string, unknown>[] | null ?? []).map((row) => ({
@@ -154,7 +170,7 @@ export async function POST(request: NextRequest) {
     const path = `shop/${companyId}/${Date.now()}.${EXT_BY_MIME[type] ?? "png"}`;
     const upload = await supabase.storage.from(SHELF_BUCKET).upload(path, buffer, { contentType: type, upsert: false });
     if (upload.error) {
-      return NextResponse.json({ success: false, error: `الصورة ما اتخزنّتش: ${upload.error.message}` }, { status: 500 });
+      return NextResponse.json({ success: false, error: "الصورة ما اتخزنّتش — القطعة ما اتسجلّش" }, { status: 500 });
     }
     cover = path;
   }
@@ -162,11 +178,20 @@ export async function POST(request: NextRequest) {
   const shortDescription = typeof body.shortDescription === "string" ? body.shortDescription.trim() : "";
   const description = typeof body.description === "string" ? body.description.trim() : "";
 
+  /**
+   * `created_by` points at the store's staff register, not at the sign-in account, and the register
+   * holds no row for the owner's login (measured: 0 rows in `users` for the gate email, while the
+   * first insert attempt was refused by that very foreign key). So the writer is looked up by email
+   * and left blank when the register does not know him — a piece of his furniture must not fail to
+   * reach his shelf because his name is not filed as staff.
+   */
+  const staff = await supabase.from("users").select("id").eq("email", access.email).maybeSingle();
+
   const { data, error } = await supabase
     .from("products")
     .insert({
       company_id: companyId,
-      created_by: access.via === "session" ? access.userId : null,
+      created_by: staff?.data?.id ?? null,
       name,
       slug: arabicSlug(name),
       base_price: price,
@@ -182,7 +207,10 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error || !data) {
-    return NextResponse.json({ success: false, error: `السطر ما اتسجلّش: ${error?.message ?? "رد فاضي"} — المكتوب: ١، المخزّن: ٠` }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: `${arabicReason(error?.message)} — المكتوب: ١، المخزّن: ٠` },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ success: true, id: data.id, wrote: 1, stored: 1 });
@@ -231,7 +259,7 @@ export async function PATCH(request: NextRequest) {
 
   const { data, error } = await supabase.from("products").update(patch).eq("id", id).select("id,is_active,sale_price,featured_image_url").single();
   if (error || !data) {
-    return NextResponse.json({ success: false, error: `التعديل ما اتسجلّش: ${error?.message ?? "رد فاضي"}` }, { status: 500 });
+    return NextResponse.json({ success: false, error: `التعديل ما اتسجلّش — ${arabicReason(error?.message)}` }, { status: 500 });
   }
 
   return NextResponse.json({ success: true, row: data, stored: 1 });
