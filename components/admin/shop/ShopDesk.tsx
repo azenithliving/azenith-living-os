@@ -219,17 +219,25 @@ export function ShopDesk() {
             />
           </div>
           <div className="space-y-2 rounded-2xl border border-dashed border-white/10 p-3">
-            <label htmlFor="shop-photo" className="block text-[11px] text-white/70">
-              صورتها من شغلنا
-            </label>
+            <p className="text-[11px] text-white/70">صورتها من شغلنا</p>
+            {/* The browser paints its own file picker in English («Choose File»), and his screen
+                carries Arabic only — so the real input is kept for the keyboard and the phone, and
+                the word he presses is this store's own. */}
             <input
               id="shop-photo"
               ref={fileRef}
               type="file"
               accept="image/png,image/jpeg,image/webp,image/gif"
+              aria-label="اختار صورة القطعة من موبايلك"
               onChange={(e) => pickPhoto(e.target.files?.[0])}
-              className="w-full text-[11px] text-white/70 file:ml-3 file:rounded-xl file:border-0 file:bg-[#C5A059] file:px-4 file:py-2 file:text-[11px] file:font-bold file:text-[#1A1A1B]"
+              className="sr-only"
             />
+            <label
+              htmlFor="shop-photo"
+              className="inline-flex w-fit cursor-pointer items-center rounded-xl border border-white/15 px-4 py-2 text-[11px] font-bold text-white transition-colors hover:border-[#C5A059]/50"
+            >
+              اختار صورة من الموبايل
+            </label>
             {photoError ? <p className="text-[11px] text-rose-300">{photoError}</p> : null}
             {photo ? (
               <img src={photo} alt="الصورة اللي اخترتها" className="h-28 w-28 rounded-xl object-cover" />

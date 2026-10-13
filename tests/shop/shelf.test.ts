@@ -80,6 +80,12 @@ describe("the owner's desk puts a piece on the shelf without touching the worksh
     }
   });
 
+  it("does not let the browser paint its own English file button on his screen", () => {
+    expect(desk).not.toMatch(/\bfile:bg-|\bfile:text-\[/);
+    expect(desk).toContain('aria-label="اختار صورة القطعة من موبايلك"');
+    expect(desk).toContain("اختار صورة من الموبايل");
+  });
+
   it("does not drag the service credential into the browser", () => {
     // `lib/shop/shelf.ts` reads the database and is server-only; the desk may only take the words.
     expect(desk).toContain('from "@/lib/shop/words"');
