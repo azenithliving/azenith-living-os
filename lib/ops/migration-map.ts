@@ -146,6 +146,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^app\/api\/admin\/(browser|computer|phone|sandbox|automation|simulate-scenario)\//, office: "workshop", reason: "أبواب التجربة" },
   { match: /^app\/api\/admin\/(tasks|decisions|audit|telemetry|work)\//, office: "records-office", reason: "أبواب السجلات والقرارات" },
   { match: /^app\/api\/admin\/(system|settings|database|keys|health|env|config)\//, office: "system-room", reason: "أبواب النظام والمفاتيح" },
+  { match: /^app\/api\/admin\/numbers\//, office: "system-room", reason: "باب أرقام المتجر: مكان الكتابة الوحيد اللي كل سطوح الموقع بتقرا منها" },
 
   // The furniture that both houses stand on today: it moves to the new tree first.
   { match: /^components\/admin\/sales\//, office: "sales-office", reason: "عفش مدير المبيعات في البيت الجديد" },
@@ -256,8 +257,11 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "app/api/admin/keys/desk/route.ts", office: "key-desk", status: "moving", reason: "بوّابة المكتب: بتقرأ السجل وبتسأل كل مزود عن مفاتيحه في دفعة محدودة" },
   { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "moved", reason: "مكتب الإعدادات في البيت الجديد: بيقول الحقائق اللي ليها قارئ حيّ، وبيعدّ الباقي مهمل، والمفتاح السرّي مش بيطلع على الشاشة" },
   { id: "components/admin/settings/SettingsFactsDesk.tsx", office: "system-room", status: "moved", reason: "سطح المكتب نفسه: تلات كروت بتتحكم في حاجة، وعدّاد للأربع عشر اللي ما بيقرأهاش حد" },
+  { id: "app/api/admin/numbers/route.ts", office: "system-room", status: "moved", reason: "باب الأرقام: الكتابة الوحيدة في القائمة، بيرفض الفاضي وبيخلّي رقم واحد أساسي وبيردّ باللي اتخزّن فعلاً" },
+  { id: "components/admin/settings/StoreNumbersCard.tsx", office: "system-room", status: "moved", reason: "طاولته يغيّر الرقم ويضيف أرقام — الإزالة بضغطين، وآخر رقم ما بيتشال، ومفيش مسح سطر" },
   { id: "app/api/passport/[token]/contact/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الرقم والمنطقة: العميل هو اللي بيديها وهي اللي بتربط الورقة بصاحبها — شغل مكتب المبيعات" },
   { id: "lib/cad/sheet-images.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الصور اللي واقف وراها الملف الذهبي وصفحة العميل معًا — مش ملك موظف واحد" },
+  { id: "lib/store-numbers.ts", office: SHARED_OFFICE, status: "moved", reason: "صاحب الرقم الواحد: بيقرا منه الهيكل وصفحات الكتالوج ومكتب الأرقام معًا — رقم مش ملك سطح واحد" },
   { id: "lib/cad/plan.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الرسم: ورق العميل وملفه عند المالك بيمشوا نفس الأضلاع بنفس Builder — مش ملك موظف واحد" },
   { id: "lib/cad/colours.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة مصفوفة الألوان: نفس الصور اللي بتظهر ليه هي اللي بتحدّد الألوان اللي تتعرض، عند العميل وعند المالك" },
   { id: "lib/ops/inboxes.ts", office: "decision-desk", status: "moved", reason: "قارئ بريدهم الواحد: تسعة أرقام على شاشة القيادة بتيجي من مقياس واحد بنفس قاعدة باب الرسائل" },

@@ -6,12 +6,15 @@ export async function GET() {
     const config = await getRuntimeConfig();
     return NextResponse.json(config);
   } catch {
-    // Return minimal config if runtime config fails
+    // Degraded, and honest about it: the number is not guessed from a build-time variable here,
+    // because that is how a customer ended up with a number that is not the store's. A surface that
+    // gets null keeps its fallback (the request page) instead of opening a stranger's chat.
     return NextResponse.json({
       brandName: "Azenith Living",
       brandNameAr: "أزينث ليفينج",
-      whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || null,
+      whatsappNumber: null,
       primaryColor: "#C5A059",
+      degraded: true,
     });
   }
 }

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getCurrentTenant } from "@/lib/tenant";
+import { getPrimaryWhatsApp } from "@/lib/store-numbers";
 
 export type RuntimeConfig = {
   brandName: string;
@@ -42,9 +43,9 @@ export async function getRuntimeConfig(): Promise<RuntimeConfig> {
 
   // Fallback to environment variables if no tenant found
   const brandName = tenant?.name ?? readEnv("BRAND_NAME") ?? "Azenith Living";
-  const whatsappNumber = tenant?.whatsapp
-    ? normalizePhoneNumber(tenant.whatsapp)
-    : normalizePhoneNumber(readEnv("WHATSAPP_DEFAULT_NUMBER"));
+  // The number is not resolved here: `lib/store-numbers.ts` is its only owner, and it answers in
+  // international form so a customer's button actually opens a chat.
+  const whatsappNumber = await getPrimaryWhatsApp();
   const primaryColor = tenant?.primary_color ?? "#C5A059";
 
   return {

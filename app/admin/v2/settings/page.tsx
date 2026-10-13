@@ -2,6 +2,7 @@ import Link from "next/link";
 import AdsSettingsCard from "@/components/admin/settings/AdsSettingsCard";
 import ConsultantFaqCard from "@/components/admin/settings/ConsultantFaqCard";
 import { SettingsFactsDesk } from "@/components/admin/settings/SettingsFactsDesk";
+import { StoreNumbersCard } from "@/components/admin/settings/StoreNumbersCard";
 import { supabaseService } from "@/lib/supabase-service";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +28,8 @@ export default async function V2SettingsPage() {
             مسجّل في السجل لسه.
           </p>
         </header>
+
+        <StoreNumbersCard />
 
         <SettingsFactsDesk values={values} />
 

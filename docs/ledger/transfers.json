@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T02:12:56.229Z",
+  "generatedAt": "2026-10-13T05:10:30.743Z",
   "states": [
     "not-moved",
     "moving",
@@ -8,7 +8,7 @@
   ],
   "counts": {
     "not-moved": 487,
-    "moved": 25,
+    "moved": 28,
     "moving": 6,
     "erased": 1
   },
@@ -597,6 +597,14 @@
       "kind": "admin-door",
       "atom": "app/api/admin/notifications/route.ts",
       "state": "not-moved"
+    },
+    {
+      "kind": "admin-door",
+      "atom": "app/api/admin/numbers/route.ts",
+      "state": "moved",
+      "phase": "numbers-1",
+      "when": "2026-10-13",
+      "proof": "the only writer of the list: it takes the whole list at once, drops anything that is not dialable, refuses an empty list, keeps exactly one primary, and answers with what the record kept (wrote / stored) rather than with what it was handed"
     },
     {
       "kind": "admin-door",
@@ -1255,6 +1263,14 @@
       "kind": "root-lib",
       "atom": "lib/specialized-providers.ts",
       "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/store-numbers.ts",
+      "state": "moved",
+      "phase": "numbers-1",
+      "when": "2026-10-13",
+      "proof": "the one owner of the store's phone numbers: it reads the settings record, normalizes an Egyptian local number to the international form a WhatsApp link needs, and answers null rather than a guess. Measured 2026-10-13 before it existed: four producers of one fact, five customer pages with zero WhatsApp links, and 18 catalogue buttons opening a number that was not the store's"
     },
     {
       "kind": "root-lib",
@@ -1986,6 +2002,14 @@
       "phase": "settings-1",
       "when": "2026-10-13",
       "proof": "measured 2026-10-13 with the census script and a reader grep over the repository: the settings table holds 17 keys, 3 are read by something that renders (theme and seo in the site shell, telegram_config in the alert door), 14 are read by nothing but the old desk generic editor — so the new desk names the three, counts the fourteen as unread residue, and offers no erase"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/settings/StoreNumbersCard.tsx",
+      "state": "moved",
+      "phase": "numbers-1",
+      "when": "2026-10-13",
+      "proof": "his desk for it: change a number, add one, mark which one the buttons open, remove with a second press, and the last number cannot be removed — deleting a row is his word, and there is no erase here"
     },
     {
       "kind": "furniture",

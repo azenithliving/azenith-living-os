@@ -1,20 +1,23 @@
-"use client"
-
 import Link from "next/link";
 import { roomDefinitions } from "@/lib/site-content";
 import FurnitureCard from "@/components/FurnitureCard";
-import { getClientRuntimeConfig } from "@/lib/client-runtime-config";
+import { getPrimaryWhatsApp, whatsappHref } from "@/lib/store-numbers";
 
-export default function FurniturePage() {
-  const allFurniture = roomDefinitions.flatMap(room => 
-    (room.furniture || []).map(f => ({ ...f, roomSlug: room.slug, roomTitle: room.title }))
+export const dynamic = "force-dynamic";
+
+/**
+ * The catalogue a visitor browses. The address every «اطلب عرض سعر فوري» button opens is read from
+ * the store's own numbers record — measured 2026-10-13, this page used to build its 18 links from a
+ * browser environment variable that held a number which is not the store's, in a form wa.me cannot
+ * open. With no number saved the button falls back to the request page rather than a dead chat.
+ */
+export default async function FurniturePage() {
+  const number = await getPrimaryWhatsApp();
+  const allFurniture = roomDefinitions.flatMap((room) =>
+    (room.furniture || []).map((f) => ({ ...f, roomSlug: room.slug, roomTitle: room.title }))
   );
 
-  const clientRuntimeConfig = getClientRuntimeConfig();
-
-  const getQuoteHref = (message: string) => clientRuntimeConfig.whatsappNumber
-    ? `https://wa.me/${clientRuntimeConfig.whatsappNumber}?text=${encodeURIComponent(message)}`
-    : "/request";
+  const getQuoteHref = (message: string) => whatsappHref(number, message) ?? "/request";
 
   return (
     <main className="px-6 py-12 md:px-10 lg:px-16">
@@ -29,7 +32,7 @@ export default function FurniturePage() {
         </div>
 
         <div className="space-y-16">
-          {roomDefinitions.map(room => 
+          {roomDefinitions.map(room =>
             (room.furniture || []).length > 0 && (
               <section key={room.slug} className="space-y-8 animate-fadeInUp">
                 <div className="flex items-center gap-4">
@@ -40,7 +43,7 @@ export default function FurniturePage() {
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {room.furniture!.map(furniture => (
-                    <FurnitureCard 
+                    <FurnitureCard
                       key={furniture.slug}
                       furniture={furniture}
                       quoteHref={getQuoteHref(`${room.title} - ${furniture.title}`)}
@@ -61,4 +64,3 @@ export default function FurniturePage() {
     </main>
   );
 }
-

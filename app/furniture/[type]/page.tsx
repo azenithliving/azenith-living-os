@@ -1,37 +1,35 @@
-"use client"
-
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { roomDefinitions, type FurnitureDefinition } from "@/lib/site-content";
-import { getClientRuntimeConfig } from "@/lib/client-runtime-config";
+import { getPrimaryWhatsApp, whatsappHref } from "@/lib/store-numbers";
 import FurnitureCard from "@/components/FurnitureCard";
+
+export const dynamic = "force-dynamic";
 
 type FurnitureWithRoom = FurnitureDefinition & {
   roomSlug: string;
   roomTitle: string;
 };
 
-export default function FurnitureTypePage() {
-  const params = useParams();
-  const typeParam = params?.type;
-  const type = Array.isArray(typeParam) ? typeParam[0] : (typeParam ?? "");
-  const matchingFurniture = roomDefinitions.flatMap(room => 
-    (room.furniture || []).filter(f => 
-      f.title.toLowerCase().includes(type) || 
-      (type === 'sofas' && f.title.includes('كنب')) ||
-      (type === 'corner-sofas' && f.title.includes('زاوية'))
-    ).map(f => ({ ...f, roomSlug: room.slug, roomTitle: room.title }))
+/** One type of piece, filtered out of the same catalogue — and the same numbers record behind every button. */
+export default async function FurnitureTypePage({ params }: { params: Promise<{ type: string }> }) {
+  const { type } = await params;
+  const number = await getPrimaryWhatsApp();
+  const matchingFurniture = roomDefinitions.flatMap((room) =>
+    (room.furniture || [])
+      .filter(
+        (f) =>
+          f.title.toLowerCase().includes(type) ||
+          (type === "sofas" && f.title.includes("كنب")) ||
+          (type === "corner-sofas" && f.title.includes("زاوية"))
+      )
+      .map((f) => ({ ...f, roomSlug: room.slug, roomTitle: room.title }))
   );
 
-  const clientRuntimeConfig = getClientRuntimeConfig();
-
-  const getQuoteHref = (message: string) => clientRuntimeConfig.whatsappNumber
-    ? `https://wa.me/${clientRuntimeConfig.whatsappNumber}?text=${encodeURIComponent(message)}`
-    : "/request";
+  const getQuoteHref = (message: string) => whatsappHref(number, message) ?? "/request";
 
   const titleMap: Record<string, string> = {
     sofas: "الكنب",
-    'corner-sofas': "كنب الزوايا"
+    "corner-sofas": "كنب الزوايا",
   };
 
   const pageTitle = titleMap[type as keyof typeof titleMap] || type;
@@ -51,8 +49,8 @@ export default function FurnitureTypePage() {
 
         {matchingFurniture.length > 0 ? (
           <div className="space-y-12">
-            {roomDefinitions.map(room => {
-              const roomFurniture = matchingFurniture.filter(f => f.roomSlug === room.slug);
+            {roomDefinitions.map((room) => {
+              const roomFurniture = matchingFurniture.filter((f) => f.roomSlug === room.slug);
               if (roomFurniture.length === 0) return null;
               return (
                 <section key={room.slug} className="space-y-8 animate-fadeInUp">
@@ -64,7 +62,7 @@ export default function FurnitureTypePage() {
                   </div>
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {roomFurniture.map((furniture: FurnitureWithRoom) => (
-                      <FurnitureCard 
+                      <FurnitureCard
                         key={furniture.slug}
                         furniture={furniture}
                         quoteHref={getQuoteHref(`${room.title} - ${furniture.title}`)}
@@ -87,4 +85,3 @@ export default function FurnitureTypePage() {
     </main>
   );
 }
-
