@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T05:10:30.734Z",
+  "generatedAt": "2026-10-13T05:51:09.453Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5042,
@@ -9,10 +9,10 @@
     "allDoors": 207,
     "outsideDoors": 8,
     "outsideDoorLines": 2600,
-    "rootLibFiles": 293,
+    "rootLibFiles": 294,
     "rootLibUsed": 91,
     "orphanDoors": 77,
-    "rootLibUsedLines": 31203,
+    "rootLibUsedLines": 31171,
     "furnitureFiles": 61,
     "furnitureLines": 16689,
     "furnitureUsedByBoth": 7,
@@ -21,7 +21,7 @@
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 73,
-    "swarmFileLines": 16473,
+    "swarmFileLines": 16475,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
@@ -1303,8 +1303,8 @@
     },
     {
       "kind": "root-lib",
-      "id": "lib/store-numbers.ts",
-      "lines": 108,
+      "id": "lib/store-numbers/read.ts",
+      "lines": 76,
       "callers": 1
     },
     {
@@ -2360,7 +2360,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 370
+      "lines": 372
     },
     {
       "kind": "swarm-file",

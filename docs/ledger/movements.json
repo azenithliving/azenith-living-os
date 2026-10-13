@@ -232,7 +232,7 @@
       "proof": "measured 2026-10-13 with the census script and a reader grep over the repository: the settings table holds 17 keys, 3 are read by something that renders (theme and seo in the site shell, telegram_config in the alert door), 14 are read by nothing but the old desk generic editor — so the new desk names the three, counts the fourteen as unread residue, and offers no erase"
     },
     {
-      "atom": "lib/store-numbers.ts",
+      "atom": "lib/store-numbers/read.ts",
       "state": "moved",
       "phase": "numbers-1",
       "when": "2026-10-13",

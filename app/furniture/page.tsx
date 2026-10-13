@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { roomDefinitions } from "@/lib/site-content";
 import FurnitureCard from "@/components/FurnitureCard";
-import { getPrimaryWhatsApp, whatsappHref } from "@/lib/store-numbers";
+import { getPrimaryWhatsApp, whatsappHref } from "@/lib/store-numbers/read";
 
 export const dynamic = "force-dynamic";
 

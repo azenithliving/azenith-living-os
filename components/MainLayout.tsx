@@ -4,8 +4,9 @@ import { usePathname } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import React from "react";
+import type { StoreNumber } from "@/lib/store-numbers/format";
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayout({ children, storeNumbers = [] }: { children: React.ReactNode; storeNumbers?: StoreNumber[] }) {
   const pathname = usePathname();
   
   const isExcluded = 
@@ -21,7 +22,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <div className="flex-1">
         {children}
       </div>
-      {!isExcluded && <Footer />}
+      {!isExcluded && <Footer storeNumbers={storeNumbers} />}
     </div>
   );
 }

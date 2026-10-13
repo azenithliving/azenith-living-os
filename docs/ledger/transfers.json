@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T05:10:30.743Z",
+  "generatedAt": "2026-10-13T05:51:09.463Z",
   "states": [
     "not-moved",
     "moving",
@@ -1266,7 +1266,7 @@
     },
     {
       "kind": "root-lib",
-      "atom": "lib/store-numbers.ts",
+      "atom": "lib/store-numbers/read.ts",
       "state": "moved",
       "phase": "numbers-1",
       "when": "2026-10-13",

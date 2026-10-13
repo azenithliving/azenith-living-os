@@ -2,7 +2,7 @@
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 
-import { normalizeWhatsApp, whatsappHref, NUMBERS_KEY } from "@/lib/store-numbers";
+import { localForm, normalizeWhatsApp, whatsappHref, NUMBERS_KEY } from "@/lib/store-numbers/format";
 
 /**
  * The store's phone number, guarded to one owner.
@@ -60,13 +60,41 @@ describe("the number has exactly one owner", () => {
   });
 });
 
+describe("the number shows on every page a customer opens", () => {
+  it("the root layout reads the owner and hands it down", () => {
+    const layout = read("app/layout.tsx");
+    expect(layout).toContain("getStoreNumbers()");
+    expect(layout).toContain("storeNumbers={storeNumbers}");
+  });
+
+  it("the footer links it and writes it the way he reads it", () => {
+    const footer = read("components/Footer.tsx");
+    expect(footer).toContain("whatsappHref(n.value)");
+    expect(footer).toContain("arabicNumerals(localForm(n.value))");
+    expect(footer).toContain("storeNumbers.length === 0 && !email");
+  });
+
+  it("shows the local form, not the country-coded one", () => {
+    expect(localForm("201090819584")).toBe("01090819584");
+    expect(localForm("01090819584")).toBe("01090819584");
+  });
+});
+
 describe("the dashboard is where he changes it", () => {
   const door = read("app/api/admin/numbers/route.ts");
   const card = read("components/admin/settings/StoreNumbersCard.tsx");
 
   it("saves through the one settings key the pages read", () => {
     expect(door).toContain("NUMBERS_KEY");
-    expect(read("lib/store-numbers.ts")).toContain(`"${NUMBERS_KEY}"`);
+    expect(read("lib/store-numbers/read.ts")).toContain("eq(\"key\", NUMBERS_KEY)");
+    expect(read("lib/store-numbers/format.ts")).toContain(`"${NUMBERS_KEY}"`);
+  });
+
+  it("keeps the credential out of the browser: the footer may only take the arithmetic", () => {
+    expect(card).not.toContain('from "@/lib/store-numbers/read"');
+    expect(read("components/Footer.tsx")).toContain('from "@/lib/store-numbers/format"');
+    expect(read("components/Footer.tsx")).not.toContain('from "@/lib/store-numbers/read"');
+    expect(read("lib/store-numbers/format.ts")).not.toContain("supabase-admin");
   });
 
   it("keeps at least one number and exactly one primary", () => {

@@ -261,7 +261,7 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "components/admin/settings/StoreNumbersCard.tsx", office: "system-room", status: "moved", reason: "طاولته يغيّر الرقم ويضيف أرقام — الإزالة بضغطين، وآخر رقم ما بيتشال، ومفيش مسح سطر" },
   { id: "app/api/passport/[token]/contact/route.ts", office: "sales-office", status: "moved", reason: "بوّابة الرقم والمنطقة: العميل هو اللي بيديها وهي اللي بتربط الورقة بصاحبها — شغل مكتب المبيعات" },
   { id: "lib/cad/sheet-images.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الصور اللي واقف وراها الملف الذهبي وصفحة العميل معًا — مش ملك موظف واحد" },
-  { id: "lib/store-numbers.ts", office: SHARED_OFFICE, status: "moved", reason: "صاحب الرقم الواحد: بيقرا منه الهيكل وصفحات الكتالوج ومكتب الأرقام معًا — رقم مش ملك سطح واحد" },
+  { id: "lib/store-numbers/read.ts", office: SHARED_OFFICE, status: "moved", reason: "صاحب الرقم الواحد: بيقرا منه الهيكل وصفحات الكتالوج ومكتب الأرقام معًا — رقم مش ملك سطح واحد" },
   { id: "lib/cad/plan.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة الرسم: ورق العميل وملفه عند المالك بيمشوا نفس الأضلاع بنفس Builder — مش ملك موظف واحد" },
   { id: "lib/cad/colours.ts", office: SHARED_OFFICE, status: "moved", reason: "آلة مصفوفة الألوان: نفس الصور اللي بتظهر ليه هي اللي بتحدّد الألوان اللي تتعرض، عند العميل وعند المالك" },
   { id: "lib/ops/inboxes.ts", office: "decision-desk", status: "moved", reason: "قارئ بريدهم الواحد: تسعة أرقام على شاشة القيادة بتيجي من مقياس واحد بنفس قاعدة باب الرسائل" },

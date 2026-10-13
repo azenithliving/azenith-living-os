@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { requireAdminApiAccess, AdminApiAuthError } from "@/lib/admin-api-auth";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-import { getStoreNumbers, normalizeWhatsApp, NUMBERS_KEY, type StoreNumber } from "@/lib/store-numbers";
+import { getStoreNumbers, normalizeWhatsApp, NUMBERS_KEY, type StoreNumber } from "@/lib/store-numbers/read";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

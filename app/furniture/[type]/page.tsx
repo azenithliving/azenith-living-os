@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { roomDefinitions, type FurnitureDefinition } from "@/lib/site-content";
-import { getPrimaryWhatsApp, whatsappHref } from "@/lib/store-numbers";
+import { getPrimaryWhatsApp, whatsappHref } from "@/lib/store-numbers/read";
 import FurnitureCard from "@/components/FurnitureCard";
 
 export const dynamic = "force-dynamic";

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import type { RuntimeConfig } from "@/lib/runtime-config";
+import { localForm, whatsappHref } from "@/lib/store-numbers/format";
 import { arabicNumerals } from "@/lib/arabic";
 import { BRAND_NAME_AR, BRAND_NAME_EN } from "@/lib/seo";
 import useSessionStore from "@/stores/useSessionStore";
@@ -35,9 +36,11 @@ type FooterProps = {
   contactEmail?: RuntimeConfig["contactEmail"];
   contactPhone?: RuntimeConfig["contactPhone"];
   businessAddress?: RuntimeConfig["businessAddress"];
+  /** Every number the store answers on, read from the store's own record by the root layout. */
+  storeNumbers?: { value: string; label: string; primary: boolean }[];
 };
 
-export default function Footer({ contactEmail, contactPhone, businessAddress }: FooterProps) {
+export default function Footer({ contactEmail, contactPhone, businessAddress, storeNumbers = [] }: FooterProps) {
   const currentLang = useSessionStore((state) => state.language);
   const isRTL = currentLang === "ar";
   const email = contactEmail ?? null;
@@ -92,6 +95,20 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
           <motion.div variants={columnVariants} className="space-y-8">
             <h2 className="text-xs font-light uppercase tracking-widest text-gray-400">{isRTL ? "تواصل مباشر" : "Direct Contact"}</h2>
             <ul className="space-y-4">
+              {storeNumbers.map((n) => (
+                <li key={n.value} className="text-sm font-light text-gray-300">
+                  <span className="text-gray-400">{n.label}:</span>{" "}
+                  <a
+                    href={whatsappHref(n.value) ?? "/request"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="transition-all duration-300 hover:text-[#C5A059]"
+                    dir="ltr"
+                  >
+                    {arabicNumerals(localForm(n.value))}
+                  </a>
+                </li>
+              ))}
               {email ? (
                 <li className="text-sm font-light text-gray-300">
                   <span className="text-gray-400">{isRTL ? "البريد:" : "Email:"}</span>{" "}
@@ -113,7 +130,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress }: 
                   <span className="text-gray-400">{isRTL ? "العنوان:" : "Address:"}</span> <span>{officeAddress}</span>
                 </li>
               ) : null}
-              {!email && !phone && !officeAddress ? (
+              {storeNumbers.length === 0 && !email && !phone && !officeAddress ? (
                 <li className="text-sm font-light text-gray-400">
                   {isRTL ? "استخدم نموذج الطلب للتواصل مع الفريق." : "Use the request form to contact the team."}
                 </li>

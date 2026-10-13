@@ -148,7 +148,7 @@ export function StoreNumbersCard() {
                 type="button"
                 onClick={() => remove(n.value)}
                 disabled={saving}
-                aria-label={`أزل ${n.label} من قائمة المتجر`}
+                aria-label={confirmRemove === n.value ? `أؤكد إزالة ${n.label}` : `أزل ${n.label} من قائمة المتجر`}
                 className="rounded-xl border border-rose-500/30 px-3 py-1.5 text-[11px] font-bold text-rose-200 transition-colors hover:bg-rose-500/10 disabled:opacity-60"
               >
                 {confirmRemove === n.value ? "أؤكد الإزالة" : "أزله"}

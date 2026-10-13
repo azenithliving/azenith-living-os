@@ -8,6 +8,7 @@ import RealityUIProvider from "@/components/RealityUIProvider";
 import TelemetryTracker from "@/components/TelemetryTracker";
 import { buildPageMetadata, getOrganizationJsonLd } from "@/lib/seo";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { getStoreNumbers } from "@/lib/store-numbers/read";
 
 import ConsultantWidgetWrapper from "./ConsultantWidgetWrapper";
 import "./globals.css";
@@ -89,6 +90,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const settings = await loadPublicRuntimeSettings();
+  const storeNumbers = await getStoreNumbers();
   const theme = settings.theme || {};
   const seo = settings.seo || {};
 
@@ -156,7 +158,7 @@ export default async function RootLayout({
         <Providers>
           <TelemetryTracker />
           <RealityUIProvider />
-          <MainLayout>{children}</MainLayout>
+          <MainLayout storeNumbers={storeNumbers}>{children}</MainLayout>
         </Providers>
         <Toaster
           position="bottom-center"

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getCurrentTenant } from "@/lib/tenant";
-import { getPrimaryWhatsApp } from "@/lib/store-numbers";
+import { getPrimaryWhatsApp } from "@/lib/store-numbers/read";
 
 export type RuntimeConfig = {
   brandName: string;
