@@ -71,6 +71,20 @@ describe("the credential a door carries", () => {
   });
 });
 
+describe("the record answers to the store, so an open write is the store writing on a stranger's word", () => {
+  // Two doors write to the picture bank and spend model credit, and neither is called by any surface in
+  // the repository (measured 2026-10-15: their names appear only in their own files and the rate-limit
+  // list). While they read through the visitor's key their writes were politely refused by the policies;
+  // with the store's own credential behind them, an unguarded press would be honoured.
+  for (const door of ["app/api/curated-pages/route.ts", "app/api/enhance-image/route.ts"]) {
+    it(`${door} stands behind the owner's gate`, () => {
+      const source = readFileSync(door, "utf8");
+      expect(source).toContain("requireAdminApi");
+      expect(source).toContain("if (unauthorized) return unauthorized;");
+    });
+  }
+});
+
 describe("the lock on the database itself", () => {
   const path = "supabase/migrations/20261015_a_lock_the_public_gate.sql";
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin as supabase } from "@/lib/supabase-server";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 import { analyzeImageMetadata, type ImageMetadata } from "@/services/aiEnhancement";
 
 export interface EnhanceImageRequest {
@@ -17,8 +18,15 @@ export interface EnhanceImageResponse {
 /**
  * POST /api/enhance-image
  * AI-powered image metadata enhancement with Supabase caching
+ *
+ * Behind the owner's gate: no surface calls this door (measured 2026-10-15 — the rate-limit list is the
+ * only other place its name appears), and every press spends the store's own model credit. An open door
+ * here is a stranger burning the owner's free ceiling.
  */
-export async function POST(request: NextRequest): Promise<NextResponse<EnhanceImageResponse | { error: string }>> {
+export async function POST(request: NextRequest) {
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
+
   try {
     const body: EnhanceImageRequest = await request.json();
     const { imageId, imageUrl, roomType, style } = body;

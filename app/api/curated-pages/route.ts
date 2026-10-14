@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin as supabase } from "@/lib/supabase-server";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 import { filterImagesWithAI, type PhotoCandidate } from "@/utils/aiImageFilter";
 
 export interface CuratedPageRequest {
@@ -23,8 +24,15 @@ const lastRequestTime = new Map<string, number>();
 /**
  * POST /api/curated-pages
  * AI-powered filtering with Supabase caching per page
+ *
+ * Behind the owner's gate: no customer surface calls this door (measured 2026-10-15 — the only name in
+ * the repository besides its own file is the rate-limit list), and since the record began answering to
+ * the store's own credential, an open write here would be the store writing on a stranger's word.
  */
-export async function POST(request: NextRequest): Promise<NextResponse<CuratedPageResponse | { error: string }>> {
+export async function POST(request: NextRequest) {
+  const { unauthorized } = await requireAdminApi();
+  if (unauthorized) return unauthorized;
+
   try {
     const body: CuratedPageRequest = await request.json();
     const { roomId, style, page, photos, forceRefresh = false } = body;
