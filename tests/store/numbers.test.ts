@@ -78,6 +78,23 @@ describe("the number shows on every page a customer opens", () => {
     expect(localForm("201090819584")).toBe("01090819584");
     expect(localForm("01090819584")).toBe("01090819584");
   });
+
+  it("the footer also carries the hours and his word about the showroom", () => {
+    const layout = read("app/layout.tsx");
+    expect(layout).toContain("readStoreFacts()");
+    expect(layout).toContain("workingHours={facts.workingHours ?? null}");
+    const footer = read("components/Footer.tsx");
+    expect(footer).toContain("المواعيد:");
+    // The record's sentence already begins with its own label; the footer must not print it twice.
+    expect(footer).toContain("replace(/^مواعيد العمل[:：]\\s*/, \"\")");
+  });
+
+  it("the no-showroom sentence is written once in the whole repository", () => {
+    const facts = read("lib/consultant/store-facts.ts");
+    const copies = facts.split("ملناش معرض: الدار ما بتخزنش قطع جاهزة").length - 1;
+    expect(copies, "the sentence must be declared once and reused by name").toBe(1);
+    expect(facts).toContain("export function noShowroomLine()");
+  });
 });
 
 describe("the dashboard is where he changes it", () => {

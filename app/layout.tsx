@@ -9,6 +9,7 @@ import TelemetryTracker from "@/components/TelemetryTracker";
 import { buildPageMetadata, getOrganizationJsonLd } from "@/lib/seo";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { getStoreNumbers } from "@/lib/store-numbers/read";
+import { noShowroomLine, readStoreFacts } from "@/lib/consultant/store-facts";
 
 import ConsultantWidgetWrapper from "./ConsultantWidgetWrapper";
 import "./globals.css";
@@ -91,6 +92,9 @@ export default async function RootLayout({
 }) {
   const settings = await loadPublicRuntimeSettings();
   const storeNumbers = await getStoreNumbers();
+  // The hours are quoted from the store's own record, never restated here: a footer that guesses an
+  // opening time is how a customer is told a schedule the owner never ordered.
+  const facts = await readStoreFacts();
   const theme = settings.theme || {};
   const seo = settings.seo || {};
 
@@ -158,7 +162,9 @@ export default async function RootLayout({
         <Providers>
           <TelemetryTracker />
           <RealityUIProvider />
-          <MainLayout storeNumbers={storeNumbers}>{children}</MainLayout>
+          <MainLayout storeNumbers={storeNumbers} workingHours={facts.workingHours ?? null} noShowroom={noShowroomLine()}>
+            {children}
+          </MainLayout>
         </Providers>
         <Toaster
           position="bottom-center"

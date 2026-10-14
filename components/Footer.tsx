@@ -38,9 +38,13 @@ type FooterProps = {
   businessAddress?: RuntimeConfig["businessAddress"];
   /** Every number the store answers on, read from the store's own record by the root layout. */
   storeNumbers?: { value: string; label: string; primary: boolean }[];
+  /** The owner's sentence about the working hours, quoted from his record — null when nothing is recorded. */
+  workingHours?: string | null;
+  /** His own words on why there is nothing to visit. */
+  noShowroom?: string;
 };
 
-export default function Footer({ contactEmail, contactPhone, businessAddress, storeNumbers = [] }: FooterProps) {
+export default function Footer({ contactEmail, contactPhone, businessAddress, storeNumbers = [], workingHours = null, noShowroom = "" }: FooterProps) {
   const currentLang = useSessionStore((state) => state.language);
   const isRTL = currentLang === "ar";
   const email = contactEmail ?? null;
@@ -109,6 +113,15 @@ export default function Footer({ contactEmail, contactPhone, businessAddress, st
                   </a>
                 </li>
               ))}
+              {workingHours ? (
+                <li className="text-sm font-light leading-7 text-gray-300">
+                  <span className="text-gray-400">{isRTL ? "المواعيد:" : "Hours:"}</span>{" "}
+                  {String(workingHours).replace(/^مواعيد العمل[:：]\s*/, "")}
+                </li>
+              ) : null}
+              {noShowroom ? (
+                <li className="text-sm font-light leading-7 text-gray-300">{noShowroom}</li>
+              ) : null}
               {email ? (
                 <li className="text-sm font-light text-gray-300">
                   <span className="text-gray-400">{isRTL ? "البريد:" : "Email:"}</span>{" "}
@@ -130,7 +143,7 @@ export default function Footer({ contactEmail, contactPhone, businessAddress, st
                   <span className="text-gray-400">{isRTL ? "العنوان:" : "Address:"}</span> <span>{officeAddress}</span>
                 </li>
               ) : null}
-              {storeNumbers.length === 0 && !email && !phone && !officeAddress ? (
+              {storeNumbers.length === 0 && !email && !phone && !officeAddress && !workingHours && !noShowroom ? (
                 <li className="text-sm font-light text-gray-400">
                   {isRTL ? "استخدم نموذج الطلب للتواصل مع الفريق." : "Use the request form to contact the team."}
                 </li>

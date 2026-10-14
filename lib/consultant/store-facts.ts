@@ -126,6 +126,13 @@ export function buildCoverageReply(facts: StoreFacts, language?: string): string
  * showroom, because nothing is made ready to be seen. The replacement is the store's actual
  * process — measurements and pictures, then the workshop builds it to fit.
  */
+const NO_SHOWROOM_LINE = "احنا في أزينث ليفينج ملناش معرض: الدار ما بتخزنش قطع جاهزة، كل حاجة بتتصمّم وبتتصنّع حسب الطلب وعلى مقاس بيتك.";
+
+/** The same sentence, short enough for a page footer — one copy, sliced, never restated. */
+export function noShowroomLine(): string {
+  return NO_SHOWROOM_LINE;
+}
+
 export function buildShowroomReply(facts: StoreFacts, language?: string): string {
   if (language === "en") {
     const wa = facts.whatsappLocal ? ` Send them to our WhatsApp: ${facts.whatsappLocal}.` : "";
@@ -135,7 +142,7 @@ export function buildShowroomReply(facts: StoreFacts, language?: string): string
   }
   const wa = facts.whatsappLocal ? ` ابعتهم على واتساب الدار ${toArabicDigits(facts.whatsappLocal)}،` : "";
   return [
-    "احنا في أزينث ليفينج ملناش معرض: الدار ما بتخزنش قطع جاهزة، كل حاجة بتتصمّم وبتتصنّع حسب الطلب وعلى مقاس بيتك.",
+    NO_SHOWROOM_LINE,
     "يعني اللي هيحصل إنك تقولي مقاسات المكان والستايل اللي مريحك، وأنا أحدد معاك الخامة والألوان والتقسيم، وبعدها فريق الدار ينفّذ في ورشته لحد التركيب.",
     `لو عندك صور للمكان${wa} أو قولي المساحات هنا وأبدأ معاك خطوة خطوة.`,
   ].join("\n");
