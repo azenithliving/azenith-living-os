@@ -821,11 +821,12 @@ export class AzenithMastermind {
         const { executeCommand } = await import("./command-executor");
         const { createClient } = await import("@supabase/supabase-js");
 
-        // Use service_role key for owner bypass, anon key for normal users
+        // The record answers to the store's own credential and to nothing else: the public key was
+        // locked out of the tables on 2026-10-15, so a command handed that key would run with no
+        // database at all and report success anyway. The signature check above is what authorises
+        // the command; the credential below is only what the store always had.
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-        const supabaseKey = isOwnerBypass
-          ? (process.env.SUPABASE_SERVICE_ROLE_KEY || "")
-          : (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "");
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
         const supabase = createClient(supabaseUrl, supabaseKey);
 
