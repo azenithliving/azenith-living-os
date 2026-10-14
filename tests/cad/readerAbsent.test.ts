@@ -11,6 +11,13 @@ import { readerAbsent } from "@/lib/cad/paper-sketch-parser";
  * دلوقتي (google API error: 403 …)»), the paper arrived with zero numbers, and the seal rule —
  * written to refuse a disagreement — kept the customer out of his own sheet forever. The offline
  * engine is not the rescue: across 17 stored readings it finished inside a request 0 times.
+ *
+ * Measured again 2026-10-15, and the rule was still guessing: a customer filing his own paper through
+ * `/api/sheet` gets a sheet that carries no reading at all and the line «الورقة مستنية — اكتب
+ * مقاساتك عليها» — which the sentence test above does not recognise. His numbers came back from the
+ * door with 200 and were never stored: the sheet answered «الأرقام اللي كتبتها ما طابتش اللي قريناه»
+ * about a reading that never existed. Absence is now read from the fact — does the paper hold any
+ * number the store claims? — and the sentence stays only as the older shape of the same fact.
  */
 describe("was there no reading at all?", () => {
   it("says yes when the reader was refused", () => {
@@ -19,6 +26,14 @@ describe("was there no reading at all?", () => {
 
   it("says yes when the reader answered in words nobody can parse", () => {
     expect(readerAbsent({ ok: false, failure: "القارئ الذكي ردّ بصيغة مش مفهومة — مبنخترعش أرقام من رد مش مقروء" })).toBe(true);
+  });
+
+  it("says yes when the paper carries no number at all, whatever its line says", () => {
+    expect(readerAbsent({ ok: false, failure: "الورقة مستنية — اكتب مقاساتك عليها وهتتقفل بيك", dimensions: [] })).toBe(true);
+  });
+
+  it("says no when the paper really does carry the store's numbers", () => {
+    expect(readerAbsent({ ok: false, failure: "الورقة مستنية", dimensions: [{ meters: 4, confirmed: false }] })).toBe(false);
   });
 
   it("says no when a reading exists and simply disagrees", () => {

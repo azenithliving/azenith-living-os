@@ -418,6 +418,12 @@ export function applyCustomerWitness<
  * numbers and its owner could never seal his own sheet. Refusing to seal a disagreement is the rule;
  * refusing to seal an absence punishes the customer for a witness that never showed up.
  */
-export function readerAbsent(row: { ok?: boolean | null; failure?: string | null } | null): boolean {
-  return row?.ok === false && /مرفوض|مش مفهومة/.test(String(row?.failure ?? ''));
+export function readerAbsent(row: { ok?: boolean | null; failure?: string | null; dimensions?: unknown } | null): boolean {
+  if (!row) return false;
+  // The plainest absence there is: a paper carrying no number the store claims. A customer filing his
+  // own page through `/api/sheet` arrives exactly like this — no reader was ever asked — so his own
+  // digits are the only witness, and the sheet must seal on them instead of accusing him of
+  // disagreeing with a reading that never happened.
+  if (Array.isArray(row.dimensions) && row.dimensions.length === 0) return true;
+  return row.ok === false && /مرفوض|مش مفهومة/.test(String(row?.failure ?? ''));
 }
