@@ -1687,7 +1687,7 @@ function MessageBubble({
   const approvalId = pendingApprovalIdFromMessage(message);
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div data-chat-message={isUser ? 'owner' : 'employee'} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className={`flex max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
         <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
           isUser ? 'bg-blue-600 text-white shadow-md' : `${colors.bubble} border`
