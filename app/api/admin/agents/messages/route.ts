@@ -40,7 +40,17 @@ export async function GET(request: NextRequest) {
         .order('created_at', { ascending: false })
         .limit(1);
       if (companyId) convQuery = convQuery.eq('company_id', companyId);
-      const { data: conv } = await convQuery.maybeSingle();
+      const { data: conv, error: convError } = await convQuery.maybeSingle();
+
+      if (convError) {
+        // «ما لقيتش المحادثة» و«السجل رفض يقرأ» جملتين مختلفتين. الثانية كانت بترجع
+        // «نجح، ومفيش رسائل» — فتقول للمالك إن مفيش جديد وهو مقفول عن كلام موجود.
+        console.error('[Messages] the conversation lookup was refused:', convError.message);
+        return NextResponse.json(
+          { success: false, error: 'السجل ما ردّش على اسم المحادثة' },
+          { status: 500 }
+        );
+      }
 
       if (conv) {
         resolvedConvId = conv.id;
@@ -72,6 +82,13 @@ export async function GET(request: NextRequest) {
     }
 
     const { data: rows, error } = await query;
+    if (error) {
+      // Read before a single row is used, and answered as a refusal: this branch used to reply
+      // «success» with an empty list and an English note no screen of this store reads, which turned a
+      // missing table into «the owner has no messages».
+      console.error('[Messages] the record refused the thread:', error.message);
+      return NextResponse.json({ success: false, error: 'السجل ما ردّش على المحادثة' }, { status: 500 });
+    }
     // Back to oldest→newest: the window is taken newest-first so a long
     // conversation shows its RECENT history, but every caller renders in time
     // order.
@@ -98,17 +115,6 @@ export async function GET(request: NextRequest) {
       if (resolvedConvId) countQuery = countQuery.eq('conversation_id', resolvedConvId);
       const { count } = await countQuery;
       return NextResponse.json({ success: true, count: count ?? messages.length, data: messages });
-    }
-
-    if (error) {
-      if (error.code === 'PGRST205' || error.code === '42703') {
-        return NextResponse.json({
-          success: true,
-          data: [],
-          warnings: ['agent_messages schema is not available in the expected shape.'],
-        });
-      }
-      throw error;
     }
 
     // format messages with sender names

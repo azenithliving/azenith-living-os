@@ -406,6 +406,13 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * What the last read of this conversation actually was. A refusal is not an empty conversation:
+   * measured 2026-10-15, the sales office showed «ابدأ محادثة تشغيلية» over a thread that holds rows,
+   * because the only place a failed read went was the console.
+   */
+  const [readState, setReadState] = useState<'loading' | 'answered' | 'refused'>('loading');
+  const [readProblem, setReadProblem] = useState<string | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
   const sessionIdRef = useRef(`chat-${agentKey}-${Date.now()}`);
@@ -754,13 +761,20 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
   }, [messages, firstUnreadId, scrollToBottom]);
 
   const fetchMessages = useCallback(async () => {
+    let refusal: string | null = null;
     try {
       // Opening the conversation IS the read event: without mark_read nothing was
       // ever flagged, so the seed card's badge only ever grew — past every real
       // message, every test run, and eventually past being believed.
       const res = await fetch(`/api/admin/agents/messages?agent_key=${agentKey}&mark_read=true`);
-      const data = await res.json();
-      if (data.success && Array.isArray(data.data)) {
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success || !Array.isArray(data?.data)) {
+        // The door answered — with «I could not». That is a different fact from «there is nothing»,
+        // and the screen must carry it rather than fall through to the start-a-conversation panel.
+        refusal = typeof data?.error === 'string' ? data.error : `الباب ردّ بـ ${res.status}`;
+      } else {
+        setReadState('answered');
+        setReadProblem(null);
         setMessages((prev) => {
           if (data.data.length === 0 && prev.length > 0) {
             return prev;
@@ -810,11 +824,22 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
         setLoading(false);
       }
     } catch (err) {
+      refusal = 'المتصفح ما وصلش للسجل';
       console.error('Error fetching messages:', err);
     } finally {
       setLoading(false);
     }
+    if (refusal) {
+      // The bubbles already on screen stay: a poll that failed is not a conversation that ended.
+      setReadState('refused');
+      setReadProblem(refusal);
+    }
   }, [agentKey, isTyping]);
+
+  const retryRead = () => {
+    setLoading(true);
+    void fetchMessages();
+  };
 
   useEffect(() => {
     fetchMessages();
@@ -1245,6 +1270,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
       <div
         ref={messagesContainerRef}
         data-thread-area=""
+        data-chat-read-state={readState}
         onScroll={handleScroll}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
@@ -1254,7 +1280,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
           <div className="flex items-center justify-center py-16">
             <Loader2 className={`w-6 h-6 ${colors.text} animate-spin`} />
           </div>
-        ) : messages.length === 0 ? (
+        ) : readState === 'answered' && messages.length === 0 ? (
           <div className="text-center py-12 space-y-3">
             <Bot className={`w-12 h-12 ${colors.text} mx-auto opacity-30`} />
             <p className="text-white/70 text-sm font-bold">ابدأ محادثة تشغيلية مع {agentName || agentKey}</p>
@@ -1310,6 +1336,22 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
             <span className="text-xs text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
               {error}
             </span>
+          </div>
+        )}
+
+        {readState === 'refused' && (
+          <div data-chat-read-state="refused" className="text-center space-y-2">
+            <p className="inline-block text-xs text-rose-300 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
+              المحادثة ما جاتش — السجل ما ردّش، ومش معناه إن مفيش كلام.
+            </p>
+            <p className="text-[10px] text-white/70">{readProblem}</p>
+            <button
+              type="button"
+              onClick={retryRead}
+              className="mx-auto block text-[11px] text-white/70 hover:text-white underline underline-offset-4"
+            >
+              حاول تاني
+            </button>
           </div>
         )}
       </div>
