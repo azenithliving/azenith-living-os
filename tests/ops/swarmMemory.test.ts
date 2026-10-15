@@ -103,9 +103,13 @@ describe("the recall answers with zero model keys", () => {
 
   it("the reply carries what answered, and the panel shows it to the owner", () => {
     expect(orchestrator).toContain("metadata as any).memory = { count: memory.count, how: memory.how }");
+    // Measured live: the door sent the count and the screen showed nothing, because the fact rode on
+    // the response and the panel refreshes its rows from the record. So the row carries it too.
+    expect(orchestrator).toContain("...(memory.count ? { memory: { count: memory.count, how: memory.how } } : {})");
     expect(panel).toContain("data-chat-memory");
     expect(panel).toContain("رجع لذاكرة الدار");
     expect(panel).toContain("سطر بالكلمة من غير مفتاح نموذج");
+    expect(panel).toContain("(message.context as { memory?: unknown } | undefined)?.memory");
   });
 });
 

@@ -593,13 +593,18 @@ export class AgentOrchestrator {
           context: {
             ...provenanceEnvelope("orchestrator", deskRuns),
             ...(toolResult ? { result: toolResult.message, data: toolResult.data } : {}),
+            // And it says what the shop recalled to answer — a memory the owner cannot see after the
+            // screen refreshes is a claim, not a capability.
+            ...(memory.count ? { memory: { count: memory.count, how: memory.how } } : {}),
           },
         });
         const written = deskRuns.map((d) => `${d.desk}:${d.ok ? "تم" : "فشل"}`).join(" · ") || "ولا مكتب";
         if (stored) {
           console.warn(`[provenance] سطر الموظف ما اتسجّلش: ${stored.message}`);
         } else {
-          console.log(`[provenance] سطر الموظف اتكتب ومعه سجل ${deskRuns.length} مكتب — ${written}`);
+          console.log(
+            `[provenance] سطر الموظف اتكتب ومعه سجل ${deskRuns.length} مكتب — ${written} · ذاكرة: ${memory.count ? `${memory.count} سطر (${memory.how})` : "مفيش"}`
+          );
         }
 
         // حدّث last_message_at

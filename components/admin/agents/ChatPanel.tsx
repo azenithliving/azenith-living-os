@@ -1675,10 +1675,11 @@ function MessageBubble({
     ? [{ desk: String(message.metadata.tool), ok: message.metadata.toolSuccess !== false }]
     : readDesks(message.context);
   const toolName = deskRuns[0]?.desk ?? "";
-  // What the swarm's memory gave this reply, and by which door — read from the reply, never invented here.
-  const rawMemory = (message.metadata as { memory?: unknown } | undefined)?.memory as
-    | { count?: number; how?: string }
-    | undefined;
+  // What the swarm's memory gave this reply, and by which door — read from the reply, never invented
+  // here. A message the panel just sent carries it in metadata; a row re-read from the record carries
+  // it in its own envelope, so the line survives a refresh instead of vanishing with the response.
+  const rawMemory = ((message.metadata as { memory?: unknown } | undefined)?.memory ??
+    (message.context as { memory?: unknown } | undefined)?.memory) as { count?: number; how?: string } | undefined;
   const memoryNote =
     rawMemory && Number(rawMemory.count) > 0
       ? { count: Number(rawMemory.count), how: rawMemory.how === 'vector' ? 'vector' : 'keyword' }
