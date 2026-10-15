@@ -350,9 +350,13 @@ export class AgentOrchestrator {
         } catch {}
       }
 
-      // P5-M1: inject real semantic memories (pgvector) — never blocks the reply
-      const memoryCtx = await recallMemory(message, resolvedCompanyId);
-      if (memoryCtx) promptWithToolContext = `${memoryCtx}\n\n${promptWithToolContext}`;
+      // P5-M1: the swarm's own memory, read before it speaks. Measured 2026-10-15: this line ran on
+      // every reply and never once returned anything — 0 rows in the table and a query that needs a
+      // model key. It now falls back to the keyword floor, and what it recalled is carried on the
+      // reply, because a memory the owner cannot see is a claim, not a capability.
+      const memory = await recallMemory(message, resolvedCompanyId);
+      if (memory.block) promptWithToolContext = `${memory.block}\n\n${promptWithToolContext}`;
+      if (memory.count) (metadata as any).memory = { count: memory.count, how: memory.how };
 
       // P5-M5: closed learning loop — feed thumbs-up/down lessons back into the prompt
       try {

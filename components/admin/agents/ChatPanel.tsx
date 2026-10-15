@@ -1675,6 +1675,14 @@ function MessageBubble({
     ? [{ desk: String(message.metadata.tool), ok: message.metadata.toolSuccess !== false }]
     : readDesks(message.context);
   const toolName = deskRuns[0]?.desk ?? "";
+  // What the swarm's memory gave this reply, and by which door — read from the reply, never invented here.
+  const rawMemory = (message.metadata as { memory?: unknown } | undefined)?.memory as
+    | { count?: number; how?: string }
+    | undefined;
+  const memoryNote =
+    rawMemory && Number(rawMemory.count) > 0
+      ? { count: Number(rawMemory.count), how: rawMemory.how === 'vector' ? 'vector' : 'keyword' }
+      : null;
   // The decision this very message is waiting on, when there is one.
   const approvalId = pendingApprovalIdFromMessage(message);
 
@@ -1700,6 +1708,13 @@ function MessageBubble({
             <div className="text-sm leading-relaxed">
               <MarkdownContent content={isUser ? message.content : ownerRowText(message.content, message.sender_name)} onZoom={onZoom} />
             </div>
+
+            {/* الذاكرة اللي رجع لها الرد — بتقول كم سطر ومنين، عشان «فاكر» تكون حاجة يشوفها مش حاجة يُقال عنها. */}
+            {memoryNote ? (
+              <p className="mt-2 text-[10px] text-white/70" data-chat-memory={String(memoryNote.count)}>
+                رجع لذاكرة الدار: {arNum(memoryNote.count)} {memoryNote.how === 'vector' ? 'سطر بالبحث الدلالي' : 'سطر بالكلمة من غير مفتاح نموذج'}
+              </p>
+            ) : null}
 
             {/* القرار مطلوب من الرسالة دي نفسها — فالأزرار تحتها، مش في مكان تاني من الصفحة. */}
             {approvalId ? (

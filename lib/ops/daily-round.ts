@@ -51,6 +51,11 @@ export interface DailyRoundResults {
   telegramSent?: boolean;
   telegramReason?: string;
   telegramHref?: string;
+  /** What the round left in the swarm's memory, and whether a vector came with it. */
+  memoryWritten?: number;
+  memoryStored?: number;
+  memoryVector?: boolean;
+  memoryNote?: string | null;
   proposalId?: string | null;
   errors: string[];
   [k: string]: unknown;
@@ -228,6 +233,24 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
     }
   } catch (e: any) {
     results.errors.push(`SyncLayer publish: ${e.message}`);
+  }
+
+  // (d2) The round remembers what it measured. Until today the swarm's memory table held 0 rows
+  // behind a recall that runs on every answer the owner gets — so this is the producer, not another
+  // reader. A step that failed is remembered as having failed; nothing here is invented.
+  try {
+    const { rememberRound } = await import("@/lib/ops/memory/remember-round");
+    const remembered = await rememberRound(companyId, results);
+    results.memoryWritten = remembered.wrote;
+    results.memoryStored = remembered.stored;
+    results.memoryVector = remembered.embedded;
+    if (remembered.failures.length) {
+      results.memoryNote = remembered.failures.join(" | ");
+      results.errors.push(`ذاكرة الدار: ${remembered.failures.join(" | ")}`);
+    }
+  } catch (e: any) {
+    results.errors.push(`ذاكرة الدار: ${e.message}`);
+    results.memoryNote = `استثناء: ${e.message}`;
   }
 
   // (e) One proposal, only when something actually needs the owner.

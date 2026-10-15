@@ -6,6 +6,7 @@
 import { getNextAvailableKey, setKeyCooldown, incrementKeyUsage } from "@/lib/api-keys-service";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
+import { foldArabic } from "@/lib/arabic";
 
 export interface MemoryItem {
   id: string;
@@ -48,6 +49,30 @@ export interface SearchResult {
 export interface LearningSearchResult {
   learning: SwarmLearning;
   relevance: number;
+}
+
+/** What a memory write reports back: what landed, what the store holds, and whether a vector exists. */
+export interface SwarmMemoryWrite {
+  wrote: number;
+  stored: number;
+  embedded: boolean;
+  failure: string | null;
+  duplicate?: boolean;
+}
+
+/** Arabic particles that match every row and would rank the whole table equal. */
+const STOPWORDS = new Set(['في','من','على','عن','هل','ما','لا','هو','هي','أنا','انا','اللي','الي','ده','دي','الك','للك','وكان','يكون','عشان','لانه','لأنه','كل','بعض','بين','بعد','قبل','كده','النهاردة','امبارح','ممكن','عايز','عاوزه','يبقى','فيها','فيه','لينا','عندنا','عندك','عندي','اليوم','كان','لو','او','أو','ثم','ايه','إيه','ازاي','إزاي','ليه','متى','فين','كام']);
+
+/**
+ * The question's own words, folded the way the store folds everything before comparing it:
+ * three letters or more, no particle, no Latin noise.
+ */
+export function memoryTokens(text: string): string[] {
+  const words: string[] = foldArabic(text ?? '')
+    .split(/[^\p{L}]+/u)
+    .map((word: string) => word.trim())
+    .filter((word: string) => word.length >= 3 && !STOPWORDS.has(word));
+  return [...new Set(words)].slice(0, 12);
 }
 
 export class SharedMemory {
@@ -174,6 +199,122 @@ export class SharedMemory {
 
     if (error) throw error;
     return data.id;
+  }
+
+  /**
+   * Remember one sentence the swarm actually produced — with a vector when a key answers, and
+   * without one when it does not.
+   *
+   * `embedding` is nullable in the record, so a dead key costs the semantic ranking and never the
+   * memory itself; inventing a vector is the thing the store's own brake forbids. This is the writer
+   * the reader in `lib/ops/chat-brain.ts` has waited for since the table was created — measured
+   * 2026-10-15: 0 rows behind a recall that runs on every answer the owner gets, and the only path
+   * that ever wrote here needed a model key and threw when none answered.
+   */
+  async storeText(item: {
+    agent_key: string;
+    memory_type: MemoryItem['memory_type'];
+    content: string;
+    tags?: string[];
+    related_entities?: Record<string, any>;
+    importance_score?: number;
+    expires_at?: string | null;
+  }): Promise<SwarmMemoryWrite> {
+    if (!this.companyId) await this.initialize();
+    const supabase = this.supabase;
+    if (!supabase) return { wrote: 0, stored: 0, embedded: false, failure: 'مفيش موكّل للمتجر — الذاكرة ما اتكتبتش' };
+
+    const content = String(item.content ?? '').replace(/\s+/g, ' ').trim();
+    if (!content) return { wrote: 0, stored: 0, embedded: false, failure: 'سطر فاضي — مفيش حاجة تتسجل' };
+
+    // A memory he already holds keeps its first day; refreshing it would rewrite history as today's.
+    const { count, error: asked } = await supabase
+      .from('ops_semantic_memory')
+      .select('id', { count: 'exact', head: true })
+      .eq('company_id', this.companyId)
+      .eq('agent_key', item.agent_key)
+      .eq('content', content);
+    if (asked) return { wrote: 0, stored: 0, embedded: false, failure: `السجل ما ردّش: ${asked.message}` };
+    if ((count ?? 0) > 0) return { wrote: 0, stored: count ?? 0, embedded: false, failure: null, duplicate: true };
+
+    let embedding: number[] | null = null;
+    let vectorFailure: string | null = null;
+    try {
+      embedding = await this.generateEmbedding(content);
+    } catch (e: any) {
+      vectorFailure = e?.message ? `المتجه ما اتعملش: ${String(e.message).slice(0, 160)}` : 'المتجه ما اتعملش';
+    }
+
+    const { error } = await supabase.from('ops_semantic_memory').insert({
+      company_id: this.companyId,
+      agent_key: item.agent_key,
+      memory_type: item.memory_type,
+      content,
+      ...(embedding ? { embedding } : {}),
+      tags: item.tags ?? [],
+      related_entities: item.related_entities ?? {},
+      importance_score: item.importance_score ?? 0.5,
+      expires_at: item.expires_at ?? null,
+    });
+    if (error) return { wrote: 0, stored: count ?? 0, embedded: false, failure: `كتابة مرفوضة: ${error.message}` };
+
+    const { data: rows, error: readErr } = await supabase
+      .from('ops_semantic_memory')
+      .select('id')
+      .eq('company_id', this.companyId);
+    const stored = rows?.length ?? 0;
+    console.log(
+      `[SwarmMemory] ${item.agent_key}: كتبت 1 · المحفوظ ${stored} · متجه=${embedding ? 'نعم' : 'لا'}${vectorFailure ? ` (${vectorFailure})` : ''}`
+    );
+    return {
+      wrote: 1,
+      stored,
+      embedded: !!embedding,
+      failure: vectorFailure ?? (readErr ? `الرجوع من السجل مرفوض: ${readErr.message}` : null),
+    };
+  }
+
+  /**
+   * The zero-key recall: the question's own Arabic words, matched against what the swarm wrote.
+   * No model, no vector, no provider — the floor the store's law demands, and the only recall that
+   * can answer the day a key dies. Ranking counts how many of the question's words a memory repeats,
+   * so a note about «الصوف» answers «الصوف» and not everything else.
+   */
+  async recallText(
+    query: string,
+    options: { agentKey?: string; limit?: number } = {}
+  ): Promise<{ items: MemoryItem[]; failure: string | null }> {
+    if (!this.companyId) await this.initialize();
+    const supabase = this.supabase;
+    if (!supabase) return { items: [], failure: 'مفيش موكّل للمتجر — الذاكرة ما اتقريتش' };
+
+    const tokens = memoryTokens(query);
+    if (!tokens.length) return { items: [], failure: null };
+
+    let builder = supabase
+      .from('ops_semantic_memory')
+      .select('id,company_id,agent_key,memory_type,content,tags,related_entities,importance_score,access_count,last_accessed_at,expires_at,created_at')
+      .eq('company_id', this.companyId)
+      .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (options.agentKey) builder = builder.eq('agent_key', options.agentKey);
+
+    const { data, error } = await builder;
+    if (error) return { items: [], failure: `سجل الذاكرة ما ردّش: ${error.message}` };
+
+    const scored: { row: MemoryItem; hits: number }[] = (data ?? [])
+      .map((row: any) => {
+        const haystack = foldArabic(String(row?.content ?? ''));
+        const hits = tokens.filter((token) => haystack.includes(token)).length;
+        return { row: row as MemoryItem, hits };
+      })
+      .filter((entry: { row: MemoryItem; hits: number }) => entry.hits > 0)
+      .sort((a: { row: MemoryItem; hits: number }, b: { row: MemoryItem; hits: number }) =>
+        b.hits - a.hits || Number(b.row.importance_score ?? 0) - Number(a.row.importance_score ?? 0)
+      );
+
+    return { items: scored.slice(0, options.limit ?? 3).map((entry: { row: MemoryItem; hits: number }) => entry.row), failure: null };
   }
 
   /**
