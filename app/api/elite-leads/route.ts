@@ -4,6 +4,7 @@ import { leadSubmissionSchema, persistLeadSubmission } from "@/lib/leads";
 import { normalizeHost } from "@/lib/tenant";
 import { analyzeStyleDNA } from "@/lib/pdf-generator";
 import { processAutomation } from "@/lib/automation";
+import { SOURCES, rememberForPhone } from "@/lib/customers/memory";
 import { z } from "zod";
 
 /**
@@ -116,6 +117,19 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
+
+    // What he just told the shop is remembered under his own number, not only inside this session:
+    // measured 2026-10-15, the store had never kept a single taste fact about a customer, so a man who
+    // came back next week was a stranger again.
+    const remembered = await rememberForPhone(parsed.data.phone, result.companyId, [
+      ...String(basePayload.style ?? "")
+        .split(",")
+        .map((one) => ({ kind: "style" as const, value: one.trim(), source: SOURCES.advisorWords })),
+      ...(basePayload.area ? [{ kind: "area" as const, value: String(basePayload.area), source: SOURCES.advisorWords }] : []),
+      ...(basePayload.roomType ? [{ kind: "room" as const, value: String(basePayload.roomType), source: SOURCES.leadForm }] : []),
+      ...(basePayload.budget ? [{ kind: "budget" as const, value: String(basePayload.budget), source: SOURCES.leadForm }] : []),
+    ]);
+    if (remembered.failures.length) console.warn("[EliteLeads] الذاكرة ما اكتملتش:", remembered.failures.join(" | "));
 
     // Step 3: Trigger Diamond Lead automation if applicable.
     if (parsed.data.qualification.isDiamond) {

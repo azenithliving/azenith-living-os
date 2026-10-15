@@ -77,6 +77,8 @@ export default function PassportPage() {
   // bank actually sent back.
   const [city, setCity] = useState('');
   const [taste, setTaste] = useState<RegionTaste | null>(null);
+  /** What the shop knew about him before this paper — «زي آخر مرة», in his own words. */
+  const [memory, setMemory] = useState<string | null>(null);
   // Once he has started typing his area, a poll must not overwrite his letters with the stored one.
   const cityTouchedRef = useRef(false);
   const [roomChoice, setRoomChoice] = useState('');
@@ -124,6 +126,7 @@ export default function PassportPage() {
           setImages(Array.isArray(data.images) ? data.images : []);
           setImagesForHisRoom(Boolean(data.images_for_his_room));
           setTaste(data.taste ?? null);
+          setMemory(typeof data.memory === 'string' ? data.memory : null);
           // His recorded area is the box's starting word, so a paper that already knows it does not
           // make him say it again.
           if (!cityTouchedRef.current) setCity(String(data.sheet?.contact?.city ?? ''));
@@ -262,6 +265,7 @@ export default function PassportPage() {
       }
       setOffer({ line: String(data.line ?? ''), picks: Array.isArray(data.picks?.images) ? data.picks.images : [], matched: Boolean(data.picks?.matched) });
       setTaste(data.taste ?? null);
+          setMemory(typeof data.memory === 'string' ? data.memory : null);
     } catch {
       setNews('المتجر ما ردّش — جرّب تاني.');
     } finally {
@@ -656,6 +660,14 @@ export default function PassportPage() {
                   />
                 </div>
               </section>
+            )}
+            {memory && (
+              <p
+                className="mt-4 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3 text-[11px] leading-relaxed text-amber-200/70"
+                data-customer-memory=""
+              >
+                الدار فاكر: {memory}
+              </p>
             )}
             {images.length > 0 && (
               <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4" data-family-room>

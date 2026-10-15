@@ -18,6 +18,7 @@ import { offerLine, planClaim } from "@/lib/cad/contact";
 import { orderWithTaste, tasteForPaper } from "@/lib/cad/area-taste";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { factsFromPaper, rememberFacts } from "@/lib/customers/memory";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ type Paper = {
   customer_city: string | null;
   room: string | null;
   colour_picks: { hex?: string | null }[];
+  company_id: string | null;
 };
 
 async function findByToken(token: string): Promise<Paper | null> {
@@ -34,7 +36,7 @@ async function findByToken(token: string): Promise<Paper | null> {
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,customer_key,customer_city,room,colour_picks")
+    .select("id,customer_key,customer_city,room,colour_picks,company_id")
     .eq("token", token)
     .maybeSingle();
   if (error || !data) return null;
@@ -44,6 +46,7 @@ async function findByToken(token: string): Promise<Paper | null> {
     customer_city: data.customer_city ? String(data.customer_city) : null,
     room: data.room ? String(data.room) : null,
     colour_picks: Array.isArray(data.colour_picks) ? data.colour_picks : [],
+    company_id: data.company_id ? String(data.company_id) : null,
   };
 }
 
@@ -89,6 +92,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     stored?.room ? "نوع غرفة" : null,
   ].filter(Boolean);
   console.log(`[PassportContact] paper ${paper.id}: asked to write ${wrote}, the table now holds ${kept.join("+") || "nothing"}`);
+
+  // The number is what turns a paper into a person: whatever he said here is remembered under his
+  // own key, so the shop knows him the second he calls again.
+  if (stored?.customer_key) {
+    const memory = await rememberFacts(stored.customer_key, stored.company_id, factsFromPaper(stored));
+    if (memory.failures.length) console.warn("[PassportContact] الذاكرة ما اكتملتش:", memory.failures.join(" | "));
+  }
 
   // His area is measured first, so a style his area asked for can actually be reached in the bank.
   const taste = await tasteForPaper({

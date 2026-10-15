@@ -28,6 +28,7 @@ import { roomTypeName } from "@/lib/cad/room-labels";
 import { planFromPaper, type Plan } from "@/lib/cad/plan";
 import { matrixFor, type ColourPick } from "@/lib/cad/colours";
 import { orderWithTaste, tasteForPaper } from "@/lib/cad/area-taste";
+import { memoryLine, recallFacts } from "@/lib/customers/memory";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,9 @@ type Row = {
   /** Read for the write rules below. `publicSheet` never returns it: this is a public address. */
   customer_key: string | null;
   customer_city: string | null;
+  company_id: string | null;
+  /** What the shop remembered of him before this paper — see `lib/customers/memory.ts`. */
+  created_at: string | null;
 };
 
 function publicSheet(
@@ -98,7 +102,7 @@ async function findByToken(token: string) {
   if (!supabase) return { error: "المتجر غير متصل دلوقتي" as const, status: 503 };
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,confirmed_at,frozen_hash,customer_dimensions,plan,colour_picks,customer_key,customer_city")
+    .select("id,token,room,dimensions,openings,area_sqm,confirmed_count,ok,failure,confirmed_at,frozen_hash,customer_dimensions,plan,colour_picks,customer_key,customer_city,company_id,created_at")
     .eq("token", token)
     .maybeSingle();
   if (error) return { error: "السجل ما ردّش" as const, status: 500 };
@@ -124,10 +128,20 @@ async function sheetPayload(row: Row) {
   // His own colours first, then his area's measured taste, then the bank's quality — and the line
   // says which of the three ordered them, so a quality list is never shown as a personal one.
   const ordered = orderWithTaste(picks.images, taste);
+  // What the shop already knew about him BEFORE this paper. Facts this same paper produced are left
+  // out, because «زي آخر مرة» that repeats what he chose two seconds ago is not memory, it is an echo.
+  let memory: string | null = null;
+  if (row.customer_key) {
+    const recalled = await recallFacts(row.customer_key, row.company_id);
+    if (recalled.failure) console.warn("[Passport] " + recalled.failure);
+    const before = recalled.rows.filter((row2) => !row.created_at || new Date(row2.first_seen_at) < new Date(row.created_at));
+    memory = memoryLine(before);
+  }
   return {
     sheet: publicSheet(row, Boolean(row.customer_key), { matrix: matrixFor(picks.images), picks: chosen }),
     images: ordered.images,
     taste: ordered.taste,
+    memory,
     images_room_type: picks.roomType,
     images_for_his_room: picks.matched,
   };

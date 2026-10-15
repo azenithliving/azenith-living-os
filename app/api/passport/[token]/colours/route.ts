@@ -14,17 +14,18 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { looksLikePassportToken } from "@/lib/cad/passport";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
 import { cleanPicks, matrixFor, type ColourPick } from "@/lib/cad/colours";
+import { factsFromPaper, rememberFacts } from "@/lib/customers/memory";
 
 export const dynamic = "force-dynamic";
 
-type Row = { id: number; room: string | null; colour_picks: ColourPick[] | null };
+type Row = { id: number; room: string | null; colour_picks: ColourPick[] | null; customer_key: string | null; company_id: string | null };
 
 async function findByToken(token: string): Promise<Row | null> {
   const supabase = getSupabaseAdminClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("room_sketches")
-    .select("id,room,colour_picks")
+    .select("id,room,colour_picks,customer_key,company_id")
     .eq("token", token)
     .maybeSingle();
   if (error || !data) return null;
@@ -32,6 +33,8 @@ async function findByToken(token: string): Promise<Row | null> {
     id: Number(data.id),
     room: data.room ? String(data.room) : null,
     colour_picks: Array.isArray(data.colour_picks) ? (data.colour_picks as ColourPick[]) : null,
+    customer_key: data.customer_key ? String(data.customer_key) : null,
+    company_id: data.company_id ? String(data.company_id) : null,
   };
 }
 
@@ -71,6 +74,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   console.log(
     `[PassportColours] paper ${row.id}: asked to keep ${cleaned.picks.length}, the table holds ${(stored?.colour_picks ?? []).length} of ${matrix.length} offered`
   );
+
+  // A colour he stopped on is his own word, and it outlives the paper: written under his key so the
+  // next visit — or the next room — starts from what the shop already knows about him.
+  if (stored?.customer_key) {
+    const memory = await rememberFacts(stored.customer_key, stored.company_id, factsFromPaper(stored));
+    if (memory.failures.length) console.warn("[PassportColours] الذاكرة ما اكتملتش:", memory.failures.join(" | "));
+  }
 
   return NextResponse.json({
     success: true,

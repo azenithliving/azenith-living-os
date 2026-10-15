@@ -43,7 +43,7 @@ import { phoneForms } from "@/lib/customers/identity";
 export type DossierFact = { label: string; value: string };
 
 export type DossierSection = {
-  id: "who" | "paper" | "taste" | "colours" | "family" | "missing";
+  id: "who" | "paper" | "taste" | "memory" | "colours" | "family" | "missing";
   title: string;
   facts: DossierFact[];
   /** Colours are swatches, not words: hex values the bank measured off the pictures. */
@@ -84,6 +84,8 @@ export function buildDossier(input: {
   imagesForHisRoom: boolean;
   /** The family's taps on his papers, as the vote desk recorded them. */
   votes?: VoteRow[];
+  /** What the shop remembered from his EARLIER visits, already in his words. Empty is a fact too. */
+  memory?: { label: string; value: string; source: string }[];
 }): { headline: string; sections: DossierSection[]; plan: Plan | null; plan_question: string | null } {
   const { line, sketches, images } = input;
   const newest = sketches[0] ?? null;
@@ -235,6 +237,13 @@ export function buildDossier(input: {
     { id: "who", title: "اللي هتكلّمه", facts: who },
     { id: "paper", title: "رسمته", facts: paper },
     { id: "taste", title: "اللي بيدوّر عليه", facts: taste, missing: tasteMissing },
+    {
+      // Not a repeat of this paper: what the shop knew about him before it, under his own number.
+      id: "memory",
+      title: "الدار فاكره من قبل كده",
+      facts: input.memory ?? [],
+      missing: input.memory?.length ? undefined : ["دي أول مرة يسجّل فيها حاجة — مفيش كلام قديم عنه."],
+    },
     {
       id: "colours",
       title: input.imagesForHisRoom ? "ألوان الصور اللي لمكانه" : "ألوان من البيت العام — مكانه مش في البنك",

@@ -24,6 +24,7 @@ import { readCustomers } from "@/lib/customers/read";
 import { parseSketchLink } from "@/lib/cad/sketch-link";
 import { pickSheetImages } from "@/lib/cad/sheet-images";
 import { readVotesForSketches } from "@/lib/cad/family-votes";
+import { ownerMemoryFacts, recallFacts } from "@/lib/customers/memory";
 import { buildDossier, paperPath, type DossierSketch } from "@/lib/cad/dossier";
 import type { Plan } from "@/lib/cad/plan";
 import type { ColourPick } from "@/lib/cad/colours";
@@ -103,8 +104,17 @@ export async function GET(request: NextRequest) {
   // link he shares is per paper and a man with three rooms has three links.
   const votes = await readVotesForSketches(papers.map((paper) => paper.id));
 
+  // What the shop knew about him before these papers. Read on its own so the file can say «دي أول
+  // مرة» out loud rather than leave the owner guessing whether memory exists and is empty or broken.
+  const remembered = await recallFacts(wanted.key, companyId);
+  if (remembered.failure) console.warn("[Dossier] " + remembered.failure);
+  const memoryFacts = ownerMemoryFacts(
+    remembered.rows.filter((fact) => !papers.length || new Date(fact.first_seen_at) < new Date(papers[papers.length - 1].created_at))
+  );
+
   const dossier = buildDossier({
     line,
+    memory: memoryFacts,
     sketches: papers.map((p) => ({
       id: p.id,
       token: p.token ?? null,
