@@ -67,16 +67,31 @@ export function displayValue(kind: MemoryKind, value: string): string {
 }
 
 /**
- * The one sentence the customer and the owner both read: «طرازه مودرن · ألوانه رمادي وبيج دافئ».
- * Null when nothing is stored — the caller then prints the gap instead of this line.
+ * His words, or nothing. A value that still comes back wearing Latin letters is not something either
+ * of them reads: the label maps own the four bank keys, and everything else is a page slug or an
+ * outside spelling. Measured 2026-10-15 in the store's own taste column: `elite-brief` on 14 rows,
+ * «مودرن (Modern)» on 2, `modern` on 1.
+ *
+ * The customer's sentence and the owner's file both go through here, because a machine key printed on
+ * either surface reads as the shop remembering a word nobody ever used.
+ */
+export function readableValue(kind: MemoryKind, value: string): string | null {
+  const shown = displayValue(kind, value);
+  return /[A-Za-z]/.test(shown) ? null : shown;
+}
+
+/**
+ * The one sentence the customer and the advisor both read: «طرازه مودرن · ألوانه رمادي وبيج دافئ».
+ * Empty when nothing is stored — the caller prints the gap instead of this line.
  */
 export function memoryLine(rows: MemoryRow[], limit = 6): string | null {
   if (!rows.length) return null;
   const byKind = new Map<MemoryKind, string[]>();
   for (const row of rows) {
     if (!isMemoryKind(row.kind)) continue;
+    const shown = readableValue(row.kind, row.value);
+    if (!shown) continue;
     const list = byKind.get(row.kind) ?? [];
-    const shown = displayValue(row.kind, row.value);
     if (!list.includes(shown)) list.push(shown);
     byKind.set(row.kind, list);
   }
@@ -96,7 +111,8 @@ export function ownerMemoryFacts(rows: MemoryRow[], limit = 8): { label: string;
   const facts: { label: string; value: string; source: string }[] = [];
   for (const row of rows) {
     if (!isMemoryKind(row.kind)) continue;
-    const value = displayValue(row.kind, row.value);
+    const value = readableValue(row.kind, row.value);
+    if (!value) continue;
     const id = `${row.kind}:${value}`;
     if (seen.has(id)) continue;
     seen.add(id);

@@ -81,6 +81,15 @@ describe("what the store says about him", () => {
     ]);
     expect(factsFromPaper({ room: null, customer_city: null, colour_picks: [] })).toEqual([]);
   });
+
+  it("keeps a word he cannot read out of his sentence", () => {
+    // Measured 2026-10-15 in the store's own taste column: `elite-brief` on 14 rows, «مودرن (Modern)»
+    // on 2, `modern` on 1. A row may hold what an old door filed; his sentence never shows it.
+    expect(memoryLine([row("style", "elite-brief"), row("area", "التجمع")])).toBe("منطقته التجمع");
+    expect(memoryLine([row("style", "modern (Modern)"), row("budget", "500k EGP")])).toBeNull();
+    // The bank's own key still reads out Arabic — the filter is on the display, not on the row.
+    expect(memoryLine([row("style", "modern")])).toBe("طرازه مودرن");
+  });
 });
 
 describe("the memory cannot be reached without the store", () => {
@@ -113,8 +122,17 @@ describe("the doors that produce it and the surfaces that read it", () => {
     }
   });
 
-  it("the elite form writes what he typed there, under the same key", () => {
-    expect(readFileSync("app/api/elite-leads/route.ts", "utf8")).toContain("rememberForPhone(");
+  it("the elite form writes what he typed there, under the same key — and calls itself its source", () => {
+    const elite = readFileSync("app/api/elite-leads/route.ts", "utf8");
+    expect(elite).toContain("rememberForPhone(");
+    // Measured 2026-10-15: the first version of this writer labelled the form's own answers «قالها في
+    // كلامه مع المسترشد». A fact has to name where it really came from or the shop lies about its history.
+    expect(elite).not.toContain("source: SOURCES.advisorWords");
+    expect(elite).toContain("SOURCES.leadForm");
+    // And the taste is translated by the store's single reader before it is kept — the column holds
+    // `elite-brief` on 14 rows, so a raw copy would remember a screen's name as a man's taste.
+    expect(elite).toContain("storedTaste(");
+    expect(elite).toContain("styleKey(");
   });
 
   it("his own sheet shows what the shop knew BEFORE this paper", () => {

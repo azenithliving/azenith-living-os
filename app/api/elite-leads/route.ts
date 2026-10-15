@@ -5,6 +5,8 @@ import { normalizeHost } from "@/lib/tenant";
 import { analyzeStyleDNA } from "@/lib/pdf-generator";
 import { processAutomation } from "@/lib/automation";
 import { SOURCES, rememberForPhone } from "@/lib/customers/memory";
+import { storedTaste, styleKey } from "@/lib/taste-words";
+import { areaLabel } from "@/lib/regions";
 import { z } from "zod";
 
 /**
@@ -121,13 +123,25 @@ export async function POST(request: Request) {
     // What he just told the shop is remembered under his own number, not only inside this session:
     // measured 2026-10-15, the store had never kept a single taste fact about a customer, so a man who
     // came back next week was a stranger again.
+    // Every value goes through the store's own translators before it is kept. The first live read of
+    // this memory found the taste column holding `elite-brief` on 14 rows and «مودرن (Modern)» on 2 —
+    // a screen's name and a machine spelling. Remembering those would tell a returning customer the
+    // shop remembers a word he never used.
+    const tastes = [
+      ...new Set(
+        String(basePayload.style ?? "")
+          .split(",")
+          .map((one) => storedTaste(one.trim(), parsed.data.lastPage))
+          .filter((one): one is string => !!one)
+          .map((one) => styleKey(one) ?? one)
+      ),
+    ];
+    const area = areaLabel(basePayload.area ?? "");
     const remembered = await rememberForPhone(parsed.data.phone, result.companyId, [
-      ...String(basePayload.style ?? "")
-        .split(",")
-        .map((one) => ({ kind: "style" as const, value: one.trim(), source: SOURCES.advisorWords })),
-      ...(basePayload.area ? [{ kind: "area" as const, value: String(basePayload.area), source: SOURCES.advisorWords }] : []),
-      ...(basePayload.roomType ? [{ kind: "room" as const, value: String(basePayload.roomType), source: SOURCES.leadForm }] : []),
-      ...(basePayload.budget ? [{ kind: "budget" as const, value: String(basePayload.budget), source: SOURCES.leadForm }] : []),
+      ...tastes.map((value) => ({ kind: "style" as const, value, source: SOURCES.leadForm, evidence: "كتبه في استمارة النخبة" })),
+      ...(area ? [{ kind: "area" as const, value: area, source: SOURCES.leadForm, evidence: "كتب منطقه في الاستمارة" }] : []),
+      ...(basePayload.roomType ? [{ kind: "room" as const, value: String(basePayload.roomType), source: SOURCES.leadForm, evidence: "اختار غرفتها في الاستمارة" }] : []),
+      ...(basePayload.budget ? [{ kind: "budget" as const, value: String(basePayload.budget), source: SOURCES.leadForm, evidence: "كتب ميزانيته في الاستمارة" }] : []),
     ]);
     if (remembered.failures.length) console.warn("[EliteLeads] الذاكرة ما اكتملتش:", remembered.failures.join(" | "));
 
