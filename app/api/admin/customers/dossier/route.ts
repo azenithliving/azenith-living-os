@@ -104,13 +104,12 @@ export async function GET(request: NextRequest) {
   // link he shares is per paper and a man with three rooms has three links.
   const votes = await readVotesForSketches(papers.map((paper) => paper.id));
 
-  // What the shop knew about him before these papers. Read on its own so the file can say «دي أول
-  // مرة» out loud rather than leave the owner guessing whether memory exists and is empty or broken.
+  // Everything the shop holds about him, under his own number. The owner's file is the summary of what
+  // is known — the «before this paper» rule belongs on the customer's own sheet, where repeating what
+  // he chose two seconds ago would be an echo rather than a memory.
   const remembered = await recallFacts(wanted.key, companyId);
   if (remembered.failure) console.warn("[Dossier] " + remembered.failure);
-  const memoryFacts = ownerMemoryFacts(
-    remembered.rows.filter((fact) => !papers.length || new Date(fact.first_seen_at) < new Date(papers[papers.length - 1].created_at))
-  );
+  const memoryFacts = ownerMemoryFacts(remembered.rows);
 
   const dossier = buildDossier({
     line,

@@ -238,11 +238,11 @@ export function buildDossier(input: {
     { id: "paper", title: "رسمته", facts: paper },
     { id: "taste", title: "اللي بيدوّر عليه", facts: taste, missing: tasteMissing },
     {
-      // Not a repeat of this paper: what the shop knew about him before it, under his own number.
+      // What the shop holds about him under his own number — his colours, his area, his room.
       id: "memory",
-      title: "الدار فاكره من قبل كده",
+      title: "الدار فاكره",
       facts: input.memory ?? [],
-      missing: input.memory?.length ? undefined : ["دي أول مرة يسجّل فيها حاجة — مفيش كلام قديم عنه."],
+      missing: input.memory?.length ? undefined : ["مفيش حاجة مسجلة عنه لحد دلوقتي — دي أول مرة."],
     },
     {
       id: "colours",
