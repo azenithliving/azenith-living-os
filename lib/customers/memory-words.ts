@@ -106,6 +106,35 @@ export function ownerMemoryFacts(rows: MemoryRow[], limit = 8): { label: string;
   return facts;
 }
 
+/** The one prefix every surface uses when it says what the shop remembers about him. */
+export const MEMORY_PREFIX = "الدار فاكر";
+
+/** His sheet, his chat and the owner's file all say the same three words, from here. */
+export function memorySentence(line: string | null): string | null {
+  return line ? `${MEMORY_PREFIX}: ${line}` : null;
+}
+
+/**
+ * The facts the advisor's own conversation carries, read off the answers the chat's existing readers
+ * already named (the area, the style, the room). The budget and anything a model summarised stay out:
+ * a memory is only what HE wrote, so an invented number can never come back to him as his own word.
+ */
+export function factsFromHisWords(named: {
+  style?: string | null;
+  area?: string | null;
+  roomType?: string | null;
+}): Fact[] {
+  const facts: Fact[] = [];
+  const add = (kind: MemoryKind, value: unknown) => {
+    const text = cleanValue(value);
+    if (text) facts.push({ kind, value: text, source: SOURCES.advisorWords, evidence: "قالها في كلامه مع المسترشد" });
+  };
+  add("style", named.style);
+  add("area", named.area);
+  add("room", named.roomType);
+  return facts;
+}
+
 /**
  * The facts one paper of his carries: the room he drew, the colours he stopped on, the area he typed.
  * Read off the row itself, so a paper that says nothing produces no memory.

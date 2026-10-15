@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { arNum } from '@/lib/ops/metricLabels';
 import { linkFromPhone } from '@/lib/cad/sketch-link';
+import { MEMORY_PREFIX } from '@/lib/customers/memory-words';
 import { imageKeyOf } from '@/lib/cad/vote-keys';
 import { cleanDeviceKey, newDeviceKey } from '@/lib/cad/visit-keys';
 import { ROOM_CHOICES } from '@/lib/cad/room-labels';
@@ -666,7 +667,7 @@ export default function PassportPage() {
                 className="mt-4 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3 text-[11px] leading-relaxed text-amber-200/70"
                 data-customer-memory=""
               >
-                الدار فاكر: {memory}
+                {MEMORY_PREFIX}: {memory}
               </p>
             )}
             {images.length > 0 && (

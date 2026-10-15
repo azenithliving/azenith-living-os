@@ -20,10 +20,21 @@ import {
 } from "@/lib/consultant/question-intent";
 import { buildCoverageReply, buildHoursReply, buildShowroomReply, readStoreFacts, storeFactsBlock } from "@/lib/consultant/store-facts";
 import { sendTelegramMessage, broadcastTelegramMessage } from "@/lib/telegram-config";
-import { storeMemory, storeUserPreference, getUserPreferences } from "@/lib/ultimate-agent/memory-store";
+import { storeMemory } from "@/lib/ultimate-agent/memory-store";
 import { LearningEngine } from "@/lib/ultimate-agent/learning-engine";
 import { tryFastResponse, classifyIntent } from "@/lib/specialized-providers";
-import { captureConversationContact } from "@/lib/customers/capture";
+import { captureConversationContact, readContactFrom } from "@/lib/customers/capture";
+import { getTenantByHost } from "@/lib/tenant";
+import { linkFromPhone } from "@/lib/cad/sketch-link";
+import {
+  memoryLine,
+  memorySentence,
+  ownerMemoryFacts,
+  factsFromHisWords,
+  recallFacts,
+  rememberForPhone,
+  type MemoryRow,
+} from "@/lib/customers/memory";
 import {
   buildLocationReply,
   buildNearbyFoodReply,
@@ -223,13 +234,22 @@ function applyHumanGuardrails(
   rawReply: string,
   latestUserMessage: string,
   conversationHistory: Message[],
-  language?: string
+  language?: string,
+  /** «الدار فاكر: طرازه مودرن…» when the shop knows him from before this conversation, else null. */
+  rememberedLine?: string | null
 ): { reply: string; uiAction?: string; escalated: boolean; bookingReady: boolean } {
   const allText = [...conversationHistory.map((m) => m.content), latestUserMessage].join(" ");
   const phoneExists = hasPhoneNumber(allText);
 
   if (hasPhoneNumber(latestUserMessage)) {
-    return { reply: buildHumanPhoneConfirmation(language), escalated: false, bookingReady: true };
+    // The moment he hands the number is the moment the shop proves it was listening: the memory
+    // sentence is written here, not by the model, so it arrives the same way with a key or without one.
+    const confirmation = buildHumanPhoneConfirmation(language);
+    return {
+      reply: rememberedLine ? `${rememberedLine}\n${confirmation}` : confirmation,
+      escalated: false,
+      bookingReady: true,
+    };
   }
 
   if (asksEscalation(latestUserMessage)) {
@@ -551,6 +571,40 @@ export async function POST(
     };
     conversationHistory.push(userMessage);
 
+    // ── THE SHOP REMEMBERS HIM ─────────────────────────────────────────────
+    // His own number is what turns a stranger into a returning customer, and the only honest way to
+    // find it is in the lines HE wrote. The store's answer to «بتوصلوا فين؟» recites every district
+    // it works in, so a reader allowed to read the advisor's sentences would remember a taste nobody
+    // chose — the same brake his sheet already holds.
+    let tenantId: string | null = null;
+    try {
+      tenantId = (await getTenantByHost(request.headers.get("host")))?.id ?? null;
+    } catch (tenantErr) {
+      console.warn(`[Consultant] ${sessionId}: المتجر ما اتعرفش من الدومين:`, tenantErr);
+    }
+
+    const { phone: hisPhone } = readContactFrom(
+      conversationHistory.filter((m) => m.role === "user").map((m) => String(m.content ?? "")).join(" ")
+    );
+    const hisLink = linkFromPhone(hisPhone);
+
+    // What the shop knew BEFORE this conversation. A fact he gave two messages ago is already on his
+    // screen, and echoing it back is the defect his sheet refuses, so the cut is this session's own day.
+    let rememberedBefore: MemoryRow[] = [];
+    let rememberedLine: string | null = null;
+    if (hisLink && tenantId) {
+      const recalled = await recallFacts(hisLink.key, tenantId);
+      if (recalled.failure) console.warn(`[Consultant] ${sessionId}: ${recalled.failure}`);
+      const beganAt = existingSession?.created_at ? Date.parse(existingSession.created_at) : null;
+      rememberedBefore = beganAt
+        ? recalled.rows.filter((row) => Date.parse(row.first_seen_at) < beganAt)
+        : recalled.rows;
+      rememberedLine = memorySentence(memoryLine(rememberedBefore));
+      console.log(`[Consultant] ${sessionId}: ذاكرة ${hisLink.key} — مقروء ${recalled.rows.length} · من قبل المحادثة ${rememberedBefore.length} · الجملة ${rememberedLine ? "اتقالت" : "فاضية"}`);
+    } else if (hisLink && !tenantId) {
+      console.warn(`[Consultant] ${sessionId}: رقم بدون متجر — الذاكرة ما اتقريتش`);
+    }
+
     const nextInsights: Insights = {
       ...(freshSession?.insights || {}),
     };
@@ -561,7 +615,7 @@ export async function POST(
 
     // Save user message to DB IMMEDIATELY (before takeover check)
     // This ensures message is persisted even if takeover is active
-    await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : freshSession?.insights);
+    await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : freshSession?.insights, tenantId);
 
     // ── SEAMLESS ADMIN TAKEOVER MODE ──
     // While an admin is manually driving the chat (ui_state.takeover_active), the AI
@@ -588,7 +642,7 @@ export async function POST(
         content: noLocationReply,
         timestamp: new Date().toISOString(),
       });
-      await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : freshSession?.insights);
+      await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : freshSession?.insights, tenantId);
       return NextResponse.json({ reply: noLocationReply, sessionId });
     }
 
@@ -607,7 +661,7 @@ export async function POST(
         content: locationReply,
         timestamp: new Date().toISOString(),
       });
-      await saveSession(sessionId, conversationHistory, nextInsights);
+      await saveSession(sessionId, conversationHistory, nextInsights, tenantId);
       return NextResponse.json({ reply: locationReply, sessionId });
     }
 
@@ -620,7 +674,7 @@ export async function POST(
           content: foodReply,
           timestamp: new Date().toISOString(),
         });
-        await saveSession(sessionId, conversationHistory, nextInsights);
+        await saveSession(sessionId, conversationHistory, nextInsights, tenantId);
         return NextResponse.json({ reply: foodReply, sessionId });
       } catch (nearbyErr) {
         console.warn("[Consultant] Nearby food lookup failed:", nearbyErr);
@@ -632,7 +686,7 @@ export async function POST(
           content: failureReply,
           timestamp: new Date().toISOString(),
         });
-        await saveSession(sessionId, conversationHistory, nextInsights);
+        await saveSession(sessionId, conversationHistory, nextInsights, tenantId);
         return NextResponse.json({ reply: failureReply, sessionId });
       }
     }
@@ -658,7 +712,7 @@ export async function POST(
           content: faqHit.row.answer,
           timestamp: new Date().toISOString(),
         });
-        await saveSession(sessionId, conversationHistory, nextInsights);
+        await saveSession(sessionId, conversationHistory, nextInsights, tenantId);
         return NextResponse.json({
           reply: faqHit.row.answer,
           sessionId,
@@ -704,22 +758,15 @@ export async function POST(
       allLearnings.push(typeof learningData.value === 'string' ? learningData.value : JSON.stringify(learningData.value));
     }
 
-    // --- SAA vInfinity VISITOR PROFILING ---
-    let profileContext = "";
-    try {
-      const { preferences } = await getUserPreferences();
-      if (preferences && preferences.length > 0) {
-        const userPrefs = preferences.filter(p => p.key.endsWith(`_${sessionId}`));
-        if (userPrefs.length > 0) {
-          profileContext = "[سياق تفضيلات العميل المستقرة من الذاكرة]:";
-          userPrefs.forEach(p => {
-            const keyLabel = p.key.replace(`_${sessionId}`, "");
-            profileContext += `\n- ${keyLabel}: ${p.value}`;
-          });
-        }
-      }
-    } catch (memErr) {
-      console.warn("[Consultant] Memory profiling load failed:", memErr);
+    // --- What the shop remembers about him, read from its own record ---
+    // The old block asked a preference table that has never held one row — measured 2026-10-15: the
+    // table carries three columns while the writer named six it does not have, so every write was
+    // refused and the refusal was swallowed. What the store really keeps is his memory under his own
+    // number, and that is what reaches the advisor now.
+    let memoryBlock = "";
+    if (rememberedBefore.length) {
+      const lines = ownerMemoryFacts(rememberedBefore).map((fact) => `- ${fact.label}: ${fact.value} (${fact.source})`);
+      memoryBlock = `[ذاكرة الدار عن العميل ده من قبل المحادثة دي — هو اللي قالها أو اختارها بنفسه، فردّ عليه منها ومتسألهوش عنها من جديد]:\n${lines.join("\n")}`;
     }
 
     // --- SAA vInfinity BEHAVIORAL TELEMETRY (HESITATION DETECTOR) ---
@@ -737,10 +784,7 @@ export async function POST(
       console.warn("[Consultant] Behavioral telemetry parsing failed:", telemetryErr);
     }
 
-    // Merge memory profile and behavioral telemetry into learnings
-    if (profileContext) {
-      allLearnings.push(profileContext);
-    }
+    // Merge behavioral telemetry into learnings
     if (hesitationDetected) {
       allLearnings.push("[سلوك العميل: تم رصد تردد وبطء في الكتابة. قدم الدعم المعنوي وتجارب عملاء مثله، وقسّم إجابتك لتكون مبسطة جداً ولا تضغط على العميل.]");
     }
@@ -765,7 +809,7 @@ export async function POST(
           content: factReply,
           timestamp: new Date().toISOString(),
         });
-        await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : existingSession?.insights);
+        await saveSession(sessionId, conversationHistory, Object.keys(nextInsights).length ? nextInsights : existingSession?.insights, tenantId);
         return NextResponse.json({ reply: factReply, sessionId });
       }
     }
@@ -784,7 +828,8 @@ export async function POST(
       Object.keys(nextInsights).length ? nextInsights : existingSession?.insights,
       language,
       weatherDateTime,
-      factsBlock
+      factsBlock,
+      memoryBlock
     );
 
     // A short statement, not a question. A question deserves the store's full advisor, and the
@@ -833,10 +878,13 @@ export async function POST(
       // The floor is the point, not the apology: the question goes to the pending desk and to
       // Telegram with the customer's number, so a dead key costs a delay and never a lost buyer.
       await notifyAdminUnknownQuestion(message, sessionId, userName, conversationHistory);
-      const fallbackReply = buildHumanTemporaryFailureReply(language);
+      // The floor is the point, not the apology. And when the shop already knows him, the sentence
+      // that proves it is written here too — so a dead key costs him an answer, never his history.
+      const remembered = rememberedLine ? `${rememberedLine}\n` : "";
+      const fallbackReply = `${remembered}${buildHumanTemporaryFailureReply(language)}`;
       const assistantMessage: Message = { role: "assistant", content: fallbackReply, timestamp: new Date().toISOString() };
       conversationHistory.push(assistantMessage);
-      await saveSession(sessionId, conversationHistory, existingSession?.insights);
+      await saveSession(sessionId, conversationHistory, existingSession?.insights, tenantId);
       return NextResponse.json({ reply: fallbackReply, sessionId });
     }
 
@@ -844,7 +892,8 @@ export async function POST(
       aiResult.content.trim(),
       message,
       conversationHistory,
-      language
+      language,
+      rememberedLine
     );
     const reply = guarded.reply;
 
@@ -981,49 +1030,13 @@ export async function POST(
       }
     }
 
-    // --- SAA vInfinity MEMORY SYNCING ---
+    // --- The interaction trace, kept in the store's own memory ledger ---
+    // The four preference writes that used to sit here named columns the table has never had
+    // (`user_preferences` holds three columns and zero rows, measured 2026-10-15), so every visitor
+    // profile was refused in silence. His taste is remembered under his own number now, in
+    // `customer_memory`, and that write runs with the conversation capture below.
     if (insights) {
       try {
-        const syncPromises = [];
-        if (insights.userName) {
-          syncPromises.push(storeUserPreference({
-            category: "profile",
-            key: `userName_${sessionId}`,
-            value: insights.userName,
-            confidence: 0.95,
-            source: "chat_inference"
-          }));
-        }
-        if (insights.style) {
-          syncPromises.push(storeUserPreference({
-            category: "profile",
-            key: `style_${sessionId}`,
-            value: insights.style,
-            confidence: 0.85,
-            source: "chat_inference"
-          }));
-        }
-        if (insights.budget) {
-          syncPromises.push(storeUserPreference({
-            category: "profile",
-            key: `budget_${sessionId}`,
-            value: insights.budget,
-            confidence: 0.8,
-            source: "chat_inference"
-          }));
-        }
-        if (insights.location) {
-          syncPromises.push(storeUserPreference({
-            category: "profile",
-            key: `location_${sessionId}`,
-            value: insights.location,
-            confidence: 0.9,
-            source: "chat_inference"
-          }));
-        }
-        await Promise.all(syncPromises);
-
-        // Store a memory trace of the interaction
         await storeMemory({
           type: "preference",
           category: "visitor_profile",
@@ -1037,7 +1050,7 @@ export async function POST(
     }
 
     // Save session to database
-    await saveSession(sessionId, conversationHistory, insights);
+    await saveSession(sessionId, conversationHistory, insights, tenantId);
 
     console.log(`[Consultant] Session ${sessionId}: ${conversationHistory.length} messages`);
 
@@ -1181,7 +1194,8 @@ function buildGroqMessages(
   insights?: Insights,
   language?: string,
   weatherDateTime?: any,
-  factsBlock?: string
+  factsBlock?: string,
+  memoryBlock?: string
 ): GroqMessage[] {
 // Start with system message
   let systemContent = `${SALES_EXCELLENCE_PROMPT}\n\n${HUMAN_CONSULTANT_PROMPT}`;
@@ -1260,6 +1274,12 @@ Use this information naturally in conversation:
     systemContent += "\n\n[CRITICAL DIRECTIVE - HIGHEST PRIORITY]: The user is browsing the English version of the website. YOU MUST RESPOND ENTIRELY IN ENGLISH. Do not use Arabic words, greetings, or phrases under any circumstances. Translate your sales tactics, luxury tone, and closing statements into perfect, native-sounding English.";
   } else {
     systemContent += "\n\n[CRITICAL DIRECTIVE - HIGHEST PRIORITY]: The user is browsing the Arabic version of the website. Respond entirely in polished Egyptian Arabic unless the user writes in English.";
+  }
+
+  // What the shop remembers about HIM goes in before the store's general facts: it is the one block
+  // that is about the person reading the answer, and the advisor must not re-ask it.
+  if (memoryBlock) {
+    systemContent += `\n\n${memoryBlock}`;
   }
 
   // The store's own record is the last thing the advisor reads, so it is the first thing it says.
@@ -1390,7 +1410,8 @@ The summary should be concise, useful for a human sales consultant, and preserve
 async function saveSession(
   sessionId: string,
   messages: Array<{ role: "user" | "assistant"; content: string; timestamp?: string; source?: string }>,
-  insights?: Insights
+  insights?: Insights,
+  companyId?: string | null
 ): Promise<void> {
   try {
     const supabase = getSupabaseAdminClient();
@@ -1447,12 +1468,15 @@ async function saveSession(
     // district it works in, so a matcher allowed to read the advisor would file every customer in
     // the country under التجمع.
     const hisWords = normalizedMessages.filter((m) => m.role === "user").map((m) => String(m.content ?? ""));
+    // And only HIS lines may name who the memory belongs to. A number the store itself printed in an
+    // answer would otherwise become a customer's key, and the shop would remember the wrong man.
+    const hisPhone = readContactFrom(hisWords.join(" ")).phone;
     void captureConversationContact({
       sessionId,
       text: conversation,
       name: insights?.customerName ?? null,
       ownWords: hisWords,
-    }).then((captured) => {
+    }).then(async (captured) => {
       if (captured.recorded) {
         const said = [
           captured.area ? `منطقته ${captured.area} (المحفوظ: ${captured.stored.area ?? "فاضي"})` : null,
@@ -1461,6 +1485,22 @@ async function saveSession(
         ].filter(Boolean);
         console.log(`[Consultant] Contact captured for ${sessionId}: ${captured.reason}${said.length ? ` · ${said.join(" · ")}` : ""}`);
       } else if (captured.reason === "failed") console.error(`[Consultant] Contact capture failed: ${captured.detail}`);
+
+      // The taste his own lines named lands under his number, so his next conversation starts from
+      // here. Skipped out loud when there is no number — a silent return is what left this store
+      // with zero memories for a hundred and fifty conversations.
+      if (!hisPhone) {
+        console.log(`[Consultant] ${sessionId}: ذاكرة — مفيش رقم في كلامه، مفيش حاجة اتكتبت`);
+        return;
+      }
+      const facts = factsFromHisWords(captured);
+      if (!facts.length) {
+        console.log(`[Consultant] ${sessionId}: ذاكرة ${hisPhone} — كلامه ما سمّاش طراز ولا منطقة ولا غرفة`);
+        return;
+      }
+      const remembered = await rememberForPhone(hisPhone, companyId, facts);
+      console.log(`[Consultant] ${sessionId}: ذاكرة ${hisPhone} — كتبت ${remembered.wrote} · المحفوظ ${remembered.stored} · مرفوض ${remembered.failures.length}`);
+      if (remembered.failures.length) console.error(`[Consultant] ${sessionId}: ${remembered.failures.join(" | ")}`);
     });
   } catch (err) {
     console.error("[Consultant] Exception in saveSession:", err);
