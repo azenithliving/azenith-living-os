@@ -79,3 +79,20 @@ describe("the messages door does not report an unreadable read as an empty one",
     expect(door).not.toContain("schema is not available in the expected shape");
   });
 });
+
+describe("the composer fits the phone it is written for", () => {
+  // Measured live 2026-10-15 at 390px on the leader's own desk: the row held 581px of buttons and an
+  // input that could not shrink (`min-width: auto`, the flex default), so the whole typing box — and
+  // the send button with it — spilled past the left edge of the screen. The owner could read the
+  // swarm's chat and could not answer it.
+  it("lets the tool buttons fall to a second line instead of pushing the input out", () => {
+    expect(panel).toMatch(/className=\{`flex flex-wrap gap-2/);
+  });
+
+  it("lets the input shrink, which is what `flex-1` was always meant to do", () => {
+    const composer = panel.match(/data-chat-composer[\s\S]{0,1400}?className="([^"]+)"/);
+    expect(composer, "the composer's own classes").not.toBeNull();
+    expect(composer![1]).toContain("min-w-0");
+    expect(composer![1]).toContain("flex-1");
+  });
+});

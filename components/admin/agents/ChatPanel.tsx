@@ -1416,7 +1416,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               fileInputRef.current?.dispatchEvent(new Event('change', { bubbles: true }));
             }
           }}
-          className={`flex gap-2 ${isDragging ? 'ring-2 ring-amber-500/50 rounded-xl p-1' : ''}`}
+          className={`flex flex-wrap gap-2 ${isDragging ? 'ring-2 ring-amber-500/50 rounded-xl p-1' : ''}`}
         >
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -1504,7 +1504,7 @@ export function ChatPanel({ agentKey, agentName, agentColor, initialMessage, ful
               }
             }}
             placeholder={`اكتب بلهجتك العادية لـ ${agentName || meta.name}... (مثال: الجزء اللي فوق باهت)`}
-            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+            className="min-w-0 flex-1 basis-40 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
             disabled={isTyping}
           />
           <button
