@@ -10,8 +10,9 @@ import "server-only";
  * What it copies: the nine tables that hold the owner's record — his chat with the swarm, the
  * conversations behind it, the employee profiles and their task log, the customer conversations the
  * advisor keeps, both memory tables, the sync ledger, and the settings rows that carry his orders.
- * What it deliberately does not: the 8,969-row picture bank (re-harvestable, and 24 times the rest
- * of the scope — it would eat the storage ceiling in five weeks), and any table holding a credential.
+ * What it deliberately does not: the picture bank (8,969 rows measured 2026-10-19 at 5,789,320 bytes
+ * against 2,260,980 for all nine tables together — and it is the one thing the harvest pipeline can
+ * re-make), and any table holding a credential.
  *
  * Two brakes decide the shape. Nothing here deletes or rotates anything: an old snapshot is a copy of
  * the owner's data and retiring it is his word, not a schedule's. And every object is read back from

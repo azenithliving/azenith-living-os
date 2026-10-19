@@ -138,9 +138,21 @@ export async function executeBackupRestore(
         : await supabase.from("backup_snapshots").select("*").eq("id", backupId).single();
 
     if (snapErr || !snapshot) {
+      // The store DOES hold copies now — in the private bucket, written by the nightly round. Saying
+      // «مفيش نسخة» would be a false negative, and a door that writes rows back into the record is
+      // not built yet (that write is the owner's word, not a tool's). So this names what exists.
+      const { SNAPSHOT_BUCKET } = await import("@/lib/ops/nightly-snapshot");
+      const { arNum } = await import("@/lib/ops/metricLabels");
+      const days = await supabase.storage.from(SNAPSHOT_BUCKET).list("", { limit: 60 });
+      const named = (days.data ?? []).map((d) => d.name).filter((n) => /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(n)).sort();
+      const latest = named[named.length - 1];
+      const files = latest ? await supabase.storage.from(SNAPSHOT_BUCKET).list(latest + "/", { limit: 100 }) : null;
       return {
         success: false,
-        message: "لم أجد نسخة احتياطية للاستعادة",
+        message: latest
+          ? `النسخ موجودة في الدرج الخاص (${arNum(named.length)} يوم، أحدثها ${latest} بـ${arNum((files?.data ?? []).length)} ملف)، بس باب الرجوع اللي يكتب في السجل لسه ما اتبنىش — والكتابة دي كلمة المالك، مش زر.`
+          : "مفيش نسخة احتياطية في الدرج لحد دلوقتي — الجولة اليومية لسه ما عملتش واحدة.",
+        data: { bucket: SNAPSHOT_BUCKET, days: named.slice(-14), latest: latest ?? null },
         executionId: context.executionId,
       };
     }

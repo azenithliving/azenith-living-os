@@ -13,7 +13,7 @@ import { gunzipSync } from "node:zlib";
  *
  * Two brakes are held as tests, not as intentions: the step never deletes or rotates anything (an old
  * snapshot is the owner's data, and retiring it is his word), and the picture bank stays out of the
- * daily scope (24 times the rest of it — it would eat the free storage ceiling in five weeks).
+ * daily scope (measured 2026-10-19: 5,789,320 bytes against 2,260,980 for all nine copied tables).
  */
 const STAMP = "nightly_snapshot_last";
 

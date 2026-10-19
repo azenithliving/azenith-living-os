@@ -415,142 +415,38 @@ export async function executeSEOAnalysis(
 // ============================================
 
 export async function executeBackupCreate(
-  params: Record<string, unknown>,
+  _params: Record<string, unknown>,
   context: ToolExecutionContext
 ): Promise<ToolExecutionResult> {
-  const supabase = await getSupabase();
-
+  // The chat's «اعمل نسخة احتياطية» and the morning round now call the same module, so the store has
+  // one copy with one measured shape instead of two owners disagreeing about what was saved.
+  const { runNightlySnapshot, SNAPSHOT_BUCKET } = await import("@/lib/ops/nightly-snapshot");
+  const { arNum } = await import("@/lib/ops/metricLabels");
   try {
-    const name = params.name as string;
-    const description = params.description as string || "Backup created by Executive Agent";
-    const tables = params.tables as string[] || [
-      "companies",
-      "users",
-      "site_sections",
-      "site_settings",
-      "general_suggestions",
-      "agent_executions",
-    ];
-    const retentionDays = params.retentionDays as number || 30;
-
-    // Fetch data from tables
-    const backupData: Record<string, unknown[]> = {};
-
-    for (const table of tables) {
-      const { data, error } = await supabase
-        .from(table)
-        .select("*")
-        .limit(10000);
-
-      if (error) {
-        console.warn(`[Backup] Failed to fetch ${table}:`, error.message);
-        backupData[table] = [];
-      } else {
-        backupData[table] = data || [];
-      }
-    }
-
-    // Create backup object
-    const backup = {
-      metadata: {
-        name,
-        description,
-        createdAt: new Date().toISOString(),
-        createdBy: context.actorUserId,
-        version: "1.0",
-        tables,
-      },
-      data: backupData,
-      checksum: "", // Will be calculated
-    };
-
-    // Calculate checksum
-    const backupJson = JSON.stringify(backup);
-    const checksum = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(backupJson));
-    const checksumHex = Array.from(new Uint8Array(checksum))
-      .map(b => b.toString(16).padStart(2, "0"))
-      .join("");
-
-    backup.checksum = checksumHex;
-
-    // Upload to Vercel Blob, with a real database-inline backup as fallback.
-    const blobName = `backups/executive-agent/${name}-${Date.now()}.json`;
-    let storageProvider = "vercel_blob";
-    let storageUrl = "";
-    let storagePath = "";
-    let storageNote = "";
-
-    try {
-      const blob = await put(blobName, JSON.stringify(backup, null, 2), {
-        access: "public",
-        token: process.env.BLOB_READ_WRITE_TOKEN,
-      });
-      storageUrl = blob.url;
-      storagePath = blob.pathname;
-    } catch (uploadError) {
-      storageProvider = "database_inline";
-      storageUrl = jsonToDataUrl(backup);
-      storagePath = `backup_snapshots.storage_url:${blobName}`;
-      storageNote =
-        uploadError instanceof Error
-          ? `Blob unavailable: ${uploadError.message}`
-          : "Blob unavailable";
-    }
-
-    // Store in database
-    const { data: snapshot, error: dbError } = await supabase
-      .from("backup_snapshots")
-      .insert({
-        execution_id: context.executionId,
-        company_id: context.companyId || null,
-        created_by: context.actorUserId || null,
-        backup_type: "data",
-        backup_name: name,
-        backup_description: description,
-        storage_provider: storageProvider,
-        storage_url: storageUrl,
-        storage_path: storagePath,
-        size_bytes: backupJson.length,
-        checksum: checksumHex,
-        checksum_algorithm: "sha256",
-        integrity_verified: true,
-        integrity_verified_at: new Date().toISOString(),
-        tables_backed_up: tables as unknown as Json,
-        retention_days: retentionDays,
-        expires_at: new Date(Date.now() + retentionDays * 24 * 60 * 60 * 1000).toISOString(),
-        backup_status: "completed",
-        restoration_result: storageNote ? { storageNote } as unknown as Json : null,
-        completed_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (dbError) {
-      throw dbError;
-    }
-
+    const snap = await runNightlySnapshot();
+    const ok = snap.failures.length === 0;
     return {
-      success: true,
-      message:
-        storageProvider === "database_inline"
-          ? `تم إنشاء نسخة احتياطية "${name}" بنجاح داخل قاعدة البيانات كمسار بديل حقيقي`
-          : `تم إنشاء نسخة احتياطية "${name}" بنجاح`,
+      success: ok,
+      message: ok
+        ? `النسخة الاحتياطية اتعملت: ${arNum(snap.tables)} جداول و${arNum(snap.rows)} سطراً، ${arNum(Math.round(snap.bytes / 1024))} كيلوبايت في الدرج الخاص — وكل ملف اتمّت قراءته من الدرج تاني وعدّاده طابق السجل.`
+        : `النسخة الاحتياطية وقفت: ${snap.failures[0]}`,
       data: {
-        backupId: snapshot.id,
-        name: snapshot.backup_name,
-        downloadUrl: storageProvider === "vercel_blob" ? storageUrl : undefined,
-        storageProvider,
-        sizeBytes: backupJson.length,
-        tables: tables,
-        expiresAt: snapshot.expires_at,
+        day: snap.day,
+        bucket: SNAPSHOT_BUCKET,
+        tables: snap.tables,
+        rows: snap.rows,
+        bytes: snap.bytes,
+        failures: snap.failures,
+        objects: snap.writes.map((w) => w.path),
       },
       executionId: context.executionId,
     };
   } catch (error) {
+    const why = error instanceof Error ? error.message : "خطأ غير معروف";
     return {
       success: false,
-      message: `فشل إنشاء النسخة الاحتياطية: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
-      error: error instanceof Error ? error.message : "Unknown error",
+      message: `النسخة الاحتياطية وقفت: ${why}`,
+      error: why,
       executionId: context.executionId,
     };
   }
@@ -1109,19 +1005,21 @@ export async function executeSystemHealthCheck(
   })();
 
   // ── 4. Last Backup Age ────────────────────────────────────────────────
+  // Read from the stamp the copy itself writes. It used to ask a `backup_snapshots` table that does
+  // not exist in the record, so the health panel reported «لا نسخة» forever while copies were sitting
+  // in the bucket — a dead read dressed as a fact.
   const backupCheck = await (async () => {
     if (!supabase) return { lastBackupAt: null as string | null, ageDays: null as number | null };
     try {
       const { data } = await supabase
-        .from("backup_snapshots")
-        .select("completed_at")
-        .eq("backup_status", "completed")
-        .order("completed_at", { ascending: false })
-        .limit(1)
-        .single();
-      if (!data?.completed_at) return { lastBackupAt: null, ageDays: null };
-      const ageDays = Math.floor((Date.now() - new Date(data.completed_at).getTime()) / (1000 * 60 * 60 * 24));
-      return { lastBackupAt: data.completed_at as string, ageDays };
+        .from("site_settings")
+        .select("updated_at, value")
+        .eq("key", "nightly_snapshot_last")
+        .maybeSingle();
+      const when = (data?.value as { day?: string } | null)?.day;
+      if (!data?.updated_at || !when) return { lastBackupAt: null, ageDays: null };
+      const ageDays = Math.floor((Date.now() - new Date(data.updated_at as string).getTime()) / (1000 * 60 * 60 * 24));
+      return { lastBackupAt: data.updated_at as string, ageDays };
     } catch { return { lastBackupAt: null, ageDays: null }; }
   })();
 
@@ -1249,25 +1147,40 @@ export async function executeBackupList(
   _params: Record<string, unknown>,
   context: ToolExecutionContext
 ): Promise<ToolExecutionResult> {
-  const supabase = getServiceSupabase() || (await getSupabase());
+  const { SNAPSHOT_BUCKET } = await import("@/lib/ops/nightly-snapshot");
+  const { arNum } = await import("@/lib/ops/metricLabels");
+  const supabase = getServiceSupabase();
   try {
-    const { data, error } = await supabase
-      .from("backup_snapshots")
-      .select("id, backup_name, backup_type, backup_status, created_at, size_bytes")
-      .order("created_at", { ascending: false })
-      .limit(20);
-    if (error) throw error;
-    const count = data?.length || 0;
+    if (!supabase) throw new Error("مفتاح الخدمة مش ضابط");
+    const days = await supabase.storage.from(SNAPSHOT_BUCKET).list("", { limit: 60 });
+    if (days.error) throw days.error;
+    const named = (days.data ?? []).map((d) => d.name).filter((n) => /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(n));
+    const sorted = named.slice().sort().reverse();
+    if (!sorted.length) {
+      return {
+        success: true,
+        message: "مفيش نسخة احتياطية في الدرج لحد دلوقتي — الجولة اليومية لسه ما عملتش واحدة.",
+        data: { bucket: SNAPSHOT_BUCKET, days: [] },
+        executionId: context.executionId,
+      };
+    }
+    const files = await supabase.storage.from(SNAPSHOT_BUCKET).list(sorted[0] + "/", { limit: 100 });
+    const list = (files.data ?? []).map((f) => ({
+      path: `${sorted[0]}/${f.name}`,
+      bytes: (f.metadata as { size?: number } | null)?.size ?? null,
+      writtenAt: f.updated_at ?? null,
+    }));
     return {
       success: true,
-      message: `عندك ${count} نسخة احتياطية مسجّلة`,
-      data: { backups: data || [] },
+      message: `عندك ${arNum(sorted.length)} يوم فيه نسخة، أحدثها ${sorted[0]} وفيه ${arNum(list.length)} ملف في الدرج الخاص.`,
+      data: { bucket: SNAPSHOT_BUCKET, days: sorted.slice(0, 14), latest: sorted[0], files: list },
       executionId: context.executionId,
     };
   } catch (error) {
+    const why = error instanceof Error ? error.message : "خطأ غير معروف";
     return {
       success: false,
-      message: error instanceof Error ? error.message : "تعذر قراءة النسخ الاحتياطية",
+      message: `قراءة النسخ الاحتياطية فشلت: ${why}`,
       executionId: context.executionId,
     };
   }

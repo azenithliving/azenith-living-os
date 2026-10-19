@@ -15,12 +15,14 @@ describe("real execution paths (not deferred gaps)", () => {
     expect(JSON.stringify(tool.parameters)).toMatch(/confirmUsersRestore/);
   });
 
-  it("backup_create has a real non-simulated fallback path", () => {
+  it("backup_create calls the one implementation that is measured live", () => {
     const handlerSource = String(TOOL_REGISTRY.backup_create.handler);
-    expect(String(TOOL_REGISTRY.backup_create.handler)).not.toMatch(
-      /placeholder-url|simulated:\s*true/
-    );
-    expect(handlerSource).toMatch(/database_inline|data:application\/json/);
+    expect(handlerSource).not.toMatch(/placeholder-url|simulated:\s*true/);
+    // Measured 2026-10-19: the old path wrote a `backup_snapshots` row into a table that does not
+    // exist and asked Vercel Blob for a public URL over the owner's record. The copy now has one
+    // owner — the nightly module that was proved on the published site (40 checks).
+    expect(handlerSource).toMatch(/runNightlySnapshot/);
+    expect(handlerSource).not.toMatch(/database_inline|data:application\/json|backup_snapshots/);
   });
 
   it("natural backup requests include required params", () => {
