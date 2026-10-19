@@ -82,7 +82,7 @@ export async function POST(req: Request) {
         if (!approvalResult.success) {
           // Measured live 2026-10-19: when the approval row could not be written this branch still
           // answered `success: true`, which is how a door teaches its owner to trust a failure.
-          const why = (approvalResult as { error?: string }).error ?? "لم يُسجَّل طلب الموافقة";
+          const why = approvalResult.error ?? "لم يُسجَّل طلب الموافقة";
           return NextResponse.json(
             {
               success: false,

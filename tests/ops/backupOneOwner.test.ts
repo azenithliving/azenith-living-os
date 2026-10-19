@@ -115,6 +115,16 @@ describe("the chat's backup tools and the nightly round share one implementation
     expect(bridge).not.toMatch(/toolName: "backup_create",\s*\n\s*params: \{[^}]*tables/);
   });
 
+  it("the approval wrapper cannot invent a success its writer refused", () => {
+    // The route guard is only honest if the layer below it stops answering `success: true` when the
+    // approval row was never written. Measured live: it did, and the door's fix changed nothing.
+    const approval = readFileSync("lib/agent-tools/approval-system.ts", "utf8");
+    const tail = approval.slice(approval.lastIndexOf("// Create approval request"));
+    expect(tail).toContain("success: approvalResult.success");
+    expect(tail).toContain("error: approvalResult.error");
+    expect(tail).not.toMatch(/return \{\s*\n\s*success: true,\s*\n\s*requiresApproval/);
+  });
+
   it("the tool door cannot report success when the approval row was never written", () => {
     // Measured live 2026-10-19: the approval branch answered `success: true, requiresApproval: true`
     // even when creating the request threw, so a failed approval looked like a pending decision.

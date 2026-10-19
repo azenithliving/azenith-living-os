@@ -373,6 +373,7 @@ export async function executeWithApproval(
   message: string;
   requiresApproval?: boolean;
   approvalId?: string;
+  error?: string;
   executionResult?: {
     success: boolean;
     data?: Record<string, unknown>;
@@ -412,9 +413,13 @@ export async function executeWithApproval(
   });
 
   return {
-    success: true,
+    // Measured live 2026-10-19: this used to answer `success: true` even when the approval row was
+    // never written — the writer reports its own failure, and swallowing it here is how a store
+    // teaches its owner to trust a failure.
+    success: approvalResult.success,
     requiresApproval: true,
     approvalId: approvalResult.approvalId,
     message: approvalResult.message,
+    error: approvalResult.error,
   };
 }
