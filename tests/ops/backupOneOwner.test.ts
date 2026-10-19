@@ -114,4 +114,14 @@ describe("the chat's backup tools and the nightly round share one implementation
     const bridge = readFileSync("lib/admin-tool-bridge.ts", "utf8");
     expect(bridge).not.toMatch(/toolName: "backup_create",\s*\n\s*params: \{[^}]*tables/);
   });
+
+  it("the tool door cannot report success when the approval row was never written", () => {
+    // Measured live 2026-10-19: the approval branch answered `success: true, requiresApproval: true`
+    // even when creating the request threw, so a failed approval looked like a pending decision.
+    const door = readFileSync("app/api/admin/agent/tools/execute/route.ts", "utf8");
+    const branch = door.slice(door.indexOf("if (approvalResult.requiresApproval)"), door.indexOf("// Create execution record"));
+    expect(branch).toContain("approvalResult.success");
+    expect(branch).toMatch(/status: 500/);
+    expect(branch).toContain("طلب الموافقة ما اتسجلش");
+  });
 });
