@@ -64,6 +64,23 @@ export function requiresApproval(toolName: string): boolean {
 // Create Approval Request
 // ============================================
 
+/**
+ * The cause, in words. A driver rejection is a plain object (`{ message, code, details, hint }`), not
+ * an `Error`, and `error instanceof Error ? … : "Unknown error"` threw the whole reason away — which
+ * is how a door ends up telling its owner that something failed and nothing about what.
+ */
+function causeOf(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  const shaped = error as { message?: unknown; error_description?: unknown; code?: unknown } | null;
+  const message = typeof shaped?.message === "string" ? shaped.message : typeof shaped?.error_description === "string" ? shaped.error_description : null;
+  if (message) return shaped?.code ? `${message} (${String(shaped.code)})` : message;
+  try {
+    return String(error ?? "Unknown error").slice(0, 300);
+  } catch {
+    return "Unknown error";
+  }
+}
+
 export async function createApprovalRequest(
   input: CreateApprovalInput
 ): Promise<ApprovalResult> {
@@ -127,7 +144,7 @@ export async function createApprovalRequest(
       success: false,
       requiresApproval: true,
       message: "Failed to create approval request",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: causeOf(error),
     };
   }
 }
@@ -289,7 +306,7 @@ export async function approveRequest(
   } catch (error) {
     return {
       success: false,
-      message: `Failed to process approval: ${error instanceof Error ? error.message : "Unknown error"}`,
+      message: `Failed to process approval: ${causeOf(error)}`,
     };
   }
 }
@@ -354,7 +371,7 @@ export async function rejectRequest(
   } catch (error) {
     return {
       success: false,
-      message: `Failed to reject approval: ${error instanceof Error ? error.message : "Unknown error"}`,
+      message: `Failed to reject approval: ${causeOf(error)}`,
     };
   }
 }

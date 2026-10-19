@@ -115,6 +115,13 @@ describe("the chat's backup tools and the nightly round share one implementation
     expect(bridge).not.toMatch(/toolName: "backup_create",\s*\n\s*params: \{[^}]*tables/);
   });
 
+  it("a driver rejection keeps its own words instead of becoming «Unknown error»", () => {
+    const approval = readFileSync("lib/agent-tools/approval-system.ts", "utf8");
+    expect(approval).toContain("function causeOf");
+    expect(approval.match(/instanceof Error \? error\.message : "Unknown error"/g) ?? []).toHaveLength(0);
+    expect((approval.match(/causeOf\(error\)/g) ?? []).length).toBeGreaterThanOrEqual(3);
+  });
+
   it("the approval wrapper cannot invent a success its writer refused", () => {
     // The route guard is only honest if the layer below it stops answering `success: true` when the
     // approval row was never written. Measured live: it did, and the door's fix changed nothing.
