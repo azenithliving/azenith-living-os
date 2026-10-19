@@ -104,4 +104,14 @@ describe("the chat's backup tools and the nightly round share one implementation
     expect(block).toContain("كلمة المالك");
     expect(block).not.toContain("لم أجد نسخة احتياطية");
   });
+
+  it("the tool advertises no knob the copy ignores", () => {
+    // The scope of the store's copy has one owner. A caller asking for a table list it happens to
+    // name — or a retention window that deletes nothing — would be promised something that does not exist.
+    const registry = readFileSync("lib/agent-tools/tool-registry.ts", "utf8");
+    const schema = registry.slice(registry.indexOf("const BackupCreateSchema"), registry.indexOf("required: [\"name\"]"));
+    expect(schema).not.toMatch(/tables:|retentionDays:|includeFiles:/);
+    const bridge = readFileSync("lib/admin-tool-bridge.ts", "utf8");
+    expect(bridge).not.toMatch(/toolName: "backup_create",\s*\n\s*params: \{[^}]*tables/);
+  });
 });

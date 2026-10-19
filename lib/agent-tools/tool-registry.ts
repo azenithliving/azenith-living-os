@@ -132,9 +132,9 @@ const BackupCreateSchema: ToolParameterSchema = {
   properties: {
     name: { type: "string", description: "اسم النسخة الاحتياطية", required: true },
     description: { type: "string", description: "وصف النسخة" },
-    tables: { type: "array", description: "الجداول المطلوبة (افتراضي: الكل)", items: { type: "string" } },
-    includeFiles: { type: "boolean", description: "تضمين الملفات" },
-    retentionDays: { type: "number", description: "فترة الاحتفاظ بالأيام" },
+    // `tables`, `includeFiles` and `retentionDays` were dropped when the tool was re-pointed at the
+    // nightly copy (2026-10-19): the scope of the store's copy has one owner, and advertising a knob
+    // the implementation ignores is how a tool starts lying.
   },
   required: ["name"],
 };

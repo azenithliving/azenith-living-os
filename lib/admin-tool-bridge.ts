@@ -385,8 +385,8 @@ export function inferUltimateTool(
     return {
       toolName: "backup_create",
       params: {
-        name: `assistant-backup-${new Date().toISOString().slice(0, 10)}`,
-        tables: ["site_settings", "site_sections"],
+        name: `nightly-${new Date().toISOString().slice(0, 10)}`,
+        description: "نسخة طلبها المالك من الكابينة",
       },
     };
   }
