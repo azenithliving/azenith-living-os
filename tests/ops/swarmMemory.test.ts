@@ -64,6 +64,19 @@ describe("what the round may remember", () => {
     // The round stores these as `unknown`; a missing reading must never be spoken as a zero.
     expect(roundLines({ canary: {}, anomaly: "لا شيء" }, day)).toEqual([]);
   });
+
+  it("remembers the nightly copy by its counts, and remembers it stopped", () => {
+    const made = roundLines({ snapshotTables: 9, snapshotRows: 2112 }, day);
+    expect(made).toHaveLength(1);
+    expect(made[0]).toContain("النسخة الاحتياطية");
+    expect(made[0]).toContain(arNum(9));
+    expect(made[0]).toContain(arNum(2112));
+    for (const line of made) expect(line).not.toMatch(/[0-9]/);
+
+    const stopped = roundLines({ snapshotRows: 0, snapshotNote: "الدرج مقفول" }, day);
+    expect(stopped[0]).toContain("وقفت");
+    expect(stopped[0]).toContain("الدرج مقفول");
+  });
 });
 
 describe("the writer never invents what it cannot compute", () => {

@@ -18,7 +18,7 @@ async function handle(request: NextRequest) {
   // `?only=` runs one weekly organ on demand (still behind the cron secret):
   // Sunday-only and Monday-only code should be provable today, not next weekend.
   const only = new URL(request.url).searchParams.get("only");
-  const step = only === "audit" || only === "canary" ? only : undefined;
+  const step = only === "audit" || only === "canary" || only === "snapshot" ? only : undefined;
   try {
     return NextResponse.json(await executeDailyRound({ only: step }));
   } catch (error: any) {

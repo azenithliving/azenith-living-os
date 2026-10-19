@@ -136,4 +136,18 @@ describe("the morning report keeps a receipt", () => {
     expect(receipt).toContain("telegramSent");
     expect(receipt).toContain("reason");
   });
+
+  it("tells him the copy was made, with its own counts", () => {
+    const s = buildDailyStory({ ...base, snapshot: { tables: 9, rows: 2112, bytes: 870400, failed: null } });
+    expect(s.text).toContain("النسخة الاحتياطية");
+    expect(s.text).toContain("2112");
+    expect(s.text).toContain("850 كيلوبايت");
+    expect(renderTelegramHtml(s)).toContain("٢١١٢");
+  });
+
+  it("and says out loud when the copy stopped, instead of going quiet", () => {
+    const s = buildDailyStory({ ...base, snapshot: { tables: 9, rows: 0, bytes: 0, failed: "رفع agent_tasks: الدرج مقفول" } });
+    expect(s.text).toContain("النسخة الاحتياطية: وقفت");
+    expect(s.text).toContain("الدرج مقفول");
+  });
 });

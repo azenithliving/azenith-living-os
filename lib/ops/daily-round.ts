@@ -56,6 +56,12 @@ export interface DailyRoundResults {
   memoryStored?: number;
   memoryVector?: boolean;
   memoryNote?: string | null;
+  /** (a1) The nightly copy of the rows that cannot be re-made — reported by its real counts. */
+  snapshotDay?: string;
+  snapshotTables?: number;
+  snapshotRows?: number;
+  snapshotBytes?: number;
+  snapshotNote?: string | null;
   proposalId?: string | null;
   errors: string[];
   [k: string]: unknown;
@@ -74,7 +80,7 @@ export interface DailyRoundOutcome {
  * claimed, never verified — and a claim the owner cannot re-run is exactly what
  * P6 exists to kill.
  */
-export type RoundStep = "audit" | "canary";
+export type RoundStep = "audit" | "canary" | "snapshot";
 
 /** Kept under the platform's 60s cap so the round finishes reporting itself. */
 const ROUND_BUDGET_MS = 45_000;
@@ -129,8 +135,33 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
     }
   };
 
+  // (a1) The nightly copy of the rows that cannot be re-made — taken while the whole budget is
+  // still open. A round that measures everything and copies nothing leaves the owner with exactly
+  // what he had the morning after the 306 chat rows died: nothing to read back from.
+  const snapshotStep = async () => {
+    try {
+      const { runNightlySnapshot } = await import("@/lib/ops/nightly-snapshot");
+      const snap = await runNightlySnapshot();
+      results.snapshotDay = snap.day;
+      results.snapshotTables = snap.tables;
+      results.snapshotRows = snap.rows;
+      results.snapshotBytes = snap.bytes;
+      if (snap.failures.length) {
+        results.snapshotNote = snap.failures[0];
+        results.errors.push(`النسخة الاحتياطية: ${snap.failures.join(" | ")}`);
+      }
+    } catch (e: any) {
+      results.snapshotNote = `استثناء: ${e.message}`;
+      results.errors.push(`النسخة الاحتياطية: ${e.message}`);
+    }
+  };
+
   if (opts.only === "canary") {
     await canaryStep();
+    return { success: true, results };
+  }
+  if (opts.only === "snapshot") {
+    await snapshotStep();
     return { success: true, results };
   }
   if (opts.only === "audit") {
@@ -139,6 +170,7 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
   }
 
   await canaryStep();
+  await snapshotStep();
 
   // (a) Luxury score — measured from real signals (images, prices, SEO, load,
   // alt text), not from asking a model how luxurious the shop feels.
@@ -345,6 +377,14 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
     ]);
     const cfg = await getActiveTelegramConfig();
     const rivalRead = results.rivals as { crawled: number; failed: number; skipped: number } | null | undefined;
+    const snapshotRead = results.snapshotDay
+      ? {
+          tables: results.snapshotTables ?? 0,
+          rows: results.snapshotRows ?? 0,
+          bytes: results.snapshotBytes ?? 0,
+          failed: results.snapshotNote ?? null,
+        }
+      : null;
     const story = buildDailyStory({
       dateKey: new Date().toISOString().slice(0, 10),
       luxuryScore: results.luxuryScore,
@@ -355,6 +395,7 @@ export async function executeDailyRound(opts: { only?: RoundStep } = {}): Promis
       anomalyDigest: results.anomalyDigest ?? null,
       anomalyReadError: results.anomalyReadError ?? null,
       rivals: rivalRead ? { crawled: rivalRead.crawled, failed: rivalRead.failed, skipped: rivalRead.skipped } : null,
+      snapshot: snapshotRead,
       errors: results.errors,
       proposalId: results.proposalId ?? null,
       siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",

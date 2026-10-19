@@ -29,6 +29,10 @@ export type RoundMemoryInput = {
   canaryDigest?: string | null;
   selfAudit?: unknown;
   selfAuditNote?: string | null;
+  /** The nightly copy's own counts — including the sentence that it stopped. */
+  snapshotTables?: number;
+  snapshotRows?: number;
+  snapshotNote?: string | null;
 };
 
 export type RoundMemoryOutcome = {
@@ -84,6 +88,14 @@ export function roundLines(results: RoundMemoryInput, day: string): string[] {
   const judged = measured(results.selfAudit, "judged");
   if (judged !== null) {
     lines.push(`يوم ${day}: تدقيق الردود — ${arNum(measured(results.selfAudit, "sampled") ?? 0)} رد اتبعت للمقيّم و${arNum(judged)} اتقيّمت. ${(results.selfAuditNote ?? "").trim()}`.trim());
+  }
+
+  if (typeof results.snapshotRows === "number" || results.snapshotNote) {
+    lines.push(
+      results.snapshotNote
+        ? `يوم ${day}: النسخة الاحتياطية وقفت — ${results.snapshotNote}`
+        : `يوم ${day}: النسخة الاحتياطية — ${arNum(results.snapshotTables ?? 0)} جدول و${arNum(results.snapshotRows ?? 0)} سطراً رجعت مقروءة من الدرج الخاص.`
+    );
   }
 
   return lines.filter(Boolean);

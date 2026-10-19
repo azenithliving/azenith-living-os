@@ -31,6 +31,11 @@ export interface StoryInput {
   anomalyDigest?: string | null;
   anomalyReadError?: string | null;
   rivals?: { crawled: number; failed: number; skipped: number } | null;
+  /**
+   * The nightly copy, counted from the objects the store really wrote. `failed` carries the first
+   * refusal, so a backup that stopped speaks in the morning report instead of living in a log.
+   */
+  snapshot?: { tables: number; rows: number; bytes: number; failed: string | null } | null;
   errors: string[];
   proposalId?: string | null;
   siteUrl: string;
@@ -63,6 +68,14 @@ export function buildDailyStory(input: StoryInput): DailyStory {
 
   if (input.anomalyDigest) lines.push(`• حركة الزوار:\n${input.anomalyDigest}`);
   if (input.anomalyReadError) lines.push(`• حركة الزوار: قراتها فشلت — ${input.anomalyReadError}`);
+  if (input.snapshot) {
+    const s = input.snapshot;
+    lines.push(
+      s.failed
+        ? `• النسخة الاحتياطية: وقفت — ${s.failed}`
+        : `• النسخة الاحتياطية: ${s.tables} جداول و${s.rows} سطراً، ${Math.round(s.bytes / 1024)} كيلوبايت`
+    );
+  }
   if (input.rivals) {
     lines.push(`• المنافسون: قِيس ${input.rivals.crawled} — فشل ${input.rivals.failed} — متجاهَل ${input.rivals.skipped}`);
   }
