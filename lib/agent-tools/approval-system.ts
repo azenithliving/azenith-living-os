@@ -18,6 +18,7 @@ import { createExecutionRecord, updateExecutionRecord } from "./execution-tracke
 import { logAuditEvent } from "@/lib/ultimate-agent/security-manager";
 import type { Json } from "@/lib/supabase/database.types";
 import { normalizeApprovalRiskLevel } from "@/lib/approval-risk";
+import { buildApprovalRow } from "@/lib/ops/approval-intake";
 
 export interface ApprovalRequest {
   id: string;
@@ -97,25 +98,39 @@ export async function createApprovalRequest(
       };
     }
 
-    // Create approval request in database
-    const { data: approval, error } = await supabase
-      .from("approval_requests")
-      .insert({
+    // The row is shaped by the module that already owns this table's rules: `action_id` is a uuid
+    // column and this caller is naming the action, not identifying a row. Measured live 2026-10-19:
+    // passing the tool name here made every approval insert die with «invalid input syntax for type
+    // uuid» (code 22P02), so no destructive tool could ever raise a decision for the owner.
+    const shaped = buildApprovalRow(
+      {
         action_id: input.toolName,
         action_type: input.toolName,
         description: input.description || `Execute ${tool.displayName}`,
         risk_level: normalizeApprovalRiskLevel(tool.riskLevel),
-        requested_at: new Date().toISOString(),
         expires_at: input.expiresInMinutes
           ? new Date(Date.now() + input.expiresInMinutes * 60 * 1000).toISOString()
-          : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Default 24 hours
-        status: "pending",
+          : undefined,
         metadata: {
           toolName: input.toolName,
           params: input.params,
           executionContext: input.context,
-        } as unknown as Json,
-      })
+        },
+      },
+      (input.context?.companyId as string | null | undefined) ?? null
+    );
+    if (!shaped.ok) {
+      return {
+        success: false,
+        requiresApproval: true,
+        message: "Failed to create approval request",
+        error: shaped.error,
+      };
+    }
+
+    const { data: approval, error } = await supabase
+      .from("approval_requests")
+      .insert(shaped.row)
       .select()
       .single();
 

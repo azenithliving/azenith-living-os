@@ -132,6 +132,16 @@ describe("the chat's backup tools and the nightly round share one implementation
     expect(tail).not.toMatch(/return \{\s*\n\s*success: true,\s*\n\s*requiresApproval/);
   });
 
+  it("the approval writer shapes its row through the module that owns the table's contract", () => {
+    // Measured live 2026-10-19: `action_id` is a uuid column and this caller was putting the tool's
+    // name in it, so every approval request died with code 22P02 and no destructive tool could ever
+    // reach the owner as a decision card.
+    const approval = readFileSync("lib/agent-tools/approval-system.ts", "utf8");
+    expect(approval).toContain("buildApprovalRow");
+    expect(approval).toContain(".insert(shaped.row)");
+    expect(approval).not.toMatch(/\.insert\(\{\s*\n\s*action_id: input\.toolName/);
+  });
+
   it("the tool door cannot report success when the approval row was never written", () => {
     // Measured live 2026-10-19: the approval branch answered `success: true, requiresApproval: true`
     // even when creating the request threw, so a failed approval looked like a pending decision.
