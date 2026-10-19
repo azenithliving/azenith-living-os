@@ -45,6 +45,14 @@ export default function GateLoginPage() {
         return;
       }
 
+      // The door says whether a second step is required — the page does not decide that by itself,
+      // so the rule lives in one place and a settings row can bring the code back.
+      if (data.signedIn === true) {
+        router.push("/admin");
+        router.refresh();
+        return;
+      }
+
       setStep("2fa");
     } catch {
       setError("تعذر الاتصال بالخادم. حاول مرة أخرى.");

@@ -5,7 +5,10 @@ import {
   normalizeAdminEmail,
   validateAdminGateCredentials,
   isAdminGateConfigured,
+  adminGateRequires2FA,
 } from "@/lib/admin-gate";
+import { sendSecurityAlert } from "@/lib/telegram-notify";
+import { telegramAlert, telegramTime } from "@/lib/telegram-copy";
 
 async function ensurePrimaryAdminAuthUser(email: string, password: string) {
   if (!validateAdminGateCredentials(email, password)) {
@@ -93,9 +96,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Owner's word 2026-10-19: his phone was lost and the verification code locked him out of his own
+    // dashboard, so he ordered the second step off. When the store says so, this door leaves the
+    // session standing instead of signing out — records how the door was really opened, and tells him
+    // on Telegram, because a factor that is off should never be quiet about being off.
+    if (!(await adminGateRequires2FA())) {
+      const { data: me } = await supabase.auth.getUser();
+      const adminClient = getSupabaseAdminClient();
+      if (me?.user?.id && adminClient) {
+        await adminClient.from("sovereign_sessions").insert({
+          user_id: me.user.id,
+          session_token: crypto.randomUUID(),
+          is_2fa_verified: false,
+          ip_address: request.headers.get("x-forwarded-for") || "unknown",
+          user_agent: request.headers.get("user-agent"),
+          expires_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+        });
+      }
+      await sendSecurityAlert(
+        telegramAlert("🔓", "دخول المدير بكلمة السر فقط — كود التحقق مقفول بأمره", [
+          ["المستخدم", normalizedEmail],
+          ["الوقت", telegramTime()],
+          ["العنوان", request.headers.get("x-forwarded-for") || "غير معروف"],
+        ])
+      );
+      console.log("[gate] الدخول اكتمل بكلمة السر وحدها — كود التحقق مقفول في إعدادات المتجر");
+      return NextResponse.json({ success: true, signedIn: true });
+    }
+
     await supabase.auth.signOut();
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, signedIn: false });
   } catch (error) {
     console.error("[gate/validate]", error);
     return NextResponse.json(
