@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T05:51:09.463Z",
+  "generatedAt": "2026-10-20T16:35:38.155Z",
   "states": [
     "not-moved",
     "moving",
@@ -7,96 +7,316 @@
     "erased"
   ],
   "counts": {
-    "not-moved": 487,
+    "not-moved": 491,
     "moved": 28,
     "moving": 6,
     "erased": 1
+  },
+  "disagreements": {
+    "staleMap": [
+      "app/admin/assistant/page.tsx (محوّل بلا سطح)",
+      "app/admin/computer/page.tsx (محوّل بلا سطح)",
+      "app/admin/fate/page.tsx (متقاعدة عمدًا)",
+      "app/admin/intel/page.tsx (محوّل بلا سطح)",
+      "app/admin/intelligence/page.tsx (محوّل بلا سطح)",
+      "app/admin/phone/page.tsx (محوّل بلا سطح)",
+      "app/admin/sandbox/page.tsx (محوّل بلا سطح)"
+    ],
+    "unprovenMoves": []
   },
   "rows": [
     {
       "kind": "old-page",
       "atom": "app/admin/agents/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "agents",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 20,
+        "sharedDoors": 2,
+        "onlyOldDoors": [
+          "/api/admin/agents/approval/decision",
+          "/api/admin/agents/learn",
+          "/api/admin/agents/messages",
+          "/api/admin/agents/orchestrate",
+          "/api/admin/agents/suggestions",
+          "/api/admin/agents/tasks",
+          "/api/admin/assistant",
+          "/api/admin/live-browser/action",
+          "/api/admin/live-browser/screenshot",
+          "/api/admin/live-browser/session",
+          "/api/admin/live-browser/stream",
+          "/api/admin/mind",
+          "/api/admin/mind/decision",
+          "/api/admin/ops",
+          "/api/admin/ops/preview",
+          "/api/admin/ops/self",
+          "/api/admin/ops/vision",
+          "/api/admin/remote-browser/session"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/assistant/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "assistant",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/browser/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "browser",
+        "twin": false,
+        "forwarder": false,
+        "retired": false,
+        "doors": 2,
+        "sharedDoors": 1,
+        "onlyOldDoors": [
+          "/api/admin/remote-browser/session"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/computer/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "computer",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/database/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "database",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 1,
+        "sharedDoors": 0,
+        "onlyOldDoors": [
+          "/api/system-health"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/elite/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "elite",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 1,
+        "sharedDoors": 0,
+        "onlyOldDoors": [
+          "/api/admin/elite/invitations"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/fate/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "fate",
+        "twin": false,
+        "forwarder": false,
+        "retired": true,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/intel/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "intel",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/intelligence/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "intelligence",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/owner-dashboard/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "owner-dashboard",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 3,
+        "sharedDoors": 0,
+        "onlyOldDoors": [
+          "/api/admin/owner/approval/decision",
+          "/api/admin/owner/dashboard",
+          "/api/admin/owner/emergency-stop"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "landing",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 17,
+        "sharedDoors": 1,
+        "onlyOldDoors": [
+          "/api/admin/aaca/status",
+          "/api/admin/keys",
+          "/api/admin/keys/bulk",
+          "/api/admin/keys/import-env",
+          "/api/admin/keys/live-stats",
+          "/api/admin/keys/reload",
+          "/api/admin/mastermind/stats",
+          "/api/admin/notifications",
+          "/api/admin/ops/self",
+          "/api/admin/proactive",
+          "/api/admin/quality",
+          "/api/admin/telegram/config",
+          "/api/admin/telegram/status",
+          "/api/admin/telegram/test",
+          "/api/analytics",
+          "/api/system-health"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/phone/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "phone",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/sales/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "sales",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 6,
+        "sharedDoors": 0,
+        "onlyOldDoors": [
+          "/api/admin/knowledge/audit",
+          "/api/admin/settings",
+          "/api/consultant",
+          "/api/consultant/learnings",
+          "/api/consultant/pending-questions",
+          "/api/tenants"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/sandbox/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "sandbox",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/settings/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "settings",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 1,
+        "sharedDoors": 0,
+        "onlyOldDoors": [
+          "/api/admin/settings"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/system/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "system",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "atom": "app/admin/work/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "evidence": {
+        "leaf": "work",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "new-page",
@@ -1136,6 +1356,11 @@
     },
     {
       "kind": "root-lib",
+      "atom": "lib/customers/memory.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
       "atom": "lib/customers/read.ts",
       "state": "not-moved"
     },
@@ -1310,6 +1535,11 @@
     {
       "kind": "root-lib",
       "atom": "lib/telegram-notify.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "root-lib",
+      "atom": "lib/tenant.ts",
       "state": "not-moved"
     },
     {
@@ -2257,6 +2487,11 @@
     },
     {
       "kind": "swarm-file",
+      "atom": "lib/ops/memory/remember-round.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
       "atom": "lib/ops/memory/SharedMemory.ts",
       "state": "not-moved"
     },
@@ -2283,6 +2518,11 @@
     {
       "kind": "swarm-file",
       "atom": "lib/ops/migration-map.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/nightly-snapshot.ts",
       "state": "not-moved"
     },
     {

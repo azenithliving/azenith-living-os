@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T05:51:09.453Z",
+  "generatedAt": "2026-10-20T16:35:38.132Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5042,
@@ -8,114 +8,322 @@
     "adminDoors": 122,
     "allDoors": 207,
     "outsideDoors": 8,
-    "outsideDoorLines": 2600,
-    "rootLibFiles": 294,
-    "rootLibUsed": 91,
+    "outsideDoorLines": 2640,
+    "rootLibFiles": 296,
+    "rootLibUsed": 93,
     "orphanDoors": 77,
-    "rootLibUsedLines": 31171,
+    "rootLibUsedLines": 31557,
     "furnitureFiles": 61,
-    "furnitureLines": 16689,
+    "furnitureLines": 16747,
     "furnitureUsedByBoth": 7,
-    "furnitureBothLines": 2896,
+    "furnitureBothLines": 2954,
     "furnitureNewOnly": 21,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
-    "swarmFiles": 73,
-    "swarmFileLines": 16475,
+    "swarmFiles": 75,
+    "swarmFileLines": 17111,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 12,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 522
+    "atoms": 526
   },
   "duplicatedDoors": [],
   "atoms": [
     {
       "kind": "old-page",
       "id": "app/admin/agents/page.tsx",
-      "lines": 798
+      "lines": 798,
+      "evidence": {
+        "leaf": "agents",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 20,
+        "sharedDoors": 2,
+        "onlyOldDoors": [
+          "/api/admin/agents/approval/decision",
+          "/api/admin/agents/learn",
+          "/api/admin/agents/messages",
+          "/api/admin/agents/orchestrate",
+          "/api/admin/agents/suggestions",
+          "/api/admin/agents/tasks",
+          "/api/admin/assistant",
+          "/api/admin/live-browser/action",
+          "/api/admin/live-browser/screenshot",
+          "/api/admin/live-browser/session",
+          "/api/admin/live-browser/stream",
+          "/api/admin/mind",
+          "/api/admin/mind/decision",
+          "/api/admin/ops",
+          "/api/admin/ops/preview",
+          "/api/admin/ops/self",
+          "/api/admin/ops/vision",
+          "/api/admin/remote-browser/session"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/assistant/page.tsx",
-      "lines": 23
+      "lines": 23,
+      "evidence": {
+        "leaf": "assistant",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/browser/page.tsx",
-      "lines": 610
+      "lines": 610,
+      "evidence": {
+        "leaf": "browser",
+        "twin": false,
+        "forwarder": false,
+        "retired": false,
+        "doors": 2,
+        "sharedDoors": 1,
+        "onlyOldDoors": [
+          "/api/admin/remote-browser/session"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/computer/page.tsx",
-      "lines": 6
+      "lines": 6,
+      "evidence": {
+        "leaf": "computer",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/database/page.tsx",
-      "lines": 312
+      "lines": 312,
+      "evidence": {
+        "leaf": "database",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 1,
+        "sharedDoors": 0,
+        "onlyOldDoors": [
+          "/api/system-health"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/elite/page.tsx",
-      "lines": 244
+      "lines": 244,
+      "evidence": {
+        "leaf": "elite",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 1,
+        "sharedDoors": 0,
+        "onlyOldDoors": [
+          "/api/admin/elite/invitations"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/fate/page.tsx",
-      "lines": 27
+      "lines": 27,
+      "evidence": {
+        "leaf": "fate",
+        "twin": false,
+        "forwarder": false,
+        "retired": true,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/intel/page.tsx",
-      "lines": 7
+      "lines": 7,
+      "evidence": {
+        "leaf": "intel",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/intelligence/page.tsx",
-      "lines": 7
+      "lines": 7,
+      "evidence": {
+        "leaf": "intelligence",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/owner-dashboard/page.tsx",
-      "lines": 461
+      "lines": 461,
+      "evidence": {
+        "leaf": "owner-dashboard",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 3,
+        "sharedDoors": 0,
+        "onlyOldDoors": [
+          "/api/admin/owner/approval/decision",
+          "/api/admin/owner/dashboard",
+          "/api/admin/owner/emergency-stop"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/page.tsx",
-      "lines": 874
+      "lines": 874,
+      "evidence": {
+        "leaf": "landing",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 17,
+        "sharedDoors": 1,
+        "onlyOldDoors": [
+          "/api/admin/aaca/status",
+          "/api/admin/keys",
+          "/api/admin/keys/bulk",
+          "/api/admin/keys/import-env",
+          "/api/admin/keys/live-stats",
+          "/api/admin/keys/reload",
+          "/api/admin/mastermind/stats",
+          "/api/admin/notifications",
+          "/api/admin/ops/self",
+          "/api/admin/proactive",
+          "/api/admin/quality",
+          "/api/admin/telegram/config",
+          "/api/admin/telegram/status",
+          "/api/admin/telegram/test",
+          "/api/analytics",
+          "/api/system-health"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/phone/page.tsx",
-      "lines": 6
+      "lines": 6,
+      "evidence": {
+        "leaf": "phone",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/sales/page.tsx",
-      "lines": 1262
+      "lines": 1262,
+      "evidence": {
+        "leaf": "sales",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 6,
+        "sharedDoors": 0,
+        "onlyOldDoors": [
+          "/api/admin/knowledge/audit",
+          "/api/admin/settings",
+          "/api/consultant",
+          "/api/consultant/learnings",
+          "/api/consultant/pending-questions",
+          "/api/tenants"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/sandbox/page.tsx",
-      "lines": 8
+      "lines": 8,
+      "evidence": {
+        "leaf": "sandbox",
+        "twin": false,
+        "forwarder": true,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/settings/page.tsx",
-      "lines": 280
+      "lines": 280,
+      "evidence": {
+        "leaf": "settings",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 1,
+        "sharedDoors": 0,
+        "onlyOldDoors": [
+          "/api/admin/settings"
+        ]
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/system/page.tsx",
-      "lines": 62
+      "lines": 62,
+      "evidence": {
+        "leaf": "system",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "old-page",
       "id": "app/admin/work/page.tsx",
-      "lines": 55
+      "lines": 55,
+      "evidence": {
+        "leaf": "work",
+        "twin": true,
+        "forwarder": false,
+        "retired": false,
+        "doors": 0,
+        "sharedDoors": 0,
+        "onlyOldDoors": []
+      }
     },
     {
       "kind": "new-page",
@@ -824,7 +1032,7 @@
     {
       "kind": "outside-door",
       "id": "app/api/consultant/route.ts",
-      "lines": 1515,
+      "lines": 1555,
       "callers": 1
     },
     {
@@ -908,7 +1116,7 @@
     {
       "kind": "root-lib",
       "id": "lib/admin-gate.ts",
-      "lines": 47,
+      "lines": 80,
       "callers": 5
     },
     {
@@ -956,7 +1164,7 @@
     {
       "kind": "root-lib",
       "id": "lib/agent-tools/approval-system.ts",
-      "lines": 421,
+      "lines": 458,
       "callers": 2
     },
     {
@@ -974,7 +1182,7 @@
     {
       "kind": "root-lib",
       "id": "lib/agents/AgentOrchestrator.ts",
-      "lines": 927,
+      "lines": 936,
       "callers": 1
     },
     {
@@ -1028,7 +1236,7 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/dossier.ts",
-      "lines": 394,
+      "lines": 403,
       "callers": 2
     },
     {
@@ -1040,7 +1248,7 @@
     {
       "kind": "root-lib",
       "id": "lib/cad/paper-sketch-parser.ts",
-      "lines": 424,
+      "lines": 430,
       "callers": 1
     },
     {
@@ -1077,7 +1285,7 @@
       "kind": "root-lib",
       "id": "lib/cad/sketch-link.ts",
       "lines": 77,
-      "callers": 3
+      "callers": 4
     },
     {
       "kind": "root-lib",
@@ -1118,7 +1326,7 @@
     {
       "kind": "root-lib",
       "id": "lib/consultant/store-facts.ts",
-      "lines": 188,
+      "lines": 195,
       "callers": 1
     },
     {
@@ -1143,6 +1351,12 @@
       "kind": "root-lib",
       "id": "lib/customers/match.ts",
       "lines": 92,
+      "callers": 2
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/customers/memory.ts",
+      "lines": 135,
       "callers": 2
     },
     {
@@ -1322,7 +1536,7 @@
     {
       "kind": "root-lib",
       "id": "lib/supabase-server.ts",
-      "lines": 32,
+      "lines": 34,
       "callers": 2
     },
     {
@@ -1347,13 +1561,19 @@
       "kind": "root-lib",
       "id": "lib/telegram-copy.ts",
       "lines": 63,
-      "callers": 3
+      "callers": 4
     },
     {
       "kind": "root-lib",
       "id": "lib/telegram-notify.ts",
       "lines": 173,
-      "callers": 6
+      "callers": 7
+    },
+    {
+      "kind": "root-lib",
+      "id": "lib/tenant.ts",
+      "lines": 148,
+      "callers": 1
     },
     {
       "kind": "root-lib",
@@ -1554,7 +1774,7 @@
     {
       "kind": "orphan-door",
       "id": "app/api/curated-pages/route.ts",
-      "lines": 133
+      "lines": 141
     },
     {
       "kind": "orphan-door",
@@ -1569,12 +1789,12 @@
     {
       "kind": "orphan-door",
       "id": "app/api/elite-leads/route.ts",
-      "lines": 179
+      "lines": 207
     },
     {
       "kind": "orphan-door",
       "id": "app/api/enhance-image/route.ts",
-      "lines": 93
+      "lines": 101
     },
     {
       "kind": "orphan-door",
@@ -1634,12 +1854,12 @@
     {
       "kind": "orphan-door",
       "id": "app/api/passport/[token]/colours/route.ts",
-      "lines": 82
+      "lines": 92
     },
     {
       "kind": "orphan-door",
       "id": "app/api/passport/[token]/contact/route.ts",
-      "lines": 116
+      "lines": 126
     },
     {
       "kind": "orphan-door",
@@ -1649,7 +1869,7 @@
     {
       "kind": "orphan-door",
       "id": "app/api/passport/[token]/route.ts",
-      "lines": 284
+      "lines": 298
     },
     {
       "kind": "orphan-door",
@@ -1809,7 +2029,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/agents/ChatPanel.tsx",
-      "lines": 1861,
+      "lines": 1919,
       "usedBy": "both"
     },
     {
@@ -2190,7 +2410,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/chat-brain.ts",
-      "lines": 90
+      "lines": 130
     },
     {
       "kind": "swarm-file",
@@ -2210,12 +2430,12 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/daily-round.ts",
-      "lines": 412
+      "lines": 476
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/daily-story.ts",
-      "lines": 127
+      "lines": 140
     },
     {
       "kind": "swarm-file",
@@ -2334,8 +2554,13 @@
     },
     {
       "kind": "swarm-file",
+      "id": "lib/ops/memory/remember-round.ts",
+      "lines": 140
+    },
+    {
+      "kind": "swarm-file",
       "id": "lib/ops/memory/SharedMemory.ts",
-      "lines": 472
+      "lines": 613
     },
     {
       "kind": "swarm-file",
@@ -2361,6 +2586,11 @@
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
       "lines": 372
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/nightly-snapshot.ts",
+      "lines": 238
     },
     {
       "kind": "swarm-file",

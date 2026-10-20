@@ -240,8 +240,81 @@ const viewAtoms = existsSync(screensPath)
       .filter((v) => !seenViews.has(v.id) && seenViews.add(v.id))
   : [];
 
+/**
+ * Code evidence for every old screen. The hand-written map decides states; this asks the
+ * repository whether the map is contradicted: does the new house have a twin route, does the old
+ * screen merely forward, was it retired on purpose, and which doors are reachable ONLY from the
+ * old house. A screen with no door of its own is not «unmoved because it failed» — it may be a
+ * display surface, and the two are different sentences, so both get recorded.
+ */
+const readSrc = (f) => { try { return readFileSync(f, "utf8"); } catch { return ""; } };
+const sourceFiles = (dir) => walk(dir).filter((f) => /\.tsx?$/.test(f));
+
+function resolveImport(spec, fromFile) {
+  if (spec.startsWith("@/")) return spec.slice(2);
+  if (spec.startsWith(".")) {
+    const parts = (fromFile.split("/").slice(0, -1).join("/") + "/" + spec).split("/");
+    const out = [];
+    for (const part of parts) {
+      if (part === "..") out.pop();
+      else if (part && part !== ".") out.push(part);
+    }
+    return out.join("/");
+  }
+  return null;
+}
+
+function withExt(base) {
+  for (const e of ["", ".tsx", ".ts", "/index.tsx", "/index.ts"]) if (existsSync(base + e)) return base + e;
+  return null;
+}
+
+function importClosure(entry, depth = 2) {
+  const seen = new Set();
+  const stack = [{ file: entry, level: 0 }];
+  while (stack.length) {
+    const { file, level } = stack.pop();
+    if (seen.has(file)) continue;
+    seen.add(file);
+    if (level >= depth) continue;
+    for (const m of readSrc(file).matchAll(/from ["']([^"']+)["']/g)) {
+      const resolved = resolveImport(m[1], file);
+      if (!resolved) continue;
+      if (!(resolved.startsWith("components/") || resolved.startsWith("lib/"))) continue;
+      const target = withExt(resolved);
+      if (target && !seen.has(target)) stack.push({ file: target, level: level + 1 });
+    }
+  }
+  return [...seen];
+}
+
+function doorsIn(files) {
+  const set = new Set();
+  for (const f of files) for (const m of readSrc(f).matchAll(/["'`](\/api\/[A-Za-z0-9\-_/[\]]+)/g)) set.add(m[1].replace(/\/+$/, ""));
+  return set;
+}
+
+const newHouseDoors = doorsIn(sourceFiles("app/admin/v2").concat(sourceFiles("components/admin/v2")));
+const pageEvidence = new Map();
+for (const page of oldPages) {
+  const src = readSrc(page);
+  const doors = [...doorsIn(importClosure(page))].sort();
+  const shared = doors.filter((d) => newHouseDoors.has(d));
+  const onlyOld = doors.filter((d) => !newHouseDoors.has(d));
+  const leaf = page.split("/").slice(-2, -1)[0] === "admin" ? "landing" : page.split("/").slice(-2, -1)[0];
+  pageEvidence.set(page, {
+    leaf,
+    twin: leaf === "landing" ? existsSync("app/admin/v2/page.tsx") : existsSync(`app/admin/v2/${leaf}/page.tsx`),
+    forwarder: /redirect\(|router\.replace\(|router\.push\(/.test(src) && src.split("\n").length < 30,
+    retired: /تم إيقاف|retired rather/i.test(src),
+    doors: doors.length,
+    sharedDoors: shared.length,
+    onlyOldDoors: onlyOld,
+  });
+}
+
 const atoms = [
-  ...oldPages.map((f) => ({ kind: "old-page", id: f, lines: linesOf(f) })),
+  ...oldPages.map((f) => ({ kind: "old-page", id: f, lines: linesOf(f), evidence: pageEvidence.get(f) ?? null })),
   ...newPages.map((f) => ({ kind: "new-page", id: f, lines: linesOf(f) })),
   ...adminOnlyDoors.map((f) => ({ kind: "admin-door", id: f, resource: doorResource(f) })),
   ...calledDoors.map((d) => ({ kind: "outside-door", id: d.file, lines: linesOf(d.file), callers: d.callers })),
@@ -314,16 +387,32 @@ if (existsSync(movementsPath)) {
     seen.add(row.atom);
     byId.set(row.atom, row);
   }
-  rows = atoms.map((a) => ({ kind: a.kind, ...(byId.get(a.id) ?? { atom: a.id, state: "not-moved" }) }));
+  rows = atoms.map((a) => ({ kind: a.kind, ...(byId.get(a.id) ?? { atom: a.id, state: "not-moved" }), ...(a.evidence ? { evidence: a.evidence } : {}) }));
 } else {
   problems.push("docs/ledger/movements.json is missing — the ledger would claim nothing has moved");
+}
+
+/**
+ * Where the hand-written map and the repository disagree, the disagreement is recorded instead of
+ * silently resolved: a screen the map says never moved but the new house already carries is a stale
+ * map, and a screen claimed moved with no twin and no shared door is a false claim. Both are listed
+ * so the next agent reconciles them rather than trusting either file.
+ */
+const stale = [];
+const unproven = [];
+for (const row of rows) {
+  if (row.kind !== "old-page" || !row.evidence) continue;
+  const e = row.evidence;
+  const carried = e.twin && e.doors > 0 && e.sharedDoors === e.doors;
+  if (row.state === "not-moved" && (carried || e.forwarder || e.retired)) stale.push(`${row.atom}${e.forwarder ? " (محوّل بلا سطح)" : e.retired ? " (متقاعدة عمدًا)" : " (كل أبوابها في الجديدة)"}`);
+  if (row.state === "moved" && !e.twin && e.sharedDoors === 0) unproven.push(`${row.atom} (مُدّعى أنه نُقل ولا نسخة ولا باب مشترك)`);
 }
 
 const ledgerCounts = rows.reduce((acc, r) => ({ ...acc, [r.state]: (acc[r.state] ?? 0) + 1 }), {});
 writeFileSync(
   "docs/ledger/transfers.json",
   JSON.stringify(
-    { generatedAt: new Date().toISOString(), states: STATES, counts: ledgerCounts, rows },
+    { generatedAt: new Date().toISOString(), states: STATES, counts: ledgerCounts, disagreements: { staleMap: stale, unprovenMoves: unproven }, rows },
     null,
     2,
   ),
@@ -333,6 +422,10 @@ writeFileSync(
 console.log(JSON.stringify(counts, null, 2));
 console.log(`wrote docs/ledger/census.json (${atoms.length} atoms)`);
 console.log(`wrote docs/ledger/transfers.json (${rows.length} rows: ${JSON.stringify(ledgerCounts)})`);
+console.log(`evidence: old screens with a twin in the new house = ${[...pageEvidence.values()].filter((e) => e.twin).length}, forwarders = ${[...pageEvidence.values()].filter((e) => e.forwarder).length}, retired = ${[...pageEvidence.values()].filter((e) => e.retired).length}`);
+console.log(`map contradicted by code (stale rows) = ${stale.length}, moves with no code backing = ${unproven.length}`);
+for (const s of stale) console.log(`  stale: ${s}`);
+for (const u of unproven) console.log(`  unproven: ${u}`);
 
 if (problems.length > 0) {
   for (const p of problems) console.error(`LEDGER PROBLEM: ${p}`);
