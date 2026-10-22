@@ -89,6 +89,9 @@ export default function KnowledgeDesk() {
   const [gaps, setGaps] = useState<Question[]>([]);
   const [auditing, setAuditing] = useState(false);
   const [auditError, setAuditError] = useState<string | null>(null);
+  // A count of gaps only means something after a hunt has finished. Before the first run the number
+  // would be a zero about nothing — the same reassuring zero a refusal used to print.
+  const [auditRan, setAuditRan] = useState(false);
 
   const loadLearnings = useCallback(async () => {
     const { data, error } = await readDoor("/api/consultant/learnings");
@@ -193,6 +196,7 @@ export default function KnowledgeDesk() {
       return;
     }
     setGaps(((data as { questions?: Question[] } | null)?.questions ?? []).filter((row) => typeof row?.question === "string"));
+    setAuditRan(true);
   };
 
   return (
@@ -303,13 +307,17 @@ export default function KnowledgeDesk() {
         </ul>
       </Section>
 
-      <Section icon={RefreshCw} title="تدقيق المعرفة" count={auditing || auditError ? null : gaps.length} note={auditError}>
+      <Section icon={RefreshCw} title="تدقيق المعرفة" count={auditing || auditError || !auditRan ? null : gaps.length} note={auditError}>
         <button type="button" onClick={runAudit} disabled={auditing} className="inline-flex items-center gap-1.5 rounded-xl bg-white/[0.05] border border-white/10 px-3 py-1.5 text-[11px] font-bold text-white/85 disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70">
           {auditing ? <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" /> : <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />}
           {auditing ? "بيدوّر..." : "دوّر على الفجوات"}
         </button>
-        {!auditing && gaps.length === 0 && !auditError ? (
-          <p className="text-[11px] text-white/70">لما تدوّر ولقي فجوة في معرفتك، الأسئلة دي تظهر هنا واحد واحد.</p>
+        {!auditing && !auditError && gaps.length === 0 ? (
+          <p className="text-[11px] text-white/70">
+            {auditRan
+              ? "دوّر وما لقاش فجوة في اللي علّمته — كل سؤال في القواعد ليه ردّ."
+              : "لسه ما دورتش: اضغط «دوّر على الفجوات» يقرأ قواعدك واحد واحد ويقول فين النقص."}
+          </p>
         ) : null}
         <ul className="space-y-2">
           {gaps.map((g) => (

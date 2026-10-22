@@ -101,11 +101,14 @@ describe("the sales knowledge desk in the new house", () => {
     expect(door).toMatch(/try \{\s*\n\s*parsed = JSON\.parse/);
   });
 
-  it("does not print a reassuring zero when the auditor refused", () => {
+  it("does not print a reassuring zero before the hunt has really finished", () => {
     const desk = readFileSync(deskPath, "utf8");
-    // A refusal leaves the gap list empty, and an empty list beside a heading reads as «clean shop».
-    expect(desk).toContain("count={auditing || auditError ? null : gaps.length}");
-    expect(desk).not.toContain("count={auditing ? null : gaps.length}");
+    // An empty list beside a heading reads as «clean shop», whether the audit refused or never ran.
+    expect(desk).toContain("count={auditing || auditError || !auditRan ? null : gaps.length}");
+    expect(desk).toContain("setAuditRan(true)");
+    expect(desk).toContain("لسه ما دورتش");
+    expect(desk).toContain("دوّر وما لقاش فجوة");
+    expect(desk).not.toContain("لما تدوّر ولقي فجوة");
   });
 
   it("the door that answers a question is the one owner of the rule it turns into", () => {
