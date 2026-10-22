@@ -4,6 +4,7 @@ import { askGroq, askOrchestratorMessages } from "@/lib/ai-orchestrator";
 import { capabilityOf } from "@/lib/ops/capability-tiers";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { predatoryDefense } from "@/lib/predatory-defense";
+import { requireAdminApi } from "@/lib/admin-api-guard";
 import { semanticCache } from "@/lib/semantic-cache";
 import { pickFaqAnswer, type FaqRow } from "@/lib/consultant/faq-gate";
 import { extractUiAction, polishReply } from "@/lib/consultant/reply-polish";
@@ -474,8 +475,12 @@ export async function POST(
       return NextResponse.json({ reply: buildHumanTemporaryFailureReply(language), sessionId });
     }
 
-    // Check if in Admin Learning Mode
-    const adminMode = isAdmin(sessionId, userEmail);
+    // Admin learning mode writes into the owner's memory, so it asks his own signed-in session.
+    // Measured 2026-10-23 on the published link: the decision used to read `userEmail` from the request
+    // body, so an anonymous POST naming an admin email saved a rule into `consultant_learnings`
+    // (51 rows before, 52 after) and answered «Knowledge saved successfully».
+    const { user: adminSessionUser } = await requireAdminApi();
+    const adminMode = isAdmin(sessionId, adminSessionUser?.email);
 
     // ADMIN LEARNING MODE
     if (adminMode) {
@@ -485,8 +490,8 @@ export async function POST(
       const saved = await saveLearning(message);
       
       const reply = saved
-        ? "Knowledge saved successfully."
-        : "Could not save the knowledge. Please try again.";
+        ? "القاعدة اتحفظت عند مدير المبيعات."
+        : "القاعدة ما اتحفظتش — اكتبها تاني بعد ما تتصل بالقاعدة.";
 
       return NextResponse.json({
         reply,
