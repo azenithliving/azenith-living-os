@@ -101,6 +101,13 @@ describe("the sales knowledge desk in the new house", () => {
     expect(door).toMatch(/try \{\s*\n\s*parsed = JSON\.parse/);
   });
 
+  it("does not print a reassuring zero when the auditor refused", () => {
+    const desk = readFileSync(deskPath, "utf8");
+    // A refusal leaves the gap list empty, and an empty list beside a heading reads as «clean shop».
+    expect(desk).toContain("count={auditing || auditError ? null : gaps.length}");
+    expect(desk).not.toContain("count={auditing ? null : gaps.length}");
+  });
+
   it("the door that answers a question is the one owner of the rule it turns into", () => {
     const desk = readFileSync(deskPath, "utf8");
     const questionDoor = readFileSync("app/api/consultant/pending-questions/route.ts", "utf8");

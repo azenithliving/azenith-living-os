@@ -303,7 +303,7 @@ export default function KnowledgeDesk() {
         </ul>
       </Section>
 
-      <Section icon={RefreshCw} title="تدقيق المعرفة" count={auditing ? null : gaps.length} note={auditError}>
+      <Section icon={RefreshCw} title="تدقيق المعرفة" count={auditing || auditError ? null : gaps.length} note={auditError}>
         <button type="button" onClick={runAudit} disabled={auditing} className="inline-flex items-center gap-1.5 rounded-xl bg-white/[0.05] border border-white/10 px-3 py-1.5 text-[11px] font-bold text-white/85 disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70">
           {auditing ? <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" /> : <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />}
           {auditing ? "بيدوّر..." : "دوّر على الفجوات"}
