@@ -4,7 +4,6 @@ import { askGroq, askOrchestratorMessages } from "@/lib/ai-orchestrator";
 import { capabilityOf } from "@/lib/ops/capability-tiers";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { predatoryDefense } from "@/lib/predatory-defense";
-import { requireAdminApi } from "@/lib/admin-api-guard";
 import { semanticCache } from "@/lib/semantic-cache";
 import { pickFaqAnswer, type FaqRow } from "@/lib/consultant/faq-gate";
 import { extractUiAction, polishReply } from "@/lib/consultant/reply-polish";
@@ -50,15 +49,6 @@ interface GroqMessage {
   role: "system" | "user" | "assistant";
   content: string;
 }
-
-// Admin configuration
-const MASTER_ADMIN_EMAILS = (process.env.MASTER_ADMIN_EMAILS || "")
-  .split(",")
-  .map(e => e.trim())
-  .filter(Boolean);
-
-// Admin session IDs (can be expanded as needed)
-const ADMIN_SESSION_IDS: string[] = [];
 
 // supabase instance will be retrieved inside handlers using getSupabaseAdminClient()
 
@@ -280,50 +270,15 @@ function applyHumanGuardrails(
 }
 
 /**
- * Check if user is admin based on sessionId or email
+ * The public door no longer writes the manager's memory.
+ *
+ * It used to carry a «learning mode» that decided who was the owner from a `userEmail` field in the
+ * request body — measured 2026-10-23, one anonymous POST with an admin email planted a rule in
+ * `consultant_learnings` and answered «Knowledge saved successfully». Requiring the real session
+ * instead closed the hole but taught the manager every question the owner typed on his own test desk.
+ * Teaching has one owner now: the guarded desk door `/api/consultant/learnings`, which asks the admin
+ * gate before it writes and reads the row back.
  */
-function isAdmin(sessionId?: string, userEmail?: string): boolean {
-  // Check by email
-  if (userEmail && MASTER_ADMIN_EMAILS.includes(userEmail)) {
-    return true;
-  }
-  // Check by session ID
-  if (sessionId && ADMIN_SESSION_IDS.includes(sessionId)) {
-    return true;
-  }
-  return false;
-}
-
-/**
- * Save learning instruction to database
- */
-async function saveLearning(instruction: string): Promise<boolean> {
-  try {
-    // const supabaseAdmin = getSupabaseAdminClient();
-    if (!supabase) {
-      console.error("[Consultant] Supabase admin client not available");
-      return false;
-    }
-
-    const { error } = await supabase
-      .from("consultant_learnings")
-      .insert({
-        instruction: instruction.trim(),
-        created_at: new Date().toISOString(),
-      });
-
-    if (error) {
-      console.error("[Consultant] Error saving learning:", error);
-      return false;
-    }
-
-    console.log("[Consultant] Learning saved:", instruction.substring(0, 50) + "...");
-    return true;
-  } catch (err) {
-    console.error("[Consultant] Exception saving learning:", err);
-    return false;
-  }
-}
 
 /**
  * Get all learnings from database
@@ -473,30 +428,6 @@ export async function POST(
       // No filing cabinet is news for the store, not a reason to leave a customer reading an
       // English status word.
       return NextResponse.json({ reply: buildHumanTemporaryFailureReply(language), sessionId });
-    }
-
-    // Admin learning mode writes into the owner's memory, so it asks his own signed-in session.
-    // Measured 2026-10-23 on the published link: the decision used to read `userEmail` from the request
-    // body, so an anonymous POST naming an admin email saved a rule into `consultant_learnings`
-    // (51 rows before, 52 after) and answered «Knowledge saved successfully».
-    const { user: adminSessionUser } = await requireAdminApi();
-    const adminMode = isAdmin(sessionId, adminSessionUser?.email);
-
-    // ADMIN LEARNING MODE
-    if (adminMode) {
-      console.log(`[Consultant] Admin learning mode - Session ${sessionId}`);
-      
-      // Save the instruction/learning
-      const saved = await saveLearning(message);
-      
-      const reply = saved
-        ? "القاعدة اتحفظت عند مدير المبيعات."
-        : "القاعدة ما اتحفظتش — اكتبها تاني بعد ما تتصل بالقاعدة.";
-
-      return NextResponse.json({
-        reply,
-        sessionId,
-      });
     }
 
     // --- SAA vInfinity SECURITY FIREWALL ---
