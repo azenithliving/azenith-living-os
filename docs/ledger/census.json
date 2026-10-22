@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20T16:35:38.132Z",
+  "generatedAt": "2026-10-22T20:16:34.916Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5042,
@@ -41,13 +41,11 @@
         "twin": true,
         "forwarder": false,
         "retired": false,
-        "doors": 20,
-        "sharedDoors": 2,
+        "doors": 23,
+        "sharedDoors": 13,
+        "furniture": 16,
+        "sharedFurniture": 7,
         "onlyOldDoors": [
-          "/api/admin/agents/approval/decision",
-          "/api/admin/agents/learn",
-          "/api/admin/agents/messages",
-          "/api/admin/agents/orchestrate",
           "/api/admin/agents/suggestions",
           "/api/admin/agents/tasks",
           "/api/admin/assistant",
@@ -57,11 +55,18 @@
           "/api/admin/live-browser/stream",
           "/api/admin/mind",
           "/api/admin/mind/decision",
-          "/api/admin/ops",
-          "/api/admin/ops/preview",
-          "/api/admin/ops/self",
-          "/api/admin/ops/vision",
           "/api/admin/remote-browser/session"
+        ],
+        "onlyOldFurniture": [
+          "AgentActionsFeed.tsx",
+          "AgentHealthPanel.tsx",
+          "AssistantBrowserCopilot.tsx",
+          "CommandConsole.tsx",
+          "GroupChatView.tsx",
+          "ProactiveSuggestions.tsx",
+          "SovereignMindPanel.tsx",
+          "TaskQueue.tsx",
+          "UnifiedAssistant.tsx"
         ]
       }
     },
@@ -76,7 +81,10 @@
         "retired": false,
         "doors": 0,
         "sharedDoors": 0,
-        "onlyOldDoors": []
+        "furniture": 0,
+        "sharedFurniture": 0,
+        "onlyOldDoors": [],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -90,8 +98,13 @@
         "retired": false,
         "doors": 2,
         "sharedDoors": 1,
+        "furniture": 1,
+        "sharedFurniture": 0,
         "onlyOldDoors": [
           "/api/admin/remote-browser/session"
+        ],
+        "onlyOldFurniture": [
+          "AskQayyimAboutPage.tsx"
         ]
       }
     },
@@ -106,7 +119,10 @@
         "retired": false,
         "doors": 0,
         "sharedDoors": 0,
-        "onlyOldDoors": []
+        "furniture": 0,
+        "sharedFurniture": 0,
+        "onlyOldDoors": [],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -120,9 +136,12 @@
         "retired": false,
         "doors": 1,
         "sharedDoors": 0,
+        "furniture": 0,
+        "sharedFurniture": 0,
         "onlyOldDoors": [
           "/api/system-health"
-        ]
+        ],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -136,9 +155,12 @@
         "retired": false,
         "doors": 1,
         "sharedDoors": 0,
+        "furniture": 0,
+        "sharedFurniture": 0,
         "onlyOldDoors": [
           "/api/admin/elite/invitations"
-        ]
+        ],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -152,7 +174,10 @@
         "retired": true,
         "doors": 0,
         "sharedDoors": 0,
-        "onlyOldDoors": []
+        "furniture": 0,
+        "sharedFurniture": 0,
+        "onlyOldDoors": [],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -166,7 +191,10 @@
         "retired": false,
         "doors": 0,
         "sharedDoors": 0,
-        "onlyOldDoors": []
+        "furniture": 0,
+        "sharedFurniture": 0,
+        "onlyOldDoors": [],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -180,7 +208,10 @@
         "retired": false,
         "doors": 0,
         "sharedDoors": 0,
-        "onlyOldDoors": []
+        "furniture": 0,
+        "sharedFurniture": 0,
+        "onlyOldDoors": [],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -194,11 +225,14 @@
         "retired": false,
         "doors": 3,
         "sharedDoors": 0,
+        "furniture": 0,
+        "sharedFurniture": 0,
         "onlyOldDoors": [
           "/api/admin/owner/approval/decision",
           "/api/admin/owner/dashboard",
           "/api/admin/owner/emergency-stop"
-        ]
+        ],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -211,7 +245,9 @@
         "forwarder": false,
         "retired": false,
         "doors": 17,
-        "sharedDoors": 1,
+        "sharedDoors": 2,
+        "furniture": 5,
+        "sharedFurniture": 0,
         "onlyOldDoors": [
           "/api/admin/aaca/status",
           "/api/admin/keys",
@@ -221,7 +257,6 @@
           "/api/admin/keys/reload",
           "/api/admin/mastermind/stats",
           "/api/admin/notifications",
-          "/api/admin/ops/self",
           "/api/admin/proactive",
           "/api/admin/quality",
           "/api/admin/telegram/config",
@@ -229,6 +264,13 @@
           "/api/admin/telegram/test",
           "/api/analytics",
           "/api/system-health"
+        ],
+        "onlyOldFurniture": [
+          "AIKeysControlPanel.tsx",
+          "AdminProactiveStrip.tsx",
+          "NotificationsPanel.tsx",
+          "TelegramControlPanel.tsx",
+          "master-dashboard-components.tsx"
         ]
       }
     },
@@ -243,7 +285,10 @@
         "retired": false,
         "doors": 0,
         "sharedDoors": 0,
-        "onlyOldDoors": []
+        "furniture": 0,
+        "sharedFurniture": 0,
+        "onlyOldDoors": [],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -256,15 +301,17 @@
         "forwarder": false,
         "retired": false,
         "doors": 6,
-        "sharedDoors": 0,
+        "sharedDoors": 1,
+        "furniture": 0,
+        "sharedFurniture": 0,
         "onlyOldDoors": [
           "/api/admin/knowledge/audit",
-          "/api/admin/settings",
           "/api/consultant",
           "/api/consultant/learnings",
           "/api/consultant/pending-questions",
           "/api/tenants"
-        ]
+        ],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -278,7 +325,10 @@
         "retired": false,
         "doors": 0,
         "sharedDoors": 0,
-        "onlyOldDoors": []
+        "furniture": 0,
+        "sharedFurniture": 0,
+        "onlyOldDoors": [],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -291,10 +341,11 @@
         "forwarder": false,
         "retired": false,
         "doors": 1,
-        "sharedDoors": 0,
-        "onlyOldDoors": [
-          "/api/admin/settings"
-        ]
+        "sharedDoors": 1,
+        "furniture": 0,
+        "sharedFurniture": 0,
+        "onlyOldDoors": [],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -308,7 +359,10 @@
         "retired": false,
         "doors": 0,
         "sharedDoors": 0,
-        "onlyOldDoors": []
+        "furniture": 0,
+        "sharedFurniture": 0,
+        "onlyOldDoors": [],
+        "onlyOldFurniture": []
       }
     },
     {
@@ -322,7 +376,10 @@
         "retired": false,
         "doors": 0,
         "sharedDoors": 0,
-        "onlyOldDoors": []
+        "furniture": 0,
+        "sharedFurniture": 0,
+        "onlyOldDoors": [],
+        "onlyOldFurniture": []
       }
     },
     {

@@ -256,6 +256,7 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "app/admin/v2/keys/page.tsx", office: "key-desk", status: "moving", reason: "مكتب المفاتيح: قايمة النماذج المجانية وعدد المفاتيح اللي بيجاوب فعلًا وخطوات جيب المفتاح" },
   { id: "app/api/admin/keys/desk/route.ts", office: "key-desk", status: "moving", reason: "بوّابة المكتب: بتقرأ السجل وبتسأل كل مزود عن مفاتيحه في دفعة محدودة" },
   { id: "app/admin/v2/settings/page.tsx", office: "system-room", status: "moved", reason: "مكتب الإعدادات في البيت الجديد: بيقول الحقائق اللي ليها قارئ حيّ، وبيعدّ الباقي مهمل، والمفتاح السرّي مش بيطلع على الشاشة" },
+  { id: "app/admin/settings/page.tsx", office: "system-room", status: "moved", reason: "الشاشة القديمة ما بقاش لها حاجة حصرية: بابها الوحيد وعفشها كله يُقرأان من البيت الجديد — محسوب بالقياس المولّد من الكود، مش بالاسم" },
   { id: "components/admin/settings/SettingsFactsDesk.tsx", office: "system-room", status: "moved", reason: "سطح المكتب نفسه: تلات كروت بتتحكم في حاجة، وعدّاد للأربع عشر اللي ما بيقرأهاش حد" },
   { id: "app/api/admin/numbers/route.ts", office: "system-room", status: "moved", reason: "باب الأرقام: الكتابة الوحيدة في القائمة، بيرفض الفاضي وبيخلّي رقم واحد أساسي وبيردّ باللي اتخزّن فعلاً" },
   { id: "components/admin/settings/StoreNumbersCard.tsx", office: "system-room", status: "moved", reason: "طاولته يغيّر الرقم ويضيف أرقام — الإزالة بضغطين، وآخر رقم ما بيتشال، ومفيش مسح سطر" },

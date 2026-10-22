@@ -31,9 +31,21 @@ describe("the transfer ledger", () => {
     expect([...ids].sort()).toEqual([...census!.atoms.map((a) => a.id)].sort());
   });
 
-  it("uses only the four agreed states", () => {
-    expect(ledger!.states).toEqual(["not-moved", "moving", "moved", "erased"]);
+  it("uses only the agreed states", () => {
+    expect(ledger!.states).toEqual(["not-moved", "moving", "moved", "erased", "no-surface"]);
     for (const row of ledger!.rows) expect(ledger!.states, row.atom).toContain(row.state);
+  });
+
+  it("never counts a signpost or a retired screen as work still pending", () => {
+    // Six old screens only forward and one was retired on purpose. Under four states all seven sat in
+    // `not-moved`, so the owner's «what is left» was inflated by rows that carry no surface at all.
+    const signposts = ledger!.rows.filter(
+      (r) => r.kind === "old-page" && (r as { evidence?: { forwarder?: boolean } }).evidence?.forwarder
+    );
+    expect(signposts.length).toBeGreaterThanOrEqual(6);
+    for (const row of signposts) expect(row.state, `${row.atom} is a forwarder`).toBe("no-surface");
+    const retired = ledger!.rows.filter((r) => (r as { atom?: string }).atom === "app/admin/fate/page.tsx");
+    expect(retired[0]?.state, "the retired influence console is not pending transfer work").toBe("no-surface");
   });
 
   it("names nothing the map cannot seat", () => {

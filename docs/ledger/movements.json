@@ -4,7 +4,8 @@
     "not-moved",
     "moving",
     "moved",
-    "erased"
+    "erased",
+    "no-surface"
   ],
   "rows": [
     {

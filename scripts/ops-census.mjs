@@ -294,13 +294,24 @@ function doorsIn(files) {
   return set;
 }
 
-const newHouseDoors = doorsIn(sourceFiles("app/admin/v2").concat(sourceFiles("components/admin/v2")));
+/**
+ * The new house is not a folder — it is every file the new screens actually reach. Measuring it as
+ * `components/admin/v2/**` alone declared the moved chat panel «old-only», because the new cockpit
+ * imports it from `components/admin/agents/`.
+ */
+const newScreenPages = newPages;
+const newClosure = new Set(newScreenPages.flatMap((p) => importClosure(p, 3)));
+const newHouseDoors = doorsIn([...newClosure]);
+const newHouseFurniture = new Set([...newClosure].filter((f) => f.startsWith("components/")).map((f) => f.split("/").pop()));
 const pageEvidence = new Map();
 for (const page of oldPages) {
   const src = readSrc(page);
-  const doors = [...doorsIn(importClosure(page))].sort();
+  const own = importClosure(page, 3);
+  const doors = [...doorsIn(own)].sort();
+  const furniture = [...new Set(own.filter((f) => f.startsWith("components/")).map((f) => f.split("/").pop()))].sort();
   const shared = doors.filter((d) => newHouseDoors.has(d));
   const onlyOld = doors.filter((d) => !newHouseDoors.has(d));
+  const onlyOldFurniture = furniture.filter((f) => !newHouseFurniture.has(f));
   const leaf = page.split("/").slice(-2, -1)[0] === "admin" ? "landing" : page.split("/").slice(-2, -1)[0];
   pageEvidence.set(page, {
     leaf,
@@ -309,6 +320,10 @@ for (const page of oldPages) {
     retired: /تم إيقاف|retired rather/i.test(src),
     doors: doors.length,
     sharedDoors: shared.length,
+    furniture: furniture.length,
+    sharedFurniture: furniture.length - onlyOldFurniture.length,
+    onlyOldDoors: onlyOld,
+    onlyOldFurniture,
     onlyOldDoors: onlyOld,
   });
 }
@@ -371,7 +386,12 @@ writeFileSync(  "docs/ledger/census.json",
  * census, or a state off the four, stops the generation instead of quietly lying.
  */
 const movementsPath = "docs/ledger/movements.json";
-const STATES = ["not-moved", "moving", "moved", "erased"];
+/**
+ * Five states, not four. A screen that is only a signpost, and a screen retired on purpose, are not
+ * work still pending — counting them as `not-moved` inflated the owner's «what is left» by seven rows
+ * and made the ledger say the transfer was further behind than the repository does.
+ */
+const STATES = ["not-moved", "moving", "moved", "erased", "no-surface"];
 let rows = atoms.map((a) => ({ atom: a.id, kind: a.kind, state: "not-moved" }));
 const problems = [];
 if (existsSync(movementsPath)) {
@@ -390,6 +410,33 @@ if (existsSync(movementsPath)) {
   rows = atoms.map((a) => ({ kind: a.kind, ...(byId.get(a.id) ?? { atom: a.id, state: "not-moved" }), ...(a.evidence ? { evidence: a.evidence } : {}) }));
 } else {
   problems.push("docs/ledger/movements.json is missing — the ledger would claim nothing has moved");
+}
+
+/**
+ * The code overrules the hand where the hand forgot: an old screen that only forwards, or was retired
+ * on purpose, carries no surface to transfer. The state is written with the sentence that proves it.
+ */
+const carriedByCode = [];
+for (const row of rows) {
+  if (row.kind !== "old-page" || !row.evidence) continue;
+  const e = row.evidence;
+  if (row.state === "not-moved" && e.twin && e.doors > 0 && e.onlyOldDoors.length === 0 && e.onlyOldFurniture.length === 0) {
+    row.state = "moved";
+    row.proof = `كل أبوابها (${e.doors}) وعفشها (${e.furniture}) تُقرأ من الجديدة`;
+    row.when = new Date().toISOString().slice(0, 10);
+    carriedByCode.push(row.atom);
+    continue;
+  }
+  if (row.state !== "not-moved") continue;
+  if (e.forwarder) {
+    row.state = "no-surface";
+    row.proof = "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها";
+    row.when = new Date().toISOString().slice(0, 10);
+  } else if (e.retired) {
+    row.state = "no-surface";
+    row.proof = "متقاعدة عمدًا — الصفحة تقول إنها أوقفت أدوات التأثير المخترعة";
+    row.when = new Date().toISOString().slice(0, 10);
+  }
 }
 
 /**
@@ -424,6 +471,8 @@ console.log(`wrote docs/ledger/census.json (${atoms.length} atoms)`);
 console.log(`wrote docs/ledger/transfers.json (${rows.length} rows: ${JSON.stringify(ledgerCounts)})`);
 console.log(`evidence: old screens with a twin in the new house = ${[...pageEvidence.values()].filter((e) => e.twin).length}, forwarders = ${[...pageEvidence.values()].filter((e) => e.forwarder).length}, retired = ${[...pageEvidence.values()].filter((e) => e.retired).length}`);
 console.log(`map contradicted by code (stale rows) = ${stale.length}, moves with no code backing = ${unproven.length}`);
+console.log(`screens the code itself carries into the new house (moved by evidence) = ${carriedByCode.length}`);
+for (const c of carriedByCode) console.log(`  carried: ${c}`);
 for (const s of stale) console.log(`  stale: ${s}`);
 for (const u of unproven) console.log(`  unproven: ${u}`);
 
