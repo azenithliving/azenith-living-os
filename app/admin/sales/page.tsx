@@ -272,21 +272,29 @@ function SalesManagerTab() {
       const response = await fetch("/api/consultant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        // The door decides who may teach it from the admin session, never from a field in this body:
+        // the flag this call used to send was read by nobody, so the panel only believed it was admin.
         body: JSON.stringify({
           message: userMessage.content,
-          isAdmin: true,
         }),
       });
       const data = await response.json();
-      
+
+      // The door answers with `reply`. This panel used to read `response`, a field that door has never
+      // sent, so every test showed the same canned promise instead of what the advisor really said.
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.response || "تم استلام رسالتك وسأقوم بتحليلها.",
+        content: data.reply || "الباب ما رجّعش ردّ — الردّ ده مش من المستشار.",
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Chat error:", error);
+      setMessages((prev) => [...prev, {
+        role: "assistant",
+        content: "الباب ما وصلش أصلًا — كلام المستشار ده مش ردّ حقيقي.",
+        timestamp: new Date().toISOString(),
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -296,8 +304,8 @@ function SalesManagerTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">مدير المبيعات (ADMIN CONTROL v2.0)</h2>
-          <p className="text-sm text-[#C5A059]">مركز التحكم بالمبيعات والمحادثات - تم تفعيل الحذف الفوري</p>
+          <h2 className="text-xl font-bold text-white">مدير المبيعات</h2>
+          <p className="text-sm text-[#C5A059]">مركز التحكم بالمبيعات والمحادثات</p>
         </div>
         <div className="flex gap-2">
           {[
