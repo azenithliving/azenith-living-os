@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T20:16:34.922Z",
+  "generatedAt": "2026-10-22T20:44:34.684Z",
   "states": [
     "not-moved",
     "moving",
@@ -8,7 +8,7 @@
     "no-surface"
   ],
   "counts": {
-    "not-moved": 483,
+    "not-moved": 484,
     "no-surface": 7,
     "moved": 29,
     "moving": 6,
@@ -300,14 +300,11 @@
         "forwarder": false,
         "retired": false,
         "doors": 6,
-        "sharedDoors": 1,
+        "sharedDoors": 4,
         "furniture": 0,
         "sharedFurniture": 0,
         "onlyOldDoors": [
-          "/api/admin/knowledge/audit",
           "/api/consultant",
-          "/api/consultant/learnings",
-          "/api/consultant/pending-questions",
           "/api/tenants"
         ],
         "onlyOldFurniture": []
@@ -2280,6 +2277,11 @@
     {
       "kind": "furniture",
       "atom": "components/admin/sales/CustomersPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/sales/KnowledgeDesk.tsx",
       "state": "not-moved"
     },
     {

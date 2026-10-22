@@ -16,6 +16,7 @@ import { Briefcase } from "lucide-react";
 import { ChatPanel } from "@/components/admin/agents/ChatPanel";
 import ClientPreCallDossier from "@/components/admin/ClientPreCallDossier";
 import CustomersPanel from "@/components/admin/sales/CustomersPanel";
+import KnowledgeDesk from "@/components/admin/sales/KnowledgeDesk";
 
 export default function V2SalesPage() {
   return (
@@ -37,6 +38,9 @@ export default function V2SalesPage() {
         </section>
         <section>
           <ClientPreCallDossier />
+        </section>
+        <section>
+          <KnowledgeDesk />
         </section>
         <section>
           <Suspense fallback={<p className="text-sm text-white/40 p-8">جاري تحميل كشف العملاء...</p>}>
