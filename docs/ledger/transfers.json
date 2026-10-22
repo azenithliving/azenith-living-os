@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T21:29:45.538Z",
+  "generatedAt": "2026-10-22T22:55:26.605Z",
   "states": [
     "not-moved",
     "moving",
@@ -8,7 +8,7 @@
     "no-surface"
   ],
   "counts": {
-    "not-moved": 484,
+    "not-moved": 485,
     "no-surface": 7,
     "moved": 29,
     "moving": 6,
@@ -300,11 +300,10 @@
         "forwarder": false,
         "retired": false,
         "doors": 6,
-        "sharedDoors": 4,
+        "sharedDoors": 5,
         "furniture": 0,
         "sharedFurniture": 0,
         "onlyOldDoors": [
-          "/api/consultant",
           "/api/tenants"
         ],
         "onlyOldFurniture": []
@@ -2272,6 +2271,11 @@
     {
       "kind": "furniture",
       "atom": "components/admin/ops/StudioPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
+      "atom": "components/admin/sales/AdvisorTestDrive.tsx",
       "state": "not-moved"
     },
     {

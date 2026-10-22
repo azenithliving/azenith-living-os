@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-22T21:29:45.535Z",
+  "generatedAt": "2026-10-22T22:55:26.601Z",
   "counts": {
     "oldPages": 17,
-    "oldPageLines": 5042,
+    "oldPageLines": 5050,
     "newPages": 14,
-    "newPageLines": 870,
+    "newPageLines": 874,
     "adminDoors": 122,
     "allDoors": 207,
     "outsideDoors": 8,
-    "outsideDoorLines": 2617,
+    "outsideDoorLines": 2622,
     "rootLibFiles": 296,
     "rootLibUsed": 93,
     "orphanDoors": 77,
     "rootLibUsedLines": 31557,
-    "furnitureFiles": 62,
-    "furnitureLines": 17072,
+    "furnitureFiles": 63,
+    "furnitureLines": 17232,
     "furnitureUsedByBoth": 7,
     "furnitureBothLines": 2954,
-    "furnitureNewOnly": 22,
+    "furnitureNewOnly": 23,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 75,
-    "swarmFileLines": 17112,
+    "swarmFileLines": 17116,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 12,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 527
+    "atoms": 528
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -294,18 +294,17 @@
     {
       "kind": "old-page",
       "id": "app/admin/sales/page.tsx",
-      "lines": 1262,
+      "lines": 1270,
       "evidence": {
         "leaf": "sales",
         "twin": true,
         "forwarder": false,
         "retired": false,
         "doors": 6,
-        "sharedDoors": 4,
+        "sharedDoors": 5,
         "furniture": 0,
         "sharedFurniture": 0,
         "onlyOldDoors": [
-          "/api/consultant",
           "/api/tenants"
         ],
         "onlyOldFurniture": []
@@ -422,7 +421,7 @@
     {
       "kind": "new-page",
       "id": "app/admin/v2/sales/page.tsx",
-      "lines": 54
+      "lines": 58
     },
     {
       "kind": "new-page",
@@ -1086,8 +1085,8 @@
     {
       "kind": "outside-door",
       "id": "app/api/consultant/route.ts",
-      "lines": 1555,
-      "callers": 1
+      "lines": 1560,
+      "callers": 2
     },
     {
       "kind": "outside-door",
@@ -1129,7 +1128,7 @@
       "kind": "root-lib",
       "id": "lib/admin-api-guard.ts",
       "lines": 48,
-      "callers": 34
+      "callers": 35
     },
     {
       "kind": "root-lib",
@@ -2334,6 +2333,12 @@
     },
     {
       "kind": "furniture",
+      "id": "components/admin/sales/AdvisorTestDrive.tsx",
+      "lines": 152,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
       "id": "components/admin/sales/CustomersPanel.tsx",
       "lines": 1011,
       "usedBy": "new-only"
@@ -2341,7 +2346,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/sales/KnowledgeDesk.tsx",
-      "lines": 325,
+      "lines": 333,
       "usedBy": "new-only"
     },
     {
@@ -2650,7 +2655,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/nightly-snapshot.ts",
-      "lines": 238
+      "lines": 242
     },
     {
       "kind": "swarm-file",

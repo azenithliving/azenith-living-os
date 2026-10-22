@@ -35,3 +35,37 @@ describe("the advisor test-drive tells the truth", () => {
     expect(page).not.toContain("تم تفعيل الحذف الفوري");
   });
 });
+
+/**
+ * The capability itself was never a panel: the old page held chat state and a send handler but
+ * rendered no composer and no message list, so there was nothing to fix into working. It is built
+ * in the new house, and these guards hold what it must never become again.
+ */
+const drivePath = "components/admin/sales/AdvisorTestDrive.tsx";
+
+describe("the advisor test-drive exists on the owner's desk", () => {
+  const drive = readFileSync(drivePath, "utf8");
+  const salesPage = readFileSync("app/admin/v2/sales/page.tsx", "utf8");
+
+  it("is mounted under the sales manager", () => {
+    expect(salesPage).toContain("<AdvisorTestDrive />");
+  });
+
+  it("shows the door's own reply, and never a promise in its place", () => {
+    expect(drive).toContain("body?.reply");
+    expect(drive).toContain("الباب ما وصلش أصلًا");
+    expect(drive).toContain("الباب ردّ من غير كلام");
+    expect(drive).not.toContain("تم استلام رسالتك");
+  });
+
+  it("keeps his test tellable apart from a visitor's chat, and says what it writes", () => {
+    expect(drive).toContain("تجربة-المالك-");
+    expect(drive).toContain("بيتسجّل كمحادثة في دفتر العملاء");
+  });
+
+  it("speaks only his language and his digits", () => {
+    // No machine identifier reaches the screen; the session id is carried, never shown.
+    expect(drive).not.toMatch(/\{sessionRef\.current\}/);
+    expect(drive).not.toMatch(/>\s*\{[A-Za-z]+\.id\}/);
+  });
+});
