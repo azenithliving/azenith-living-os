@@ -31,13 +31,20 @@ interface Question {
 }
 
 async function readDoor(url: string, init?: RequestInit): Promise<{ data: unknown | null; error: string | null }> {
+  const what = url.split("?")[0].split("/").slice(-2).join(" ");
   try {
     const res = await fetch(url, init);
     const body = await res.json().catch(() => null);
-    if (!res.ok) return { data: null, error: (body as { error?: string } | null)?.error ?? `الباب ردّ بحالة ${arDigits(String(res.status))} من غير ما يوصّل سبب` };
+    const given = (body as { error?: string } | null)?.error;
+    // The owner reads Arabic only, so a door that answers with a Latin machine sentence must not reach
+    // his eyes as one. The status code stays in the sentence because it is the part he can act on.
+    if (!res.ok) {
+      const usable = typeof given === "string" && /[؀-ۿ]/.test(given) ? given : null;
+      return { data: null, error: usable ?? `باب ${what} ردّ بحالة ${arDigits(String(res.status))} من غير ما يوصّل سبب بالعربي` };
+    }
     return { data: body, error: null };
   } catch (e) {
-    return { data: null, error: `الاتصال بالباب فشل: ${e instanceof Error ? e.message : "رسالة ما اتقراش"}` };
+    return { data: null, error: `باب ${what} ما وصلش أصلًا: ${e instanceof Error && /[؀-ۿ]/.test(e.message) ? e.message : "الاتصال انقطع"}` };
   }
 }
 
@@ -152,26 +159,25 @@ export default function KnowledgeDesk() {
     if (!answering || !text) return;
     setSaving(true);
     setActionNote(null);
-    const learned = await readDoor("/api/consultant/learnings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ instruction: `سؤال: ${answering.question}\nالإجابة: ${text}` }),
-    });
-    if (learned.error) {
-      setSaving(false);
-      setActionNote(`الإجابة ما اتعلمتهاش: ${learned.error}`);
-      return;
-    }
-    const marked = await readDoor(`/api/consultant/pending-questions?id=${encodeURIComponent(answering.id)}`, {
+    // One act, one door: the desk hands the answer over and the question's own door turns it into
+    // a rule. This panel used to write a rule beside that one, so every answer taught the manager
+    // the same thing twice, in two shapes.
+    const { data, error } = await readDoor(`/api/consultant/pending-questions?id=${encodeURIComponent(answering.id)}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ answered_reply: text }),
     });
     setSaving(false);
-    if (marked.error) {
-      setActionNote(`السؤال اتعلّم، بس الإشارة عليه ما اتقصتش: ${marked.error}`);
+    if (error) {
+      setActionNote(`الردّ ما اتسجلش: ${error}`);
       return;
     }
+    const compiled = (data as { compiled?: { saved: boolean; note: string } } | null)?.compiled;
+    if (compiled && !compiled.saved) {
+      setActionNote(compiled.note);
+      return;
+    }
+    setActionNote(compiled?.note ?? null);
     setAnswering(null);
     setAnswer("");
     await Promise.all([loadLearnings(), loadQuestions()]);

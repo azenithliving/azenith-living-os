@@ -41,9 +41,11 @@ describe("the sales knowledge desk in the new house", () => {
     expect(desk).toContain("من غير ما يوصّل سبب");
     expect(desk).toContain("القاعدة ما اتسجلتش");
     expect(desk).toContain("التصحيح ما اتعملش");
-    expect(desk).toContain("الإجابة ما اتعلمتهاش");
-    // A learning that saved but could not be marked must not be reported as a clean success.
-    expect(desk).toContain("السؤال اتعلّم، بس الإشارة عليه ما اتقصتش");
+    expect(desk).toContain("الردّ ما اتسجلش");
+    // A reply that landed but did not become a rule must not be reported as a clean success:
+    // the door says which half happened and the panel repeats it.
+    expect(desk).toContain("compiled");
+    expect(desk).toContain("compiled.note");
   });
 
   it("shows his digits and never a machine identifier", () => {
@@ -65,6 +67,67 @@ describe("the sales knowledge desk in the new house", () => {
     expect(focusable.length, "a button without a focus ring is invisible to a keyboard owner").toBeGreaterThanOrEqual(buttons.length);
     expect(desk).toContain('className="sr-only"');
   });
+
+  it("a missing model is a spoken refusal, never an empty list that looks like a clean shop", () => {
+    const door = readFileSync("app/api/admin/knowledge/audit/route.ts", "utf8");
+    expect(door).toContain("مفيش نموذج ذكي ردّ دلوقتي");
+    expect(door).toContain("status: 503");
+    expect(door).toContain("قواعد المعرفة ما قريتش");
+    expect(door).toContain("التدقيق وقف");
+    // The old shape answered 200 with an empty list and a Latin warning nobody rendered.
+    expect(door).not.toContain("AI audit unavailable");
+    expect(door).not.toContain('"Internal server error"');
+  });
+
+  it("keeps a Latin machine sentence off the owner's screen", () => {
+    const desk = readFileSync(deskPath, "utf8");
+    expect(desk).toContain("من غير ما يوصّل سبب بالعربي");
+    expect(desk).toMatch(/\[؀-ۿ\]/);
+  });
+
+  it("the audit door answers in his language on every stop, and a rough reply is not a crash", () => {
+    const door = readFileSync("app/api/admin/knowledge/audit/route.ts", "utf8");
+    // Every refusal the owner can see must already be Arabic at the door, not only cleaned by the panel.
+    // Machine prose is allowed in the log lines, so this walks the response fields, not the whole file.
+    const spoken = [...door.matchAll(/error:\s*"([^"]*)"/g)].map((m) => m[1]);
+    expect(spoken.length).toBeGreaterThanOrEqual(4);
+    for (const line of spoken) {
+      expect(line, `the door answers in Latin: ${line}`).toMatch(/[\u0600-\u06FF]/);
+    }
+    expect(door).toContain("القاعدة ما اتوصلش");
+    expect(door).toContain("سببه اتسجل في اللوج مش على الشاشة");
+    expect(door).not.toContain("What locations in Egypt");
+    // Brackets that are not JSON used to throw out of the parser and surface as an unnamed 500.
+    expect(door).toMatch(/try \{\s*\n\s*parsed = JSON\.parse/);
+  });
+
+  it("the door that answers a question is the one owner of the rule it turns into", () => {
+    const desk = readFileSync(deskPath, "utf8");
+    const questionDoor = readFileSync("app/api/consultant/pending-questions/route.ts", "utf8");
+    // Teaching on an answer used to write two rows: the panel's own and the door's compiled one.
+    expect(desk).not.toMatch(/method: "POST"[\s\S]{0,200}instruction: `سؤال:/);
+    expect(questionDoor).toContain("سؤال: ${originalQuestion} -> إجابة: ${answered_reply}");
+    expect(questionDoor).toContain("القاعدة ما اتكوّنتش");
+  });
+
+  it("a door that cannot write stops claiming it wrote", () => {
+    const learningsDoor = readFileSync("app/api/consultant/learnings/route.ts", "utf8");
+    const questionDoor = readFileSync("app/api/consultant/pending-questions/route.ts", "utf8");
+    // Both doors used to park a row in a request-local Map on a database failure and answer «saved».
+    // That memory dies with the invocation, so the next visit could not find the rule it promised.
+    for (const door of [learningsDoor, questionDoor]) {
+      expect(door).not.toContain("IN_MEMORY");
+      expect(door).not.toContain("Falling back to");
+    }
+    expect(learningsDoor).toContain("القاعدة ما اتحفظتش في القاعدة");
+    expect(questionDoor).toContain("السؤال ما اتسجلش");
+    // An erase now counts the rows that actually went.
+    expect(learningsDoor).toContain("فما اتشالش حاجة");
+    // The queue door used to write a `user_email` column the table has never had (measured: the table
+    // is six columns), so every real insert failed and the memory fallback called it a success.
+    expect(questionDoor).not.toContain("user_email");
+  });
+
 
   it("the generated ledger stops counting the knowledge doors as old-only", () => {
     const ledger = JSON.parse(readFileSync("docs/ledger/transfers.json", "utf8")) as {

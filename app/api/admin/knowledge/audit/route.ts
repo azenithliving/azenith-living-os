@@ -14,14 +14,23 @@ function parseQuestions(content: string): AuditQuestion[] {
   const jsonMatch = content.match(/\[[\s\S]*\]/);
   if (!jsonMatch) return [];
 
-  const parsed = JSON.parse(jsonMatch[0]);
+  // A model that answers with brackets but not with JSON is a common answer, and throwing here
+  // used to turn the whole audit into an unnamed 500. An unreadable reply is a missing list.
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch {
+    return [];
+  }
   if (!Array.isArray(parsed)) return [];
 
   return parsed
+    .filter((item): item is Record<string, unknown> =>
+      item !== null && typeof item === "object")
     .map((item) => ({
       question: typeof item.question === "string" ? item.question.trim() : "",
       category: typeof item.category === "string" ? item.category.trim() : "general",
-      severity: ["low", "medium", "high"].includes(item.severity) ? item.severity : "medium",
+      severity: ["low", "medium", "high"].includes(String(item.severity)) ? (item.severity as "low" | "medium" | "high") : "medium",
       suggested_learning: typeof item.suggested_learning === "string" ? item.suggested_learning.trim() : undefined,
     }))
     .filter((item) => item.question)
@@ -35,7 +44,7 @@ export async function POST(): Promise<NextResponse> {
 
     const supabase = getSupabaseAdminClient();
     if (!supabase) {
-      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+      return NextResponse.json({ error: "القاعدة ما اتوصلش بيها — التدقيق ما ياقدرش يقرأ قواعدك" }, { status: 500 });
     }
 
     const { data, error } = await supabase
@@ -46,7 +55,10 @@ export async function POST(): Promise<NextResponse> {
 
     if (error) {
       console.error("[KnowledgeAudit] Failed to load learnings:", error);
-      return NextResponse.json({ error: "Failed to load learnings" }, { status: 500 });
+      return NextResponse.json(
+        { error: "قواعد المعرفة ما قريتش — التدقيق محتاج يقرأها الأول", code: error.code ?? null },
+        { status: 500 }
+      );
     }
 
     const learnings = (data || []).map((row) => row.instruction).filter(Boolean);
@@ -54,10 +66,10 @@ export async function POST(): Promise<NextResponse> {
       return NextResponse.json({
         questions: [
           {
-            question: "What locations in Egypt does Azenith Living serve, and are there any excluded areas?",
+            question: "أزينث ليفينغ بتغطّي أنهي مناطق في مصر، وفي مناطق بترفضها؟",
             category: "coverage",
             severity: "high",
-            suggested_learning: "Azenith Living serves ...",
+            suggested_learning: "أزينث ليفينغ بتخدم ...",
           },
         ],
       });
@@ -84,12 +96,33 @@ ${learnings.map((learning, index) => `${index + 1}. ${learning}`).join("\n")}`;
     });
 
     if (!result.success) {
-      return NextResponse.json({ questions: [], warning: "AI audit unavailable right now" });
+      // A missing model is not «no gaps». It is a door that did not run, and it has to arrive that way —
+      // a 200 with an empty list teaches the owner that his knowledge is clean when nothing looked.
+      return NextResponse.json(
+        { error: "مفيش نموذج ذكي ردّ دلوقتي — التدقيق بيحتاج نموذج، وقواعدك المحفوظة ما اتلمستش" },
+        { status: 503 }
+      );
     }
 
-    return NextResponse.json({ questions: parseQuestions(result.content) });
+    const parsed = parseQuestions(result.content);
+    if (!parsed.length && String(result.content ?? "").trim().length > 40) {
+      // The model answered but nothing survived the parse: say that instead of reporting a clean shop.
+      return NextResponse.json(
+        { error: "النموذج ردّ بردّ ما اتقراش كامعًد أسئلة — التدقيق ما تمّش" },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json({ questions: parsed });
   } catch (error) {
+    const raw =
+      error instanceof Error ? error.message
+      : typeof (error as { message?: unknown } | null)?.message === "string"
+        ? String((error as { message: string }).message)
+        : "";
     console.error("[KnowledgeAudit] Error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    // A machine sentence is a log line, not owner copy. The screen gets the state; the cause stays here.
+    const usable = /[؀-ۿ]/.test(raw) ? raw : "سببه اتسجل في اللوج مش على الشاشة";
+    return NextResponse.json({ error: `التدقيق وقف — ${usable}` }, { status: 500 });
   }
 }

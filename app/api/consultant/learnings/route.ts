@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { requireAdminApi } from "@/lib/admin-api-guard";
 
-const IN_MEMORY_LEARNINGS = new Map<string, { id: string; instruction: string; created_at: string }>();
-
 /**
  * GET /api/consultant/learnings
  * Get all learnings from consultant_learnings table
@@ -12,8 +10,7 @@ export async function GET(): Promise<NextResponse> {
   try {
     const supabase = getSupabaseAdminClient();
     if (!supabase) {
-      const memoryLearnings = Array.from(IN_MEMORY_LEARNINGS.values()).sort((a, b) => b.created_at.localeCompare(a.created_at));
-      return NextResponse.json({ learnings: memoryLearnings });
+      return NextResponse.json({ error: "القاعدة ما اتوصلش بيها — القواعد المحفوظة ما قريتش" }, { status: 500 });
     }
 
     const { data, error } = await supabase
@@ -23,17 +20,14 @@ export async function GET(): Promise<NextResponse> {
 
     if (error) {
       console.error("[ConsultantLearnings] Error fetching:", error);
-      const memoryLearnings = Array.from(IN_MEMORY_LEARNINGS.values()).sort((a, b) => b.created_at.localeCompare(a.created_at));
-      return NextResponse.json({ learnings: memoryLearnings });
+      return NextResponse.json({ error: "قواعد المعرفة ما قريتش من القاعدة" }, { status: 500 });
     }
 
-    const live = data || [];
-    const memoryLearnings = Array.from(IN_MEMORY_LEARNINGS.values());
-    return NextResponse.json({ learnings: [...memoryLearnings, ...live] });
+    return NextResponse.json({ learnings: data || [] });
   } catch (error) {
     console.error("[ConsultantLearnings] Error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "قواعد المعرفة ما قريتش — السبب اتسجل في اللوج" },
       { status: 500 }
     );
   }
@@ -53,22 +47,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!instruction || typeof instruction !== "string" || !instruction.trim()) {
       return NextResponse.json(
-        { error: "Missing required field: instruction" },
+        { error: "مفيش كلام مكتوب — القاعدة محتاجة جملة تتحفظ" },
         { status: 400 }
       );
     }
 
     const supabase = getSupabaseAdminClient();
     if (!supabase) {
-      const fallbackId = `learn_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-      const fallbackData = {
-        id: fallbackId,
-        instruction: instruction.trim(),
-        created_at: new Date().toISOString(),
-      };
-      IN_MEMORY_LEARNINGS.set(fallbackId, fallbackData);
-      console.warn("[ConsultantLearnings] Falling back to in-memory learning store:", fallbackId);
-      return NextResponse.json({ success: true, learning: fallbackData });
+      return NextResponse.json(
+        { error: "القاعدة ما اتوصلش بيها — القاعدة ما اتحفظتش" },
+        { status: 500 }
+      );
     }
 
     const { data, error } = await supabase
@@ -77,17 +66,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .select()
       .single();
 
-    if (error) {
+    if (error || !data) {
       console.error("[ConsultantLearnings] Error saving:", error);
-      const fallbackId = `learn_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-      const fallbackData = {
-        id: fallbackId,
-        instruction: instruction.trim(),
-        created_at: new Date().toISOString(),
-      };
-      IN_MEMORY_LEARNINGS.set(fallbackId, fallbackData);
-      console.warn("[ConsultantLearnings] Falling back to memory write for learning:", fallbackId);
-      return NextResponse.json({ success: true, learning: fallbackData });
+      // A learning kept only in this request's memory is a learning that never was: the process dies
+      // with the request, so answering «saved» here taught the owner his manager knew things he did not.
+      return NextResponse.json(
+        { error: "القاعدة ما اتحفظتش في القاعدة — اكتبها تاني بعد ما تتصل" },
+        { status: 500 }
+      );
     }
 
     // --- SAA vInfinity AUTO-COMPILATION SEEDING ---
@@ -125,7 +111,7 @@ Return JSON array of strings only. Format: ["question 1", "question 2", ...]`;
   } catch (error) {
     console.error("[ConsultantLearnings] Error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "الحفظ وقف — السبب اتسجل في اللوج" },
       { status: 500 }
     );
   }
@@ -146,27 +132,24 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Missing id parameter" },
+        { error: "مفيش إشارة للقاعدة اللي تتعدّل" },
         { status: 400 }
       );
     }
 
     if (!instruction || typeof instruction !== "string" || !instruction.trim()) {
       return NextResponse.json(
-        { error: "Missing required field: instruction" },
+        { error: "مفيش كلام مكتوب — القاعدة محتاجة جملة" },
         { status: 400 }
       );
     }
 
     const supabase = getSupabaseAdminClient();
     if (!supabase) {
-      const existing = IN_MEMORY_LEARNINGS.get(id);
-      if (!existing) {
-        return NextResponse.json({ error: "Learning not found" }, { status: 404 });
-      }
-      const updated = { ...existing, instruction: instruction.trim() };
-      IN_MEMORY_LEARNINGS.set(id, updated);
-      return NextResponse.json({ success: true, learning: updated });
+      return NextResponse.json(
+        { error: "القاعدة ما اتوصلش بيها — التعديل ما اتحفظش" },
+        { status: 500 }
+      );
     }
 
     const { data, error } = await supabase
@@ -176,10 +159,10 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       .select("id, instruction, created_at")
       .single();
 
-    if (error) {
+    if (error || !data) {
       console.error("[ConsultantLearnings] Error updating:", error);
       return NextResponse.json(
-        { error: "Failed to update learning" },
+        { error: "التعديل ما اتحفظش — القاعدة ترجّع زي ما كانت" },
         { status: 500 }
       );
     }
@@ -188,7 +171,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     console.error("[ConsultantLearnings] Error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "التعديل وقف — السبب اتسجل في اللوج" },
       { status: 500 }
     );
   }
@@ -208,7 +191,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Missing id parameter" },
+        { error: "مفيش إشارة للقاعدة اللي تتشال" },
         { status: 400 }
       );
     }
@@ -216,29 +199,37 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     const supabase = getSupabaseAdminClient();
     if (!supabase) {
       return NextResponse.json(
-        { error: "Database not initialized" },
+        { error: "القاعدة ما اتوصلش بيها — المسح ما تمّش" },
         { status: 500 }
       );
     }
 
-    const { error } = await supabase
+    const { data: removed, error } = await supabase
       .from("consultant_learnings")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .select("id");
 
     if (error) {
       console.error("[ConsultantLearnings] Error deleting:", error);
       return NextResponse.json(
-        { error: "Failed to delete learning" },
+        { error: "القاعدة ما اتشالتش" },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true });
+    // Asked to erase one row, the door reports how many actually went, because a delete that matched
+    // nothing used to answer «success» and leave the rule on the shelf.
+    const gone = removed?.length ?? 0;
+    if (gone === 0) {
+      return NextResponse.json({ error: "مفيش قاعدة متخزنة بالإشارة دي — فما اتشالش حاجة" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, removed: gone });
   } catch (error) {
     console.error("[ConsultantLearnings] Error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "المسح وقف — السبب اتسجل في اللوج" },
       { status: 500 }
     );
   }
