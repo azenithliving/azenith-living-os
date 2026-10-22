@@ -7,11 +7,13 @@ import "server-only";
  * this store runs on has no automatic restore point and no management token to buy one, so the only
  * backup that exists is the one the app writes itself, inside the project the owner already owns.
  *
- * What it copies: the nine tables that hold the owner's record — his chat with the swarm, the
+ * What it copies: the eleven tables that hold the owner's record — his chat with the swarm, the
  * conversations behind it, the employee profiles and their task log, the customer conversations the
- * advisor keeps, both memory tables, the sync ledger, and the settings rows that carry his orders.
- * What it deliberately does not: the picture bank (8,969 rows measured 2026-10-19 at 5,789,320 bytes
- * against 2,260,980 for all nine tables together — and it is the one thing the harvest pipeline can
+ * advisor keeps, the rules he was taught and the questions still waiting for him (measured 2026-10-23:
+ * 51 and 38 rows — the manager's memory was outside his own backup until that day), both memory
+ * tables, the sync ledger, and the settings rows that carry his orders.
+ * What it deliberately does not: the picture bank (13,631,488 bytes on disk against 5,505,024 for all
+ * eleven copied tables, measured the same day — and it is the one thing the harvest pipeline can
  * re-make), and any table holding a credential.
  *
  * Two brakes decide the shape. Nothing here deletes or rotates anything: an old snapshot is a copy of
@@ -41,6 +43,8 @@ export const SNAPSHOT_TARGETS: SnapshotTarget[] = [
   { table: "agent_profiles", order: "id" },
   { table: "agent_tasks", order: "id" },
   { table: "consultant_sessions", order: "id" },
+  { table: "consultant_learnings", order: "id" },
+  { table: "consultant_pending_questions", order: "id" },
   { table: "customer_memory", order: "id" },
   { table: "ops_semantic_memory", order: "id" },
   { table: "ops_sync_events", order: "id" },

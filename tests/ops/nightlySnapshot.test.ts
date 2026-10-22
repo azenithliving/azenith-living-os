@@ -13,7 +13,7 @@ import { gunzipSync } from "node:zlib";
  *
  * Two brakes are held as tests, not as intentions: the step never deletes or rotates anything (an old
  * snapshot is the owner's data, and retiring it is his word), and the picture bank stays out of the
- * daily scope (measured 2026-10-19: 5,789,320 bytes against 2,260,980 for all nine copied tables).
+ * daily scope (measured 2026-10-19: 5,789,320 bytes against the copied tables of that day).
  */
 const STAMP = "nightly_snapshot_last";
 
@@ -187,6 +187,10 @@ describe("the nightly copy of the owner's record", () => {
     expect(names.some((n) => /session_token|sovereign_sessions|api_keys|vault/.test(n))).toBe(false);
     expect(names).toContain("agent_messages");
     expect(names).toContain("site_settings");
+    // Measured 2026-10-23: the manager's own memory sat outside the store's only backup — the rules he
+    // was taught and the customer questions waiting for him were the two tables nobody copied.
+    expect(names).toContain("consultant_learnings");
+    expect(names).toContain("consultant_pending_questions");
     expect(SNAPSHOT_BUCKET).toBe("snapshots");
   });
 
