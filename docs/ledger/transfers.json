@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T22:55:26.605Z",
+  "generatedAt": "2026-10-22T23:49:47.393Z",
   "states": [
     "not-moved",
     "moving",
@@ -8,7 +8,7 @@
     "no-surface"
   ],
   "counts": {
-    "not-moved": 485,
+    "not-moved": 488,
     "no-surface": 7,
     "moved": 29,
     "moving": 6,
@@ -409,6 +409,11 @@
       "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
       "proof": "the page stops claiming its content is coming later: it now states what «دعوات النخبة» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
+    },
+    {
+      "kind": "new-page",
+      "atom": "app/admin/v2/images/page.tsx",
+      "state": "not-moved"
     },
     {
       "kind": "new-page",
@@ -2190,6 +2195,11 @@
     },
     {
       "kind": "furniture",
+      "atom": "components/admin/images/ImageBankPanel.tsx",
+      "state": "not-moved"
+    },
+    {
+      "kind": "furniture",
       "atom": "components/admin/master-dashboard-components.tsx",
       "state": "not-moved"
     },
@@ -3009,6 +3019,11 @@
     {
       "kind": "nav-entry",
       "atom": "/admin/v2/shop",
+      "state": "not-moved"
+    },
+    {
+      "kind": "nav-entry",
+      "atom": "/admin/v2/images",
       "state": "not-moved"
     },
     {

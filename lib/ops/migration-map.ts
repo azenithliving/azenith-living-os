@@ -89,6 +89,16 @@ export const OFFICES: Office[] = [
     employees: [],
   },
   {
+    id: "image-bank",
+    /**
+     * The picture record. Not an employee: the harvest pipeline runs on its own schedule, and this
+     * screen only answers «كام صورة في السجل، وبتوزّع على إيه».
+     */
+    label: "بنك الصور",
+    answers: "كام صورة محفوظة للدار فعلاً، وبتغطي أنهي غرف",
+    employees: [],
+  },
+  {
     id: "records-office",
     label: "مكتب السجلات",
     answers: "إيه اللي اتعمل، ومين عمله، وهل اتنقل فعلاً ولا لأ",
@@ -206,6 +216,7 @@ export const OFFICE_RULES: OfficeRule[] = [
   { match: /^\/admin\/v2\/(agents|ops)\b/, office: "swarm-house", reason: "دار الموظفين في البيت الجديد" },
   { match: /^\/admin\/v2\/sales\b/, office: "sales-office", reason: "المبيعات في البيت الجديد" },
   { match: /^\/admin\/v2\/shop\b/, office: "shelf-desk", reason: "رفّ الجاهز في البيت الجديد" },
+  { match: /^\/admin\/v2\/images\b/, office: "image-bank", reason: "بنك الصور في البيت الجديد" },
   { match: /^\/admin\/v2\/elite\b/, office: "elite-room", reason: "النخبة في البيت الجديد" },
   { match: /^\/admin\/v2\/work\b/, office: "records-office", reason: "المتابعة في البيت الجديد" },
   { match: /^\/admin\/v2\/(system|settings|database)\b/, office: "system-room", reason: "النظام في البيت الجديد" },
@@ -248,6 +259,8 @@ export const EXPLICIT: ExplicitPlacement[] = [
   { id: "components/admin/CockpitDoors.tsx", office: "decision-desk", status: "moved", reason: "بابا الكابينة في القائمة الجانبية: قرارات مستنية كلمتك بعددها الحيّ، والإيقاف الفوري" },
   { id: "app/admin/v2/sketches/page.tsx", office: "paper-desk", status: "moved", reason: "طاولة الورق: التصوير والحفظ والقراءة والسجل والربط بصاحب الورقة من الدفتر — كلها شغالة على العنوان الجديد" },
   { id: "app/admin/v2/shop/page.tsx", office: "shelf-desk", status: "moved", reason: "طاولة الرفّ: يضيف القطعة باسمها وسعرها وصورته، ويخبّيها، ومن نفس السطر صفحة الزائر بتقرأ" },
+  { id: "app/admin/v2/images/page.tsx", office: "image-bank", status: "moving", reason: "بنك الصور اتعمل له عنوان في الجديدة، بس اللوحة القديمة لسه بتعرض لوحها على الصفحة الرئيسية — فالنقل ما كملش" },
+  { id: "components/admin/images/ImageBankPanel.tsx", office: "image-bank", status: "moving", reason: "عدد السجل بأرقام المالك وحالة السجل بالعربي، من نفس الباب الحارس اللي اللوحة القديمة بتقراه" },
   { id: "components/admin/shop/ShopDesk.tsx", office: "shelf-desk", status: "moved", reason: "جسم الطاولة: بيقول الناقص في كل قطعة بدل ما يوري كارت فاضي" },
   { id: "app/api/admin/shop/route.ts", office: "shelf-desk", status: "moved", reason: "بوّابة الرفّ: كتابة وقراءة بنفس قاعدة الظهور، وبلا زر مسح — المسح كلمة المالك" },
   { id: "components/admin/sketches/SketchOwner.tsx", office: "paper-desk", status: "moved", reason: "مين صاحب الورقة: بحث في دفتر العملاء نفسه، والمفتاح المخزن هو مفتاح الدفتر مش نسخة من اسمه" },

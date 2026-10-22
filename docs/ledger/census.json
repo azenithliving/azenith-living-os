@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-22T22:55:26.601Z",
+  "generatedAt": "2026-10-22T23:49:47.391Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5050,
-    "newPages": 14,
-    "newPageLines": 874,
+    "newPages": 15,
+    "newPageLines": 908,
     "adminDoors": 122,
     "allDoors": 207,
     "outsideDoors": 8,
-    "outsideDoorLines": 2622,
+    "outsideDoorLines": 2567,
     "rootLibFiles": 296,
     "rootLibUsed": 93,
     "orphanDoors": 77,
-    "rootLibUsedLines": 31557,
-    "furnitureFiles": 63,
-    "furnitureLines": 17232,
+    "rootLibUsedLines": 31558,
+    "furnitureFiles": 64,
+    "furnitureLines": 17390,
     "furnitureUsedByBoth": 7,
     "furnitureBothLines": 2954,
-    "furnitureNewOnly": 23,
+    "furnitureNewOnly": 24,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
     "swarmFiles": 75,
-    "swarmFileLines": 17116,
+    "swarmFileLines": 17129,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
-    "navEntries": 12,
+    "navEntries": 13,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 528
+    "atoms": 531
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -397,6 +397,11 @@
       "kind": "new-page",
       "id": "app/admin/v2/elite/page.tsx",
       "lines": 15
+    },
+    {
+      "kind": "new-page",
+      "id": "app/admin/v2/images/page.tsx",
+      "lines": 34
     },
     {
       "kind": "new-page",
@@ -1085,7 +1090,7 @@
     {
       "kind": "outside-door",
       "id": "app/api/consultant/route.ts",
-      "lines": 1560,
+      "lines": 1491,
       "callers": 2
     },
     {
@@ -1103,7 +1108,7 @@
     {
       "kind": "outside-door",
       "id": "app/api/tenants/route.ts",
-      "lines": 86,
+      "lines": 100,
       "callers": 1
     },
     {
@@ -1187,7 +1192,7 @@
     {
       "kind": "root-lib",
       "id": "lib/admin-nav.ts",
-      "lines": 116,
+      "lines": 117,
       "callers": 1
     },
     {
@@ -1326,7 +1331,7 @@
       "kind": "root-lib",
       "id": "lib/cad/room-names.ts",
       "lines": 70,
-      "callers": 1
+      "callers": 2
     },
     {
       "kind": "root-lib",
@@ -2231,6 +2236,12 @@
     },
     {
       "kind": "furniture",
+      "id": "components/admin/images/ImageBankPanel.tsx",
+      "lines": 158,
+      "usedBy": "new-only"
+    },
+    {
+      "kind": "furniture",
       "id": "components/admin/master-dashboard-components.tsx",
       "lines": 258,
       "usedBy": "old-only"
@@ -2650,7 +2661,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/migration-map.ts",
-      "lines": 373
+      "lines": 386
     },
     {
       "kind": "swarm-file",
@@ -3150,6 +3161,10 @@
     {
       "kind": "nav-entry",
       "id": "/admin/v2/shop"
+    },
+    {
+      "kind": "nav-entry",
+      "id": "/admin/v2/images"
     },
     {
       "kind": "nav-entry",

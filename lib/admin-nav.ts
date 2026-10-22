@@ -35,6 +35,7 @@ const BASE_NAV: NavCategory[] = [
       { href: "/admin/sales", label: "المبيعات", icon: "MessageSquare" },
       { href: "/admin/v2/sketches", label: "ورق المقاسات", icon: "ScanLine" },
       { href: "/admin/v2/shop", label: "رفّ الجاهز", icon: "Store" },
+      { href: "/admin/v2/images", label: "بنك الصور", icon: "Images" },
       { href: "/admin/elite", label: "دعوات النخبة", icon: "Crown" },
     ],
   },
