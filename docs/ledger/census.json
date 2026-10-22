@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T20:44:34.674Z",
+  "generatedAt": "2026-10-22T21:29:45.535Z",
   "counts": {
     "oldPages": 17,
     "oldPageLines": 5042,
@@ -8,13 +8,13 @@
     "adminDoors": 122,
     "allDoors": 207,
     "outsideDoors": 8,
-    "outsideDoorLines": 2640,
+    "outsideDoorLines": 2617,
     "rootLibFiles": 296,
     "rootLibUsed": 93,
     "orphanDoors": 77,
     "rootLibUsedLines": 31557,
     "furnitureFiles": 62,
-    "furnitureLines": 17066,
+    "furnitureLines": 17072,
     "furnitureUsedByBoth": 7,
     "furnitureBothLines": 2954,
     "furnitureNewOnly": 22,
@@ -1074,13 +1074,13 @@
     {
       "kind": "outside-door",
       "id": "app/api/consultant/learnings/route.ts",
-      "lines": 246,
+      "lines": 237,
       "callers": 2
     },
     {
       "kind": "outside-door",
       "id": "app/api/consultant/pending-questions/route.ts",
-      "lines": 279,
+      "lines": 265,
       "callers": 2
     },
     {
@@ -2341,7 +2341,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/sales/KnowledgeDesk.tsx",
-      "lines": 319,
+      "lines": 325,
       "usedBy": "new-only"
     },
     {

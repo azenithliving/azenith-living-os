@@ -108,7 +108,7 @@ ${learnings.map((learning, index) => `${index + 1}. ${learning}`).join("\n")}`;
     if (!parsed.length && String(result.content ?? "").trim().length > 40) {
       // The model answered but nothing survived the parse: say that instead of reporting a clean shop.
       return NextResponse.json(
-        { error: "النموذج ردّ بردّ ما اتقراش كامعًد أسئلة — التدقيق ما تمّش" },
+        { error: "النموذج ردّ بردّ ما طلعتش منه أسئلة — التدقيق ما تمّش" },
         { status: 502 }
       );
     }
