@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T23:49:47.393Z",
+  "generatedAt": "2026-10-23T16:30:40.657Z",
   "states": [
     "not-moved",
     "moving",
@@ -8,7 +8,7 @@
     "no-surface"
   ],
   "counts": {
-    "not-moved": 488,
+    "not-moved": 489,
     "no-surface": 7,
     "moved": 29,
     "moving": 6,
@@ -74,7 +74,7 @@
         "onlyOldFurniture": []
       },
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-22"
+      "when": "2026-10-23"
     },
     {
       "kind": "old-page",
@@ -114,7 +114,7 @@
         "onlyOldFurniture": []
       },
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-22"
+      "when": "2026-10-23"
     },
     {
       "kind": "old-page",
@@ -171,7 +171,7 @@
         "onlyOldFurniture": []
       },
       "proof": "متقاعدة عمدًا — الصفحة تقول إنها أوقفت أدوات التأثير المخترعة",
-      "when": "2026-10-22"
+      "when": "2026-10-23"
     },
     {
       "kind": "old-page",
@@ -190,7 +190,7 @@
         "onlyOldFurniture": []
       },
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-22"
+      "when": "2026-10-23"
     },
     {
       "kind": "old-page",
@@ -209,7 +209,7 @@
         "onlyOldFurniture": []
       },
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-22"
+      "when": "2026-10-23"
     },
     {
       "kind": "old-page",
@@ -288,7 +288,7 @@
         "onlyOldFurniture": []
       },
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-22"
+      "when": "2026-10-23"
     },
     {
       "kind": "old-page",
@@ -326,7 +326,7 @@
         "onlyOldFurniture": []
       },
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-22"
+      "when": "2026-10-23"
     },
     {
       "kind": "old-page",
@@ -345,7 +345,7 @@
         "onlyOldFurniture": []
       },
       "proof": "كل أبوابها (1) وعفشها (0) تُقرأ من الجديدة",
-      "when": "2026-10-22"
+      "when": "2026-10-23"
     },
     {
       "kind": "old-page",
@@ -2546,6 +2546,11 @@
     {
       "kind": "swarm-file",
       "atom": "lib/ops/lead-heat.ts",
+      "state": "not-moved"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/ledger.ts",
       "state": "not-moved"
     },
     {

@@ -107,7 +107,7 @@ export function CockpitDoors() {
         </span>
       </button>
 
-      {news && <p className="text-[10px] leading-relaxed text-white/45">{news}</p>}
+      {news && <p className="text-[10px] leading-relaxed text-white/70">{news}</p>}
     </div>
   );
 }
