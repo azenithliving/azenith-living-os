@@ -30,6 +30,8 @@ export const ALERT_EVENT_TYPES = [
   'scope_violation',
   'quality_gate_failed',
   'agent_task_failed',
+  // The owner's own stop control — the store halting is news, not a receipt.
+  'emergency_stop',
   // The automation bus, now writing into the same table.
   'system:anomaly_detected',
   'system:error',
@@ -59,6 +61,7 @@ const ARABIC: Record<string, string> = {
   scope_violation: 'موظف تجاوز المجال المسموح له',
   quality_gate_failed: 'بوابة الجودة رفضت عملاً',
   agent_task_failed: 'مهمة موظف فشلت',
+  emergency_stop: 'الإيقاف الطارئ اتفعّل — الموظفين واقفين',
   'system:anomaly_detected': 'رصد الآلية شذوذاً في التشغيل',
   'system:error': 'خطأ في النظام',
   'tool:failed': 'أداة فشلت في التنفيذ',

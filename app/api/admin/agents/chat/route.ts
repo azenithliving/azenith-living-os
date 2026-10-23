@@ -53,16 +53,6 @@ export async function POST(request: NextRequest) {
       run_params,
     });
 
-    await agentOrchestrator.logEvent(
-      "chat_interaction",
-      result.agentUsed,
-      {
-        inputLength: message.length,
-        outputLength: result.response.length,
-        success: result.success,
-      }
-    );
-
     return NextResponse.json({
       success: result.success,
       data: {

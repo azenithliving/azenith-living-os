@@ -904,32 +904,6 @@ export class AgentOrchestrator {
     // Default to core for general website appearance queries
     return "ops-lead";
   }
-
-  async logEvent(eventType: string, agentKey: string, data: Record<string, any>) {
-    try {
-      const supabase = getSupabaseAdminClient();
-      const resolvedCompanyId = await resolveAdminCompanyId();
-      if (!supabase || !resolvedCompanyId) return;
-
-      const { data: agentProfile } = await supabase
-        .from("agent_profiles")
-        .select("id")
-        .eq("agent_key", agentKey)
-        .eq("company_id", resolvedCompanyId)
-        .maybeSingle();
-
-      await supabase.from("agent_events").insert({
-        company_id: resolvedCompanyId,
-        agent_profile_id: agentProfile?.id || null,
-        event_type: eventType,
-        event_data: data,
-        severity: "info",
-        created_at: new Date().toISOString(),
-      });
-    } catch (err) {
-      console.error("[Orchestrator] Event log error:", err);
-    }
-  }
 }
 
 export const agentOrchestrator = new AgentOrchestrator();

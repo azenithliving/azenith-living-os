@@ -2,19 +2,26 @@
  * Owner Control - Approval Decision API
  * POST /api/admin/owner/approval/decision
  * Approve or reject pending approval requests
+ *
+ * Measured on the live record 2026-10-23: this door wrote `decided_by`, `decided_at` and
+ * `notes` into `approval_requests`, and none of those columns exist — the table's own answer
+ * to a decision is `approved_by`, `approved_at` and `rejection_reason`. Every press therefore
+ * failed with the database's English sentence, and the receipt went to `agent_events` under
+ * columns that table does not have. Both now speak the shape the record actually holds.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
 import { requireAdminApi } from '@/lib/admin-api-guard';
+import { recordLedgerEvent } from '@/lib/ops/ledger';
 
 export async function POST(request: NextRequest) {
   try {
     const { user, unauthorized } = await requireAdminApi();
     if (unauthorized) return unauthorized;
     if (!user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'لازم تكون داخل بلوحة التحكم' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -28,15 +35,15 @@ export async function POST(request: NextRequest) {
     // Validation
     if (!approval_id || !companyId || !decision) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields: approval_id and decision' },
-        { status: 400 }
+        { success: false, error: 'القرار ما اتسجّلش: رقم الطلب والقرار مطلوبين' },
+        { status: 400 },
       );
     }
 
     if (!['approved', 'rejected'].includes(decision)) {
       return NextResponse.json(
-        { success: false, error: 'Decision must be "approved" or "rejected"' },
-        { status: 400 }
+        { success: false, error: 'القرار لازم يكون «موافق» أو «مرفوض»' },
+        { status: 400 },
       );
     }
 
@@ -52,26 +59,26 @@ export async function POST(request: NextRequest) {
 
     if (fetchError || !approvalRequest) {
       return NextResponse.json(
-        { success: false, error: 'Approval request not found' },
-        { status: 404 }
+        { success: false, error: 'مفيش طلب مستني بهذا الرقم' },
+        { status: 404 },
       );
     }
 
     if (approvalRequest.status !== 'pending') {
       return NextResponse.json(
-        { success: false, error: `Request already ${approvalRequest.status}` },
-        { status: 400 }
+        { success: false, error: 'الطلب ده اتفصل فيه قبل كده' },
+        { status: 400 },
       );
     }
 
-    // Update approval request
+    // Update approval request — the columns the table actually answers to
     const { data, error } = await supabaseServer
       .from('approval_requests')
       .update({
         status: decision,
-        decided_by: user.id,
-        decided_at: timestamp,
-        notes: notes || null,
+        approved_by: user.id,
+        approved_at: timestamp,
+        rejection_reason: decision === 'rejected' ? (notes || null) : undefined,
         updated_at: timestamp
       })
       .eq('id', approval_id)
@@ -81,24 +88,22 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error updating approval:', error);
       return NextResponse.json(
-        { success: false, error: error.message },
+        { success: false, error: 'القرار ما اتسجّلش في السجل — سبب الخطأ اتسجّل في اللوج' },
         { status: 500 }
       );
     }
 
-    // Create approval event
-    await supabaseServer.from('agent_events').insert({
-      company_id: companyId,
-      event_type: decision === 'approved' ? 'approval_granted' : 'approval_rejected',
-      severity: 'info',
-      message: `Approval request #${approval_id.slice(0, 8)} ${decision}`,
-      metadata: {
+    // Record the owner's word in the store's ledger
+    const record = await recordLedgerEvent({
+      eventType: decision === 'approved' ? 'approval_granted' : 'approval_rejected',
+      source: 'owner',
+      payload: {
         approval_id,
         decision,
-        decided_by: user.id,
-        request_type: approvalRequest.request_type,
-        amount: approvalRequest.amount
-      }
+        action_type: approvalRequest.action_type ?? null,
+        risk_level: approvalRequest.risk_level ?? null,
+      },
+      companyId,
     });
 
     // Trigger downstream actions based on approval type
@@ -108,13 +113,18 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Request ${decision} successfully`,
+      recorded: record.ok,
+      message: record.ok
+        ? decision === 'approved'
+          ? 'كلمتك اتسجّلت: موافق'
+          : 'كلمتك اتسجّلت: مرفوض'
+        : 'القرار اتنفّذ، بس ما اتسجّلش في دفتر المتجر',
       data
     });
   } catch (error) {
     console.error('Approval decision error:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'القرار وقف — سبب الخطأ اتسجّل في اللوج' },
       { status: 500 }
     );
   }

@@ -5,6 +5,7 @@
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
+import { recordLedgerEvent } from "@/lib/ops/ledger";
 import { SYNC_EVENT_TYPES, type SyncEventType } from "@/lib/ops/syncTypes";
 
 // Kept on this module because everything that speaks the ledger already imports it
@@ -198,32 +199,27 @@ export class SyncLayer {
   }
 
   /**
-   * Publish a sync event
+   * Publish a sync event through the one ledger writer.
+   *
+   * It used to answer a failed write with a made-up `evt_<timestamp>` id, so every caller
+   * that trusted the return value believed an event existed that the record never took.
+   * An empty string now means the ledger refused, and the reason is logged.
    */
   async publish(event: Omit<SyncEvent, 'id' | 'company_id' | 'created_at'>): Promise<string> {
-    try {
-      if (!this.companyId) await this.initialize();
+    const record = await recordLedgerEvent({
+      eventType: event.event_type,
+      source: event.source_agent,
+      payload: event.payload,
+      targets: event.target_agents,
+      companyId: this.companyId,
+    });
 
-      const { data, error } = await this.supabase
-        .from('ops_sync_events')
-        .insert({
-          company_id: this.companyId,
-          event_type: event.event_type,
-          source_agent: event.source_agent,
-          target_agents: event.target_agents,
-          payload: event.payload,
-        })
-        .select('id')
-        .single();
-
-      if (!error && data?.id) {
-        return data.id;
-      }
-    } catch {
-      // Safe fallback
+    if (!record.ok) {
+      console.error('[SyncLayer] the ledger refused the event:', record.error);
+      return '';
     }
 
-    return `evt_${Date.now()}`;
+    return String(record.id);
   }
 
   /**

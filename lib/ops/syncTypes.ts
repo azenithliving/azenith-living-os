@@ -29,6 +29,13 @@ export const SYNC_EVENT_TYPES = [
   /** A customer handed over a hand-drawn room. Phase two's passport and phase four's
    * lead temperature both hang on this one moment, so it is news, not a log line. */
   'paper_sketch_received',
+  /** The owner's own controls leave receipts here, because the ledger is the only event
+   * record the store reads. Measured 2026-10-23: both of these used to be written into
+   * `agent_events` with columns that table does not have, so neither ever landed. */
+  'emergency_stop',
+  'emergency_stop_released',
+  'approval_granted',
+  'approval_rejected',
 ] as const;
 
 export type SyncEventType = (typeof SYNC_EVENT_TYPES)[number];

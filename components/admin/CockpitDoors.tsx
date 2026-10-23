@@ -58,9 +58,19 @@ export function CockpitDoors() {
         body: JSON.stringify({ action: "trigger", reason: "من كابينة القيادة" }),
       });
       const data = await res.json().catch(() => null);
-      setNews(data?.success ? "الإيقاف الطارئ مفعل دلوقتي" : data?.error || "السيرفر ما ردّش");
+      if (!res.ok || !data?.success) {
+        const reason = typeof data?.error === "string" ? data.error.trim() : "";
+        setNews(/[\u0600-\u06FF]/.test(reason) ? reason : "الباب ردّ بردّة مش عربية — السبب في اللوج مش قدامك");
+        return;
+      }
+      // The number is what the record actually cancelled, not a promise that everything stopped.
+      const cancelled = Number(data?.data?.cancelled ?? 0);
+      const news =
+        (cancelled > 0 ? `الدار واقفة — ${arNum(cancelled)} مهمة شغالة اتلغت` : "الدار واقفة — مفيش مهمة شغالة كانت هتتلغى") +
+        (data?.recorded ? "" : " · الإيقاف ما اتسجّلش في الدفتر");
+      setNews(news);
     } catch {
-      setNews("فشل الاتصال بخادم الأمان");
+      setNews("الباب ما وصلش أصلًا — الإيقاف ما اتنفّذش");
     } finally {
       setArmed(false);
       setBusy(false);
