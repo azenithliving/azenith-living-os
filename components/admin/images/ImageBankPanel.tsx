@@ -75,8 +75,14 @@ export function ImageBankPanel() {
   }, [load]);
 
   const rooms = stats?.distribution ?? [];
+  // The door returns room+style pairs. Summing a slice of them would print a room's fraction and
+  // call it its total, and grouping by the raw key would show one room twice — the store's own namer
+  // maps `living-room` and `lounge` to the same Arabic name. So: sum every pair, by its name.
   const byRoom = new Map<string, number>();
-  for (const row of rooms) byRoom.set(row.room_type, (byRoom.get(row.room_type) ?? 0) + row.active_count);
+  for (const row of rooms) {
+    const name = roomLabel(row.room_type) ?? "غير مصنف";
+    byRoom.set(name, (byRoom.get(name) ?? 0) + row.active_count);
+  }
   const topRooms = [...byRoom.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
 
   return (

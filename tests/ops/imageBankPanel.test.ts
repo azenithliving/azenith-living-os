@@ -43,6 +43,17 @@ describe("the image bank in the new house", () => {
     expect(panel).toContain('from "@/lib/cad/room-names"');
   });
 
+  it("sums every room before it shows eight, and shows a room once", () => {
+    const panel = readFileSync(panelPath, "utf8");
+    // The door answers room+style pairs: slicing first printed a fraction as a total, and grouping by
+    // the raw key printed «الصالة والمعيشة» twice (living-room and lounge share one Arabic name).
+    const sumLoop = panel.indexOf("byRoom.set(");
+    const slice = panel.indexOf(".slice(0, 8)");
+    expect(sumLoop).toBeGreaterThan(-1);
+    expect(slice).toBeGreaterThan(sumLoop);
+    expect(panel).toMatch(/byRoom\.set\(\s*name/);
+  });
+
   it("says so when the door refused, instead of showing a zero bank", () => {
     const panel = readFileSync(panelPath, "utf8");
     expect(panel).toContain("من غير ما يوصّل سبب بالعربي");
