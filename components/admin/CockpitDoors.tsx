@@ -20,6 +20,7 @@ export function CockpitDoors() {
   const [armed, setArmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [news, setNews] = useState("");
+  const [hint, setHint] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -43,14 +44,18 @@ export function CockpitDoors() {
   async function stop() {
     if (!armed) {
       setArmed(true);
-      setNews("اضغط تاني مرة خلال ثلاث ثواني تقفل كل حاجة");
+      // The arming warning is what expires after three seconds — never the door's answer.
+      // Measured 2026-10-23: this timer used to clear the single shared line, so on a cold
+      // server the confirmation was wiped seconds before the reply arrived and he saw nothing.
+      setHint("اضغط تاني مرة خلال ثلاث ثواني تقفل كل حاجة");
       setTimeout(() => {
         setArmed(false);
-        setNews("");
+        setHint("");
       }, 3000);
       return;
     }
     setBusy(true);
+    setNews("");
     try {
       const res = await fetch("/api/admin/owner/emergency-stop", {
         method: "POST",
@@ -107,6 +112,7 @@ export function CockpitDoors() {
         </span>
       </button>
 
+      {hint && <p className="text-[10px] leading-relaxed text-rose-200">{hint}</p>}
       {news && <p className="text-[10px] leading-relaxed text-white/70">{news}</p>}
     </div>
   );

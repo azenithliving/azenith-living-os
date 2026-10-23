@@ -150,6 +150,15 @@ describe("the owner's controls record what they did", () => {
     expect(doors).toContain("arNum(");
   });
 
+  it("the arming timer clears its own warning, never the door's answer", () => {
+    const doors = codeOf(cockpitDoors);
+    // Measured 2026-10-23: one shared line held both the three-second warning and the reply, and
+    // the warning's timer wiped it — so on a cold server the confirmation vanished before it came.
+    expect(doors).toContain("const [hint, setHint]");
+    expect(doors).toMatch(/setTimeout\(\(\) => \{[^}]*setHint\(""\)/);
+    expect(doors).not.toMatch(/setTimeout\(\(\) => \{[^}]*setNews\(""\)/);
+  });
+
   it("the orchestrator's dead telemetry writer is gone, and the chat keeps its own store", () => {
     expect(readFileSync("lib/agents/AgentOrchestrator.ts", "utf8")).not.toMatch(/logEvent|agent_events/);
     expect(readFileSync("app/api/admin/agents/chat/route.ts", "utf8")).not.toMatch(/logEvent/);
