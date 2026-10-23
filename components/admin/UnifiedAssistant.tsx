@@ -129,6 +129,7 @@ export function UnifiedAssistant() {
   const [capabilityAudit,  setCapabilityAudit]  = useState<CapabilityAudit | null>(null);
   const [evidenceLedger,   setEvidenceLedger]   = useState<EvidenceLedger | null>(null);
   const [agentsLabel,      setAgentsLabel]      = useState("جاري التحقق...");
+  const [historyWarning,   setHistoryWarning]   = useState("");
 
   // capabilities tab
   const [capabilityFilter, setCapabilityFilter] = useState<CapabilityFilter>("all");
@@ -154,6 +155,7 @@ export function UnifiedAssistant() {
       } else {
         setAgentsLabel("الوكلاء — غير متصل");
       }
+      setHistoryWarning(data.historyFailed ? "سجل محادثاتنا ما قريش — لو تكرّم تسأل من جديد" : "");
       if (Array.isArray(data.history) && data.history.length > 0) {
         const restored: ChatMessage[] = data.history
           .filter((h: { role: string }) => h.role === "user" || h.role === "assistant")
@@ -317,6 +319,7 @@ export function UnifiedAssistant() {
           <div>
             <h1 className="text-xl md:text-2xl font-bold">المساعد الموحّد</h1>
             <p className="text-xs text-white/40">كل قدرات الموقع — مكان واحد</p>
+            {historyWarning ? <p className="text-xs text-white/70">{historyWarning}</p> : null}
           </div>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400">

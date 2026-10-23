@@ -14,6 +14,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { executeCommand } from "./command-executor";
 import { incrementKeyUsage } from "./key-monitor";
+import { recordChatTurn, readChatTurns, type ChatWrite } from "@/lib/ops/chat-record";
 
 // ============================================
 // API CONFIGURATION
@@ -757,49 +758,33 @@ function getSupabaseClient() {
 /**
  * Save message to chat history
  */
-async function saveMessage(message: ChatMessage): Promise<void> {
-  try {
-    const supabase = getSupabaseClient();
-    
-    await supabase.from("chat_history").insert({
-      session_id: message.session_id,
-      user_id: message.user_id,
-      role: message.role,
-      content: message.content,
-      command_executed: message.command_executed,
-      command_result: message.command_result,
-      created_at: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("[MastermindAI] Failed to save message:", error);
-    // Non-critical, don't throw
-  }
+async function saveMessage(message: ChatMessage): Promise<ChatWrite> {
+  return recordChatTurn({
+    userId: message.user_id,
+    sessionId: message.session_id,
+    role: message.role,
+    content: message.content,
+    commandExecuted: message.command_executed,
+    commandResult: message.command_result,
+  });
 }
 
 /**
  * Load chat history for user (by user_id, not session_id)
  */
 async function loadHistory(userId: string, limit: number = 20): Promise<ChatMessage[]> {
-  try {
-    const supabase = getSupabaseClient();
-    
-    const { data, error } = await supabase
-      .from("chat_history")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: true })
-      .limit(limit);
-    
-    if (error) {
-      console.error("[MastermindAI] Failed to load history:", error);
-      return [];
-    }
-    
-    return data || [];
-  } catch (error) {
-    console.error("[MastermindAI] Failed to load history:", error);
-    return [];
-  }
+  const { turns } = await readChatTurns(userId, { limit });
+
+  return turns.map((turn, index) => ({
+    id: `history-${index}`,
+    session_id: turn.sessionId ?? "",
+    user_id: userId,
+    role: turn.role === "system" ? "assistant" : turn.role,
+    content: turn.content,
+    command_executed: turn.commandExecuted ?? undefined,
+    command_result: turn.commandResult ?? undefined,
+    created_at: turn.createdAt ?? undefined,
+  }));
 }
 
 // ============================================

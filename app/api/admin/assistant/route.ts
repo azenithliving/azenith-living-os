@@ -12,6 +12,7 @@ import { buildCapabilityAuditReport, buildCapabilityAuditReportEnriched } from "
 import { buildAssistantEvidenceLedger } from "@/lib/admin-assistant-evidence";
 import { buildResultActions } from "@/lib/admin-result-actions";
 import { isAuthorizedAdminEmail } from "@/lib/admin-access";
+import { readChatTurns } from "@/lib/ops/chat-record";
 
 export const maxDuration = 60;
 
@@ -68,18 +69,7 @@ export async function GET(req: NextRequest) {
   const capabilityAudit = await buildCapabilityAuditReportEnriched();
   const evidenceLedger = buildAssistantEvidenceLedger(executions);
 
-  const supabase = createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
-
-  const { data: history } = await supabase
-    .from("chat_history")
-    .select("role, content, command_executed, created_at")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(30);
+  const { turns, failed } = await readChatTurns(user.id, { limit: 30, newestFirst: true });
 
   return NextResponse.json({
     success: true,
@@ -87,7 +77,15 @@ export async function GET(req: NextRequest) {
     capabilityAudit,
     evidenceLedger,
     executions,
-    history: (history || []).reverse(),
+    history: turns
+      .map((turn) => ({
+        role: turn.role,
+        content: turn.content,
+        command_executed: turn.commandExecuted,
+        created_at: turn.createdAt,
+      }))
+      .reverse(),
+    historyFailed: failed,
   });
 }
 
