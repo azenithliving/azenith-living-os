@@ -183,6 +183,14 @@ describe("the surfaces that read his alerts", () => {
     expect(panel).toContain("restingLine");
   });
 
+  it("never prints the edge gate's English refusal on his screen", () => {
+    const panel = readFileSync(oldPanel, "utf8");
+    // The outer gate answers «Unauthorized» / «Forbidden» before any door speaks (proxy.ts:194).
+    expect(panel).toContain("function arabicRefusal(");
+    expect(panel).toContain("بردّة مش عربية");
+    expect(panel).not.toMatch(/setRefusal\(\s*\(?\s*typeof data/);
+  });
+
   it("holds the alert window in one module only", () => {
     const files: string[] = [];
     for (const dir of ["app", "components", "lib", "services"]) {

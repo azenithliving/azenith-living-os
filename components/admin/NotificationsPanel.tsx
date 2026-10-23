@@ -16,8 +16,15 @@ interface Notification {
  * own ledger and nobody has looked at yet — rows come from the one reading rule in
  * `lib/ops/alerts.ts`, the same rule the cockpit's red strip uses, so the two counts
  * cannot drift apart. A row the door refused to read is reported as a refusal; an empty
- * list is only ever claimed with the window it was measured over.
+ * list is only ever claimed with the window it was measured over. The edge gate answers in
+ * English, so a refusal with no Arabic letter in it is named as such instead of printed.
  */
+function arabicRefusal(raw: unknown): string {
+  const text = typeof raw === 'string' ? raw.trim() : '';
+  if (text && /[\u0600-\u06FF]/.test(text)) return text.slice(0, 200);
+  return 'باب التنبيهات ردّ بردّة مش عربية — السبب بيتسجّل في اللوج مش على الشاشة.';
+}
+
 export function NotificationsPanel() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [restingLine, setRestingLine] = useState<string | null>(null);
@@ -30,7 +37,7 @@ export function NotificationsPanel() {
       const res = await fetch('/api/admin/notifications?limit=20', { cache: 'no-store' });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setRefusal(typeof data?.error === 'string' && data.error ? data.error : 'الباب ما ردّش على التنبيهات');
+        setRefusal(arabicRefusal(data?.error));
         return;
       }
       setRefusal(null);
@@ -64,11 +71,7 @@ export function NotificationsPanel() {
         // An alert he closed leaves the strip — the ledger keeps the receipt, not a flag.
         setNotifications((prev) => prev.filter((n) => !ids.includes(n.id)));
       } else {
-        setRefusal(
-          typeof data?.error === 'string' && data.error
-            ? data.error
-            : 'التعليم كمقروء ما تمّ — التنبيهات لسه في مكانها.',
-        );
+        setRefusal(arabicRefusal(data?.error));
       }
     } catch {
       setRefusal('الباب ما وصلش — التنبيهات ما اتعلامتش كمقروءة.');
