@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     }
 
     const limit = Number(new URL(request.url).searchParams.get("limit") || 20);
-    const read = await readOpenAlerts(supabase, companyId, limit);
+    const read = await readOpenAlerts(supabase, companyId, { limit });
     if (!read.ok) {
       return NextResponse.json({ success: false, error: read.error }, { status: 500 });
     }

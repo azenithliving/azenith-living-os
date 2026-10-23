@@ -180,10 +180,8 @@ describe("the owner's controls record what they did", () => {
       };
       walk(dir);
     }
-    // #130: the owner dashboard's alert query. The CRM service method has no caller at all.
-    expect(files.sort()).toEqual([
-      "app/api/admin/owner/dashboard/route.ts",
-      "services/crm/customer-communications.ts",
-    ]);
+    // Only the CRM service still builds a query against it, and that class has no caller at all
+    // (task #137). The owner dashboard's dead-table read was retired in task #130.
+    expect(files.sort()).toEqual(["services/crm/customer-communications.ts"]);
   });
 });

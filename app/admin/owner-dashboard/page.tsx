@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Crown, AlertTriangle, Loader2, RefreshCw, TrendingUp } from 'lucide-react';
 
+import { arNum } from '@/lib/ops/metricLabels';
+
+/** A number he has not been given is said as a word, never printed as a reassuring zero. */
+function countOr(value: number | null, missing: string): string {
+  return value === null || value === undefined ? missing : arNum(value);
+}
+
 interface DashboardData {
   orders_summary: {
     pending_orders: number;
@@ -13,7 +20,8 @@ interface DashboardData {
   production_status: {
     active_jobs: number;
     completed_today: number;
-    delayed_jobs: number;
+    /** Papers that have waited a day for his word — counted, not guessed off a missing column. */
+    overdue_papers: number | null;
   };
   pending_approvals: Array<{
     id: string;
@@ -31,13 +39,11 @@ interface DashboardData {
   agent_stats: {
     leader_tasks_completed: number;
     vanguard_tasks_completed: number;
-    active_conversations: number;
+    connected_devices: number | null;
   };
-  alerts: Array<{
-    type: string;
-    message: string;
-    severity: 'info' | 'warning' | 'critical';
-  }>;
+  /** Trouble the store recorded today, already in the words the reading rule prints. */
+  alerts: Array<{ id: number; label: string; who: string; note: string; at: string | null }>;
+  alerts_error: string | null;
 }
 
 export default function OwnerDashboardPage() {
@@ -68,7 +74,7 @@ export default function OwnerDashboardPage() {
           production_status: {
             active_jobs: dashboard.today?.orders_in_production || 0,
             completed_today: dashboard.this_month?.completed_orders || 0,
-            delayed_jobs: dashboard.alerts?.filter((alert: { severity?: string }) => alert.severity === 'critical' || alert.severity === 'high').length || 0,
+            overdue_papers: dashboard.today?.overdue_papers ?? null,
           },
           pending_approvals: dashboard.pending_decisions || [],
           revenue_stats: {
@@ -79,13 +85,16 @@ export default function OwnerDashboardPage() {
           agent_stats: {
             leader_tasks_completed: dashboard.agent_performance?.leader?.completed_tasks || 0,
             vanguard_tasks_completed: dashboard.agent_performance?.vanguard?.completed_tasks || 0,
-            active_conversations: dashboard.agent_performance?.active_devices || 0,
+            connected_devices: dashboard.agent_performance?.active_devices ?? null,
           },
-          alerts: (dashboard.alerts || []).map((alert: { event_type?: string; message?: string; severity?: string }) => ({
-            type: alert.event_type || 'system',
-            message: alert.message || 'تنبيه نظام بدون وصف',
-            severity: alert.severity === 'high' ? 'critical' : alert.severity === 'critical' ? 'critical' : alert.severity === 'warning' ? 'warning' : 'info',
+          alerts: (dashboard.alerts || []).map((alert: { id?: number; event_type?: string; label?: string; who?: string; note?: string; at?: string | null }) => ({
+            id: Number(alert.id ?? 0),
+            label: alert.label || 'تنبيه مسجّل في دفتر المتجر',
+            who: alert.who || '',
+            note: alert.note || '',
+            at: alert.at ?? null,
           })),
+          alerts_error: typeof dashboard.alerts_error === 'string' ? dashboard.alerts_error : null,
         });
       } else {
         throw new Error(result.error || 'Unknown error');
@@ -232,8 +241,8 @@ export default function OwnerDashboardPage() {
                 <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">منجز الشهر</p>
               </div>
               <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl text-center group-hover:border-rose-500/20 transition-all">
-                <p className="text-4xl font-black text-rose-400 mb-1">{data?.production_status.delayed_jobs || 0}</p>
-                <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">متأخرات</p>
+                <p className="text-4xl font-black text-rose-400 mb-1">{countOr(data?.production_status.overdue_papers ?? null, '—')}</p>
+                <p className="text-[10px] text-white/70 font-bold">ورقة مستنية من امبارح</p>
               </div>
             </div>
           </div>
@@ -324,9 +333,9 @@ export default function OwnerDashboardPage() {
               صحة الوكلاء المستقلين
             </h2>
             <div className="space-y-4">
-              <AgentMetric label="مدير تشغيل المحتوى" count={data?.agent_stats.leader_tasks_completed || 0} icon="👑" color="gold" />
-              <AgentMetric label="VANGUARD AI" count={data?.agent_stats.vanguard_tasks_completed || 0} icon="💼" color="emerald" />
-              <AgentMetric label="ACTIVE DEVICES" count={data?.agent_stats.active_conversations || 0} icon="💻" color="blue" />
+              <AgentMetric label="مدير تشغيل المحتوى" count={arNum(data?.agent_stats.leader_tasks_completed ?? 0)} icon="👑" color="gold" />
+              <AgentMetric label="مدير المبيعات" count={arNum(data?.agent_stats.vanguard_tasks_completed ?? 0)} icon="💼" color="emerald" />
+              <AgentMetric label="أجهزة متصلة" count={countOr(data?.agent_stats.connected_devices ?? null, 'ما اتقستش')} icon="💻" color="blue" />
             </div>
           </div>
 
@@ -337,18 +346,32 @@ export default function OwnerDashboardPage() {
               تنبيهات استراتيجية
             </h2>
             <div className="space-y-3">
+              {data?.alerts_error && (
+                <p className="p-4 rounded-2xl text-[11px] font-medium leading-relaxed border border-rose-500/20 bg-rose-500/10 text-rose-200">
+                  {data.alerts_error}
+                </p>
+              )}
               {data?.alerts && data.alerts.length > 0 ? (
-                data.alerts.map((alert, idx) => (
-                  <div key={idx} className={`p-4 rounded-2xl text-[11px] font-medium leading-relaxed border ${
-                    alert.severity === 'critical' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' :
-                    alert.severity === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
-                    'bg-blue-500/10 border-blue-500/20 text-blue-400'
-                  }`}>
-                    {alert.message}
-                  </div>
-                ))
+                data.alerts.map((alert) => {
+                  const detail = [alert.who, alert.note].filter(Boolean).join(' — ');
+                  return (
+                    <div key={alert.id} className="p-4 rounded-2xl border border-rose-500/20 bg-rose-500/10">
+                      <p className="text-[11px] font-bold leading-relaxed text-rose-200">{alert.label}</p>
+                      {detail && <p className="text-[11px] leading-relaxed text-white/70 mt-1">{detail}</p>}
+                      {alert.at && (
+                        <p className="text-[10px] text-white/70 mt-1">
+                          {new Date(alert.at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })
               ) : (
-                <p className="text-center text-white/20 text-xs font-bold py-6 uppercase tracking-widest">جميع الأنظمة مستقرة</p>
+                !data?.alerts_error && (
+                  <p className="text-center text-white/70 text-xs font-bold py-6">
+                    مفيش تنبيه مفتوح النهاردة في دفتر المتجر
+                  </p>
+                )
               )}
             </div>
           </div>
@@ -398,7 +421,7 @@ function OrderStatusRow({ label, count, color, progress }: { label: string; coun
   );
 }
 
-function AgentMetric({ label, count, icon, color }: { label: string; count: number; icon: string; color: string }) {
+function AgentMetric({ label, count, icon, color }: { label: string; count: string; icon: string; color: string }) {
   const colorMap: Record<string, string> = {
     gold: 'text-[#C5A059]',
     emerald: 'text-emerald-400',

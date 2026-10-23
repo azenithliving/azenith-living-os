@@ -2,13 +2,24 @@
  * Owner Dashboard API
  * GET /api/admin/owner/dashboard
  * Returns comprehensive dashboard data for the owner
+ *
+ * Measured on the live record 2026-10-23: the alert block read `agent_events` filtering on
+ * `severity` and `acknowledged` — two columns that table does not have — so the query failed
+ * on every load, the failure was caught and returned as an empty list, and his screen printed
+ * «جميع الأنظمة مستقرة» over a number that was never measured. The alerts now come from the
+ * store's ledger through the one reading rule, asking for today's span; a ledger that does not
+ * answer is reported as a failure in its own section instead of becoming a calm zero. The
+ * "delayed" card counts papers that have actually waited a day, and the connected-devices
+ * figure stopped being a hard-coded null.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { LEADER_KEYS } from '@/lib/ops/identity';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
+import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
 import { requireAdminApi } from '@/lib/admin-api-guard';
+import { readOpenAlerts } from '@/lib/ops/alerts';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     if (!companyId) {
       return NextResponse.json(
-        { success: false, error: 'No company is configured for the owner dashboard' },
+        { success: false, error: 'شركة المتجر مش مسجّلة في الإعدادات — اللوحة ما قريتش' },
         { status: 404 }
       );
     }
@@ -37,7 +48,9 @@ export async function GET(request: NextRequest) {
       inventoryResult,
       agentsResult,
       revenueResult,
-      alertsResult
+      alertsResult,
+      overduePapers,
+      connectedDevices
     ] = await Promise.all([
       // Orders summary
       getOrdersSummary(companyId, startOfMonth),
@@ -51,8 +64,12 @@ export async function GET(request: NextRequest) {
       getAgentStats(companyId, startOfMonth, startOfToday),
       // Revenue this month
       getRevenueStats(companyId, startOfMonth),
-      // System alerts
-      getSystemAlerts(companyId, startOfToday)
+      // System alerts — the store's ledger, read through the one rule
+      getOpenAlerts(companyId, startOfToday),
+      // Papers that have actually waited a day for his word
+      countOverduePapers(companyId),
+      // Devices the store sees connected right now
+      countConnectedDevices(),
     ]);
 
     const dashboard = {
@@ -63,6 +80,7 @@ export async function GET(request: NextRequest) {
         orders_in_production: productionResult.inProduction,
         orders_ready: productionResult.ready,
         pending_approvals: approvalsResult.count,
+        overdue_papers: overduePapers,
         payments_due: revenueResult.paymentsDue,
         low_stock_alerts: inventoryResult.lowStockCount
       },
@@ -84,21 +102,14 @@ export async function GET(request: NextRequest) {
       inventory_alerts: inventoryResult.items,
 
       // Agent performance
-      agent_performance: agentsResult,
+      agent_performance: { ...agentsResult, active_devices: connectedDevices },
 
       // Production pipeline
       production_pipeline: productionResult.pipeline,
 
-      // System alerts
-      alerts: alertsResult,
-
-      // Quick stats
-      quick_stats: {
-        leader_tasks_today: agentsResult.leader?.tasks_today || 0,
-        vanguard_tasks_today: agentsResult.vanguard?.tasks_today || 0,
-        active_devices: agentsResult.active_devices || 0,
-        stuck_tasks: alertsResult.filter((a: any) => a.event_type === 'task_stuck').length
-      }
+      // System alerts — and the reason, when the ledger did not answer
+      alerts: alertsResult.alerts,
+      alerts_error: alertsResult.error
     };
 
     return NextResponse.json({
@@ -108,7 +119,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Dashboard API error:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'اللوحة ما قريتش — سبب الخطأ اتسجّل في اللوج' },
       { status: 500 }
     );
   }
@@ -273,7 +284,6 @@ async function getAgentStats(companyId: string, startOfMonth: string, startOfTod
       completed_tasks: vanguardTasks.filter(t => t.status === 'completed').length,
       deals_closed: vanguardTasks.filter(t => t.status === 'completed').length
     },
-    active_devices: null,
   };
 }
 
@@ -303,22 +313,43 @@ async function getRevenueStats(companyId: string, startOfMonth: string) {
   return { total, profit, avgOrderValue, paymentsDue: unpaid };
 }
 
-// Get system alerts
-async function getSystemAlerts(companyId: string, startOfToday: string) {
+// Get system alerts — through the store's one reading rule, over today
+async function getOpenAlerts(companyId: string, startOfToday: string) {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return { alerts: [], error: 'الدفتر غير متصل دلوقتي — التنبيهات ما قريتش' };
+
+  const read = await readOpenAlerts(supabase, companyId, { limit: 100, sinceIso: startOfToday });
+  if (!read.ok) return { alerts: [], error: read.error };
+
+  return { alerts: read.alerts, error: null };
+}
+
+// Papers that have waited a day for his word
+async function countOverduePapers(companyId: string) {
   const { data, error } = await supabaseServer
-    .from('agent_events')
-    .select('*')
+    .from('approval_requests')
+    .select('id')
     .eq('company_id', companyId)
-    .gte('created_at', startOfToday)
-    .in('severity', ['warning', 'critical'])
-    .eq('acknowledged', false)
-    .order('created_at', { ascending: false })
-    .limit(10);
+    .eq('status', 'pending')
+    .lt('requested_at', new Date(Date.now() - 86_400_000).toISOString());
 
   if (error) {
-    console.error('System alerts error:', error);
-    return [];
+    console.error('Overdue papers error:', error);
+    return null;
   }
+  return (data ?? []).length;
+}
 
-  return data || [];
+// Devices the store sees connected right now
+async function countConnectedDevices() {
+  const { count, error } = await supabaseServer
+    .from('agent_devices')
+    .select('id', { count: 'exact', head: true })
+    .eq('is_active', true);
+
+  if (error) {
+    console.error('Connected devices error:', error);
+    return null;
+  }
+  return count ?? 0;
 }

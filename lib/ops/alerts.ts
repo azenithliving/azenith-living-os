@@ -128,16 +128,26 @@ export type AlertRead =
  * acknowledgements that close an alert. A surface that wants the owner's alerts calls
  * this and shows what comes back — it does not re-read the ledger its own way.
  *
+ * A surface may ask for a longer span (an overview page covering the day, not the last
+ * hour), but only through here: what counts as trouble and what closes one stays in one
+ * place. `alertWindowPhrase` still describes the default window.
+ *
  * A ledger that does not answer is a failure, never an empty list: an empty list on a
  * failed read is how his screen claims all is well while nothing was measured.
  */
+export interface AlertReadOptions {
+  limit?: number;
+  /** ISO instant to read from. Defaults to the strip's window. */
+  sinceIso?: string;
+}
+
 export async function readOpenAlerts(
   client: SupabaseClient,
   companyId: string,
-  limit = 20,
+  options: AlertReadOptions = {},
 ): Promise<AlertRead> {
-  const since = new Date(Date.now() - ALERT_WINDOW_MS).toISOString();
-  const cap = Math.min(Math.max(Number(limit) || 20, 1), 100);
+  const since = options.sinceIso ?? new Date(Date.now() - ALERT_WINDOW_MS).toISOString();
+  const cap = Math.min(Math.max(Number(options.limit) || 20, 1), 100);
 
   const [alerts, acks] = await Promise.all([
     client
