@@ -28,7 +28,18 @@ describe("Intel Relations Health API", () => {
       automation_rules: ["company_id", "enabled", "is_active"],
       approval_requests: ["company_id", "actor_user_id", "command_log_id"],
       audit_log: ["company_id", "actor_user_id", "approval_request_id", "command_log_id"],
-      agent_memory: ["company_id", "actor_user_id", "source_table", "source_id"],
+      agent_memory: [
+        "memory_type",
+        "type",
+        "category",
+        "content",
+        "context",
+        "user_id",
+        "priority",
+        "outcome",
+        "user_feedback",
+        "expires_at",
+      ],
     };
 
     const queryState: { tableName?: string } = {};

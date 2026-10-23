@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { resolvePrimaryCompanyId } from "@/lib/company-resolver";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { MEMORY_WRITE_COLUMNS } from "@/lib/ops/memory-record";
 
 type RelationCheck = {
   table: string;
@@ -14,7 +15,7 @@ const REQUIRED_RELATIONS: Array<{ table: string; columns: string[] }> = [
   { table: "automation_rules", columns: ["company_id", "enabled", "is_active"] },
   { table: "approval_requests", columns: ["company_id", "actor_user_id", "command_log_id"] },
   { table: "audit_log", columns: ["company_id", "actor_user_id", "approval_request_id", "command_log_id"] },
-  { table: "agent_memory", columns: ["company_id", "actor_user_id", "source_table", "source_id"] },
+  { table: "agent_memory", columns: [...MEMORY_WRITE_COLUMNS] },
 ];
 
 export async function GET(request: Request) {
@@ -63,6 +64,7 @@ export async function GET(request: Request) {
 
   const healthy = checks.every((check) => check.healthy);
   const totalMissing = checks.reduce((sum, check) => sum + check.missingColumns.length, 0);
+  const unhealthyTables = checks.filter((check) => !check.healthy).map((check) => check.table);
 
   return NextResponse.json({
     success: true,
@@ -77,7 +79,10 @@ export async function GET(request: Request) {
     meta: {
       actorId,
       companyId,
-      migrationHint: "Apply migration 030_intel_relations_and_contract.sql",
+      migrationHint:
+        unhealthyTables.length > 0
+          ? `Missing columns in: ${unhealthyTables.join(", ")}`
+          : "No table is missing a column the code writes",
     },
   });
 }

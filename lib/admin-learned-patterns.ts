@@ -6,6 +6,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { ClassifiedIntent } from "./admin-intent-types";
 import { inferUltimateTool } from "./admin-tool-bridge";
+import { recordMemory } from "@/lib/ops/memory-record";
 
 export interface LearnedPattern {
   id: string;
@@ -219,10 +220,8 @@ async function persistPattern(
   message: string,
   intent: ClassifiedIntent
 ): Promise<void> {
-  const supabase = getServiceSupabase();
-  if (!supabase) return;
-  await supabase.from("agent_memory").insert({
-    type: "pattern",
+  await recordMemory({
+    kind: "pattern",
     category: MEMORY_CATEGORY,
     content: message.slice(0, 500),
     context: { patternId: id, intent },
@@ -247,11 +246,13 @@ export async function hydrateLearnedPatternsFromDb(limit = 40): Promise<number> 
   for (const row of data || []) {
     const ctx = row.context as { patternId?: string; intent?: ClassifiedIntent } | null;
     const intent = ctx?.intent;
-    const pid = ctx?.patternId || `db-${hashMessage(row.content)}`;
+    const text = typeof row.content === "string" ? row.content : "";
+    if (!text) continue;
+    const pid = ctx?.patternId || `db-${hashMessage(text)}`;
     if (!intent || patternStore.has(pid)) continue;
     patternStore.set(pid, {
       id: pid,
-      triggers: [buildLoosePattern(row.content)],
+      triggers: [buildLoosePattern(text)],
       intent,
       hits: 1,
       source: "execution",

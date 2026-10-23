@@ -6,6 +6,7 @@ import { analyzeCommandLogs } from "@/lib/self-evolution";
 import { applyRepoPatches, getGitHubConfig, readRepoFile } from "@/lib/github-repo-client";
 import { queueCloudEvolutionPatch, type CloudPatchPayload } from "@/lib/admin-cloud-evolution";
 import { fetchAndPatchStaticFromUrl } from "@/lib/seo-static-patcher";
+import { recordMemory } from "@/lib/ops/memory-record";
 import { createClient } from "@supabase/supabase-js";
 
 const EVOLVE_ALLOWLIST = [
@@ -133,14 +134,11 @@ async function storeEvolutionAudit(
   pr: { filesWritten: string[]; prUrl?: string },
   userId?: string
 ) {
-  const supabase = getServiceSupabase();
-  if (!supabase) return;
-  await supabase.from("agent_memory").insert({
-    type: "evolution",
+  await recordMemory({
+    kind: "evolution",
     category: "project_evolution_pr",
     content: mission.slice(0, 2000),
-    context: { files: pr.filesWritten, prUrl: pr.prUrl },
+    context: { files: pr.filesWritten, prUrl: pr.prUrl, actorUserId: userId || null },
     priority: "high",
-    actor_user_id: userId || null,
   });
 }

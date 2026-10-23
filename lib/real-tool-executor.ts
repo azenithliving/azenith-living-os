@@ -123,8 +123,6 @@ export async function executeTool(
           result: result.success ? "success" : "failure",
         },
         priority: result.success ? "high" : "normal",
-        companyId: context.companyId,
-        actorUserId: context.actorUserId,
       });
     }
 

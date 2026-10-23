@@ -10,7 +10,7 @@ async function run(request: NextRequest) {
   if (unauthorized) return unauthorized;
 
   const report = await buildAdminDailyReport();
-  await persistDailyReport(report);
+  const stored = await persistDailyReport(report);
 
   const ownerEmail = process.env.MASTER_ADMIN_EMAILS?.split(",")[0]?.trim();
   if (report.pendingApprovals > 0) {
@@ -29,6 +29,8 @@ async function run(request: NextRequest) {
     success: true,
     generatedAt: report.generatedAt,
     pendingApprovals: report.pendingApprovals,
+    memoryStored: stored.ok,
+    memoryError: stored.ok ? null : stored.error,
     preview: report.fullTextAr.slice(0, 400),
   });
 }

@@ -147,8 +147,18 @@ export async function processAdminNaturalLanguage(
 
   const remember = parseRememberInstruction(message);
   if (remember && userId) {
-    await rememberOwnerPreference(userId, remember.key, remember.value);
-    const memHint = await buildOwnerMemoryPrompt(userId);
+    const saved = await rememberOwnerPreference(userId, remember.key, remember.value);
+    if (!saved.success) {
+      const refusal = saved.error || "الذاكرة رفضت السطر";
+      await saveMessage({
+        session_id: sessionId,
+        user_id: userId,
+        role: "assistant",
+        content: refusal,
+      });
+      return { type: "conversation", message: refusal };
+    }
+    const memHint = await buildOwnerMemoryPrompt();
     const reply = `✅ **حفظت تفضيلك:** ${remember.key}\n${remember.value}${memHint ? `\n\n${memHint}` : ""}`;
     await saveMessage({
       session_id: sessionId,

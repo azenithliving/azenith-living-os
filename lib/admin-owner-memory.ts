@@ -2,19 +2,10 @@
  * Long-term owner preferences and decisions for the unified assistant.
  */
 
-import { createClient } from "@supabase/supabase-js";
-import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
+import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { recordMemory } from "@/lib/ops/memory-record";
 
 const CATEGORY = "admin_owner_memory";
-
-function getServiceSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-}
 
 export type OwnerMemoryEntry = {
   key: string;
@@ -27,52 +18,59 @@ export async function rememberOwnerPreference(
   key: string,
   value: string,
   opts?: { outcome?: "approved" | "rejected" | "neutral" }
-): Promise<{ success: boolean }> {
-  const supabase = getServiceSupabase();
-  if (!supabase) return { success: false };
-
+): Promise<{ success: boolean; error?: string }> {
   const content = `${key}=${value}`.slice(0, 2000);
-  await supabase.from("agent_memory").insert({
-    type: "preference",
+  const written = await recordMemory({
+    kind: "preference",
     category: CATEGORY,
     content,
     context: { key, value, userId, outcome: opts?.outcome || "neutral" },
     priority: "high",
-    actor_user_id: userId,
-    company_id: (await resolveMasterCompanyId()) || null,
     outcome: opts?.outcome || null,
   });
+
+  if (!written.ok) return { success: false, error: written.error };
 
   return { success: true };
 }
 
-export async function listOwnerPreferences(userId: string, limit = 30): Promise<OwnerMemoryEntry[]> {
-  const supabase = getServiceSupabase();
-  if (!supabase) return [];
+/**
+ * The owner's shelf, read as a shelf: the record's person column points at the customers' roll,
+ * and the store's one sign-in has no row there (measured 2026-10-24), so stamping it would be
+ * refused rather than remembered.
+ */
+export async function listOwnerPreferences(
+  limit = 30
+): Promise<{ entries: OwnerMemoryEntry[]; failed: boolean }> {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return { entries: [], failed: true };
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("agent_memory")
     .select("content, context, created_at")
     .eq("category", CATEGORY)
-    .eq("actor_user_id", userId)
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  return (data || []).map((row) => {
+  if (error) return { entries: [], failed: true };
+
+  const entries = (data || []).map((row) => {
     const ctx = row.context as { key?: string; value?: string } | null;
+    const text = typeof row.content === "string" ? row.content : "";
     return {
-      key: ctx?.key || row.content.split("=")[0] || "note",
-      value: ctx?.value || row.content,
+      key: ctx?.key || text.split("=")[0] || "note",
+      value: ctx?.value || text,
       createdAt: row.created_at,
     };
   });
+
+  return { entries, failed: false };
 }
 
-export async function buildOwnerMemoryPrompt(userId?: string): Promise<string> {
-  if (!userId) return "";
-  const prefs = await listOwnerPreferences(userId, 12);
-  if (!prefs.length) return "";
-  const lines = prefs.map((p) => `- ${p.key}: ${p.value}`).join("\n");
+export async function buildOwnerMemoryPrompt(): Promise<string> {
+  const { entries } = await listOwnerPreferences(12);
+  if (!entries.length) return "";
+  const lines = entries.map((p) => `- ${p.key}: ${p.value}`).join("\n");
   return `\n\nتفضيلات المالك المحفوظة:\n${lines}`;
 }
 

@@ -11,6 +11,7 @@
  */
 
 import { createClient as createServerClient } from "@/utils/supabase/server";
+import { recordMemory } from "@/lib/ops/memory-record";
 
 // Memory types
 export type MemoryType = 
@@ -38,10 +39,6 @@ export interface MemoryEntry {
   outcome?: "success" | "failure" | "pending" | "rejected";
   userFeedback?: "positive" | "negative" | "neutral";
   expiresAt?: Date;
-  companyId?: string;
-  actorUserId?: string;
-  sourceTable?: string;
-  sourceId?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -101,56 +98,20 @@ export interface MemoryFilters {
 export async function storeMemory(
   entry: Omit<MemoryEntry, "id" | "createdAt" | "updatedAt">
 ): Promise<{ success: boolean; id?: string; error?: string }> {
-  const supabase = await createServerClient();
+  const written = await recordMemory({
+    kind: entry.type,
+    category: entry.category,
+    content: entry.content,
+    context: entry.context,
+    priority: entry.priority,
+    outcome: entry.outcome || "pending",
+    userFeedback: entry.userFeedback || "neutral",
+    expiresAt: entry.expiresAt ?? null,
+  });
 
-  try {
-    const insertPayload = {
-      type: entry.type,
-      category: entry.category,
-      content: entry.content,
-      context: entry.context || {},
-      priority: entry.priority,
-      outcome: entry.outcome || "pending",
-      user_feedback: entry.userFeedback || "neutral",
-      expires_at: entry.expiresAt?.toISOString(),
-      company_id: entry.companyId || null,
-      actor_user_id: entry.actorUserId || null,
-      source_table: entry.sourceTable || null,
-      source_id: entry.sourceId || null,
-    };
+  if (!written.ok) return { success: false, error: written.error };
 
-    let { data, error } = await supabase
-      .from("agent_memory")
-      .insert(insertPayload)
-      .select("id")
-      .single();
-
-    // Backward compatibility for older schemas without relation columns.
-    if (error && error.code === "42703") {
-      const legacyPayload = { ...insertPayload } as Record<string, unknown>;
-      delete legacyPayload.company_id;
-      delete legacyPayload.actor_user_id;
-      delete legacyPayload.source_table;
-      delete legacyPayload.source_id;
-      const legacyInsert = await supabase
-        .from("agent_memory")
-        .insert(legacyPayload)
-        .select("id")
-        .single();
-      data = legacyInsert.data;
-      error = legacyInsert.error;
-    }
-
-    if (error) throw error;
-
-    return { success: true, id: data?.id };
-  } catch (error) {
-    console.error("[MemoryStore] Failed to store memory:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-  }
+  return { success: true, id: written.id };
 }
 
 /**
@@ -204,7 +165,7 @@ export async function searchMemories(
       .order("created_at", { ascending: false });
 
     if (filters.types && filters.types.length > 0) {
-      query = query.in("type", filters.types);
+      query = query.in("memory_type", filters.types);
     }
 
     if (filters.categories && filters.categories.length > 0) {
@@ -241,7 +202,7 @@ export async function searchMemories(
 
     const memories: MemoryEntry[] = (data || []).map((row) => ({
       id: row.id,
-      type: row.type as MemoryType,
+      type: row.memory_type as MemoryType,
       category: row.category,
       content: row.content,
       context: row.context || {},
@@ -249,10 +210,6 @@ export async function searchMemories(
       outcome: row.outcome,
       userFeedback: row.user_feedback,
       expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
-      companyId: row.company_id || undefined,
-      actorUserId: row.actor_user_id || undefined,
-      sourceTable: row.source_table || undefined,
-      sourceId: row.source_id || undefined,
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
     }));
@@ -634,7 +591,7 @@ export async function getMemoryStats(): Promise<{
     // Get counts by type
     const { data: typeCounts, error: typeError } = await supabase
       .from("agent_memory")
-      .select("type", { count: "exact" });
+      .select("memory_type", { count: "exact" });
 
     if (typeError) throw typeError;
 
@@ -663,7 +620,7 @@ export async function getMemoryStats(): Promise<{
     // Calculate by type
     const byType: Record<string, number> = {};
     typeCounts?.forEach((row) => {
-      byType[row.type] = (byType[row.type] || 0) + 1;
+      byType[row.memory_type] = (byType[row.memory_type] || 0) + 1;
     });
 
     return {

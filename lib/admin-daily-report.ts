@@ -6,8 +6,7 @@ import { getAnalyticsReport, getSystemHealth } from "@/lib/architect-tools";
 import { getCapabilityMaturityReport } from "@/lib/admin-capability-evolution";
 import { arNum } from "@/lib/ops/metricLabels";
 import { listPendingAdminProposals } from "@/lib/admin-sovereign-mind";
-import { createClient } from "@supabase/supabase-js";
-import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
+import { recordMemory, type MemoryWrite } from "@/lib/ops/memory-record";
 
 export interface AdminDailyReport {
   generatedAt: string;
@@ -59,21 +58,12 @@ export async function buildAdminDailyReport(): Promise<AdminDailyReport> {
   };
 }
 
-export async function persistDailyReport(report: AdminDailyReport): Promise<void> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return;
-
-  const supabase = createClient(url, key, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-
-  await supabase.from("agent_memory").insert({
-    type: "report",
+export async function persistDailyReport(report: AdminDailyReport): Promise<MemoryWrite> {
+  return recordMemory({
+    kind: "report",
     category: "admin_daily_report",
     content: report.fullTextAr.slice(0, 8000),
-    context: report,
+    context: { ...report },
     priority: "normal",
-    company_id: (await resolveMasterCompanyId()) || null,
   });
 }

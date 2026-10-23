@@ -7,6 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { EvolutionSuggestion } from "@/lib/self-evolution";
 import { normalizeApprovalRiskLevel } from "@/lib/approval-risk";
 import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
+import { recordMemory } from "@/lib/ops/memory-record";
 
 export interface CloudPatchPayload {
   targetFile: string;
@@ -49,14 +50,12 @@ export async function queueCloudEvolutionPatch(
   }
 
   const patchId = crypto.randomUUID();
-  await supabase.from("agent_memory").insert({
-    type: "code_patch",
+  await recordMemory({
+    kind: "code_patch",
     category: "cloud_evolution",
     content: suggestion.description.slice(0, 2000),
     context: { patchId, ...suggestion },
     priority: "high",
-    actor_user_id: opts?.userId || null,
-    company_id: (await resolveMasterCompanyId()) || null,
   });
 
   let prUrl: string | undefined;
