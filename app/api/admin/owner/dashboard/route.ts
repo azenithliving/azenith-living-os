@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         orders_pending: ordersResult.pending,
         orders_in_production: productionResult.inProduction,
         orders_ready: productionResult.ready,
-        pending_approvals: approvalsResult.count,
+        pending_approvals: approvalsResult.failed ? null : approvalsResult.count,
         overdue_papers: overduePapers,
         payments_due: revenueResult.paymentsDue,
         low_stock_alerts: inventoryResult.lowStockCount
@@ -98,6 +98,7 @@ export async function GET(request: NextRequest) {
 
       // Pending decisions
       pending_decisions: approvalsResult.items,
+      approvals_error: approvalsResult.failed ? "الورق المستني ما قريش من السجل" : null,
 
       // Low stock alerts
       inventory_alerts: inventoryResult.items,
@@ -183,10 +184,13 @@ async function getProductionStatus(companyId: string) {
 
 // Get pending approvals
 async function getPendingApprovals(companyId: string) {
+  // No `users(name)` embed here: the record has no foreign key from a paper to the public
+  // users table (it points at auth.users), and PostgREST answers that embed with PGRST200 —
+  // measured 2026-10-23, which is why this list had never shown a single paper.
   const { data, error } = await withOwnerPapers(
     supabaseServer
       .from('approval_requests')
-      .select('*, users(name)')
+      .select('*')
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(10),
@@ -195,7 +199,7 @@ async function getPendingApprovals(companyId: string) {
 
   if (error) {
     console.error('Pending approvals error:', error);
-    return { count: 0, items: [] };
+    return { count: 0, items: [], failed: true };
   }
 
   const items = data?.map(item => ({
@@ -204,7 +208,7 @@ async function getPendingApprovals(companyId: string) {
     title: item.description,
     description: item.description,
     risk_level: item.risk_level,
-    requested_by: (item.users as any)?.name || '',
+    requested_by: '',
     created_at: item.created_at,
     context: item.metadata
   })) || [];

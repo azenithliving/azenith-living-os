@@ -85,4 +85,15 @@ describe("the company has one answer-giver", () => {
     expect((dashboard.match(/withOwnerPapers\(/g) ?? []).length).toBeGreaterThanOrEqual(2);
     expect(dashboard).not.toMatch(/\.from\(['"]approval_requests['"]\)\s*\.select\([^)]*\)\s*\.eq\(['"]company_id/);
   });
+
+  it("asks the record only for relations it can answer", () => {
+    // `users(name)` embeds failed with PGRST200 (no foreign key from a paper to public.users),
+    // so this list had never shown a single paper and the card said «لا توجد طلبات معلقة».
+    const dashboard = sourceOf("app/api/admin/owner/dashboard/route.ts");
+    expect(dashboard).not.toMatch(/users\(name\)/);
+    const page = sourceOf("app/admin/owner-dashboard/page.tsx");
+    expect(page).not.toContain("لا توجد طلبات معلقة");
+    expect(page).toContain("مفيش ورق مستني ردّك دلوقتي");
+    expect(page).toContain("approvals_error");
+  });
 });

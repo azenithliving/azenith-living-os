@@ -30,6 +30,9 @@ interface DashboardData {
     description?: string;
     requested_by: string;
   }>;
+  /** The record's own count — the list above is capped at ten rows. */
+  approvals_count: number | null;
+  approvals_error: string | null;
   revenue_stats: {
     this_month_revenue: number;
     this_month_profit: number;
@@ -76,6 +79,8 @@ export default function OwnerDashboardPage() {
             overdue_papers: dashboard.today?.overdue_papers ?? null,
           },
           pending_approvals: dashboard.pending_decisions || [],
+          approvals_count: dashboard.today?.pending_approvals ?? null,
+          approvals_error: typeof dashboard.approvals_error === 'string' ? dashboard.approvals_error : null,
           revenue_stats: {
             this_month_revenue: dashboard.this_month?.total_revenue || 0,
             this_month_profit: dashboard.this_month?.estimated_profit || 0,
@@ -214,7 +219,7 @@ export default function OwnerDashboardPage() {
         />
         <MetricCard
           title="موافقات معلقة"
-          value={data?.pending_approvals.length || 0}
+          value={countOr(data?.approvals_count ?? null, 'ما اتقستش')}
           icon="⏳"
           color="rose"
         />
@@ -316,10 +321,13 @@ export default function OwnerDashboardPage() {
                   </div>
                 ))}
               </div>
+            ) : data?.approvals_error ? (
+              <p className="p-3 rounded-xl border border-rose-500/20 bg-rose-500/10 text-[11px] leading-relaxed text-rose-200">
+                {data.approvals_error}
+              </p>
             ) : (
               <div className="text-center py-12">
-                <div className="w-12 h-12 bg-white/[0.03] rounded-full flex items-center justify-center mx-auto mb-3">✅</div>
-                <p className="text-xs text-white/20 font-bold uppercase tracking-widest">لا توجد طلبات معلقة</p>
+                <p className="text-xs text-white/70 font-bold">مفيش ورق مستني ردّك دلوقتي</p>
               </div>
             )}
           </div>
