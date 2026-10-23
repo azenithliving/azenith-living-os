@@ -17,6 +17,7 @@ import { executeTool as executeRealTool } from "@/lib/real-tool-executor";
 import { triggerVercelDeploy } from "@/lib/admin-cloud-evolution";
 import { runBrowserResearchMission } from "@/lib/admin-browser-copilot-brain";
 import type { ToolExecutionContext, ToolExecutionResult } from "@/lib/agent-tools/tool-registry";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -430,7 +431,7 @@ export async function executeLeadDossierSend(
   const tenantId =
     (params.tenantId as string) ||
     context.companyId ||
-    process.env.MASTER_COMPANY_ID ||
+    (await resolveMasterCompanyId()) ||
     "";
   if (!leadId) {
     return { success: false, message: "leadId مطلوب", executionId: context.executionId };

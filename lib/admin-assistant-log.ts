@@ -3,6 +3,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 
 export interface AssistantExecutionEntry {
   id: string;
@@ -38,7 +39,7 @@ export async function logAssistantExecution(params: {
 
   const now = new Date().toISOString();
   const row = {
-    company_id: process.env.MASTER_COMPANY_ID || null,
+    company_id: (await resolveMasterCompanyId()) || null,
     actor_user_id: params.userId || null,
     execution_type: `assistant:${params.tool || params.intentKind || "natural"}`,
     execution_data: {

@@ -16,6 +16,7 @@ import { runCapabilityEvolutionCycle } from "./admin-capability-evolution";
 import { normalizeApprovalRiskLevel } from "./approval-risk";
 import { buildAdminApprovalReport } from "./admin-approval-report";
 import { sendAdminTelegramSummon } from "./admin-telegram-summon";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 
 export interface MindProposal {
   title: string;
@@ -257,8 +258,14 @@ export async function createAdminProposal(params: {
       legacyDescription: params.description,
     },
     actor_user_id: params.userId || null,
-    company_id: process.env.MASTER_COMPANY_ID || null,
+    company_id: (await resolveMasterCompanyId()) || null,
   };
+
+  if (!row.company_id) {
+    // A paper with no company never reaches the owner's decision door, so creating one is a
+    // silent loss rather than a pending item. Measured 2026-10-23: 52 of 56 waiting papers.
+    return { success: false, error: "شركة المتجر ما اتحلّتش — الورقة ما اتسجّلتش" };
+  }
 
   const { data, error } = await supabase
     .from("approval_requests")
@@ -267,11 +274,14 @@ export async function createAdminProposal(params: {
     .single();
 
   if (error) {
-    const legacy = { ...row } as Record<string, unknown>;
-    delete legacy.actor_user_id;
-    delete legacy.company_id;
-    const retry = await supabase.from("approval_requests").insert(legacy).select("id").single();
-    if (retry.error) return { success: false, error: retry.error.message };
+    // The actor column points at an account, and a scheduled run has none — dropping that one
+    // field is a real repair. Dropping the company is not: that is what orphaned the papers,
+    // so the retry keeps the owner stamp and a persisting failure is reported, not hidden.
+    if (!params.userId) return { success: false, error: error.message || "الورقة ما اتسجّلتش" };
+    const withoutActor = { ...row } as Record<string, unknown>;
+    delete withoutActor.actor_user_id;
+    const retry = await supabase.from("approval_requests").insert(withoutActor).select("id").single();
+    if (retry.error) return { success: false, error: retry.error.message || "الورقة ما اتسجّلتش" };
     void summonOwnerForProposal({
       title: params.title,
       reportTitle: approvalReport.title,

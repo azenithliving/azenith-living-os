@@ -3,6 +3,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 
 const CATEGORY = "admin_owner_memory";
 
@@ -38,7 +39,7 @@ export async function rememberOwnerPreference(
     context: { key, value, userId, outcome: opts?.outcome || "neutral" },
     priority: "high",
     actor_user_id: userId,
-    company_id: process.env.MASTER_COMPANY_ID || null,
+    company_id: (await resolveMasterCompanyId()) || null,
     outcome: opts?.outcome || null,
   });
 

@@ -7,6 +7,7 @@ import { getCapabilityMaturityReport } from "@/lib/admin-capability-evolution";
 import { arNum } from "@/lib/ops/metricLabels";
 import { listPendingAdminProposals } from "@/lib/admin-sovereign-mind";
 import { createClient } from "@supabase/supabase-js";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 
 export interface AdminDailyReport {
   generatedAt: string;
@@ -73,6 +74,6 @@ export async function persistDailyReport(report: AdminDailyReport): Promise<void
     content: report.fullTextAr.slice(0, 8000),
     context: report,
     priority: "normal",
-    company_id: process.env.MASTER_COMPANY_ID || null,
+    company_id: (await resolveMasterCompanyId()) || null,
   });
 }

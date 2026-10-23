@@ -6,6 +6,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { EvolutionSuggestion } from "@/lib/self-evolution";
 import { normalizeApprovalRiskLevel } from "@/lib/approval-risk";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 
 export interface CloudPatchPayload {
   targetFile: string;
@@ -55,7 +56,7 @@ export async function queueCloudEvolutionPatch(
     context: { patchId, ...suggestion },
     priority: "high",
     actor_user_id: opts?.userId || null,
-    company_id: process.env.MASTER_COMPANY_ID || null,
+    company_id: (await resolveMasterCompanyId()) || null,
   });
 
   let prUrl: string | undefined;
@@ -83,7 +84,7 @@ export async function queueCloudEvolutionPatch(
         userEmail: opts?.userEmail,
       },
       actor_user_id: opts?.userId || null,
-      company_id: process.env.MASTER_COMPANY_ID || null,
+      company_id: (await resolveMasterCompanyId()) || null,
     })
     .select("id")
     .single();

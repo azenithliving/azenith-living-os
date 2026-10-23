@@ -9,6 +9,7 @@ import { runGenesisManifest, runUltimateTool } from "./admin-tool-bridge";
 import { executeStoredSuggestion } from "./general-agent";
 import type { ClassifiedIntent } from "./admin-intent-types";
 import { buildResultActions, type ResultAction } from "./admin-result-actions";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 
 export interface AdminProposalMetadata {
   executor: "admin_assistant";
@@ -84,7 +85,7 @@ export async function executeAdminProposal(
           {
             userId: metadata.userId || approvedBy,
             userEmail: metadata.userEmail,
-            companyId: process.env.MASTER_COMPANY_ID,
+            companyId: (await resolveMasterCompanyId()) ?? undefined,
           }
         );
         return {

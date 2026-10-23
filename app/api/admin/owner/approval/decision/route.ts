@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
 import { requireAdminApi } from '@/lib/admin-api-guard';
+import { withOwnerPapers } from '@/lib/ops/approval-intake';
 import { recordLedgerEvent } from '@/lib/ops/ledger';
 
 export async function POST(request: NextRequest) {
@@ -49,13 +50,14 @@ export async function POST(request: NextRequest) {
 
     const timestamp = new Date().toISOString();
 
-    // Get the approval request first
-    const { data: approvalRequest, error: fetchError } = await supabaseServer
-      .from('approval_requests')
-      .select('*')
-      .eq('id', approval_id)
-      .eq('company_id', companyId)
-      .single();
+    // Get the approval request first — the same set of papers the decision desk lists
+    const { data: approvalRequest, error: fetchError } = await withOwnerPapers(
+      supabaseServer
+        .from('approval_requests')
+        .select('*')
+        .eq('id', approval_id),
+      companyId,
+    ).maybeSingle();
 
     if (fetchError || !approvalRequest) {
       return NextResponse.json(
@@ -78,6 +80,9 @@ export async function POST(request: NextRequest) {
         status: decision,
         approved_by: user.id,
         approved_at: timestamp,
+        // His word also adopts a paper written before the company stamp existed, so it stops
+        // being invisible to every other surface that counts his waiting pile.
+        company_id: companyId,
         rejection_reason: decision === 'rejected' ? (notes || null) : undefined,
         updated_at: timestamp
       })

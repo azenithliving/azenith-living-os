@@ -6,6 +6,7 @@ import { executeTool, type ToolExecutionResult } from "@/lib/agent-tools/tool-re
 import { SovereignArchitect } from "@/lib/sovereign-architect";
 import { supabaseServer } from "@/lib/dal/unified-supabase";
 import { draftTargetLabel, draftTypeLabel } from "@/lib/ops/draft-labels";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 
 export interface AdminToolContext {
   userId: string;
@@ -18,7 +19,7 @@ export async function runUltimateTool(
   params: Record<string, unknown>,
   ctx: AdminToolContext
 ): Promise<ToolExecutionResult> {
-  const companyId = ctx.companyId || process.env.MASTER_COMPANY_ID || undefined;
+  const companyId = ctx.companyId || (await resolveMasterCompanyId()) || undefined;
 
   // The store's trade is the customer's question, design and agreement. The warehouse,
   // the workshop and the margin are not run from here, so the honest answer is written

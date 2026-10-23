@@ -15,6 +15,7 @@ import type {
   ToolExecutionResult,
 } from "./tool-registry";
 import type { Json } from "@/lib/supabase/database.types";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 
 // ============================================
 // Helper Functions
@@ -1243,7 +1244,7 @@ export async function executeGoalCreate(
         target_metric: (params.targetMetric as string) || "conversion_rate",
         target_value: Number(params.targetValue) || 5,
         unit: "percent",
-        company_id: context.companyId || process.env.MASTER_COMPANY_ID || null,
+        company_id: context.companyId || (await resolveMasterCompanyId()) || null,
         created_by: context.actorUserId,
         status: "active",
         progress_percent: 0,

@@ -88,3 +88,13 @@ export function buildApprovalRow(
     },
   };
 }
+
+/**
+ * Which waiting papers belong to this store: its own rows, plus the ones written before the
+ * company stamp existed. Every surface that lists papers and every surface that decides them
+ * must use this, or the two disagree — measured 2026-10-23: the badge counted 56 papers and the
+ * owner's decision door could see 4, because it filtered on the company alone.
+ */
+export function withOwnerPapers<T extends { or: (filter: string) => T }>(query: T, companyId: string): T {
+  return query.or(`company_id.eq.${companyId},company_id.is.null`);
+}

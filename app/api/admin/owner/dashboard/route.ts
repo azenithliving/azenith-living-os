@@ -20,6 +20,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
 import { requireAdminApi } from '@/lib/admin-api-guard';
 import { readOpenAlerts } from '@/lib/ops/alerts';
+import { withOwnerPapers } from '@/lib/ops/approval-intake';
 
 export async function GET(request: NextRequest) {
   try {
@@ -182,13 +183,15 @@ async function getProductionStatus(companyId: string) {
 
 // Get pending approvals
 async function getPendingApprovals(companyId: string) {
-  const { data, error } = await supabaseServer
-    .from('approval_requests')
-    .select('*, users(name)')
-    .eq('company_id', companyId)
-    .eq('status', 'pending')
-    .order('created_at', { ascending: false })
-    .limit(10);
+  const { data, error } = await withOwnerPapers(
+    supabaseServer
+      .from('approval_requests')
+      .select('*, users(name)')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(10),
+    companyId,
+  );
 
   if (error) {
     console.error('Pending approvals error:', error);
@@ -197,13 +200,13 @@ async function getPendingApprovals(companyId: string) {
 
   const items = data?.map(item => ({
     id: item.id,
-    type: item.request_type,
-    title: item.title,
+    type: item.action_type,
+    title: item.description,
     description: item.description,
-    amount: item.amount,
-    requested_by: (item.users as any)?.name || 'Unknown',
+    risk_level: item.risk_level,
+    requested_by: (item.users as any)?.name || '',
     created_at: item.created_at,
-    context: item.context
+    context: item.metadata
   })) || [];
 
   return { count: items.length, items };
@@ -326,12 +329,14 @@ async function getOpenAlerts(companyId: string, startOfToday: string) {
 
 // Papers that have waited a day for his word
 async function countOverduePapers(companyId: string) {
-  const { data, error } = await supabaseServer
-    .from('approval_requests')
-    .select('id')
-    .eq('company_id', companyId)
-    .eq('status', 'pending')
-    .lt('requested_at', new Date(Date.now() - 86_400_000).toISOString());
+  const { data, error } = await withOwnerPapers(
+    supabaseServer
+      .from('approval_requests')
+      .select('id')
+      .eq('status', 'pending')
+      .lt('requested_at', new Date(Date.now() - 86_400_000).toISOString()),
+    companyId,
+  );
 
   if (error) {
     console.error('Overdue papers error:', error);

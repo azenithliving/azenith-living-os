@@ -29,7 +29,6 @@ interface DashboardData {
     title: string;
     description?: string;
     requested_by: string;
-    amount?: number;
   }>;
   revenue_stats: {
     this_month_revenue: number;
@@ -276,9 +275,8 @@ export default function OwnerDashboardPage() {
                   <div key={approval.id} className="p-4 bg-white/[0.03] border border-white/5 rounded-2xl hover:border-[#C5A059]/30 transition-all group">
                     <p className="font-bold text-sm text-white/90 group-hover:text-[#C5A059]">{approval.title}</p>
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-[10px] text-white/30 uppercase font-bold tracking-wider">{approval.requested_by}</span>
-                      {approval.amount && (
-                        <span className="text-xs font-black text-[#C5A059]">{approval.amount.toLocaleString()} ج</span>
+                      {approval.requested_by && (
+                        <span className="text-[10px] text-white/30 uppercase font-bold tracking-wider">{approval.requested_by}</span>
                       )}
                     </div>
                     <button

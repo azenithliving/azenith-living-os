@@ -45,6 +45,7 @@ import {
 } from "./admin-browser-augmentation";
 import { initializeAdminEnv } from "./admin-env-resolver";
 import { modelFloorLine, modelFailureReason } from "@/lib/ops/capability-tiers";
+import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
 
 export type { IntentKind, ClassifiedIntent } from "./admin-intent-types";
 export { needsMultiAgentMission } from "./admin-intent-classifier";
@@ -315,7 +316,7 @@ export async function processAdminNaturalLanguage(
         const toolResult = await runUltimateTool(
           toolName,
           intent.toolParams || {},
-          { userId: userId || "admin", userEmail, companyId: process.env.MASTER_COMPANY_ID }
+          { userId: userId || "admin", userEmail, companyId: (await resolveMasterCompanyId()) ?? undefined }
         );
         const body =
           toolResult.success && toolResult.message

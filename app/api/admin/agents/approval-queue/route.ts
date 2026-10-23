@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/dal/unified-supabase';
 import { resolveAdminCompanyId } from '@/lib/admin-company';
-import { buildApprovalRow } from '@/lib/ops/approval-intake';
+import { buildApprovalRow, withOwnerPapers } from '@/lib/ops/approval-intake';
 
 // GET: جلب كل الطلبات المعلقة
 export async function GET(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (companyId) {
-      query = query.or(`company_id.eq.${companyId},company_id.is.null`);
+      query = withOwnerPapers(query, companyId);
     }
 
     const { data, error } = await query;
