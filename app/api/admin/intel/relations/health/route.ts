@@ -8,6 +8,7 @@ type RelationCheck = {
   table: string;
   requiredColumns: string[];
   missingColumns: string[];
+  readFailed: boolean;
   healthy: boolean;
 };
 
@@ -42,11 +43,16 @@ export async function GET(request: Request) {
       .eq("table_schema", "public")
       .eq("table_name", relation.table);
 
-    if (error) {
+    if (error || (data || []).length === 0) {
+      // PostgREST cannot see a system view, so this read answers with nothing for every table
+      // (measured on the published link 2026-10-24: all four tables came back "missing" every one
+      // of its columns, including the ones the record had been answering to for weeks). A table
+      // the door cannot read is reported as unreadable — not as a schema fault.
       checks.push({
         table: relation.table,
         requiredColumns: relation.columns,
-        missingColumns: relation.columns,
+        missingColumns: [],
+        readFailed: true,
         healthy: false,
       });
       continue;
@@ -58,31 +64,38 @@ export async function GET(request: Request) {
       table: relation.table,
       requiredColumns: relation.columns,
       missingColumns,
+      readFailed: false,
       healthy: missingColumns.length === 0,
     });
   }
 
   const healthy = checks.every((check) => check.healthy);
   const totalMissing = checks.reduce((sum, check) => sum + check.missingColumns.length, 0);
-  const unhealthyTables = checks.filter((check) => !check.healthy).map((check) => check.table);
+  const unreadableTables = checks.filter((check) => check.readFailed).map((check) => check.table);
+  const gapTables = checks.filter((check) => !check.healthy && !check.readFailed).map((check) => check.table);
 
   return NextResponse.json({
     success: true,
-    message: healthy
-      ? "Intel relation schema is healthy"
-      : "Intel relation schema needs migration sync",
+    message: unreadableTables.length > 0
+      ? `Schema read unavailable for: ${unreadableTables.join(", ")}`
+      : healthy
+        ? "Intel relation schema is healthy"
+        : "Intel relation schema needs migration sync",
     data: {
       healthy,
       totalMissing,
+      unreadableTables,
       checks,
     },
     meta: {
       actorId,
       companyId,
       migrationHint:
-        unhealthyTables.length > 0
-          ? `Missing columns in: ${unhealthyTables.join(", ")}`
-          : "No table is missing a column the code writes",
+        gapTables.length > 0
+          ? `Measured gaps in: ${gapTables.join(", ")}`
+          : unreadableTables.length > 0
+            ? "No gap measured — this door cannot read the schema"
+            : "No table is missing a column the code writes",
     },
   });
 }
