@@ -86,6 +86,12 @@ describe("the company has one answer-giver", () => {
     expect(dashboard).not.toMatch(/\.from\(['"]approval_requests['"]\)\s*\.select\([^)]*\)\s*\.eq\(['"]company_id/);
   });
 
+  it("asks for the pile as a count, not as the length of a page", () => {
+    const dashboard = sourceOf("app/api/admin/owner/dashboard/route.ts");
+    expect(dashboard).toMatch(/count: 'exact'/);
+    expect(dashboard).not.toMatch(/return \{ count: items\.length/);
+  });
+
   it("asks the record only for relations it can answer", () => {
     // `users(name)` embeds failed with PGRST200 (no foreign key from a paper to public.users),
     // so this list had never shown a single paper and the card said «لا توجد طلبات معلقة».

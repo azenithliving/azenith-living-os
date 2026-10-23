@@ -187,19 +187,30 @@ async function getPendingApprovals(companyId: string) {
   // No `users(name)` embed here: the record has no foreign key from a paper to the public
   // users table (it points at auth.users), and PostgREST answers that embed with PGRST200 —
   // measured 2026-10-23, which is why this list had never shown a single paper.
-  const { data, error } = await withOwnerPapers(
-    supabaseServer
-      .from('approval_requests')
-      .select('*')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false })
-      .limit(10),
-    companyId,
-  );
+  // The count is asked for as a count, over the same scope: the list below is a page of ten,
+  // and `items.length` would print 10 on a pile of 58 (measured 2026-10-23 on the published site).
+  const [{ data, error }, total] = await Promise.all([
+    withOwnerPapers(
+      supabaseServer
+        .from('approval_requests')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(10),
+      companyId,
+    ),
+    withOwnerPapers(
+      supabaseServer
+        .from('approval_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending'),
+      companyId,
+    ),
+  ]);
 
-  if (error) {
-    console.error('Pending approvals error:', error);
-    return { count: 0, items: [], failed: true };
+  if (error || total.error) {
+    console.error('Pending approvals error:', error || total.error);
+    return { count: null, items: [], failed: true };
   }
 
   const items = data?.map(item => ({
@@ -213,7 +224,7 @@ async function getPendingApprovals(companyId: string) {
     context: item.metadata
   })) || [];
 
-  return { count: items.length, items };
+  return { count: total.count ?? items.length, items };
 }
 
 // Get low stock items
