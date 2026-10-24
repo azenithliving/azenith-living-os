@@ -854,7 +854,7 @@ function ManagementTab() {
             إعدادات SEO
           </h3>
           <div>
-            <label className="block text-sm text-white/60 mb-1">عنوان الموقع (SEO Title)</label>
+            <label className="block text-sm text-white/60 mb-1">عنوان الموقع</label>
             <input
               value={settings.seo_title || ""}
               onChange={(e) => updateSetting("seo_title", e.target.value)}
@@ -863,7 +863,7 @@ function ManagementTab() {
             />
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1">وصف الموقع (SEO Description)</label>
+            <label className="block text-sm text-white/60 mb-1">وصف الموقع</label>
             <textarea
               value={settings.seo_description || ""}
               onChange={(e) => updateSetting("seo_description", e.target.value)}
@@ -873,7 +873,7 @@ function ManagementTab() {
             />
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1">الكلمات المفتاحية (SEO Keywords)</label>
+            <label className="block text-sm text-white/60 mb-1">الكلمات المفتاحية</label>
             <input
               value={settings.seo_keywords || ""}
               onChange={(e) => updateSetting("seo_keywords", e.target.value)}
@@ -928,7 +928,7 @@ function ManagementTab() {
             </div>
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1">الخط (Font Family)</label>
+            <label className="block text-sm text-white/60 mb-1">الخط</label>
             <input
               value={settings.font_family || ""}
               onChange={(e) => updateSetting("font_family", e.target.value)}
@@ -937,7 +937,7 @@ function ManagementTab() {
             />
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1">رابط الشعار (Logo URL)</label>
+            <label className="block text-sm text-white/60 mb-1">رابط الشعار</label>
             <input
               value={settings.logo_url || ""}
               onChange={(e) => updateSetting("logo_url", e.target.value)}
@@ -946,7 +946,7 @@ function ManagementTab() {
             />
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1">رابط الأيقونة (Favicon URL)</label>
+            <label className="block text-sm text-white/60 mb-1">رابط الأيقونة</label>
             <input
               value={settings.favicon_url || ""}
               onChange={(e) => updateSetting("favicon_url", e.target.value)}

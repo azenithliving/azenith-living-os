@@ -233,7 +233,7 @@ export default function OwnerDashboardPage() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#C5A059]/5 blur-3xl rounded-full" />
             <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">🏭</div>
-              ذكاء الإنتاج (Production Intel)
+              ذكاء الإنتاج
             </h2>
             <div className="grid grid-cols-3 gap-6">
               <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl text-center group-hover:border-blue-500/20 transition-all">
@@ -255,7 +255,7 @@ export default function OwnerDashboardPage() {
           <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8">
             <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">📦</div>
-              التدفق التشغيلي (Operational Flow)
+              التدفق التشغيلي
             </h2>
             <div className="space-y-4">
               <OrderStatusRow label="قيد المراجعة" count={data?.orders_summary.pending_orders || 0} color="gold" progress={workflowTotal ? Math.round(((data?.orders_summary.pending_orders || 0) / workflowTotal) * 100) : 0} />

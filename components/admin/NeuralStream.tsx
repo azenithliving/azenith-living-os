@@ -60,7 +60,7 @@ export function NeuralStream() {
         <div>
           <h3 className="flex items-center gap-2 text-lg font-bold text-white">
             <Activity className="h-5 w-5 text-[#C5A059] animate-pulse" />
-            سجل استدلال وعمليات الوكلاء (Agent Reasoning Stream)
+            سجل استدلال وعمليات الوكلاء
           </h3>
           <p className="text-xs text-white/50">تدفق عمليات التفكير والأوامر الميدانية المسجلة في جدول neural_stream</p>
         </div>

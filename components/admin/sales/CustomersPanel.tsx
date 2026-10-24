@@ -597,11 +597,11 @@ export default function CustomersPanel() {
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
                           </span>
-                          <p className="text-xs font-bold text-blue-400 tracking-wider">رادار الاستشعار الحي (Telemetry)</p>
+                          <p className="text-xs font-bold text-blue-400 tracking-wider">رادار الاستشعار الحي</p>
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-sm mt-3">
                           <div>
-                            <p className="text-white/70 text-xs">معدل الانتباه (Attention)</p>
+                            <p className="text-white/70 text-xs">معدل الانتباه</p>
                             <div className="flex items-center gap-2 mt-1">
                               <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
                                 <div 

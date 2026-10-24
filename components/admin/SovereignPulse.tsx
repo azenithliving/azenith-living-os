@@ -87,7 +87,7 @@ export function SovereignPulse() {
             )}
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white tracking-tight">سجل أحداث النظام اللحظي (Event Stream)</h3>
+            <h3 className="text-sm font-bold text-white tracking-tight">سجل أحداث النظام اللحظي</h3>
             <p className="text-[10px] text-white/40 uppercase tracking-widest">PostgreSQL Event Horizon • Real-time</p>
           </div>
         </div>

@@ -187,7 +187,7 @@ export function ArchitectWidget() {
                   type="text"
                   value={intent}
                   onChange={(e) => setIntent(e.target.value)}
-                  placeholder="أدخل أمر التكوين (Genesis)..."
+                  placeholder="أدخل أمر التكوين..."
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#C5A059] transition-colors"
                   disabled={isManifesting}
                 />
