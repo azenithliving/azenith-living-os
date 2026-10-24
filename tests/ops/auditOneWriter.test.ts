@@ -22,6 +22,9 @@ function codeOf(path: string) {
   return readFileSync(path, "utf8");
 }
 
+// Built in two pieces so these guards cannot match their own source.
+const deadTable = ["sovereign", "audit_logs"].join("_");
+
 function files(dir: string): string[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir).flatMap((entry) => {
@@ -135,6 +138,25 @@ describe("the one audit writer", () => {
     if (!wrote.ok) expect(wrote.error).toContain("ما رجّعتش رقم السطر");
   });
 
+  it("carries an account-recovery event with the object it touched inside the payload", async () => {
+    const { client, calls } = fakeClient({ data: [{ id: "r9" }], error: null });
+    const writer = await loadWriter(client);
+
+    const wrote = await writer.recordAuditEvent({
+      kind: "recovery_code_used",
+      action: "اتستخدم كود استرجاع للدخول للحساب",
+      actor: "03105dde-325a-43ff-987d-50a0424505b9",
+      details: { entityType: "auth", entityId: "03105dde-325a-43ff-987d-50a0424505b9", codeIndex: 3, remaining: 9 },
+      outcome: "success",
+    });
+
+    expect(wrote).toEqual({ ok: true, id: "r9" });
+    const sent = calls[0] as { event_type: string; actor: string; details: Record<string, unknown> };
+    expect(sent.event_type).toBe("recovery_code_used");
+    expect(sent.actor).toBe("03105dde-325a-43ff-987d-50a0424505b9");
+    expect(sent.details).toMatchObject({ entityType: "auth", codeIndex: 3, remaining: 9 });
+  });
+
   it("admits when the store's own credential is missing", async () => {
     const writer = await loadWriter(null);
 
@@ -167,5 +189,21 @@ describe("the audit desk has one door", () => {
 
     expect(door).toContain("AUDIT_WRITE_COLUMNS");
     expect(door).not.toMatch(/"approval_request_id"/);
+  });
+
+  it("no file in the store names the trail table the record never had", () => {
+    const naming = ["lib", "app", "components", "tests"]
+      .flatMap((root) => files(root))
+      .filter((file) => codeOf(file).includes(deadTable));
+
+    expect(naming, naming.join(", ")).toEqual([]);
+  });
+
+  it("the account-recovery path writes through the one audit door", () => {
+    const vault = codeOf("lib/auth/vault.ts");
+
+    expect(vault).toContain("recordAuditEvent");
+    expect(vault).toContain('kind: "recovery_code_used"');
+    expect(vault).not.toContain(deadTable);
   });
 });

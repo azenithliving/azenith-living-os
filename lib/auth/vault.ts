@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash, randomBytes, createCipheriv, createDecipheriv, pbkdf2Sync } from "crypto";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { recordAuditEvent } from "@/lib/ops/audit-record";
 
 interface TrustedDevice {
   deviceId: string;
@@ -179,9 +180,13 @@ export async function verifyRecoveryCode(adminId: string, code: string): Promise
     })
     .eq("admin_id", adminId);
   
-  await logAuditEvent(adminId, "recovery_code_used", "auth", adminId, {
-    codeIndex,
-    remaining: vaultData.remaining,
+  // A trail that refuses must never cost a man his own account, so this verdict is not thrown.
+  await recordAuditEvent({
+    kind: "recovery_code_used",
+    action: "اتستخدم كود استرجاع للدخول للحساب",
+    actor: adminId,
+    details: { entityType: "auth", entityId: adminId, codeIndex, remaining: vaultData.remaining },
+    outcome: "success",
   });
   
   return true;
@@ -284,29 +289,6 @@ export function verifyOfflineMasterHash(
   const fullClientHash = clientHash + serverFragment;
   
   return fullClientHash === expectedHash;
-}
-
-/**
- * Log audit event
- */
-async function logAuditEvent(
-  actorId: string,
-  action: string,
-  entityType: string,
-  entityId: string,
-  payload: Record<string, unknown>
-): Promise<void> {
-  const supabase = getSupabaseAdminClient();
-  if (!supabase) throw new Error("System Configuration Error");
-  
-  await supabase.from("sovereign_audit_logs").insert({
-    actor_id: actorId,
-    actor_type: "user",
-    action,
-    entity_type: entityType,
-    entity_id: entityId,
-    payload,
-  });
 }
 
 /**
