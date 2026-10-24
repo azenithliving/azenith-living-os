@@ -53,7 +53,7 @@ describe("a path in his chat is named where it leads", () => {
 });
 
 describe("the chat draws the label and keeps the address behind the press", () => {
-  const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+  const panel = readFileSync("components/talk/MarkdownContent.tsx", "utf8");
 
   it("labels a path link in Arabic and leaves a full web address alone", () => {
     expect(panel).toContain("chatPlaceLabel(part)");

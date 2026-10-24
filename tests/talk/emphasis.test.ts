@@ -57,7 +57,7 @@ describe("the owner's screen draws emphasis instead of printing its markers", ()
 });
 
 describe("the chat surface actually uses it", () => {
-  const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+  const panel = readFileSync("components/talk/MarkdownContent.tsx", "utf8");
 
   it("imports the splitter and marks what it drew", () => {
     expect(panel).toContain('from \'@/lib/talk/emphasis\'');
@@ -144,7 +144,7 @@ describe("a line that is a list item", () => {
 });
 
 describe("the chat surface uses the bullet rule", () => {
-  const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+  const panel = readFileSync("components/talk/MarkdownContent.tsx", "utf8");
   it("draws a star line as a dot, not as punctuation", () => {
     expect(panel).toContain("isBulletLine(line)");
     expect(panel).toContain("stripBullet(line)");
@@ -241,7 +241,7 @@ describe("a list written in brackets is drawn as a list", () => {
 });
 
 describe("the chat surface draws both", () => {
-  const panel = readFileSync("components/admin/agents/ChatPanel.tsx", "utf8");
+  const panel = readFileSync("components/talk/MarkdownContent.tsx", "utf8");
 
   it("puts the equation in its own direction and the list through the bullet rule", () => {
     expect(panel).toContain('data-inline="math"');

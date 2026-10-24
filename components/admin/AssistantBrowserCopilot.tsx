@@ -31,6 +31,7 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
+import { MarkdownContent } from "@/components/talk/MarkdownContent";
 
 type BrowserSession =
   | {
@@ -898,7 +899,7 @@ export function AssistantBrowserCopilot({
                             : "border-white/10 bg-white/[0.04] text-white/80"
                         }`}
                       >
-                        <p className="whitespace-pre-wrap line-clamp-5">{message.content}</p>
+                        <MarkdownContent content={message.content} />
                         {message.tool && <p className="mt-1 font-mono text-[10px] text-[#C5A059]/80">{message.tool}</p>}
                       </div>
                     ))}

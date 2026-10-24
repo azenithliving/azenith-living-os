@@ -22,6 +22,7 @@ import {
 import { SovereignMindPanel } from "@/components/admin/SovereignMindPanel";
 import { AssistantBrowserCopilot } from "@/components/admin/AssistantBrowserCopilot";
 import { ChatPanel } from "@/components/admin/agents/ChatPanel";
+import { MarkdownContent } from "@/components/talk/MarkdownContent";
 import type { ResultAction } from "@/lib/admin-result-actions";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -374,7 +375,9 @@ export function UnifiedAssistant() {
                       ? "bg-[#C5A059]/15 border border-[#C5A059]/30"
                       : "bg-white/[0.04] border border-white/10"
                   }`}>
-                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    <div className="leading-relaxed">
+                      <MarkdownContent content={msg.content} />
+                    </div>
                     {msg.tool && (
                       <p className="mt-2 text-[10px] text-[#C5A059]/80 font-mono">أداة: {msg.tool}</p>
                     )}

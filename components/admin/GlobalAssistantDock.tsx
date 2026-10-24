@@ -5,6 +5,7 @@ import { Bot, ExternalLink, Loader2, MessageCircle, Send, X } from "lucide-react
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ResultAction } from "@/lib/admin-result-actions";
+import { MarkdownContent } from "@/components/talk/MarkdownContent";
 
 type DockMessage = {
   id: string;
@@ -200,7 +201,9 @@ export function GlobalAssistantDock() {
             <Bot className="h-3.5 w-3.5" />
             المساعد
           </div>
-          <p className="line-clamp-2">{latestAssistant.content}</p>
+          <div className="line-clamp-2">
+            <MarkdownContent content={latestAssistant.content} />
+          </div>
         </div>
       )}
 
@@ -232,7 +235,7 @@ export function GlobalAssistantDock() {
                     : "ml-8 border-white/10 bg-white/[0.04] text-white/80"
                 }`}
               >
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                <MarkdownContent content={message.content} />
                 {message.tool && <p className="mt-1 font-mono text-[10px] text-[#C5A059]/80">{message.tool}</p>}
                 {message.actions && message.actions.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
