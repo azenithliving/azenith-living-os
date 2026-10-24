@@ -201,7 +201,8 @@ export default function OwnerDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="الإيرادات الشهرية"
-          value={`${(data?.revenue_stats.this_month_revenue || 0).toLocaleString()} ج`}
+          value={data?.revenue_stats?.this_month_revenue ?? 0}
+          suffix="ج"
           icon={<TrendingUp className="w-5 h-5" />}
           color="gold"
         />
@@ -387,7 +388,7 @@ export default function OwnerDashboardPage() {
   );
 }
 
-function MetricCard({ title, value, color, icon }: { title: string; value: string | number; color: string; icon: any }) {
+function MetricCard({ title, value, color, icon, suffix }: { title: string; value: string | number; color: string; icon: any; suffix?: string }) {
   const colorMap: Record<string, string> = {
     gold: 'text-[#C5A059] border-[#C5A059]/20 bg-[#C5A059]/5',
     blue: 'text-blue-400 border-blue-500/20 bg-blue-500/5',
@@ -401,7 +402,9 @@ function MetricCard({ title, value, color, icon }: { title: string; value: strin
         <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{title}</p>
         <span className="opacity-80">{icon}</span>
       </div>
-      <p className="text-2xl font-black text-white">{value}</p>
+      <p className="text-2xl font-black text-white">
+        {typeof value === "number" ? `${arNum(value)}${suffix ? ` ${suffix}` : ""}` : value}
+      </p>
     </div>
   );
 }

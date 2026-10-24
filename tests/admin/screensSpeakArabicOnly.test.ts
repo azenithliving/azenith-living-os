@@ -81,4 +81,13 @@ describe("his admin screens do not restate Arabic in brackets", () => {
     }
     expect(readFileSync("app/admin/owner-dashboard/page.tsx", "utf8")).toContain("ذكاء الإنتاج\n");
   });
+
+  it("the dashboard counts in his numerals, through the store's own namer", () => {
+    const page = readFileSync("app/admin/owner-dashboard/page.tsx", "utf8");
+    // Two owners of «how a number looks»: the browser's locale and `arNum`. Measured in the
+    // screenshot this atom shipped with: «0» and «2» in Latin next to «٥٦» in his digits.
+    expect(page).not.toMatch(/toLocaleString\(\)/);
+    expect(page).toMatch(/typeof value === "number" \? `\$\{arNum\(value\)\}/);
+    expect(page).toMatch(/value=\{data\?\.orders_summary\.pending_orders \|\| 0\}/);
+  });
 });
