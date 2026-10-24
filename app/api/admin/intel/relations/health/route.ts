@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { resolvePrimaryCompanyId } from "@/lib/company-resolver";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { AUDIT_WRITE_COLUMNS } from "@/lib/ops/audit-record";
 import { MEMORY_WRITE_COLUMNS } from "@/lib/ops/memory-record";
 
 /**
@@ -27,7 +28,7 @@ const REQUIRED_RELATIONS: Array<{ table: string; columns: string[] }> = [
   // strip it again on refusal, and `enabled` alone carries the fact.
   { table: "automation_rules", columns: ["company_id", "enabled"] },
   { table: "approval_requests", columns: ["company_id", "actor_user_id", "command_log_id"] },
-  { table: "audit_log", columns: ["company_id", "actor_user_id", "approval_request_id", "command_log_id"] },
+  { table: "audit_log", columns: [...AUDIT_WRITE_COLUMNS] },
   { table: "agent_memory", columns: [...MEMORY_WRITE_COLUMNS] },
 ];
 

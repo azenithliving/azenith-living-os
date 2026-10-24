@@ -11,6 +11,7 @@
  */
 
 import { createClient as createServerClient } from "@/utils/supabase/server";
+import { recordAuditEvent, type AuditWrite } from "@/lib/ops/audit-record";
 import { storeMemory } from "./memory-store";
 import { normalizeApprovalRiskLevel } from "@/lib/approval-risk";
 
@@ -260,21 +261,6 @@ export async function createApprovalRequest(
       .insert(approvalPayload)
       .select("*")
       .single();
-
-    // Backward compatibility for older schemas without relation columns.
-    if (error && error.code === "42703") {
-      const legacyPayload = { ...approvalPayload } as Record<string, unknown>;
-      delete legacyPayload.company_id;
-      delete legacyPayload.actor_user_id;
-      delete legacyPayload.command_log_id;
-      const legacyInsert = await supabase
-        .from("approval_requests")
-        .insert(legacyPayload)
-        .select("*")
-        .single();
-      data = legacyInsert.data;
-      error = legacyInsert.error;
-    }
 
     if (error) throw error;
 
@@ -591,35 +577,15 @@ export async function logAuditEvent(
   details: Record<string, unknown>,
   result: "success" | "failure" | "blocked",
   relationContext?: RelationContext
-): Promise<void> {
-  const supabase = await createServerClient();
-
-  try {
-    const payload = {
-      event_type: eventType,
-      action,
-      actor,
-      details,
-      result,
-      timestamp: new Date().toISOString(),
-      company_id: relationContext?.companyId || null,
-      actor_user_id: relationContext?.actorUserId || null,
-      approval_request_id: relationContext?.approvalRequestId || null,
-      command_log_id: relationContext?.commandLogId || null,
-    };
-
-    const insertResult = await supabase.from("audit_log").insert(payload);
-    if (insertResult.error && insertResult.error.code === "42703") {
-      const legacyPayload = { ...payload } as Record<string, unknown>;
-      delete legacyPayload.company_id;
-      delete legacyPayload.actor_user_id;
-      delete legacyPayload.approval_request_id;
-      delete legacyPayload.command_log_id;
-      await supabase.from("audit_log").insert(legacyPayload);
-    }
-  } catch (error) {
-    console.error("[SecurityManager] Failed to log audit event:", error);
-  }
+): Promise<AuditWrite> {
+  return recordAuditEvent({
+    kind: eventType,
+    action,
+    actor,
+    details,
+    outcome: result,
+    relation: relationContext,
+  });
 }
 
 /**

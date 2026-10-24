@@ -15,7 +15,7 @@ vi.mock("@/lib/company-resolver", () => ({
 const FULL_SCHEMA: Record<string, string[]> = {
   automation_rules: ["company_id", "enabled"],
   approval_requests: ["company_id", "actor_user_id", "command_log_id"],
-  audit_log: ["company_id", "actor_user_id", "approval_request_id", "command_log_id"],
+  audit_log: ["event_type", "action", "actor", "details", "result", "timestamp"],
   agent_memory: [
     "memory_type",
     "type",
@@ -134,13 +134,8 @@ describe("Intel Relations Health API", () => {
     expect(json.data.healthy).toBe(false);
     expect(audit.readFailed).toBe(false);
     expect(audit.tableMissing).toBe(false);
-    expect(audit.missingColumns).toEqual([
-      "company_id",
-      "actor_user_id",
-      "approval_request_id",
-      "command_log_id",
-    ]);
-    expect(json.data.totalMissing).toBe(4);
+    expect(audit.missingColumns).toEqual(["action", "details", "timestamp"]);
+    expect(json.data.totalMissing).toBe(3);
     expect(json.data.gapTables).toEqual(["audit_log"]);
     expect(json.message).toContain("Columns missing in: audit_log");
     expect(json.meta.migrationHint).toContain("audit_log");
