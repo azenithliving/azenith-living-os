@@ -78,6 +78,8 @@ export type SchemaCensus = {
   tables: TableInfo[];
   failed: boolean;
   error: string | null;
+  /** Relations the record exposes but the census leaves out — old backups and internal relations. */
+  skipped: number;
 };
 
 /**
@@ -90,27 +92,29 @@ export type SchemaCensus = {
 export async function discoverDatabaseSchema(preFetched?: RecordInventory): Promise<SchemaCensus> {
   const inventory = preFetched ?? (await fetchRecordInventory());
   if (!inventory.ok) {
-    return { tables: [], failed: true, error: inventory.error };
+    return { tables: [], failed: true, error: inventory.error, skipped: 0 };
   }
 
-  const tables: TableInfo[] = inventory.tables
-    .filter((table) => !table.name.startsWith("pg_") && !table.name.startsWith("_"))
-    .map((table) => {
-      const columns: TableColumn[] = table.columns.map((column) => ({
-        name: column.name,
-        type: column.type,
-        nullable: !column.required,
-        defaultValue: null,
-      }));
-      return {
-        name: table.name,
-        columns,
-        description: generateTableDescription(table.name, columns),
-        rowCount: null,
-      };
-    });
+  const working = inventory.tables.filter(
+    (table) => !table.name.startsWith("pg_") && !table.name.startsWith("_")
+  );
 
-  return { tables, failed: false, error: null };
+  const tables: TableInfo[] = working.map((table) => {
+    const columns: TableColumn[] = table.columns.map((column) => ({
+      name: column.name,
+      type: column.type,
+      nullable: !column.required,
+      defaultValue: null,
+    }));
+    return {
+      name: table.name,
+      columns,
+      description: generateTableDescription(table.name, columns),
+      rowCount: null,
+    };
+  });
+
+  return { tables, failed: false, error: null, skipped: inventory.tables.length - working.length };
 }
 
 /**
@@ -407,7 +411,9 @@ function generateSystemSummary(
   const inactiveRules = rules.filter((r) => !r.isActive).length;
   const tablesLine = census.failed
     ? `- عدد الجداول مش معروف — السجل ما ردّش على الجرد${census.error ? ` (${census.error})` : ""}`
-    : `- قاعدة البيانات فيها ${arNum(census.tables.length)} جدول`;
+    : `- قاعدة البيانات فيها ${arNum(census.tables.length)} جدول${
+        census.skipped > 0 ? `، و ${arNum(census.skipped)} علاقة مش داخلة في العدّ (نسخ قديمة أو علاقات داخلية)` : ""
+      }`;
   const mainTables = census.failed ? "مش معروف" : census.tables.slice(0, 5).map((t) => t.name).join(", ");
 
   return `

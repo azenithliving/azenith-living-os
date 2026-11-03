@@ -146,12 +146,22 @@ describe("the census the agents read", () => {
     expect(census.tables[0].description).toContain("أعمدة");
   });
 
-  it("keeps the backup relations out of the inventory the way the old census did", async () => {
+  it("keeps the backup relations out of the inventory, and says how many it left out", async () => {
     stubFetch({ ok: true, json: swagger });
 
     const census = await engine.discoverDatabaseSchema();
 
     expect(census.tables.some((t) => t.name.startsWith("_"))).toBe(false);
+    expect(census.skipped).toBe(1);
+  });
+
+  it("the snapshot says which relations the count leaves out", async () => {
+    stubFetch({ ok: true, json: swagger });
+    const freshEngine = await loadEngine();
+
+    const snapshot = await freshEngine.generateSystemSnapshot();
+
+    expect(snapshot.summary).toContain("علاقة مش داخلة في العدّ");
   });
 
   it("carries the failure up instead of returning a silent empty list", async () => {
