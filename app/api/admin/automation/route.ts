@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase-service";
 import { resolvePrimaryCompanyId } from "@/lib/company-resolver";
+import { AUTOMATION_WRITE_COLUMNS } from "@/lib/ops/automation-shape";
 
 export const dynamic = "force-dynamic";
 
@@ -36,80 +37,16 @@ function apiError(error: string, status: number, details?: unknown) {
 }
 
 function normalizeRule(row: Record<string, unknown>): AutomationRule {
-  const isActive = typeof row.is_active === "boolean" ? row.is_active : Boolean(row.enabled);
   return {
     id: String(row.id || ""),
     name: String(row.name || ""),
     trigger: String(row.trigger || ""),
     conditions: (row.conditions as Record<string, unknown>) || {},
     actions: (row.actions as Record<string, unknown>) || {},
-    enabled: isActive,
+    enabled: Boolean(row.enabled),
     created_at: row.created_at ? String(row.created_at) : undefined,
     updated_at: row.updated_at ? String(row.updated_at) : undefined,
   };
-}
-
-function isMissingColumn(error: { code?: string; message?: string } | null, column: string) {
-  const message = error?.message || "";
-  return (
-    ((error?.code === "42703" || error?.code === "PGRST204") &&
-      message.toLowerCase().includes(column.toLowerCase())) ||
-    new RegExp(`column .*${column}.* does not exist|could not find .*${column}.* column`, "i").test(message)
-  );
-}
-
-function missingOptionalColumn(
-  error: { code?: string; message?: string } | null,
-  columns: string[]
-) {
-  return columns.find((column) => isMissingColumn(error, column)) || null;
-}
-
-async function insertAutomationRule(insertData: Record<string, unknown>) {
-  let data = null;
-  let error = null;
-  const optionalColumns = ["created_by", "is_active", "company_id"];
-
-  for (let attempt = 0; attempt <= optionalColumns.length; attempt += 1) {
-    const result = await supabaseService
-      .from("automation_rules")
-      .insert(insertData as never)
-      .select()
-      .single();
-
-    data = result.data;
-    error = result.error;
-
-    const column = missingOptionalColumn(error, optionalColumns);
-    if (!error || !column) break;
-    delete insertData[column];
-  }
-
-  return { data, error };
-}
-
-async function updateAutomationRule(id: string, updateData: Record<string, unknown>) {
-  let data = null;
-  let error = null;
-  const optionalColumns = ["updated_by", "is_active"];
-
-  for (let attempt = 0; attempt <= optionalColumns.length; attempt += 1) {
-    const result = await supabaseService
-      .from("automation_rules")
-      .update(updateData as never)
-      .eq("id", id)
-      .select()
-      .single();
-
-    data = result.data;
-    error = result.error;
-
-    const column = missingOptionalColumn(error, optionalColumns);
-    if (!error || !column) break;
-    delete updateData[column];
-  }
-
-  return { data, error };
 }
 
 /**
@@ -168,12 +105,22 @@ export async function POST(request: NextRequest) {
       conditions: conditions || {},
       actions: actions || {},
       enabled,
-      is_active: enabled,
       company_id: resolvedCompanyId,
-      created_by: actorId,
     };
 
-    const { data, error } = await insertAutomationRule(insertData);
+    // A name the record does not have is paid for with a refused round trip, so it stops here.
+    const stray = Object.keys(insertData).filter(
+      (key) => !(AUTOMATION_WRITE_COLUMNS as readonly string[]).includes(key),
+    );
+    if (stray.length > 0) {
+      return apiError(`القاعدة فيها أسماء مش في سجل القواعد: ${stray.join("، ")}`, 500);
+    }
+
+    const { data, error } = await supabaseService
+      .from("automation_rules")
+      .insert(insertData as never)
+      .select()
+      .single();
 
     if (error) {
       return apiError("Failed to create automation rule", 500, error);
@@ -217,12 +164,20 @@ export async function PUT(request: NextRequest) {
       return apiError("No fields to update", 400);
     }
 
-    if (updateData.enabled !== undefined) {
-      (updateData as Record<string, unknown>).is_active = updateData.enabled;
+    const update = updateData as Record<string, unknown>;
+    const stray = Object.keys(update).filter(
+      (key) => !(AUTOMATION_WRITE_COLUMNS as readonly string[]).includes(key),
+    );
+    if (stray.length > 0) {
+      return apiError(`القاعدة فيها أسماء مش في سجل القواعد: ${stray.join("، ")}`, 500);
     }
-    (updateData as Record<string, unknown>).updated_by = actorId;
 
-    const { data, error } = await updateAutomationRule(id, updateData as Record<string, unknown>);
+    const { data, error } = await supabaseService
+      .from("automation_rules")
+      .update(update as never)
+      .eq("id", id)
+      .select()
+      .single();
 
     if (error) {
       console.error("[Automation API] Error updating rule:", error);

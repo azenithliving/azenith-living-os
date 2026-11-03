@@ -13,7 +13,7 @@ vi.mock("@/lib/company-resolver", () => ({
  * not have, and an empty row list with no error for a table that has the column but no rows.
  */
 const FULL_SCHEMA: Record<string, string[]> = {
-  automation_rules: ["company_id", "enabled"],
+  automation_rules: ["name", "trigger", "conditions", "actions", "enabled", "company_id"],
   approval_requests: ["company_id", "actor_user_id", "command_log_id"],
   audit_log: ["event_type", "action", "actor", "details", "result", "timestamp"],
   agent_memory: [
