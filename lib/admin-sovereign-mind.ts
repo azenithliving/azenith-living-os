@@ -418,3 +418,22 @@ export async function countPendingAdminProposals(): Promise<number | null> {
   if (error) return null;
   return count ?? 0;
 }
+
+/**
+ * Whether a paper asking the same thing is already waiting. Measured 2026-11-03: the daily report
+ * opened a fresh copy of the same fault every morning, sixty-eight deep, because nothing asked
+ * whether the question was already on his desk.
+ */
+export async function countOpenPapersLike(actionType: string): Promise<number | null> {
+  const supabase = getServiceSupabase();
+  if (!supabase) return null;
+
+  const { count, error } = await supabase
+    .from("approval_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending")
+    .eq("action_type", actionType);
+
+  if (error) return null;
+  return count ?? 0;
+}

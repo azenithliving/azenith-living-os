@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assertCronAuthorized } from "@/lib/cron-auth";
 import { buildAdminDailyReport, persistDailyReport } from "@/lib/admin-daily-report";
-import { createAdminProposal } from "@/lib/admin-sovereign-mind";
+import { createAdminProposal, countOpenPapersLike } from "@/lib/admin-sovereign-mind";
 
 export const maxDuration = 60;
 
@@ -15,22 +15,30 @@ async function run(request: NextRequest) {
   const ownerEmail = process.env.MASTER_ADMIN_EMAILS?.split(",")[0]?.trim();
   let proposalCreated = false;
   let proposalId: string | null = null;
+  let proposalSkipped: string | null = null;
   let proposalError: string | null = null;
   // Only a report carrying something broken asks for his signature. Gating on the pending pile
   // made this job create the paper it was counting, every day, forever.
   if (report.needsReview) {
-    const proposal = await createAdminProposal({
-      title: "تقرير يومي فيه حاجة محتاجة مراجعتك",
-      description: report.fullTextAr.slice(0, 1500),
-      reasoning: `تقرير مجدول يومي · ${report.reviewReasons.join(" · ")}`,
-      userMessage: "اعرض إحصائيات آخر يوم وافحص صحة النظام",
-      intent: { kind: "analytics", analyticsDays: 7, confidence: 0.9 },
-      userEmail: ownerEmail,
-      proactive: true,
-    });
-    proposalCreated = proposal.success;
-    proposalId = proposal.success ? (proposal.requestId ?? null) : null;
-    proposalError = proposal.success ? null : proposal.error || "الورقة ما اتسجلتش";
+    const alreadyWaiting = await countOpenPapersLike("assistant_analytics");
+    if (alreadyWaiting === null) {
+      proposalError = "السجل ما ردّش — ما قدرناش نعرف لو فيه ورقة مستنية";
+    } else if (alreadyWaiting > 0) {
+      proposalSkipped = `فيه ${alreadyWaiting} ورقة مستنية نفس الطلب`;
+    } else {
+      const proposal = await createAdminProposal({
+        title: "تقرير يومي فيه حاجة محتاجة مراجعتك",
+        description: report.fullTextAr.slice(0, 1500),
+        reasoning: `تقرير مجدول يومي · ${report.reviewReasons.join(" · ")}`,
+        userMessage: "اعرض إحصائيات آخر يوم وافحص صحة النظام",
+        intent: { kind: "analytics", analyticsDays: 7, confidence: 0.9 },
+        userEmail: ownerEmail,
+        proactive: true,
+      });
+      proposalCreated = proposal.success;
+      proposalId = proposal.success ? (proposal.requestId ?? null) : null;
+      proposalError = proposal.success ? null : proposal.error || "الورقة ما اتسجلتش";
+    }
   }
 
   return NextResponse.json({
@@ -41,6 +49,7 @@ async function run(request: NextRequest) {
     reviewReasons: report.reviewReasons,
     proposalCreated,
     proposalId,
+    proposalSkipped,
     proposalError,
     memoryStored: stored.ok,
     memoryError: stored.ok ? null : stored.error,

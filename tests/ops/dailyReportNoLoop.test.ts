@@ -27,7 +27,7 @@ function stubReport(overrides: Record<string, unknown> = {}) {
   };
 }
 
-async function loadCronDoor(report: ReturnType<typeof stubReport>) {
+async function loadCronDoor(report: ReturnType<typeof stubReport>, alreadyWaiting: number | null = 0) {
   const createAdminProposal = vi.fn(async () => ({ success: true, requestId: "paper-1" }));
   vi.resetModules();
   vi.doMock("@/lib/cron-auth", () => ({ assertCronAuthorized: () => null }));
@@ -35,7 +35,10 @@ async function loadCronDoor(report: ReturnType<typeof stubReport>) {
     buildAdminDailyReport: async () => report,
     persistDailyReport: async () => ({ ok: true, id: "m1" }),
   }));
-  vi.doMock("@/lib/admin-sovereign-mind", () => ({ createAdminProposal }));
+  vi.doMock("@/lib/admin-sovereign-mind", () => ({
+    createAdminProposal,
+    countOpenPapersLike: async () => alreadyWaiting,
+  }));
   const { GET } = await import("@/app/api/cron/admin-daily-report/route");
   return { GET, createAdminProposal };
 }
@@ -94,13 +97,41 @@ describe("the daily report's paper", () => {
       buildAdminDailyReport: async () => stubReport({ needsReview: true, reviewReasons: ["أرقام آخر أسبوع ما جتش"] }),
       persistDailyReport: async () => ({ ok: true, id: "m1" }),
     }));
-    vi.doMock("@/lib/admin-sovereign-mind", () => ({ createAdminProposal }));
+    vi.doMock("@/lib/admin-sovereign-mind", () => ({
+      createAdminProposal,
+      countOpenPapersLike: async () => 0,
+    }));
     const { GET } = await import("@/app/api/cron/admin-daily-report/route");
 
     const json = await (await GET(new Request("http://localhost/api/cron/admin-daily-report") as never)).json();
 
     expect(json.proposalCreated).toBe(false);
     expect(json.proposalError).toContain("ما اتحلّتش");
+  });
+
+  it("does not open a second copy of a question already waiting", async () => {
+    const { GET, createAdminProposal } = await loadCronDoor(
+      stubReport({ needsReview: true, reviewReasons: ["أرقام آخر أسبوع ما جتش"] }),
+      1,
+    );
+
+    const json = await (await GET(new Request("http://localhost/api/cron/admin-daily-report") as never)).json();
+
+    expect(createAdminProposal).not.toHaveBeenCalled();
+    expect(json.proposalCreated).toBe(false);
+    expect(json.proposalSkipped).toContain("ورقة مستنية");
+  });
+
+  it("says so when the record will not answer whether a paper waits", async () => {
+    const { GET, createAdminProposal } = await loadCronDoor(
+      stubReport({ needsReview: true, reviewReasons: ["صحة النظام ردّت بفشل"] }),
+      null,
+    );
+
+    const json = await (await GET(new Request("http://localhost/api/cron/admin-daily-report") as never)).json();
+
+    expect(createAdminProposal).not.toHaveBeenCalled();
+    expect(json.proposalError).toContain("ما ردّش");
   });
 
   it("no longer reads the waiting pile as its own reason", () => {
