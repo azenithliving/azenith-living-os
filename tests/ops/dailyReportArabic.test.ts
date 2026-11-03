@@ -20,6 +20,7 @@ vi.mock("@/lib/architect-tools", () => ({
 
 vi.mock("@/lib/admin-sovereign-mind", () => ({
   listPendingAdminProposals: vi.fn(async () => Array.from({ length: counted.n }, (_, i) => ({ id: `p${i}` }))),
+  countPendingAdminProposals: vi.fn(async () => counted.n),
 }));
 
 const { buildAdminDailyReport } = await import("@/lib/admin-daily-report");

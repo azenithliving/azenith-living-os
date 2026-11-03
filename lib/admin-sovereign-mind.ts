@@ -399,3 +399,22 @@ export async function listPendingAdminProposals(limit = 20) {
 
   return data || [];
 }
+
+/**
+ * What waits for his signature, counted the way his own decision desk lists it — every pending
+ * paper. The daily report used to reuse the capped assistant-only page, so it read «٥٠ مستني»
+ * while 68 waited (measured on the live record 2026-11-03). `null` means the count itself failed,
+ * which is reported as such rather than as a zero.
+ */
+export async function countPendingAdminProposals(): Promise<number | null> {
+  const supabase = getServiceSupabase();
+  if (!supabase) return null;
+
+  const { count, error } = await supabase
+    .from("approval_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending");
+
+  if (error) return null;
+  return count ?? 0;
+}

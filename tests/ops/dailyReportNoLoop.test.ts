@@ -40,7 +40,11 @@ async function loadCronDoor(report: ReturnType<typeof stubReport>) {
   return { GET, createAdminProposal };
 }
 
-async function loadBuilder(health: { success: boolean; message?: string }, analytics: { success: boolean; message?: string }) {
+async function loadBuilder(
+  health: { success: boolean; message?: string },
+  analytics: { success: boolean; message?: string },
+  waiting: number | null = 2,
+) {
   vi.resetModules();
   // The cron tests above mock this very module; the builder tests must run the real one.
   vi.doUnmock("@/lib/admin-daily-report");
@@ -49,7 +53,7 @@ async function loadBuilder(health: { success: boolean; message?: string }, analy
     getAnalyticsReport: async () => ({ message: "أرقام", ...analytics }),
   }));
   vi.doMock("@/lib/admin-sovereign-mind", () => ({
-    listPendingAdminProposals: async () => [{ id: "p1" }, { id: "p2" }],
+    countPendingAdminProposals: async () => waiting,
   }));
   const { buildAdminDailyReport } = await import("@/lib/admin-daily-report");
   return await buildAdminDailyReport();
@@ -128,6 +132,28 @@ describe("what makes a report need him", () => {
     expect(report.needsReview).toBe(true);
     expect(report.reviewReasons).toContain("أرقام آخر أسبوع ما جتش");
   });
+
+  it("counts every paper waiting for him, not a capped page", async () => {
+    const report = await loadBuilder({ success: true }, { success: true }, 68);
+
+    expect(report.pendingApprovals).toBe(68);
+    expect(report.fullTextAr).toContain("٦٨");
+  });
+
+  it("admits when the count itself failed, instead of printing a calm zero", async () => {
+    const report = await loadBuilder({ success: true }, { success: true }, null);
+
+    expect(report.pendingApprovals).toBeNull();
+    expect(report.fullTextAr).toContain("ما اتقاسش");
+    expect(report.fullTextAr).not.toMatch(/٠ (اقتراح|اقتراحين|اقتراحات)/);
+  });
+
+  it("the builder asks the counter, not the capped list", () => {
+    const builder = readFileSync("lib/admin-daily-report.ts", "utf8");
+
+    expect(builder).toContain("countPendingAdminProposals");
+    expect(builder).not.toContain("listPendingAdminProposals(50)");
+  });
 });
 
 describe("a paper says what it is waiting for", () => {
@@ -138,6 +164,9 @@ describe("a paper says what it is waiting for", () => {
 
     expect(report.actionLabel).toContain("أرقام");
     expect(report.actionLabel).not.toBe("إجراء إداري");
+    // Caught on the published link 2026-11-03: the label printed «آخر 7 يوم» in Latin digits.
+    expect(report.actionLabel.match(/[0-9]/g) ?? []).toEqual([]);
+    expect(report.actionLabel).toContain("٧");
     expect(report.whereToSeeResult).toContain("مفيش أي تعديل");
     expect(report.whatWillHappen.join(" ")).not.toContain("سيحاول تنفيذ الطلب");
   });

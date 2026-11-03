@@ -14,6 +14,7 @@ async function run(request: NextRequest) {
 
   const ownerEmail = process.env.MASTER_ADMIN_EMAILS?.split(",")[0]?.trim();
   let proposalCreated = false;
+  let proposalId: string | null = null;
   let proposalError: string | null = null;
   // Only a report carrying something broken asks for his signature. Gating on the pending pile
   // made this job create the paper it was counting, every day, forever.
@@ -28,6 +29,7 @@ async function run(request: NextRequest) {
       proactive: true,
     });
     proposalCreated = proposal.success;
+    proposalId = proposal.success ? (proposal.requestId ?? null) : null;
     proposalError = proposal.success ? null : proposal.error || "الورقة ما اتسجلتش";
   }
 
@@ -38,6 +40,7 @@ async function run(request: NextRequest) {
     needsReview: report.needsReview,
     reviewReasons: report.reviewReasons,
     proposalCreated,
+    proposalId,
     proposalError,
     memoryStored: stored.ok,
     memoryError: stored.ok ? null : stored.error,

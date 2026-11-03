@@ -1,6 +1,7 @@
 import type { ClassifiedIntent } from "./admin-intent-types";
 import { commandLabel } from "./owner-labels";
 import { toolDisplayName } from "./ops/owner-voice";
+import { arNum } from "./ops/metricLabels";
 
 export interface AdminApprovalReport {
   title: string;
@@ -25,7 +26,7 @@ function actionLabelFor(intent: ClassifiedIntent): string {
   if (intent.kind === "ultimate_tool") return `تشغيل أداة: ${toolDisplayName(intent.toolName) || "أداة"}`;
   // Measured 2026-11-03: 63 waiting papers all read «إجراء إداري» because the four kinds below had
   // no label, so the pile said nothing about what it was waiting for.
-  if (intent.kind === "analytics") return `تقرير أرقام آخر ${intent.analyticsDays ?? 7} يوم`;
+  if (intent.kind === "analytics") return `تقرير أرقام آخر ${arNum(intent.analyticsDays ?? 7)} يوم`;
   if (intent.kind === "health") return "فحص صحة المتجر";
   if (intent.kind === "architect") return "تعديل على الموقع بعد مراجعتك";
   if (intent.kind === "conversation") return "رد توضيحي من المساعد";

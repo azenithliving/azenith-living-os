@@ -5,7 +5,7 @@
 import { getAnalyticsReport, getSystemHealth } from "@/lib/architect-tools";
 import { getCapabilityMaturityReport } from "@/lib/admin-capability-evolution";
 import { arNum } from "@/lib/ops/metricLabels";
-import { listPendingAdminProposals } from "@/lib/admin-sovereign-mind";
+import { countPendingAdminProposals } from "@/lib/admin-sovereign-mind";
 import { recordMemory, type MemoryWrite } from "@/lib/ops/memory-record";
 
 export interface AdminDailyReport {
@@ -13,7 +13,8 @@ export interface AdminDailyReport {
   healthMessage: string;
   analyticsMessage: string;
   maturitySummary: string;
-  pendingApprovals: number;
+  /** Every paper waiting for his signature, or null when the record would not answer. */
+  pendingApprovals: number | null;
   /**
    * Whether the report carries something only he can settle. A waiting pile is not an answer here:
    * measured 2026-11-03, gating on the pending count made the daily job create the very paper it
@@ -35,11 +36,18 @@ export async function buildAdminDailyReport(): Promise<AdminDailyReport> {
   const [health, analytics, pending] = await Promise.all([
     getSystemHealth().catch(() => ({ success: false, message: "صحة: غير متاح" })),
     getAnalyticsReport({ days: 7 }).catch(() => ({ success: false, message: "تحليلات: غير متاح" })),
-    listPendingAdminProposals(50),
+    countPendingAdminProposals(),
   ]);
 
   const maturity = getCapabilityMaturityReport();
   const generatedAt = new Date().toISOString();
+
+  const waitingLine =
+    pending === null
+      ? "⏳ عدد المستني ما اتقاسش — سجل الموافقات ما ردّش"
+      : pending > 0
+        ? `⏳ ${arNum(pending)} ${waitingWord(pending)} موافقتك في «عقل النظام»`
+        : "✅ مفيش اقتراحات مستنية";
 
   const fullTextAr = [
     `📋 **تقرير أزينث ليفينج اليومي** — ${new Date().toLocaleDateString("ar-EG")}`,
@@ -50,9 +58,7 @@ export async function buildAdminDailyReport(): Promise<AdminDailyReport> {
     "",
     `🧠 نضج المساعد (${arNum(maturity.score)} من ${arNum(100)}): ${maturity.summaryAr}`,
     "",
-    pending.length > 0
-      ? `⏳ ${arNum(pending.length)} ${waitingWord(pending.length)} موافقتك في «عقل النظام»`
-      : "✅ مفيش اقتراحات مستنية",
+    waitingLine,
   ].join("\n");
 
   const reviewReasons: string[] = [];
@@ -64,7 +70,7 @@ export async function buildAdminDailyReport(): Promise<AdminDailyReport> {
     healthMessage: health.message || "",
     analyticsMessage: analytics.message || "",
     maturitySummary: maturity.summaryAr,
-    pendingApprovals: pending.length,
+    pendingApprovals: pending,
     needsReview: reviewReasons.length > 0,
     reviewReasons,
     fullTextAr,
