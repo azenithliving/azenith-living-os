@@ -57,6 +57,14 @@ export const LIVE_FACTS: SettingFact[] = [
 export const SECRET_MASK = "«مخفي — بيتحفظ في الخزانة مش على الشاشة»";
 
 /**
+ * Which keys carry a credential. One owner for that fact — the `secret` flag on the facts above —
+ * so no surface has to keep its own copy of the list.
+ */
+export function isSecretSetting(key: string): boolean {
+  return LIVE_FACTS.some((fact) => fact.key === key && fact.secret === true);
+}
+
+/**
  * The keys with no reader. Named in Arabic so he can see what is sitting in his store's records,
  * counted by the guard so the number cannot drift, and never rendered as a control.
  */

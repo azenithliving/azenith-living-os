@@ -21,11 +21,16 @@ async function testCommand1() {
   console.log("═══════════════════════════════════════════════════════════\n");
 
   try {
-    const tables = await discoverDatabaseSchema();
+    const census = await discoverDatabaseSchema();
+    if (census.failed) {
+      console.error("❌ السجل ما ردّش على الجرد:", census.error);
+      return false;
+    }
+    const tables = census.tables;
     console.log("✅ تم اكتشاف الجداول بنجاح:");
     console.log(`   عدد الجداول: ${tables.length}`);
     tables.slice(0, 5).forEach((table) => {
-      console.log(`   - ${table.name} (${table.columns.length} أعمدة, ${table.rowCount} صف)`);
+      console.log(`   - ${table.name} (${table.columns.length} أعمدة)`);
     });
     if (tables.length > 5) {
       console.log(`   ... و ${tables.length - 5} جداول أخرى`);

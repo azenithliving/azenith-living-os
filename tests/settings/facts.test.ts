@@ -2,7 +2,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 
-import { DEAD_KEYS, LIVE_FACTS, SECRET_MASK, factLabel } from "@/lib/settings/facts";
+import { DEAD_KEYS, LIVE_FACTS, SECRET_MASK, factLabel, isSecretSetting } from "@/lib/settings/facts";
 
 /**
  * The settings office, guarded.
@@ -42,9 +42,20 @@ describe("the credential never reaches a screen", () => {
   const desk = read("components/admin/settings/SettingsFactsDesk.tsx");
 
   it("the door masks the secret keys on both read paths", () => {
-    expect(door).toContain('SECRET_KEYS = new Set(["telegram_config"])');
+    // One owner for «which key carries a credential»: the `secret` flag in the facts above.
+    // Measured 2026-11-03: the discovery engine reads the same table for the assistants' picture of
+    // the store, and it asks this same helper — a second list would drift the day a key is added.
+    expect(door).toContain("isSecretSetting(setting.key)");
+    expect(door).not.toMatch(/new Set\(\["telegram_config"\]\)/);
     expect(door).toContain("maskSecret(data as SiteSetting)");
     expect(door).toContain("rawMasked");
+  });
+
+  it("the census, not a copy, decides which key is a secret", () => {
+    expect(isSecretSetting("telegram_config")).toBe(true);
+    expect(isSecretSetting("theme")).toBe(false);
+    expect(isSecretSetting("seo")).toBe(false);
+    expect(read("lib/discovery-engine.ts")).toContain("isSecretSetting(row.key)");
   });
 
   it("the door refuses to save the mask back over a real key", () => {

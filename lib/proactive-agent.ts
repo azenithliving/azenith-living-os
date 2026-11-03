@@ -146,7 +146,10 @@ async function checkUnusedFeatures(snapshot: SystemSnapshot): Promise<Finding[]>
 
   // Check for empty tables
   for (const table of snapshot.tables) {
-    if ((table.rowCount || 0) === 0 && !isSystemTable(table.name)) {
+    // A table the census never counted is not an empty table: measured, the inventory names 160
+    // relations in one read, and reading them as zeros would raise 160 false alarms a day.
+    if (table.rowCount === null) continue;
+    if (table.rowCount === 0 && !isSystemTable(table.name)) {
       findings.push({
         type: "unused_feature",
         severity: "low",
@@ -195,7 +198,8 @@ async function checkPerformanceIssues(snapshot: SystemSnapshot): Promise<Finding
 
   // Check for large tables
   for (const table of snapshot.tables) {
-    const rowCount = table.rowCount || 0;
+    if (table.rowCount === null) continue;
+    const rowCount = table.rowCount;
 
     if (rowCount > 100000) {
       findings.push({

@@ -7,15 +7,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminApi } from "@/lib/admin-api-guard";
-import { SECRET_MASK } from "@/lib/settings/facts";
+import { SECRET_MASK, isSecretSetting } from "@/lib/settings/facts";
 
 export const dynamic = "force-dynamic";
 
-/** Keys whose value carries a credential. The browser never sees the value. */
-const SECRET_KEYS = new Set(["telegram_config"]);
-
 function maskSecret(setting: SiteSetting): SiteSetting {
-  if (!SECRET_KEYS.has(setting.key) || typeof setting.value !== "object" || setting.value === null) {
+  if (!isSecretSetting(setting.key) || typeof setting.value !== "object" || setting.value === null) {
     return setting;
   }
   const value = setting.value as Record<string, unknown>;

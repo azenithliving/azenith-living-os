@@ -12,6 +12,9 @@
  */
 
 import { createClient as createServerClient } from "@/utils/supabase/server";
+import { fetchRecordInventory, type RecordInventory } from "@/lib/ops/record-inventory";
+import { SECRET_MASK, isSecretSetting } from "@/lib/settings/facts";
+import { arNum } from "@/lib/ops/metricLabels";
 import fs from "fs";
 import path from "path";
 
@@ -27,7 +30,8 @@ export interface TableInfo {
   name: string;
   columns: TableColumn[];
   description: string;
-  rowCount?: number;
+  /** null means the census did not count rows — it is not a zero. */
+  rowCount: number | null;
 }
 
 export interface ApiEndpoint {
@@ -70,70 +74,43 @@ export interface SystemSnapshot {
   summary: string;
 }
 
+export type SchemaCensus = {
+  tables: TableInfo[];
+  failed: boolean;
+  error: string | null;
+};
+
 /**
- * Fetch all tables from information_schema
+ * The store's own inventory, in the one read the record can answer.
+ *
+ * Row counts are deliberately not collected here: the inventory names 160 relations, and counting
+ * each one is 160 round trips inside a single request — measured elsewhere in this store, work that
+ * size does not finish.
  */
-export async function discoverDatabaseSchema(): Promise<TableInfo[]> {
-  const supabase = await createServerClient();
-
-  try {
-    // Get all tables from public schema
-    const { data: tables, error: tablesError } = await supabase
-      .from("information_schema.tables")
-      .select("table_name")
-      .eq("table_schema", "public")
-      .eq("table_type", "BASE TABLE");
-
-    if (tablesError) {
-      console.error("[Discovery] Error fetching tables:", tablesError);
-      return [];
-    }
-
-    const tableInfoList: TableInfo[] = [];
-
-    for (const table of tables || []) {
-      const tableName = table.table_name;
-
-      // Skip internal Supabase tables
-      if (tableName.startsWith("pg_") || tableName.startsWith("_")) continue;
-
-      // Get columns for this table
-      const { data: columns, error: columnsError } = await supabase
-        .from("information_schema.columns")
-        .select("column_name, data_type, is_nullable, column_default")
-        .eq("table_schema", "public")
-        .eq("table_name", tableName);
-
-      if (columnsError) {
-        console.error(`[Discovery] Error fetching columns for ${tableName}:`, columnsError);
-        continue;
-      }
-
-      // Get row count
-      const { count } = await supabase
-        .from(tableName)
-        .select("*", { count: "exact", head: true });
-
-      const columnInfo: TableColumn[] = (columns || []).map((col) => ({
-        name: col.column_name,
-        type: col.data_type,
-        nullable: col.is_nullable === "YES",
-        defaultValue: col.column_default,
-      }));
-
-      tableInfoList.push({
-        name: tableName,
-        columns: columnInfo,
-        description: generateTableDescription(tableName, columnInfo),
-        rowCount: count || 0,
-      });
-    }
-
-    return tableInfoList;
-  } catch (error) {
-    console.error("[Discovery] Failed to discover database schema:", error);
-    return [];
+export async function discoverDatabaseSchema(preFetched?: RecordInventory): Promise<SchemaCensus> {
+  const inventory = preFetched ?? (await fetchRecordInventory());
+  if (!inventory.ok) {
+    return { tables: [], failed: true, error: inventory.error };
   }
+
+  const tables: TableInfo[] = inventory.tables
+    .filter((table) => !table.name.startsWith("pg_") && !table.name.startsWith("_"))
+    .map((table) => {
+      const columns: TableColumn[] = table.columns.map((column) => ({
+        name: column.name,
+        type: column.type,
+        nullable: !column.required,
+        defaultValue: null,
+      }));
+      return {
+        name: table.name,
+        columns,
+        description: generateTableDescription(table.name, columns),
+        rowCount: null,
+      };
+    });
+
+  return { tables, failed: false, error: null };
 }
 
 /**
@@ -141,7 +118,7 @@ export async function discoverDatabaseSchema(): Promise<TableInfo[]> {
  */
 function generateTableDescription(tableName: string, columns: TableColumn[]): string {
   const columnNames = columns.map((c) => c.name).join(", ");
-  return `جدول باسم ${tableName} يحتوي على ${columns.length} أعمدة: ${columnNames}`;
+  return `جدول باسم ${tableName} يحتوي على ${arNum(columns.length)} أعمدة: ${columnNames}`;
 }
 
 /**
@@ -286,32 +263,50 @@ function generatePageDescription(path: string, type: "page" | "layout"): string 
 
 /**
  * Discover site settings
+ *
+ * The old code asked `information_schema` whether the table exists before reading it. The record
+ * answers that question with PGRST205, so the check never passed and the assistant was told the
+ * store has no settings — measured 2026-11-03: there are 20 settings rows behind that blind gate.
  */
-export async function discoverSiteSettings(): Promise<SiteSetting[]> {
-  const supabase = await createServerClient();
+export async function discoverSiteSettings(preFetched?: RecordInventory): Promise<SiteSetting[]> {
+  const inventory = preFetched ?? (await fetchRecordInventory());
+  if (!inventory.ok) {
+    console.warn("[Discovery] Could not fetch the record inventory for site settings:", inventory.error);
+    return [];
+  }
+
+  const real = inventory.tables.find((table) => table.name === "site_settings");
+  if (!real) return [];
+
+  const asked = ["key", "value"].filter((column) => real.columns.some((c) => c.name === column));
+  if (asked.length === 0) return [];
+
   const settings: SiteSetting[] = [];
 
   try {
-    // Check if site_settings table exists
-    const { data: tableExists } = await supabase
-      .from("information_schema.tables")
-      .select("table_name")
-      .eq("table_schema", "public")
-      .eq("table_name", "site_settings")
-      .single();
+    const supabase = await createServerClient();
+    const { data, error } = await supabase.from("site_settings").select(asked.join(","));
 
-    if (tableExists) {
-      const { data, error } = await supabase.from("site_settings").select("key, value");
+    if (error) {
+      console.warn("[Discovery] Could not fetch site_settings:", error.message);
+      return settings;
+    }
 
-      if (!error && data) {
-        for (const row of data) {
-          settings.push({
-            key: row.key,
-            value: row.value,
-            description: `إعداد ${row.key} بقيمة ${JSON.stringify(row.value)}`,
-          });
-        }
+    for (const row of (data ?? []) as unknown as Array<{ key: string; value: unknown }>) {
+      // A credential never enters the picture the agents build, nor the snapshot an admin door serves.
+      if (isSecretSetting(row.key)) {
+        settings.push({
+          key: row.key,
+          value: SECRET_MASK,
+          description: `إعداد ${row.key} — قيمته سر في الخزانة، ما يتطبعش`,
+        });
+        continue;
       }
+      settings.push({
+        key: row.key,
+        value: row.value,
+        description: `إعداد ${row.key} بقيمة ${JSON.stringify(row.value)}`,
+      });
     }
   } catch (error) {
     console.warn("[Discovery] Could not fetch site_settings:", error);
@@ -322,43 +317,45 @@ export async function discoverSiteSettings(): Promise<SiteSetting[]> {
 
 /**
  * Discover automation rules
+ *
+ * Same blind pre-check, and a second blindness under it: the read asked for `last_executed` and
+ * `is_active`, and the record has neither (its nine columns are id, company_id, name, trigger,
+ * conditions, actions, enabled, created_at, updated_at). The flag has one owner — `enabled`.
  */
-export async function discoverAutomationRules(): Promise<AutomationRule[]> {
-  const supabase = await createServerClient();
+export async function discoverAutomationRules(preFetched?: RecordInventory): Promise<AutomationRule[]> {
+  const inventory = preFetched ?? (await fetchRecordInventory());
+  if (!inventory.ok) {
+    console.warn("[Discovery] Could not fetch the record inventory for rules:", inventory.error);
+    return [];
+  }
+
+  const real = inventory.tables.find((table) => table.name === "automation_rules");
+  if (!real) return [];
+
+  const wanted = ["id", "name", "trigger", "conditions", "actions", "enabled", "last_executed"];
+  const asked = wanted.filter((column) => real.columns.some((c) => c.name === column));
+
   const rules: AutomationRule[] = [];
 
   try {
-    // Check if automation_rules table exists
-    const { data: tableExists } = await supabase
-      .from("information_schema.tables")
-      .select("table_name")
-      .eq("table_schema", "public")
-      .eq("table_name", "automation_rules")
-      .single();
+    const supabase = await createServerClient();
+    const { data, error } = await supabase.from("automation_rules").select(asked.join(","));
 
-    if (tableExists) {
-      const { data, error } = await supabase
-        .from("automation_rules")
-        .select("id, name, trigger, conditions, actions, last_executed, is_active, enabled");
+    if (error) {
+      console.warn("[Discovery] Could not fetch automation_rules:", error.message);
+      return rules;
+    }
 
-      if (!error && data) {
-        for (const row of data) {
-          rules.push({
-            id: row.id,
-            name: row.name,
-            trigger: row.trigger,
-            conditions: row.conditions || {},
-            actions: row.actions || {},
-            lastExecuted: row.last_executed,
-            isActive:
-              typeof row.is_active === "boolean"
-                ? row.is_active
-                : typeof row.enabled === "boolean"
-                ? row.enabled
-                : false,
-          });
-        }
-      }
+    for (const row of (data ?? []) as unknown as Array<Record<string, unknown>>) {
+      rules.push({
+        id: String(row.id ?? ""),
+        name: String(row.name ?? ""),
+        trigger: String(row.trigger ?? ""),
+        conditions: (row.conditions as Record<string, unknown>) || {},
+        actions: (row.actions as Record<string, unknown>) || {},
+        lastExecuted: typeof row.last_executed === "string" ? row.last_executed : null,
+        isActive: typeof row.enabled === "boolean" ? row.enabled : false,
+      });
     }
   } catch (error) {
     console.warn("[Discovery] Could not fetch automation_rules:", error);
@@ -371,15 +368,19 @@ export async function discoverAutomationRules(): Promise<AutomationRule[]> {
  * Generate comprehensive system snapshot
  */
 export async function generateSystemSnapshot(): Promise<SystemSnapshot> {
-  const [tables, apis, pages, settings, automationRules] = await Promise.all([
-    discoverDatabaseSchema(),
+  // One read of the record's inventory serves the census and both detail reads below.
+  const inventory = await fetchRecordInventory();
+
+  const [census, apis, pages, settings, automationRules] = await Promise.all([
+    discoverDatabaseSchema(inventory),
     discoverApiEndpoints(),
     discoverPages(),
-    discoverSiteSettings(),
-    discoverAutomationRules(),
+    discoverSiteSettings(inventory),
+    discoverAutomationRules(inventory),
   ]);
 
-  const summary = generateSystemSummary(tables, apis, pages, settings, automationRules);
+  const tables = census.tables;
+  const summary = generateSystemSummary(census, apis, pages, settings, automationRules);
 
   return {
     timestamp: new Date().toISOString(),
@@ -396,7 +397,7 @@ export async function generateSystemSnapshot(): Promise<SystemSnapshot> {
  * Generate natural language summary of the entire system (Arabic)
  */
 function generateSystemSummary(
-  tables: TableInfo[],
+  census: SchemaCensus,
   apis: ApiEndpoint[],
   pages: PageInfo[],
   settings: SiteSetting[],
@@ -404,17 +405,21 @@ function generateSystemSummary(
 ): string {
   const activeRules = rules.filter((r) => r.isActive).length;
   const inactiveRules = rules.filter((r) => !r.isActive).length;
+  const tablesLine = census.failed
+    ? `- عدد الجداول مش معروف — السجل ما ردّش على الجرد${census.error ? ` (${census.error})` : ""}`
+    : `- قاعدة البيانات فيها ${arNum(census.tables.length)} جدول`;
+  const mainTables = census.failed ? "مش معروف" : census.tables.slice(0, 5).map((t) => t.name).join(", ");
 
   return `
 نظرة عامة على النظام:
-- قاعدة البيانات تحتوي على ${tables.length} جدول/جداول
-- ${apis.length} نقطة نهاية API متاحة
-- ${pages.filter((p) => p.type === "page").length} صفحة في التطبيق
-- ${pages.filter((p) => p.type === "layout").length} تخطيط
-- ${settings.length} إعدادات موقع
-- ${activeRules} قواعد أتمتة نشطة و ${inactiveRules} غير نشطة
+${tablesLine}
+- ${arNum(apis.length)} نقطة نهاية API متاحة
+- ${arNum(pages.filter((p) => p.type === "page").length)} صفحة في التطبيق
+- ${arNum(pages.filter((p) => p.type === "layout").length)} تخطيط
+- ${arNum(settings.length)} إعدادات موقع
+- ${arNum(activeRules)} قواعد أتمتة نشطة و ${arNum(inactiveRules)} غير نشطة
 
-الجداول الرئيسية: ${tables.slice(0, 5).map((t) => t.name).join(", ")}...
+الجداول الرئيسية: ${mainTables}...
 الصفحات الرئيسية: ${pages.filter((p) => p.type === "page").slice(0, 5).map((p) => p.path).join(", ")}...
   `.trim();
 }
@@ -429,7 +434,10 @@ export function describeResource(
   switch (type) {
     case "table": {
       const table = resource as TableInfo;
-      return `${table.description}. يحتوي على ${table.rowCount || 0} صف/صفوف.`;
+      if (table.rowCount === null || table.rowCount === undefined) {
+        return `${table.description}. عدد الصفوف مش متقيس — الجرد بيسمي الجداول وأعمادها بس.`;
+      }
+      return `${table.description}. فيه ${arNum(table.rowCount)} صف.`;
     }
     case "api": {
       const api = resource as ApiEndpoint;
