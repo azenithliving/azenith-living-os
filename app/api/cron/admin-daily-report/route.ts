@@ -13,22 +13,32 @@ async function run(request: NextRequest) {
   const stored = await persistDailyReport(report);
 
   const ownerEmail = process.env.MASTER_ADMIN_EMAILS?.split(",")[0]?.trim();
-  if (report.pendingApprovals > 0) {
-    await createAdminProposal({
-      title: "تقرير يومي + اقتراحات معلّقة",
+  let proposalCreated = false;
+  let proposalError: string | null = null;
+  // Only a report carrying something broken asks for his signature. Gating on the pending pile
+  // made this job create the paper it was counting, every day, forever.
+  if (report.needsReview) {
+    const proposal = await createAdminProposal({
+      title: "تقرير يومي فيه حاجة محتاجة مراجعتك",
       description: report.fullTextAr.slice(0, 1500),
-      reasoning: "تقرير مجدول يومي",
+      reasoning: `تقرير مجدول يومي · ${report.reviewReasons.join(" · ")}`,
       userMessage: "اعرض إحصائيات آخر يوم وافحص صحة النظام",
       intent: { kind: "analytics", analyticsDays: 7, confidence: 0.9 },
       userEmail: ownerEmail,
       proactive: true,
     });
+    proposalCreated = proposal.success;
+    proposalError = proposal.success ? null : proposal.error || "الورقة ما اتسجلتش";
   }
 
   return NextResponse.json({
     success: true,
     generatedAt: report.generatedAt,
     pendingApprovals: report.pendingApprovals,
+    needsReview: report.needsReview,
+    reviewReasons: report.reviewReasons,
+    proposalCreated,
+    proposalError,
     memoryStored: stored.ok,
     memoryError: stored.ok ? null : stored.error,
     preview: report.fullTextAr.slice(0, 400),

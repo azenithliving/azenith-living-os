@@ -14,6 +14,13 @@ export interface AdminDailyReport {
   analyticsMessage: string;
   maturitySummary: string;
   pendingApprovals: number;
+  /**
+   * Whether the report carries something only he can settle. A waiting pile is not an answer here:
+   * measured 2026-11-03, gating on the pending count made the daily job create the very paper it
+   * was counting, so the pile grew by one unreadable paper every day, forever.
+   */
+  needsReview: boolean;
+  reviewReasons: string[];
   fullTextAr: string;
 }
 
@@ -48,12 +55,18 @@ export async function buildAdminDailyReport(): Promise<AdminDailyReport> {
       : "✅ مفيش اقتراحات مستنية",
   ].join("\n");
 
+  const reviewReasons: string[] = [];
+  if (!health.success) reviewReasons.push("صحة النظام ردّت بفشل");
+  if (!analytics.success) reviewReasons.push("أرقام آخر أسبوع ما جتش");
+
   return {
     generatedAt,
     healthMessage: health.message || "",
     analyticsMessage: analytics.message || "",
     maturitySummary: maturity.summaryAr,
     pendingApprovals: pending.length,
+    needsReview: reviewReasons.length > 0,
+    reviewReasons,
     fullTextAr,
   };
 }

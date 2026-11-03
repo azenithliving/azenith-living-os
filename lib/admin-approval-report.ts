@@ -23,6 +23,12 @@ function actionLabelFor(intent: ClassifiedIntent): string {
   if (intent.kind === "genesis") return "إنشاء وتكوين محتوى جديد";
   if (intent.kind === "agents") return "مهمة فحص وتحليل بواسطة الموظفين";
   if (intent.kind === "ultimate_tool") return `تشغيل أداة: ${toolDisplayName(intent.toolName) || "أداة"}`;
+  // Measured 2026-11-03: 63 waiting papers all read «إجراء إداري» because the four kinds below had
+  // no label, so the pile said nothing about what it was waiting for.
+  if (intent.kind === "analytics") return `تقرير أرقام آخر ${intent.analyticsDays ?? 7} يوم`;
+  if (intent.kind === "health") return "فحص صحة المتجر";
+  if (intent.kind === "architect") return "تعديل على الموقع بعد مراجعتك";
+  if (intent.kind === "conversation") return "رد توضيحي من المساعد";
   return "إجراء إداري";
 }
 
@@ -35,6 +41,11 @@ function resultLocationFor(intent: ClassifiedIntent): string {
   }
   if (intent.kind === "agents") {
     return "ستظهر نتيجة المهمة في محادثة المساعد، وسجل التنفيذ، ودفتر الأدلة.";
+  }
+  // A report is read, not executed: promising a result «after execution» on a paper that only
+  // shows numbers is the kind of sentence that trains him to ignore the pile.
+  if (intent.kind === "analytics" || intent.kind === "health") {
+    return "التقرير نفسه هيظهر في لوحة «عقل النظام» وفي محادثة المساعد، ومفيش أي تعديل بيتنفذ من غيره.";
   }
   return "ستظهر النتيجة في محادثة المساعد ودفتر الأدلة بعد التنفيذ.";
 }
@@ -59,6 +70,13 @@ function whatWillHappenFor(intent: ClassifiedIntent, request: string): string[] 
       "سيشغل مهمة تحليل منظمة بناء على طلبك.",
       "سيجمع النتائج ويرتبها كتقرير قابل للمراجعة.",
       "أي إجراء تغييري لاحق سيحتاج موافقة منفصلة.",
+    ];
+  }
+  if (intent.kind === "analytics" || intent.kind === "health") {
+    return [
+      "يجمّع الأرقام والحالة الحالية ويعرضها زي ما هي.",
+      "مفيش أي تعديل بيتعمل من التقرير ده.",
+      "لو التقرير لقى حاجة محتاجة تغيير، هتيجي في ورقة منفصلة تطلب موافقتك.",
     ];
   }
   return [`سيحاول تنفيذ الطلب التالي بطريقة آمنة: ${request.slice(0, 220)}`];
