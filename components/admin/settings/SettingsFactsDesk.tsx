@@ -6,10 +6,13 @@ import { arNum } from "@/lib/ops/metricLabels";
  *
  * The old desk was a raw key/value editor: it printed machine keys in a monospace box, let him save
  * any JSON, and — measured tonight — showed the alert bot's credential in a textarea, because the
- * settings door handed the browser the whole row. This desk does the opposite: it names the three
- * values that actually change something on a surface, says where each one is edited, keeps the
- * credential off the screen behind the mask the door answers with, and counts the fourteen keys that
- * answer to no reader as residue rather than as controls.
+ * settings door handed the browser the whole row. This desk does the opposite: it names the values
+ * that actually change something on a surface, says where each one is edited, keeps the credential
+ * off the screen behind the mask the door answers with, and counts the keys no customer page renders
+ * from as residue rather than as controls.
+ *
+ * The split is the record's own, re-counted 2026-11-03: the table holds twenty keys, six are read by
+ * a surface that uses them, fourteen reach no customer screen at all.
  */
 
 function stateOf(fact: SettingFact, value: unknown): string {
@@ -18,6 +21,25 @@ function stateOf(fact: SettingFact, value: unknown): string {
     const chats = Array.isArray(record.chats) ? record.chats.length : 0;
     const on = record.enabled === true;
     return `التنبيهات ${on ? "شغالة" : "مقفولة"} · ${arNum(chats)} ${chats === 1 ? "محادثة" : "محادثات"} · المفتاح ${SECRET_MASK.replace(/[«»]/g, "")}`;
+  }
+  if (fact.kind === "numbers") {
+    const list = Array.isArray(value) ? value : [];
+    if (list.length === 0) return "مفيش رقم مسجّل — أزرار واتساب هتفضل مقفولة";
+    return `${arNum(list.length)} ${list.length === 1 ? "رقم مسجّل" : "أرقام مسجّلة"}`;
+  }
+  if (fact.kind === "flag") {
+    if (value === undefined || value === null) return "السطر مش موجود في السجل — الباب بيفترض الأمان الأشد";
+    return value === true || String(value).toLowerCase() === "true"
+      ? "شغّال — الدخول يطلب كود مؤقت بعد كلمة السر"
+      : "مقفول بأمر منك — الدخول بكلمة السر وحدها";
+  }
+  if (fact.kind === "stamp") {
+    const stamp = (value ?? {}) as Record<string, unknown>;
+    if (!stamp.day) return "لسه ما اتعملتش نسخة";
+    const rows = Number(stamp.rows ?? 0);
+    const tables = Number(stamp.tables ?? 0);
+    const failures = Number(stamp.failures ?? 0);
+    return `يوم ${String(stamp.day)} · ${arNum(tables)} جدول و${arNum(rows)} سطر · ${failures > 0 ? `${arNum(failures)} فشل` : "مفيش فشل"}`;
   }
   if (value && typeof value === "object" && Object.keys(value as object).length === 0) {
     return "فاضي — مفيش قيمة متغيّرة دلوقتي";
@@ -58,11 +80,11 @@ export function SettingsFactsDesk({ values }: { values: Record<string, unknown> 
 
       <div className="rounded-2xl border border-dashed border-white/15 px-4 py-4">
         <p className="text-[13px] font-bold text-white">
-          {arNum(residue.length)} قيمة مسجّلة وما بيقرأهاش أي سطح
+          {arNum(residue.length)} قيمة مسجّلة ومفيش شاشة بتعرضها للعميل
         </p>
         <p className="mt-1 text-[11px] leading-relaxed text-white/70">
-          دي باقِة من بناء قديم للموقع. مش هتلاقيها أزرار تحكم، ومش هتتغيّر من هنا — ومسحها كلمة
-          صريحة منك، مش قرار وكيل.
+          دي باقِة من بناء قديم للموقع: ولا سطر منها بيبان في صفحة عميل · اللوحة القديمة لسه فيها
+          تبويبات بتقرا وبتكتب دول · مش هتلاقيها أزرار تحكم هنا، ومسحها كلمة صريحة منك، مش قرار وكيل.
         </p>
         <p className="mt-2 text-[11px] leading-relaxed text-white/70">
           {residue.map((r) => r.label).join(" · ")}

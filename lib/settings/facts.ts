@@ -1,19 +1,31 @@
 /**
  * facts.ts — what the store's settings table actually controls, measured on the live database.
  *
- * Counted 2026-10-13 with `node scratch/census-site-settings.mjs` and a reader grep over the whole
- * repository: `site_settings` holds 17 keys. Three of them are read by a surface that renders
- * something (`theme` and `seo` are read while the site shell renders in `app/layout.tsx`,
- * `telegram_config` is read by `lib/telegram-config.ts`). The other fourteen — hero titles, style
- * and budget option lists, favicon, logo, font, the two colors, and the four seo fields — answer to
- * no reader at all: the only code that ever touched them was the old desk's own key/value editor,
- * which lists whatever the table holds.
+ * Counted 2026-11-03 against the live table and a reader grep over the whole repository:
+ * `site_settings` holds twenty keys. Six of them are read by code that uses the value (`theme` and
+ * `seo` while the site shell renders, `telegram_config` by `lib/telegram-config.ts`,
+ * `contact_numbers` by `lib/store-numbers/read.ts`, `admin_gate_2fa_required` by `lib/admin-gate.ts`,
+ * `nightly_snapshot_last` by `lib/ops/nightly-snapshot.ts`). The other fourteen reach no customer
+ * screen: the only code that touches them is the old house's own tabs, which read and write them
+ * inside the admin pages.
  *
- * So the cockpit desk does not present fourteen dead switches as controls. It names what answers,
- * and counts what does not, and says which one is a secret.
+ * The first count (2026-10-13) found seventeen keys and three live; three more have been written
+ * since — the store's number desk, the gate's two-factor row, and the nightly copy's stamp — and a
+ * registry that stops naming keys is a registry that starts printing machine keys on his screen.
+ *
+ * So the cockpit desk does not present dead switches as controls. It names what answers, counts what
+ * does not, and says which one is a secret.
  */
 
-export type FactKind = "object" | "text" | "color" | "list" | "secret-object";
+export type FactKind =
+  | "object"
+  | "text"
+  | "color"
+  | "list"
+  | "secret-object"
+  | "numbers"
+  | "flag"
+  | "stamp";
 
 export type SettingFact = {
   key: string;
@@ -28,7 +40,7 @@ export type SettingFact = {
   secret?: boolean;
 };
 
-/** The three keys a live surface reads. */
+/** The keys a live surface reads. */
 export const LIVE_FACTS: SettingFact[] = [
   {
     key: "seo",
@@ -50,6 +62,26 @@ export const LIVE_FACTS: SettingFact[] = [
     kind: "secret-object",
     editor: "لوحة تليجرام",
     secret: true,
+  },
+  {
+    key: "contact_numbers",
+    label: "أرقام الشغل",
+    controls: "الرقم اللي بيشوفه العميل ويطلبه، واللي بيفتح عليه زرار واتساب في الموقع كله",
+    kind: "numbers",
+    editor: "كارت «أرقام التواصل» في نفس الصفحة",
+  },
+  {
+    key: "admin_gate_2fa_required",
+    label: "التحقق بخطوتين على باب اللوحة",
+    controls: "لو اتشغّل، الدخول يطلب كود مؤقت بعد كلمة السر · مقفول بأمر منك، ومفيش شاشة بتكتبه",
+    kind: "flag",
+  },
+  {
+    key: "nightly_snapshot_last",
+    label: "بصمة آخر نسخة ليلية",
+    controls: "آخر نسخة اتعملت من السجل بالليل: يومها، وكم سطر وجدول اتنقلوا، وكم حاجة فشلت",
+    kind: "stamp",
+    editor: "بتكتبها الرحلة الليلية نفسها",
   },
 ];
 

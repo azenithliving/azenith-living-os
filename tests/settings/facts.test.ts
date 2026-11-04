@@ -7,24 +7,32 @@ import { DEAD_KEYS, LIVE_FACTS, SECRET_MASK, factLabel, isSecretSetting } from "
 /**
  * The settings office, guarded.
  *
- * Measured 2026-10-13 against the live database (`node scratch/census-site-settings.mjs`) and a
- * reader grep over the whole repository: `site_settings` holds 17 keys; three are read by something
- * that renders (`theme`, `seo`, `telegram_config`), and fourteen are read by nothing but the old
- * desk's own generic editor. The same census found the alert bot's credential sitting in that table —
- * and the settings door was handing it to the browser inside the row, where the old desk printed it
- * in a textarea.
+ * Measured 2026-11-03 against the live table and a reader grep over the whole repository:
+ * `site_settings` holds twenty keys; six are read by code that uses the value, fourteen reach no
+ * customer page. The first count (2026-10-13) found seventeen and three live — the store's number
+ * desk, the gate's two-factor row and the nightly copy's stamp were written after it, and a registry
+ * that stops naming keys starts printing machine keys on his screen. The same first census found the
+ * alert bot's credential sitting in that table — and the settings door was handing it to the browser
+ * inside the row, where the old desk printed it in a textarea.
  */
 const read = (f: string) => readFileSync(f, "utf8");
 
 describe("the registry is the measured census, not a memory", () => {
-  it("names all seventeen keys the table holds, once each", () => {
+  it("names every key the table holds, once each", () => {
     const keys = [...LIVE_FACTS.map((f) => f.key), ...DEAD_KEYS.map((d) => d.key)];
-    expect(keys.length).toBe(17);
-    expect(new Set(keys).size).toBe(17);
+    expect(keys.length).toBe(20);
+    expect(new Set(keys).size).toBe(20);
   });
 
-  it("seats exactly three keys behind a surface that reads them", () => {
-    expect(LIVE_FACTS.map((f) => f.key)).toEqual(["seo", "theme", "telegram_config"]);
+  it("seats exactly the six keys a surface reads", () => {
+    expect(LIVE_FACTS.map((f) => f.key)).toEqual([
+      "seo",
+      "theme",
+      "telegram_config",
+      "contact_numbers",
+      "admin_gate_2fa_required",
+      "nightly_snapshot_last",
+    ]);
   });
 
   it("gives every key an Arabic name, and none of them is the machine key", () => {
@@ -80,10 +88,23 @@ describe("the desk shows controls only for what answers", () => {
     expect(page).toContain("pt-20");
   });
 
-  it("names the residue and counts it, instead of offering fourteen dead switches", () => {
-    expect(desk).toContain("وما بيقرأهاش أي سطح");
+  it("names the residue as what the measurement found, not as fourteen dead switches", () => {
+    // Measured 2026-11-03: none of the fourteen reaches a customer page, but the old house's own
+    // tabs do read and write them — so the desk says «مفيش شاشة بتعرضها للعميل», which is what held.
+    expect(desk).toContain("ومفيش شاشة بتعرضها للعميل");
+    expect(desk).toContain("ولا سطر منها بيبان في صفحة عميل");
+    expect(desk).not.toContain("وما بيقرأهاش أي سطح");
     expect(desk).toContain("residue.map");
     expect(desk).toContain("مسحها كلمة");
+  });
+
+  it("has a state line for every shape the registry says a value has", () => {
+    // A new kind with no branch here silently prints «متضبط» for a value that could be empty.
+    const shapes = Array.from(new Set(LIVE_FACTS.map((f) => f.kind)));
+    for (const kind of shapes) {
+      if (kind === "object" || kind === "secret-object") continue;
+      expect(desk, kind).toContain(`fact.kind === "${kind}"`);
+    }
   });
 
   it("carries no erase button — deleting a stored value is the owner's word", () => {
