@@ -7,7 +7,7 @@ import MainLayout from "@/components/MainLayout";
 import RealityUIProvider from "@/components/RealityUIProvider";
 import TelemetryTracker from "@/components/TelemetryTracker";
 import { buildPageMetadata, getOrganizationJsonLd } from "@/lib/seo";
-import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { loadPublicRuntimeSettings } from "@/lib/settings/runtime-read";
 import { getStoreNumbers } from "@/lib/store-numbers/read";
 import { noShowroomLine, readStoreFacts } from "@/lib/consultant/store-facts";
 
@@ -44,45 +44,6 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const g = Number.parseInt(full.slice(2, 4), 16);
   const b = Number.parseInt(full.slice(4, 6), 16);
   return { r, g, b };
-}
-
-async function loadPublicRuntimeSettings(): Promise<{
-  theme?: Record<string, unknown>;
-  seo?: Record<string, unknown>;
-}> {
-  const supabase = getSupabaseAdminClient();
-  if (!supabase) return {};
-
-  const { data: company } = await supabase
-    .from("companies")
-    .select("id")
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle<{ id: string }>();
-
-  const keys = ["theme", "seo"];
-
-  const scoped = company?.id
-    ? await supabase
-        .from("site_settings")
-        .select("key, value")
-        .eq("company_id", company.id)
-        .in("key", keys)
-    : null;
-
-  const rows =
-    scoped && !scoped.error
-      ? scoped.data
-      : (await supabase.from("site_settings").select("key, value").in("key", keys)).data;
-
-  const out: Record<string, Record<string, unknown>> = {};
-  for (const row of rows || []) {
-    if (row?.key && row?.value && typeof row.value === "object") {
-      out[row.key] = row.value as Record<string, unknown>;
-    }
-  }
-
-  return { theme: out.theme, seo: out.seo };
 }
 
 export default async function RootLayout({
