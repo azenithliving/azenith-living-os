@@ -96,6 +96,14 @@ describe("the writer and the caller cannot drift apart", () => {
     expect(door).not.toMatch(/r\.enforcement === ['"]hard_block['"]/);
   });
 
+  it("the door keeps the draft name the refusal is about", () => {
+    // A zod object drops keys it does not declare, and the row is filed under the name it reads
+    // from the body — so an undeclared draft_id made every refusal look like the same generic check.
+    const door = read("app/api/admin/ops/route.ts");
+    expect(door).toMatch(/draft_id: z\.string\(\)\.optional\(\)/);
+    expect(door).toContain("(input as any).draft_id");
+  });
+
   it("the ledger row carries the Arabic reason with it", () => {
     const layer = read("lib/ops/memory/SyncLayer.ts");
     expect(layer).toContain("gateBlockingNote(violations");

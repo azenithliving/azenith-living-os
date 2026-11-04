@@ -100,6 +100,9 @@ const ConstitutionCheckSchema = z.object({
   evidenceUrls: z.array(z.string()).optional(),
   humanApproval: z.boolean().optional(),
   approvedBy: z.string().optional(),
+  // The draft the check was run for. Without it the schema drops the name and every refusal is
+  // filed under the same generic label, so the ledger cannot say which work was stopped.
+  draft_id: z.string().optional(),
 });
 
 const LearningCreateSchema = z.object({
