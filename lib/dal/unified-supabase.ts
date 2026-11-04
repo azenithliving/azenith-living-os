@@ -101,11 +101,17 @@ export const usersDAL = {
   },
 
   async getByAuthId(authUserId: string) {
-    return supabaseServer
-      .from('users')
-      .select('*')
-      .eq('auth_user_id', authUserId)
-      .single();
+    // Measured 2026-11-04: `users` has seventeen columns and none of them joins a profile row to an
+    // auth account — `id` defaults to gen_random_uuid(), and the record holds 33 profile rows against
+    // 1 auth account. A filter on `auth_user_id` could never return a row, so the promise is said
+    // here instead of being paid for with a refused query.
+    return {
+      data: null,
+      error: {
+        code: 'DAL_NO_AUTH_LINK',
+        message: 'سجل المشترك مفيهوش عمود يربط الصف بحساب الدخول — الربط قرار في هيكل السجل',
+      },
+    };
   },
 
   async getByEmail(email: string) {
@@ -136,11 +142,13 @@ export const companiesDAL = {
       .single();
   },
 
-  async getBySlug(slug: string) {
+  // The record's companies table has never had a slug; the column that resolves a company from a
+  // request is `domain`, and that is what lib/tenant.ts already asks (measured 2026-11-04).
+  async getByDomain(domain: string) {
     return supabaseServer
       .from('companies')
       .select('*')
-      .eq('slug', slug)
+      .eq('domain', domain)
       .single();
   }
 };
@@ -351,20 +359,27 @@ export const agentMessagesDAL = {
 export const salesOrdersDAL = {
   async create(data: {
     company_id: string;
-    request_id?: string;
+    customer_name?: string;
     customer_id?: string;
     status?: string;
     total_amount?: number;
     deposit_amount?: number;
     created_by_user_id?: string;
   }) {
+    // Measured 2026-11-04: sales_orders answers to eleven columns. Three names this insert used to
+    // send have never been among them — `request_id`, `created_by_user_id` and `final_payment_paid`
+    // — and a payload with a name the record does not have is refused outright (PGRST204).
+    // The one column that does hold the buyer is `user_id`.
     return supabaseServer
       .from('sales_orders')
       .insert({
-        ...data,
+        company_id: data.company_id,
+        customer_name: data.customer_name ?? null,
+        user_id: data.created_by_user_id ?? data.customer_id ?? null,
         status: data.status || 'draft',
+        total_amount: data.total_amount ?? null,
+        deposit_amount: data.deposit_amount ?? null,
         deposit_paid: false,
-        final_payment_paid: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -445,7 +460,9 @@ export const productionJobsDAL = {
       query = query.eq('status', status);
     }
 
-    return query.order('scheduled_start', { ascending: true });
+    // `scheduled_start` is not one of the eight columns production_jobs answers to; ordering by a
+    // column the record does not have refuses the whole query, so the list came back empty.
+    return query.order('created_at', { ascending: true });
   },
 
   async updateStatus(id: string, status: string, stageId?: string) {
@@ -517,13 +534,17 @@ export const inventoryDAL = {
     unit_cost?: number;
     created_by?: string;
   }) {
-    return supabaseServer
-      .from('inventory_movements')
-      .insert({
-        ...data,
-        total_cost: data.unit_cost ? data.quantity * data.unit_cost : null,
-        created_at: new Date().toISOString()
-      });
+    // Measured 2026-11-04: the record has one inventory relation — `inventory_items` — and no
+    // movement ledger. Writing here used to send an insert into a table that answers PGRST205 and
+    // drop the refusal; the answer now says plainly that the store keeps no movement history.
+    void data;
+    return {
+      data: null,
+      error: {
+        code: 'DAL_NO_TABLE',
+        message: 'السجل ما فيهوش جدول حركة المخزون — التاريخ ده مالوش مكان يتسجل فيه لحد دلوقتي',
+      },
+    };
   }
 };
 
@@ -567,13 +588,16 @@ export const approvalRequestsDAL = {
     decidedBy: string,
     notes?: string
   ) {
+    // The record keeps the decision in `approved_by` / `approved_at`, and a refusal's reason in
+    // `rejection_reason` — measured 2026-11-04; `decided_by` and `decided_at` have never existed,
+    // so every decision write this layer made was refused and the paper stayed pending forever.
     return supabaseServer
       .from('approval_requests')
       .update({
         status: decision,
-        decided_by: decidedBy,
-        decided_at: new Date().toISOString(),
-        notes,
+        approved_by: decidedBy,
+        approved_at: new Date().toISOString(),
+        rejection_reason: decision === 'rejected' ? (notes ?? null) : null,
         updated_at: new Date().toISOString()
       })
       .eq('id', id);
