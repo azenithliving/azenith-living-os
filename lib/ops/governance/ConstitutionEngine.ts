@@ -54,6 +54,13 @@ export interface ConstitutionReport {
   overallPassed: boolean;
   overallScore: number;
   results: ConstitutionCheckResult[];
+  /**
+   * The violations that actually refused the work — the same list `overallPassed` is decided from.
+   * A caller that wants to say «why» must read this, not re-derive it: the result objects carry no
+   * `enforcement` field, so a filter on one is always empty (measured: 19 refused rows, all with an
+   * empty violation list).
+   */
+  blockingViolations: ConstitutionViolation[];
   summary: string;
   timestamp: string;
 }
@@ -194,6 +201,7 @@ export class ConstitutionEngine {
       overallPassed,
       overallScore: Math.round(overallScore * 100) / 100,
       results,
+      blockingViolations: hardBlockViolations,
       summary: this.generateSummary(overallPassed, overallScore, results),
       timestamp: new Date().toISOString(),
     };

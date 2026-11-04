@@ -6,6 +6,7 @@
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { resolveAdminCompanyId } from "@/lib/admin-company";
 import { recordLedgerEvent } from "@/lib/ops/ledger";
+import { gateBlockingNote } from "@/lib/ops/governance/gate-note";
 import { SYNC_EVENT_TYPES, type SyncEventType } from "@/lib/ops/syncTypes";
 
 // Kept on this module because everything that speaks the ledger already imports it
@@ -316,7 +317,13 @@ export class SyncLayer {
       event_type: passed ? 'quality_gate_passed' : 'quality_gate_failed',
       source_agent: sourceAgent,
       target_agents: [],
-      payload: { draftId, passed, violations },
+      payload: {
+        draftId,
+        passed,
+        violations,
+        // A refusal the strip cannot explain is a refusal nobody can answer.
+        summary: passed ? undefined : gateBlockingNote(violations as any),
+      },
     });
   }
 

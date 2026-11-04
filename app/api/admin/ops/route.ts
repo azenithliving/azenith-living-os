@@ -414,7 +414,9 @@ async function handleConstitutionCheck(body: any) {
     const { syncLayer } = await import('@/lib/ops/memory/SyncLayer');
     await syncLayer.initialize(companyId);
     const passed = report.overallPassed;
-    const blockingResults = report.results.filter((r: any) => !r.passed && r.enforcement === 'hard_block');
+    // The report's own blocking list — the array the refusal was decided from. Filtering the result
+    // objects by `enforcement` produced an empty list every time, because a result has no such field.
+    const blockingResults = report.blockingViolations ?? [];
     const draftId = (input as any).draft_id || 'constitution_check';
     await syncLayer.publishQualityGate(
       'ops-lead',
