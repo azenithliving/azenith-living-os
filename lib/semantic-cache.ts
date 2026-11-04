@@ -11,6 +11,8 @@
 import { Redis } from "@upstash/redis";
 import { createClient } from "@supabase/supabase-js";
 
+import { cacheStorageVerdict, type CacheStorageVerdict, type CacheTableState } from "@/lib/ops/cache-storage";
+
 // ==========================================
 // TYPES & INTERFACES
 // ==========================================
@@ -56,6 +58,12 @@ export interface CacheStats {
   totalSavings: number;
   entriesCount: number;
   avgResponseTime: number;
+  /** Whether anything this tier stores can survive the request that stored it. */
+  stored: boolean;
+  tableState: CacheTableState | "unmeasured";
+  redisLayers: number;
+  /** Writes the tier gave up on because there is nowhere to put them. */
+  skippedWrites: number;
 }
 
 // ==========================================
@@ -91,7 +99,22 @@ export class SemanticCacheManager {
     misses: 0,
     totalSavings: 0,
     totalRequests: 0,
+    skippedWrites: 0,
   };
+
+  /** The verdict the last call measured; null until this instance has asked the record. */
+  private lastVerdict: CacheStorageVerdict | null = null;
+
+  /** The record's own answer, measured once per instance — never guessed. */
+  private async l3Available(): Promise<boolean> {
+    const verdict = await cacheStorageVerdict();
+    this.lastVerdict = verdict;
+    if (verdict.table === "absent") return false;
+    if (verdict.table === "unknown") {
+      console.warn("[SemanticCache] L3 storage not measured, attempting the call anyway:", verdict.reason);
+    }
+    return true;
+  }
 
   constructor() {
     this.initializeRedis();
@@ -259,76 +282,10 @@ export class SemanticCacheManager {
       }
     }
 
-    // L3: Supabase persistent cache
-    try {
-      const { data } = await this.supabase
-        .from("semantic_cache")
-        .select("*")
-        .or(`semantic_hash.eq.${semanticHash},exact_match.ilike.%${query.query.slice(0, 20)}%`)
-        .limit(10);
-
-      if (data && data.length > 0) {
-        // Find best match
-        const typedData = data as unknown as Array<{ exact_match: string; [key: string]: unknown }>;
-        let bestMatch = typedData[0];
-        let bestSimilarity = this.calculateSimilarity(query.query, bestMatch.exact_match);
-
-        for (const entry of typedData) {
-          const similarity = this.calculateSimilarity(query.query, entry.exact_match);
-          if (similarity > bestSimilarity) {
-            bestSimilarity = similarity;
-            bestMatch = entry;
-          }
-        }
-
-        if (bestSimilarity >= threshold) {
-          this.stats.l3Hits++;
-          this.stats.totalSavings += 0.01;
-
-          const typedBestMatch = bestMatch as unknown as {
-            semantic_hash: string;
-            exact_match: string;
-            near_matches?: string[];
-            response: string;
-            context: string;
-            created_at: string;
-            last_accessed: string;
-            access_count: number;
-            emotional_weight: number;
-            source?: string;
-            confidence?: number;
-          };
-          const cacheEntry: CacheEntry = {
-            semanticHash: typedBestMatch.semantic_hash,
-            exactMatch: typedBestMatch.exact_match,
-            nearMatches: typedBestMatch.near_matches || [],
-            response: typedBestMatch.response,
-            context: typedBestMatch.context,
-            metadata: {
-              createdAt: new Date(typedBestMatch.created_at),
-              lastAccessed: new Date(typedBestMatch.last_accessed),
-              accessCount: typedBestMatch.access_count,
-              emotionalWeight: typedBestMatch.emotional_weight,
-              source: typedBestMatch.source || "unknown",
-              confidence: typedBestMatch.confidence || 0.9,
-            },
-          };
-
-          // Promote to faster layers
-          this.promoteToL1(semanticHash, cacheEntry);
-
-          return {
-            hit: true,
-            entry: cacheEntry,
-            source: "supabase_l3",
-            responseTimeMs: Date.now() - startTime,
-            costSaved: 0.01,
-            similarity: bestSimilarity,
-          };
-        }
-      }
-    } catch (error) {
-      console.error("[SemanticCache] L3 retrieval error:", error);
+    // L3: Supabase persistent cache — only when the record actually has the table.
+    if (await this.l3Available()) {
+      const l3 = await this.getFromL3(query.query, semanticHash, threshold, startTime);
+      if (l3) return l3;
     }
 
     // Cache miss
@@ -344,6 +301,84 @@ export class SemanticCacheManager {
   // ==========================================
   // CACHE STORAGE
   // ==========================================
+
+  /** The persistent layer, asked only after the record confirmed it has the table. */
+  private async getFromL3(
+    queryText: string,
+    semanticHash: string,
+    threshold: number,
+    startTime: number
+  ): Promise<CacheResult | null> {
+    try {
+      const { data } = await this.supabase
+        .from("semantic_cache")
+        .select("*")
+        .or(`semantic_hash.eq.${semanticHash},exact_match.ilike.%${queryText.slice(0, 20)}%`)
+        .limit(10);
+
+      if (!data || data.length === 0) return null;
+
+      const typedData = data as unknown as Array<{ exact_match: string; [key: string]: unknown }>;
+      let bestMatch = typedData[0];
+      let bestSimilarity = this.calculateSimilarity(queryText, bestMatch.exact_match);
+
+      for (const entry of typedData) {
+        const similarity = this.calculateSimilarity(queryText, entry.exact_match);
+        if (similarity > bestSimilarity) {
+          bestSimilarity = similarity;
+          bestMatch = entry;
+        }
+      }
+
+      if (bestSimilarity < threshold) return null;
+
+      this.stats.l3Hits++;
+      this.stats.totalSavings += 0.01;
+
+      const row = bestMatch as unknown as {
+        semantic_hash: string;
+        exact_match: string;
+        near_matches?: string[];
+        response: string;
+        context: string;
+        created_at: string;
+        last_accessed: string;
+        access_count: number;
+        emotional_weight: number;
+        source?: string;
+        confidence?: number;
+      };
+      const cacheEntry: CacheEntry = {
+        semanticHash: row.semantic_hash,
+        exactMatch: row.exact_match,
+        nearMatches: row.near_matches || [],
+        response: row.response,
+        context: row.context,
+        metadata: {
+          createdAt: new Date(row.created_at),
+          lastAccessed: new Date(row.last_accessed),
+          accessCount: row.access_count,
+          emotionalWeight: row.emotional_weight,
+          source: row.source || "unknown",
+          confidence: row.confidence || 0.9,
+        },
+      };
+
+      this.promoteToL1(semanticHash, cacheEntry);
+
+      return {
+        hit: true,
+        entry: cacheEntry,
+        source: "supabase_l3",
+        responseTimeMs: Date.now() - startTime,
+        costSaved: 0.01,
+        similarity: bestSimilarity,
+      };
+    } catch (error) {
+      console.error("[SemanticCache] L3 retrieval error:", error);
+      return null;
+    }
+  }
 
   async set(
     query: string,
@@ -412,6 +447,11 @@ export class SemanticCacheManager {
   }
 
   private async storeInL3(entry: CacheEntry): Promise<void> {
+    if (!(await this.l3Available())) {
+      // The record has no table: say it in a number that cannot be mistaken for an empty cache.
+      this.stats.skippedWrites++;
+      return;
+    }
     try {
       await this.supabase.from("semantic_cache").upsert({
         semantic_hash: entry.semanticHash,
@@ -470,14 +510,16 @@ export class SemanticCacheManager {
       }
     }
 
-    // L3
-    const { error } = await this.supabase
-      .from("semantic_cache")
-      .delete()
-      .or(`exact_match.ilike.%${pattern}%,response.ilike.%${pattern}%`);
+    // L3 — only when the record has the table.
+    if (await this.l3Available()) {
+      const { error } = await this.supabase
+        .from("semantic_cache")
+        .delete()
+        .or(`exact_match.ilike.%${pattern}%,response.ilike.%${pattern}%`);
 
-    if (error) {
-      console.error("[SemanticCache] L3 invalidation error:", error);
+      if (error) {
+        console.error("[SemanticCache] L3 invalidation error:", error);
+      }
     }
 
     return count;
@@ -500,7 +542,9 @@ export class SemanticCacheManager {
       }
     }
 
-    await this.supabase.from("semantic_cache").delete().neq("id", 0);
+    if (await this.l3Available()) {
+      await this.supabase.from("semantic_cache").delete().neq("id", 0);
+    }
   }
 
   // ==========================================
@@ -509,7 +553,9 @@ export class SemanticCacheManager {
 
   getStats(): CacheStats {
     const total = this.stats.totalRequests || 1;
-    
+    const tableState: CacheTableState | "unmeasured" = this.lastVerdict?.table ?? "unmeasured";
+    const redisLayers = this.lastVerdict?.redisLayers ?? 0;
+
     return {
       l1HitRate: Math.round((this.stats.l1Hits / total) * 1000) / 10,
       l2HitRate: Math.round((this.stats.l2Hits / total) * 1000) / 10,
@@ -517,6 +563,10 @@ export class SemanticCacheManager {
       totalSavings: Math.round(this.stats.totalSavings * 100) / 100,
       entriesCount: this.l0Cache.size,
       avgResponseTime: 2, // Estimated milliseconds
+      stored: tableState === "present" || redisLayers > 0,
+      tableState,
+      redisLayers,
+      skippedWrites: this.stats.skippedWrites,
     };
   }
 

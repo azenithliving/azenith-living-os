@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
-import { 
+import { cacheStorageVerdict } from "./ops/cache-storage";
+import {
   applyCode, 
   getCodebaseOverview, 
   generateImperialGreeting, 
@@ -109,7 +110,8 @@ class AzenithMastermind {
 
   async getDatabaseState(): Promise<{
     totalTables: number;
-    recordCounts: Record<string, number>;
+    recordCounts: Record<string, number | null>;
+    missingTables: string[];
     recentActivity: string[];
   }> {
     const tables = [
@@ -120,13 +122,21 @@ class AzenithMastermind {
       "api_keys_arsenal",
     ];
 
-    const recordCounts: Record<string, number> = {};
+    const recordCounts: Record<string, number | null> = {};
+    const missingTables: string[] = [];
 
     for (const table of tables) {
-      const { count } = await this.supabase
+      const { count, error } = await this.supabase
         .from(table)
         .select("*", { count: "exact", head: true });
-      recordCounts[table] = count || 0;
+      // Measured 2026-11-04: four of these five relations are not in the record, and `count || 0`
+      // printed them as empty tables. A refusal is named, not counted.
+      if (error) {
+        missingTables.push(table);
+        recordCounts[table] = null;
+      } else {
+        recordCounts[table] = count ?? 0;
+      }
     }
 
     const { data: recent } = await this.supabase
@@ -136,8 +146,9 @@ class AzenithMastermind {
       .limit(5);
 
     return {
-      totalTables: tables.length,
+      totalTables: tables.length - missingTables.length,
       recordCounts,
+      missingTables,
       recentActivity: recent?.map((r: any) => `${String(r.metric_type)} at ${String(r.observed_at)}`) || [],
     };
   }
@@ -414,6 +425,10 @@ class AzenithMastermind {
     if (cached && Date.now() - cached.timestamp.getTime() < 24 * 60 * 60 * 1000) {
       cached.hitCount++;
       return cached.response;
+    }
+
+    if ((await cacheStorageVerdict()).table !== "present") {
+      return "[Would generate fresh response - not in cache]";
     }
 
     const { data } = await this.supabase

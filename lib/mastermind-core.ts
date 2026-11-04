@@ -8,6 +8,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { cacheStorageVerdict } from "./ops/cache-storage";
 import { 
   applyCode, 
   getCodebaseOverview, 
@@ -160,7 +161,8 @@ export class AzenithMastermind {
 
   async getDatabaseState(): Promise<{
     totalTables: number;
-    recordCounts: Record<string, number>;
+    recordCounts: Record<string, number | null>;
+    missingTables: string[];
     recentActivity: string[];
   }> {
     const tables = [
@@ -171,13 +173,20 @@ export class AzenithMastermind {
       "api_keys_arsenal",
     ];
 
-    const recordCounts: Record<string, number> = {};
-    
+    const recordCounts: Record<string, number | null> = {};
+    const missingTables: string[] = [];
+
     for (const table of tables) {
-      const { count } = await this.supabase
+      const { count, error } = await this.supabase
         .from(table)
         .select("*", { count: "exact", head: true });
-      recordCounts[table] = count || 0;
+      // A refusal is named, not counted: four of these five relations are not in the record.
+      if (error) {
+        missingTables.push(table);
+        recordCounts[table] = null;
+      } else {
+        recordCounts[table] = count ?? 0;
+      }
     }
 
     const { data: recent } = await this.supabase
@@ -187,8 +196,9 @@ export class AzenithMastermind {
       .limit(5);
 
     return {
-      totalTables: tables.length,
+      totalTables: tables.length - missingTables.length,
       recordCounts,
+      missingTables,
       recentActivity: recent?.map((r: any) => `${String(r.metric_type)} at ${String(r.observed_at)}`) || [],
     };
   }
@@ -527,6 +537,10 @@ export class AzenithMastermind {
       return cached.response;
     }
     
+    if ((await cacheStorageVerdict()).table !== "present") {
+      return "[Would generate fresh response - not in cache]";
+    }
+
     const { data } = await this.supabase
       .from("semantic_cache")
       .select("*")
@@ -553,7 +567,9 @@ export class AzenithMastermind {
 
   async saveToSemanticCache(query: string, response: string): Promise<void> {
     const hash = await this.computeQueryHash(query);
-    
+
+    if ((await cacheStorageVerdict()).table !== "present") return;
+
     await this.supabase.from("semantic_cache").upsert({
       content_hash: hash,
       content_type: "ai_response",

@@ -17,6 +17,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 import { NO_KEY_MESSAGE } from "@/lib/ops/capability-tiers";
+import { cacheStorageVerdict } from "@/lib/ops/cache-storage";
 
 // ============================================
 // TYPES & CONFIGURATION
@@ -217,6 +218,10 @@ class ResourceShield {
     const hash = await this.computeHash(content, context);
     const supabase = this.db.getClient();
 
+    // Measured 2026-11-04: the record has no `semantic_cache` relation, so this lookup was refused
+    // (PGRST205) on every call and logged as an error. The verdict is asked once per instance.
+    if ((await cacheStorageVerdict()).table !== "present") return null;
+
     // Try exact match
     const { data: exactMatch, error: exactError } = await supabase
       .from("semantic_cache")
@@ -264,6 +269,8 @@ class ResourceShield {
     const hash = await this.computeHash(content);
     const supabase = this.db.getClient();
 
+    if ((await cacheStorageVerdict()).table !== "present") return false;
+
     const { error } = await supabase.from("semantic_cache").upsert({
       content_hash: hash,
       content_type: contentType,
@@ -288,6 +295,8 @@ class ResourceShield {
    */
   async clearCache(contentType?: string): Promise<number> {
     const supabase = this.db.getClient();
+
+    if ((await cacheStorageVerdict()).table !== "present") return 0;
 
     let query = supabase.from("semantic_cache").delete();
     if (contentType) {
