@@ -12,6 +12,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { Database } from './database.types';
+import { realtimeChannelVerdict, type RealtimeReason } from './realtime-verdict';
 
 // Environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -609,11 +610,27 @@ export const approvalRequestsDAL = {
 // ===========================================
 
 export const realtimeDAL = {
+  /**
+   * Opens a live channel only for a table the record itself publishes. A subscription to a
+   * table outside its publication costs nothing when it is wrong — the channel opens, the
+   * callback never fires, and the caller believes it has a feed — so the answer comes from
+   * the measured snapshot in lib/dal/realtime-verdict.ts and the refusal is reported.
+   */
   subscribeToTable(
     table: string,
     callback: (payload: any) => void,
     filter?: { column: string; value: string }
-  ) {
+  ): { subscribed: boolean; reason: RealtimeReason; unsubscribe: () => void } {
+    const verdict = realtimeChannelVerdict(table);
+    if (!verdict.usable) {
+      console.warn(
+        `[realtime] no live channel for "${table}": ${verdict.reason} ` +
+          `(measured ${verdict.measuredAt ?? 'never'}; ${verdict.publishedCount} tables published). ` +
+          `The store's alerts are read from the ledger by lib/ops/alerts.ts.`
+      );
+      return { subscribed: false, reason: verdict.reason, unsubscribe: () => {} };
+    }
+
     const channel = supabaseServer.channel(`table-changes-${table}`);
 
     const subscription = channel
@@ -629,11 +646,19 @@ export const realtimeDAL = {
       )
       .subscribe();
 
-    return () => {
-      subscription.unsubscribe();
+    return {
+      subscribed: true,
+      reason: verdict.reason,
+      unsubscribe: () => subscription.unsubscribe()
     };
   },
 
+  /**
+   * There is no live alert feed here. Measured 2026-11-04: the event table this used to
+   * subscribe to holds 4 seeded rows and was last written 2026-08-10, and neither it nor the
+   * ledger the alerts actually live in is in the record's publication — so the channel below
+   * refuses instead of pretending. Read the alerts through lib/ops/alerts.ts.
+   */
   subscribeToAgentEvents(companyId: string, callback: (payload: any) => void) {
     return this.subscribeToTable('agent_events', callback, {
       column: 'company_id',

@@ -109,6 +109,19 @@ export function arabicNote(value: unknown): string {
   return raw.slice(0, NOTE_LIMIT);
 }
 
+/**
+ * A refusal the owner is allowed to read. The outer gate answers in English before any
+ * door speaks, so a refusal carrying no Arabic letter is named as a non-Arabic refusal
+ * instead of printed — the reason stays in the log, not on his screen.
+ */
+export const REFUSAL_PLACEHOLDER = "باب التنبيهات ردّ بردّة مش عربية — السبب بيتسجّل في اللوج مش على الشاشة.";
+
+export function arabicRefusal(raw: unknown): string {
+  const text = typeof raw === "string" ? raw.trim() : "";
+  if (text && /[\u0600-\u06FF]/.test(text)) return text.slice(0, 200);
+  return REFUSAL_PLACEHOLDER;
+}
+
 /** One open alert, already in the words a surface can print. */
 export interface LedgerAlert {
   id: number;

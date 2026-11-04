@@ -1,7 +1,7 @@
 {
   "measuredAt": "2026-11-04",
   "measuredBy": "node scratch/measure-dal-columns.mjs",
-  "note": "Columns the record answers to, for every table the unified data layer filters or writes. The guard in tests/dal/recordColumns.test.ts reads this file; regenerate it after a migration, never by hand.",
+  "note": "Columns the record answers to, for every table the unified data layer filters or writes, plus the tables the record actually publishes live. The guards in tests/dal read this file; regenerate it after a migration, never by hand.",
   "tables": {
     "agent_conversations": [
       "company_id",
@@ -154,6 +154,17 @@
       "style",
       "tier",
       "updated_at"
+    ]
+  },
+  "realtime": {
+    "publication": "supabase_realtime",
+    "measuredAt": "2026-11-04",
+    "publishedTables": [
+      "consultant_sessions",
+      "product_categories",
+      "product_inventory_log",
+      "products",
+      "reality_mutations"
     ]
   }
 }

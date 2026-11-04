@@ -11,9 +11,10 @@ import { join } from "node:path";
  * `acknowledged_at` — are not among them (each attempt answered 42703). So the old strip could
  * only repeat four invented alerts and fail to mark any of them read.
  *
- * The store's alerts already have one owner: the ledger read through `lib/ops/alerts.ts`. Both
- * surfaces — the cockpit's red strip and the old house's notification panel — go through it here,
- * so a count cannot exist twice.
+ * The store's alerts already have one owner: the ledger read through `lib/ops/alerts.ts`. The
+ * three surfaces that show them — the cockpit's red strip, the old house's notification panel,
+ * and the second bell — all go through that one rule, so a count cannot exist twice and a
+ * surface cannot invent fields the door never answers.
  */
 
 import { acknowledgeAlerts, alertWindowPhrase, readOpenAlerts } from "@/lib/ops/alerts";
@@ -156,11 +157,19 @@ describe("the one reading rule over the store's alerts", () => {
   });
 });
 
-/** Source guards: the shape of the repair, so a second reader cannot come back. */
+function codeOnly(src: string): string {
+  return src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+}
+
+/**
+ * Source guards: the shape of the repair, so a second reader cannot come back.
+ * A doc comment is allowed to name the field a surface no longer declares; the guards read the code.
+ */
 describe("the surfaces that read his alerts", () => {
   const notificationsDoor = "app/api/admin/notifications/route.ts";
   const cockpitDoor = "app/api/admin/agents/alerts/route.ts";
   const oldPanel = "components/admin/NotificationsPanel.tsx";
+  const bell = "components/admin/NotificationBell.tsx";
 
   it("builds no query against the dead table in the notification door", () => {
     const door = readFileSync(notificationsDoor, "utf8");
@@ -183,12 +192,55 @@ describe("the surfaces that read his alerts", () => {
     expect(panel).toContain("restingLine");
   });
 
-  it("never prints the edge gate's English refusal on his screen", () => {
-    const panel = readFileSync(oldPanel, "utf8");
-    // The outer gate answers «Unauthorized» / «Forbidden» before any door speaks (proxy.ts:194).
-    expect(panel).toContain("function arabicRefusal(");
-    expect(panel).toContain("بردّة مش عربية");
-    expect(panel).not.toMatch(/setRefusal\(\s*\(?\s*typeof data/);
+  it("owns the refusal wording in the alert rule, not in each surface", () => {
+    // The outer gate answers «Unauthorized» / «Forbidden» before any door speaks (proxy.ts:194),
+    // so a refusal with no Arabic letter in it is named instead of printed — one sentence, one owner.
+    const rule = readFileSync("lib/ops/alerts.ts", "utf8");
+    expect(rule).toContain("export function arabicRefusal(");
+    expect(rule).toContain("بردّة مش عربية");
+    for (const surface of [oldPanel, bell]) {
+      const src = codeOnly(readFileSync(surface, "utf8"));
+      expect(src).toContain("arabicRefusal } from '@/lib/ops/alerts'");
+      expect(src).not.toMatch(/function arabicRefusal\(/);
+      expect(src).not.toMatch(/setRefusal\(\s*\(?\s*typeof data/);
+    }
+  });
+
+  it("keeps the second bell on the contract the door actually answers", () => {
+    // Measured 2026-11-04 (scratch/measure-bell-contract.mjs): the door answers 6 row fields and
+    // an envelope of success/data/unreadCount/restingLine. The bell used to declare a `severity`
+    // and a per-row read flag it never receives, and to count and empty-state its own way.
+    const src = codeOnly(readFileSync(bell, "utf8"));
+    expect(src).not.toMatch(/severity/);
+    expect(src).not.toMatch(/read:\s*boolean/);
+    expect(src).toContain("data.unreadCount");
+    expect(src).toContain("data.restingLine");
+    expect(src).not.toContain("لا توجد إشعارات");
+    expect(src).toContain("arNum(");
+    expect(src).not.toMatch(/'9\+'/);
+  });
+
+  it("makes the second bell believe the door, not itself", () => {
+    // Closing an alert is a receipt in the ledger: the strip loses the row and cannot flag it,
+    // and a refusal the surface ignores is how a screen claims success on work that never landed.
+    const src = codeOnly(readFileSync(bell, "utf8"));
+    expect(src).toMatch(/if \(res\.ok && data\.success\)/);
+    expect(src).not.toMatch(/read:\s*true/);
+    expect(src).toMatch(/setRefusal\(arabicRefusal\(data\?\.error\)\)/);
+  });
+
+  it("gives the second bell no affordance that goes nowhere", () => {
+    // The footer used to be a button labelled «show all notifications» whose handler only
+    // closed the pop-over. A link has to reach the surface that really holds the whole strip.
+    const src = codeOnly(readFileSync(bell, "utf8"));
+    expect(src).not.toMatch(/عرض جميع الإشعارات/);
+    expect(src).toContain('href="/admin"');
+  });
+
+  it("asks the strip for exactly the rows it shows", () => {
+    const src = codeOnly(readFileSync(bell, "utf8"));
+    expect(src).toContain("limit=20");
+    expect(src).not.toMatch(/\.slice\(0,/);
   });
 
   it("holds the alert window in one module only", () => {

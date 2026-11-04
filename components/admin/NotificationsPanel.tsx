@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Bell, Bot, Check, Loader2 } from 'lucide-react';
 import { arNum } from '@/lib/ops/metricLabels';
+import { arabicRefusal } from '@/lib/ops/alerts';
 
 interface Notification {
   id: string;
@@ -16,14 +17,9 @@ interface Notification {
  * own ledger and nobody has looked at yet — rows come from the one reading rule in
  * `lib/ops/alerts.ts`, the same rule the cockpit's red strip uses, so the two counts
  * cannot drift apart. A row the door refused to read is reported as a refusal; an empty
- * list is only ever claimed with the window it was measured over. The edge gate answers in
- * English, so a refusal with no Arabic letter in it is named as such instead of printed.
+ * list is only ever claimed with the window it was measured over. The refusal wording has
+ * one owner too, in the alert rule module, so this strip and the bell cannot disagree.
  */
-function arabicRefusal(raw: unknown): string {
-  const text = typeof raw === 'string' ? raw.trim() : '';
-  if (text && /[\u0600-\u06FF]/.test(text)) return text.slice(0, 200);
-  return 'باب التنبيهات ردّ بردّة مش عربية — السبب بيتسجّل في اللوج مش على الشاشة.';
-}
 
 export function NotificationsPanel() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
