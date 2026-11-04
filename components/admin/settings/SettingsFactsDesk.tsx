@@ -1,5 +1,5 @@
 import { DEAD_KEYS, LIVE_FACTS, SECRET_MASK, type SettingFact } from "@/lib/settings/facts";
-import { arNum } from "@/lib/ops/metricLabels";
+import { arDigits, arNum } from "@/lib/ops/metricLabels";
 
 /**
  * The owner's settings desk in the new house.
@@ -39,7 +39,7 @@ function stateOf(fact: SettingFact, value: unknown): string {
     const rows = Number(stamp.rows ?? 0);
     const tables = Number(stamp.tables ?? 0);
     const failures = Number(stamp.failures ?? 0);
-    return `يوم ${String(stamp.day)} · ${arNum(tables)} جدول و${arNum(rows)} سطر · ${failures > 0 ? `${arNum(failures)} فشل` : "مفيش فشل"}`;
+    return `يوم ${arDigits(String(stamp.day))} · ${arNum(tables)} جدول و${arNum(rows)} سطر · ${failures > 0 ? `${arNum(failures)} فشل` : "مفيش فشل"}`;
   }
   if (value && typeof value === "object" && Object.keys(value as object).length === 0) {
     return "فاضي — مفيش قيمة متغيّرة دلوقتي";

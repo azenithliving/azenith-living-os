@@ -107,6 +107,13 @@ describe("the desk shows controls only for what answers", () => {
     }
   });
 
+  it("writes the stamp's day in his digits, not the record's", () => {
+    // Measured on the published desk 2026-11-04: the nightly stamp holds «2026-11-04», and printing
+    // it as it is stored put eight Latin digits on his screen. A date identifies; it is not summed.
+    expect(desk).toContain("arDigits(String(stamp.day))");
+    expect(desk).not.toContain("يوم ${String(stamp.day)}");
+  });
+
   it("carries no erase button — deleting a stored value is the owner's word", () => {
     expect(desk).not.toContain("DELETE");
     expect(desk).not.toMatch(/method:\s*"DELETE"/);
