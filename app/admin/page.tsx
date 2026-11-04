@@ -10,6 +10,7 @@ import { NotificationsPanel } from "@/components/admin/NotificationsPanel";
 import { agentLabel, legacyToOps } from "@/lib/ops/identity";
 import { ownerVoice } from "@/lib/ops/owner-voice";
 import { arNum } from "@/lib/ops/metricLabels";
+import { arabicRefusal } from "@/lib/ops/alerts";
 import TelegramControlPanel from "@/components/admin/TelegramControlPanel";
 import AIKeysControlPanel from "@/components/admin/AIKeysControlPanel";
 
@@ -23,6 +24,17 @@ interface AnalyticsData {
     uniqueVisitors: number;
     averageLeadScore: number;
   };
+}
+
+interface OwnerAlert {
+  icon: React.ElementType;
+  color: "rose" | "amber" | "emerald";
+  text: string;
+  subtext: string;
+  /** Where the alert came from, in his words — the block has more than one source. */
+  source: string;
+  /** Only an alert that really has a page to open carries a link. */
+  link?: string;
 }
 
 interface SystemHealthData {
@@ -80,13 +92,10 @@ export default function AdminPage() {
     timestamp: string;
   }> | null>(null);
 
-  const [alerts, setAlerts] = useState<Array<{
-    icon: React.ElementType;
-    color: "rose" | "amber" | "emerald";
-    text: string;
-    subtext: string;
-    link: string;
-  }> | null>(null);
+  const [alerts, setAlerts] = useState<OwnerAlert[] | null>(null);
+
+  /** What the alert block measured but could not show: the rest line, a refusal, or a truncation. */
+  const [alertsNote, setAlertsNote] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,11 +124,14 @@ export default function AdminPage() {
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       // Fetch all APIs in parallel using allSettled so one slow route never stalls the dashboard
-      const [analyticsRes, healthRes, mastermindRes, customersRes] = await Promise.allSettled([
+      const [analyticsRes, healthRes, mastermindRes, customersRes, ledgerAlertsRes] = await Promise.allSettled([
         fetch("/api/analytics?period=30days", { signal: controller.signal }),
         fetch("/api/system-health", { cache: "no-store", signal: controller.signal }),
         fetch("/api/admin/mastermind/stats", { cache: "no-store", signal: controller.signal }),
         fetch("/api/admin/customers", { cache: "no-store", signal: controller.signal }),
+        // The store's own alerts have one reading rule; this surface is a reader of it, not a
+        // second opinion — the same door the cockpit strip and the panel go through.
+        fetch("/api/admin/notifications?limit=20", { cache: "no-store", signal: controller.signal }),
       ]);
       clearTimeout(timeoutId);
 
@@ -195,7 +207,7 @@ export default function AdminPage() {
         {
           title: "تفاعلات المساعد",
           value: mastermind.commands?.total || 0,
-          subtitle: mastermind.commands?.last24h ? `${mastermind.commands.last24h} في آخر 24 ساعة` : "هذا الشهر",
+          subtitle: mastermind.commands?.last24h ? `${arNum(mastermind.commands.last24h)} في آخر ${arNum(24)} ساعة` : "هذا الشهر",
           icon: <Brain className="h-6 w-6" />,
           color: "purple" as const,
           href: "/admin/agents",
@@ -203,7 +215,7 @@ export default function AdminPage() {
         {
           title: "نظام الوكلاء",
           value: analytics.metrics?.totalRequests || 0,
-          subtitle: analytics.metrics?.totalBookings ? `${analytics.metrics.totalBookings} حجز مؤكد` : "قيد الانتظار",
+          subtitle: analytics.metrics?.totalBookings ? `${arNum(analytics.metrics.totalBookings)} حجز مؤكد` : "قيد الانتظار",
           icon: <Bot className="h-6 w-6" />,
           color: "blue" as const,
           href: "/admin/agents",
@@ -231,33 +243,67 @@ export default function AdminPage() {
 
       setActivities(realActivities.length > 0 ? realActivities : []);
 
-      // Generate alerts from system health
-      const realAlerts = [];
-      
-      // Add security alert if there are failed attempts
-      if (mastermind.security?.failedAttempts24h > 0) {
+      // Three sources, each named on the row it produces. The store's own ledger comes through
+      // the one alert rule — the same door the cockpit strip, the panel and the bell read. The
+      // site watcher and the login door are separate findings with pages of their own.
+      const ledgerRows: Array<{ id: string; title: string; message: string; timestamp: string }> = [];
+      let ledgerRest: string | null = null;
+      let ledgerRefusal: string | null = null;
+      if (ledgerAlertsRes.status === "fulfilled") {
+        try {
+          const aJson = await ledgerAlertsRes.value.json();
+          if (!ledgerAlertsRes.value.ok || aJson?.success !== true) {
+            ledgerRefusal = arabicRefusal(aJson?.error);
+          } else {
+            ledgerRows.push(...(Array.isArray(aJson.data) ? aJson.data : []));
+            ledgerRest = aJson.restingLine ?? null;
+          }
+        } catch (_) {
+          ledgerRefusal = "باب التنبيهات ردّ بردّة مش مفهومة — السبب بيتسجّل في اللوج مش على الشاشة.";
+        }
+      } else {
+        ledgerRefusal = "باب التنبيهات ما وصلش أصلًا — مفيش تنبيه من الدفتر اتقرا.";
+      }
+
+      const realAlerts: OwnerAlert[] = ledgerRows.map((row) => ({
+        icon: AlertTriangle,
+        color: "rose" as const,
+        text: row.title,
+        subtext: row.message,
+        source: "دفتر المتجر",
+      }));
+
+      // A real count now: the query used to filter the attempts table on a company column the
+      // table has never had, so the record refused it and this row could never appear.
+      if (mastermind.security && mastermind.security.failedAttempts24h > 0) {
         realAlerts.push({
           icon: AlertTriangle,
           color: "rose" as const,
-          text: `${mastermind.security.failedAttempts24h} محاولة دخول فاشلة`,
-          subtext: "في آخر 24 ساعة - تحقق من الأمان",
+          text: `${arNum(mastermind.security.failedAttempts24h)} محاولة دخول فاشلة`,
+          subtext: `في آخر ${arNum(24)} ساعة — تحقق من الأمان`,
+          source: "بوابة الدخول",
           link: "/admin/agents",
         });
       }
 
-      // Add system health alerts
-      if (health.pendingAlerts && health.pendingAlerts.length > 0) {
-        health.pendingAlerts.slice(0, 2).forEach((alert) => {
-          realAlerts.push({
-            icon: alert.severity === "critical" ? AlertTriangle : CheckCircle,
-            color: alert.severity === "critical" ? "rose" : alert.severity === "warning" ? "amber" : "emerald" as const,
-            text: alert.problem,
-            subtext: alert.rootCause,
-            link: "/admin/database",
-          });
+      const watcherAlerts = health.pendingAlerts ?? [];
+      watcherAlerts.slice(0, 2).forEach((alert) => {
+        realAlerts.push({
+          icon: alert.severity === "critical" ? AlertTriangle : CheckCircle,
+          color: alert.severity === "critical" ? "rose" : alert.severity === "warning" ? "amber" : ("emerald" as const),
+          text: alert.problem,
+          subtext: alert.rootCause,
+          source: "فحص الموقع",
+          link: "/admin/database",
         });
-      }
+      });
 
+      // What the block measured but could not put on the card: a refusal first, then the rows it
+      // left out, then the ledger's own rest line — never a bare «no alerts».
+      const hiddenWatcher = Math.max(watcherAlerts.length - 2, 0);
+      setAlertsNote(
+        ledgerRefusal ?? (hiddenWatcher > 0 ? `${arNum(hiddenWatcher)} تنبيه من فحص الموقع على صفحة الفحص` : ledgerRest)
+      );
       setAlerts(realAlerts);
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
@@ -535,27 +581,44 @@ export default function AdminPage() {
                 <AlertTriangle className="w-6 h-6 text-rose-400" />
                 أهم التنبيهات
               </h2>
-              <p className="mt-1 text-sm text-white/60">تنبيهات تتطلب الانتباه</p>
+              <p className="mt-1 text-sm text-white/60">
+                {alerts ? `${arNum(alerts.length)} على الشاشة` : "بتتقرا دلوقتي"}
+              </p>
+
+              {alertsNote && Boolean(alerts?.length) && (
+                <p className="mt-2 text-xs text-white/50 leading-relaxed">{alertsNote}</p>
+              )}
 
               <div className="mt-6 space-y-4">
                 {alerts && alerts.length > 0 ? (
-                  alerts.map((alert, idx) => (
-                    <Link
-                      key={idx}
-                      href={alert.link}
-                      className={`flex items-start gap-3 p-4 rounded-xl border ${colorClasses[alert.color]} hover:opacity-80 transition-all`}
-                    >
-                      <div className="rounded-lg bg-black/20 p-2">
-                        <alert.icon className={`w-5 h-5 ${iconColors[alert.color]}`} />
+                  alerts.map((alert, idx) => {
+                    const row = (
+                      <>
+                        <div className="rounded-lg bg-black/20 p-2">
+                          <alert.icon className={`w-5 h-5 ${iconColors[alert.color]}`} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-white">{alert.text}</p>
+                          <p className="text-xs text-white/60 mt-1">{alert.subtext}</p>
+                          <p className="text-[10px] text-white/40 mt-1">{alert.source}</p>
+                        </div>
+                      </>
+                    );
+                    const shell = `flex items-start gap-3 p-4 rounded-xl border ${colorClasses[alert.color]}`;
+                    return alert.link ? (
+                      <Link key={idx} href={alert.link} className={`${shell} hover:opacity-80 transition-all`}>
+                        {row}
+                      </Link>
+                    ) : (
+                      <div key={idx} className={shell}>
+                        {row}
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-white">{alert.text}</p>
-                        <p className="text-xs text-white/60 mt-1">{alert.subtext}</p>
-                      </div>
-                    </Link>
-                  ))
+                    );
+                  })
                 ) : (
-                  <p className="text-center text-white/40 py-4">لا توجد تنبيهات حالية</p>
+                  <p className="text-center text-white/40 py-4 leading-relaxed">
+                    {alertsNote ?? "مفيش تنبيه مفتوح دلوقتي — الدفتر والفحص وبوابة الدخول ما قالوش حاجة"}
+                  </p>
                 )}
               </div>
             </div>

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -261,5 +261,70 @@ describe("the surfaces that read his alerts", () => {
 
   it("still refuses the strip to a caller with no admin session", () => {
     expect(readFileSync(notificationsDoor, "utf8")).toContain("requireAdminApiAccess");
+  });
+});
+
+/**
+ * The old admin home is a fourth reader of the same rule. Measured 2026-11-04
+ * (scratch/measure-admin-alerts.mjs): it built his alert list in the browser from two other doors,
+ * never read the ledger rule at all, printed its own «no alerts» line, hid the rows it truncated
+ * to 2, and its security row could never appear — the door filtered the attempts table on a
+ * `company_id` column the table has never had (6 columns), so the record refused the query and the
+ * count stayed zero while the page ignored the warning the door sent back.
+ */
+describe("the old admin home's alert block", () => {
+  const home = "app/admin/page.tsx";
+  const statsDoor = "app/api/admin/mastermind/stats/route.ts";
+  const src = codeOnly(readFileSync(home, "utf8"));
+
+  it("reads the store's alerts through the one door", () => {
+    expect(src).toContain("/api/admin/notifications");
+    expect(src).not.toMatch(/from\(\s*["'`]ops_sync_events/);
+  });
+
+  it("names which source each alert came from", () => {
+    const sources = [...src.matchAll(/source:\s*["'`]([^"'`]+)["'`]/g)].map((m) => m[1]);
+    expect(sources.length).toBe(3);
+    expect(sources).toContain("دفتر المتجر");
+    expect(sources).toContain("فحص الموقع");
+    expect(sources).toContain("بوابة الدخول");
+  });
+
+  it("does not claim there are no alerts", () => {
+    expect(src).not.toContain("لا توجد تنبيهات حالية");
+    expect(src).toContain("alertsNote");
+  });
+
+  it("counts what it leaves off the card instead of hiding it", () => {
+    const cap = Number(/watcherAlerts\.slice\(0,\s*(\d+)\)/.exec(src)?.[1] ?? 0);
+    expect(cap).toBeGreaterThan(0);
+    expect(src).toContain(`Math.max(watcherAlerts.length - ${cap}, 0)`);
+    expect(src).toMatch(/arNum\(hiddenWatcher\)/);
+  });
+
+  it("prints his digits in the alert copy", () => {
+    expect(src).not.toMatch(/في آخر 24 ساعة/);
+    expect(src).toMatch(/في آخر \$\{arNum\(24\)\} ساعة/);
+    expect(src).toMatch(/arNum\(mastermind\.security\.failedAttempts24h\)/);
+    // No Arabic sentence on this page may print a door's number raw — measured 3, now none.
+    const raw = [...src.matchAll(/["'`]([^"'`\n]{3,140})["'`]/g)]
+      .map((m) => m[1])
+      .filter((s) => /[؀-ۿ]/.test(s) && /\$\{[^}]*\}/.test(s) && !/arNum|arDigits|toLocaleString/.test(s));
+    expect(raw).toEqual([]);
+  });
+
+  it("asks the attempts table only for columns it answers to", () => {
+    const door = codeOnly(readFileSync(statsDoor, "utf8"));
+    const block = /from\("failed_login_attempts"\)([\s\S]{0,260}?)\.gte/.exec(door)?.[1] ?? "";
+    expect(block).toContain("attempted_at");
+    expect(block).not.toMatch(/company_id/);
+  });
+
+  it("gives an alert a link only when the page exists", () => {
+    const links = [...src.matchAll(/link:\s*["'`](\/[^"'`]+)["'`]/g)].map((m) => m[1]);
+    expect(links.length).toBeGreaterThan(0);
+    for (const l of links) {
+      expect(existsSync(join("app", l.replace(/^\//, ""), "page.tsx"))).toBe(true);
+    }
   });
 });

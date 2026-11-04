@@ -61,7 +61,10 @@ async function gatherMastermindStats(supabase: AdminClient, userId: string, comp
     supabase
       .from("failed_login_attempts")
       .select("attempted_at")
-      .eq("company_id", companyId)
+      // Measured 2026-11-04 (scratch/measure-admin-alerts.mjs): the table answers to 6 columns
+      // — id, email, ip_address, attempted_at, failure_reason, user_agent — and none of them is a
+      // company link, so filtering on `company_id` was refused (42703) and the count could never
+      // leave zero. The reading is for the whole record; the store has one company.
       .gte("attempted_at", oneDayAgo),
     supabase
       .from("agent_tasks")
