@@ -1,0 +1,27 @@
+import { chromium } from '@playwright/test';
+import speakeasy from 'speakeasy';
+import fs from 'fs';
+const BASE='http://localhost:3222';
+const env=Object.fromEntries(fs.readFileSync('.env.local','utf8').split(/\r?\n/).filter(l=>/^[A-Z]/.test(l)&&l.includes('=')).map(l=>[l.slice(0,l.indexOf('=')),l.slice(l.indexOf('=')+1).replace(/^"|"$/g,'')]));
+const b=await chromium.launch({headless:true});
+const p=await (await b.newContext({viewport:{width:390,height:844}})).newPage();
+await p.goto(`${BASE}/gate/login`,{waitUntil:'domcontentloaded',timeout:60000});
+await p.fill('input[type=email]',env.ADMIN_GATE_EMAIL);
+await p.fill('input[type=password]',env.ADMIN_GATE_PASSWORD);
+await p.click('button[type=submit]');
+await p.waitForSelector('input[placeholder="000000"]',{timeout:30000});
+const s=env.ADMIN_GATE_2FA_SECRET.replace(/\s+/g,'').replace(/-/g,'').toUpperCase();
+await p.fill('input[placeholder="000000"]',speakeasy.totp({secret:s,encoding:'base32',step:30,digits:6}));
+await p.click('button[type=submit]');
+for(let i=0;i<15&&!p.url().includes('/admin');i++) await p.waitForTimeout(2000);
+await p.goto(`${BASE}/admin/v2/agents/ops`,{waitUntil:'domcontentloaded',timeout:60000});
+await p.waitForSelector('input[placeholder*="لهجتك"]',{timeout:45000});
+await p.waitForTimeout(4000);
+console.log(await p.evaluate(()=>{
+  const h=document.querySelector('[data-chat-header]');
+  const kids=[...h.children].map(c=>{const r=c.getBoundingClientRect();return {cls:c.className.slice(0,40),x:Math.round(r.x),y:Math.round(r.y),w:Math.round(r.width)};});
+  const name=[...h.querySelectorAll('span')].find(e=>/مدير|وكيل/.test(e.textContent||''));
+  const nr=name?name.getBoundingClientRect():null;
+  return JSON.stringify({header:{h:Math.round(h.getBoundingClientRect().height),wrap:getComputedStyle(h).flexWrap},kids,name:name?name.textContent.trim().slice(0,25):null,nameBox:nr?{x:Math.round(nr.x),y:Math.round(nr.y),w:Math.round(nr.width)}:null},null,1);
+}));
+await b.close();

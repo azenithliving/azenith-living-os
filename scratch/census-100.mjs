@@ -1,0 +1,10 @@
+import postgres from "postgres";
+import dotenv from "dotenv";
+dotenv.config();
+const sql = postgres(process.env.DIRECT_URL, { ssl: "require", max: 1 });
+const a = await sql`select count(*)::int as c from product_images where is_active = true`;
+const s = await sql`select count(distinct category)::int as c from product_images where is_active = true`;
+const v = await sql`select count(*)::int as c from ops_semantic_memory`;
+const m = await sql`select count(*)::int as c from customer_memory_facts`;
+console.log("نشطة", a[0].c, "تصنيفات", s[0].c, "سرب", v[0].c, "عملاء", m[0].c);
+await sql.end();

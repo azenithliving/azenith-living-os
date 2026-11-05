@@ -1,0 +1,11 @@
+import postgres from "postgres";
+import dotenv from "dotenv";
+dotenv.config();
+const sql = postgres(process.env.DIRECT_URL, { ssl: "require", max: 1 });
+const cols = await sql`select column_name, data_type from information_schema.columns where table_schema='public' and table_name='user_preferences' order by ordinal_position`;
+console.log("columns:", cols.map(c => `${c.column_name}:${c.data_type}`).join(" | "));
+const n = await sql`select count(*)::int as c from user_preferences`;
+console.log("rows:", n[0].c);
+const mem = await sql`select count(*)::int as c from memories`;
+console.log("memories rows:", mem[0].c);
+await sql.end();

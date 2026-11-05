@@ -1,0 +1,16 @@
+login ok
+canvas line: ٩ أبواب حيّة، كل باب يفتح محادثة كاملة الشاشة مع موظف حقيقي
+SHOT 13-canvas-arabic-digits.png
+drawer closed geometry {"x":-350,"right":-7,"w":343} (right edge must be < 0)
+tool really answered: صحة المحتوى: يحتاج تحسين تم فحص 4 صفحة. عدد الملاحظات: 6 تكرار: - title مكرر: "أزينث ليفينج | تصميم داخلي فاخر وتشطيبات في مصر" في
+SHOT 14-tool-answered.png
+drawer after the close button {"x":-350,"right":-7,"w":343}
+SHOT 15-drawer-closed.png
+strip (raised through door http 200): رُصد شذوذ في المتجر — وكيل الجودة — صفحة الغرف بترد بخطأ في آخر ربع ساعةالآنتم الاستلام
+SHOT 16-red-strip.png
+strip after acknowledge + reload: gone
+content employee header: →✍️وكيل المحتوىمتصلكتابة فاخرة، توحيد نبرة، قانون هويةأوامرC
+SHOT 17-content-employee.png
+storefront title: أزينث ليفينج | تصميم داخلي فاخر وتشطيبات في مصر
+SHOT 18-storefront-phone.png
+CONSOLE_ERRORS 0

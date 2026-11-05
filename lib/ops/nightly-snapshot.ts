@@ -30,26 +30,13 @@ export const SNAPSHOT_BUCKET = "snapshots";
 /** Supabase hands back at most 1,000 rows a request; 500 keeps one page well inside it. */
 const PAGE_ROWS = 500;
 
-export interface SnapshotTarget {
-  table: string;
-  /** A stable ordering key, so paging cannot skip a row or count one twice. */
-  order: string;
-}
-
-/** The record the owner cannot rebuild. `site_settings` is keyed by its own `key` column. */
-export const SNAPSHOT_TARGETS: SnapshotTarget[] = [
-  { table: "agent_messages", order: "id" },
-  { table: "agent_conversations", order: "id" },
-  { table: "agent_profiles", order: "id" },
-  { table: "agent_tasks", order: "id" },
-  { table: "consultant_sessions", order: "id" },
-  { table: "consultant_learnings", order: "id" },
-  { table: "consultant_pending_questions", order: "id" },
-  { table: "customer_memory", order: "id" },
-  { table: "ops_semantic_memory", order: "id" },
-  { table: "ops_sync_events", order: "id" },
-  { table: "site_settings", order: "key" },
-];
+/**
+ * The scope lives in `snapshot-scope.ts` — one owner for what is copied and what is named with a
+ * reason. It is re-exported here because the copy job and its guards read it from this module.
+ */
+export type { SnapshotTarget } from "./snapshot-scope.ts";
+export { SNAPSHOT_TARGETS } from "./snapshot-scope.ts";
+import { SNAPSHOT_TARGETS, type SnapshotTarget } from "./snapshot-scope.ts";
 
 /** The settings row the snapshot stamps itself with, so freshness is one read away. */
 export const SNAPSHOT_STAMP_KEY = "nightly_snapshot_last";
@@ -229,6 +216,76 @@ export async function runNightlySnapshot(): Promise<SnapshotOutcome> {
   }
 
   return { day, writes, tables: writes.length, rows, bytes, failures, note };
+}
+
+/**
+ * Read one day's copy back out of the bucket.
+ *
+ * The restore door cannot re-implement decompression — a second reader is how a copy starts lying.
+ * This returns the rows and the count it actually parsed, so the caller compares against what it
+ * asked for instead of trusting the file's existence.
+ */
+export async function loadSnapshotRows(
+  day: string,
+  table: string,
+): Promise<{ rows: Record<string, unknown>[]; parsed: number; error: string | null }> {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return { rows: [], parsed: 0, error: "مفتاح الخدمة مش ضابط — النسخة ما تقراش" };
+  const target = SNAPSHOT_TARGETS.find((t) => t.table === table);
+  if (!target) return { rows: [], parsed: 0, error: `الجدول «${table}» مش في طقم النسخة` };
+
+  const path = snapshotObjectPath(day, table);
+  const down = await supabase.storage.from(SNAPSHOT_BUCKET).download(path);
+  if (down.error) return { rows: [], parsed: 0, error: `ملف ${path} ما نزلش: ${down.error.message}` };
+
+  let plain: string;
+  try {
+    plain = gunzipSync(Buffer.from(await down.data.arrayBuffer())).toString("utf8");
+  } catch (e: any) {
+    return { rows: [], parsed: 0, error: `فكّ ${table} فشل: ${e.message}` };
+  }
+  const lines = plain.split("\n").filter((l) => l.length > 0);
+  const rows: Record<string, unknown>[] = [];
+  for (const line of lines) {
+    try {
+      rows.push(JSON.parse(line) as Record<string, unknown>);
+    } catch {
+      return { rows: [], parsed: rows.length, error: `سطر في ${path} مش مقروء — النسخة ما تتقبلش` };
+    }
+  }
+  console.log(`[Snapshot] رجّع ${table} من ${day} — ${rows.length} سطر من ${lines.length} سطر في الملف`);
+  return { rows, parsed: rows.length, error: null };
+}
+
+/**
+ * Copy a named part of the set now, without touching the nightly stamp.
+ *
+ * The drill and the owner's «copy this now» need a real object for one table, not a claim. The stamp
+ * row means «the whole nightly copy ran today», so a partial copy must never write it — otherwise
+ * the freshness read would lie about tables this run never touched. A table outside the set is
+ * refused into `failures` instead of being silently skipped.
+ */
+export async function runSnapshotForTables(tables: string[]): Promise<SnapshotOutcome> {
+  const day = snapshotDay();
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    const why = "مفتاح الخدمة مش ضابط — النسخة ما اتعملتش";
+    return { day, writes: [], tables: 0, rows: 0, bytes: 0, failures: [why], note: why };
+  }
+
+  const chosen = SNAPSHOT_TARGETS.filter((t) => tables.includes(t.table));
+  const refused = tables.filter((t) => !chosen.some((c) => c.table === t));
+  const writes: SnapshotWrite[] = [];
+  for (const target of chosen) writes.push(await snapshotTable(supabase, day, target));
+
+  const failures = writes.filter((w) => w.error).map((w) => w.error as string);
+  for (const table of refused) failures.push(`الجدول «${table}» مش في طقم النسخة — ما انسخش`);
+  const rows = writes.reduce((sum, w) => sum + w.storedRows, 0);
+  const bytes = writes.reduce((sum, w) => sum + w.storedBytes, 0);
+  console.log(
+    `[Snapshot] نسخة جزئية ${day} — الجداول ${writes.length} · السطور ${rows} · مرفوض ${failures.length}`,
+  );
+  return { day, writes, tables: writes.length, rows, bytes, failures, note: failures.length ? failures[0] : null };
 }
 
 /**

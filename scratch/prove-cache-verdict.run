@@ -1,0 +1,17 @@
+the record's answer about the cache table: status=404 code=PGRST205
+نجح — the record has no cache table, so the live verdict is absent · code=PGRST205
+the cache-hit function in the record: 0
+نجح — the function the cache hits also does not exist
+admin arsenal door: status=200 bytes=604
+نجح — the arsenal door answers · {"success":true,"stats":{"providers":{"groq":{"total":0,"active":0,"cooling":0,"disabled":
+consultant answer: status=200 ms=52125 reply bytes=275
+نجح — the consultant still answers · {"reply":"مساء النور! تنفيذ غرفة نوم بيختلف وقته حسب تفاصيل المشروع. التصميم المخصص والتشطيبات الفاخرة محتاجين وقت علشان
+نجح — the answer is his Arabic, not a cache placeholder · مساء النور! تنفيذ غرفة نوم بيختلف وقته حسب تفاصيل المشروع. التصميم المخصص والتشط
+home page text at 390px: 2781
+advisor bubble present: true
+نجح — the customer page renders · chars=2781
+نجح — the advisor is on the page the cache serves
+نجح — no console error on the consultant surface
+rows left by the instrument: sessions=1 pending=0
+rows after cleanup: sessions=0 pending=0
+RESULT: 8 of 8

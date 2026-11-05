@@ -1,0 +1,41 @@
+1 login ok -> https://azenith-living.vercel.app/admin
+2 canvas cards=9 keys=ops-lead,ops-qa,vanguard,ops-content,ops-visual,ops-seo,ops-analytics,ops-ux,ops-dev
+SHOT 01-canvas-full.png
+SHOT 02-canvas-bottom.png
+SHOT 03-leader-chat-open.png
+3 sent a real message and an answer arrived=false
+SHOT 04-leader-answer.png
+SHOT 05-roles-strip.png
+5 vault قرارات بانتظار كلمتك21 معلقةتحديث🔵 عاديتقرير قرار قبل الموافقة إجراء إداري١‏/١٠‏/٢٠٢٦، ١١
+SHOT 06-decisions-vault.png
+SHOT 07-actions-drawer.png
+6 pressed a real tool, the drawer answered: نسخة احتياطيةحفظ نسخة كاملة الآن
+SHOT 08-tool-result.png
+CRASH page.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-actions-toggle]')[22m
+[2m    - locator resolved to <button data-actions-toggle="" title="عِدّة الإجراءات: أدوات تشتغل فعلاً" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors bg-amber-500/15 border-amber-500/30 text-amber-300">…</button>[22m
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <button title="إغلاق" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-white/60 hover:text-white">✕</button> from <aside aria-hidden="false" data-actions-drawer="" class="absolute inset-y-0 left-0 z-30 w-[88%] max-w-sm overflow-y-auto border-r border-white/10 bg-[#0d0f12] shadow-2xl transition-transform duration-200 ease-out translate-x-0">…</aside> subtree intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <button title="إغلاق" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-white/60 hover:text-white">✕</button> from <aside aria-hidden="false" data-actions-drawer="" class="absolute inset-y-0 left-0 z-30 w-[88%] max-w-sm overflow-y-auto border-r border-white/10 bg-[#0d0f12] shadow-2xl transition-transform duration-200 ease-out translate-x-0">…</aside> subtree intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    57 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is visible, enabled and stable[22m
+[2m       - scrolling into view if needed[22m
+[2m       - done scrolling[22m
+[2m       - <button title="إغلاق" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-white/60 hover:text-white">✕</button> from <aside aria-hidden="false" data-actions-drawer="" class="absolute inset-y-0 left-0 z-30 w-[88%] max-w-sm overflow-y-auto border-r border-white/10 bg-[#0d0f12] shadow-2xl transition-transform duration-200 ease-out translate-x-0">…</aside> subtree intercepts pointer events[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+
+CONSOLE_ERRORS 0

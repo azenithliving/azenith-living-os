@@ -1,0 +1,11 @@
+import { chromium } from '@playwright/test';
+const BASE = process.argv[2] || 'https://azenith-living.vercel.app';
+const b = await chromium.launch({ headless: true });
+const p = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+const bad = [];
+p.on('response', (r) => { if (r.status() >= 400) bad.push(`${r.status()} ${r.url().slice(0, 120)}`); });
+await p.goto(BASE, { waitUntil: 'load', timeout: 90000 });
+await p.waitForTimeout(6000);
+console.log('NON-2XX', bad.length);
+bad.slice(0, 8).forEach((x) => console.log('  ', x));
+await b.close();

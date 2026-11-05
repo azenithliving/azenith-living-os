@@ -15,6 +15,7 @@ import { SWARM_NAME } from '@/lib/ops/identity';
 import { arNum } from '@/lib/ops/metricLabels';
 import { splitInline } from '@/lib/talk/emphasis';
 import { pulseItems } from '@/lib/ops/command-canvas';
+import { SnapshotLine } from '@/components/admin/backup/SnapshotLine';
 
 type AgentStatus = { agent: string; status: 'online' | 'busy' | 'offline'; taskCount: number; recentActivity: string };
 type Inbox = { unread: number; teaser: string | null };
@@ -175,6 +176,8 @@ export function CommandCanvas() {
           بيمتّزش عن رقم حقيقي.
         </p>
       </section>
+
+      <SnapshotLine />
 
       {waitingForMail && (
         <p className="mb-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-[11px] leading-relaxed text-white/70" data-inboxes-loading>

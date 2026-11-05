@@ -1,0 +1,20 @@
+relations in the record: 160
+names still absent from the record: 7 of 7
+نجح — the six phantom names are still not in the record · companies.slug,production_jobs.scheduled_start,users.auth_user_id,sales_orders.final_payment_paid,approval_requests.decided_by,approval_requests.decided_at,inventory_movements.id
+column names the layer uses: 77 mentions · 51 distinct
+نجح — every name the layer uses is a column the record answers to
+company resolved by domain: yes
+نجح — the company resolver finds the row the record holds
+production jobs ordered by the column that exists: 3
+نجح — the jobs list answers with the column it now orders by · rows=3
+decision write keys the record has: 5 of 5
+نجح — the decision write sends only columns the record has
+order create keys the record has: 9 of 9
+نجح — the order create sends only columns the record has
+cockpit text at 390px: 2066
+نجح — the cockpit renders · chars=2066
+نجح — no console error on the cockpit
+customer home text at 390px: 2781
+نجح — the customer home renders · chars=2781
+نجح — no console error on the customer home
+RESULT: 10 of 10

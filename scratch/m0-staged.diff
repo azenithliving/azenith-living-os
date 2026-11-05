@@ -1,0 +1,3619 @@
+diff --git a/.gitignore b/.gitignore
+index 83cc5a5..f8dec76 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -48,6 +48,17 @@ clean.js
+ # screenshots written by scripts/qayyim-ui-test.mjs on every run
+ ui-test-final.png
+ 
++# Measurement OUTPUTS. The tools themselves live in scripts/instruments and are committed;
++# everything a run prints is throwaway and must not be mistaken for the proof machinery.
++scratch/*.out
++scratch/*.log
++scratch/*.png
++scratch/*.txt
++scratch/*.json
++scratch/*.html
++scratch/*.csv
++scratch/*.html.gz
++
+ # Offline speech data the OCR probe downloads into the working tree
+ *.traineddata
+ !public/ocr/*.traineddata
+diff --git a/docs/ledger/scratch-manifest.json b/docs/ledger/scratch-manifest.json
+new file mode 100644
+index 0000000..32d0f28
+--- /dev/null
++++ b/docs/ledger/scratch-manifest.json
+@@ -0,0 +1,2026 @@
++{
++  "generatedAt": "2026-11-05T01:15:14.610Z",
++  "root": "scratch",
++  "found": true,
++  "reason": "",
++  "count": 1994,
++  "instruments": 702,
++  "byExtension": {
++    "log": 362,
++    "txt": 89,
++    "json": 27,
++    "out": 497,
++    "mjs": 664,
++    "png": 250,
++    "tsx": 2,
++    "ps1": 2,
++    "cjs": 28,
++    "cts": 16,
++    "done": 1,
++    "ts": 18,
++    "js": 18,
++    "sql": 2,
++    "html": 5,
++    "zip": 2,
++    "pid": 1,
++    "console": 4,
++    "run": 6
++  },
++  "names": [
++    "_build.log",
++    "_build2.log",
++    "_build3.log",
++    "_build4.log",
++    "_build5.log",
++    "_build6.log",
++    "_build7.log",
++    "_build8.log",
++    "_build9.log",
++    "_buildA.log",
++    "_buildG.log",
++    "_buildH.log",
++    "_buildI.log",
++    "_census.txt",
++    "_claims.log",
++    "_claims2.log",
++    "_claims3.log",
++    "_claimslive.log",
++    "_claimslive2.log",
++    "_claimslive3.log",
++    "_claimslive4.log",
++    "_claimslive5.log",
++    "_commit.log",
++    "_commit2.log",
++    "_commit3.log",
++    "_commit4.log",
++    "_commit5.log",
++    "_commit6.log",
++    "_commit7.log",
++    "_commit8.log",
++    "_commit9.log",
++    "_commitA.log",
++    "_commitB.log",
++    "_commitC.log",
++    "_commitD.log",
++    "_commitE.log",
++    "_commitH.log",
++    "_commitI.log",
++    "_commitJ.log",
++    "_commitK.log",
++    "_commitL.log",
++    "_commitN.log",
++    "_full.log",
++    "_full2.log",
++    "_full3.log",
++    "_full4.log",
++    "_full5.log",
++    "_full6.log",
++    "_full7.log",
++    "_full8.log",
++    "_full9.log",
++    "_fullA.log",
++    "_fullF.log",
++    "_fullG.log",
++    "_fullH.log",
++    "_journey.log",
++    "_journey2.log",
++    "_jump.log",
++    "_live1.log",
++    "_live2.log",
++    "_live3.log",
++    "_liverep.log",
++    "_liverep2.log",
++    "_liverep3.log",
++    "_ov.log",
++    "_ov2.log",
++    "_ov3.log",
++    "_ov4.log",
++    "_probe.log",
++    "_push.log",
++    "_push2.log",
++    "_push3.log",
++    "_push4.log",
++    "_push5.log",
++    "_push6.log",
++    "_push7.log",
++    "_push8.log",
++    "_push9.log",
++    "_pushA.log",
++    "_pushB.log",
++    "_pushC.log",
++    "_pushD.log",
++    "_pushE.log",
++    "_pushH.log",
++    "_pushI.log",
++    "_pushJ.log",
++    "_pushK.log",
++    "_pushL.log",
++    "_pushN.log",
++    "_ra.log",
++    "_router.log",
++    "_router2.log",
++    "_sd.log",
++    "_sl.log",
++    "_sl2.log",
++    "_sl3.log",
++    "_tc.log",
++    "_tc2.log",
++    "_tc3.log",
++    "_tc4.log",
++    "_tc5.log",
++    "_tc6.log",
++    "_tc7.log",
++    "_tc8.log",
++    "_tc9.log",
++    "_tcA.log",
++    "_tcF.log",
++    "_tcG.log",
++    "_tcH.log",
++    "_tcI.log",
++    "_um.log",
++    "_vision.log",
++    "_vision2.log",
++    "_vision4.log",
++    "_voice-live.log",
++    "_voice-live2.log",
++    "_voice-live3.log",
++    "_voice-live4.log",
++    "_voice-live5.log",
++    "a11y-admin-sweep-before.json",
++    "a11y-admin-sweep.json",
++    "a11y-admin-sweep.out",
++    "a11y-admin-sweep2.out",
++    "a11y-admin-sweep3.out",
++    "a11y-after.out",
++    "a11y-after2.out",
++    "a11y-all-screens.out",
++    "a11y-detail-now.out",
++    "a11y-detail-v2.mjs",
++    "a11y-detail.out",
++    "a11y-gradient-contrast.mjs",
++    "a11y-gradient.out",
++    "a11y-gradient2.out",
++    "a11y-gradient3.out",
++    "a11y-gradient4.out",
++    "a11y-gradient5.out",
++    "a11y-gradient6.out",
++    "a11y-nodes.out",
++    "a11y-nodes2.out",
++    "a11y-residue.out",
++    "a11y.out",
++    "actions-drawer-phone.png",
++    "admin-alerts-390.png",
++    "admin-alerts-after.out",
++    "admin-alerts-before-390.png",
++    "admin-alerts-before-live.out",
++    "admin-alerts-before.out",
++    "admin-alerts-run.out",
++    "admin-alerts-run2.out",
++    "admin-alerts-run3.out",
++    "admin-alerts-tests.out",
++    "admin-alerts-tests2.out",
++    "admin-alerts-tests3.out",
++    "admin-alerts-tsc.out",
++    "admin-before.log",
++    "admin-build.out",
++    "admin-fullsuite.out",
++    "admin-gates.out",
++    "admin-home-before.tsx",
++    "admin-ledger-msg.out",
++    "admin-ledger.out",
++    "admin-ledger2.out",
++    "admin-msg.out",
++    "admin-msg2.out",
++    "admin-prove.log",
++    "admin-push.out",
++    "admin-push2.out",
++    "admin-session.json",
++    "admin-tsc.out",
++    "admin-wait.out",
++    "adopt-orphan-papers.mjs",
++    "adopt-orphan-papers.out",
++    "advisor-bubble-phone.png",
++    "advisor-build.out",
++    "advisor-build2.out",
++    "advisor-coverage-live.png",
++    "advisor-coverage-phone.png",
++    "advisor-gates-run1.out",
++    "advisor-remembers-him-390.png",
++    "advisor-showroom-live.png",
++    "advisor-sofa-live.png",
++    "advisor-test-drive-390.png",
++    "advisor-tests.out",
++    "advisor-tests2.out",
++    "advisor-tests3.out",
++    "advisor-tests4.out",
++    "advisor-tsc.out",
++    "advisor-tsc2.out",
++    "alert-card-390.png",
++    "alert-log-live-390.png",
++    "alert-strip-live-390.png",
++    "alert-strip-resting-390.png",
++    "alerts-build.out",
++    "alerts-build2.out",
++    "alerts-fullsuite.out",
++    "alerts-fullsuite2.out",
++    "alerts-tests.out",
++    "alerts-tests2.out",
++    "alerts-tests3.out",
++    "alerts-tsc.out",
++    "alerts-tsc2.out",
++    "append-council-admin-alerts.mjs",
++    "append-council-alert-strip.mjs",
++    "append-council-arabic-screens.mjs",
++    "append-council-audit-door.mjs",
++    "append-council-audit.mjs",
++    "append-council-bell.mjs",
++    "append-council-brief.mjs",
++    "append-council-cache.mjs",
++    "append-council-cancel-rental.mjs",
++    "append-council-census.mjs",
++    "append-council-chat-history.mjs",
++    "append-council-colour.mjs",
++    "append-council-correct.mjs",
++    "append-council-daily-loop.mjs",
++    "append-council-dal.mjs",
++    "append-council-dashboard-alerts.mjs",
++    "append-council-decided.mjs",
++    "append-council-decision.mjs",
++    "append-council-gate-note.mjs",
++    "append-council-image-bank.mjs",
++    "append-council-inboxes.mjs",
++    "append-council-knowledge-desk.mjs",
++    "append-council-labels.mjs",
++    "append-council-learning-mode.mjs",
++    "append-council-memory-writer.mjs",
++    "append-council-negative.mjs",
++    "append-council-owner-controls.mjs",
++    "append-council-papers-owner.mjs",
++    "append-council-prose.mjs",
++    "append-council-publish3.mjs",
++    "append-council-quality.mjs",
++    "append-council-refute.mjs",
++    "append-council-registry.mjs",
++    "append-council-relations-door.mjs",
++    "append-council-reply-renderer.mjs",
++    "append-council-returns.mjs",
++    "append-council-rules-shape.mjs",
++    "append-council-runtime-read.mjs",
++    "append-council-servervoice.mjs",
++    "append-council-snapshot-widen.mjs",
++    "append-council-telegram.mjs",
++    "append-council-tenants.mjs",
++    "append-council-test-drive.mjs",
++    "append-council-tools.mjs",
++    "append-council-unread.mjs",
++    "append-council-vault-trail.mjs",
++    "append-council-verify.mjs",
++    "append-council-voice.mjs",
++    "append-council-world.mjs",
++    "append-council.mjs",
++    "append-ledger-a11y-30.mjs",
++    "append-ledger-a11y-fix.mjs",
++    "append-ledger-accessibility.mjs",
++    "append-ledger-address-proof.mjs",
++    "append-ledger-advisor-memory.mjs",
++    "append-ledger-alert-log.mjs",
++    "append-ledger-approval-chain.mjs",
++    "append-ledger-backup-owner-v2.mjs",
++    "append-ledger-backup-owner.mjs",
++    "append-ledger-boundary.mjs",
++    "append-ledger-brief-area.mjs",
++    "append-ledger-chat-area.mjs",
++    "append-ledger-chat-floor.mjs",
++    "append-ledger-chat-read.mjs",
++    "append-ledger-conditions.mjs",
++    "append-ledger-copy.mjs",
++    "append-ledger-covers.mjs",
++    "append-ledger-customer-memory.mjs",
++    "append-ledger-decisions.mjs",
++    "append-ledger-delete.mjs",
++    "append-ledger-dial.mjs",
++    "append-ledger-digits.mjs",
++    "append-ledger-door-census.mjs",
++    "append-ledger-elite-address.mjs",
++    "append-ledger-elite-arabic.mjs",
++    "append-ledger-elite-taste.mjs",
++    "append-ledger-elite.mjs",
++    "append-ledger-env-sweep.mjs",
++    "append-ledger-env-sweep2.mjs",
++    "append-ledger-footer-hours.mjs",
++    "append-ledger-gate-lock.mjs",
++    "append-ledger-gate-password-only.mjs",
++    "append-ledger-glyphs.mjs",
++    "append-ledger-guards.mjs",
++    "append-ledger-hard-delete.mjs",
++    "append-ledger-history.mjs",
++    "append-ledger-hours.mjs",
++    "append-ledger-journey.mjs",
++    "append-ledger-language-fix.mjs",
++    "append-ledger-language-owner.mjs",
++    "append-ledger-language-published.mjs",
++    "append-ledger-language.mjs",
++    "append-ledger-latin.mjs",
++    "append-ledger-math.mjs",
++    "append-ledger-memory-built.mjs",
++    "append-ledger-mute-window.mjs",
++    "append-ledger-night.mjs",
++    "append-ledger-not-open.mjs",
++    "append-ledger-number-addendum.mjs",
++    "append-ledger-number-owner.mjs",
++    "append-ledger-numbers.mjs",
++    "append-ledger-owner-screens.mjs",
++    "append-ledger-phone-line.mjs",
++    "append-ledger-pipes.mjs",
++    "append-ledger-places.mjs",
++    "append-ledger-radar-source.mjs",
++    "append-ledger-refuted-digits.mjs",
++    "append-ledger-region.mjs",
++    "append-ledger-room-covers.mjs",
++    "append-ledger-room-names.mjs",
++    "append-ledger-round-three.mjs",
++    "append-ledger-round-two.mjs",
++    "append-ledger-row-provenance.mjs",
++    "append-ledger-rows.mjs",
++    "append-ledger-sales-roll.mjs",
++    "append-ledger-seal.mjs",
++    "append-ledger-sentinel.mjs",
++    "append-ledger-settings.mjs",
++    "append-ledger-shelf.mjs",
++    "append-ledger-single-owner.mjs",
++    "append-ledger-snapshot.mjs",
++    "append-ledger-style-census.mjs",
++    "append-ledger-swarm-memory-1515.mjs",
++    "append-ledger-swarm-memory.mjs",
++    "append-ledger-sweep.mjs",
++    "append-ledger-tally-tenant.mjs",
++    "append-ledger-tool-door-v2.mjs",
++    "append-ledger-tool-door.mjs",
++    "append-ledger-witnesses.mjs",
++    "append-ledger-write.mjs",
++    "append-yardstick-advisor-memory.mjs",
++    "append-yardstick-swarm-memory.mjs",
++    "apply-city-migration.mjs",
++    "apply-customer-memory-migration.mjs",
++    "apply-migration.mjs",
++    "apply-one-file.mjs",
++    "apply-the-public-gate-lock.mjs",
++    "apply-user-area-migration.mjs",
++    "arabic-command-failures.mjs",
++    "arabic-command-messages.mjs",
++    "arabic-command-usage.mjs",
++    "arabic-dashboard-headings-390.png",
++    "arabic-management-labels-390.png",
++    "assistant-emphasis.png",
++    "atom1-tests.log",
++    "atom1-tests2.log",
++    "atom1-tests3.log",
++    "atom1-tests4.log",
++    "atom2-tests.log",
++    "atom2-tests2.log",
++    "atom2-tests3.log",
++    "audit-build.out",
++    "audit-dashboard-390.png",
++    "audit-detail.ps1",
++    "audit-fullsuite.out",
++    "audit-fullsuite2.out",
++    "audit-gates.out",
++    "audit-http.ps1",
++    "audit-more-screens.mjs",
++    "audit-more.out",
++    "audit-more2.out",
++    "audit-round-three.mjs",
++    "audit-stats-390.png",
++    "backup-one-owner-390.png",
++    "badge-digits-phone.png",
++    "bank-cover-score.cjs",
++    "bell-after.log",
++    "bell-after2.log",
++    "bell-before.out",
++    "bell-before.tsx",
++    "bell-build.out",
++    "bell-build2.out",
++    "bell-fullsuite.out",
++    "bell-fullsuite2.out",
++    "bell-gates.out",
++    "bell-ledger-msg.out",
++    "bell-ledger.out",
++    "bell-ledger2.out",
++    "bell-msg.out",
++    "bell-msg2.out",
++    "bell-prove.log",
++    "bell-prove2.log",
++    "bell-prove3.log",
++    "bell-push.out",
++    "bell-push2.out",
++    "bell-run.log",
++    "bell-strip-390.png",
++    "bell-tests.out",
++    "bell-tests2.out",
++    "bell-tsc.out",
++    "bell-tsc2.out",
++    "bell-wait.out",
++    "bidi-after.out",
++    "bidi-after2.out",
++    "bidi-after3.out",
++    "bidi-after4.out",
++    "bidi-after5.out",
++    "bidi-before.out",
++    "bidi.log",
++    "bidi2.log",
++    "bo.out",
++    "bo3.out",
++    "bo4.out",
++    "bo5.out",
++    "bo6.out",
++    "brief-area-saved.png",
++    "brief-area-stuck.png",
++    "build-29.log",
++    "build-29b.log",
++    "build-32.log",
++    "build-33.log",
++    "build-34.log",
++    "build-35.log",
++    "build-a11y.log",
++    "build-a11y2.log",
++    "build-a11y3.log",
++    "build-a11y3b.log",
++    "build-a11y4.log",
++    "build-arrow.log",
++    "build-boundary.log",
++    "build-boundary2.log",
++    "build-c3.log",
++    "build-chat.out",
++    "build-cond.log",
++    "build-cond2.log",
++    "build-copy.log",
++    "build-covers.log",
++    "build-dec.log",
++    "build-dec2.log",
++    "build-det.log",
++    "build-digits.log",
++    "build-digits2.log",
++    "build-digits3.log",
++    "build-elite-arabic.log",
++    "build-elite-page.log",
++    "build-elite-taste.log",
++    "build-elite-taste2.log",
++    "build-elite.log",
++    "build-elite2.log",
++    "build-env.log",
++    "build-floor.log",
++    "build-gate-lock.txt",
++    "build-gloss.out",
++    "build-gloss2.out",
++    "build-glyphs.log",
++    "build-guard5.log",
++    "build-history.log",
++    "build-hours-card.log",
++    "build-hours-card2.log",
++    "build-hours.log",
++    "build-hours2.log",
++    "build-journey.log",
++    "build-lang.log",
++    "build-latin.log",
++    "build-latin2.log",
++    "build-latin3.log",
++    "build-mail.log",
++    "build-master-list.mjs",
++    "build-math.log",
++    "build-math2.log",
++    "build-memory.out",
++    "build-memory2.out",
++    "build-mute.log",
++    "build-name.log",
++    "build-phase1.log",
++    "build-phone.log",
++    "build-pipes.log",
++    "build-place.log",
++    "build-prov.log",
++    "build-prov2.log",
++    "build-recorded-hours.log",
++    "build-renderer.out",
++    "build-roll.log",
++    "build-room.log",
++    "build-rows.log",
++    "build-rows2.log",
++    "build-rows3.log",
++    "build-sales-failure.log",
++    "build-scores.log",
++    "build-sent.log",
++    "build-sent2.log",
++    "build-shop.txt",
++    "build-sweep.log",
++    "build-taste-line.log",
++    "build-taste-tally.log",
++    "build-teaser.log",
++    "build-tenant.log",
++    "build-voice.log",
++    "build-voice2.log",
++    "build-voice3.log",
++    "build-voice5.log",
++    "build-widget.log",
++    "build-write.log",
++    "build.log",
++    "build10.txt",
++    "build2.txt",
++    "build3.txt",
++    "build4.txt",
++    "build5.txt",
++    "build6.txt",
++    "build7.txt",
++    "build8.txt",
++    "build9.txt",
++    "cache-build.out",
++    "cache-commit.out",
++    "cache-commit2.out",
++    "cache-commit3.out",
++    "cache-fullsuite.out",
++    "cache-gates.out",
++    "cache-tests.out",
++    "cache-tests2.out",
++    "cache-tsc.out",
++    "cache-verdict-consultant-390.png",
++    "call-sketch-door.mjs",
++    "can-a-stranger-run-sql.mjs",
++    "census-100.mjs",
++    "census-a11y-nodes.mjs",
++    "census-a11y-residue.mjs",
++    "census-abandoned-env.mjs",
++    "census-admin-english-v2.mjs",
++    "census-after-desk.out",
++    "census-agent-memory-tables.mjs",
++    "census-ai-score.cjs",
++    "census-alert-homes.mjs",
++    "census-area-evidence.mjs",
++    "census-bank-cols.cjs",
++    "census-bank-ids.cjs",
++    "census-bank-score.cjs",
++    "census-bank.cjs",
++    "census-bidi-lines.mjs",
++    "census-build.out",
++    "census-call-records.mjs",
++    "census-categories.cjs",
++    "census-chat-paths.cjs",
++    "census-chat-to-paper.mjs",
++    "census-claims-without-desk.mjs",
++    "census-cockpit-390.png",
++    "census-commit.out",
++    "census-commit2.out",
++    "census-commit3.out",
++    "census-condition-guard.cts",
++    "census-conditions-live.cts",
++    "census-conditions.log",
++    "census-conversation-taste.mjs",
++    "census-curated-library.mjs",
++    "census-customer-language.mjs",
++    "census-customer-memory.mjs",
++    "census-customer-words.mjs",
++    "census-emails.cjs",
++    "census-english-authors.cjs",
++    "census-env-strict.mjs",
++    "census-error-counts.mjs",
++    "census-gates.out",
++    "census-guard.log",
++    "census-guards.out",
++    "census-home-images.mjs",
++    "census-image-ranking.mjs",
++    "census-img.out",
++    "census-img2.out",
++    "census-key-verdicts.mjs",
++    "census-latin-in-chat.mjs",
++    "census-latin-shape.mjs",
++    "census-line-shapes.cts",
++    "census-math-lines.cts",
++    "census-model-doors.mjs",
++    "census-out.txt",
++    "census-out2.txt",
++    "census-out3.txt",
++    "census-owner-chat.mjs",
++    "census-owner-latin.mjs",
++    "census-place-columns.mjs",
++    "census-product-tables.cjs",
++    "census-products-completeness.cjs",
++    "census-residue.mjs",
++    "census-roll-rooms.cjs",
++    "census-room-namers.cts",
++    "census-room-style-grid.cjs",
++    "census-row-provenance.mjs",
++    "census-screen-errors.done",
++    "census-screen-errors.mjs",
++    "census-section-images.mjs",
++    "census-session-areas.mjs",
++    "census-session-keys.mjs",
++    "census-site-settings.mjs",
++    "census-source-mix.mjs",
++    "census-stability-shapes.mjs",
++    "census-style-groups.ts",
++    "census-style-values.ts",
++    "census-system-telemetry.mjs",
++    "census-table-rows.cjs",
++    "census-tables.cjs",
++    "census-targeted.out",
++    "census-taste-shape.mjs",
++    "census-td.out",
++    "census-tests.out",
++    "census-the-database-gate.mjs",
++    "census-the-number-owner.mjs",
++    "census-the-sofa-row.mjs",
++    "census-tsc.out",
++    "census-user-preferences-shape.mjs",
++    "census-v2.mjs",
++    "census4.txt",
++    "census5.txt",
++    "census6.txt",
++    "census7.txt",
++    "census8.txt",
++    "chat-area-dossier.png",
++    "chat-area-said.png",
++    "chat-decisions.png",
++    "chat-floor-live.png",
++    "chat-floor-regression.png",
++    "chat-history-restored-390.png",
++    "chat-paths.out",
++    "check_db_leads.ts",
++    "check_reality_table.js",
++    "check_schema.ts",
++    "check-actions-drawer.mjs",
++    "check-and-init.js",
++    "check-approval-block-resolves.mjs",
++    "check-assistant-emphasis.mjs",
++    "check-badge-digits.mjs",
++    "check-brief-area.mjs",
++    "check-bubble-phone.mjs",
++    "check-chat-area.mjs",
++    "check-chat-decisions.mjs",
++    "check-chat-floor-live.mjs",
++    "check-chat-floor.mjs",
++    "check-claims-live.mjs",
++    "check-cockpit-v2.mjs",
++    "check-colour-matrix.mjs",
++    "check-commit-subject-novel.mjs",
++    "check-condition-guard-live.mjs",
++    "check-console-v2.mjs",
++    "check-consultant-live.mjs",
++    "check-contact-offer.mjs",
++    "check-db.mjs",
++    "check-decision-in-chat.mjs",
++    "check-decision-vault.mjs",
++    "check-dossier-dial.mjs",
++    "check-dossier-phone.mjs",
++    "check-dossier-plan.mjs",
++    "check-dossier-votes-live.mjs",
++    "check-drawer-arabic.mjs",
++    "check-elite-hours-card.mjs",
++    "check-elite-intelligence.mjs",
++    "check-elite-taste.mjs",
++    "check-emergency-banner.mjs",
++    "check-employee-cards.mjs",
++    "check-eol.cjs",
++    "check-events.js",
++    "check-family-room.mjs",
++    "check-floor-doors.mjs",
++    "check-handoff-deps.mjs",
++    "check-handoff-events.mjs",
++    "check-image-panel.mjs",
++    "check-inboxes-speed.mjs",
++    "check-key-desk-screen.mjs",
++    "check-key-station.mjs",
++    "check-keys.ts",
++    "check-landing-roll.mjs",
++    "check-language-owner.mjs",
++    "check-leads-door-live.mjs",
++    "check-learnings.js",
++    "check-live-quick-actions.mjs",
++    "check-live-report-arabic.mjs",
++    "check-live-self-report.mjs",
++    "check-live-sweep.mjs",
++    "check-live-three.mjs",
++    "check-old-admin.mjs",
++    "check-old-tab-erased.mjs",
++    "check-owner-decisions-live.mjs",
++    "check-owner-voice-live.mjs",
++    "check-panel-house.mjs",
++    "check-paper-desk.mjs",
++    "check-passport-chain.mjs",
++    "check-photo-read.mjs",
++    "check-precall-dossier.mjs",
++    "check-preview.mjs",
++    "check-proof-loose-ends.mjs",
++    "check-radar-door.mjs",
++    "check-radar-styles.mjs",
++    "check-radar-two-doors.mjs",
++    "check-region-rows.mjs",
++    "check-region-station.mjs",
++    "check-rendered-digits.mjs",
++    "check-room-names-live.mjs",
++    "check-room-plan.mjs",
++    "check-row-provenance-live.mjs",
++    "check-sales-failure-said.mjs",
++    "check-seal-honest.mjs",
++    "check-sentinel-live.mjs",
++    "check-sheet-visits-browser.mjs",
++    "check-sidebar-doors.mjs",
++    "check-sketch-owner.mjs",
++    "check-stats-arabic.mjs",
++    "check-swipe.mjs",
++    "check-taste-tally-door.mjs",
++    "check-teasers-arabic.mjs",
++    "check-test-results.ts",
++    "check-unread-jump.mjs",
++    "check-visitors.js",
++    "check-voice-brief.mjs",
++    "checkpoint-agent-tasks.json",
++    "checkpoint-orphan-papers.json",
++    "claims-live-phone.png",
++    "classify-env-copies.mjs",
++    "clear-test-links.mjs",
++    "clip-customer.mjs",
++    "clip-dossier.mjs",
++    "cockpit-glyph-390.png",
++    "cockpit-v2-canvas.png",
++    "cockpit-v2-chat.png",
++    "cockpit-v2-section.png",
++    "cockpit-v2-sidebar.png",
++    "cold-clock.png",
++    "colours-customer.png",
++    "colours-owner.png",
++    "commit-msg.txt",
++    "committed-diff.txt",
++    "company-build.out",
++    "company-build2.out",
++    "company-build3.out",
++    "company-fullsuite.out",
++    "company-fullsuite2.out",
++    "company-fullsuite3.out",
++    "company-fullsuite4.out",
++    "company-gates2.out",
++    "company-gates3.out",
++    "company-tests.out",
++    "company-tests2.out",
++    "company-tests3.out",
++    "company-tsc.out",
++    "company-tsc2.out",
++    "company-tsc3.out",
++    "company-tsc4.out",
++    "company-tsc5.out",
++    "compare-customer-doors.mjs",
++    "compiled-note-door.out",
++    "compiled-note-panel.out",
++    "compiled-note.out",
++    "composer-guard.out",
++    "composer-guard2.out",
++    "composer-guard3.out",
++    "condition-guard-kept.png",
++    "condition-guard-live.log",
++    "condition-guard-live2.log",
++    "condition-guard-struck.png",
++    "consultant-live-phone.png",
++    "contact-after.png",
++    "contact-before.png",
++    "council-1.json",
++    "council-2.json",
++    "council-close.json",
++    "council-debate.json",
++    "council-debate2.json",
++    "council-fix.json",
++    "council-reply-2.json",
++    "council-reply.json",
++    "council-sign.json",
++    "council-status.json",
++    "council-tests.log",
++    "count-analyze-parses.mjs",
++    "count-consultant-voice.mjs",
++    "count-cross-shape-pairs.mjs",
++    "count-duplicate-learnings.mjs",
++    "count-my-chat-rows.mjs",
++    "count-probe-sessions.mjs",
++    "count-simulation-residue.mjs",
++    "cover-rpc.out",
++    "cover-rpc2.out",
++    "create-consultant-tables.sql",
++    "create-prod-tables.js",
++    "create-table.sql",
++    "customer-after-elite.png",
++    "customer-after-furniture.png",
++    "customer-after-furniture2.png",
++    "customer-after-home.png",
++    "customer-after-request.png",
++    "customer-after-roomslug.png",
++    "customer-after-start.png",
++    "customer-door-phone.png",
++    "customer-door-sheet.png",
++    "customer-language-request.png",
++    "customer-seal-phone.png",
++    "customers-card-open.png",
++    "customers-card-with-chat.png",
++    "customers-screen-one-rule.png",
++    "dal-after-snapshot.json",
++    "dal-before-snapshot.json",
++    "dal-before.ts",
++    "dal-build.out",
++    "dal-cockpit-390.png",
++    "dal-columns-rerun.out",
++    "dal-commit.out",
++    "dal-commit2.out",
++    "dal-fullsuite.out",
++    "dal-gates.out",
++    "dal-guard.out",
++    "dal-guard2.out",
++    "dal-schema-snapshot.json",
++    "dash-build.out",
++    "dash-fullsuite.out",
++    "dash-gates.out",
++    "dash-tests.out",
++    "dash-tests2.out",
++    "dbg-login.mjs",
++    "debug-brief-walk.mjs",
++    "decision-admin-live.png",
++    "decision-gate-live.png",
++    "decision-header.png",
++    "decision-in-chat-phone.png",
++    "decision-preview-live.png",
++    "decision-preview.png",
++    "decision-vault-phone.png",
++    "deep-verify.log",
++    "delete-after-confirm.png",
++    "delete-stale-hours-row.mjs",
++    "dev-3222-b.log",
++    "dev-3222-c.log",
++    "dev-3222.log",
++    "dev-3223.log",
++    "dev-voice.log",
++    "dev3222.log",
++    "diag.log",
++    "diagnose-contrast.mjs",
++    "dossier-dial.png",
++    "dossier-phone.png",
++    "dossier-plan-clip.png",
++    "dossier-plan-live.png",
++    "dossier-plan-missing.png",
++    "dossier-plan.png",
++    "dossier-votes-live.png",
++    "drawer-arabic.png",
++    "drawer-over-composer-390.png",
++    "drive-customer-steps.mjs",
++    "drive-two.mjs",
++    "drop-english-glosses.mjs",
++    "drop-ledger-entry.mjs",
++    "dump-recent-agent-rows.mjs",
++    "dump-td.mjs",
++    "elite-brief-arabic-top.png",
++    "elite-chips-selected.png",
++    "elite-hours-once.png",
++    "elite-intel-saved.png",
++    "elite-intel-taste.png",
++    "elite-taste-saved.png",
++    "elite-taste-step.png",
++    "email-order-390.png",
++    "emergency-banner-phone.png",
++    "employee-cards-phone.png",
++    "employee-cards-result.txt",
++    "enable_realtime.js",
++    "ensure-uploads-bucket.mjs",
++    "erase-the-sofa-row.mjs",
++    "evidence-per-old-page.mjs",
++    "evidence-twin-pairs.mjs",
++    "exhaust-tests.log",
++    "explain-phase1-readings.mjs",
++    "extract-markdown-renderer.mjs",
++    "factory-gone-live.png",
++    "facts-guard.out",
++    "facts-guard2.out",
++    "facts-guard3.out",
++    "family-room-phone.png",
++    "fetch-agent-tasks.mjs",
++    "final_delete_verify.ts",
++    "final-build.out",
++    "final-tests.out",
++    "final-tsc.out",
++    "find-404.mjs",
++    "find-council-file.mjs",
++    "find-md-links.cjs",
++    "fix-currency-space.mjs",
++    "fix-currency-word.mjs",
++    "fix-design-tips.mjs",
++    "fix-heading-levels.mjs",
++    "fix-hint-arrow.mjs",
++    "fix-ledger-math-wording.mjs",
++    "fix-ledger-telemetry-numbers.mjs",
++    "fix-master-list-region.mjs",
++    "fix-office-hours.mjs",
++    "footer-390.png",
++    "footer-hours-390.png",
++    "full-run.log",
++    "full-suite-29.log",
++    "full-tests.txt",
++    "full-tests2.txt",
++    "full3.txt",
++    "full4.txt",
++    "full5.txt",
++    "full6.txt",
++    "full7.txt",
++    "furniture.html",
++    "g1.out",
++    "g2.out",
++    "g3.out",
++    "g4.out",
++    "gate-build.out",
++    "gate-build2.out",
++    "gate-commit.out",
++    "gate-commit2.out",
++    "gate-commit3.out",
++    "gate-full-tests.out",
++    "gate-fullsuite.out",
++    "gate-fullsuite2.out",
++    "gate-gates.out",
++    "gate-gates2.out",
++    "gate-note-cockpit-390.png",
++    "gate-note.out",
++    "gate-note2.out",
++    "gate-password-only-390.png",
++    "gate-proof.out",
++    "gate-tests.out",
++    "gates10-build.out",
++    "gates10-tests.out",
++    "gates11-build.out",
++    "gates11-tests.out",
++    "gates2-tests.out",
++    "gates2.out",
++    "gates3-build.out",
++    "gates3-tests.out",
++    "gates3.out",
++    "gates4-build.out",
++    "gates4-tests.out",
++    "gates5-build.out",
++    "gates5-tests.out",
++    "gates6-build.out",
++    "gates6-tests.out",
++    "gates7-build.out",
++    "gates7-tests.out",
++    "gates8-build.out",
++    "gates8-tests.out",
++    "gates9-tests.out",
++    "gen2.out",
++    "get-link-line.cjs",
++    "gradient-contrast.out",
++    "gradient-contrast2.out",
++    "gradient-elite.out",
++    "gradient-elite2.out",
++    "guard-ledger.out",
++    "harvest-live.log",
++    "harvest-log.zip",
++    "harvest-night.out",
++    "harvest-room-covers.cts",
++    "harvest-run.out",
++    "harvest-run2.out",
++    "harvest-tests.log",
++    "harvest-tests2.log",
++    "history-guard.out",
++    "history-scrub-390.png",
++    "history-scrub.out",
++    "home-covers-a-390.png",
++    "home-covers-b-390.png",
++    "home-covers.out",
++    "home-images-390.png",
++    "hours-tests.txt",
++    "image-bank-390.png",
++    "image-panel-live.png",
++    "img-build.out",
++    "img-build2.out",
++    "img-prove.out",
++    "img-prove2.out",
++    "img-prove3.out",
++    "img-prove4.out",
++    "img-prove5.out",
++    "img-prove6.out",
++    "img-suite.out",
++    "img-suite2.out",
++    "img-suite3.out",
++    "img-tsc.out",
++    "img2-tsc.out",
++    "inboxes-after.png",
++    "inspect_images_db.js",
++    "isolate-two-customers.mjs",
++    "isolation-out.txt",
++    "jobs.json",
++    "journey-1-start.png",
++    "journey-2-request.png",
++    "journey-3-passport.png",
++    "journey-4-colours.png",
++    "journey-4-sealed.png",
++    "journey-5-vote-أحمد.png",
++    "journey-5-vote-مريم.png",
++    "journey-6-dossier.png",
++    "kd.out",
++    "kd2.out",
++    "kd3.out",
++    "kdesk-build.out",
++    "kdesk-build2.out",
++    "kdesk-build3.out",
++    "kdesk-build4.out",
++    "kdesk-suite.out",
++    "kdesk-suite2.out",
++    "kdesk-suite3.out",
++    "kdesk-suite4.out",
++    "kdesk-suite5.out",
++    "kdesk-tsc.out",
++    "kdesk-tsc2.out",
++    "kdesk-tsc3.out",
++    "kdesk-tsc4.out",
++    "kdesk-tsc5.out",
++    "kdesk-tsc6.out",
++    "key-desk-phone.png",
++    "key-station-after.png",
++    "key-station-form.png",
++    "landing-customer-card.png",
++    "lang-fresh-arabic.png",
++    "lang-switched-english.png",
++    "latin-after-math.out",
++    "latin-after-places.out",
++    "latin-after-rows.out",
++    "leads-door-live.png",
++    "ledger-build.out",
++    "ledger-build2.out",
++    "ledger-build3.out",
++    "ledger-fullsuite.out",
++    "ledger-fullsuite2.out",
++    "ledger-fullsuite3.out",
++    "ledger-guard.out",
++    "ledger-msg.txt",
++    "ledger-tests.out",
++    "ledger-tests2.out",
++    "ledger-tests3.out",
++    "ledger-tests4.out",
++    "ledger-tsc.out",
++    "ledger-tsc2.out",
++    "line-shapes.out",
++    "list-buckets.mjs",
++    "list-hours-rows.mjs",
++    "list-region-candidates.mjs",
++    "list-tables.js",
++    "list-unwired-doors.mjs",
++    "listen-sales-screen.mjs",
++    "listen-to-the-gate.mjs",
++    "live-cards.png",
++    "live-photo.png",
++    "live-proof/01-canvas-full.png",
++    "live-proof/02-canvas-bottom.png",
++    "live-proof/03-leader-chat-open.png",
++    "live-proof/04-leader-answer.png",
++    "live-proof/05-roles-strip.png",
++    "live-proof/06-decisions-vault.png",
++    "live-proof/07-actions-drawer.png",
++    "live-proof/08-tool-result.png",
++    "live-proof/13-canvas-arabic-digits.png",
++    "live-proof/14-tool-answered.png",
++    "live-proof/15-drawer-closed.png",
++    "live-proof/16-red-strip.png",
++    "live-proof/17-content-employee.png",
++    "live-proof/18-storefront-phone.png",
++    "live-proof/run.txt",
++    "live-proof/run2.txt",
++    "live-real-sheet.png",
++    "live-report-arabic-phone.png",
++    "live-two.json",
++    "live-walkthrough-2-local.mjs",
++    "live-walkthrough-2.mjs",
++    "live-walkthrough.mjs",
++    "load-env.cjs",
++    "local-server.log",
++    "lock-cockpit-390.png",
++    "lock-gate-390.png",
++    "lock-home-390.png",
++    "lock-preview-390.png",
++    "lock-sheet-sealed-390.png",
++    "lock-the-sql-door.mjs",
++    "look-at-sales-card.mjs",
++    "look-at-the-empty-shelf.mjs",
++    "look-at-the-footer.mjs",
++    "loop-build.out",
++    "loop-cockpit-390.png",
++    "loop-fullsuite.out",
++    "loop-gates.out",
++    "loop2-build.out",
++    "loop2-fullsuite.out",
++    "loop2-gates.out",
++    "loop3-build.out",
++    "loop3-fullsuite.out",
++    "loop3-gates.out",
++    "m0-build-tests.out",
++    "m0-build-tests2.out",
++    "m0-green.out",
++    "m0-green2.out",
++    "m0-manifest.out",
++    "m0-manifest2.out",
++    "m0-red.out",
++    "m0-red2.out",
++    "m0-ruler.out",
++    "m0-ruler2.out",
++    "make-admin-alerts-commit-msg.mjs",
++    "make-admin-alerts-ledger-msg.mjs",
++    "make-bell-commit-msg.mjs",
++    "make-bell-ledger-msg.mjs",
++    "make-cache-commit-msg.mjs",
++    "make-census-commit-msg.mjs",
++    "make-dal-commit-msg.mjs",
++    "make-gate-commit-msg.mjs",
++    "make-registry-commit-msg.mjs",
++    "make-runtime-commit-msg.mjs",
++    "map-test.txt",
++    "map2.txt",
++    "map3.txt",
++    "map4.txt",
++    "map5.txt",
++    "map6.txt",
++    "map7.txt",
++    "map8.txt",
++    "map9.txt",
++    "math-order.out",
++    "math-screen-390.png",
++    "math-span-390.png",
++    "measure-accessibility-after.mjs",
++    "measure-admin-alerts.mjs",
++    "measure-admin-alerts.out",
++    "measure-admin-company.mjs",
++    "measure-admin-company.out",
++    "measure-admin-door-auth.mjs",
++    "measure-admin-door-auth.out",
++    "measure-alert-payloads.mjs",
++    "measure-alert-payloads.out",
++    "measure-alerts-ledger.mjs",
++    "measure-alerts-ledger.out",
++    "measure-approval-jump.mjs",
++    "measure-approval-jump.out",
++    "measure-approval-producer.mjs",
++    "measure-approval-producer.out",
++    "measure-audit-insert.mjs",
++    "measure-audit-insert.out",
++    "measure-audit-shape.mjs",
++    "measure-audit-shape.out",
++    "measure-audit-write.mjs",
++    "measure-audit-write.out",
++    "measure-automation-shape.mjs",
++    "measure-automation-shape.out",
++    "measure-bell-contract.mjs",
++    "measure-bell-contract.out",
++    "measure-buckets.mjs",
++    "measure-card-bidi.mjs",
++    "measure-card-bidi.out",
++    "measure-card-glyphs.mjs",
++    "measure-census-fence-gap.mjs",
++    "measure-chat-table.mjs",
++    "measure-chat-table.out",
++    "measure-cockpit-glyph.mjs",
++    "measure-cockpit-glyph.out",
++    "measure-counted-tables.mjs",
++    "measure-counted-tables.out",
++    "measure-dal-after.out",
++    "measure-dal-before.out",
++    "measure-dal-columns.mjs",
++    "measure-dal-columns.out",
++    "measure-discovery-blind.mjs",
++    "measure-discovery-blind.out",
++    "measure-emergency-chain.mjs",
++    "measure-emergency-chain.out",
++    "measure-event-tables.mjs",
++    "measure-event-tables.out",
++    "measure-gate-rows.mjs",
++    "measure-gate-rows.out",
++    "measure-gradient-contrast.mjs",
++    "measure-header.mjs",
++    "measure-image-bank.mjs",
++    "measure-knowledge-size.mjs",
++    "measure-ledger-constraints.mjs",
++    "measure-ledger-constraints.out",
++    "measure-math-order.mjs",
++    "measure-memory-fkey.mjs",
++    "measure-memory-fkey.out",
++    "measure-memory-owner.mjs",
++    "measure-memory-owner.out",
++    "measure-memory-table.mjs",
++    "measure-memory-table.out",
++    "measure-merge-scope.mjs",
++    "measure-moved-before-the-plan.mjs",
++    "measure-notifications-shape.mjs",
++    "measure-notifications-shape.out",
++    "measure-notifications-table.mjs",
++    "measure-notifications-table.out",
++    "measure-one-row.cts",
++    "measure-openapi.mjs",
++    "measure-openapi.out",
++    "measure-order-backfill.mjs",
++    "measure-orphan-papers.mjs",
++    "measure-orphan-papers.out",
++    "measure-owner-dashboard-truth.mjs",
++    "measure-owner-dashboard-truth.out",
++    "measure-pending-split.mjs",
++    "measure-pending-split.out",
++    "measure-picture-service-speed.mjs",
++    "measure-picture-timings-browser.mjs",
++    "measure-probe-empty.mjs",
++    "measure-probe-empty.out",
++    "measure-quality-door.mjs",
++    "measure-quality-door.out",
++    "measure-quality-payload.mjs",
++    "measure-quality-payload.out",
++    "measure-realtime-publication.mjs",
++    "measure-recovery-vault.mjs",
++    "measure-recovery-vault.out",
++    "measure-relation-kinds.mjs",
++    "measure-relation-kinds.out",
++    "measure-report-paper.out",
++    "measure-rival-counters.mjs",
++    "measure-room-key-collision.mjs",
++    "measure-schema-probe.mjs",
++    "measure-schema-probe.out",
++    "measure-settings-readers.mjs",
++    "measure-settings-readers.out",
++    "measure-settings-scope-refusal.mjs",
++    "measure-settings-scope-refusal.out",
++    "measure-sheet-pick-gap.cjs",
++    "measure-snapshot-scope.mjs",
++    "measure-store-ledger-owners.mjs",
++    "measure-strip-window.mjs",
++    "measure-strip-window.out",
++    "measure-summary-lang.mjs",
++    "measure-summary-lang.out",
++    "measure-swarm-orphans.mjs",
++    "measure-task-dates.mjs",
++    "measure-task-dates.out",
++    "measure-unmoved-capabilities.mjs",
++    "measure-voice-digits.cts",
++    "measure-what-the-public-still-calls.mjs",
++    "memory-his-second-sheet-390.png",
++    "memory-landed-390.png",
++    "memory-sales-screen-390.png",
++    "memory-stranger-sheet-390.png",
++    "mid-deploy-passport.html",
++    "move-customers-tab.mjs",
++    "mute-window-390.png",
++    "next-3223.log",
++    "next-3223b.log",
++    "next-3223c.log",
++    "next-3223d.log",
++    "next-start-3100.log",
++    "next-start.log",
++    "next-start.pid",
++    "nightly.zip",
++    "nightly/0_harvest.txt",
++    "nightly/harvest/system.txt",
++    "no-money-on-customers.png",
++    "noop-server-only.cjs",
++    "normalize-eol.mjs",
++    "numbers-desk-390.png",
++    "numbers-tests.txt",
++    "numbers-tests2.txt",
++    "numbers-tests3.txt",
++    "numbers-tests4.txt",
++    "numbers-tests5.txt",
++    "old-link-lands-in-the-office.png",
++    "old-page.txt",
++    "old-sales-tabs.png",
++    "oneowner.out",
++    "oneowner2.out",
++    "order-condition-suspects.cts",
++    "owner-chat-ops.png",
++    "owner-chat-sales.png",
++    "owner-dashboard-alerts-390.png",
++    "owner-latin-after.out",
++    "owner-latin-before-boundary.out",
++    "owner-latin-before-copy.out",
++    "owner-latin.out",
++    "owner-stop-door-390.png",
++    "owner-voice-phone.png",
++    "p.html",
++    "panel-house-admin.png",
++    "panel-tests.log",
++    "panel2-tests.log",
++    "paper-desk-reading.png",
++    "paper-for-door.png",
++    "papers-have-owner-390.png",
++    "passport-after-reload.png",
++    "passport-confirmed.png",
++    "passport-mismatch.png",
++    "passport-open.png",
++    "patch-a11y-round-four.mjs",
++    "patch-a11y-round-three.mjs",
++    "patch-a11y-round-two.mjs",
++    "patch-assistant.mjs",
++    "patch-company-one-owner.mjs",
++    "patch-harvester-empty-cells.mjs",
++    "patch-home.js",
++    "patch-prove-papers-count.mjs",
++    "patch-prove-papers-js.mjs",
++    "patch-sales-chat.mjs",
++    "patch-site-content.js",
++    "patch-types.js",
++    "peek-condition-cuts.cts",
++    "peek-cuts.log",
++    "peek-cuts2.log",
++    "peek-cuts3.log",
++    "pending-probe.json",
++    "photo-read-absent.png",
++    "photo-read-real.png",
++    "place-labels-390.png",
++    "plan-1-before.png",
++    "plan-2-confirmed.png",
++    "plan-3-dragging.png",
++    "plan-4-reloaded.png",
++    "plan-5-empty.png",
++    "plan-customer-after.png",
++    "plan-customer-before.png",
++    "plan-push.out",
++    "plan-suite.out",
++    "plan-tests.log",
++    "point-agents-at-master-list.mjs",
++    "pre-deploy-fingerprint.txt",
++    "pre-deploy-home.html",
++    "pre-deploy-passport.html",
++    "precall-dossier-phone.png",
++    "precall-noresult.png",
++    "preview-overlay.png",
++    "preview-zoomed.png",
++    "probe-agent-columns.mjs",
++    "probe-agent-keys.mjs",
++    "probe-agent-messages-shape.mjs",
++    "probe-approval-columns.mjs",
++    "probe-approval-constraints.mjs",
++    "probe-approval-rls.mjs",
++    "probe-brief-bundle.mjs",
++    "probe-colour-bank.ts",
++    "probe-colour-distance.ts",
++    "probe-colour-families.ts",
++    "probe-command-log-constraints.mjs",
++    "probe-command-log-shape.mjs",
++    "probe-command-log.mjs",
++    "probe-commerce.mjs",
++    "probe-council-counts.mjs",
++    "probe-cover-rpc.cjs",
++    "probe-dims.mjs",
++    "probe-door-shape.mjs",
++    "probe-doors-live.mjs",
++    "probe-draft-and-order-values.mjs",
++    "probe-drag-live.mjs",
++    "probe-events-table.mjs",
++    "probe-execution-keys.mjs",
++    "probe-funnel.mjs",
++    "probe-google-models.mjs",
++    "probe-harvest-dates.mjs",
++    "probe-harvest-keys.mjs",
++    "probe-image-count.mjs",
++    "probe-image-crosstab.mjs",
++    "probe-index.mjs",
++    "probe-labels.mjs",
++    "probe-last-reading.mjs",
++    "probe-latin-runs.mjs",
++    "probe-lead-delete-fanout.mjs",
++    "probe-lead-phones.mjs",
++    "probe-learnings-table.mjs",
++    "probe-like.mjs",
++    "probe-local-ocr.mjs",
++    "probe-localhost-in-data.mjs",
++    "probe-manifest-rows.mjs",
++    "probe-material.mjs",
++    "probe-newest.mjs",
++    "probe-order-statuses.mjs",
++    "probe-paper-owners.mjs",
++    "probe-passport-shape.mjs",
++    "probe-payload-shape.mjs",
++    "probe-payload-shape.out",
++    "probe-pending-schema.mjs",
++    "probe-pexels.mjs",
++    "probe-plan-corpus.ts",
++    "probe-price.mjs",
++    "probe-pulse-data.mjs",
++    "probe-pulse-stamp-write.mjs",
++    "probe-qayyim-in-chat.mjs",
++    "probe-quality-panel.mjs",
++    "probe-quality-rows.mjs",
++    "probe-quality-table.mjs",
++    "probe-real-sheet.mjs",
++    "probe-region-line.mjs",
++    "probe-region-page.mjs",
++    "probe-relations.mjs",
++    "probe-retired-addresses.mjs",
++    "probe-roll-size.mjs",
++    "probe-room-sections.mjs",
++    "probe-round-age.mjs",
++    "probe-scorer.cts",
++    "probe-seal-rows.mjs",
++    "probe-section-ids.mjs",
++    "probe-semantic-cache.mjs",
++    "probe-sessions-schema.mjs",
++    "probe-sheet-room-values.mjs",
++    "probe-sheet-unchanged.mjs",
++    "probe-sketch-cols.mjs",
++    "probe-sketch-geom.mjs",
++    "probe-stock-rows.mjs",
++    "probe-style.mjs",
++    "probe-taste-columns.mjs",
++    "probe-telegram-channel.mjs",
++    "probe-test-sheet-stamp.mjs",
++    "probe-that-row.mjs",
++    "probe-tier-headers.mjs",
++    "probe-tool-digest.ts",
++    "probe-unmapped-keys.mjs",
++    "probe-voices-windows.mjs",
++    "probe-vote-post-status.mjs",
++    "probe-witness-time.mjs",
++    "prod-deploy-10.log",
++    "prod-deploy-11.log",
++    "prod-deploy-12.log",
++    "prod-deploy-13.log",
++    "prod-deploy-14.log",
++    "prod-deploy-2.log",
++    "prod-deploy-3.log",
++    "prod-deploy-4.log",
++    "prod-deploy-5.log",
++    "prod-deploy-6.log",
++    "prod-deploy-7.log",
++    "prod-deploy-8.log",
++    "prod-deploy-9.log",
++    "proof-after-the-erase.mjs",
++    "proof-email-order.mjs",
++    "proof-email.out",
++    "proof-home-covers.mjs",
++    "proof-lock-out.txt",
++    "proof-math-live.mjs",
++    "proof-math.out",
++    "proof-numbers-live.mjs",
++    "proof-numbers.txt",
++    "proof-numbers2.txt",
++    "proof-place-labels.mjs",
++    "proof-place.out",
++    "proof-place2.out",
++    "proof-place3.out",
++    "proof-rows-final.out",
++    "proof-rows-live.mjs",
++    "proof-rows-live.out",
++    "proof-rows-settled.mjs",
++    "proof-settings-live.mjs",
++    "proof-settings.txt",
++    "proof-settings2.txt",
++    "proof-shelf-live.mjs",
++    "proof-shelf.txt",
++    "proof-shelf2.txt",
++    "proof-shelf3.txt",
++    "proof-shelf4.txt",
++    "proof-shelf5.txt",
++    "prove-390.out",
++    "prove-390b.out",
++    "prove-admin-alerts-before.mjs",
++    "prove-admin-alerts-lands.mjs",
++    "prove-admin-alerts-lands.out",
++    "prove-advisor-memory-live.mjs",
++    "prove-advisor-memory.out",
++    "prove-advisor-memory2.out",
++    "prove-advisor-memory3.out",
++    "prove-advisor-test-drive.mjs",
++    "prove-alert-card.mjs",
++    "prove-alert-log-live.mjs",
++    "prove-alert-log.cts",
++    "prove-alert-strip.console",
++    "prove-alert-strip.mjs",
++    "prove-alert-strip.out",
++    "prove-arabic-run.out",
++    "prove-arabic-run2.out",
++    "prove-arabic-run3.out",
++    "prove-audit-lands.mjs",
++    "prove-audit-lands.out",
++    "prove-backup-one-owner.mjs",
++    "prove-bell-lands.mjs",
++    "prove-bell-lands.out",
++    "prove-cache-verdict.mjs",
++    "prove-cache-verdict.out",
++    "prove-cache-verdict.run",
++    "prove-census-answers.mjs",
++    "prove-census-answers.out",
++    "prove-census-answers.run",
++    "prove-chat-history-lands.mjs",
++    "prove-chat-history-lands.out",
++    "prove-chat-run.out",
++    "prove-compiled-note.mjs",
++    "prove-covers-live.out",
++    "prove-customer-door.mjs",
++    "prove-customer-memory-live.mjs",
++    "prove-customer-seal.mjs",
++    "prove-customers-roll.mjs",
++    "prove-daily-report-loop-broken.mjs",
++    "prove-daily-report-loop-broken.out",
++    "prove-dal-columns.mjs",
++    "prove-dal-columns.out",
++    "prove-dal-columns.run",
++    "prove-doors.mjs",
++    "prove-factory-gone-live.mjs",
++    "prove-gate-note-lands.mjs",
++    "prove-gate-note-lands.out",
++    "prove-gate-note-lands.run",
++    "prove-gate-password-only.mjs",
++    "prove-history-scrub-live.mjs",
++    "prove-image-bank.mjs",
++    "prove-image-scores.cjs",
++    "prove-knowledge.out",
++    "prove-knowledge2.out",
++    "prove-knowledge3.out",
++    "prove-knowledge4.out",
++    "prove-lead-pulse.mjs",
++    "prove-learning-mode-hole.mjs",
++    "prove-memory-one-writer.mjs",
++    "prove-memory-one-writer.out",
++    "prove-memory-run.out",
++    "prove-memory-run2.out",
++    "prove-mute-live.mjs",
++    "prove-mute-live.out",
++    "prove-mute-window.cts",
++    "prove-nightly-snapshot.mjs",
++    "prove-no-money-screens.mjs",
++    "prove-one-owner.out",
++    "prove-one-owner2.out",
++    "prove-one-owner3.out",
++    "prove-one-owner4.out",
++    "prove-one-owner5.out",
++    "prove-one-owner6.out",
++    "prove-one-owner7.out",
++    "prove-one-owner8.out",
++    "prove-owner-controls-record.mjs",
++    "prove-owner-controls.console",
++    "prove-owner-controls.out",
++    "prove-owner-dashboard-alerts.mjs",
++    "prove-owner-dashboard.console",
++    "prove-owner-dashboard.out",
++    "prove-papers-have-owner.mjs",
++    "prove-papers-have-owner.out",
++    "prove-papers.console",
++    "prove-registry-names.mjs",
++    "prove-registry-names.out",
++    "prove-registry-names.run",
++    "prove-relations-door-reads.mjs",
++    "prove-relations-door-reads.out",
++    "prove-reply-drawn-not-printed.mjs",
++    "prove-reply-drawn.out",
++    "prove-reply-run.out",
++    "prove-room-covers-live.mjs",
++    "prove-room-covers.cjs",
++    "prove-rules-one-shape.mjs",
++    "prove-rules-one-shape.out",
++    "prove-runtime-read-lands.mjs",
++    "prove-runtime-read-lands.out",
++    "prove-runtime-read-lands.run",
++    "prove-sales-knowledge-desk.mjs",
++    "prove-sales-manager-phase1.mjs",
++    "prove-scenario-writes-nothing.mjs",
++    "prove-scores-live.cjs",
++    "prove-screens-speak-arabic.mjs",
++    "prove-screens-speak-arabic.out",
++    "prove-sheet-visits.mjs",
++    "prove-snapshot.out",
++    "prove-snapshot2.out",
++    "prove-snapshot3.out",
++    "prove-surfaces-after-the-lock.mjs",
++    "prove-swarm-memory-live.mjs",
++    "prove-swarm-memory.out",
++    "prove-swarm-memory2.out",
++    "prove-swarm-memory3.out",
++    "prove-swarm-memory4.out",
++    "prove-swarm-memory5.out",
++    "prove-swarm-memory6.out",
++    "prove-swarm-memory7.out",
++    "prove-tenants-door.mjs",
++    "prove-the-link-live.mjs",
++    "prove-the-order-link.mjs",
++    "prove-vault-trail-wired.mjs",
++    "prove-vault-trail-wired.out",
++    "publish-atom1.log",
++    "publish-capture.log",
++    "publish-capture2.log",
++    "publish-digits.log",
++    "publish-panel.log",
++    "publish-panel2.log",
++    "publish-plan.log",
++    "publish-verify-1.log",
++    "publish-verify-2.log",
++    "purge-authority-clause.mjs",
++    "quality-card.png",
++    "quality-panel.png",
++    "quick-actions-live.png",
++    "r.json",
++    "radar-two-doors.png",
++    "read-hours-row.mjs",
++    "read-intent-values.mjs",
++    "read-master-47.mjs",
++    "read-order-amounts.mjs",
++    "read-sender-names.mjs",
++    "read-the-leads-ledger.mjs",
++    "read-the-order-ledger.mjs",
++    "read-the-pending-questions.mjs",
++    "read-walk-log.mjs",
++    "recall-probe.out",
++    "record-colour-ledger.mjs",
++    "record-inboxes-ledger.mjs",
++    "record-standing-authority.mjs",
++    "record-store-hours.mjs",
++    "refute-advisor-memory-guards.mjs",
++    "refute-swarm-memory-guards.mjs",
++    "region-1-no-evidence.png",
++    "region-2-area-taste.png",
++    "region-3-other-area.png",
++    "region-area-taste.png",
++    "region-no-evidence.png",
++    "region-other-area.png",
++    "register-numbers-atoms.mjs",
++    "register-settings-atoms.mjs",
++    "registry-build.out",
++    "registry-commit.out",
++    "registry-commit2.out",
++    "registry-commit3.out",
++    "registry-gates.out",
++    "registry-settings-390.png",
++    "registry-tests.out",
++    "relations-build.out",
++    "relations-dashboard-390.png",
++    "relations-door-390.png",
++    "relations-fullsuite.out",
++    "remove-four-credentials.mjs",
++    "remove-my-test-row.mjs",
++    "rename-quick-actions.mjs",
++    "repair-agents-split.mjs",
++    "repair-brief-minute.mjs",
++    "reply-drawn-dock-390.png",
++    "reply-drawn-page-390.png",
++    "repoint-backup-tools.mjs",
++    "reproduce-the-silent-chat-read.mjs",
++    "restore-council-minutes.mjs",
++    "restore-mixed-eol.mjs",
++    "room-cards-390.png",
++    "room-name-living.png",
++    "room-names-elite.png",
++    "room-names-request.png",
++    "room.json",
++    "round-three.out",
++    "round-three.out.json",
++    "row-provenance-audit.png",
++    "row-provenance-clean.png",
++    "row-provenance-live.log",
++    "row-provenance-none.png",
++    "row-provenance-tool.png",
++    "rows-chat-390.png",
++    "rows-roll-390.png",
++    "rows-settled-ops-390.png",
++    "rows-settled-sales-390.png",
++    "rows-table-390.png",
++    "rules-build.out",
++    "rules-dashboard-390.png",
++    "rules-fullsuite.out",
++    "rules-gates.out",
++    "run-customer-journey.mjs",
++    "run-genesis.ts",
++    "runs.json",
++    "runs2.json",
++    "runtime-build.out",
++    "runtime-commit.out",
++    "runtime-commit2.out",
++    "runtime-gates.out",
++    "runtime-read-home-390.png",
++    "runtime-read-tests.out",
++    "runtime-tests.out",
++    "s.json",
++    "sales-before-390.png",
++    "sales-desk-prove2.out",
++    "sales-desk-prove3.out",
++    "sales-desk-prove4.out",
++    "sales-desk-prove5.out",
++    "sales-desk-prove6.out",
++    "sales-failure-said.png",
++    "sales-full-390.png",
++    "sales-knowledge-desk-390.png",
++    "sales-manager-office.png",
++    "sales-office-delete-ask.png",
++    "sales-office-new.png",
++    "screen-errors.out",
++    "screen-errors2.out",
++    "screen-walk-4.log",
++    "seal-honest-failed.png",
++    "sec-build.out",
++    "sec-prove.out",
++    "sec-prove2.out",
++    "sec-suite.out",
++    "sec-tsc.out",
++    "seed-the-store-number.mjs",
++    "send-live-alert.mjs",
++    "sentinel-admin.png",
++    "server-3222.log",
++    "server-3223.log",
++    "server-phase1.log",
++    "settings-desk-390.png",
++    "settings-t2.txt",
++    "settings-tests.txt",
++    "settings-tests2.txt",
++    "setup_fate_table.js",
++    "sheet-visits-phone.png",
++    "shim-server-only.cjs",
++    "shoot-customer-pages.mjs",
++    "shoot-dim-text.mjs",
++    "shoot-elite-chips.mjs",
++    "shoot-room-cards.mjs",
++    "shoot-room-names.mjs",
++    "shoot-room-page.mjs",
++    "shoot-the-two-decisions.mjs",
++    "shoot-the-wordmark.mjs",
++    "shop-desk-390.png",
++    "shop-desk-after-erase-390.png",
++    "shop-empty-390.png",
++    "shop-empty-panel.png",
++    "shop-stocked-390.png",
++    "shop-t2.txt",
++    "shop-t3.txt",
++    "shop-t4.txt",
++    "shop-tests.txt",
++    "shop-tests2.txt",
++    "shot-agents-390.png",
++    "shot-sales-390.png",
++    "shot-sketches-390.png",
++    "sidebar-decisions-opened.png",
++    "sidebar-doors-phone.png",
++    "silent-chat-door----.png",
++    "silent-chat-door-answers.png",
++    "silent-chat-door-cut.png",
++    "sim-link.cts",
++    "sketch-owner-failed.png",
++    "sketch-owner-filter.png",
++    "sketch-owner-linked.png",
++    "sketch-owner-sheet.png",
++    "smoke-extract.mjs",
++    "snap-build.out",
++    "snap-prove.out",
++    "snap-prove2.out",
++    "snap-suite.out",
++    "snap-tests2.out",
++    "snap-tsc.out",
++    "snapshot-cockpit-390.png",
++    "snapshot-columns.mjs",
++    "snapshot-gates-build.out",
++    "snapshot-gates-tests.out",
++    "snapshot-no-regression-390.png",
++    "speak-apply-rows.log",
++    "speak-dry-rows.log",
++    "speak-stored-failures.cts",
++    "speak-stored-rows.cts",
++    "start-29.log",
++    "start-29b.log",
++    "start-32.log",
++    "start-33.log",
++    "start-34.log",
++    "start-35.log",
++    "stay-on-the-numbers-desk.mjs",
++    "style-chips-390.png",
++    "suite-gate-lock.txt",
++    "suite-hours.log",
++    "suite-journey.log",
++    "suite-name.log",
++    "suite-phone.log",
++    "suite-recorded-hours.log",
++    "suite-roll.log",
++    "suite-voice.log",
++    "suite-voice2.log",
++    "suite-voice3.log",
++    "suite-voice4.log",
++    "suite-voice5.log",
++    "suite-widget.log",
++    "suite-widget2.log",
++    "suite2.txt",
++    "suite3.txt",
++    "suite4.txt",
++    "suite5.txt",
++    "suite6.txt",
++    "swarm-build.out",
++    "swarm-build2.out",
++    "swarm-build3.out",
++    "swarm-eol-tests.out",
++    "swarm-memory-negative-390.png",
++    "swarm-memory-recalled-390.png",
++    "swarm-memory-tests.out",
++    "swarm-memory-tests2.out",
++    "swarm-memory-tests3.out",
++    "swarm-tests-full.out",
++    "swarm-tests2.out",
++    "swarm-tests3.out",
++    "swarm-tsc2.out",
++    "swarm-tsc3.out",
++    "sweep-a11y-admin.mjs",
++    "sweep-alert-probe.mjs",
++    "sweep-alert-probe.out",
++    "sweep-first-run-papers.mjs",
++    "sweep-memory-probe.mjs",
++    "sweep-memory-probe.out",
++    "sweep-old-env-copies.mjs",
++    "sweep-the-instrument-papers.mjs",
++    "taste-tally-door.png",
++    "td-build.out",
++    "td-prove.out",
++    "td-prove2.out",
++    "td-suite.out",
++    "td-tsc.out",
++    "td2-tsc.out",
++    "td3-build.out",
++    "td3-suite.out",
++    "td4-build.out",
++    "td4-suite.out",
++    "td4-tsc.out",
++    "teasers-arabic.png",
++    "telegram-status-test.mjs",
++    "ten-build.out",
++    "ten-prove2.out",
++    "ten-suite.out",
++    "ten-tsc.out",
++    "test-browser.mjs",
++    "test-db.js",
++    "test-db.ts",
++    "test-evolution.ts",
++    "test-live.js",
++    "test-pexels-local.js",
++    "test-pexels.js",
++    "tests-c3.log",
++    "tests-chat.out",
++    "tests-cond.log",
++    "tests-cond2.log",
++    "tests-dec.log",
++    "tests-dec2.log",
++    "tests-det1.log",
++    "tests-det2.log",
++    "tests-det3.log",
++    "tests-det4.log",
++    "tests-det5.log",
++    "tests-det6.log",
++    "tests-env.log",
++    "tests-floor.log",
++    "tests-gloss.out",
++    "tests-gloss2.out",
++    "tests-memory.out",
++    "tests-prov2.log",
++    "tests-renderer.out",
++    "tests-renderer2.out",
++    "tests-room.log",
++    "tests-sent.log",
++    "tests-sent2.log",
++    "tests-sweep.log",
++    "three.txt",
++    "toolDigestLive.probe.test.ts",
++    "translate-command-door.mjs",
++    "try-nextreq.mjs",
++    "try-snapshot-bucket.mjs",
++    "tsc-a11y4.log",
++    "tsc-c3.log",
++    "tsc-chat.out",
++    "tsc-cond.log",
++    "tsc-cond2.log",
++    "tsc-covers.log",
++    "tsc-dec.log",
++    "tsc-dec2.log",
++    "tsc-det.log",
++    "tsc-floor.log",
++    "tsc-gate-lock.txt",
++    "tsc-gloss.out",
++    "tsc-gloss2.out",
++    "tsc-guard5.log",
++    "tsc-mail.log",
++    "tsc-math.log",
++    "tsc-math2.log",
++    "tsc-memory.out",
++    "tsc-memory2.out",
++    "tsc-place.log",
++    "tsc-prov.log",
++    "tsc-prov2.log",
++    "tsc-renderer.out",
++    "tsc-renderer2.out",
++    "tsc-room.log",
++    "tsc-rows.log",
++    "tsc-sent.log",
++    "tsc-shop.txt",
++    "tsc-shop2.txt",
++    "tsc10.txt",
++    "tsc2.log",
++    "tsc3.log",
++    "tsc3.txt",
++    "tsc4.txt",
++    "tsc5.txt",
++    "tsc6.txt",
++    "tsc7.txt",
++    "tsc8.txt",
++    "tsc9.txt",
++    "unowned-orders-block.png",
++    "unread-jump-phone.png",
++    "unread-jump-read.png",
++    "update-master-list-a11y-after.mjs",
++    "update-master-list-a11y.mjs",
++    "update-master-list-address-and-pictures.mjs",
++    "update-master-list-boundary.mjs",
++    "update-master-list-brief-area.mjs",
++    "update-master-list-chat-area.mjs",
++    "update-master-list-conditions.mjs",
++    "update-master-list-customer-memory.mjs",
++    "update-master-list-digits.mjs",
++    "update-master-list-elite-address.mjs",
++    "update-master-list-elite-arabic.mjs",
++    "update-master-list-elite-taste.mjs",
++    "update-master-list-gate-lock.mjs",
++    "update-master-list-hours.mjs",
++    "update-master-list-journey.mjs",
++    "update-master-list-language.mjs",
++    "update-master-list-latin.mjs",
++    "update-master-list-memory.mjs",
++    "update-master-list-owner.mjs",
++    "update-master-list-places.mjs",
++    "update-master-list-provenance.mjs",
++    "update-master-list-radar-source.mjs",
++    "update-master-list-region.mjs",
++    "update-master-list-round-three.mjs",
++    "update-master-list-rows.mjs",
++    "update-master-list-the-gate-lock.mjs",
++    "update-master-list-tonight.mjs",
++    "update-yardstick-backup-v2.mjs",
++    "update-yardstick-backup.mjs",
++    "update-yardstick-census.mjs",
++    "update-yardstick-fake-tools.mjs",
++    "vault-build.out",
++    "vault-fullsuite.out",
++    "vault-gates.out",
++    "vault-status-390.png",
++    "verify-customers-screen.mjs",
++    "verify-link-index.mjs",
++    "verify-pass.log",
++    "verify-speak-rows.cjs",
++    "verify-supabase.js",
++    "visionWitnessLive.probe.test.ts",
++    "vitest-a11y4-full.log",
++    "vitest-a11y4.log",
++    "vitest-a11y5.log",
++    "vitest-covers.log",
++    "vitest-emph.log",
++    "vitest-fix.log",
++    "vitest-full-rows.log",
++    "vitest-full.log",
++    "vitest-full2.log",
++    "vitest-full3.log",
++    "vitest-full4.log",
++    "vitest-guard5-full.log",
++    "vitest-guard5.log",
++    "vitest-mail-full.log",
++    "vitest-mail.log",
++    "vitest-mail2.log",
++    "vitest-math-full.log",
++    "vitest-math-full2.log",
++    "vitest-math.log",
++    "vitest-math2.log",
++    "vitest-math3.log",
++    "vitest-math4.log",
++    "vitest-math5.log",
++    "vitest-place-full.log",
++    "vitest-place.log",
++    "vitest-place2.log",
++    "vitest-rows.log",
++    "vitest-rows2.log",
++    "vitest-rows3.log",
++    "voice-brief-phone.png",
++    "wait-badge-live.mjs",
++    "wait-cover-door.mjs",
++    "wait-elite-address.mjs",
++    "wait-elite-arabic.mjs",
++    "wait-elite-live.mjs",
++    "wait-img.out",
++    "wait-img2.out",
++    "wait-language-live.mjs",
++    "wait-publish.out",
++    "wait-publish2.out",
++    "wait-publish3.out",
++    "wait-publish4.out",
++    "wait-publish5.out",
++    "wait-radar-live.mjs",
++    "wait-region-live.mjs",
++    "wait-sec.out",
++    "wait-td5.out",
++    "wait-ten.out",
++    "where-bracket-390.png",
++    "where-is-old-sales.mjs",
++    "where-is-the-bracket.mjs",
++    "which-2fa-key-does-the-gate-hold.mjs",
++    "which-css-orders-math.mjs",
++    "which-doors-read-with-the-public-key.mjs",
++    "which-functions-can-the-public-call.mjs",
++    "who-is-in-the-office.mjs",
++    "why-is-the-gate-shut.mjs",
++    "why-json-doors-fall.mjs",
++    "wire-owner-voice-boundary.mjs",
++    "wire-room-names.mjs",
++    "work-doors-phone.png",
++    "write-audit-commit-msg.mjs",
++    "write-audit-ledger-msg.mjs",
++    "write-commit-msg.mjs",
++    "write-count-commit-msg.mjs",
++    "write-ledger-commit-msg.mjs",
++    "write-loop-commit-msg.mjs",
++    "write-rules-commit-msg.mjs",
++    "write-vault-commit-msg.mjs"
++  ],
++  "totalBytes": 50441387
++}
+diff --git "a/docs/\330\256\330\267\330\251-\330\247\331\204\330\250\331\206\330\247\330\241/EXECUTION-PROMPT.md" "b/docs/\330\256\330\267\330\251-\330\247\331\204\330\250\331\206\330\247\330\241/EXECUTION-PROMPT.md"
+index 9a7e049..779dec1 100644
+--- "a/docs/\330\256\330\267\330\251-\330\247\331\204\330\250\331\206\330\247\330\241/EXECUTION-PROMPT.md"
++++ "b/docs/\330\256\330\267\330\251-\330\247\331\204\330\250\331\206\330\247\330\241/EXECUTION-PROMPT.md"
+@@ -71,11 +71,9 @@ The owner is **Eng. Alaa Aziz** — a business owner, not a programmer, reading
+ - **DoD-5 ledger:** a line appended to `docs/ledger/council-minutes.md` whose every number is parsed from
+   a file that run printed, plus the atom's state updated in `docs/ledger/transfers.json` (via
+   `scripts/ops-census.mjs`), with `proof` filled.
+-- **DoD-6 published:** `node scratch/wait-publish.mjs` reports `PUBLISHED` for a deployment whose commit
+-  subject equals `git log -1 --format=%s`. **Note:** that file is currently untracked in git (one of the
+-  1563 untracked instruments) — M0 promotes it to `scripts/instruments/wait-publish.mjs` and commits it;
+-  until then, if it is missing, recreate it from `git log` + `vercel ls --json` rather than declaring
+-  success from a cached deployment.
++- **DoD-6 published:** `node scripts/instruments/wait-publish.mjs` reports `PUBLISHED` for a deployment
++  whose commit subject equals `git log -1 --format=%s`. (Since M0 this tool is committed under
++  `scripts/instruments/`; before that it lived untracked in `scratch/`.)
+ - **DoD-7 nothing lost:** every orphan you touched is classified (repair / retire / owner's word), never
+   silently removed.
+ 
+@@ -96,7 +94,7 @@ master list `54` items: `28` proven + `1` partial + `23` built-without-proof + `
+    since the plan was written: update the phase, don't force the code.
+ 5. For the atom you are about to touch, **measure whether it already exists** before building it
+    (`grep` the symbol, hit the door, read the record). Plans lie; the file is the truth.
+-6. `node scratch/wait-publish.mjs --check` (or read `vercel ls`) — know the currently published SHA so
++6. `node scripts/instruments/wait-publish.mjs` — know the currently published SHA so
+    your live proof is attributable.
+ 
+ ## ٦) The work loop (one atom at a time — this is the anti-loop rule)
+@@ -122,9 +120,18 @@ attribute your own instrument's 400 to the product) → capture values via `page
+ 
+ ## ٧) Verification gate sequence
+ 
+-`typecheck` → `lint` (`npm run lint:ci`) → `vitest` (full) → `next build` → push → wait for READY →
+-live 390px proof → (for anything customer-facing) `scripts/qayyim-smoke.mjs` (console/failed-request gate)
+-and `scripts/ops-vision-test.mjs` (production human simulation) → ledger.
++One command, since M0:
++
++```
++node scripts/gate.mjs --phase N --live scripts/instruments/<the proof for this atom>.mjs
++```
++
++It runs vitest → typecheck → full build → the live phone-width proof, prints the ruler line with
++today's numbers, and exits non-zero if any gate refused **or did not run**. `npm run ruler` prints
++the ruler alone; `npm run manifest` records what is still sitting in `scratch/`.
++Then: push → wait for READY (`scripts/instruments/wait-publish.mjs`) → live proof → ledger.
++For anything customer-facing also run `scripts/qayyim-smoke.mjs` (console/failed-request gate) and
++`scripts/ops-vision-test.mjs` (production human simulation).
+ 
+ ## ٨) Rollback
+ 
+diff --git "a/docs/\330\256\330\267\330\251-\330\247\331\204\330\250\331\206\330\247\330\241/\330\247\331\204\330\271\331\205\330\247\330\261\330\251-\331\210\330\247\331\204\331\205\330\261\330\247\330\255\331\204.md" "b/docs/\330\256\330\267\330\251-\330\247\331\204\330\250\331\206\330\247\330\241/\330\247\331\204\330\271\331\205\330\247\330\261\330\251-\331\210\330\247\331\204\331\205\330\261\330\247\330\255\331\204.md"
+index 918b573..b5e2149 100644
+--- "a/docs/\330\256\330\267\330\251-\330\247\331\204\330\250\331\206\330\247\330\241/\330\247\331\204\330\271\331\205\330\247\330\261\330\251-\331\210\330\247\331\204\331\205\330\261\330\247\330\255\331\204.md"
++++ "b/docs/\330\256\330\267\330\251-\330\247\331\204\330\250\331\206\330\247\330\241/\330\247\331\204\330\271\331\205\330\247\330\261\330\251-\331\210\330\247\331\204\331\205\330\261\330\247\330\255\331\204.md"
+@@ -44,13 +44,33 @@
+ 
+ ## ٢) المراحل الاثنتا عشرة — عقد كل مرحلة
+ 
+-### M0 — المِسطرة والآلة (الأرض)
++### M0 — المِسطرة والآلة (الأرض) — ✅ متسلّمة ٢٠٢٦-١١-٠٥
+ **يُبنى لأن:** لا ادعاء بعد اليوم يصدق بدون أمر واحد.
+-**Consumes:** لا شيء. **Produces:** `npm run gate` → `{ tests, typecheck, build, live, ruler }`.
+-- Files: Create `scripts/gate.mjs`, `scripts/instruments/live-proof.mjs`, `scripts/instruments/ruler.mjs`, `scripts/instruments/README.md` · Modify `package.json` (scripts: `gate`, `gate:live`) · Move `scratch/measure-accessibility.mjs`, `scratch/prove-snapshot-no-regression-390.mjs`, `scratch/shoot-*.mjs` → `scripts/instruments/` · Modify `.gitignore` (outputs: `scratch/*.out`, `scratch/*.png`, `scratch/*.log`) و commit الأدوات نفسها.
+-- ruler.mjs يطبع: بنود القائمة الجامعة بحالاتها (يقرأ `القائمة الجامعة…md` من سطور البنود `ن. **عنوان** — *حالة*`)، عدّاد `docs/ledger/transfers.json`، عدد الاختبارات من تشغيل vitest، الأبواب/الصفحات من `docs/ledger/census.json`.
+-- Interfaces: `runGates(): Promise<{tests:{passed,skipped,files}, tsc:0|1, build:0|1, live:{url, viewport, screenshot, consoleErrors}}>` · `readRuler(): {items:{total,proven,builtNoProof,notBuilt}, atoms:{total,moved,moving,noSurface,erased,notMoved,withProof}, doors:{all,admin,orphan}, pages:{old,new}}`
+-- DoD: `npm run gate` يطبع السطور الأربعة من تشغيل واحد · صفر ملف قياس مطلوب في `scratch/` فقط · الأدوات محفوظة في جيت‌هَب (اللي كان ١٥٦٣ ملف غير محفوظ يُحسم: أدوات → `scripts/instruments`، مخارج → gitignore، مذكرات → `docs/ledger/notes/`).
++**Consumes:** لا شيء. **Produces:** `npm run gate` · `npm run ruler` · `npm run manifest`.
++- Files (اللي اتبنى فعلاً): Create `lib/build/ruler.ts` · `lib/build/gates.ts` · `lib/build/scratch-manifest.ts`
++  (المنطق اللي عليه اختبارات) · Create `scripts/gate.mjs` · `scripts/scratch-manifest.mjs` (قشرة تشغيل بس —
++  حارس في `tests/build/instruments.test.ts` يمنع إن المنطق يرجع يكتب جوه السكربت) ·
++  Create `scripts/instruments/prove-ruler-lands.mjs` · Move `scratch/wait-publish.mjs`,
++  `scratch/measure-accessibility.mjs`, `scratch/prove-snapshot-no-regression-390.mjs` → `scripts/instruments/`
++  (نقل مش نسخة — نفس الحارس يمنع النسخة التانية) · Modify `package.json` (scripts: `gate`, `ruler`, `manifest`) ·
++  Modify `.gitignore` (مخارج القياس) · Modify `tsconfig.json` (`allowImportingTsExtensions`).
++- **اتصالّح عن المكتوب:** الخطة قالت `scripts/gate.ts` + `scripts/instruments/ruler.mjs`. الواقع أن Node 24
++  يحمّل `.ts` مباشرة لكن ما يفهمش اسم المسار `@/`، و ts-node ما كانش بيوصل لملف ESM؛ فاتعمل المنطق في
++  `lib/build/*.ts` (مُختبَر بـ vitest) والسكربت `.mjs` بستيراد نسبي، و`ruler.mjs` المستقل اتلغى لأن
++  مكانه في الطبقة المُختبَرة. عدد الملفات المحفوظة من scratch بقى ٣ أدوات + manifest بدل `shoot-*` السبعة
++  (دول واحد-استعمال؛ الأداة الجامعة ليهم `prove-snapshot-no-regression-390.mjs`).
++- ruler يطبع: بنود القائمة الجامعة بحالاتها (من سطور البنود `ن. **عنوان** — *حالة*، مش من سطر الخلاصة)،
++  عدّاد `docs/ledger/transfers.json` وحالاته وعدد اللي عليها دليل، الأبواب/الصفحات/الكرون من
++  `docs/ledger/census.json`، **وتاريخ الجرد نفسه لو مش النهاردة** («الجرد من …») عشان رقم قديم ما يتقالش
++  كأنه قياس اللحظة، وأي مصدر ما ردّش يتسمّى في «ما اتقارش» — ممنوع يتحوّل لصفر.
++- Interfaces: `readRuler(sources?): Ruler` حيث `Ruler = {items, atoms, doors, pages, crons, asOf, missing}`
++  و `formatRulerLine(ruler, {phase, totalPhases?, tests?, live?, today?}) → string` ·
++  `parseVitestSummary(text) → {files,tests,passed,skipped,failed|null}` ·
++  `gateReport(results) → {ok, failed[], notRun[]}` · `formatGateBlock(report, results) → string` ·
++  `readScratchManifest(root) → {found, reason, count, instruments, byExtension, names, totalBytes}`
++- DoD: `npm run gate` يطبع البوابات الأربع من تشغيل واحد ويطلع برقم غير صفر لو بوابة رفضت **أو ما اتشغّلتش** ·
++  صفر أداة قياس عايشة في `scratch/` بس · الأدوات محفوظة في جيت‌هَب · `docs/ledger/scratch-manifest.json`
++  يسجّل اللي لسه في scratch (عدد · أدوات · بايتات).
+ - Forbidden: أي تعديل سلوكي في المنتج · أي حذف ملف.
+ - Rollback: `git revert` لسطر الـ commit (لا reset).
+ 
+diff --git a/lib/build/gates.ts b/lib/build/gates.ts
+new file mode 100644
+index 0000000..1fbccd3
+--- /dev/null
++++ b/lib/build/gates.ts
+@@ -0,0 +1,93 @@
++/**
++ * gates.ts — the four publish gates as one machine, not one paragraph.
++ *
++ * The programme said: tests, typecheck, full build, and a live measurement at phone width with a
++ * screenshot actually looked at. It was written in prose, so an agent could run three of them and
++ * still say "published". This module parses what each gate printed and refuses green when a gate
++ * did not run at all.
++ */
++export type GateName = "tests" | "typecheck" | "build" | "live";
++
++export interface GateResult {
++  /** The command's exit code, or null when the gate never ran. */
++  exit: number | null;
++  detail: string;
++}
++
++export type GateResults = Record<GateName, GateResult>;
++
++export interface GateReport {
++  ok: boolean;
++  failed: GateName[];
++  notRun: GateName[];
++}
++
++export interface VitestSummary {
++  files: number | null;
++  tests: number | null;
++  passed: number | null;
++  skipped: number | null;
++  failed: number | null;
++}
++
++const GATE_ORDER: GateName[] = ["tests", "typecheck", "build", "live"];
++
++const stripAnsi = (text: string) => text.replace(new RegExp(String.fromCharCode(27) + "\\[[0-9;]*m", "g"), "");
++
++/** `Test Files 2 failed | 212 passed | 2 skipped (214)` — the numbers only exist if the line printed. */
++function parseSummaryLine(line: string): { passed: number | null; skipped: number | null; failed: number | null; total: number | null } {
++  const total = Number(/\((\d+)\)/.exec(line)?.[1] ?? NaN);
++  const passed = /(\d+) passed/.exec(line)?.[1];
++  const skipped = /(\d+) skipped/.exec(line)?.[1];
++  const failed = /(\d+) failed/.exec(line)?.[1];
++  return {
++    passed: passed === undefined ? 0 : Number(passed),
++    skipped: skipped === undefined ? 0 : Number(skipped),
++    failed: failed === undefined ? 0 : Number(failed),
++    total: Number.isFinite(total) ? total : null,
++  };
++}
++
++export function parseVitestSummary(text: string): VitestSummary {
++  const clean = stripAnsi(text);
++  const fileLine = /^\s*Test Files.*$/m.exec(clean)?.[0];
++  const testLine = /^\s*Tests\s+.*$/m.exec(clean)?.[0];
++  if (!fileLine || !testLine) {
++    return { files: null, tests: null, passed: null, skipped: null, failed: null };
++  }
++  const files = parseSummaryLine(fileLine);
++  const tests = parseSummaryLine(testLine);
++  return {
++    files: files.total,
++    tests: tests.total,
++    passed: tests.passed,
++    skipped: tests.skipped,
++    failed: tests.failed,
++  };
++}
++
++export function gateReport(results: GateResults): GateReport {
++  const failed: GateName[] = [];
++  const notRun: GateName[] = [];
++  for (const name of GATE_ORDER) {
++    const exit = results[name]?.exit;
++    if (exit === null || exit === undefined) notRun.push(name);
++    else if (exit !== 0) failed.push(name);
++  }
++  return { ok: failed.length === 0 && notRun.length === 0, failed, notRun };
++}
++
++export function formatGateBlock(report: GateReport, results: GateResults): string {
++  const lines = GATE_ORDER.map((name) => {
++    const result = results[name];
++    const state =
++      result?.exit === null || result?.exit === undefined
++        ? "NOT-RUN"
++        : result.exit === 0
++          ? "PASS"
++          : "REFUSED";
++    const detail = result?.detail?.trim() ? ` ${result.detail.trim()}` : "";
++    return `${name}=${state}${detail}`;
++  });
++  return [`GATES: ${report.ok ? "GREEN" : "REFUSED"}`, ...lines].join("\n");
++}
+diff --git a/lib/build/ruler.ts b/lib/build/ruler.ts
+new file mode 100644
+index 0000000..614af1c
+--- /dev/null
++++ b/lib/build/ruler.ts
+@@ -0,0 +1,204 @@
++/**
++ * ruler.ts — the three numbers that make a claim believable.
++ *
++ * The owner's question «وصلت فين؟» was answered differently by every agent because each one read a
++ * different plan. This module reads the three measured sources instead: the capability master list
++ * (items by status), the transfer ledger (atoms by state) and the census (doors, pages, crons).
++ *
++ * A source that did not answer is named in `missing` and its block is `null` — never a zero. A zero
++ * where nothing was measured is the defect this project keeps dying of.
++ */
++import { existsSync, readFileSync, readdirSync } from "node:fs";
++import { join } from "node:path";
++
++import { arDigits } from "../ops/metricLabels.ts";
++
++export interface RulerSources {
++  /** The capability master list outside the repository. */
++  masterListPath?: string;
++  /** Where transfers.json and census.json live. */
++  ledgerDir?: string;
++  /** Root used to count cron doors on disk. */
++  cronDoorRoot?: string;
++}
++
++export interface ItemTally {
++  total: number;
++  proven: number;
++  partial: number;
++  builtNoProof: number;
++  notBuilt: number;
++  unknown: number;
++}
++
++export interface AtomTally {
++  total: number;
++  moved: number;
++  moving: number;
++  notMoved: number;
++  noSurface: number;
++  erased: number;
++  withProof: number;
++}
++
++export interface Ruler {
++  items: ItemTally | null;
++  atoms: AtomTally | null;
++  doors: { all: number | null; admin: number | null; orphan: number | null } | null;
++  pages: { old: number | null; oldLines: number | null; new: number | null; newLines: number | null } | null;
++  crons: { doors: number | null; scheduled: number | null } | null;
++  /** The day the ledger was last measured — a stale number must not read as today's. */
++  asOf: string | null;
++  missing: string[];
++}
++
++const DEFAULT_MASTER_LIST =
++  process.env.AZENITH_MASTER_LIST ?? "D:/alaa2/الشركة الجديدة/القائمة الجامعة - مسار الوصول للشكل النهائي.md";
++
++const ITEM_LINE = /^[٠-٩0-9]+\.\s+\*\*(.+?)\*\*\s*—\s*\*([^*]+)\*/;
++
++function classify(status: string): keyof ItemTally | "unknown" {
++  const s = status.trim();
++  if (s === "مُثبت بدليل") return "proven";
++  if (s.includes("بلا دليل")) return "builtNoProof";
++  if (s.includes("مش مبني")) return "notBuilt";
++  if (s.includes("مُثبت")) return "partial";
++  return "unknown";
++}
++
++function readItems(path: string): ItemTally | null {
++  if (!existsSync(path)) return null;
++  const tally: ItemTally = { total: 0, proven: 0, partial: 0, builtNoProof: 0, notBuilt: 0, unknown: 0 };
++  for (const line of readFileSync(path, "utf8").split(/\r?\n/)) {
++    const m = ITEM_LINE.exec(line.trim());
++    if (!m) continue;
++    tally.total += 1;
++    tally[classify(m[2])] += 1;
++  }
++  return tally.total > 0 ? tally : null;
++}
++
++function readJson(path: string): Record<string, any> | null {
++  if (!existsSync(path)) return null;
++  try {
++    return JSON.parse(readFileSync(path, "utf8")) as Record<string, any>;
++  } catch {
++    return null;
++  }
++}
++
++function readAtoms(ledgerDir: string): { atoms: AtomTally | null; censusAgrees: boolean | null } {
++  const transfers = readJson(join(ledgerDir, "transfers.json"));
++  if (!transfers) return { atoms: null, censusAgrees: null };
++
++  const counts = (transfers.counts ?? {}) as Record<string, number>;
++  const rows = Array.isArray(transfers.rows) ? transfers.rows : [];
++  const moved = Number(counts.moved ?? 0);
++  const moving = Number(counts.moving ?? 0);
++  const notMoved = Number(counts["not-moved"] ?? 0);
++  const noSurface = Number(counts["no-surface"] ?? 0);
++  const erased = Number(counts.erased ?? 0);
++
++  const atoms: AtomTally = {
++    total: moved + moving + notMoved + noSurface + erased,
++    moved,
++    moving,
++    notMoved,
++    noSurface,
++    erased,
++    withProof: rows.filter((row: Record<string, any>) => Boolean(row?.proof)).length,
++  };
++
++  const census = readJson(join(ledgerDir, "census.json"));
++  const censusAtoms = census?.counts?.atoms;
++  const censusAgrees = censusAtoms === undefined ? null : Number(censusAtoms) === atoms.total;
++
++  return { atoms, censusAgrees };
++}
++
++function countCronDoors(root: string): number | null {
++  const dir = join(root, "app", "api", "cron");
++  if (!existsSync(dir)) return null;
++  return readdirSync(dir, { withFileTypes: true }).filter(
++    (entry) => entry.isDirectory() && existsSync(join(dir, entry.name, "route.ts")),
++  ).length;
++}
++
++export function readRuler(sources: RulerSources = {}): Ruler {
++  const masterListPath = sources.masterListPath ?? DEFAULT_MASTER_LIST;
++  const ledgerDir = sources.ledgerDir ?? "docs/ledger";
++  const cronDoorRoot = sources.cronDoorRoot ?? process.cwd();
++
++  const missing: string[] = [];
++
++  const items = readItems(masterListPath);
++  if (!items) missing.push("masterList");
++
++  const { atoms, censusAgrees } = readAtoms(ledgerDir);
++  if (!atoms) missing.push("transfers");
++  if (censusAgrees === false) missing.push("censusAtoms");
++
++  const census = readJson(join(ledgerDir, "census.json"));
++  if (!census) missing.push("census");
++  const counts = (census?.counts ?? {}) as Record<string, number>;
++
++  const transfersStamp = readJson(join(ledgerDir, "transfers.json"))?.generatedAt;
++  const asOf = String(transfersStamp ?? census?.generatedAt ?? "").slice(0, 10) || null;
++
++  const has = (key: string) => counts[key] !== undefined;
++  const doors = census
++    ? { all: has("allDoors") ? counts.allDoors : null, admin: has("adminDoors") ? counts.adminDoors : null, orphan: has("orphanDoors") ? counts.orphanDoors : null }
++    : null;
++  const pages = census
++    ? { old: has("oldPages") ? counts.oldPages : null, oldLines: has("oldPageLines") ? counts.oldPageLines : null, new: has("newPages") ? counts.newPages : null, newLines: has("newPageLines") ? counts.newPageLines : null }
++    : null;
++
++  const cronDoors = countCronDoors(cronDoorRoot);
++  const crons =
++    census || cronDoors !== null
++      ? { doors: cronDoors, scheduled: has("crons") ? counts.crons : null }
++      : null;
++
++  return { items, atoms, doors, pages, crons, asOf, missing };
++}
++
++const MISSING_LABELS: Record<string, string> = {
++  masterList: "القائمة الجامعة",
++  transfers: "سجل النقل",
++  census: "الجرد",
++  censusAtoms: "عدّ الجرد للذرات",
++};
++
++export function formatRulerLine(
++  ruler: Ruler,
++  options: {
++    phase: number;
++    totalPhases?: number;
++    tests?: number | null;
++    live?: string | null;
++    /** Injectable so a test can prove the staleness rule without waiting for tomorrow. */
++    today?: string;
++  },
++): string {
++  const totalPhases = options.totalPhases ?? 12;
++  const parts: string[] = [`المرحلة ${arDigits(options.phase)} من ${arDigits(totalPhases)}`];
++  const unmeasured: string[] = [...ruler.missing];
++
++  if (ruler.items) parts.push(`البند ${arDigits(ruler.items.proven)} من ${arDigits(ruler.items.total)} مُثبت بدليل`);
++  if (ruler.atoms) parts.push(`الذرة ${arDigits(ruler.atoms.moved)} من ${arDigits(ruler.atoms.total)} اتنقلت`);
++
++  const today = options.today ?? new Date().toISOString().slice(0, 10);
++  if (ruler.asOf && ruler.asOf !== today) parts.push(`الجرد من ${arDigits(ruler.asOf)}`);
++
++  if (options.tests === null || options.tests === undefined) unmeasured.push("الاختبارات");
++  else parts.push(`الاختبارات ${arDigits(options.tests)}`);
++
++  if (!options.live) unmeasured.push("الدليل الحيّ");
++  else parts.push(`الدليل الحيّ ${options.live}`);
++
++  let line = parts.join(" · ");
++  if (unmeasured.length) {
++    line += ` · ما اتقارش: ${unmeasured.map((key) => MISSING_LABELS[key] ?? key).join("، ")}`;
++  }
++  return line;
++}
+diff --git a/lib/build/scratch-manifest.ts b/lib/build/scratch-manifest.ts
+new file mode 100644
+index 0000000..b5294c5
+--- /dev/null
++++ b/lib/build/scratch-manifest.ts
+@@ -0,0 +1,65 @@
++/**
++ * scratch-manifest.ts — the record that the throwaway proof tooling existed.
++ *
++ * The instruments that measured this project lived in `scratch/` and were never committed: the
++ * evidence machinery was the single most losable part of the repository. This walks the folder and
++ * records what was there — names, kinds, sizes — so "nothing was forgotten" has a file behind it.
++ * An unreadable folder is reported as unreadable, never as an empty one.
++ */
++import { existsSync, readdirSync, statSync } from "node:fs";
++import { join } from "node:path";
++
++export interface ScratchManifest {
++  found: boolean;
++  reason: string;
++  count: number | null;
++  instruments: number | null;
++  byExtension: Record<string, number>;
++  names: string[];
++  totalBytes: number;
++}
++
++const INSTRUMENT_KINDS = new Set(["mjs", "js", "ts", "tsx"]);
++
++function walk(dir: string, prefix: string, hits: { name: string; bytes: number }[]): void {
++  for (const entry of readdirSync(dir, { withFileTypes: true })) {
++    const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
++    const full = join(dir, entry.name);
++    if (entry.isDirectory()) walk(full, rel, hits);
++    else if (entry.isFile()) hits.push({ name: rel, bytes: statSync(full).size });
++  }
++}
++
++export function readScratchManifest(root: string): ScratchManifest {
++  if (!existsSync(root)) {
++    return {
++      found: false,
++      reason: `the folder did not answer: ${root}`,
++      count: null,
++      instruments: null,
++      byExtension: {},
++      names: [],
++      totalBytes: 0,
++    };
++  }
++
++  const hits: { name: string; bytes: number }[] = [];
++  walk(root, "", hits);
++  hits.sort((a, b) => a.name.localeCompare(b.name));
++
++  const byExtension: Record<string, number> = {};
++  for (const file of hits) {
++    const ext = file.name.includes(".") ? file.name.split(".").pop()! : "(none)";
++    byExtension[ext] = (byExtension[ext] ?? 0) + 1;
++  }
++
++  return {
++    found: true,
++    reason: "",
++    count: hits.length,
++    instruments: hits.filter((file) => INSTRUMENT_KINDS.has(file.name.split(".").pop() ?? "")).length,
++    byExtension,
++    names: hits.map((file) => file.name),
++    totalBytes: hits.reduce((sum, file) => sum + file.bytes, 0),
++  };
++}
+diff --git a/package.json b/package.json
+index b7a5971..e753281 100644
+--- a/package.json
++++ b/package.json
+@@ -30,7 +30,10 @@
+     "db:migrate": "npm run supabase:push && npm run db:types",
+     "build:check": "npm run typecheck && npm run lint && next build",
+     "seed:dashboard": "node scripts/seed-dashboard.js",
+-    "qayyim:smoke": "node scripts/qayyim-smoke.mjs"
++    "qayyim:smoke": "node scripts/qayyim-smoke.mjs",
++    "ruler": "node scripts/gate.mjs --ruler-only",
++    "gate": "node scripts/gate.mjs",
++    "manifest": "node scripts/scratch-manifest.mjs"
+   },
+   "dependencies": {
+     "@bull-board/express": "^6.9.1",
+diff --git a/scripts/gate.mjs b/scripts/gate.mjs
+new file mode 100644
+index 0000000..a3704bd
+--- /dev/null
++++ b/scripts/gate.mjs
+@@ -0,0 +1,92 @@
++#!/usr/bin/env node
++/**
++ * gate.mjs — the four publish gates as one command, plus the ruler.
++ *
++ * Before this, "published" was a claim an agent made in prose: three of the four gates had a
++ * command and the fourth (a live measurement at phone width with a screenshot actually looked at)
++ * lived in throwaway scripts. Now a phase cannot report green unless all four ran, and a gate that
++ * did not run is printed as NOT-RUN instead of passing silently.
++ *
++ * Usage:
++ *   node scripts/gate.mjs                 run tests + typecheck + build; live stays NOT-RUN
++ *   node scripts/gate.mjs --live <file>   also run the live proof script (its exit is gate 4)
++ *   node scripts/gate.mjs --ruler-only    print the ruler line only (no gates run)
++ * The logic lives in lib/build (tested); this file only runs commands and prints.
++ */
++import { spawnSync } from "node:child_process";
++import { mkdirSync, writeFileSync } from "node:fs";
++
++import { formatGateBlock, gateReport, parseVitestSummary } from "../lib/build/gates.ts";
++import { formatRulerLine, readRuler } from "../lib/build/ruler.ts";
++
++const args = process.argv.slice(2);
++const has = (name) => args.includes(name);
++const valueAfter = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] ?? null : null);
++
++mkdirSync("scratch", { recursive: true });
++
++function run(label, argv) {
++  const [command, ...rest] = argv;
++  const child = spawnSync(command, rest, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
++  if (child.error) return { exit: null, detail: `the command never ran — ${child.error.message}`, output: "" };
++  const output = `${child.stdout ?? ""}${child.stderr ?? ""}`;
++  writeFileSync(`scratch/gate-${label}.out`, output, "utf8");
++  return { exit: child.status ?? 1, detail: "", output };
++}
++
++const lastLine = (text, pattern) => {
++  const hits = text.split(/\r?\n/).filter((line) => pattern.test(line));
++  return (hits.at(-1) ?? "").trim().slice(0, 120);
++};
++
++const results = {
++  tests: { exit: null, detail: "لم يُشغَّل" },
++  typecheck: { exit: null, detail: "لم يُشغَّل" },
++  build: { exit: null, detail: "لم يُشغَّل" },
++  live: { exit: null, detail: "لم يُشغَّل" },
++};
++
++const rulerOnly = has("--ruler-only");
++
++if (!rulerOnly) {
++  const tests = run("tests", ["node", "node_modules/vitest/vitest.mjs", "run"]);
++  const summary = parseVitestSummary(tests.output);
++  results.tests = {
++    exit: tests.exit,
++    detail:
++      summary.tests === null
++        ? "لم يطبع ملخصًا"
++        : `${summary.tests} اختبار · ${summary.passed} أخضر · ${summary.failed} أحمر · ${summary.skipped} متخطّى`,
++  };
++
++  const tsc = run("typecheck", ["node", "node_modules/typescript/bin/tsc", "--noEmit", "-p", "tsconfig.json"]);
++  results.typecheck = { exit: tsc.exit, detail: tsc.exit === 0 ? "سليم" : lastLine(tsc.output, /error TS/) };
++
++  const build = run("build", ["node", "node_modules/next/dist/bin/next", "build"]);
++  results.build = { exit: build.exit, detail: build.exit === 0 ? "سليم" : lastLine(build.output, /error|Error|Failed to compile/i) };
++
++  const liveScript = valueAfter("--live");
++  if (liveScript) {
++    const live = run("live", ["node", liveScript]);
++    results.live = { exit: live.exit, detail: lastLine(live.output, /RESULT:/) || (live.exit === 0 ? "ردّ صفر" : "رفض") };
++  }
++}
++
++const ruler = readRuler();
++const testCount = /(\d+) اختبار/.exec(results.tests.detail)?.[1];
++const liveDetail = results.live.exit === null || !results.live.detail ? null : results.live.detail;
++
++console.log(
++  formatRulerLine(ruler, {
++    phase: Number(valueAfter("--phase") ?? 0),
++    tests: testCount === undefined ? null : Number(testCount),
++    live: liveDetail,
++  }),
++);
++
++if (!rulerOnly) {
++  const report = gateReport(results);
++  console.log(formatGateBlock(report, results));
++  if (ruler.missing.length) console.log(`SOURCES NOT MEASURED: ${ruler.missing.join(", ")}`);
++  process.exitCode = report.ok ? 0 : 1;
++}
+diff --git a/scripts/instruments/measure-accessibility.mjs b/scripts/instruments/measure-accessibility.mjs
+new file mode 100644
+index 0000000..6f0c925
+--- /dev/null
++++ b/scripts/instruments/measure-accessibility.mjs
+@@ -0,0 +1,234 @@
++import { readFileSync } from "node:fs";
++import { chromium } from "@playwright/test";
++import speakeasy from "speakeasy";
++
++/**
++ * The accessibility number the owner asked for, measured on the published site.
++ *
++ * He asked when the store becomes "AAA" with no defects left. Nobody can answer that without measuring,
++ * and nothing about it has ever been measured here. So: axe-core (already a development dependency of
++ * this repository, injected at run time — nothing of it ships to a visitor) audits every page it can
++ * reach at the width he browses at, and a second pass computes text contrast itself, because the AAA
++ * bar (7 to 1 for ordinary text) is stricter than the check axe reports.
++ *
++ *   node scratch/measure-accessibility.mjs
++ */
++const BASE = "https://azenith-living.vercel.app";
++const axeSource = readFileSync("node_modules/axe-core/axe.min.js", "utf8");
++
++const env = Object.fromEntries(
++  readFileSync(".env.local", "utf8")
++    .split(/\r?\n/)
++    .filter((l) => /^[A-Z0-9_]+=/.test(l))
++    .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).trim().replace(/^["']|["']$/g, "")]),
++);
++
++const PAGES = [
++  { path: "/", label: "الواجهة", admin: false },
++  { path: "/rooms/living-room", label: "غرفة معيشة", admin: false },
++  { path: "/request", label: "طلب العميل", admin: false },
++  { path: "/terms", label: "الشروط", admin: false },
++  { path: "/admin/v2/ops", label: "كابينة القائد", admin: true },
++  { path: "/admin/database", label: "حالة النظام", admin: true },
++];
++
++/**
++ * Contrast, computed here rather than trusted to a rule: every visible text node, its own colour over
++ * the first non-transparent background behind it, measured against both bars — 4.5 (the usual one) and
++ * 7 (the one he asked for).
++ */
++const CONTRAST_PROBE = () => {
++  const parse = (value) => {
++    const m = String(value).match(/rgba?\(([^)]+)\)/);
++    if (!m) return null;
++    const parts = m[1].split(",").map((p) => Number.parseFloat(p.trim()));
++    const [r, g, b, a = 1] = parts;
++    return { r, g, b, a };
++  };
++  const lum = ([r, g, b]) => {
++    const lin = (c) => {
++      const s = c / 255;
++      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
++    };
++    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
++  };
++  const blend = (fg, bg) => {
++    const a = fg.a ?? 1;
++    return { r: fg.r * a + bg.r * (1 - a), g: fg.g * a + bg.g * (1 - a), b: fg.b * a + bg.b * (1 - a), a: 1 };
++  };
++  const ratio = (fg, bg) => {
++    const l1 = lum([fg.r, fg.g, fg.b]);
++    const l2 = lum([bg.r, bg.g, bg.b]);
++    const [hi, lo] = l1 > l2 ? [l1, l2] : [l2, l1];
++    return (hi + 0.05) / (lo + 0.05);
++  };
++  const hexToRgb = (hex) => {
++    const h = String(hex).replace("#", "");
++    const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
++    const n = Number.parseInt(full.slice(0, 6), 16);
++    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255, a: 1 };
++  };
++
++  const splitLayers = (image) => {
++    const out = [];
++    let depth = 0;
++    let current = "";
++    for (const ch of image) {
++      if (ch === "(") depth += 1;
++      if (ch === ")") depth -= 1;
++      if (ch === "," && depth === 0) {
++        out.push(current.trim());
++        current = "";
++      } else {
++        current += ch;
++      }
++    }
++    if (current.trim()) out.push(current.trim());
++    return out;
++  };
++
++  const stopsOf = (layer) =>
++    (layer.match(/rgba?\([^)]+\)|#[0-9a-f]{3,8}/gi) ?? [])
++      .map((value) => (value.startsWith("#") ? hexToRgb(value) : parse(value)))
++      .filter(Boolean);
++
++  /**
++   * Every colour this text could be sitting on, composited the way the browser composites it.
++   *
++   * The storefront paints its canvas with a gradient stack, not a background colour — measured on the
++   * published page: body's `background-color` is fully transparent and its `background-image` is
++   * `radial-gradient(rgba(197,160,89,.18), transparent 32%)` over
++   * `linear-gradient(rgb(22,22,23), rgb(26,26,27))`. Both axe and a naive walk up the tree go blind
++   * there: the first pass reported 1:1 for nearly every line because it took the 18%-alpha gold tint as
++   * if it were an opaque background. So the layers are composited back to front and the WORST resulting
++   * colour is the one judged — a label is only as readable as the lightest patch it can land on.
++   */
++  const backgroundsOf = (el) => {
++    const out = [];
++    let node = el;
++    while (node) {
++      const style = getComputedStyle(node);
++      const solid = parse(style.backgroundColor);
++      const image = style.backgroundImage;
++      if (image && image !== "none" && image.includes("gradient")) {
++        // CSS lists the front layer first; compositing runs from the deepest one forward.
++        const layers = splitLayers(image).reverse();
++        let acc = solid && solid.a > 0.9 ? solid : { r: 255, g: 255, b: 255, a: 1 };
++        for (const layer of layers) {
++          for (const stop of stopsOf(layer)) {
++            acc = blend(stop, acc);
++            out.push({ ...acc });
++          }
++        }
++      } else if (solid && solid.a > 0.9) {
++        out.push(solid);
++      }
++      node = node.parentElement;
++    }
++    return out;
++  };
++
++  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
++  const seen = new Set();
++  const fails = { aa: [], aaa: [] };
++  let checked = 0;
++  let unknown = 0;
++  let node;
++  while ((node = walker.nextNode())) {
++    const text = (node.nodeValue ?? "").trim();
++    if (text.length < 2) continue;
++    const el = node.parentElement;
++    if (!el || seen.has(el)) continue;
++    const style = getComputedStyle(el);
++    if (style.visibility === "hidden" || style.display === "none" || Number(style.opacity) === 0) continue;
++    const rect = el.getBoundingClientRect();
++    if (rect.width < 2 || rect.height < 2) continue;
++    seen.add(el);
++    const fg = parse(style.color);
++    if (!fg) continue;
++    const candidates = backgroundsOf(el);
++    if (candidates.length === 0) {
++      unknown += 1;
++      continue;
++    }
++    const size = Number.parseFloat(style.fontSize) || 16;
++    const weight = Number.parseInt(style.fontWeight, 10) || 400;
++    const large = size >= 24 || (size >= 18.66 && weight >= 700);
++    const need = { aa: large ? 3 : 4.5, aaa: large ? 4.5 : 7 };
++    const r = Math.min(...candidates.map((bg) => ratio(blend(fg, bg), bg)));
++    checked += 1;
++    const record = { text: text.slice(0, 40), size: Math.round(size), ratio: Math.round(r * 100) / 100, need: need.aaa };
++    if (r < need.aa) fails.aa.push(record);
++    if (r < need.aaa) fails.aaa.push(record);
++  }
++  return {
++    checked,
++    unknown,
++    aa: fails.aa.length,
++    aaa: fails.aaa.length,
++    worst: fails.aaa.sort((a, b) => a.ratio - b.ratio).slice(0, 5),
++  };
++};
++
++const b = await chromium.launch({ headless: true });
++const ctx = await b.newContext({ viewport: { width: 390, height: 900 }, locale: "ar-EG" });
++const p = await ctx.newPage();
++
++async function open(path) {
++  await p.goto(`${BASE}${path}`, { waitUntil: "domcontentloaded", timeout: 90000 });
++  await p.waitForTimeout(9000);
++}
++
++// Sign in once for the owner's own screens.
++await open("/gate/login");
++await p.fill("input[type=email]", env.ADMIN_GATE_EMAIL);
++await p.fill("input[type=password]", env.ADMIN_GATE_PASSWORD);
++await p.click("button[type=submit]");
++await p.waitForSelector('input[placeholder="000000"]', { timeout: 40000 });
++const secret = env.ADMIN_GATE_2FA_SECRET.replace(/\s+/g, "").replace(/-/g, "").toUpperCase();
++await p.fill('input[placeholder="000000"]', speakeasy.totp({ secret, encoding: "base32", step: 30, digits: 6 }));
++await p.click("button[type=submit]");
++for (let i = 0; i < 20 && !p.url().includes("/admin"); i++) await p.waitForTimeout(2000);
++console.log(`signed in at ${p.url()}\n`);
++
++const summary = [];
++for (const page of PAGES) {
++  await open(page.path);
++  if (page.admin && !p.url().includes("/admin")) {
++    console.log(`${page.label}: the session did not hold — ${p.url()}`);
++    continue;
++  }
++  await p.addScriptTag({ content: axeSource });
++  const audit = await p.evaluate(async () => {
++    const result = await window.axe.run(document, {
++      runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag2aaa", "wcag21aaa", "best-practice"] },
++      resultTypes: ["violations"],
++    });
++    return {
++      checked: result.testResults?.length ?? 0,
++      violations: result.violations.map((v) => ({
++        id: v.id,
++        impact: v.impact ?? "unknown",
++        nodes: v.nodes.length,
++        tags: v.tags.filter((t) => t.startsWith("wcag")).join("+"),
++      })),
++    };
++  });
++  const contrast = await p.evaluate(CONTRAST_PROBE);
++
++  const nodes = audit.violations.reduce((sum, v) => sum + v.nodes, 0);
++  const aaaRules = audit.violations.filter((v) => v.tags.includes("aaa"));
++  console.log(`## ${page.label} (${page.path})`);
++  console.log(`   axe: ${audit.violations.length} rules violated · ${nodes} places · AAA rules: ${aaaRules.length ? aaaRules.map((v) => `${v.id}(${v.nodes})`).join(", ") : "none"}`);
++  for (const v of audit.violations.sort((a, b2) => b2.nodes - a.nodes).slice(0, 8)) {
++    console.log(`     - ${v.id} · ${v.impact} · ${v.nodes} · ${v.tags}`);
++  }
++  console.log(`   contrast: ${contrast.checked} text nodes measured · ${contrast.unknown} with no computable background · fails AA ${contrast.aa} · fails AAA ${contrast.aaa}`);
++  for (const w of contrast.worst) console.log(`     worst: ${w.ratio}:1 (needs ${w.need}:1) · ${w.size}px · «${w.text}»`);
++  summary.push({ label: page.label, rules: audit.violations.length, nodes, aaaRules: aaaRules.length, contrastAa: contrast.aa, contrastAaa: contrast.aaa, textNodes: contrast.checked });
++}
++
++console.log("\n=== summary ===");
++console.table(summary);
++await b.close();
++
+diff --git a/scripts/instruments/prove-ruler-lands.mjs b/scripts/instruments/prove-ruler-lands.mjs
+new file mode 100644
+index 0000000..7747823
+--- /dev/null
++++ b/scripts/instruments/prove-ruler-lands.mjs
+@@ -0,0 +1,96 @@
++#!/usr/bin/env node
++/**
++ * prove-ruler-lands.mjs — the live gate for the ruler itself.
++ *
++ * A tooling phase still owes the owner a look at the published site: the ruler must answer with
++ * real numbers, must refuse to invent them when a source is missing, and the dashboard must still
++ * render at phone width after the tooling landed.
++ */
++import { execFileSync } from "node:child_process";
++import { readFileSync, writeFileSync } from "node:fs";
++
++import { chromium } from "@playwright/test";
++
++const SITE = "https://azenith-living.vercel.app";
++
++const env = Object.fromEntries(
++  readFileSync(".env.local", "utf8")
++    .split("\n")
++    .filter((l) => /^[A-Z0-9_]+=/.test(l))
++    .map((l) => [l.slice(0, l.indexOf("=")), l.slice(1 + l.indexOf("=")).trim().replace(/^["']|["']$/g, "")]),
++);
++
++const lines = [];
++const checks = [];
++const say = (label, value) => {
++  const s = `${label}: ${value}`;
++  lines.push(s);
++  console.log(s);
++};
++const check = (name, ok, detail = "") => {
++  checks.push({ name, ok: Boolean(ok) });
++  const s = `${ok ? "نجح" : "فشل"} — ${name}${detail ? ` · ${detail}` : ""}`;
++  lines.push(s);
++  console.log(s);
++};
++
++let browser = null;
++try {
++  // 1 — the ruler answers from the three sources, in his digits.
++  const rulerOut = execFileSync("node", ["scripts/gate.mjs", "--ruler-only"], { encoding: "utf8" });
++  const rulerLine = rulerOut.split(/\r?\n/).filter((l) => l.includes("المرحلة")).at(-1) ?? "";
++  say("ruler line", rulerLine);
++  check("the ruler prints the phase count of ١٢", rulerLine.includes("من ١٢"), rulerLine.slice(0, 40));
++  check("the ruler prints no Latin digit", !/[0-9]/.test(rulerLine), "");
++
++  // 2 — a missing source is named, never replaced with a zero.
++  const starved = execFileSync("node", ["-e", `
++    import('./lib/build/ruler.ts').then(async (m) => {
++      const f = await import('node:fs');
++      const line = m.formatRulerLine(m.readRuler({ masterListPath: 'does-not-exist.md', ledgerDir: 'does-not-exist' }), { phase: 0, tests: null });
++      console.log(line);
++    });
++  `], { encoding: "utf8" });
++  const starvedLine = starved.split(/\r?\n/).filter((l) => l.includes("المرحلة")).at(-1) ?? "";
++  say("starved ruler line", starvedLine);
++  check("a missing source is named, not zeroed", /ما اتقارش/.test(starvedLine) && !/البند ٠ من/.test(starvedLine), starvedLine.slice(0, 80));
++
++  // 3 — the published dashboard still renders at phone width after the tooling landed.
++  browser = await chromium.launch();
++  const ctx = await browser.newContext({ viewport: { width: 390, height: 900 } });
++  const page = await ctx.newPage();
++  const consoleErrors = [];
++  page.on("console", (m) => {
++    if (m.type() === "error") consoleErrors.push(m.text().slice(0, 160));
++  });
++
++  await page.goto(`${SITE}/gate/login`, { waitUntil: "domcontentloaded" });
++  await page.waitForTimeout(1500);
++  await page.fill('input[type="email"]', env.ADMIN_GATE_EMAIL);
++  await page.fill('input[type="password"]', env.ADMIN_GATE_PASSWORD);
++  await page.click('button[type="submit"]');
++  await page.waitForURL((u) => !String(u).includes("/gate/login"), { timeout: 40000 }).catch(() => {});
++
++  const dash = await ctx.newPage();
++  dash.on("console", (m) => {
++    if (m.type() === "error") consoleErrors.push(m.text().slice(0, 160));
++  });
++  await dash.goto(`${SITE}/admin/v2`, { waitUntil: "domcontentloaded" });
++  await dash.waitForTimeout(7000);
++  const body = await dash.evaluate(() => document.body.innerText.replace(/\s+/g, " ").trim());
++  say("cockpit text at 390px", `${body.length} chars`);
++  check("the cockpit still paints something", body.length > 200, `chars=${body.length}`);
++  check("the measured tab logged no console error", consoleErrors.length === 0, consoleErrors.slice(0, 2).join(" | "));
++  await dash.screenshot({ path: "scratch/ruler-cockpit-390.png" });
++  say("screenshot", "scratch/ruler-cockpit-390.png");
++} catch (err) {
++  check("the run completed", false, String(err).slice(0, 200));
++} finally {
++  if (browser) await browser.close();
++  const failed = checks.filter((c) => !c.ok);
++  lines.push(`RESULT: ${checks.length - failed.length} of ${checks.length} checks passed · failed=${failed.length}`);
++  if (failed.length) lines.push("FAILED CHECKS: " + failed.map((f) => f.name).join(" · "));
++  writeFileSync("scratch/prove-ruler-lands.out", lines.join("\n") + "\n");
++  console.log(failed.length ? "PROVE_FAILED" : "PROVE_PASSED");
++  if (failed.length) process.exitCode = 1;
++}
+diff --git a/scripts/instruments/prove-snapshot-no-regression-390.mjs b/scripts/instruments/prove-snapshot-no-regression-390.mjs
+new file mode 100644
+index 0000000..66fac7a
+--- /dev/null
++++ b/scripts/instruments/prove-snapshot-no-regression-390.mjs
+@@ -0,0 +1,79 @@
++/**
++ * prove-snapshot-no-regression-390.mjs — the owner's screen after the nightly copy went in.
++ *
++ * The copy added no button and no line of his interface, so this proves the negative: at 390px on the
++ * published link the cockpit still opens, still fits, still answers, and prints nothing red in the
++ * console. A screenshot is taken because a number without a looked-at screen is not a proof here.
++ */
++import { readFileSync } from "node:fs";
++import { chromium } from "@playwright/test";
++
++const BASE = "https://azenith-living.vercel.app";
++const env = Object.fromEntries(
++  readFileSync(".env.local", "utf8")
++    .split(/\r?\n/)
++    .filter((l) => /^[A-Z0-9_]+=/.test(l))
++    .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).trim().replace(/^["']|["']$/g, "")]),
++);
++
++const checks = [];
++const check = (name, ok, detail = "") => {
++  checks.push({ name, ok });
++  console.log(`${ok ? "نجح" : "فشل"} — ${name}${detail ? ` · ${detail}` : ""}`);
++};
++const say = (label, value) => console.log(`${label}: ${value}`);
++
++const browser = await chromium.launch({ headless: true });
++const ctx = await browser.newContext({ viewport: { width: 390, height: 900 }, locale: "ar-EG" });
++const page = await ctx.newPage();
++const errors = [];
++page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
++page.on("pageerror", (e) => errors.push(String(e)));
++
++await page.goto(`${BASE}/gate/login`, { waitUntil: "domcontentloaded", timeout: 90000 });
++await page.waitForTimeout(4000);
++await page.fill("input[type=email]", env.ADMIN_GATE_EMAIL);
++await page.fill("input[type=password]", env.ADMIN_GATE_PASSWORD);
++await page.click("button[type=submit]");
++for (let i = 0; i < 25 && !page.url().includes("/admin"); i++) await page.waitForTimeout(2000);
++check("باب اللوحة بيفتح زي ما أمر", page.url().includes("/admin"), page.url().replace(BASE, ""));
++
++await page.waitForTimeout(9000);
++const text = await page.evaluate(() => document.body.innerText.replace(/\s+/g, " "));
++say("طول الكلام على الشاشة", text.length);
++check("الكابينة مش فاضية", text.length > 200, text.slice(0, 60));
++
++const overflow = await page.evaluate(() => ({
++  scrollW: document.documentElement.scrollWidth,
++  clientW: document.documentElement.clientWidth,
++}));
++say("العرض الكلي مقابل الشاشة", `${overflow.scrollW} مقابل ${overflow.clientW}`);
++check("مفيش حاجة طالعة بره عرض الشاشة في اللوحة", overflow.scrollW <= overflow.clientW + 1, `فرق=${overflow.scrollW - overflow.clientW}`);
++
++await page.goto(`${BASE}/admin/v2/agents/ops`, { waitUntil: "domcontentloaded", timeout: 90000 });
++await page.waitForTimeout(9000);
++const composer = await page.evaluate(() => {
++  const holder = document.querySelector("[data-chat-composer]");
++  const field = holder?.querySelector("input, textarea") ?? holder;
++  if (!field) return null;
++  const box = field.getBoundingClientRect();
++  return {
++    x: Math.round(box.x),
++    right: Math.round(box.right),
++    w: Math.round(box.width),
++    inView: box.width > 0 && box.x >= 0 && box.right <= window.innerWidth + 1,
++  };
++});
++say("مربّع الكتابة", JSON.stringify(composer));
++check("مربّع الكتابة داخل الشاشة عند عرض ٣٩٠", Boolean(composer?.inView), composer ? `من ${composer.x} إلى ${composer.right} عرض=${composer.w}` : "مفيش مربّع كتابة");
++
++const headings = await page.locator("h1, h2, h3").count();
++check("العناوين موجودة (الصفحة ما اتكسرتش)", headings > 0, "عدد=" + headings);
++check("صفر رسالة خطأ في الكابينة", errors.length === 0, errors.slice(0, 2).map((e) => e.slice(0, 90)).join(" | "));
++
++await page.screenshot({ path: "scratch/snapshot-cockpit-390.png" });
++await browser.close();
++
++const failed = checks.filter((c) => !c.ok);
++console.log(`\nراجعت ${checks.length} · نجح ${checks.length - failed.length} · فشل ${failed.length}`);
++process.exit(failed.length ? 1 : 0);
+diff --git a/scripts/instruments/wait-publish.mjs b/scripts/instruments/wait-publish.mjs
+new file mode 100644
+index 0000000..ebdaf36
+--- /dev/null
++++ b/scripts/instruments/wait-publish.mjs
+@@ -0,0 +1,47 @@
++import { execFileSync } from "node:child_process";
++
++// Waits until the deployment that is READY is the one carrying the commit just pushed.
++// Measured 2026-11-04: the first version declared success on the *previous* READY deployment,
++// because it only looked at deployments[0].state and never at which commit that build was.
++const want = execFileSync("git", ["log", "-1", "--format=%H|%s"], { encoding: "utf8" }).trim();
++const wantSha = want.split("|")[0];
++const wantSubject = want.split("|").slice(1).join("|").slice(0, 48);
++console.log("waiting for build of: " + wantSha.slice(0, 8) + " · " + wantSubject);
++
++for (let i = 1; i <= 40; i++) {
++  let list;
++  try {
++    const out = execFileSync(process.platform === "win32" ? "npx.cmd" : "npx", ["--no-install", "vercel", "ls", "--json"], {
++      encoding: "utf8",
++      maxBuffer: 32 * 1024 * 1024,
++      shell: true,
++    });
++    list = JSON.parse(out.slice(out.indexOf("{"))).deployments ?? [];
++  } catch (e) {
++    console.log(`محاولة ${i}: قراءة القائمة فشلت: ${String(e).slice(0, 120)}`);
++    await new Promise((r) => setTimeout(r, 20000));
++    continue;
++  }
++
++  // This project's deployments report githubCommitRef as the branch name, not the sha (measured
++  // 2026-11-04), so the build is matched by the subject line of the commit that triggered it.
++  const subject = (d) => ((d.meta?.githubCommitMessage ?? "").split("\n")[0] ?? "").slice(0, wantSubject.length);
++  const mine = list.find((d) => subject(d) === wantSubject);
++  const newest = list[0];
++  const seen = newest ? `${newest.url} · حالة ${newest.state} · ${subject(newest).slice(0, 40)}` : "ولا نسخة";
++  console.log(`محاولة ${i}: الأحدث ${seen}`);
++
++  if (mine) {
++    if (mine.state === "READY") {
++      console.log(`PUBLISHED url=${mine.url} subject=${subject(mine).slice(0, 40)}`);
++      process.exit(0);
++    }
++    if (mine.state === "ERROR" || mine.state === "CANCELED") {
++      console.log("BUILD FAILED state=" + mine.state + " subject=" + subject(mine).slice(0, 40));
++      process.exit(1);
++    }
++  }
++  await new Promise((r) => setTimeout(r, 20000));
++}
++console.log("البناء ما وصلش للنسخة المطلوبة في المهلة");
++process.exit(2);
+diff --git a/scripts/scratch-manifest.mjs b/scripts/scratch-manifest.mjs
+new file mode 100644
+index 0000000..4cdf1e5
+--- /dev/null
++++ b/scripts/scratch-manifest.mjs
+@@ -0,0 +1,22 @@
++#!/usr/bin/env node
++/**
++ * scratch-manifest.mjs — write the record of what the throwaway folder held.
++ * Refuses to write a manifest for a folder that did not answer.
++ */
++import { writeFileSync } from "node:fs";
++
++import { readScratchManifest } from "../lib/build/scratch-manifest.ts";
++
++const root = process.argv[2] ?? "scratch";
++const manifest = readScratchManifest(root);
++
++if (!manifest.found) {
++  console.error(`scratch manifest NOT WRITTEN — ${manifest.reason}`);
++  process.exitCode = 1;
++} else {
++  const body = JSON.stringify({ generatedAt: new Date().toISOString(), root, ...manifest }, null, 2) + "\n";
++  writeFileSync("docs/ledger/scratch-manifest.json", body, "utf8");
++  console.log(
++    `scratch manifest: ${manifest.count} files · ${manifest.instruments} instruments · ${manifest.totalBytes} bytes → docs/ledger/scratch-manifest.json`,
++  );
++}
+diff --git a/tests/build/gates.test.ts b/tests/build/gates.test.ts
+new file mode 100644
+index 0000000..5a1632a
+--- /dev/null
++++ b/tests/build/gates.test.ts
+@@ -0,0 +1,96 @@
++// @vitest-environment node
++import { describe, expect, it } from "vitest";
++
++import { parseVitestSummary, gateReport, formatGateBlock, type GateResults } from "@/lib/build/gates";
++
++/**
++ * The four publish gates were a convention written in prose. This is the machine that turns the
++ * convention into one command: parse what each gate printed, and refuse to call a run green when a
++ * gate did not run at all. A gate that never ran is not a pass.
++ */
++
++const ESC = String.fromCharCode(27);
++
++describe("parseVitestSummary", () => {
++  it("reads the real summary line, colours and all", () => {
++    const text = [
++      `  ${ESC}[33m❯${ESC}[39m tests/ops/x.test.ts (9 tests | 1 skipped)`,
++      `${ESC}[2m Test Files${ESC}[22m ${ESC}[1m${ESC}[32m212 passed${ESC}[39m${ESC}[22m${ESC}[2m | 2 skipped${ESC}[22m ${ESC}[2m(214)${ESC}[22m`,
++      `${ESC}[2m      Tests${ESC}[22m ${ESC}[1m${ESC}[32m2483 passed${ESC}[39m${ESC}[22m${ESC}[2m | 3 skipped${ESC}[22m ${ESC}[2m(2486)${ESC}[22m`,
++    ].join("\n");
++
++    expect(parseVitestSummary(text)).toEqual({ files: 214, tests: 2486, passed: 2483, skipped: 3, failed: 0 });
++  });
++
++  it("returns nulls, never zeros, when the run printed no summary", () => {
++    expect(parseVitestSummary("Some other output\nnothing here")).toEqual({
++      files: null,
++      tests: null,
++      passed: null,
++      skipped: null,
++      failed: null,
++    });
++  });
++
++  it("counts the failing files it names", () => {
++    const text = `Test Files 2 failed | 212 passed (214)\n      Tests 3 failed | 2480 passed (2486)`;
++    const parsed = parseVitestSummary(text);
++    expect(parsed.failed).toBe(3);
++    expect(parsed.passed).toBe(2480);
++  });
++});
++
++describe("gateReport", () => {
++  it("names the gate that refused", () => {
++    const results: GateResults = {
++      tests: { exit: 0, detail: "2486" },
++      typecheck: { exit: 0, detail: "" },
++      build: { exit: 1, detail: "Failed to compile" },
++      live: { exit: 0, detail: "11 of 11" },
++    };
++
++    expect(gateReport(results)).toEqual({ ok: false, failed: ["build"], notRun: [] });
++  });
++
++  it("refuses to call a skipped gate a pass", () => {
++    const results: GateResults = {
++      tests: { exit: 0, detail: "2486" },
++      typecheck: { exit: null, detail: "لم يُشغَّل" },
++      build: { exit: 0, detail: "" },
++      live: { exit: null, detail: "لم يُشغَّل" },
++    };
++
++    const report = gateReport(results);
++    expect(report.ok).toBe(false);
++    expect(report.failed).toEqual([]);
++    expect(report.notRun.sort()).toEqual(["live", "typecheck"]);
++  });
++
++  it("is green only when all four gates ran and answered zero", () => {
++    const results: GateResults = {
++      tests: { exit: 0, detail: "2486" },
++      typecheck: { exit: 0, detail: "" },
++      build: { exit: 0, detail: "" },
++      live: { exit: 0, detail: "11 of 11" },
++    };
++
++    expect(gateReport(results).ok).toBe(true);
++  });
++});
++
++describe("formatGateBlock", () => {
++  it("prints every gate with what it answered, and says not-run out loud", () => {
++    const results: GateResults = {
++      tests: { exit: 0, detail: "2486 passed" },
++      typecheck: { exit: 0, detail: "clean" },
++      build: { exit: 1, detail: "Failed to compile" },
++      live: { exit: null, detail: "" },
++    };
++
++    const block = formatGateBlock(gateReport(results), results);
++    expect(block).toContain("tests=PASS 2486 passed");
++    expect(block).toContain("build=REFUSED");
++    expect(block).toContain("live=NOT-RUN");
++    expect(block).toContain("GATES: REFUSED");
++  });
++});
+diff --git a/tests/build/instruments.test.ts b/tests/build/instruments.test.ts
+new file mode 100644
+index 0000000..f66a500
+--- /dev/null
++++ b/tests/build/instruments.test.ts
+@@ -0,0 +1,37 @@
++// @vitest-environment node
++import { describe, expect, it } from "vitest";
++import { existsSync, readdirSync, readFileSync } from "node:fs";
++
++/**
++ * The proof tooling must have exactly one home.
++ *
++ * Every measurement this project ever proved itself with sat in `scratch/`, untracked — and the
++ * three that mattered (the publish waiter, the accessibility sweep, the phone-width live proof)
++ * were one disk wipe from vanishing. M0 moved them into `scripts/instruments/`. This guard fails
++ * if a copy reappears in scratch, because two copies of a measuring tool is how two different
++ * numbers end up in two different reports.
++ */
++
++const PROMOTED = ["wait-publish.mjs", "measure-accessibility.mjs", "prove-snapshot-no-regression-390.mjs"];
++
++describe("the promoted instruments", () => {
++  it("live in scripts/instruments", () => {
++    for (const name of PROMOTED) {
++      expect(existsSync(`scripts/instruments/${name}`), name).toBe(true);
++    }
++  });
++
++  it("are not left behind in scratch as a second copy", () => {
++    if (!existsSync("scratch")) return;
++    const leftovers = readdirSync("scratch").filter((name) => PROMOTED.includes(name));
++    expect(leftovers).toEqual([]);
++  });
++
++  it("keep the gate command's own logic in the tested module, not in the script", () => {
++    const cli = existsSync("scripts/gate.mjs") ? readFileSync("scripts/gate.mjs", "utf8") : "";
++    expect(cli).toContain("../lib/build/gates.ts");
++    expect(cli).toContain("../lib/build/ruler.ts");
++    expect(cli).not.toMatch(/function parseVitestSummary/);
++    expect(cli).not.toMatch(/function readRuler/);
++  });
++});
+diff --git a/tests/build/ruler.test.ts b/tests/build/ruler.test.ts
+new file mode 100644
+index 0000000..d3dcfba
+--- /dev/null
++++ b/tests/build/ruler.test.ts
+@@ -0,0 +1,239 @@
++// @vitest-environment node
++import { describe, expect, it } from "vitest";
++import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
++import { tmpdir } from "node:os";
++import { join } from "node:path";
++
++import { readRuler, formatRulerLine } from "@/lib/build/ruler";
++
++/**
++ * The ruler is the only thing that makes a claim believable in this project. It reads three
++ * measured sources — the capability master list, the transfer ledger, the census — and reports
++ * what each one answered. A source that did not answer is NAMED, never reported as zero: a
++ * reassuring zero is the defect class this whole programme exists to kill.
++ */
++
++function workspace(files: Record<string, string>): string {
++  const root = mkdtempSync(join(tmpdir(), "ruler-"));
++  for (const [rel, body] of Object.entries(files)) {
++    const full = join(root, rel);
++    mkdirSync(join(full, ".."), { recursive: true });
++    writeFileSync(full, body, "utf8");
++  }
++  return root;
++}
++
++describe("readRuler", () => {
++  it("counts the capability items by status, from the item lines themselves", () => {
++    const root = workspace({
++      "master.md": [
++        "# القائمة الجامعة",
++        "",
++        "## أولاً — كابينة القيادة",
++        "١. **شات بملء الشاشة** — *مُثبت بدليل* — مقيس على ٣٩٠ بكسل",
++        "٢. **الاستباقية** — *مبني — بلا دليل* — الكود موجود",
++        "٣. **مؤشرات الوصول** — *مُثبت بدليل على ٦ شاشات، والباقي مقاسش* — جزئي",
++        "٤. **حسم مفاتيح البيئة** — *مش مبني* — مش مبني أصلاً",
++        "",
++        "- **مش مبني**: مش مبني أصلاً.",
++      ].join("\n"),
++      "docs/ledger/transfers.json": JSON.stringify({
++        counts: { "not-moved": 489, moving: 6, moved: 29, erased: 1, "no-surface": 7 },
++        rows: [
++          { atom: "a", state: "moved", proof: "مقيس" },
++          { atom: "b", state: "moved" },
++          { atom: "c", state: "not-moved" },
++        ],
++      }),
++      "docs/ledger/census.json": JSON.stringify({
++        counts: {
++          atoms: 532,
++          allDoors: 207,
++          adminDoors: 122,
++          orphanDoors: 77,
++          oldPages: 17,
++          oldPageLines: 5050,
++          newPages: 15,
++          newPageLines: 908,
++          crons: 2,
++        },
++      }),
++    });
++
++    const ruler = readRuler({
++      masterListPath: join(root, "master.md"),
++      ledgerDir: join(root, "docs/ledger"),
++      cronDoorRoot: root,
++    });
++
++    expect(ruler.items).toEqual({
++      total: 4,
++      proven: 1,
++      partial: 1,
++      builtNoProof: 1,
++      notBuilt: 1,
++      unknown: 0,
++    });
++    expect(ruler.atoms?.total).toBe(532);
++    expect(ruler.atoms?.moved).toBe(29);
++    expect(ruler.atoms?.withProof).toBe(1);
++    expect(ruler.doors).toEqual({ all: 207, admin: 122, orphan: 77 });
++    expect(ruler.pages).toEqual({ old: 17, oldLines: 5050, new: 15, newLines: 908 });
++    expect(ruler.missing).toEqual([]);
++  });
++
++  it("names a source that did not answer instead of reporting zero", () => {
++    const root = workspace({
++      "docs/ledger/census.json": JSON.stringify({ counts: { atoms: 10, allDoors: 3 } }),
++    });
++
++    const ruler = readRuler({
++      masterListPath: join(root, "does-not-exist.md"),
++      ledgerDir: join(root, "docs/ledger"),
++      cronDoorRoot: root,
++    });
++
++    expect(ruler.items).toBeNull();
++    expect(ruler.missing).toContain("masterList");
++    expect(ruler.atoms).toBeNull();
++    expect(ruler.missing).toContain("transfers");
++    expect(JSON.stringify(ruler)).not.toMatch(/"total":0/);
++  });
++
++  it("counts cron doors on disk and scheduled ones in the census, apart", () => {
++    const root = workspace({
++      "app/api/cron/ops-daily/route.ts": "export {}",
++      "app/api/cron/admin-daily-report/route.ts": "export {}",
++      "app/api/cron/monthly-refresh/route.ts": "export {}",
++      "docs/ledger/transfers.json": JSON.stringify({ counts: {}, rows: [] }),
++      "docs/ledger/census.json": JSON.stringify({ counts: { crons: 2, atoms: 0 } }),
++    });
++
++    const ruler = readRuler({
++      masterListPath: join(root, "missing.md"),
++      ledgerDir: join(root, "docs/ledger"),
++      cronDoorRoot: root,
++    });
++
++    expect(ruler.crons).toEqual({ doors: 3, scheduled: 2 });
++  });
++
++  it("refuses a census whose counts contradict the ledger's atom total", () => {
++    const root = workspace({
++      "docs/ledger/transfers.json": JSON.stringify({
++        counts: { "not-moved": 5, moved: 5 },
++        rows: [],
++      }),
++      "docs/ledger/census.json": JSON.stringify({ counts: { atoms: 11 } }),
++    });
++
++    const ruler = readRuler({
++      masterListPath: join(root, "missing.md"),
++      ledgerDir: join(root, "docs/ledger"),
++      cronDoorRoot: root,
++    });
++
++    expect(ruler.atoms?.total).toBe(10);
++    expect(ruler.missing).toContain("censusAtoms");
++  });
++
++  it("prints the owner's ruler line in his digits", () => {
++    const root = workspace({
++      "master.md": [
++        "١. **بند** — *مُثبت بدليل* — مقيس",
++        "٢. **بند** — *مبني — بلا دليل* — الكود موجود",
++        "٣. **بند** — *مش مبني* — لأ",
++      ].join("\n"),
++      "docs/ledger/transfers.json": JSON.stringify({
++        counts: { "not-moved": 489, moved: 29, moving: 6, erased: 1, "no-surface": 7 },
++        rows: [{ atom: "a", state: "moved", proof: "مقيس" }],
++      }),
++      "docs/ledger/census.json": JSON.stringify({
++        counts: {
++          atoms: 532,
++          allDoors: 207,
++          adminDoors: 122,
++          orphanDoors: 77,
++          oldPages: 17,
++          oldPageLines: 5050,
++          newPages: 15,
++          newPageLines: 908,
++          crons: 2,
++        },
++      }),
++    });
++
++    const line = formatRulerLine(
++      readRuler({
++        masterListPath: join(root, "master.md"),
++        ledgerDir: join(root, "docs/ledger"),
++        cronDoorRoot: root,
++      }),
++      { phase: 0, tests: 2486 },
++    );
++
++    expect(line).toContain("من ١٢");
++    expect(line).toContain("المرحلة ٠");
++    expect(line).toContain("١ من ٣");
++    expect(line).toContain("٢٩ من ٥٣٢");
++    expect(line).toContain("٢٤٨٦");
++    expect(line).not.toMatch(/[0-9]/);
++    expect(line).not.toMatch(/[A-Za-z]/);
++  });
++
++  it("says what is not measured in the line itself, in his language", () => {
++    const root = workspace({});
++    const line = formatRulerLine(
++      readRuler({
++        masterListPath: join(root, "missing.md"),
++        ledgerDir: join(root, "docs/ledger"),
++        cronDoorRoot: root,
++      }),
++      { phase: 0, tests: null },
++    );
++
++    expect(line).toContain("ما اتقارش");
++    expect(line).toContain("القائمة الجامعة");
++    expect(line).not.toMatch(/البند ٠ من/);
++    expect(line).not.toMatch(/الذرة ٠ من/);
++    expect(line).not.toMatch(/الاختبارات ٠/);
++    expect(line).not.toMatch(/[A-Za-z]/);
++  });
++
++  it("carries the date the ledger was measured, so a stale number cannot pass as today's", () => {
++    const root = workspace({
++      "docs/ledger/transfers.json": JSON.stringify({
++        generatedAt: "2026-10-23T16:30:40.657Z",
++        counts: { "not-moved": 489, moved: 29, moving: 6, erased: 1, "no-surface": 7 },
++        rows: [],
++      }),
++      "docs/ledger/census.json": JSON.stringify({ generatedAt: "2026-10-23T16:30:40.652Z", counts: { atoms: 532 } }),
++    });
++
++    const line = formatRulerLine(
++      readRuler({ masterListPath: join(root, "missing.md"), ledgerDir: join(root, "docs/ledger"), cronDoorRoot: root }),
++      { phase: 1, tests: 2486, today: "2026-11-05" },
++    );
++
++    expect(line).toContain("الجرد من ٢٠٢٦-١٠-٢٣");
++    expect(line).not.toMatch(/2026/);
++  });
++
++  it("stays quiet about the date when the ledger was measured today", () => {
++    const root = workspace({
++      "docs/ledger/transfers.json": JSON.stringify({
++        generatedAt: "2026-11-05T08:00:00.000Z",
++        counts: { "not-moved": 0, moved: 1, moving: 0, erased: 0, "no-surface": 0 },
++        rows: [],
++      }),
++      "docs/ledger/census.json": JSON.stringify({ generatedAt: "2026-11-05T08:00:00.000Z", counts: { atoms: 1 } }),
++    });
++
++    const line = formatRulerLine(
++      readRuler({ masterListPath: join(root, "missing.md"), ledgerDir: join(root, "docs/ledger"), cronDoorRoot: root }),
++      { phase: 1, tests: 2486, today: "2026-11-05" },
++    );
++
++    expect(line).not.toContain("الجرد من");
++  });
++});
+diff --git a/tests/build/scratchManifest.test.ts b/tests/build/scratchManifest.test.ts
+new file mode 100644
+index 0000000..f5f0453
+--- /dev/null
++++ b/tests/build/scratchManifest.test.ts
+@@ -0,0 +1,59 @@
++// @vitest-environment node
++import { describe, expect, it } from "vitest";
++import { mkdirSync, writeFileSync, mkdtempSync } from "node:fs";
++import { tmpdir } from "node:os";
++import { join } from "node:path";
++
++import { readScratchManifest } from "@/lib/build/scratch-manifest";
++
++/**
++ * 1563 measurement files sat in scratch/ untracked — the proof tooling itself was the thing most
++ * likely to be lost. The manifest is not a backup of their contents; it is the record that they
++ * existed, what they were named, and how big they were, so "nothing was forgotten" is a claim with
++ * a file behind it.
++ */
++
++function workspace(files: Record<string, string>): string {
++  const root = mkdtempSync(join(tmpdir(), "manifest-"));
++  for (const [rel, body] of Object.entries(files)) {
++    const full = join(root, rel);
++    mkdirSync(join(full, ".."), { recursive: true });
++    writeFileSync(full, body, "utf8");
++  }
++  return root;
++}
++
++describe("readScratchManifest", () => {
++  it("names every instrument it found and tallies it by extension", () => {
++    const root = workspace({
++      "measure-a.mjs": "console.log(1)",
++      "prove-b.mjs": "console.log(22)",
++      "nested/run-c.mjs": "console.log(333)",
++      "a.out": "text",
++      "b.png": "xxxx",
++    });
++
++    const manifest = readScratchManifest(root);
++
++    expect(manifest.found).toBe(true);
++    expect(manifest.count).toBe(5);
++    expect(manifest.byExtension).toEqual({ mjs: 3, out: 1, png: 1 });
++    expect(manifest.instruments).toBe(3);
++    expect(manifest.names).toContain("nested/run-c.mjs");
++    expect(manifest.totalBytes).toBeGreaterThan(0);
++  });
++
++  it("says the folder did not answer instead of reporting an empty manifest", () => {
++    const manifest = readScratchManifest(join(tmpdir(), "definitely-not-here-42"));
++    expect(manifest.found).toBe(false);
++    expect(manifest.count).toBeNull();
++    expect(manifest.reason).toContain("definitely-not-here");
++  });
++
++  it("counts an empty folder as zero files but still a folder that answered", () => {
++    const root = workspace({});
++    const manifest = readScratchManifest(root);
++    expect(manifest.found).toBe(true);
++    expect(manifest.count).toBe(0);
++  });
++});
+diff --git a/tsconfig.json b/tsconfig.json
+index 6b1107a..9a6df9d 100644
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -26,7 +26,8 @@
+       "@/*": [
+         "./*"
+       ]
+-    }
++    },
++    "allowImportingTsExtensions": true
+   },
+   "include": [
+     "next-env.d.ts",

@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+const env = Object.fromEntries(fs.readFileSync('.env.local','utf8').split(/\r?\n/).filter(l=>/^[A-Z]/.test(l)&&l.includes('=')).map(l=>[l.slice(0,l.indexOf('=')),l.slice(l.indexOf('=')+1).replace(/^"|"$/g,'')]));
+const U = env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL;
+const K = env.SUPABASE_SERVICE_ROLE_KEY;
+const H = { apikey: K, Authorization: `Bearer ${K}`, Prefer: 'count=exact' };
+const count = async (t, q='select=id&limit=1') => {
+  const r = await fetch(`${U}/rest/v1/${t}?${q}`, { headers: H });
+  const cr = r.headers.get('content-range') || '';
+  return `${cr.split('/')[1] ?? '?'} (http ${r.status})`;
+};
+console.log('users            ', await count('users'));
+console.log('users w/ phone   ', await count('users','select=id&phone=not.is.null&limit=1'));
+console.log('leads            ', await count('leads'));
+console.log('sales_orders     ', await count('sales_orders'));
+console.log('bookings         ', await count('bookings'));
+console.log('requests         ', await count('requests'));
+console.log('consultant_sessions', await count('consultant_sessions'));
+console.log('room_sketches    ', await count('room_sketches'));
+console.log('sketches linked  ', await count('room_sketches','select=id&customer_key=not.is.null&limit=1'));
+const r = await fetch(`${U}/rest/v1/room_sketches?select=id,room,ok,confirmed_at,customer_key,created_at&order=created_at.desc&limit=8`, { headers: H });
+console.log(JSON.stringify(await r.json()));
