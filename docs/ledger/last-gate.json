@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-11-05T08:22:19.314Z",
+  "phase": 1,
+  "verdict": "REFUSED",
+  "refused": [],
+  "notRun": [
+    "live"
+  ],
+  "tests": 2536,
+  "live": null,
+  "gates": {
+    "tests": {
+      "exit": 0,
+      "detail": "2536 اختبار · 2533 أخضر · 0 أحمر · 3 متخطّى"
+    },
+    "typecheck": {
+      "exit": 0,
+      "detail": "سليم"
+    },
+    "build": {
+      "exit": 0,
+      "detail": "سليم"
+    },
+    "live": {
+      "exit": null,
+      "detail": "لم يُشغَّل"
+    }
+  }
+}

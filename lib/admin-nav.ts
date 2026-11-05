@@ -26,6 +26,7 @@ const BASE_NAV: NavCategory[] = [
     items: [
       { href: "/admin", label: "نظرة عامة", icon: "Home" },
       { href: "/admin/owner-dashboard", label: "لوحة المالك", icon: "Crown" },
+      { href: "/admin/v2/ruler", label: "المِسطرة", icon: "Ruler" },
     ],
   },
   {

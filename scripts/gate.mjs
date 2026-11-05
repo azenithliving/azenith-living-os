@@ -88,5 +88,27 @@ if (!rulerOnly) {
   const report = gateReport(results);
   console.log(formatGateBlock(report, results));
   if (ruler.missing.length) console.log(`SOURCES NOT MEASURED: ${ruler.missing.join(", ")}`);
+
+  // The ruler screen must be able to say what the last gate run measured, not guess it from prose.
+  // A gate that never ran is stored as NOT-RUN so the screen cannot read it as a pass.
+  writeFileSync(
+    "docs/ledger/last-gate.json",
+    `${JSON.stringify(
+      {
+        generatedAt: new Date().toISOString(),
+        phase: Number(valueAfter("--phase") ?? 0),
+        verdict: report.ok ? "GREEN" : "REFUSED",
+        refused: report.failed,
+        notRun: report.notRun,
+        tests: testCount === undefined ? null : Number(testCount),
+        live: results.live.exit === null ? null : results.live.detail || null,
+        gates: results,
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+  console.log("stamped docs/ledger/last-gate.json");
   process.exitCode = report.ok ? 0 : 1;
 }

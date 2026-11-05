@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  // The ruler door reads the measured ledgers, and a serverless function only sees the files the
+  // tracer put in its bundle. Without this the screen would answer «ما اتقارش» on the hosted build
+  // for files that exist in the repository.
+  outputFileTracingIncludes: {
+    "/api/admin/ruler": ["./docs/ledger/*.json"],
+  },
   // The prod qa_security_headers probe reported FAIL: the site sent no
   // nosniff / Referrer-Policy / framing / device-permission headers and no
   // Content-Security-Policy at all. Written against what this site actually

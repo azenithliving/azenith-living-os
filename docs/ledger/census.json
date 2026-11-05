@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-23T16:30:40.652Z",
+  "generatedAt": "2026-11-05T08:10:39.605Z",
   "counts": {
     "oldPages": 17,
-    "oldPageLines": 5050,
+    "oldPageLines": 5145,
     "newPages": 15,
     "newPageLines": 908,
     "adminDoors": 122,
     "allDoors": 207,
     "outsideDoors": 8,
     "outsideDoorLines": 2567,
-    "rootLibFiles": 296,
+    "rootLibFiles": 303,
     "rootLibUsed": 93,
-    "orphanDoors": 77,
-    "rootLibUsedLines": 31532,
+    "orphanDoors": 75,
+    "rootLibUsedLines": 31665,
     "furnitureFiles": 64,
-    "furnitureLines": 17375,
+    "furnitureLines": 17291,
     "furnitureUsedByBoth": 7,
-    "furnitureBothLines": 2954,
+    "furnitureBothLines": 2811,
     "furnitureNewOnly": 24,
     "furnitureOldOnly": 15,
     "furnitureUnreachable": 18,
-    "swarmFiles": 76,
-    "swarmFileLines": 17343,
+    "swarmFiles": 83,
+    "swarmFileLines": 17877,
     "crons": 2,
     "views": 45,
     "viewsOpeningWrites": 9,
     "navEntries": 13,
     "duplicatedAdminLeaves": 0,
     "duplicatedDoorLeavesAll": 10,
-    "atoms": 532
+    "atoms": 537
   },
   "duplicatedDoors": [],
   "atoms": [
@@ -43,8 +43,8 @@
         "retired": false,
         "doors": 23,
         "sharedDoors": 13,
-        "furniture": 16,
-        "sharedFurniture": 7,
+        "furniture": 17,
+        "sharedFurniture": 8,
         "onlyOldDoors": [
           "/api/admin/agents/suggestions",
           "/api/admin/agents/tasks",
@@ -217,7 +217,7 @@
     {
       "kind": "old-page",
       "id": "app/admin/owner-dashboard/page.tsx",
-      "lines": 461,
+      "lines": 493,
       "evidence": {
         "leaf": "owner-dashboard",
         "twin": true,
@@ -238,7 +238,7 @@
     {
       "kind": "old-page",
       "id": "app/admin/page.tsx",
-      "lines": 874,
+      "lines": 937,
       "evidence": {
         "leaf": "landing",
         "twin": true,
@@ -1138,7 +1138,7 @@
     {
       "kind": "root-lib",
       "id": "lib/admin-approved-executor.ts",
-      "lines": 287,
+      "lines": 288,
       "callers": 1
     },
     {
@@ -1156,7 +1156,7 @@
     {
       "kind": "root-lib",
       "id": "lib/admin-assistant-log.ts",
-      "lines": 96,
+      "lines": 97,
       "callers": 1
     },
     {
@@ -1186,7 +1186,7 @@
     {
       "kind": "root-lib",
       "id": "lib/admin-natural-brain.ts",
-      "lines": 512,
+      "lines": 523,
       "callers": 4
     },
     {
@@ -1210,7 +1210,7 @@
     {
       "kind": "root-lib",
       "id": "lib/admin-sovereign-mind.ts",
-      "lines": 392,
+      "lines": 440,
       "callers": 1
     },
     {
@@ -1426,13 +1426,13 @@
     {
       "kind": "root-lib",
       "id": "lib/dal/unified-supabase.ts",
-      "lines": 637,
+      "lines": 686,
       "callers": 15
     },
     {
       "kind": "root-lib",
       "id": "lib/discovery-engine.ts",
-      "lines": 599,
+      "lines": 613,
       "callers": 1
     },
     {
@@ -1480,7 +1480,7 @@
     {
       "kind": "root-lib",
       "id": "lib/mastermind-ai.ts",
-      "lines": 896,
+      "lines": 881,
       "callers": 1
     },
     {
@@ -1504,7 +1504,7 @@
     {
       "kind": "root-lib",
       "id": "lib/proactive-agent.ts",
-      "lines": 476,
+      "lines": 480,
       "callers": 1
     },
     {
@@ -1516,7 +1516,7 @@
     {
       "kind": "root-lib",
       "id": "lib/real-tool-executor.ts",
-      "lines": 1968,
+      "lines": 1966,
       "callers": 2
     },
     {
@@ -1528,7 +1528,7 @@
     {
       "kind": "root-lib",
       "id": "lib/semantic-cache.ts",
-      "lines": 559,
+      "lines": 609,
       "callers": 3
     },
     {
@@ -1546,7 +1546,7 @@
     {
       "kind": "root-lib",
       "id": "lib/settings/facts.ts",
-      "lines": 86,
+      "lines": 126,
       "callers": 2
     },
     {
@@ -1564,7 +1564,7 @@
     {
       "kind": "root-lib",
       "id": "lib/sovereign-os.ts",
-      "lines": 1236,
+      "lines": 1245,
       "callers": 1
     },
     {
@@ -1583,7 +1583,7 @@
       "kind": "root-lib",
       "id": "lib/supabase-admin.ts",
       "lines": 21,
-      "callers": 34
+      "callers": 35
     },
     {
       "kind": "root-lib",
@@ -1607,7 +1607,7 @@
       "kind": "root-lib",
       "id": "lib/talk/emphasis.ts",
       "lines": 146,
-      "callers": 2
+      "callers": 1
     },
     {
       "kind": "root-lib",
@@ -1654,7 +1654,7 @@
     {
       "kind": "root-lib",
       "id": "lib/ultimate-agent/memory-store.ts",
-      "lines": 717,
+      "lines": 674,
       "callers": 2
     },
     {
@@ -1666,7 +1666,7 @@
     {
       "kind": "root-lib",
       "id": "lib/ultimate-agent/security-manager.ts",
-      "lines": 784,
+      "lines": 750,
       "callers": 3
     },
     {
@@ -1791,11 +1791,6 @@
     },
     {
       "kind": "orphan-door",
-      "id": "app/api/cron/admin-daily-report/route.ts",
-      "lines": 43
-    },
-    {
-      "kind": "orphan-door",
       "id": "app/api/cron/admin-sovereign-mind/route.ts",
       "lines": 31
     },
@@ -1808,11 +1803,6 @@
       "kind": "orphan-door",
       "id": "app/api/cron/monthly-refresh/route.ts",
       "lines": 54
-    },
-    {
-      "kind": "orphan-door",
-      "id": "app/api/cron/ops-daily/route.ts",
-      "lines": 37
     },
     {
       "kind": "orphan-door",
@@ -2087,7 +2077,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/agents/ChatPanel.tsx",
-      "lines": 1919,
+      "lines": 1776,
       "usedBy": "both"
     },
     {
@@ -2195,7 +2185,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/AssistantBrowserCopilot.tsx",
-      "lines": 937,
+      "lines": 938,
       "usedBy": "old-only"
     },
     {
@@ -2213,7 +2203,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/CockpitDoors.tsx",
-      "lines": 114,
+      "lines": 120,
       "usedBy": "unreachable"
     },
     {
@@ -2225,7 +2215,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/GlobalAssistantDock.tsx",
-      "lines": 283,
+      "lines": 286,
       "usedBy": "unreachable"
     },
     {
@@ -2267,13 +2257,13 @@
     {
       "kind": "furniture",
       "id": "components/admin/NotificationBell.tsx",
-      "lines": 175,
+      "lines": 200,
       "usedBy": "unreachable"
     },
     {
       "kind": "furniture",
       "id": "components/admin/NotificationsPanel.tsx",
-      "lines": 173,
+      "lines": 169,
       "usedBy": "old-only"
     },
     {
@@ -2375,7 +2365,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/settings/SettingsFactsDesk.tsx",
-      "lines": 74,
+      "lines": 96,
       "usedBy": "new-only"
     },
     {
@@ -2423,7 +2413,7 @@
     {
       "kind": "furniture",
       "id": "components/admin/UnifiedAssistant.tsx",
-      "lines": 749,
+      "lines": 755,
       "usedBy": "old-only"
     },
     {
@@ -2451,7 +2441,7 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/alerts.ts",
-      "lines": 214
+      "lines": 237
     },
     {
       "kind": "swarm-file",
@@ -2466,12 +2456,27 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/approval-intake.ts",
-      "lines": 91
+      "lines": 101
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/audit-record.ts",
+      "lines": 85
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/automation-shape.ts",
+      "lines": 17
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/benchmarks/index.ts",
       "lines": 217
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/cache-storage.ts",
+      "lines": 78
     },
     {
       "kind": "swarm-file",
@@ -2487,6 +2492,11 @@
       "kind": "swarm-file",
       "id": "lib/ops/chat-brain.ts",
       "lines": 130
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/chat-record.ts",
+      "lines": 112
     },
     {
       "kind": "swarm-file",
@@ -2561,7 +2571,12 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/governance/ConstitutionEngine.ts",
-      "lines": 594
+      "lines": 602
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/governance/gate-note.ts",
+      "lines": 33
     },
     {
       "kind": "swarm-file",
@@ -2651,12 +2666,17 @@
     {
       "kind": "swarm-file",
       "id": "lib/ops/memory/SyncLayer.ts",
-      "lines": 493
+      "lines": 500
     },
     {
       "kind": "swarm-file",
       "id": "lib/ops/memory/VectorStore.ts",
       "lines": 198
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/memory-record.ts",
+      "lines": 95
     },
     {
       "kind": "swarm-file",
@@ -2757,6 +2777,11 @@
       "kind": "swarm-file",
       "id": "lib/ops/QayyimVisualAgent.ts",
       "lines": 429
+    },
+    {
+      "kind": "swarm-file",
+      "id": "lib/ops/record-inventory.ts",
+      "lines": 66
     },
     {
       "kind": "swarm-file",

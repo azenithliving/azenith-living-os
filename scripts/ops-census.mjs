@@ -15,6 +15,9 @@
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
+import { leafOf, resourceOfDoor, scheduledByCron } from "../lib/build/dead-map.ts";
+import { phaseOfAtom } from "../lib/build/phase-map.ts";
+
 const norm = (p) => p.split("\\").join("/");
 
 function walk(dir, acc = []) {
@@ -41,14 +44,14 @@ const opsFiles = walk("lib/ops").filter((f) => /\.ts$/.test(f));
 
 /** The leaf resource of a door: /api/admin/ops/goals -> ops/goals */
 function doorResource(path) {
-  return norm(path).replace("app/api/", "").replace("/route.ts", "");
+  return resourceOfDoor(path);
 }
 
 /** Duplicate service names: the same leaf under two or more parents. */
 function duplicatedLeaves(doors) {
   const byLeaf = new Map();
   for (const d of doors) {
-    const leaf = doorResource(d).split("/").pop();
+    const leaf = leafOf(doorResource(d));
     if (!byLeaf.has(leaf)) byLeaf.set(leaf, []);
     byLeaf.get(leaf).push(doorResource(d));
   }
@@ -196,7 +199,7 @@ const calledDoors = outsideDoors
  */
 const orphanDoors = outsideDoors
   .map((f) => ({ file: f, callers: calledAs(`/api/${doorResource(f)}`) }))
-  .filter((d) => d.callers === 0);
+  .filter((d) => d.callers === 0 && !scheduledByCron(d.file, crons.map((c) => c.path)));
 
 /**
  * Library machinery the store stands on, at any depth. The fence used to look only at
@@ -413,6 +416,22 @@ if (existsSync(movementsPath)) {
 }
 
 /**
+ * The phase of an atom is computed from the office that already seats it (`lib/build/phase-map`),
+ * never hand-typed per row. Measured 2026-11-05: 35 of 532 rows carried a hand phase in fourteen
+ * spellings («P6», «cockpit-transfer-1», «colour-1»), which is how two agents could answer «فاضل قد
+ * إيه» with two different numbers. A hand row that still carries one is named, not swallowed.
+ */
+const atomById = new Map(atoms.map((a) => [a.id, a]));
+for (const row of rows) {
+  const computed = phaseOfAtom(atomById.get(row.atom) ?? { kind: row.kind, id: row.atom });
+  const hand = row.phase;
+  row.phase = computed;
+  if (hand !== undefined && hand !== computed) {
+    problems.push(`hand phase «${hand}» on ${row.atom} is retired — the office seats it in ${computed}`);
+  }
+}
+
+/**
  * The code overrules the hand where the hand forgot: an old screen that only forwards, or was retired
  * on purpose, carries no surface to transfer. The state is written with the sentence that proves it.
  */
@@ -469,6 +488,12 @@ writeFileSync(
 console.log(JSON.stringify(counts, null, 2));
 console.log(`wrote docs/ledger/census.json (${atoms.length} atoms)`);
 console.log(`wrote docs/ledger/transfers.json (${rows.length} rows: ${JSON.stringify(ledgerCounts)})`);
+const phaseCounts = rows.reduce((acc, r) => {
+  const key = r.phase ?? "no-office";
+  acc[key] = (acc[key] ?? 0) + 1;
+  return acc;
+}, {});
+console.log(`phases seated by office: ${JSON.stringify(phaseCounts)}`);
 console.log(`evidence: old screens with a twin in the new house = ${[...pageEvidence.values()].filter((e) => e.twin).length}, forwarders = ${[...pageEvidence.values()].filter((e) => e.forwarder).length}, retired = ${[...pageEvidence.values()].filter((e) => e.retired).length}`);
 console.log(`map contradicted by code (stale rows) = ${stale.length}, moves with no code backing = ${unproven.length}`);
 console.log(`screens the code itself carries into the new house (moved by evidence) = ${carriedByCode.length}`);

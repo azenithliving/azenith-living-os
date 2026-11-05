@@ -11,245 +11,210 @@
     {
       "atom": "app/admin/v2/ops/page.tsx",
       "state": "moved",
-      "phase": "P6",
       "when": "2026-09-28",
       "proof": "production suites measured on the published URL: browser 28 of 28, product 21 of 21"
     },
     {
       "atom": "app/admin/v2/agents/ops/page.tsx",
       "state": "moved",
-      "phase": "P6",
       "when": "2026-09-28",
       "proof": "same run, and the retired agent key is rewritten at the outer gate for old links"
     },
     {
       "atom": "components/admin/CockpitDoors.tsx",
       "state": "moved",
-      "phase": "M1",
       "when": "2026-10-01",
       "proof": "measured on the published site at 390px: the queue answered 21 and the sidebar door shows ٢١, pressing it lands on the conversation with the vault already open, and the stop button keeps the safety door's two-press shape"
     },
     {
       "atom": "components/admin/sketches/SketchOwner.tsx",
       "state": "moved",
-      "phase": "M2",
       "when": "2026-10-01",
       "proof": "built on the new surface, not carried from the old house: it reads the people list from the customers door (the same reading the customers screen uses), stores the roll's own key on the paper, and was measured pressing it on the published site — one candidate from four digits, the name on the chip after a reload, and the paper returned to «من غير صاحب»"
     },
     {
       "atom": "components/admin/ClientPreCallDossier.tsx",
       "state": "moved",
-      "phase": "M2",
       "when": "2026-10-03",
       "proof": "the owner sees his drawing read-only and his colours as named chips: «ألوانه اللي اختارها» with the real colour beside each Arabic name"
     },
     {
       "atom": "app/api/admin/customers/dossier/route.ts",
       "state": "moved",
-      "phase": "M2",
       "when": "2026-10-03",
       "proof": "the file door reads the paper's drawing and his picks off the same row the sheet writes, so the two screens cannot disagree about who he is"
     },
     {
       "atom": "app/admin/v2/sketches/page.tsx",
       "state": "moved",
-      "phase": "M2",
       "when": "2026-10-01",
       "proof": "measured on the published site at 390px: 17 papers on the desk, each with its owner control; searching the roll in Arabic-Indic digits (٥٦٧٨) returned 1 candidate, pressing it wrote the link and the name survived a reload; a customer typing his own mobile on a paper the store could NOT read still claimed it, so the desk showed his name for it; the per-customer filter answered 2 rows with every row carrying the same key, and «شيل الاسم» put both back to «من غير صاحب» with 0 console errors. Taking the parked pixel engine out of the request cut the desk's answer from 57-63 s to 22 s on the same paper. The witnesses are now what they really are: across all 17 stored readings the offline pixel engine finished inside a request 0 times (12 honest failures between 12 and 40 s, and 4 rows that claimed 480 ms turned out to be a figure one of my own test instruments had handed the door — marked as such in the row, and the door refuses a client-supplied witness under guard). The reader proposes, the customer confirms, and the desk says which is which"
     },
     {
       "atom": "/admin/sales#العملاء",
       "state": "erased",
-      "phase": "consolidation-4",
       "when": "2026-09-30",
       "proof": "the tab entry and its import are gone from app/admin/sales/page.tsx; the old deep link is answered at the outer gate (/admin/sales?tab=leads&expand=… → /admin/v2/sales?expand=…), guarded by tests/ops/legacyAddressTable.test.ts, so the consultant's Telegram messages still land on the card"
     },
     {
       "atom": "app/api/admin/leads/route.ts",
       "state": "moving",
-      "phase": "consolidation-3",
       "when": "2026-09-30",
       "proof": "the screen's door used to decide on its own who is a customer and showed 4 while the roll saw 6 (measured on the published site); it now reads lib/customers/read.ts, and measured on the built app against the live data both doors answer 6 with no phone on one side and missing on the other"
     },
     {
       "atom": "app/admin/v2/sales/page.tsx",
       "state": "moved",
-      "phase": "consolidation-2",
       "when": "2026-09-29",
       "proof": "live on the published URL: the window shows the sales office header, the four tier counters and five real customer rows; scripts/verify-sales-office.mjs 9 of 10, and the delete panel counted and cancelled without erasing anything"
     },
     {
       "atom": "app/admin/v2/page.tsx",
       "state": "moved",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
       "proof": "the shell that said the content would be transferred later is gone: the address now mounts the command canvas (components/admin/v2/CommandCanvas.tsx, the same module the swarm address mounts, so one counter answers both). Measured on the local house at 390px: 6 department headings in the owner's own words, 9 employee cards each named by its live role, the pulse answering ٥ عملاء and ٢ مستنيين رد and ٢١ قرار and ٠ رسائل in Arabic-Indic digits, 0 occurrences of the transfer sentence in the page text, the thumb menu opening the two sidebar doors (٢١ and the instant stop), and the first card landing on the full-screen conversation with header, composer, 75 turns, the quick-actions toggle and the decisions toggle. and measured again on the published URL at 390px after the owner's word: the same 6 department heads and 9 employee cards, the pulse answering ٥ و ٢ و ٢١, the thumb menu opening both doors, and the first card landing on the full-screen conversation with header, composer and 75 turns"
     },
     {
       "atom": "app/admin/v2/work/page.tsx",
       "state": "moving",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
       "proof": "the page stops claiming its content is coming later: it now states what «العمل» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
     },
     {
       "atom": "app/admin/v2/system/page.tsx",
       "state": "moving",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
       "proof": "the page stops claiming its content is coming later: it now states what «مركز النظام» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
     },
     {
       "atom": "app/admin/v2/database/page.tsx",
       "state": "moving",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
       "proof": "the page stops claiming its content is coming later: it now states what «البيانات» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
     },
     {
       "atom": "app/admin/v2/elite/page.tsx",
       "state": "moving",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
       "proof": "the page stops claiming its content is coming later: it now states what «دعوات النخبة» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
     },
     {
       "atom": "app/admin/v2/owner-dashboard/page.tsx",
       "state": "moving",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
       "proof": "the page stops claiming its content is coming later: it now states what «لوحة المالك» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
     },
     {
       "atom": "app/api/passport/[token]/contact/route.ts",
       "state": "moved",
-      "phase": "capture-1",
       "when": "2026-10-03",
       "proof": "the door behind the sheet's secret address: it refuses a number that is not an Egyptian mobile in the words he reads (measured 400 «الرقم ده مش موبايل مصري» on a paper with no owner), claims a paper only when nobody owns it, writes his area and his room type without overwriting what the store already holds, and reads the row back before it answers — the log line says what the table kept, not what the request intended. Measured on the local house at 390px with a throwaway paper: the table came back with phone:1009998877 + التجمع الخامس + نوم رئيسي, three bank pictures returned and every one of them loaded, and after a reload the sheet stopped asking for a number it already holds. and measured again on the published URL at 390px after the owner's word: the same 400 refusal in his words, three bank pictures shown and loaded, the table answering phone:1009998877 + التجمع الخامس + نوم رئيسي, and the sheet after a reload holding his number without asking again. The throwaway paper was deleted and the roll was left as found"
     },
     {
       "atom": "lib/cad/sheet-images.ts",
       "state": "moved",
-      "phase": "capture-1",
       "when": "2026-10-03",
       "proof": "the suggestions now walk the four styles before they repeat one: measured on the live bank, the top three bedroom pictures by quality were three rooms in the same taste, and after the change the same address showed a warm modern bedroom, a classic majlis and a canopy bed — 3 shown, 3 loaded, on a 390px phone, and again on the published URL: 3 shown, 3 loaded, three different tastes. The room-type labels moved to their own module so the customer's page never imports the database reader"
     },
     {
       "atom": "lib/cad/plan.ts",
       "state": "moved",
-      "phase": "plan-1",
       "when": "2026-10-03",
       "proof": "the paper's numbers become a walked room: two numbers are a rectangle's length and width (measured: all 19 stored papers hold either no number or exactly two), four are the same rectangle wall by wall, six are the L. Opposite walls that disagree are both kept and named for the call instead of averaged, an opening wider than every wall is reported rather than squeezed, and a template with no turn table draws nothing. 17 tests, each watched failing first"
     },
     {
       "atom": "app/api/passport/[token]/plan/route.ts",
       "state": "moved",
-      "phase": "plan-1",
       "when": "2026-10-03",
       "proof": "the drawing door behind the same secret address: a chosen shape and a dragged door are re-walked by the store's own builder and stored on the paper's row (plan + area only, never the numbers the seal is over). Proved on the built site at 390px: a door dragged from ١٫٨ to ٢٫٧٩٧ came back from the table after a reload, and the sheet still said «مختومة ومفيش حاجة اتغيرت بعدها». 13 storage tests"
     },
     {
       "atom": "app/api/passport/[token]/route.ts",
       "state": "moved",
-      "phase": "plan-1",
       "when": "2026-10-03",
       "proof": "the sheet answers with the room and the palette together: the stored drawing, the matrix built from the pictures it really shows him, his picks, and the bank's list re-ordered by those picks — both the first read and the answer after he confirms go through the same builder, so his colours cannot vanish because one door forgot to compute them"
     },
     {
       "atom": "app/api/admin/ops/sketch/route.ts",
       "state": "moved",
-      "phase": "plan-1",
       "when": "2026-10-03",
       "proof": "the owner sees the room the moment the paper is filed: the reading's numbers are walked on insert, the area comes from the closed polygon rather than a two-number product, and when the shape cannot be drawn the door returns the one question to ask rather than an empty frame"
     },
     {
       "atom": "lib/cad/dossier.ts",
       "state": "moved",
-      "phase": "plan-1",
       "when": "2026-10-03",
       "proof": "the file carries the same drawing and his own chosen colours, printed apart from the bank's palette because a colour he stopped on is his word, not the shop's. Its area line reads off the room that was drawn — which changed two earlier assertions, disclosed in the minutes"
     },
     {
       "atom": "lib/cad/colours.ts",
       "state": "moved",
-      "phase": "colour-1",
       "when": "2026-10-03",
       "proof": "the matrix a room can back: families are named off the bank's own distribution (measured over 5,909 stored colours — grey 36%, warm beige 23%, wood 13%, off-white 12%, dark wood and caramel 4% each), a pick is only kept when one of his room's pictures really carries it, and a claim whose label does not match its colour is refused. The near line is 40 of 255 because that is where the data splits: inside one family pictures sit 0-35 apart, a different family in the same room starts near 45"
     },
     {
       "atom": "app/api/passport/[token]/colours/route.ts",
       "state": "moved",
-      "phase": "colour-1",
       "when": "2026-10-03",
       "proof": "the colour desk behind the same secret address: it re-reads the bank rather than trusting the screen, keeps at most three, and writes one column and nothing else — a taste can never move a sealed measurement. Proved on a built server at 390px: three taps stored and read back (#7e7165, #9f8c7b, #8d6a4e), the fourth swatch arrived disabled with the reason on the same card"
     },
     {
       "atom": "lib/ops/inboxes.ts",
       "state": "moved",
-      "phase": "cockpit-1",
       "when": "2026-10-05",
       "proof": "one read answers all nine badges: the same conversation rule the messages door uses (participant or title, newest wins), the same unread definition, and a count that comes from the record rather than the page when the page fills up. A retired key folds to its live one, and an employee with no conversation answers zero — never an error the card has to wear"
     },
     {
       "atom": "app/api/admin/agents/inboxes/route.ts",
       "state": "moved",
-      "phase": "cockpit-1",
       "when": "2026-10-05",
       "proof": "measured on a built server at 390px: the cockpit now opens 1 door instead of 9 per-employee reads (0 message reads, 1 inbox read), all 9 cards carry their teaser, and a missing table answers zeros rather than a failure. The whitelist is the canvas's own staff list, because the sales manager is deliberately not a swarm key — an earlier draft of this door left his card waiting forever"
     },
     {
       "atom": "app/admin/v2/shop/page.tsx",
       "state": "moved",
-      "phase": "shelf-1",
       "when": "2026-10-13",
       "proof": "the shelf desk mounted in the new house at its own address, named from the office map and reachable from the cockpit menu under العمل Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors."
     },
     {
       "atom": "components/admin/shop/ShopDesk.tsx",
       "state": "moved",
-      "phase": "shelf-1",
       "when": "2026-10-13",
       "proof": "his own form: name, price in the currency word, one line, more detail, his photograph from the phone or a link; every row answers with what is missing (السعر، الصورة، موافقته) instead of a blank card, and hiding is reversible because erase is his word, never a button Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors."
     },
     {
       "atom": "app/api/admin/shop/route.ts",
       "state": "moved",
-      "phase": "shelf-1",
       "when": "2026-10-13",
       "proof": "one door writes and reads the products row, and it applies the same isDisplayable rule the visitor page reads, so the desk and the shelf cannot disagree; cost, stock and workshop columns are named in no file of this office Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors."
     },
     {
       "atom": "app/admin/v2/settings/page.tsx",
       "state": "moved",
-      "phase": "settings-1",
       "when": "2026-10-13",
       "proof": "the settings office in the new house reads the store record on the server and hands the desk only what it renders: three facts with a live reader, the rest counted as residue, and no credential in the page"
     },
     {
       "atom": "components/admin/settings/SettingsFactsDesk.tsx",
       "state": "moved",
-      "phase": "settings-1",
       "when": "2026-10-13",
       "proof": "measured 2026-10-13 with the census script and a reader grep over the repository: the settings table holds 17 keys, 3 are read by something that renders (theme and seo in the site shell, telegram_config in the alert door), 14 are read by nothing but the old desk generic editor — so the new desk names the three, counts the fourteen as unread residue, and offers no erase"
     },
     {
       "atom": "lib/store-numbers/read.ts",
       "state": "moved",
-      "phase": "numbers-1",
       "when": "2026-10-13",
       "proof": "the one owner of the store's phone numbers: it reads the settings record, normalizes an Egyptian local number to the international form a WhatsApp link needs, and answers null rather than a guess. Measured 2026-10-13 before it existed: four producers of one fact, five customer pages with zero WhatsApp links, and 18 catalogue buttons opening a number that was not the store's"
     },
     {
       "atom": "app/api/admin/numbers/route.ts",
       "state": "moved",
-      "phase": "numbers-1",
       "when": "2026-10-13",
       "proof": "the only writer of the list: it takes the whole list at once, drops anything that is not dialable, refuses an empty list, keeps exactly one primary, and answers with what the record kept (wrote / stored) rather than with what it was handed"
     },
     {
       "atom": "components/admin/settings/StoreNumbersCard.tsx",
       "state": "moved",
-      "phase": "numbers-1",
       "when": "2026-10-13",
       "proof": "his desk for it: change a number, add one, mark which one the buttons open, remove with a second press, and the last number cannot be removed — deleting a row is his word, and there is no erase here"
     }

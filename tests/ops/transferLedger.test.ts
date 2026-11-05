@@ -2,6 +2,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { EXPLICIT, officeOf, sharedMachines, type CensusAtom } from "@/lib/ops/migration-map";
+import { PHASES, phaseOfAtom } from "@/lib/build/phase-map";
 
 /**
  * The transfer ledger is the reference the program says to count from — «the ledger,
@@ -77,5 +78,29 @@ describe("the transfer ledger", () => {
       return acc;
     }, {});
     expect(states["not-moved"], JSON.stringify(states)).toBeGreaterThan(0);
+  });
+
+  it("gives every atom a phase computed from the office that already owns it", () => {
+    // M1's promise: an agent answers «فين» from the ledger, and the answer has one owner. Before
+    // this, 35 of 532 rows carried a hand-typed phase in 14 spellings.
+    expect(ledger, "run: node scripts/ops-census.mjs").not.toBeNull();
+    const ids = new Set(PHASES.map((p) => p.id));
+    const missing = ledger!.rows.filter((r) => !r.phase);
+    expect(missing.map((r) => r.atom).slice(0, 5), `${missing.length} rows have no phase`).toHaveLength(0);
+    for (const row of ledger!.rows) {
+      expect(ids.has(row.phase as string), `${row.atom} seats in ${row.phase}`).toBe(true);
+      const atom = census!.atoms.find((a) => a.id === row.atom)!;
+      expect(row.phase, `${row.atom} disagrees with its office`).toBe(phaseOfAtom(atom));
+    }
+  });
+
+  it("retires the hand-written phase, so the ledger cannot grow a second owner", () => {
+    const movementsPath = "docs/ledger/movements.json";
+    if (!existsSync(movementsPath)) return;
+    const movements = JSON.parse(readFileSync(movementsPath, "utf8")) as {
+      rows: { atom: string; phase?: string }[];
+    };
+    const hand = movements.rows.filter((r) => r.phase !== undefined).map((r) => r.atom);
+    expect(hand, "the phase is computed from the office; a hand row would be a second owner").toEqual([]);
   });
 });

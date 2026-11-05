@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-23T16:30:40.657Z",
+  "generatedAt": "2026-11-05T08:10:39.620Z",
   "states": [
     "not-moved",
     "moving",
@@ -8,7 +8,7 @@
     "no-surface"
   ],
   "counts": {
-    "not-moved": 489,
+    "not-moved": 494,
     "no-surface": 7,
     "moved": 29,
     "moving": 6,
@@ -30,8 +30,8 @@
         "retired": false,
         "doors": 23,
         "sharedDoors": 13,
-        "furniture": 16,
-        "sharedFurniture": 7,
+        "furniture": 17,
+        "sharedFurniture": 8,
         "onlyOldDoors": [
           "/api/admin/agents/suggestions",
           "/api/admin/agents/tasks",
@@ -55,7 +55,8 @@
           "TaskQueue.tsx",
           "UnifiedAssistant.tsx"
         ]
-      }
+      },
+      "phase": "M10"
     },
     {
       "kind": "old-page",
@@ -73,8 +74,9 @@
         "onlyOldDoors": [],
         "onlyOldFurniture": []
       },
+      "phase": "M10",
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-23"
+      "when": "2026-11-05"
     },
     {
       "kind": "old-page",
@@ -95,7 +97,8 @@
         "onlyOldFurniture": [
           "AskQayyimAboutPage.tsx"
         ]
-      }
+      },
+      "phase": "M11"
     },
     {
       "kind": "old-page",
@@ -113,8 +116,9 @@
         "onlyOldDoors": [],
         "onlyOldFurniture": []
       },
+      "phase": "M11",
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-23"
+      "when": "2026-11-05"
     },
     {
       "kind": "old-page",
@@ -133,7 +137,8 @@
           "/api/system-health"
         ],
         "onlyOldFurniture": []
-      }
+      },
+      "phase": "M5"
     },
     {
       "kind": "old-page",
@@ -152,7 +157,8 @@
           "/api/admin/elite/invitations"
         ],
         "onlyOldFurniture": []
-      }
+      },
+      "phase": "M7"
     },
     {
       "kind": "old-page",
@@ -170,8 +176,9 @@
         "onlyOldDoors": [],
         "onlyOldFurniture": []
       },
+      "phase": "M11",
       "proof": "متقاعدة عمدًا — الصفحة تقول إنها أوقفت أدوات التأثير المخترعة",
-      "when": "2026-10-23"
+      "when": "2026-11-05"
     },
     {
       "kind": "old-page",
@@ -189,8 +196,9 @@
         "onlyOldDoors": [],
         "onlyOldFurniture": []
       },
+      "phase": "M10",
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-23"
+      "when": "2026-11-05"
     },
     {
       "kind": "old-page",
@@ -208,8 +216,9 @@
         "onlyOldDoors": [],
         "onlyOldFurniture": []
       },
+      "phase": "M10",
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-23"
+      "when": "2026-11-05"
     },
     {
       "kind": "old-page",
@@ -230,7 +239,8 @@
           "/api/admin/owner/emergency-stop"
         ],
         "onlyOldFurniture": []
-      }
+      },
+      "phase": "M1"
     },
     {
       "kind": "old-page",
@@ -269,7 +279,8 @@
           "TelegramControlPanel.tsx",
           "master-dashboard-components.tsx"
         ]
-      }
+      },
+      "phase": "M1"
     },
     {
       "kind": "old-page",
@@ -287,8 +298,9 @@
         "onlyOldDoors": [],
         "onlyOldFurniture": []
       },
+      "phase": "M11",
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-23"
+      "when": "2026-11-05"
     },
     {
       "kind": "old-page",
@@ -307,7 +319,8 @@
           "/api/tenants"
         ],
         "onlyOldFurniture": []
-      }
+      },
+      "phase": "M7"
     },
     {
       "kind": "old-page",
@@ -325,8 +338,9 @@
         "onlyOldDoors": [],
         "onlyOldFurniture": []
       },
+      "phase": "M10",
       "proof": "الشاشة تحويل فقط — الكود يحوّل ولا سطح لها",
-      "when": "2026-10-23"
+      "when": "2026-11-05"
     },
     {
       "kind": "old-page",
@@ -344,8 +358,9 @@
         "onlyOldDoors": [],
         "onlyOldFurniture": []
       },
+      "phase": "M5",
       "proof": "كل أبوابها (1) وعفشها (0) تُقرأ من الجديدة",
-      "when": "2026-10-23"
+      "when": "2026-11-05"
     },
     {
       "kind": "old-page",
@@ -362,7 +377,8 @@
         "sharedFurniture": 0,
         "onlyOldDoors": [],
         "onlyOldFurniture": []
-      }
+      },
+      "phase": "M5"
     },
     {
       "kind": "old-page",
@@ -379,2687 +395,3198 @@
         "sharedFurniture": 0,
         "onlyOldDoors": [],
         "onlyOldFurniture": []
-      }
+      },
+      "phase": "M1"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/agents/ops/page.tsx",
       "state": "moved",
-      "phase": "P6",
       "when": "2026-09-28",
-      "proof": "same run, and the retired agent key is rewritten at the outer gate for old links"
+      "proof": "same run, and the retired agent key is rewritten at the outer gate for old links",
+      "phase": "M10"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/agents/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/database/page.tsx",
       "state": "moving",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
-      "proof": "the page stops claiming its content is coming later: it now states what «البيانات» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
+      "proof": "the page stops claiming its content is coming later: it now states what «البيانات» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet",
+      "phase": "M5"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/elite/page.tsx",
       "state": "moving",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
-      "proof": "the page stops claiming its content is coming later: it now states what «دعوات النخبة» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
+      "proof": "the page stops claiming its content is coming later: it now states what «دعوات النخبة» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet",
+      "phase": "M7"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/images/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M8"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/keys/page.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/ops/page.tsx",
       "state": "moved",
-      "phase": "P6",
       "when": "2026-09-28",
-      "proof": "production suites measured on the published URL: browser 28 of 28, product 21 of 21"
+      "proof": "production suites measured on the published URL: browser 28 of 28, product 21 of 21",
+      "phase": "M10"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/owner-dashboard/page.tsx",
       "state": "moving",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
-      "proof": "the page stops claiming its content is coming later: it now states what «لوحة المالك» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
+      "proof": "the page stops claiming its content is coming later: it now states what «لوحة المالك» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet",
+      "phase": "M1"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/page.tsx",
       "state": "moved",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
-      "proof": "the shell that said the content would be transferred later is gone: the address now mounts the command canvas (components/admin/v2/CommandCanvas.tsx, the same module the swarm address mounts, so one counter answers both). Measured on the local house at 390px: 6 department headings in the owner's own words, 9 employee cards each named by its live role, the pulse answering ٥ عملاء and ٢ مستنيين رد and ٢١ قرار and ٠ رسائل in Arabic-Indic digits, 0 occurrences of the transfer sentence in the page text, the thumb menu opening the two sidebar doors (٢١ and the instant stop), and the first card landing on the full-screen conversation with header, composer, 75 turns, the quick-actions toggle and the decisions toggle. and measured again on the published URL at 390px after the owner's word: the same 6 department heads and 9 employee cards, the pulse answering ٥ و ٢ و ٢١, the thumb menu opening both doors, and the first card landing on the full-screen conversation with header, composer and 75 turns"
+      "proof": "the shell that said the content would be transferred later is gone: the address now mounts the command canvas (components/admin/v2/CommandCanvas.tsx, the same module the swarm address mounts, so one counter answers both). Measured on the local house at 390px: 6 department headings in the owner's own words, 9 employee cards each named by its live role, the pulse answering ٥ عملاء and ٢ مستنيين رد and ٢١ قرار and ٠ رسائل in Arabic-Indic digits, 0 occurrences of the transfer sentence in the page text, the thumb menu opening the two sidebar doors (٢١ and the instant stop), and the first card landing on the full-screen conversation with header, composer, 75 turns, the quick-actions toggle and the decisions toggle. and measured again on the published URL at 390px after the owner's word: the same 6 department heads and 9 employee cards, the pulse answering ٥ و ٢ و ٢١, the thumb menu opening both doors, and the first card landing on the full-screen conversation with header, composer and 75 turns",
+      "phase": "M1"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/sales/page.tsx",
       "state": "moved",
-      "phase": "consolidation-2",
       "when": "2026-09-29",
-      "proof": "live on the published URL: the window shows the sales office header, the four tier counters and five real customer rows; scripts/verify-sales-office.mjs 9 of 10, and the delete panel counted and cancelled without erasing anything"
+      "proof": "live on the published URL: the window shows the sales office header, the four tier counters and five real customer rows; scripts/verify-sales-office.mjs 9 of 10, and the delete panel counted and cancelled without erasing anything",
+      "phase": "M7"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/settings/page.tsx",
       "state": "moved",
-      "phase": "settings-1",
       "when": "2026-10-13",
-      "proof": "the settings office in the new house reads the store record on the server and hands the desk only what it renders: three facts with a live reader, the rest counted as residue, and no credential in the page"
+      "proof": "the settings office in the new house reads the store record on the server and hands the desk only what it renders: three facts with a live reader, the rest counted as residue, and no credential in the page",
+      "phase": "M5"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/shop/page.tsx",
       "state": "moved",
-      "phase": "shelf-1",
       "when": "2026-10-13",
-      "proof": "the shelf desk mounted in the new house at its own address, named from the office map and reachable from the cockpit menu under العمل Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors."
+      "proof": "the shelf desk mounted in the new house at its own address, named from the office map and reachable from the cockpit menu under العمل Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors.",
+      "phase": "M7"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/sketches/page.tsx",
       "state": "moved",
-      "phase": "M2",
       "when": "2026-10-01",
-      "proof": "measured on the published site at 390px: 17 papers on the desk, each with its owner control; searching the roll in Arabic-Indic digits (٥٦٧٨) returned 1 candidate, pressing it wrote the link and the name survived a reload; a customer typing his own mobile on a paper the store could NOT read still claimed it, so the desk showed his name for it; the per-customer filter answered 2 rows with every row carrying the same key, and «شيل الاسم» put both back to «من غير صاحب» with 0 console errors. Taking the parked pixel engine out of the request cut the desk's answer from 57-63 s to 22 s on the same paper. The witnesses are now what they really are: across all 17 stored readings the offline pixel engine finished inside a request 0 times (12 honest failures between 12 and 40 s, and 4 rows that claimed 480 ms turned out to be a figure one of my own test instruments had handed the door — marked as such in the row, and the door refuses a client-supplied witness under guard). The reader proposes, the customer confirms, and the desk says which is which"
+      "proof": "measured on the published site at 390px: 17 papers on the desk, each with its owner control; searching the roll in Arabic-Indic digits (٥٦٧٨) returned 1 candidate, pressing it wrote the link and the name survived a reload; a customer typing his own mobile on a paper the store could NOT read still claimed it, so the desk showed his name for it; the per-customer filter answered 2 rows with every row carrying the same key, and «شيل الاسم» put both back to «من غير صاحب» with 0 console errors. Taking the parked pixel engine out of the request cut the desk's answer from 57-63 s to 22 s on the same paper. The witnesses are now what they really are: across all 17 stored readings the offline pixel engine finished inside a request 0 times (12 honest failures between 12 and 40 s, and 4 rows that claimed 480 ms turned out to be a figure one of my own test instruments had handed the door — marked as such in the row, and the door refuses a client-supplied witness under guard). The reader proposes, the customer confirms, and the desk says which is which",
+      "phase": "M7"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/system/page.tsx",
       "state": "moving",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
-      "proof": "the page stops claiming its content is coming later: it now states what «مركز النظام» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
+      "proof": "the page stops claiming its content is coming later: it now states what «مركز النظام» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet",
+      "phase": "M5"
     },
     {
       "kind": "new-page",
       "atom": "app/admin/v2/work/page.tsx",
       "state": "moving",
-      "phase": "cockpit-transfer-1",
       "when": "2026-10-03",
-      "proof": "the page stops claiming its content is coming later: it now states what «العمل» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet"
+      "proof": "the page stops claiming its content is coming later: it now states what «العمل» is for, says plainly that its transfer is not finished, and gives the doors where that work happens today. Measured on the local house at 390px: its heading renders, 0 occurrences of the transfer sentence, and every door it offers answers below 400 (15-16 links checked per page). Moving, not moved: the section's own substance has not arrived yet",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/2fa/disable/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/2fa/set-verified/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/2fa/setup/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/2fa/status/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/2fa/verify/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/aaca/status/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agent/communication/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agent/goals/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agent/rollback/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agent/smart/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agent/tools/execute/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agent/ultimate/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/alerts/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/approval/decision/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/approval-queue/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/chat/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/conversations/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/events/stream/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/inboxes/route.ts",
       "state": "moved",
-      "phase": "cockpit-1",
       "when": "2026-10-05",
-      "proof": "measured on a built server at 390px: the cockpit now opens 1 door instead of 9 per-employee reads (0 message reads, 1 inbox read), all 9 cards carry their teaser, and a missing table answers zeros rather than a failure. The whitelist is the canvas's own staff list, because the sales manager is deliberately not a swarm key — an earlier draft of this door left his card waiting forever"
+      "proof": "measured on a built server at 390px: the cockpit now opens 1 door instead of 9 per-employee reads (0 message reads, 1 inbox read), all 9 cards carry their teaser, and a missing table answers zeros rather than a failure. The whitelist is the canvas's own staff list, because the sales manager is deliberately not a swarm key — an earlier draft of this door left his card waiting forever",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/learn/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/lock/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/messages/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/notify/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/orchestrate/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/suggestions/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/agents/tasks/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ai/health/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/analyze-lead/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/architect/command/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/arsenal/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/assistant/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/assistant/summon/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/automation/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/categories/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/command/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/customers/dossier/route.ts",
       "state": "moved",
-      "phase": "M2",
       "when": "2026-10-03",
-      "proof": "the file door reads the paper's drawing and his picks off the same row the sheet writes, so the two screens cannot disagree about who he is"
+      "proof": "the file door reads the paper's drawing and his picks off the same row the sheet writes, so the two screens cannot disagree about who he is",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/customers/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/elite/invitations/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/eternal/genesis/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/fate/latest/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/fate/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/gate/health/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/gate/reset-2fa/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/gate/validate/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/images/stats/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/images/trigger-harvest/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/intel/evolve/decision/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/intel/evolve/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/intel/relations/health/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/keys/bulk/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/keys/desk/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/keys/import-env/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/keys/live-stats/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/keys/public/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/keys/reload/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/keys/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/keys/stats/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/keys/[id]/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/knowledge/audit/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/leads/analyze/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/leads/delete/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/leads/follow-up/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/leads/release/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/leads/reply/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/leads/route.ts",
       "state": "moving",
-      "phase": "consolidation-3",
       "when": "2026-09-30",
-      "proof": "the screen's door used to decide on its own who is a customer and showed 4 while the roll saw 6 (measured on the published site); it now reads lib/customers/read.ts, and measured on the built app against the live data both doors answer 6 with no phone on one side and missing on the other"
+      "proof": "the screen's door used to decide on its own who is a customer and showed 4 while the roll saw 6 (measured on the published site); it now reads lib/customers/read.ts, and measured on the built app against the live data both doors answer 6 with no phone on one side and missing on the other",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/leads/suggestions/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/live-browser/action/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/live-browser/screenshot/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/live-browser/session/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/live-browser/stream/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/mastermind/chat/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/mastermind/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/mastermind/stats/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/metrics/realtime/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/mind/decision/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/mind/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/notifications/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/numbers/route.ts",
       "state": "moved",
-      "phase": "numbers-1",
       "when": "2026-10-13",
-      "proof": "the only writer of the list: it takes the whole list at once, drops anything that is not dialable, refuses an empty list, keeps exactly one primary, and answers with what the record kept (wrote / stored) rather than with what it was handed"
+      "proof": "the only writer of the list: it takes the whole list at once, drops anything that is not dialable, refuses an empty list, keeps exactly one primary, and answers with what the record kept (wrote / stored) rather than with what it was handed",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/ab-test/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/audit/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/benchmarks/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/draft/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/experiments/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/goals/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/identity/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/images/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/observability/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/perf/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/preview/[token]/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/publish/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/qa/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/rollback/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/self/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/seo/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/sketch/route.ts",
       "state": "moved",
-      "phase": "plan-1",
       "when": "2026-10-03",
-      "proof": "the owner sees the room the moment the paper is filed: the reading's numbers are walked on insert, the area comes from the closed polygon rather than a two-number product, and when the shape cannot be drawn the door returns the one question to ask rather than an empty frame"
+      "proof": "the owner sees the room the moment the paper is filed: the reading's numbers are walked on insert, the area comes from the closed polygon rather than a two-number product, and when the shape cannot be drawn the door returns the one question to ask rather than an empty frame",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/suggestions/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/swarm/status/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/telemetry/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/unify-tone/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/ops/vision/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/owner/approval/decision/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/owner/dashboard/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/owner/emergency-stop/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/prime/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/proactive/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/products/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/qayyim/[[...legacy]]/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/quality/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/remote-browser/health/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/remote-browser/session/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/settings/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/shop/route.ts",
       "state": "moved",
-      "phase": "shelf-1",
       "when": "2026-10-13",
-      "proof": "one door writes and reads the products row, and it applies the same isDisplayable rule the visitor page reads, so the desk and the shelf cannot disagree; cost, stock and workshop columns are named in no file of this office Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors."
+      "proof": "one door writes and reads the products row, and it applies the same isDisplayable rule the visitor page reads, so the desk and the shelf cannot disagree; cost, stock and workshop columns are named in no file of this office Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors.",
+      "phase": "M7"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/silent/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/sovereign/pulse/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/speech/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/supreme/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/telegram/config/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/telegram/status/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/telegram/test/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/verify-2fa/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "admin-door",
       "atom": "app/api/admin/war-room/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "outside-door",
       "atom": "app/api/analytics/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "outside-door",
       "atom": "app/api/consultant/faq/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "outside-door",
       "atom": "app/api/consultant/learnings/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "outside-door",
       "atom": "app/api/consultant/pending-questions/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "outside-door",
       "atom": "app/api/consultant/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "outside-door",
       "atom": "app/api/omnipotent/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "outside-door",
       "atom": "app/api/system-health/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "outside-door",
       "atom": "app/api/tenants/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "root-lib",
       "atom": "lib/aaca-client.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-access.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-api-auth.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-api-guard.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-approved-executor.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-assistant-capabilities.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-assistant-evidence.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-assistant-log.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-company.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-env-resolver.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-gate.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-live-browser.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-natural-brain.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-nav.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-proactive-snapshot.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-result-actions.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-sovereign-mind.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/admin-telegram-summon.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/agent-tools/approval-system.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/agent-tools/execution-tracker.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/agent-tools/tool-registry.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/agents/AgentOrchestrator.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/agents/SelfLearningEngine.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/ai-orchestrator.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/analytics.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/api-keys-service.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/arabic.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/architect-tools.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/azenith-prime.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/colours.ts",
       "state": "moved",
-      "phase": "colour-1",
       "when": "2026-10-03",
-      "proof": "the matrix a room can back: families are named off the bank's own distribution (measured over 5,909 stored colours — grey 36%, warm beige 23%, wood 13%, off-white 12%, dark wood and caramel 4% each), a pick is only kept when one of his room's pictures really carries it, and a claim whose label does not match its colour is refused. The near line is 40 of 255 because that is where the data splits: inside one family pictures sit 0-35 apart, a different family in the same room starts near 45"
+      "proof": "the matrix a room can back: families are named off the bank's own distribution (measured over 5,909 stored colours — grey 36%, warm beige 23%, wood 13%, off-white 12%, dark wood and caramel 4% each), a pick is only kept when one of his room's pictures really carries it, and a claim whose label does not match its colour is refused. The near line is 40 of 255 because that is where the data splits: inside one family pictures sit 0-35 apart, a different family in the same room starts near 45",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/dossier.ts",
       "state": "moved",
-      "phase": "plan-1",
       "when": "2026-10-03",
-      "proof": "the file carries the same drawing and his own chosen colours, printed apart from the bank's palette because a colour he stopped on is his word, not the shop's. Its area line reads off the room that was drawn — which changed two earlier assertions, disclosed in the minutes"
+      "proof": "the file carries the same drawing and his own chosen colours, printed apart from the bank's palette because a colour he stopped on is his word, not the shop's. Its area line reads off the room that was drawn — which changed two earlier assertions, disclosed in the minutes",
+      "phase": "M7"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/family-votes.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/paper-sketch-parser.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/passport.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/plan.ts",
       "state": "moved",
-      "phase": "plan-1",
       "when": "2026-10-03",
-      "proof": "the paper's numbers become a walked room: two numbers are a rectangle's length and width (measured: all 19 stored papers hold either no number or exactly two), four are the same rectangle wall by wall, six are the L. Opposite walls that disagree are both kept and named for the call instead of averaged, an opening wider than every wall is reported rather than squeezed, and a template with no turn table draws nothing. 17 tests, each watched failing first"
+      "proof": "the paper's numbers become a walked room: two numbers are a rectangle's length and width (measured: all 19 stored papers hold either no number or exactly two), four are the same rectangle wall by wall, six are the L. Opposite walls that disagree are both kept and named for the call instead of averaged, an opening wider than every wall is reported rather than squeezed, and a template with no turn table draws nothing. 17 tests, each watched failing first",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/room-labels.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/room-names.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/sheet-images.ts",
       "state": "moved",
-      "phase": "capture-1",
       "when": "2026-10-03",
-      "proof": "the suggestions now walk the four styles before they repeat one: measured on the live bank, the top three bedroom pictures by quality were three rooms in the same taste, and after the change the same address showed a warm modern bedroom, a classic majlis and a canopy bed — 3 shown, 3 loaded, on a 390px phone, and again on the published URL: 3 shown, 3 loaded, three different tastes. The room-type labels moved to their own module so the customer's page never imports the database reader"
+      "proof": "the suggestions now walk the four styles before they repeat one: measured on the live bank, the top three bedroom pictures by quality were three rooms in the same taste, and after the change the same address showed a warm modern bedroom, a classic majlis and a canopy bed — 3 shown, 3 loaded, on a 390px phone, and again on the published URL: 3 shown, 3 loaded, three different tastes. The room-type labels moved to their own module so the customer's page never imports the database reader",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/cad/sketch-link.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/command-executor.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/company-resolver.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/constants/rooms.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/consultant/faq-gate.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/consultant/question-intent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/consultant/reply-polish.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/consultant/store-facts.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/crypto-keys.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/customers/capture.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/customers/identity.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/customers/match.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/customers/memory.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/customers/read.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/dal/unified-supabase.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/discovery-engine.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/elite/auth.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/general-agent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/key-tester.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/lead-insights.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "root-lib",
       "atom": "lib/leads-delete-guard.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "root-lib",
       "atom": "lib/leads-freshness.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/location-services.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/mastermind-ai.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/owner-labels.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/pdf-generator.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/predatory-defense.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/proactive-agent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/qayyim-ops.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/real-tool-executor.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/remote-browser.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/semantic-cache.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/sentinel.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/seo.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/settings/facts.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/shop/rule.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/shop/words.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/sovereign-os.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/specialized-providers.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/store-numbers/read.ts",
       "state": "moved",
-      "phase": "numbers-1",
       "when": "2026-10-13",
-      "proof": "the one owner of the store's phone numbers: it reads the settings record, normalizes an Egyptian local number to the international form a WhatsApp link needs, and answers null rather than a guess. Measured 2026-10-13 before it existed: four producers of one fact, five customer pages with zero WhatsApp links, and 18 catalogue buttons opening a number that was not the store's"
+      "proof": "the one owner of the store's phone numbers: it reads the settings record, normalizes an Egyptian local number to the international form a WhatsApp link needs, and answers null rather than a guess. Measured 2026-10-13 before it existed: four producers of one fact, five customer pages with zero WhatsApp links, and 18 catalogue buttons opening a number that was not the store's",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/supabase-admin.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/supabase-client.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/supabase-server.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/supabase-service.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/talk/emphasis.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/telegram-config.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/telegram-copy.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/telegram-notify.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/tenant.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/totp-verify.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/ultimate-agent/agent-core.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/ultimate-agent/learning-engine.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/ultimate-agent/memory-store.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/ultimate-agent/predictive-engine.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "root-lib",
       "atom": "lib/ultimate-agent/security-manager.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/ai/analyze-vision/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/analytics/session/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/analyze-image/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/architect/action/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/architect/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/auth/dev-login/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/auth/recovery/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/bookings/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/bookings/[id]/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/channels/email/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/channels/websocket/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/channels/whatsapp/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/checkout/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/cms/config/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/cms/public-config/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/cms/upload/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/config/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/consultant/catalog-crawler/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/consultant/check-reply/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/consultant/check-takeover/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/consultant/inject/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/consultant/typing/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/content-generator/improve/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/content-generator/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "orphan-door",
-      "atom": "app/api/cron/admin-daily-report/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/cron/admin-sovereign-mind/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/cron/autonomous-monitoring/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/cron/monthly-refresh/route.ts",
-      "state": "not-moved"
-    },
-    {
-      "kind": "orphan-door",
-      "atom": "app/api/cron/ops-daily/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/cron/ops-proactive/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/curate-images/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/curated-images/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/curated-pages/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/elite-brief/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/elite-gallery/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/elite-leads/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/enhance-image/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/growth-insights/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/leads/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/mark-dead-image/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/media/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/navigation/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/omnipotent/ai/synthesize/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/omnipotent/[...catchall]/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/orchestrator/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/pages/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/pages/[id]/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/pages/[id]/sections/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/passport/[token]/colours/route.ts",
       "state": "moved",
-      "phase": "colour-1",
       "when": "2026-10-03",
-      "proof": "the colour desk behind the same secret address: it re-reads the bank rather than trusting the screen, keeps at most three, and writes one column and nothing else — a taste can never move a sealed measurement. Proved on a built server at 390px: three taps stored and read back (#7e7165, #9f8c7b, #8d6a4e), the fourth swatch arrived disabled with the reason on the same card"
+      "proof": "the colour desk behind the same secret address: it re-reads the bank rather than trusting the screen, keeps at most three, and writes one column and nothing else — a taste can never move a sealed measurement. Proved on a built server at 390px: three taps stored and read back (#7e7165, #9f8c7b, #8d6a4e), the fourth swatch arrived disabled with the reason on the same card",
+      "phase": "M7"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/passport/[token]/contact/route.ts",
       "state": "moved",
-      "phase": "capture-1",
       "when": "2026-10-03",
-      "proof": "the door behind the sheet's secret address: it refuses a number that is not an Egyptian mobile in the words he reads (measured 400 «الرقم ده مش موبايل مصري» on a paper with no owner), claims a paper only when nobody owns it, writes his area and his room type without overwriting what the store already holds, and reads the row back before it answers — the log line says what the table kept, not what the request intended. Measured on the local house at 390px with a throwaway paper: the table came back with phone:1009998877 + التجمع الخامس + نوم رئيسي, three bank pictures returned and every one of them loaded, and after a reload the sheet stopped asking for a number it already holds. and measured again on the published URL at 390px after the owner's word: the same 400 refusal in his words, three bank pictures shown and loaded, the table answering phone:1009998877 + التجمع الخامس + نوم رئيسي, and the sheet after a reload holding his number without asking again. The throwaway paper was deleted and the roll was left as found"
+      "proof": "the door behind the sheet's secret address: it refuses a number that is not an Egyptian mobile in the words he reads (measured 400 «الرقم ده مش موبايل مصري» on a paper with no owner), claims a paper only when nobody owns it, writes his area and his room type without overwriting what the store already holds, and reads the row back before it answers — the log line says what the table kept, not what the request intended. Measured on the local house at 390px with a throwaway paper: the table came back with phone:1009998877 + التجمع الخامس + نوم رئيسي, three bank pictures returned and every one of them loaded, and after a reload the sheet stopped asking for a number it already holds. and measured again on the published URL at 390px after the owner's word: the same 400 refusal in his words, three bank pictures shown and loaded, the table answering phone:1009998877 + التجمع الخامس + نوم رئيسي, and the sheet after a reload holding his number without asking again. The throwaway paper was deleted and the roll was left as found",
+      "phase": "M7"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/passport/[token]/plan/route.ts",
       "state": "moved",
-      "phase": "plan-1",
       "when": "2026-10-03",
-      "proof": "the drawing door behind the same secret address: a chosen shape and a dragged door are re-walked by the store's own builder and stored on the paper's row (plan + area only, never the numbers the seal is over). Proved on the built site at 390px: a door dragged from ١٫٨ to ٢٫٧٩٧ came back from the table after a reload, and the sheet still said «مختومة ومفيش حاجة اتغيرت بعدها». 13 storage tests"
+      "proof": "the drawing door behind the same secret address: a chosen shape and a dragged door are re-walked by the store's own builder and stored on the paper's row (plan + area only, never the numbers the seal is over). Proved on the built site at 390px: a door dragged from ١٫٨ to ٢٫٧٩٧ came back from the table after a reload, and the sheet still said «مختومة ومفيش حاجة اتغيرت بعدها». 13 storage tests",
+      "phase": "M7"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/passport/[token]/route.ts",
       "state": "moved",
-      "phase": "plan-1",
       "when": "2026-10-03",
-      "proof": "the sheet answers with the room and the palette together: the stored drawing, the matrix built from the pictures it really shows him, his picks, and the bank's list re-ordered by those picks — both the first read and the answer after he confirms go through the same builder, so his colours cannot vanish because one door forgot to compute them"
+      "proof": "the sheet answers with the room and the palette together: the stored drawing, the matrix built from the pictures it really shows him, his picks, and the bank's list re-ordered by those picks — both the first read and the answer after he confirms go through the same builder, so his colours cannot vanish because one door forgot to compute them",
+      "phase": "M7"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/passport/[token]/votes/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/pexels/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/proxy/gemini/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/reality/check/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/room-covers/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/room-sections/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/sheet/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/telemetry/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/tenant/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/test-harvest/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/test-search/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/theme/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/translations/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/automation/notifications/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/automation/routing/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/automation/tasks/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/automation/triggers/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/automation/triggers/[id]/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/automation/workflows/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/automation/workflows/[id]/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/execute/pipeline/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/execute/register/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/execute/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/memory/embed/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "orphan-door",
       "atom": "app/api/vanguard/memory/search/route.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/AdminProactiveStrip.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/AgentActionsFeed.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/AgentHealthPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/ApprovalDecisionBlock.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/ApprovalGate.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/ChatPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/CommandConsole.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/CommandPalette.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/DesignStudio.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/EmergencyBanner.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/FloatingAgentButton.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/GroupChatView.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/HandoffInterface.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/MultiLLMChat.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/ProactiveSuggestions.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/ProposalDecisionCard.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/QualityCheckPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/QuickActionsPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/SelfModelPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/TaskQueue.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/agents/TeamScoreboard.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/AIKeysControlPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ArchitectWidget.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/AssistantBrowserCopilot.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/browser/AskQayyimAboutPage.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ClientPreCallDossier.tsx",
       "state": "moved",
-      "phase": "M2",
       "when": "2026-10-03",
-      "proof": "the owner sees his drawing read-only and his colours as named chips: «ألوانه اللي اختارها» with the real colour beside each Arabic name"
+      "proof": "the owner sees his drawing read-only and his colours as named chips: «ألوانه اللي اختارها» with the real colour beside each Arabic name",
+      "phase": "M7"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/CockpitDoors.tsx",
       "state": "moved",
-      "phase": "M1",
       "when": "2026-10-01",
-      "proof": "measured on the published site at 390px: the queue answered 21 and the sidebar door shows ٢١, pressing it lands on the conversation with the vault already open, and the stop button keeps the safety door's two-press shape"
+      "proof": "measured on the published site at 390px: the queue answered 21 and the sidebar door shows ٢١, pressing it lands on the conversation with the vault already open, and the stop button keeps the safety door's two-press shape",
+      "phase": "M1"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/EvolutionManager.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/GlobalAssistantDock.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/GrowthInsights.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/images/ImageBankPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M8"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/master-dashboard-components.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/MasterControlCenter.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/NeuralMirror.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/NeuralStream.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/NotificationBell.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/NotificationsPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/index.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/QayyimAuditReport.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/QayyimBenchmarksPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/QayyimDraftPreview.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/QayyimExperimentsPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/QayyimGoalsPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/QayyimObservabilityDashboard.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/QayyimProactiveSuggestions.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/QayyimQualityGate.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/QayyimTelemetryPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/ops/StudioPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/sales/AdvisorTestDrive.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/sales/CustomersPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/sales/KnowledgeDesk.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/settings/AdsSettingsCard.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/settings/ConsultantFaqCard.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/settings/SettingsFactsDesk.tsx",
       "state": "moved",
-      "phase": "settings-1",
       "when": "2026-10-13",
-      "proof": "measured 2026-10-13 with the census script and a reader grep over the repository: the settings table holds 17 keys, 3 are read by something that renders (theme and seo in the site shell, telegram_config in the alert door), 14 are read by nothing but the old desk generic editor — so the new desk names the three, counts the fourteen as unread residue, and offers no erase"
+      "proof": "measured 2026-10-13 with the census script and a reader grep over the repository: the settings table holds 17 keys, 3 are read by something that renders (theme and seo in the site shell, telegram_config in the alert door), 14 are read by nothing but the old desk generic editor — so the new desk names the three, counts the fourteen as unread residue, and offers no erase",
+      "phase": "M5"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/settings/StoreNumbersCard.tsx",
       "state": "moved",
-      "phase": "numbers-1",
       "when": "2026-10-13",
-      "proof": "his desk for it: change a number, add one, mark which one the buttons open, remove with a second press, and the last number cannot be removed — deleting a row is his word, and there is no erase here"
+      "proof": "his desk for it: change a number, add one, mark which one the buttons open, remove with a second press, and the last number cannot be removed — deleting a row is his word, and there is no erase here",
+      "phase": "M5"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/shop/ShopDesk.tsx",
       "state": "moved",
-      "phase": "shelf-1",
       "when": "2026-10-13",
-      "proof": "his own form: name, price in the currency word, one line, more detail, his photograph from the phone or a link; every row answers with what is missing (السعر، الصورة، موافقته) instead of a blank card, and hiding is reversible because erase is his word, never a button Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors."
+      "proof": "his own form: name, price in the currency word, one line, more detail, his photograph from the phone or a link; every row answers with what is missing (السعر، الصورة، موافقته) instead of a blank card, and hiding is reversible because erase is his word, never a button Live 2026-10-13 at 390px on the published alias, fresh sign-in: the visitor's page answered «قريبًا» with 0 cards, the desk showed the inherited row as «ناقص: السعر، الصورة», a piece typed on the desk reached the visitor with the price «٤٥٬٠٠٠ جنيه» in his own numerals, hiding it returned the page to «قريبًا», and the instrument's row was removed with the table counted back to 1 — 0 console errors.",
+      "phase": "M7"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/sketches/SketchOwner.tsx",
       "state": "moved",
-      "phase": "M2",
       "when": "2026-10-01",
-      "proof": "built on the new surface, not carried from the old house: it reads the people list from the customers door (the same reading the customers screen uses), stores the roll's own key on the paper, and was measured pressing it on the published site — one candidate from four digits, the name on the chip after a reload, and the paper returned to «من غير صاحب»"
+      "proof": "built on the new surface, not carried from the old house: it reads the people list from the customers door (the same reading the customers screen uses), stores the roll's own key on the paper, and was measured pressing it on the published site — one candidate from four digits, the name on the chip after a reload, and the paper returned to «من غير صاحب»",
+      "phase": "M7"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/SmartSuggestions.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/SovereignMindPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/SovereignPulse.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/TelegramControlPanel.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/UnifiedAssistant.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/v2/CommandCanvas.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "furniture",
       "atom": "components/admin/v2/SectionIntake.tsx",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/ab-testing.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/agent-roles.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/alerts.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/anomaly.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/api/utils.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/approval-intake.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/audit-record.ts",
+      "state": "not-moved",
+      "phase": "M10"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/automation-shape.ts",
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/benchmarks/index.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/cache-storage.ts",
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/canary.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/capability-tiers.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/chat-brain.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/chat-record.ts",
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/claims.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/command-canvas.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/conditions.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/daily-round.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/daily-story.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/debate.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/departments.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/draft-labels.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/egypt-calendar.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/experiment-verdict.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/facade/QayyimFacade.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/forecast.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/gap-contract.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/goal-risk.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/governance/ConstitutionEngine.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/governance/gate-note.ts",
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/gsc.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/identity.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/inboxes.ts",
       "state": "moved",
-      "phase": "cockpit-1",
       "when": "2026-10-05",
-      "proof": "one read answers all nine badges: the same conversation rule the messages door uses (participant or title, newest wins), the same unread definition, and a count that comes from the record rather than the page when the page fills up. A retired key folds to its live one, and an employee with no conversation answers zero — never an error the card has to wear"
+      "proof": "one read answers all nine badges: the same conversation rule the messages door uses (participant or title, newest wins), the same unread definition, and a count that comes from the record rather than the page when the page fills up. A retired key folds to its live one, and an employee with no conversation answers zero — never an error the card has to wear",
+      "phase": "M1"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/index.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/key-desk.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/key-intake.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/key-provenance.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/key-verify.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/lead-heat.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/ledger.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/legacy-address-table.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/luxury-v2.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/measured-benchmark.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/memory/index.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/memory/remember-round.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/memory/SharedMemory.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/memory/SwarmLearnings.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/memory/SyncLayer.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/memory/VectorStore.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/memory-record.ts",
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/metricLabels.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/migration-map.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/nightly-snapshot.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/orchestrator/MasterOrchestrator.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/order-status.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/owner-address.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/owner-voice.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/palette.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/proposal-card.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/provenance.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/qa/realChecks.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/QayyimAgentBase.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/QayyimAnalyticsAgent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/QayyimContentAgent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/QayyimCoreAgent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/QayyimDevAgent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/QayyimQaAgent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/QayyimSeoAgent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/QayyimUxAgent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/QayyimVisualAgent.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
+    },
+    {
+      "kind": "swarm-file",
+      "atom": "lib/ops/record-inventory.ts",
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/rivals.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/round-freshness.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/self-audit.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/self-model.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/self-view.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/stats.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/syncTypes.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/task-reconcile.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/unread-marker.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/url-manifest.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/voice-continuous.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "swarm-file",
       "atom": "lib/ops/world-model.ts",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/agents#مركز القيادة",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/agents#المساعد الموحّد",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/agents#فريق الوكلاء",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/agents#محادثة جماعية",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/assistant#مركز القيادة",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/assistant#المساعد الموحّد",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/assistant#فريق الوكلاء",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/assistant#محادثة جماعية",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/intel#مركز القيادة",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/intel#المساعد الموحّد",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/intel#فريق الوكلاء",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/intel#محادثة جماعية",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/intelligence#مركز القيادة",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/intelligence#المساعد الموحّد",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/intelligence#فريق الوكلاء",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/intelligence#محادثة جماعية",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/sales#مدير المبيعات",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "view",
       "atom": "/admin/sales#العملاء",
       "state": "erased",
-      "phase": "consolidation-4",
       "when": "2026-09-30",
-      "proof": "the tab entry and its import are gone from app/admin/sales/page.tsx; the old deep link is answered at the outer gate (/admin/sales?tab=leads&expand=… → /admin/v2/sales?expand=…), guarded by tests/ops/legacyAddressTable.test.ts, so the consultant's Telegram messages still land on the card"
+      "proof": "the tab entry and its import are gone from app/admin/sales/page.tsx; the old deep link is answered at the outer gate (/admin/sales?tab=leads&expand=… → /admin/v2/sales?expand=…), guarded by tests/ops/legacyAddressTable.test.ts, so the consultant's Telegram messages still land on the card",
+      "phase": "M7"
     },
     {
       "kind": "view",
       "atom": "/admin/sales#المستأجرين",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "view",
       "atom": "/admin/sales#الإدارة",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "view",
       "atom": "/admin/sales#CMS",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "view",
       "atom": "/admin/sandbox#مركز القيادة",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "view",
       "atom": "/admin/sandbox#المساعد الموحّد",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "view",
       "atom": "/admin/sandbox#فريق الوكلاء",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "view",
       "atom": "/admin/sandbox#محادثة جماعية",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M11"
     },
     {
       "kind": "view",
       "atom": "/admin/settings#تحديث",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/agents/ops#أوامرCtrl K",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/agents/ops#نفسك",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/agents/ops#أدوار",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/agents/ops#✕",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/agents/ops#⚡نسّق السرب لتحسين الصفحة الرئيسية كاملاً",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/agents/ops#⚡اعرض أهدافي المهددة هذا الشهر",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/agents/ops#⚡افحص رؤوس الأمان للصفحة الرئيسية",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/agents/ops#⚡استعرض ذاكرة الوكلاء",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/agents/ops#فحص سجل قاعدة البيانات",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/ops#نظرة عامة",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/ops#العمليات",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/ops#التحسين",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/ops#المراقبة",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/ops#تحليل السلوك",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/settings#احفظ",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "view",
       "atom": "/admin/v2/settings#مقفول",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "view",
       "atom": "/bookings#EN",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "view",
       "atom": "/bookings#AR",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "view",
       "atom": "/elite-intelligence#EN",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M6"
     },
     {
       "kind": "cron",
       "atom": "/api/cron/admin-daily-report",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "cron",
       "atom": "/api/cron/ops-daily",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/owner-dashboard",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/work",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/sales",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/v2/sketches",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/v2/shop",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/v2/images",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M8"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/elite",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M7"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/agents",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M10"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/system",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/v2/keys",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M1"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/settings",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     },
     {
       "kind": "nav-entry",
       "atom": "/admin/database",
-      "state": "not-moved"
+      "state": "not-moved",
+      "phase": "M5"
     }
   ]
 }

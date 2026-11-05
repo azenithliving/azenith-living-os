@@ -162,7 +162,7 @@ export function readRuler(sources: RulerSources = {}): Ruler {
   return { items, atoms, doors, pages, crons, asOf, missing };
 }
 
-const MISSING_LABELS: Record<string, string> = {
+export const MISSING_LABELS: Record<string, string> = {
   masterList: "القائمة الجامعة",
   transfers: "سجل النقل",
   census: "الجرد",

@@ -30,6 +30,7 @@ import {
   ScanLine,
   Store,
   Images,
+  Ruler,
 } from "lucide-react";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -53,6 +54,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   ScanLine,
   Store,
   Images,
+  Ruler,
 };
 
 import { LEGACY_NAV, V2_NAV } from "@/lib/admin-nav";
