@@ -17,6 +17,8 @@ export type CodeRef = {
   table: string;
   column: string;
   kind: "select" | "filter" | "insert";
+  /** Character index of the `.from(` that produced this name — the scan names the function around it. */
+  at: number;
 };
 
 export type Phantom = {
@@ -24,9 +26,17 @@ export type Phantom = {
   table: string;
   column: string;
   kind: "select" | "filter" | "insert" | "missing-table";
+  at: number;
+  /**
+   * Every `.from(` in this file that asked this name. A name counts once per file, so a dormant first
+   * caller cannot decide for a live one — each place is judged on its own and the strongest wins.
+   */
+  sites: number[];
 };
 
-const FROM = /\.from\(\s*["'`]([a-zA-Z0-9_]+)["'`]\s*\)/g;
+const FROM =
+  /\.from\(\s*(?:(["'`])([a-zA-Z0-9_]+)\1|([A-Za-z_$][A-Za-z0-9_$]*))\s*\)/g;
+const CONSTANT = /(?:const|let)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*["'`]([a-zA-Z0-9_]+)["'`]/g;
 const FILTER_CALL = /\.(?:eq|neq|in|order|not|gte|lte|gt|lt|ilike|like|is|contains|matches)\(\s*["'`]([a-zA-Z0-9_]+)["'`]/g;
 const OR_CALL = /\.or\(\s*["'`]([^"'`]*)["'`]/g;
 const OR_TOKEN = /([a-zA-Z0-9_]+)\.(?:eq|neq|gte|lte|gt|lt|like|ilike|in|is)\./g;
@@ -71,28 +81,53 @@ function firstObjectKeys(slice: string): string[] {
   return [];
 }
 
+function tableConstants(source: string): Map<string, string> {
+  const constants = new Map<string, string>();
+  for (const [, name, value] of source.matchAll(CONSTANT)) constants.set(name, value);
+  return constants;
+}
+
+/**
+ * How many `.from(` places in a file name a table the scan can read.
+ *
+ * The scan reports only what it resolves, so without this number an unread place looks the same as a
+ * clean one — and a table held in a variable the scan cannot follow is unread, not answered.
+ */
+export function fromSiteCensus(source: string): { sites: number; resolved: number; blind: number } {
+  const sites = (source.match(/\.from\(/g) ?? []).length;
+  const constants = tableConstants(source);
+  let resolved = 0;
+  for (const match of source.matchAll(FROM)) if (match[2] || constants.get(match[3] ?? "")) resolved += 1;
+  return { sites, resolved, blind: sites - resolved };
+}
+
 export function refsFromSource(file: string, source: string): CodeRef[] {
   const refs: CodeRef[] = [];
+  const constants = tableConstants(source);
+
   const froms = [...source.matchAll(FROM)];
 
   froms.forEach((match, index) => {
-    const table = match[1];
+    const table = match[2] ?? constants.get(match[3] ?? "") ?? null;
     const from = match.index ?? 0;
+    // The next .from( ends this query whether or not we understood its table: an unresolved variable
+    // is silence, never a finding charged to whatever literal came before it.
     const to = index + 1 < froms.length ? (froms[index + 1].index ?? source.length) : source.length;
+    if (!table) return;
     const slice = source.slice(from + match[0].length, to);
 
     for (const select of slice.matchAll(/\.select\(\s*["'`]([^"'`]*)["'`]/g)) {
-      for (const column of plainSelectColumns(select[1])) refs.push({ file, table, column, kind: "select" });
+      for (const column of plainSelectColumns(select[1])) refs.push({ file, table, column, kind: "select", at: from });
     }
     for (const filter of slice.matchAll(FILTER_CALL)) {
-      refs.push({ file, table, column: filter[1], kind: "filter" });
+      refs.push({ file, table, column: filter[1], kind: "filter", at: from });
     }
     for (const or of slice.matchAll(OR_CALL)) {
-      for (const token of or[1].matchAll(OR_TOKEN)) refs.push({ file, table, column: token[1], kind: "filter" });
+      for (const token of or[1].matchAll(OR_TOKEN)) refs.push({ file, table, column: token[1], kind: "filter", at: from });
     }
     for (const write of slice.matchAll(WRITE_CALL)) {
       const after = slice.slice((write.index ?? 0) + write[0].length - 1);
-      for (const column of firstObjectKeys(after)) refs.push({ file, table, column, kind: "insert" });
+      for (const column of firstObjectKeys(after)) refs.push({ file, table, column, kind: "insert", at: from });
     }
   });
 
@@ -100,33 +135,43 @@ export function refsFromSource(file: string, source: string): CodeRef[] {
 }
 
 export function findPhantoms(refs: CodeRef[], columns: Record<string, string[]>): Phantom[] {
-  const found: Phantom[] = [];
-  const seen = new Set<string>();
+  const byName = new Map<string, Phantom>();
+
+  const addSite = (key: string, phantom: Phantom) => {
+    const existing = byName.get(key);
+    if (existing) {
+      if (!existing.sites.includes(phantom.at)) existing.sites.push(phantom.at);
+      return;
+    }
+    byName.set(key, phantom);
+  };
 
   for (const ref of refs) {
     const tableColumns = columns[ref.table];
     if (!tableColumns) {
-      const key = `${ref.file}#${ref.table}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        found.push({ file: ref.file, table: ref.table, column: "", kind: "missing-table" });
-      }
+      addSite(`${ref.file}#${ref.table}`, {
+        file: ref.file,
+        table: ref.table,
+        column: "",
+        kind: "missing-table",
+        at: ref.at,
+        sites: [ref.at],
+      });
       continue;
     }
     if (tableColumns.includes(ref.column)) continue;
-    const key = `${ref.file}#${ref.table}#${ref.column}#${ref.kind}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    found.push({ ...ref });
+    addSite(`${ref.file}#${ref.table}#${ref.column}#${ref.kind}`, { ...ref, sites: [ref.at] });
   }
 
-  return found;
+  return [...byName.values()];
 }
 
-export function tallyPhantoms(phantoms: Phantom[]): { total: number; byKind: Record<string, number> } {
+export function tallyPhantoms(phantoms: Phantom[]): { total: number; distinct: number; byKind: Record<string, number> } {
   const byKind: Record<string, number> = {};
   for (const phantom of phantoms) byKind[phantom.kind] = (byKind[phantom.kind] ?? 0) + 1;
-  return { total: phantoms.length, byKind };
+  // The same missing column asked in two files is two places to fix, but one name to explain.
+  const distinct = new Set(phantoms.map((phantom) => `${phantom.table}#${phantom.column}`)).size;
+  return { total: phantoms.length, distinct, byKind };
 }
 
 /**
@@ -155,9 +200,9 @@ const LABELS: Record<string, string> = {
   "missing-table": "جدول مش موجود",
 };
 
-export function formatRefusalLine(tally: { total: number; byKind: Record<string, number> } | null): string {
+export function formatRefusalLine(tally: { total: number; distinct: number; byKind: Record<string, number> } | null): string {
   if (!tally) return "ما اتقارش: مِقياس الرفض الصامت ما اتشغّلش — المخزن ما ردّش";
   if (tally.total === 0) return "رفض صامت: صفر — كل اسم في الكود له ردّ من المخزن";
   const parts = Object.entries(tally.byKind).map(([kind, count]) => `${LABELS[kind] ?? kind} ${arDigits(count)}`);
-  return `رفض صامت: ${arDigits(tally.total)} اسم في الكود ما لوش ردّ من المخزن · ${parts.join(" · ")}`;
+  return `رفض صامت: ${arDigits(tally.total)} موضع في الكود ما لوش ردّ عند المخزن (${arDigits(tally.distinct)} اسم مختلف) · ${parts.join(" · ")}`;
 }

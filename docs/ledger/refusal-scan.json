@@ -1,1297 +1,2627 @@
 {
-  "measuredAt": "2026-11-05T12:19:53.515Z",
+  "measuredAt": "2026-11-05T15:28:00.681Z",
   "mapMeasuredAt": "2026-11-05T12:11:56.391Z",
-  "filesScanned": 835,
-  "refsSeen": 3639,
+  "filesScanned": 836,
+  "entryFiles": 281,
+  "refsSeen": 3644,
+  "fromSites": 1347,
+  "unresolvedFromSites": 196,
   "tablesInRecord": 160,
   "deadPathsConsidered": 101,
-  "total": 213,
+  "total": 203,
+  "distinct": 139,
   "byKind": {
-    "insert": 49,
+    "insert": 42,
     "missing-table": 123,
-    "filter": 23,
-    "select": 18
+    "filter": 22,
+    "select": 16
   },
-  "line": "رفض صامت: ٢١٣ اسم في الكود ما لوش ردّ من المخزن · إدخال ٤٩ · جدول مش موجود ١٢٣ · فلترة ٢٣ · اختيار ١٨",
-  "deadCodeLine": "رفض صامت: ١٧ اسم في الكود ما لوش ردّ من المخزن · جدول مش موجود ٦ · اختيار ٤ · فلترة ٣ · إدخال ٤",
+  "line": "رفض صامت: ٢٠٣ موضع في الكود ما لوش ردّ عند المخزن (١٣٩ اسم مختلف) · إدخال ٤٢ · جدول مش موجود ١٢٣ · فلترة ٢٢ · اختيار ١٦",
+  "coverageLine": "تغطية المسح: ١٣٤٧ موضع سؤال في الكود · ١٩٦ منهم جدولهم مكتوب في متغيّر ما اتحلّش — دول ما اتقارش، مش مرفوضين",
+  "classification": {
+    "live": 49,
+    "uncalled": 45,
+    "unreached": 57,
+    "unknown": 52
+  },
+  "classificationLine": "فحص الكود مش إثبات تشغيل: مسار ظاهر ٤٩ · بلا استيراد ظاهر ٤٥ · مسار غير موصول ٥٧ · ما اتقارش ٥٢",
+  "deadCodeLine": "رفض صامت: ١٧ موضع في الكود ما لوش ردّ عند المخزن (١٠ اسم مختلف) · جدول مش موجود ٦ · اختيار ٤ · فلترة ٣ · إدخال ٤",
   "phantoms": [
     {
       "file": "app/actions/progress-actions.ts",
       "table": "requests",
       "column": "total_price",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 3924,
+      "sites": [
+        3924
+      ],
+      "symbol": "updateRequestPrice",
+      "reach": "unreached"
     },
     {
       "file": "app/actions/progress-actions.ts",
       "table": "requests",
       "column": "payment_1",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 3924,
+      "sites": [
+        3924
+      ],
+      "symbol": "updateRequestPrice",
+      "reach": "unreached"
     },
     {
       "file": "app/actions/progress-actions.ts",
       "table": "requests",
       "column": "payment_2",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 3924,
+      "sites": [
+        3924
+      ],
+      "symbol": "updateRequestPrice",
+      "reach": "unreached"
     },
     {
       "file": "app/actions/progress-actions.ts",
       "table": "requests",
       "column": "payment_3",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 3924,
+      "sites": [
+        3924
+      ],
+      "symbol": "updateRequestPrice",
+      "reach": "unreached"
     },
     {
       "file": "app/actions/progress-actions.ts",
       "table": "requests",
       "column": "payment_4",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 3924,
+      "sites": [
+        3924
+      ],
+      "symbol": "updateRequestPrice",
+      "reach": "unreached"
     },
     {
       "file": "app/actions/progress-actions.ts",
       "table": "requests",
       "column": "last_notification_sent_at",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 8304,
+      "sites": [
+        8304
+      ],
+      "symbol": "markAsNotified",
+      "reach": "unreached"
     },
     {
       "file": "app/actions/progress-actions.ts",
       "table": "requests",
       "column": "last_notification_type",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 8304,
+      "sites": [
+        8304
+      ],
+      "symbol": "markAsNotified",
+      "reach": "unreached"
     },
     {
       "file": "app/actions/progress-actions.ts",
       "table": "requests",
       "column": "last_notified_stage",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 8304,
+      "sites": [
+        8304
+      ],
+      "symbol": "markAsNotified",
+      "reach": "unreached"
     },
     {
       "file": "app/actions/progress-actions.ts",
       "table": "requests",
       "column": "last_notified_step",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 8304,
+      "sites": [
+        8304
+      ],
+      "symbol": "markAsNotified",
+      "reach": "unreached"
     },
     {
       "file": "app/api/admin/2fa/disable/route.ts",
       "table": "user_public_keys",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2570,
+      "sites": [
+        2570
+      ],
+      "symbol": "POST",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/2fa/status/route.ts",
       "table": "user_public_keys",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 776,
+      "sites": [
+        776
+      ],
+      "symbol": "GET",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/agent/goals/route.ts",
       "table": "agent_goals_v2",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 588,
+      "sites": [
+        588,
+        2981,
+        5888
+      ],
+      "symbol": "GET",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/agent/goals/route.ts",
       "table": "goal_progress_history",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 1506,
+      "sites": [
+        1506
+      ],
+      "symbol": "GET",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/agent/rollback/route.ts",
       "table": "content_revisions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 964,
+      "sites": [
+        964,
+        2904
+      ],
+      "symbol": "POST",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/agent/rollback/route.ts",
       "table": "site_settings",
       "column": "id",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 1756,
+      "sites": [
+        1756
+      ],
+      "symbol": "POST",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/agent/rollback/route.ts",
       "table": "site_settings",
       "column": "setting_value",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 1756,
+      "sites": [
+        1756
+      ],
+      "symbol": "POST",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/agent/rollback/route.ts",
       "table": "site_settings",
       "column": "current_revision_id",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 1756,
+      "sites": [
+        1756
+      ],
+      "symbol": "POST",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/agent/rollback/route.ts",
       "table": "site_sections",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2114,
+      "sites": [
+        2114
+      ],
+      "symbol": "POST",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/command/route.ts",
       "table": "user_public_keys",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2984,
+      "sites": [
+        2984,
+        8055
+      ],
+      "symbol": "POST",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/keys/public/route.ts",
       "table": "user_public_keys",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 1435,
+      "sites": [
+        1435,
+        2073,
+        3684
+      ],
+      "symbol": "POST",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/ops/draft/route.ts",
       "table": "site_sections",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3105,
+      "sites": [
+        3105
+      ],
+      "symbol": "POST",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/owner/approval/decision/route.ts",
       "table": "purchase_orders",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 5244,
+      "sites": [
+        5244
+      ],
+      "symbol": "handleApprovalActions",
+      "reach": "live"
     },
     {
       "file": "app/api/admin/owner/approval/decision/route.ts",
       "table": "design_versions",
       "column": "",
-      "kind": "missing-table"
-    },
-    {
-      "file": "app/api/consultant/faq/route.ts",
-      "table": "consultant_pending_questions",
-      "column": "answered_at",
-      "kind": "insert"
+      "kind": "missing-table",
+      "at": 5590,
+      "sites": [
+        5590
+      ],
+      "symbol": "handleApprovalActions",
+      "reach": "live"
     },
     {
       "file": "lib/admin-env-resolver.ts",
       "table": "users",
       "column": "role",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 1488,
+      "sites": [
+        1488
+      ],
+      "symbol": "resolveMasterAdminEmails",
+      "reach": "live"
     },
     {
       "file": "lib/admin-env-resolver.ts",
       "table": "users",
       "column": "is_admin",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 1943,
+      "sites": [
+        1943
+      ],
+      "symbol": "resolveMasterAdminEmails",
+      "reach": "live"
     },
     {
       "file": "lib/admin-extended-handlers.ts",
       "table": "backup_snapshots",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4035,
+      "sites": [
+        4035,
+        4260,
+        7721
+      ],
+      "symbol": "executeBackupRestore",
+      "reach": "live"
     },
     {
       "file": "lib/agent-tools/tool-handlers.ts",
       "table": "site_sections",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2305,
+      "sites": [
+        2305,
+        5861,
+        8431,
+        9640,
+        9836,
+        48338,
+        48681
+      ],
+      "symbol": "executeSectionCreate",
+      "reach": "live"
     },
     {
       "file": "lib/agent-tools/tool-handlers.ts",
       "table": "content_revisions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 15079,
+      "sites": [
+        15079
+      ],
+      "symbol": "executeSettingUpdate",
+      "reach": "live"
     },
     {
       "file": "lib/agent-tools/tool-handlers.ts",
       "table": "site_settings",
       "column": "id",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 16358,
+      "sites": [
+        16358
+      ],
+      "symbol": "executeSettingUpdate",
+      "reach": "live"
     },
     {
       "file": "lib/agent-tools/tool-handlers.ts",
       "table": "site_settings",
       "column": "current_revision_id",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 16358,
+      "sites": [
+        16358,
+        16680
+      ],
+      "symbol": "executeSettingUpdate",
+      "reach": "live"
     },
     {
       "file": "lib/agent-tools/tool-handlers.ts",
       "table": "leads",
       "column": "estimated_value",
-      "kind": "select"
+      "kind": "select",
+      "at": 18607,
+      "sites": [
+        18607
+      ],
+      "symbol": "executeRevenueAnalysis",
+      "reach": "uncalled"
     },
     {
       "file": "lib/agent-tools/tool-handlers.ts",
       "table": "bookings",
       "column": "lead_id",
-      "kind": "select"
+      "kind": "select",
+      "at": 18910,
+      "sites": [
+        18910
+      ],
+      "symbol": "executeRevenueAnalysis",
+      "reach": "uncalled"
     },
     {
       "file": "lib/agent-tools/tool-handlers.ts",
       "table": "bookings",
       "column": "total_amount",
-      "kind": "select"
+      "kind": "select",
+      "at": 18910,
+      "sites": [
+        18910
+      ],
+      "symbol": "executeRevenueAnalysis",
+      "reach": "uncalled"
     },
     {
       "file": "lib/agent-tools/tool-handlers.ts",
       "table": "agent_goals_v2",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 44364,
+      "sites": [
+        44364,
+        45757,
+        46768,
+        46867
+      ],
+      "symbol": "executeGoalCreate",
+      "reach": "live"
     },
     {
       "file": "lib/agents/SelfLearningEngine.ts",
       "table": "agent_learnings",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2336,
+      "sites": [
+        2336,
+        3150
+      ],
+      "symbol": "SelfLearningEngine",
+      "reach": "unknown"
     },
     {
       "file": "lib/architect-tools.ts",
       "table": "site_settings",
       "column": "company_id",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 7365,
+      "sites": [
+        7365
+      ],
+      "symbol": "updateSiteSetting",
+      "reach": "live"
     },
     {
       "file": "lib/architect-tools.ts",
       "table": "parallel_task_queue",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 13692,
+      "sites": [
+        13692
+      ],
+      "symbol": "getSystemHealth",
+      "reach": "live"
     },
     {
       "file": "lib/architect-tools.ts",
       "table": "conversions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 24592,
+      "sites": [
+        24592
+      ],
+      "symbol": "analyzeRevenueOpportunitiesWithInput",
+      "reach": "live"
     },
     {
       "file": "lib/architect-tools.ts",
       "table": "products",
       "column": "price",
-      "kind": "select"
+      "kind": "select",
+      "at": 29903,
+      "sites": [
+        29903
+      ],
+      "symbol": "listProducts",
+      "reach": "live"
     },
     {
       "file": "lib/atomic-state.ts",
       "table": "system_snapshots",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4077,
+      "sites": [
+        4077,
+        17911,
+        20683
+      ],
+      "symbol": "AtomicStateManager",
+      "reach": "unreached"
     },
     {
       "file": "lib/atomic-state.ts",
       "table": "schema_migrations",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 10962,
+      "sites": [
+        10962
+      ],
+      "symbol": "AtomicStateManager",
+      "reach": "unreached"
     },
     {
       "file": "lib/auth/vault.ts",
       "table": "recovery_vault",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3854,
+      "sites": [
+        3854,
+        4457,
+        5189,
+        6017,
+        6475,
+        6943,
+        7560,
+        8441,
+        8858
+      ],
+      "symbol": "initializeVault",
+      "reach": "live"
     },
     {
       "file": "lib/azenith-prime.ts",
       "table": "swarm_keys",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 7597,
+      "sites": [
+        7597
+      ],
+      "symbol": "AzenithPrime",
+      "reach": "unknown"
     },
     {
       "file": "lib/azenith-prime.ts",
       "table": "time_capsules",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 17773,
+      "sites": [
+        17773
+      ],
+      "symbol": "AzenithPrime",
+      "reach": "unknown"
     },
     {
       "file": "lib/azenith-prime.ts",
       "table": "neural_cache",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 19950,
+      "sites": [
+        19950,
+        24416
+      ],
+      "symbol": "AzenithPrime",
+      "reach": "unknown"
     },
     {
       "file": "lib/azenith-prime.ts",
       "table": "imperial_notifications",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 27510,
+      "sites": [
+        27510
+      ],
+      "symbol": "AzenithPrime",
+      "reach": "unknown"
     },
     {
       "file": "lib/azenith-sovereign.ts",
       "table": "system_health_log",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3176,
+      "sites": [
+        3176,
+        3605,
+        4679
+      ],
+      "symbol": "getSystemHealth",
+      "reach": "uncalled"
     },
     {
       "file": "lib/azenith-sovereign.ts",
       "table": "parallel_task_queue",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4304,
+      "sites": [
+        4304
+      ],
+      "symbol": "getSystemHealth",
+      "reach": "uncalled"
     },
     {
       "file": "lib/cron/purge-images.ts",
       "table": "users",
       "column": "last_activity_at",
-      "kind": "select"
+      "kind": "select",
+      "at": 1083,
+      "sites": [
+        1083
+      ],
+      "symbol": "purgeOldCustomerData",
+      "reach": "uncalled"
     },
     {
       "file": "lib/cron/purge-images.ts",
       "table": "users",
       "column": "last_activity_at",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 1083,
+      "sites": [
+        1083,
+        7252
+      ],
+      "symbol": "purgeOldCustomerData",
+      "reach": "uncalled"
     },
     {
       "file": "lib/cron/purge-images.ts",
       "table": "users",
       "column": "special_requests",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 5665,
+      "sites": [
+        5665
+      ],
+      "symbol": "purgeSpecificUser",
+      "reach": "uncalled"
     },
     {
       "file": "lib/executive-persona.ts",
       "table": "architect_memory",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 5010,
+      "sites": [
+        5010,
+        6265
+      ],
+      "symbol": "ExecutivePersona",
+      "reach": "unknown"
     },
     {
       "file": "lib/executive-persona.ts",
       "table": "system_intelligence",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 9299,
+      "sites": [
+        9299
+      ],
+      "symbol": "ExecutivePersona",
+      "reach": "unknown"
     },
     {
       "file": "lib/executive-persona.ts",
       "table": "architect_actions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 9530,
+      "sites": [
+        9530
+      ],
+      "symbol": "ExecutivePersona",
+      "reach": "unknown"
     },
     {
       "file": "lib/general-agent.ts",
       "table": "general_suggestions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 16521,
+      "sites": [
+        16521,
+        17456,
+        17902,
+        18791
+      ],
+      "symbol": "storeSuggestion",
+      "reach": "live"
     },
     {
       "file": "lib/market-simulator.ts",
       "table": "market_scenarios",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3291,
+      "sites": [
+        3291,
+        19978,
+        20428
+      ],
+      "symbol": "MarketSimulationEngine",
+      "reach": "unreached"
     },
     {
       "file": "lib/market-simulator.ts",
       "table": "generated_pages",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 17168,
+      "sites": [
+        17168
+      ],
+      "symbol": "MarketSimulationEngine",
+      "reach": "unreached"
     },
     {
       "file": "lib/mastermind-core.ts",
       "table": "architect_actions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4452,
+      "sites": [
+        4452
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unreached"
     },
     {
       "file": "lib/mastermind-core.ts",
       "table": "system_intelligence",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 5836,
+      "sites": [
+        5836
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unreached"
     },
     {
       "file": "lib/mastermind-core.ts",
       "table": "system_snapshots",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 14425,
+      "sites": [
+        14425,
+        15524,
+        15811
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unreached"
     },
     {
       "file": "lib/mastermind-core.ts",
       "table": "semantic_cache",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 16602,
+      "sites": [
+        16602,
+        17504
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unreached"
     },
     {
       "file": "lib/mastermind-core.ts",
       "table": "architect_notifications",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 19058,
+      "sites": [
+        19058
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unreached"
     },
     {
       "file": "lib/mastermind-core.ts",
       "table": "room_sections",
       "column": "seo_metadata",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 19892,
+      "sites": [
+        19892
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unreached"
     },
     {
       "file": "lib/mastermind.ts",
       "table": "system_intelligence",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4276,
+      "sites": [
+        4276
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unknown"
     },
     {
       "file": "lib/mastermind.ts",
       "table": "architect_actions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4883,
+      "sites": [
+        4883
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unknown"
     },
     {
       "file": "lib/mastermind.ts",
       "table": "system_snapshots",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 8943,
+      "sites": [
+        8943
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unknown"
     },
     {
       "file": "lib/mastermind.ts",
       "table": "architect_notifications",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 10441,
+      "sites": [
+        10441
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unknown"
     },
     {
       "file": "lib/mastermind.ts",
       "table": "room_sections",
       "column": "seo_metadata",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 11237,
+      "sites": [
+        11237
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unknown"
     },
     {
       "file": "lib/mastermind.ts",
       "table": "semantic_cache",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 12496,
+      "sites": [
+        12496
+      ],
+      "symbol": "AzenithMastermind",
+      "reach": "unknown"
     },
     {
       "file": "lib/ops/cache-storage.ts",
       "table": "semantic_cache",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 1771,
+      "sites": [
+        1771
+      ],
+      "symbol": "askTheRecord",
+      "reach": "unknown"
     },
     {
       "file": "lib/ops/memory/SwarmLearnings.ts",
       "table": "ops_learning_applications",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 6085,
+      "sites": [
+        6085,
+        12288
+      ],
+      "symbol": "SwarmLearnings",
+      "reach": "live"
     },
     {
       "file": "lib/ops/memory/SyncLayer.ts",
       "table": "ops_locks",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 10506,
+      "sites": [
+        10506,
+        11238
+      ],
+      "symbol": "SyncLayer",
+      "reach": "live"
     },
     {
       "file": "lib/pdf-generator.ts",
       "table": "media_items",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 6275,
+      "sites": [
+        6275
+      ],
+      "symbol": "findSimilarDesigns",
+      "reach": "unknown"
     },
     {
       "file": "lib/predatory-defense.ts",
       "table": "blocked_ips",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3801,
+      "sites": [
+        3801,
+        9661,
+        16526
+      ],
+      "symbol": "PredatoryDefenseSystem",
+      "reach": "unreached"
     },
     {
       "file": "lib/predatory-defense.ts",
       "table": "security_threats",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 8919,
+      "sites": [
+        8919
+      ],
+      "symbol": "PredatoryDefenseSystem",
+      "reach": "unreached"
     },
     {
       "file": "lib/predatory-defense.ts",
       "table": "defense_alerts",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 11453,
+      "sites": [
+        11453
+      ],
+      "symbol": "PredatoryDefenseSystem",
+      "reach": "unreached"
     },
     {
       "file": "lib/predictive-coding.ts",
       "table": "code_patterns",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3211,
+      "sites": [
+        3211
+      ],
+      "symbol": "PredictiveCodingEngine",
+      "reach": "unreached"
     },
     {
       "file": "lib/predictive-coding.ts",
       "table": "predicted_modules",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3752,
+      "sites": [
+        3752,
+        21687,
+        22072
+      ],
+      "symbol": "PredictiveCodingEngine",
+      "reach": "unreached"
     },
     {
       "file": "lib/proactive-agent.ts",
       "table": "api_logs",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 5556,
+      "sites": [
+        5556
+      ],
+      "symbol": "checkUnusedFeatures",
+      "reach": "unknown"
     },
     {
       "file": "lib/proactive-agent.ts",
       "table": "users",
       "column": "last_active",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 7913,
+      "sites": [
+        7913
+      ],
+      "symbol": "checkDataAnomalies",
+      "reach": "unknown"
     },
     {
       "file": "lib/proactive-agent.ts",
       "table": "analytics_hourly",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 10305,
+      "sites": [
+        10305
+      ],
+      "symbol": "checkUserBehaviorPatterns",
+      "reach": "unknown"
     },
     {
       "file": "lib/proactive-agent.ts",
       "table": "monitoring_logs",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 12364,
+      "sites": [
+        12364
+      ],
+      "symbol": "logMonitoringSession",
+      "reach": "unknown"
     },
     {
       "file": "lib/proactive-agent.ts",
       "table": "general_suggestions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 14033,
+      "sites": [
+        14033
+      ],
+      "symbol": "getRecentSuggestions",
+      "reach": "live"
     },
     {
       "file": "lib/proactive-autonomy.ts",
       "table": "architect_conversations",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 6889,
+      "sites": [
+        6889
+      ],
+      "symbol": "ProactiveAutonomy",
+      "reach": "unknown"
     },
     {
       "file": "lib/proactive-autonomy.ts",
       "table": "system_intelligence",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 7325,
+      "sites": [
+        7325,
+        13192,
+        14568,
+        14831
+      ],
+      "symbol": "ProactiveAutonomy",
+      "reach": "unknown"
     },
     {
       "file": "lib/proactive-autonomy.ts",
       "table": "architect_notifications",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 12417,
+      "sites": [
+        12417
+      ],
+      "symbol": "ProactiveAutonomy",
+      "reach": "unknown"
     },
     {
       "file": "lib/real-tool-executor.ts",
       "table": "site_sections",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 8179,
+      "sites": [
+        8179,
+        11887,
+        14343,
+        17193
+      ],
+      "symbol": "executeSectionCreate",
+      "reach": "unknown"
     },
     {
       "file": "lib/real-tool-executor.ts",
       "table": "content_revisions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 25803,
+      "sites": [
+        25803,
+        27282,
+        32566,
+        33520
+      ],
+      "symbol": "executeSettingUpdate",
+      "reach": "unknown"
     },
     {
       "file": "lib/real-tool-executor.ts",
       "table": "site_settings",
       "column": "id",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 26403,
+      "sites": [
+        26403
+      ],
+      "symbol": "executeSettingUpdate",
+      "reach": "unknown"
     },
     {
       "file": "lib/real-tool-executor.ts",
       "table": "site_settings",
       "column": "setting_value",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 26403,
+      "sites": [
+        26403,
+        26692
+      ],
+      "symbol": "executeSettingUpdate",
+      "reach": "unknown"
     },
     {
       "file": "lib/real-tool-executor.ts",
       "table": "site_settings",
       "column": "current_revision_id",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 26403,
+      "sites": [
+        26403,
+        26692
+      ],
+      "symbol": "executeSettingUpdate",
+      "reach": "unknown"
     },
     {
       "file": "lib/real-tool-executor.ts",
       "table": "site_settings",
       "column": "setting_key",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 26692,
+      "sites": [
+        26692
+      ],
+      "symbol": "executeSettingUpdate",
+      "reach": "unknown"
     },
     {
       "file": "lib/real-tool-executor.ts",
       "table": "site_settings",
       "column": "setting_category",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 26692,
+      "sites": [
+        26692
+      ],
+      "symbol": "executeSettingUpdate",
+      "reach": "unknown"
     },
     {
       "file": "lib/recursive-engine.ts",
       "table": "evolution_log",
       "column": "proposal",
-      "kind": "select"
+      "kind": "select",
+      "at": 3045,
+      "sites": [
+        3045
+      ],
+      "symbol": "runRecursiveOptimization",
+      "reach": "uncalled"
     },
     {
       "file": "lib/self-optimization.ts",
       "table": "performance_bottlenecks",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4072,
+      "sites": [
+        4072
+      ],
+      "symbol": "SelfOptimizationEngine",
+      "reach": "unreached"
     },
     {
       "file": "lib/self-optimization.ts",
       "table": "optimization_history",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 15492,
+      "sites": [
+        15492
+      ],
+      "symbol": "SelfOptimizationEngine",
+      "reach": "unreached"
     },
     {
       "file": "lib/semantic-cache.ts",
       "table": "semantic_cache",
       "column": "",
-      "kind": "missing-table"
-    },
-    {
-      "file": "lib/sentinel.ts",
-      "table": "api_keys",
-      "column": "status",
-      "kind": "select"
-    },
-    {
-      "file": "lib/sentinel.ts",
-      "table": "api_keys",
-      "column": "muted_until",
-      "kind": "select"
-    },
-    {
-      "file": "lib/sentinel.ts",
-      "table": "api_keys",
-      "column": "dedupe_key",
-      "kind": "filter"
-    },
-    {
-      "file": "lib/sentinel.ts",
-      "table": "api_keys",
-      "column": "status",
-      "kind": "insert"
-    },
-    {
-      "file": "lib/sentinel.ts",
-      "table": "api_keys",
-      "column": "applied_at",
-      "kind": "insert"
-    },
-    {
-      "file": "lib/sentinel.ts",
-      "table": "api_keys",
-      "column": "resolved_at",
-      "kind": "insert"
-    },
-    {
-      "file": "lib/sentinel.ts",
-      "table": "api_keys",
-      "column": "dedupe_key",
-      "kind": "insert"
-    },
-    {
-      "file": "lib/sentinel.ts",
-      "table": "api_keys",
-      "column": "alert_id",
-      "kind": "insert"
-    },
-    {
-      "file": "lib/sentinel.ts",
-      "table": "api_keys",
-      "column": "muted_until",
-      "kind": "insert"
+      "kind": "missing-table",
+      "at": 9646,
+      "sites": [
+        9646,
+        13779,
+        15711,
+        16417
+      ],
+      "symbol": "SemanticCacheManager",
+      "reach": "unreached"
     },
     {
       "file": "lib/seo-auto-fixer.ts",
       "table": "site_sections",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2477,
+      "sites": [
+        2477,
+        2861,
+        3485,
+        4145
+      ],
+      "symbol": "applySeoAutoFixes",
+      "reach": "live"
     },
     {
       "file": "lib/silent-architect.ts",
       "table": "room_images",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 5309,
+      "sites": [
+        5309
+      ],
+      "symbol": "SilentArchitect",
+      "reach": "unknown"
     },
     {
       "file": "lib/silent-architect.ts",
       "table": "room_sections",
       "column": "seo_metadata",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 6075,
+      "sites": [
+        6075
+      ],
+      "symbol": "SilentArchitect",
+      "reach": "unknown"
     },
     {
       "file": "lib/silent-architect.ts",
       "table": "intelligence_snapshots",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 9433,
+      "sites": [
+        9433,
+        12595
+      ],
+      "symbol": "SilentArchitect",
+      "reach": "unknown"
     },
     {
       "file": "lib/silent-architect.ts",
       "table": "parallel_task_queue",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 11906,
+      "sites": [
+        11906
+      ],
+      "symbol": "SilentArchitect",
+      "reach": "unknown"
     },
     {
       "file": "lib/silent-architect.ts",
       "table": "architect_notifications",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 15628,
+      "sites": [
+        15628,
+        16454
+      ],
+      "symbol": "SilentArchitect",
+      "reach": "unknown"
     },
     {
       "file": "lib/site-config.ts",
       "table": "site_config",
       "column": "section_key",
-      "kind": "select"
+      "kind": "select",
+      "at": 1402,
+      "sites": [
+        1402
+      ],
+      "symbol": "getSiteConfig",
+      "reach": "uncalled"
     },
     {
       "file": "lib/site-config.ts",
       "table": "site_config",
       "column": "content",
-      "kind": "select"
+      "kind": "select",
+      "at": 1402,
+      "sites": [
+        1402
+      ],
+      "symbol": "getSiteConfig",
+      "reach": "uncalled"
     },
     {
       "file": "lib/site-config.ts",
       "table": "site_config",
       "column": "company_id",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 1402,
+      "sites": [
+        1402
+      ],
+      "symbol": "getSiteConfig",
+      "reach": "uncalled"
     },
     {
       "file": "lib/sovereign-os.ts",
       "table": "semantic_cache",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 6083,
+      "sites": [
+        6083,
+        7506,
+        8194,
+        9094
+      ],
+      "symbol": "ResourceShield",
+      "reach": "unknown"
     },
     {
       "file": "lib/sovereign-os.ts",
       "table": "cache_statistics",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 9835,
+      "sites": [
+        9835
+      ],
+      "symbol": "ResourceShield",
+      "reach": "unknown"
     },
     {
       "file": "lib/sovereign-os.ts",
       "table": "api_keys_arsenal",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 10866,
+      "sites": [
+        10866,
+        16996,
+        17190,
+        23799,
+        24028,
+        32193
+      ],
+      "symbol": "Arsenal",
+      "reach": "unknown"
     },
     {
       "file": "lib/sovereign-os.ts",
       "table": "system_health_log",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 30009,
+      "sites": [
+        30009
+      ],
+      "symbol": "SovereignOS",
+      "reach": "unknown"
     },
     {
       "file": "lib/sovereign-status.ts",
       "table": "sovereign_reports",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 13316,
+      "sites": [
+        13316,
+        15075
+      ],
+      "symbol": "SovereignStatusGenerator",
+      "reach": "unreached"
     },
     {
       "file": "lib/supreme-architect.ts",
       "table": "codebase_knowledge",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 9418,
+      "sites": [
+        9418
+      ],
+      "symbol": "SupremeArchitect",
+      "reach": "unknown"
     },
     {
       "file": "lib/supreme-architect.ts",
       "table": "architect_actions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 11840,
+      "sites": [
+        11840,
+        24035
+      ],
+      "symbol": "SupremeArchitect",
+      "reach": "unknown"
     },
     {
       "file": "lib/supreme-architect.ts",
       "table": "architect_conversations",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 24504,
+      "sites": [
+        24504,
+        24743
+      ],
+      "symbol": "SupremeArchitect",
+      "reach": "unknown"
     },
     {
       "file": "lib/swarm-consensus.ts",
       "table": "swarm_nodes",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 6224,
+      "sites": [
+        6224,
+        27612
+      ],
+      "symbol": "InfiniteSwarmEngine",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "id",
-      "kind": "select"
+      "kind": "select",
+      "at": 6701,
+      "sites": [
+        6701,
+        7343
+      ],
+      "symbol": "storeUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "category",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 6701,
+      "sites": [
+        6701,
+        8219,
+        9362
+      ],
+      "symbol": "storeUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "key",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 6701,
+      "sites": [
+        6701,
+        9362
+      ],
+      "symbol": "storeUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "id",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 6933,
+      "sites": [
+        6933
+      ],
+      "symbol": "storeUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "value",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 6933,
+      "sites": [
+        6933,
+        7343
+      ],
+      "symbol": "storeUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "confidence",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 6933,
+      "sites": [
+        6933,
+        7343
+      ],
+      "symbol": "storeUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "source",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 6933,
+      "sites": [
+        6933,
+        7343
+      ],
+      "symbol": "storeUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "last_confirmed",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 6933,
+      "sites": [
+        6933,
+        7343
+      ],
+      "symbol": "storeUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "category",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 7343,
+      "sites": [
+        7343
+      ],
+      "symbol": "storeUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "key",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 7343,
+      "sites": [
+        7343
+      ],
+      "symbol": "storeUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "confidence",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 8219,
+      "sites": [
+        8219
+      ],
+      "symbol": "getUserPreferences",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "user_preferences",
       "column": "value",
-      "kind": "select"
+      "kind": "select",
+      "at": 9362,
+      "sites": [
+        9362
+      ],
+      "symbol": "getUserPreference",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "title",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 10199,
+      "sites": [
+        10199
+      ],
+      "symbol": "createGoal",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "description",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 10199,
+      "sites": [
+        10199
+      ],
+      "symbol": "createGoal",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "target_metric",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 10199,
+      "sites": [
+        10199
+      ],
+      "symbol": "createGoal",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "target_value",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 10199,
+      "sites": [
+        10199
+      ],
+      "symbol": "createGoal",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "current_value",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 10199,
+      "sites": [
+        10199
+      ],
+      "symbol": "createGoal",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "deadline",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 10199,
+      "sites": [
+        10199
+      ],
+      "symbol": "createGoal",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "progress",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 10199,
+      "sites": [
+        10199
+      ],
+      "symbol": "createGoal",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "steps",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 10199,
+      "sites": [
+        10199,
+        13977
+      ],
+      "symbol": "createGoal",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "steps",
-      "kind": "select"
+      "kind": "select",
+      "at": 13318,
+      "sites": [
+        13318
+      ],
+      "symbol": "completeGoalStep",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "progress",
-      "kind": "select"
+      "kind": "select",
+      "at": 13318,
+      "sites": [
+        13318
+      ],
+      "symbol": "completeGoalStep",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/memory-store.ts",
       "table": "agent_goals",
       "column": "updated_at",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 13977,
+      "sites": [
+        13977
+      ],
+      "symbol": "completeGoalStep",
+      "reach": "unreached"
     },
     {
       "file": "lib/ultimate-agent/predictive-engine.ts",
       "table": "page_views",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2685,
+      "sites": [
+        2685,
+        5797
+      ],
+      "symbol": "getMetricsSnapshot",
+      "reach": "live"
     },
     {
       "file": "lib/ultimate-agent/predictive-engine.ts",
       "table": "conversions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3029,
+      "sites": [
+        3029,
+        6355,
+        10528
+      ],
+      "symbol": "getMetricsSnapshot",
+      "reach": "live"
     },
     {
       "file": "lib/ultimate-agent/predictive-engine.ts",
       "table": "inquiries",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3334,
+      "sites": [
+        3334,
+        6603,
+        12681
+      ],
+      "symbol": "getMetricsSnapshot",
+      "reach": "live"
     },
     {
       "file": "lib/ultimate-agent/predictive-engine.ts",
       "table": "performance_metrics",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 9558,
+      "sites": [
+        9558,
+        13970
+      ],
+      "symbol": "detectAnomalies",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/analytics/analytics_engine.ts",
       "table": "vanguard_leads",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 8522,
+      "sites": [
+        8522,
+        8756,
+        15038,
+        15541,
+        16424,
+        16635,
+        16874
+      ],
+      "symbol": "AnalyticsEngine",
+      "reach": "uncalled"
     },
     {
       "file": "lib/vanguard/analytics/analytics_engine.ts",
       "table": "vanguard_workflow_executions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 9372,
+      "sites": [
+        9372,
+        9625,
+        10506,
+        13076
+      ],
+      "symbol": "AnalyticsEngine",
+      "reach": "uncalled"
     },
     {
       "file": "lib/vanguard/analytics/analytics_engine.ts",
       "table": "vanguard_background_tasks",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 11344,
+      "sites": [
+        11344,
+        12539
+      ],
+      "symbol": "AnalyticsEngine",
+      "reach": "uncalled"
     },
     {
       "file": "lib/vanguard/analytics/analytics_engine.ts",
       "table": "vanguard_notifications",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 13900,
+      "sites": [
+        13900,
+        14150
+      ],
+      "symbol": "AnalyticsEngine",
+      "reach": "uncalled"
     },
     {
       "file": "lib/vanguard/automation/actions/lead_actions.ts",
       "table": "vanguard_leads",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2334,
+      "sites": [
+        2334,
+        3495,
+        5213,
+        5450,
+        7198
+      ],
+      "symbol": "UpdateLeadAction",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/automation/actions/lead_actions.ts",
       "table": "vanguard_opportunities",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 7629,
+      "sites": [
+        7629
+      ],
+      "symbol": "ConvertLeadAction",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/automation/actions/task_actions.ts",
       "table": "vanguard_tasks",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2654,
+      "sites": [
+        2654,
+        3740,
+        5019
+      ],
+      "symbol": "UpdateTaskAction",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/automation/event_bus.ts",
       "table": "vanguard_api_usage",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 11451,
+      "sites": [
+        11451
+      ],
+      "symbol": "EventBus",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/automation/notifications/notification_engine.ts",
       "table": "vanguard_notifications",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 18462,
+      "sites": [
+        18462
+      ],
+      "symbol": "NotificationEngine",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/automation/routing/agent_loader.ts",
       "table": "users",
       "column": "role",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 877,
+      "sites": [
+        877,
+        4257
+      ],
+      "symbol": "AgentLoader",
+      "reach": "unreached"
     },
     {
       "file": "lib/vanguard/automation/routing/agent_loader.ts",
       "table": "users",
       "column": "is_active",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 877,
+      "sites": [
+        877,
+        4257
+      ],
+      "symbol": "AgentLoader",
+      "reach": "unreached"
     },
     {
       "file": "lib/vanguard/automation/routing/agent_loader.ts",
       "table": "vanguard_conversations",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 1554,
+      "sites": [
+        1554,
+        4478
+      ],
+      "symbol": "AgentLoader",
+      "reach": "unreached"
     },
     {
       "file": "lib/vanguard/automation/routing/agent_loader.ts",
       "table": "vanguard_agent_metrics",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 1845,
+      "sites": [
+        1845
+      ],
+      "symbol": "AgentLoader",
+      "reach": "unreached"
     },
     {
       "file": "lib/vanguard/automation/routing/agent_loader.ts",
       "table": "users",
       "column": "metadata",
-      "kind": "select"
+      "kind": "select",
+      "at": 4257,
+      "sites": [
+        4257
+      ],
+      "symbol": "AgentLoader",
+      "reach": "unreached"
     },
     {
       "file": "lib/vanguard/automation/routing/routing_actions.ts",
       "table": "vanguard_leads",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 1460,
+      "sites": [
+        1460
+      ],
+      "symbol": "RouteLeadAction",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/automation/routing/routing_actions.ts",
       "table": "vanguard_conversations",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3409,
+      "sites": [
+        3409
+      ],
+      "symbol": "RouteConversationAction",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/automation/task_queue.ts",
       "table": "vanguard_background_tasks",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 11769,
+      "sites": [
+        11769,
+        13879,
+        14347,
+        15864,
+        16283,
+        16736,
+        17268
+      ],
+      "symbol": "TaskQueue",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/automation/trigger_engine.ts",
       "table": "vanguard_background_tasks",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 5892,
+      "sites": [
+        5892,
+        19529
+      ],
+      "symbol": "TriggerEngine",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/automation/workflow_engine.ts",
       "table": "vanguard_background_tasks",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 23252,
+      "sites": [
+        23252
+      ],
+      "symbol": "WorkflowEngine",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/channels/conversation_manager.ts",
       "table": "vanguard_channel_identities",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 12016,
+      "sites": [
+        12016,
+        14837
+      ],
+      "symbol": "ConversationManager",
+      "reach": "unknown"
     },
     {
       "file": "lib/vanguard/channels/conversation_manager.ts",
       "table": "vanguard_conversations",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 13405,
+      "sites": [
+        13405
+      ],
+      "symbol": "ConversationManager",
+      "reach": "unknown"
     },
     {
       "file": "lib/vanguard/evolution/evolution_engine.ts",
       "table": "vanguard_evolution_history",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4986,
+      "sites": [
+        4986
+      ],
+      "symbol": "persistEvolutionResult",
+      "reach": "unknown"
     },
     {
       "file": "lib/vanguard/execution/adapters/crm_adapter.ts",
       "table": "vanguard_leads",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 6826,
+      "sites": [
+        6826,
+        11054,
+        11555,
+        12177,
+        15519,
+        15901,
+        19764,
+        20140,
+        23042,
+        23452,
+        26509,
+        26924
+      ],
+      "symbol": "CRMCreateAdapter",
+      "reach": "unknown"
     },
     {
       "file": "lib/vanguard/execution/adapters/knowledge_adapter.ts",
       "table": "vanguard_materials",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 5105,
+      "sites": [
+        5105,
+        5501,
+        8812,
+        9220
+      ],
+      "symbol": "SearchMaterialsAdapter",
+      "reach": "unknown"
     },
     {
       "file": "lib/vanguard/execution/adapters/knowledge_adapter.ts",
       "table": "vanguard_products",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 12610,
+      "sites": [
+        12610,
+        13003,
+        16509,
+        16914
+      ],
+      "symbol": "SearchProductsAdapter",
+      "reach": "unknown"
     },
     {
       "file": "lib/vanguard/execution/adapters/knowledge_adapter.ts",
       "table": "vanguard_learnings",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 20218,
+      "sites": [
+        20218,
+        20614
+      ],
+      "symbol": "SearchLearningsAdapter",
+      "reach": "unknown"
     },
     {
       "file": "lib/vanguard/execution/adapters/knowledge_adapter.ts",
       "table": "vanguard_knowledge_relations",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 24709,
+      "sites": [
+        24709,
+        25338,
+        25910
+      ],
+      "symbol": "GetRelationsAdapter",
+      "reach": "unknown"
     },
     {
       "file": "lib/vanguard/execution/execution_monitor.ts",
       "table": "vanguard_api_usage",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 9572,
+      "sites": [
+        9572
+      ],
+      "symbol": "ExecutionMonitor",
+      "reach": "unknown"
     },
     {
       "file": "lib/vanguard/memory/memory_consolidator.ts",
       "table": "vanguard_embeddings",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2487,
+      "sites": [
+        2487
+      ],
+      "symbol": "consolidateMemories",
+      "reach": "uncalled"
     },
     {
       "file": "lib/vanguard/memory/supabase_persistence.ts",
       "table": "vanguard_consciousness_state",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3826,
+      "sites": [
+        3826
+      ],
+      "symbol": "SupabaseConsciousnessPersistence",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/memory/supabase_persistence.ts",
       "table": "vanguard_embeddings",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 8156,
+      "sites": [
+        8156,
+        9086
+      ],
+      "symbol": "SupabaseConsciousnessPersistence",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/memory/vector_store.ts",
       "table": "vanguard_embeddings",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4385,
+      "sites": [
+        4385,
+        5790,
+        9117,
+        11122
+      ],
+      "symbol": "updateEmbedding",
+      "reach": "live"
     },
     {
       "file": "lib/vanguard/observability/cache_manager.ts",
       "table": "vanguard_cache",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4228,
+      "sites": [
+        4228,
+        4519,
+        4913,
+        5277
+      ],
+      "symbol": "l2Get",
+      "reach": "unknown"
     },
     {
       "file": "lib/vanguard/verification/citation_engine.ts",
       "table": "vanguard_learnings",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3661,
+      "sites": [
+        3661
+      ],
+      "symbol": "searchTier3",
+      "reach": "uncalled"
     },
     {
       "file": "lib/vanguard/verification/citation_engine.ts",
       "table": "vanguard_verification_log",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 7817,
+      "sites": [
+        7817
+      ],
+      "symbol": "persistVerificationLog",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/customer-communications.ts",
       "table": "users",
       "column": "name",
-      "kind": "select"
+      "kind": "select",
+      "at": 1107,
+      "sites": [
+        1107,
+        2291,
+        3532,
+        4343
+      ],
+      "symbol": "CustomerCommunicationsService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/customer-communications.ts",
       "table": "sales_orders",
       "column": "customer_id",
-      "kind": "select"
+      "kind": "select",
+      "at": 2109,
+      "sites": [
+        2109,
+        3350,
+        4186
+      ],
+      "symbol": "CustomerCommunicationsService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/customer-communications.ts",
       "table": "payment_schedules",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3074,
+      "sites": [
+        3074
+      ],
+      "symbol": "CustomerCommunicationsService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/customer-communications.ts",
       "table": "sales_orders",
       "column": "last_contact_at",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 5275,
+      "sites": [
+        5275
+      ],
+      "symbol": "CustomerCommunicationsService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/order-workflow.ts",
       "table": "sales_orders",
       "column": "request_id",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 702,
+      "sites": [
+        702
+      ],
+      "symbol": "OrderWorkflowService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/order-workflow.ts",
       "table": "sales_orders",
       "column": "customer_id",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 702,
+      "sites": [
+        702
+      ],
+      "symbol": "OrderWorkflowService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/order-workflow.ts",
       "table": "sales_orders",
       "column": "created_by_user_id",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 702,
+      "sites": [
+        702
+      ],
+      "symbol": "OrderWorkflowService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/order-workflow.ts",
       "table": "payment_schedules",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 1421,
+      "sites": [
+        1421
+      ],
+      "symbol": "OrderWorkflowService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/order-workflow.ts",
       "table": "sales_orders",
       "column": "contract_signed_at",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 1943,
+      "sites": [
+        1943
+      ],
+      "symbol": "OrderWorkflowService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/order-workflow.ts",
       "table": "production_jobs",
       "column": "sales_order_id",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 2437,
+      "sites": [
+        2437
+      ],
+      "symbol": "OrderWorkflowService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/order-workflow.ts",
       "table": "production_jobs",
       "column": "sales_order_item_id",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 2437,
+      "sites": [
+        2437
+      ],
+      "symbol": "OrderWorkflowService",
+      "reach": "uncalled"
     },
     {
       "file": "services/crm/order-workflow.ts",
       "table": "sales_orders",
       "column": "expected_delivery",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 4099,
+      "sites": [
+        4099
+      ],
+      "symbol": "OrderWorkflowService",
+      "reach": "uncalled"
     },
     {
       "file": "services/local-storage.ts",
       "table": "agent_memory",
       "column": "value",
-      "kind": "select"
+      "kind": "select",
+      "at": 2047,
+      "sites": [
+        2047
+      ],
+      "symbol": "LocalStorageService",
+      "reach": "uncalled"
     },
     {
       "file": "services/local-storage.ts",
       "table": "agent_memory",
       "column": "key",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 2047,
+      "sites": [
+        2047
+      ],
+      "symbol": "LocalStorageService",
+      "reach": "uncalled"
     },
     {
       "file": "services/manufacturing/inventory.ts",
       "table": "inventory_reservations",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 1810,
+      "sites": [
+        1810,
+        2503,
+        3117
+      ],
+      "symbol": "InventoryService",
+      "reach": "uncalled"
     },
     {
       "file": "services/manufacturing/inventory.ts",
       "table": "inventory_movements",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2751,
+      "sites": [
+        2751
+      ],
+      "symbol": "InventoryService",
+      "reach": "uncalled"
     },
     {
       "file": "services/manufacturing/production-scheduler.ts",
       "table": "production_jobs",
       "column": "scheduled_start",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 1354,
+      "sites": [
+        1354
+      ],
+      "symbol": "ProductionSchedulerService",
+      "reach": "uncalled"
     },
     {
       "file": "services/manufacturing/production-scheduler.ts",
       "table": "production_jobs",
       "column": "scheduled_end",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 1354,
+      "sites": [
+        1354
+      ],
+      "symbol": "ProductionSchedulerService",
+      "reach": "uncalled"
     },
     {
       "file": "services/manufacturing/production-scheduler.ts",
       "table": "production_schedule_entries",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2050,
+      "sites": [
+        2050,
+        4665
+      ],
+      "symbol": "ProductionSchedulerService",
+      "reach": "uncalled"
     },
     {
       "file": "services/manufacturing/production-scheduler.ts",
       "table": "production_job_events",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2200,
+      "sites": [
+        2200,
+        5758
+      ],
+      "symbol": "ProductionSchedulerService",
+      "reach": "uncalled"
     },
     {
       "file": "services/manufacturing/production-scheduler.ts",
       "table": "production_jobs",
       "column": "priority",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 2707,
+      "sites": [
+        2707
+      ],
+      "symbol": "ProductionSchedulerService",
+      "reach": "uncalled"
     },
     {
       "file": "services/manufacturing/production-scheduler.ts",
       "table": "production_jobs",
       "column": "assigned_to",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 5092,
+      "sites": [
+        5092
+      ],
+      "symbol": "ProductionSchedulerService",
+      "reach": "uncalled"
     },
     {
       "file": "services/manufacturing/production-scheduler.ts",
       "table": "production_jobs",
       "column": "quality_check_required",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 5481,
+      "sites": [
+        5481
+      ],
+      "symbol": "ProductionSchedulerService",
+      "reach": "uncalled"
     },
     {
       "file": "services/self-evolution.ts",
       "table": "agent_learnings",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2723,
+      "sites": [
+        2723
+      ],
+      "symbol": "SelfEvolutionService",
+      "reach": "uncalled"
     },
     {
       "file": "services/self-evolution.ts",
       "table": "agent_task_runs",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3165,
+      "sites": [
+        3165
+      ],
+      "symbol": "SelfEvolutionService",
+      "reach": "uncalled"
     },
     {
       "file": "services/workflow-learner.ts",
       "table": "agent_learnings",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 536,
+      "sites": [
+        536,
+        832,
+        1900
+      ],
+      "symbol": "WorkflowLearner",
+      "reach": "uncalled"
     }
   ],
   "deadCodePhantoms": [
@@ -1299,103 +2629,178 @@
       "file": "app/api/auth/recovery/route.ts",
       "table": "admin_profiles",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 5043,
+      "sites": [
+        5043
+      ]
     },
     {
       "file": "app/api/channels/email/route.ts",
       "table": "vanguard_leads",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3811,
+      "sites": [
+        3811,
+        4080,
+        5141,
+        5413
+      ]
     },
     {
       "file": "app/api/channels/email/route.ts",
       "table": "vanguard_email_suppressions",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 4909,
+      "sites": [
+        4909
+      ]
     },
     {
       "file": "app/api/channels/email/route.ts",
       "table": "vanguard_email_engagement",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 6482,
+      "sites": [
+        6482
+      ]
     },
     {
       "file": "app/api/cms/config/route.ts",
       "table": "site_config",
       "column": "section_key",
-      "kind": "select"
+      "kind": "select",
+      "at": 883,
+      "sites": [
+        883
+      ]
     },
     {
       "file": "app/api/cms/config/route.ts",
       "table": "site_config",
       "column": "content",
-      "kind": "select"
+      "kind": "select",
+      "at": 883,
+      "sites": [
+        883
+      ]
     },
     {
       "file": "app/api/cms/config/route.ts",
       "table": "site_config",
       "column": "company_id",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 883,
+      "sites": [
+        883,
+        2811
+      ]
     },
     {
       "file": "app/api/cms/config/route.ts",
       "table": "site_config",
       "column": "section_key",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 2811,
+      "sites": [
+        2811
+      ]
     },
     {
       "file": "app/api/cms/config/route.ts",
       "table": "site_config",
       "column": "content",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 3033,
+      "sites": [
+        3033,
+        3269
+      ]
     },
     {
       "file": "app/api/cms/config/route.ts",
       "table": "site_config",
       "column": "published_at",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 3033,
+      "sites": [
+        3033
+      ]
     },
     {
       "file": "app/api/cms/config/route.ts",
       "table": "site_config",
       "column": "company_id",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 3269,
+      "sites": [
+        3269
+      ]
     },
     {
       "file": "app/api/cms/config/route.ts",
       "table": "site_config",
       "column": "section_key",
-      "kind": "insert"
+      "kind": "insert",
+      "at": 3269,
+      "sites": [
+        3269
+      ]
     },
     {
       "file": "app/api/cms/public-config/route.ts",
       "table": "site_config",
       "column": "section_key",
-      "kind": "select"
+      "kind": "select",
+      "at": 1185,
+      "sites": [
+        1185
+      ]
     },
     {
       "file": "app/api/cms/public-config/route.ts",
       "table": "site_config",
       "column": "content",
-      "kind": "select"
+      "kind": "select",
+      "at": 1185,
+      "sites": [
+        1185
+      ]
     },
     {
       "file": "app/api/cms/public-config/route.ts",
       "table": "site_config",
       "column": "company_id",
-      "kind": "filter"
+      "kind": "filter",
+      "at": 1185,
+      "sites": [
+        1185
+      ]
     },
     {
       "file": "app/api/curated-pages/route.ts",
       "table": "curated_pages",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 2172,
+      "sites": [
+        2172,
+        3741
+      ]
     },
     {
       "file": "app/api/orchestrator/route.ts",
       "table": "ai_provider_health",
       "column": "",
-      "kind": "missing-table"
+      "kind": "missing-table",
+      "at": 3445,
+      "sites": [
+        3445,
+        4232
+      ]
     }
   ]
 }

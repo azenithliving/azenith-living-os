@@ -8,11 +8,18 @@
  *
  * Reads only. Writes docs/ledger/refusal-scan.json. Exits 1 when the column map is missing or stale,
  * because a scan against an old map would be a guess dressed as a measurement.
+ *
+ * Two limits stay visible instead of being quietly counted as clean: a query whose table is a
+ * variable the scan cannot follow is reported as unread (`coverageLine`), and the window a query owns
+ * runs to the next `.from(` rather than to the end of the statement, so a column in trailing
+ * same-block code can still be charged to the query above it.
  */
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { findPhantoms, formatRefusalLine, refsFromSource, splitByReachability, tallyPhantoms } from "../../lib/build/phantom-names.ts";
+import { findPhantoms, formatRefusalLine, fromSiteCensus, refsFromSource, splitByReachability, tallyPhantoms } from "../../lib/build/phantom-names.ts";
+import { classifyBySymbol, formatReachabilityLine, isEntryFile } from "../../lib/build/reachability.ts";
+import { arDigits } from "../../lib/ops/metricLabels.ts";
 
 const MAP_PATH = "docs/ledger/record-columns.json";
 const ROOTS = ["app", "lib", "components", "services", "hooks"];
@@ -40,11 +47,19 @@ if (!existsSync(MAP_PATH)) {
     };
 
     const files = ROOTS.flatMap((root) => walk(root));
+    const sources = {};
     const refs = [];
+    let fromSites = 0;
+    let blindSites = 0;
     for (const file of files) {
+      const path = file.split("\\").join("/");
       const source = readFileSync(file, "utf8");
+      sources[path] = source;
       if (!source.includes(".from(")) continue;
-      refs.push(...refsFromSource(file.split("\\").join("/"), source));
+      const census = fromSiteCensus(source);
+      fromSites += census.sites;
+      blindSites += census.blind;
+      refs.push(...refsFromSource(path, source));
     }
 
     const phantoms = findPhantoms(refs, map.tables);
@@ -57,33 +72,47 @@ if (!existsSync(MAP_PATH)) {
       ...(transfers?.rows ?? []).filter((r) => r.state === "no-surface" || r.state === "erased").map((r) => r.atom),
     ]);
     const split = splitByReachability(phantoms, [...deadPaths]);
+
+    // The headline is every name the record refused in a file the census still counts as standing.
+    // The static read below sorts that same list; it may never shrink it — a code graph is not proof
+    // of execution, and a name it cannot place stays in the count, not in a bin nobody reads.
     const tally = tallyPhantoms(split.live);
+    const reached = classifyBySymbol(split.live, sources);
     const deadTally = tallyPhantoms(split.deadCode);
+    const entryFiles = Object.keys(sources).filter(isEntryFile);
 
     const out = {
       measuredAt: new Date().toISOString(),
       mapMeasuredAt: map.measuredAt,
       filesScanned: files.length,
+      entryFiles: entryFiles.length,
       refsSeen: refs.length,
+      fromSites,
+      unresolvedFromSites: blindSites,
       tablesInRecord: Object.keys(map.tables).length,
       deadPathsConsidered: deadPaths.size,
       ...tally,
       line: formatRefusalLine(tally),
+      coverageLine: `تغطية المسح: ${arDigits(fromSites)} موضع سؤال في الكود · ${arDigits(blindSites)} منهم جدولهم مكتوب في متغيّر ما اتحلّش — دول ما اتقارش، مش مرفوضين`,
+      classification: reached.tally,
+      classificationLine: formatReachabilityLine(reached.tally),
       deadCodeLine: formatRefusalLine(deadTally),
-      phantoms: split.live,
+      phantoms: reached.all,
       deadCodePhantoms: split.deadCode,
     };
     writeFileSync("docs/ledger/refusal-scan.json", JSON.stringify(out, null, 2) + "\n", "utf8");
 
     console.log(
-      `refusal scan: ${files.length} files · ${refs.length} names asked · ${tally.total} in reachable code · ${deadTally.total} in dead code → docs/ledger/refusal-scan.json`,
+      `refusal scan: ${files.length} files · ${entryFiles.length} entry files · ${refs.length} column mentions read · ${fromSites} query places (${blindSites} unread) · ${tally.total} refused by the record (${tally.distinct} distinct names) · ${deadTally.total} in census-dead code → docs/ledger/refusal-scan.json`,
     );
     console.log(out.line);
-    console.log(out.deadCodeLine);
+    console.log(out.coverageLine);
+    console.log(out.classificationLine);
     const byTable = {};
-    for (const p of split.live) (byTable[p.table] ??= []).push(p.column || "(جدول)");
+    for (const p of reached.all) (byTable[p.table] ??= []).push(`${p.column || "(جدول)"} ← ${p.symbol} · ${p.reach} · ${p.file}`);
     for (const [table, list] of Object.entries(byTable)) {
-      console.log(`  ${table}: ${[...new Set(list)].join(", ")}`);
+      console.log(`  ${table}:`);
+      for (const entry of [...new Set(list)]) console.log(`    ${entry}`);
     }
   }
 }
