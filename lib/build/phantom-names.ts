@@ -204,5 +204,7 @@ export function formatRefusalLine(tally: { total: number; distinct: number; byKi
   if (!tally) return "ما اتقارش: مِقياس الرفض الصامت ما اتشغّلش — المخزن ما ردّش";
   if (tally.total === 0) return "رفض صامت: صفر — كل اسم في الكود له ردّ من المخزن";
   const parts = Object.entries(tally.byKind).map(([kind, count]) => `${LABELS[kind] ?? kind} ${arDigits(count)}`);
-  return `رفض صامت: ${arDigits(tally.total)} موضع في الكود ما لوش ردّ عند المخزن (${arDigits(tally.distinct)} اسم مختلف) · ${parts.join(" · ")}`;
+  // No brackets: measured on the published card, a bracketed number inside this RTL line renders
+  // with its parentheses on the wrong side.
+  return `رفض صامت: ${arDigits(tally.total)} موضع في الكود ما لوش ردّ عند المخزن، منها ${arDigits(tally.distinct)} اسم مختلف · ${parts.join(" · ")}`;
 }

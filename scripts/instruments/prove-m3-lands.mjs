@@ -61,6 +61,9 @@ try {
   check("the door answers the refusal line", door.status === 200 && !!door.refusalLine, door.status);
   check("the refusal line is either counted or named", /رفض صامت|ما اتقارش/.test(door.refusalLine ?? ""), door.refusalLine ?? "");
   check("the refusal line carries no Latin digit", !/[0-9]/.test(door.refusalLine ?? ""), door.refusalLine ?? "");
+  // Caught on the published card 2026-11-05: brackets around an Arabic-Indic number flip sides in
+  // this RTL line, so the owner reads the count inside backwards parentheses.
+  check("the refusal line carries no brackets", !/[()]/.test(door.refusalLine ?? ""), door.refusalLine ?? "");
 
   const consoleErrors = [];
   const screen = await ctx.newPage();

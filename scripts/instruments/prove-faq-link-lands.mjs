@@ -136,9 +136,12 @@ try {
 } finally {
   if (browser) await browser.close();
   const failed = checks.filter((c) => !c.ok);
-  lines.push(`RESULT: ${checks.length - failed.length} of ${checks.length} checks passed · failed=${failed.length}`);
+  const result = `RESULT: ${checks.length - failed.length} of ${checks.length} checks passed · failed=${failed.length}`;
+  lines.push(result);
   if (failed.length) lines.push("FAILED CHECKS: " + failed.map((f) => f.name).join(" · "));
   writeFileSync("scratch/prove-faq-link-lands.out", lines.join("\n") + "\n");
+  // The gate reads the live count off stdout: without this line it can only say the script exited clean.
+  console.log(result);
   console.log(failed.length ? "PROVE_FAILED" : "PROVE_PASSED");
   if (failed.length) process.exitCode = 1;
 }

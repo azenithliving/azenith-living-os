@@ -114,6 +114,9 @@ describe("the phantom-name scan", () => {
     // 203 findings are not 203 names: the same name asked in two files is two places to fix.
     expect(line).toContain("اسم مختلف");
     expect(/[0-9]/.test(line)).toBe(false);
+    // Measured on the published card 2026-11-05: brackets around an Arabic-Indic number inside the
+    // RTL line flip to the wrong side, so the owner reads «مختلف) ١٣٩ اسم(». The line is his screen.
+    expect(line).not.toMatch(/[()]/);
 
     expect(formatRefusalLine({ total: 0, distinct: 0, byKind: {} })).toContain("صفر");
     expect(formatRefusalLine(null)).toContain("ما اتقارش");
