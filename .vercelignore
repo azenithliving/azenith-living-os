@@ -6,7 +6,9 @@ node_modules
 .next
 out
 dist
-build
+# Anchored on purpose: a bare `build` also matched lib/build, and the hosted build then could not
+# resolve the ruler layer that lives there (measured on the failed publish of 2026-11-05).
+/build
 
 # Environment files (except those needed for build)
 .env*.local
@@ -33,7 +35,10 @@ coverage
 *.md
 !.github/**/*.md
 # scripts - keep translate.js for build process
-docs
+# The plan papers stay out of the build, but docs/ledger must ship: the ruler door reads the
+# measured ledgers from there, and a bare `docs` line left the hosted screen with nothing to read.
+/docs/*
+!/docs/ledger
 *.test.ts
 *.test.tsx
 *.spec.ts

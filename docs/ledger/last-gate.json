@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-11-05T08:22:19.314Z",
+  "generatedAt": "2026-11-05T08:38:46.101Z",
   "phase": 1,
   "verdict": "REFUSED",
   "refused": [],
   "notRun": [
     "live"
   ],
-  "tests": 2536,
+  "tests": 2542,
   "live": null,
   "gates": {
     "tests": {
       "exit": 0,
-      "detail": "2536 اختبار · 2533 أخضر · 0 أحمر · 3 متخطّى"
+      "detail": "2542 اختبار · 2539 أخضر · 0 أحمر · 3 متخطّى"
     },
     "typecheck": {
       "exit": 0,

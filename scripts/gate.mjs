@@ -62,7 +62,8 @@ if (!rulerOnly) {
   const tsc = run("typecheck", ["node", "node_modules/typescript/bin/tsc", "--noEmit", "-p", "tsconfig.json"]);
   results.typecheck = { exit: tsc.exit, detail: tsc.exit === 0 ? "سليم" : lastLine(tsc.output, /error TS/) };
 
-  const build = run("build", ["node", "node_modules/next/dist/bin/next", "build"]);
+  // The host builds with Turbopack; a webpack-only pass is not the gate the publish will meet.
+  const build = run("build", ["node", "node_modules/next/dist/bin/next", "build", "--turbopack"]);
   results.build = { exit: build.exit, detail: build.exit === 0 ? "سليم" : lastLine(build.output, /error|Error|Failed to compile/i) };
 
   const liveScript = valueAfter("--live");
