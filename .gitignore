@@ -48,16 +48,10 @@ clean.js
 # screenshots written by scripts/qayyim-ui-test.mjs on every run
 ui-test-final.png
 
-# Measurement OUTPUTS. The tools themselves live in scripts/instruments and are committed;
-# everything a run prints is throwaway and must not be mistaken for the proof machinery.
-scratch/*.out
-scratch/*.log
-scratch/*.png
-scratch/*.txt
-scratch/*.json
-scratch/*.html
-scratch/*.csv
-scratch/*.html.gz
+# The whole throwaway folder. Listing only the output extensions left every one-off script addable,
+# and a broad `git add scratch` committed 751 of them on 2026-11-05. The tools live in
+# scripts/instruments; what is already tracked here stays tracked.
+scratch/
 
 # Offline speech data the OCR probe downloads into the working tree
 *.traineddata
