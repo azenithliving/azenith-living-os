@@ -112,23 +112,37 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // If there's an original pending question, update its status
+    // The link is a second write, and its subject is not the sentence — it is the customer's own
+    // waiting question. The record answers `status` and `answered_reply` (measured in
+    // docs/ledger/record-columns.json), and the customer's reply check reads `answered_reply` back,
+    // so writing a column the record never had would leave the answer signed and undelivered.
+    let pending: { saved: boolean; note: string } | null = null;
     if (originalPendingQuestionId) {
-      const { error: updateError } = await supabase
+      const { data: marked, error: updateError } = await supabase
         .from("consultant_pending_questions")
-        .update({
-          status: "answered",
-          answered_at: new Date().toISOString(),
-        })
-        .eq("id", originalPendingQuestionId);
+        .update({ status: "answered", answered_reply: answer.trim() })
+        .eq("id", originalPendingQuestionId)
+        .select("id");
 
       if (updateError) {
         console.error("[ConsultantFAQ] Error updating pending question:", updateError);
-        // Don't fail the request, just log the error
+      }
+      if (updateError || !marked?.length) {
+        // The sentence really is saved, so answering «failed» here would be its own lie. What stayed
+        // open gets named instead — and the two causes are told apart, because «the record refused»
+        // and «there was no such question» need different fixes.
+        pending = {
+          saved: false,
+          note: updateError
+            ? "الكلام اتسجل واتوقّع، بس سؤال الزبون فضل معلّق — الردّ ما وصلوش"
+            : "الكلام اتسجل واتوقّع، بس مفيش سؤال معلّق بالإشارة دي — فما اتحلّش حاجة",
+        };
+      } else {
+        pending = { saved: true, note: "سؤال الزبون اتحلّ، والردّ يوصله لما يرجع يسأل" };
       }
     }
 
-    return NextResponse.json({ success: true, faq: faqData });
+    return NextResponse.json({ success: true, faq: faqData, pending });
   } catch (error) {
     console.error("[ConsultantFAQ] Error:", error);
     return NextResponse.json(
