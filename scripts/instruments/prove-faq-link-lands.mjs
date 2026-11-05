@@ -15,7 +15,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { chromium } from "@playwright/test";
 
 const SITE = "https://azenith-living.vercel.app";
-const MARKER = "قياس آلي ٢٠٢٦-١١-٠٥ — سؤال آلي ما بيتقالش لزبون";
+const MARKER = "سؤال قياس آلي — ما بيتقالش لزبون";
 const ANSWER = "ردّ قياس آلي — يوصل للزبون اللي سأل";
 const SESSION = `proof-faq-link-${Date.now()}`;
 
@@ -102,8 +102,6 @@ try {
   const text = await screen.evaluate(() => document.body.innerText.replace(/\s+/g, " ").trim());
   check("the signature desk opens with no console error", consoleErrors.length === 0, consoleErrors.slice(0, 2).join(" | "));
   check("the signature desk is on the page", text.includes("الكلام اللي المستشار بيقوله لوحده"), text.slice(0, 80));
-  await screen.screenshot({ path: "scratch/faq-link-settings-390.png", fullPage: true });
-  say("screenshot", "scratch/faq-link-settings-390.png");
 
   const removedFaq = await api("DELETE", `/api/consultant/faq?id=${encodeURIComponent(created.faqId)}`);
   const removedPending = await api("DELETE", `/api/consultant/pending-questions?id=${encodeURIComponent(created.pendingId)}`);
@@ -121,6 +119,18 @@ try {
     removedPending.status === 200 && removedPending.body?.removed === 1 && againPending.status === 404,
     `first=${removedPending.status}/${removedPending.body?.removed ?? "(none)"} second=${againPending.status}`,
   );
+
+  // The picture is taken after the cleanup, so the owner's desk is shown as he will find it — and a
+  // test row left behind would be visible in the page text, not only in the door's count.
+  await screen.reload({ waitUntil: "domcontentloaded" });
+  await screen.waitForTimeout(5000);
+  const cleanText = await screen.evaluate(() => document.body.innerText.replace(/\s+/g, " ").trim());
+  check("the desk on screen carries no test row", !cleanText.includes(MARKER), cleanText.slice(0, 80));
+  await screen.screenshot({ path: "scratch/faq-link-settings-390.png", fullPage: true });
+  say("screenshot", "scratch/faq-link-settings-390.png");
+  const card = screen.locator("section", { hasText: "الكلام اللي المستشار بيقوله لوحده" }).first();
+  await card.screenshot({ path: "scratch/faq-link-card-390.png" });
+  say("card screenshot", "scratch/faq-link-card-390.png");
 } catch (err) {
   check("the run completed", false, String(err).slice(0, 200));
 } finally {
