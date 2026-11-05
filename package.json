@@ -30,7 +30,10 @@
     "db:migrate": "npm run supabase:push && npm run db:types",
     "build:check": "npm run typecheck && npm run lint && next build",
     "seed:dashboard": "node scripts/seed-dashboard.js",
-    "qayyim:smoke": "node scripts/qayyim-smoke.mjs"
+    "qayyim:smoke": "node scripts/qayyim-smoke.mjs",
+    "ruler": "node scripts/gate.mjs --ruler-only",
+    "gate": "node scripts/gate.mjs",
+    "manifest": "node scripts/scratch-manifest.mjs"
   },
   "dependencies": {
     "@bull-board/express": "^6.9.1",

@@ -71,11 +71,9 @@ The owner is **Eng. Alaa Aziz** — a business owner, not a programmer, reading 
 - **DoD-5 ledger:** a line appended to `docs/ledger/council-minutes.md` whose every number is parsed from
   a file that run printed, plus the atom's state updated in `docs/ledger/transfers.json` (via
   `scripts/ops-census.mjs`), with `proof` filled.
-- **DoD-6 published:** `node scratch/wait-publish.mjs` reports `PUBLISHED` for a deployment whose commit
-  subject equals `git log -1 --format=%s`. **Note:** that file is currently untracked in git (one of the
-  1563 untracked instruments) — M0 promotes it to `scripts/instruments/wait-publish.mjs` and commits it;
-  until then, if it is missing, recreate it from `git log` + `vercel ls --json` rather than declaring
-  success from a cached deployment.
+- **DoD-6 published:** `node scripts/instruments/wait-publish.mjs` reports `PUBLISHED` for a deployment
+  whose commit subject equals `git log -1 --format=%s`. (Since M0 this tool is committed under
+  `scripts/instruments/`; before that it lived untracked in `scratch/`.)
 - **DoD-7 nothing lost:** every orphan you touched is classified (repair / retire / owner's word), never
   silently removed.
 
@@ -96,7 +94,7 @@ master list `54` items: `28` proven + `1` partial + `23` built-without-proof + `
    since the plan was written: update the phase, don't force the code.
 5. For the atom you are about to touch, **measure whether it already exists** before building it
    (`grep` the symbol, hit the door, read the record). Plans lie; the file is the truth.
-6. `node scratch/wait-publish.mjs --check` (or read `vercel ls`) — know the currently published SHA so
+6. `node scripts/instruments/wait-publish.mjs` — know the currently published SHA so
    your live proof is attributable.
 
 ## ٦) The work loop (one atom at a time — this is the anti-loop rule)
@@ -122,9 +120,18 @@ attribute your own instrument's 400 to the product) → capture values via `page
 
 ## ٧) Verification gate sequence
 
-`typecheck` → `lint` (`npm run lint:ci`) → `vitest` (full) → `next build` → push → wait for READY →
-live 390px proof → (for anything customer-facing) `scripts/qayyim-smoke.mjs` (console/failed-request gate)
-and `scripts/ops-vision-test.mjs` (production human simulation) → ledger.
+One command, since M0:
+
+```
+node scripts/gate.mjs --phase N --live scripts/instruments/<the proof for this atom>.mjs
+```
+
+It runs vitest → typecheck → full build → the live phone-width proof, prints the ruler line with
+today's numbers, and exits non-zero if any gate refused **or did not run**. `npm run ruler` prints
+the ruler alone; `npm run manifest` records what is still sitting in `scratch/`.
+Then: push → wait for READY (`scripts/instruments/wait-publish.mjs`) → live proof → ledger.
+For anything customer-facing also run `scripts/qayyim-smoke.mjs` (console/failed-request gate) and
+`scripts/ops-vision-test.mjs` (production human simulation).
 
 ## ٨) Rollback
 
