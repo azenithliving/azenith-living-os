@@ -4,6 +4,25 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+# اقرأ الأول — أي وكيل بيدخل هنا (الترتيب ده إلزامي)
+
+المشروع هيتبنى من **١٢ مرحلة**. العدد ثابت في الوثائق دي، وممنوع أي وكيل يكتب خطة جديدة أو يعدّ مراحل
+تاني — لأن إعادة التخطيط هي اللي دخلت المالك في دوامة قبل كده.
+
+1. `docs/خطة-البناء/٠٠-للمالك.md` — المِسطرة: ٥٤ بند قدرة · ٥٣٢ ذرة نقل · ١٢ مرحلة · الفرامل · القرارين
+   اللي لي المالك بس.
+2. `docs/خطة-البناء/العمارة-والمراحل.md` — العقد: الطبقات السبع، وكل مرحلة ملفاتها وواجهاتها وحدّ
+   التسليم والممنوع والرجوع.
+3. `docs/خطة-البناء/EXECUTION-PROMPT.md` — أمر البدء: البوابات الأربع، القياس الحيّ على ٣٩٠ بكسل، صيغة
+   التقرير، والأرقام الأساسية اللي تتقارن بيها.
+4. `docs/ledger/transfers.json` و `docs/ledger/council-minutes.md` — الذرة الحالية وسجل الأدلة. اختار
+   أول ذرة `not-moved` في المرحلة الجارية؛ وممنوع تعيد عدّ المشروع من الصفر.
+5. باقي هذا الملف — قواعد الكلام وخريطة الأسماء.
+
+**لو الواقع كذّب السجل:** صدّق الواقع، صلّح السجل، واكتب السبب في سطر السجل.
+**لو رقم ما اتقارش:** قوله «ما اتقارش» مع سببه — ممنوع التقدير، وممنوع الصفر المطمئن.
+**لو الطلب محتاج حذف أو فلوس أو قرار من المالك:** وقف واسأل سؤال واحد واضح بالعربي.
+
 # How to talk to the human owner (always applies, every session)
 
 The owner reads Arabic only, is not a programmer, and uses a phone. Every reply — status, findings,
