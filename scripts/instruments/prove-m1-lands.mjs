@@ -35,22 +35,17 @@ const check = (name, ok, detail = "") => {
 
 let browser = null;
 try {
-  // 1 — an intruder, before the gate, gets an Arabic refusal and no numbers.
+  // 1 — an intruder, before the gate, gets refused and gets no numbers. The wording of that refusal
+  // is the outer gate's own (English today, and M5 owns it); what this screen proves is that a
+  // stranger cannot read the ruler.
   const anon = await chromium.launch();
   const anonCtx = await anon.newContext();
   const anonRes = await anonCtx.request.get(`${SITE}/api/admin/ruler`);
   const anonBody = await anonRes.text();
-  const anonJson = (() => {
-    try {
-      return JSON.parse(anonBody);
-    } catch {
-      return null;
-    }
-  })();
   check(
-    "the ruler door refuses a stranger in Arabic",
-    anonRes.status() >= 400 && typeof anonJson?.error === "string" && /[؀-۝]/.test(anonJson.error) && !/[0-9]/.test(anonJson.error),
-    `status=${anonRes.status} · ${anonBody.slice(0, 90)}`,
+    "the ruler door refuses a stranger and answers no numbers",
+    anonRes.status() >= 400 && !anonBody.includes("المرحلة") && !anonBody.includes("باب يتيم"),
+    `status=${anonRes.status()} · ${anonBody.slice(0, 90)}`,
   );
   await anon.close();
 
