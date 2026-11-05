@@ -15,6 +15,7 @@ type View = {
   line: string;
   phases: PhaseRow[];
   deadLine: string;
+  refusalLine: string;
   missing: string[];
   asOf: string | null;
   gateWhen: string | null;
@@ -96,6 +97,15 @@ export default function RulerPanel() {
         <p className="mt-2 text-[11px] leading-6 text-white/70">{view.deadLine}</p>
         <p className="mt-2 text-[11px] leading-6 text-white/40">
           ولا حاجة اتمسحت: التصنيف قرار، والمسح كلمة المالك لوحده
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] px-4 py-3">
+        <h2 className="text-xs font-black text-white">الرفض الصامت</h2>
+        <p className="mt-2 text-[11px] leading-6 text-white/70">{view.refusalLine}</p>
+        <p className="mt-2 text-[11px] leading-6 text-white/40">
+          الاستعلام المرفوض بيرجّع فاضي من غير صوت — وده بيبان كصفر طمّان. العدد ده من مقارنة أسماء
+          الكود بردّ المخزن نفسه
         </p>
       </div>
 

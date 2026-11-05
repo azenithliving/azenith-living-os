@@ -1,15 +1,17 @@
 {
-  "generatedAt": "2026-11-05T11:34:28.634Z",
-  "phase": 2,
-  "verdict": "GREEN",
+  "generatedAt": "2026-11-05T12:34:39.474Z",
+  "phase": 3,
+  "verdict": "REFUSED",
   "refused": [],
-  "notRun": [],
-  "tests": 2563,
-  "live": "ردّ صفر",
+  "notRun": [
+    "live"
+  ],
+  "tests": 2575,
+  "live": null,
   "gates": {
     "tests": {
       "exit": 0,
-      "detail": "2563 اختبار · 2560 أخضر · 0 أحمر · 3 متخطّى"
+      "detail": "2575 اختبار · 2572 أخضر · 0 أحمر · 3 متخطّى"
     },
     "typecheck": {
       "exit": 0,
@@ -20,8 +22,8 @@
       "detail": "سليم"
     },
     "live": {
-      "exit": 0,
-      "detail": "ردّ صفر"
+      "exit": null,
+      "detail": "لم يُشغَّل"
     }
   }
 }

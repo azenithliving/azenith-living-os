@@ -96,6 +96,37 @@ describe("the ruler view", () => {
     expect(view.missing).toContain("القائمة الجامعة");
   });
 
+  it("shows the silent-refusal count from the scan file", () => {
+    const root = mkdtempSync(join(tmpdir(), "ruler-view-"));
+    mkdirSync(join(root, "docs/ledger"), { recursive: true });
+    writeFileSync(
+      join(root, "docs/ledger/refusal-scan.json"),
+      JSON.stringify({ measuredAt: "2026-11-05T00:00:00.000Z", total: 213, line: "رفض صامت: ٢١٣ اسم في الكود ما لوش ردّ من المخزن" }),
+    );
+    const view = loadRulerView({ ledgerDir: join(root, "docs/ledger"), masterListPath: join(root, "missing.md"), phase: 3 });
+    expect(view.refusalLine).toContain("رفض صامت");
+    expect(/[0-9]/.test(view.refusalLine)).toBe(false);
+  });
+
+  it("says the refusal scan is not measured when the file is absent", () => {
+    const root = mkdtempSync(join(tmpdir(), "ruler-view-"));
+    mkdirSync(join(root, "docs/ledger"), { recursive: true });
+    const view = loadRulerView({ ledgerDir: join(root, "docs/ledger"), masterListPath: join(root, "missing.md"), phase: 3 });
+    expect(view.refusalLine).toContain("ما اتقارش");
+  });
+
+  it("names a refusal scan older than the column map instead of presenting it as now", () => {
+    const root = mkdtempSync(join(tmpdir(), "ruler-view-"));
+    mkdirSync(join(root, "docs/ledger"), { recursive: true });
+    writeFileSync(join(root, "docs/ledger/record-columns.json"), JSON.stringify({ measuredAt: "2026-11-05T00:00:00.000Z", tables: {} }));
+    writeFileSync(
+      join(root, "docs/ledger/refusal-scan.json"),
+      JSON.stringify({ measuredAt: "2026-10-01T00:00:00.000Z", total: 4, line: "رفض صامت: ٤ اسم في الكود ما لوش ردّ من المخزن" }),
+    );
+    const view = loadRulerView({ ledgerDir: join(root, "docs/ledger"), masterListPath: join(root, "missing.md"), phase: 3 });
+    expect(view.refusalLine).toContain("لقياس قديم");
+  });
+
   it("takes the phase from the last gate run when nobody passes one", () => {
     const root = mkdtempSync(join(tmpdir(), "ruler-view-"));
     mkdirSync(join(root, "docs/ledger"), { recursive: true });

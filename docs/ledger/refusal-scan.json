@@ -1,0 +1,1401 @@
+{
+  "measuredAt": "2026-11-05T12:19:53.515Z",
+  "mapMeasuredAt": "2026-11-05T12:11:56.391Z",
+  "filesScanned": 835,
+  "refsSeen": 3639,
+  "tablesInRecord": 160,
+  "deadPathsConsidered": 101,
+  "total": 213,
+  "byKind": {
+    "insert": 49,
+    "missing-table": 123,
+    "filter": 23,
+    "select": 18
+  },
+  "line": "رفض صامت: ٢١٣ اسم في الكود ما لوش ردّ من المخزن · إدخال ٤٩ · جدول مش موجود ١٢٣ · فلترة ٢٣ · اختيار ١٨",
+  "deadCodeLine": "رفض صامت: ١٧ اسم في الكود ما لوش ردّ من المخزن · جدول مش موجود ٦ · اختيار ٤ · فلترة ٣ · إدخال ٤",
+  "phantoms": [
+    {
+      "file": "app/actions/progress-actions.ts",
+      "table": "requests",
+      "column": "total_price",
+      "kind": "insert"
+    },
+    {
+      "file": "app/actions/progress-actions.ts",
+      "table": "requests",
+      "column": "payment_1",
+      "kind": "insert"
+    },
+    {
+      "file": "app/actions/progress-actions.ts",
+      "table": "requests",
+      "column": "payment_2",
+      "kind": "insert"
+    },
+    {
+      "file": "app/actions/progress-actions.ts",
+      "table": "requests",
+      "column": "payment_3",
+      "kind": "insert"
+    },
+    {
+      "file": "app/actions/progress-actions.ts",
+      "table": "requests",
+      "column": "payment_4",
+      "kind": "insert"
+    },
+    {
+      "file": "app/actions/progress-actions.ts",
+      "table": "requests",
+      "column": "last_notification_sent_at",
+      "kind": "insert"
+    },
+    {
+      "file": "app/actions/progress-actions.ts",
+      "table": "requests",
+      "column": "last_notification_type",
+      "kind": "insert"
+    },
+    {
+      "file": "app/actions/progress-actions.ts",
+      "table": "requests",
+      "column": "last_notified_stage",
+      "kind": "insert"
+    },
+    {
+      "file": "app/actions/progress-actions.ts",
+      "table": "requests",
+      "column": "last_notified_step",
+      "kind": "insert"
+    },
+    {
+      "file": "app/api/admin/2fa/disable/route.ts",
+      "table": "user_public_keys",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/admin/2fa/status/route.ts",
+      "table": "user_public_keys",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/admin/agent/goals/route.ts",
+      "table": "agent_goals_v2",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/admin/agent/goals/route.ts",
+      "table": "goal_progress_history",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/admin/agent/rollback/route.ts",
+      "table": "content_revisions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/admin/agent/rollback/route.ts",
+      "table": "site_settings",
+      "column": "id",
+      "kind": "filter"
+    },
+    {
+      "file": "app/api/admin/agent/rollback/route.ts",
+      "table": "site_settings",
+      "column": "setting_value",
+      "kind": "insert"
+    },
+    {
+      "file": "app/api/admin/agent/rollback/route.ts",
+      "table": "site_settings",
+      "column": "current_revision_id",
+      "kind": "insert"
+    },
+    {
+      "file": "app/api/admin/agent/rollback/route.ts",
+      "table": "site_sections",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/admin/command/route.ts",
+      "table": "user_public_keys",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/admin/keys/public/route.ts",
+      "table": "user_public_keys",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/admin/ops/draft/route.ts",
+      "table": "site_sections",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/admin/owner/approval/decision/route.ts",
+      "table": "purchase_orders",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/admin/owner/approval/decision/route.ts",
+      "table": "design_versions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/consultant/faq/route.ts",
+      "table": "consultant_pending_questions",
+      "column": "answered_at",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/admin-env-resolver.ts",
+      "table": "users",
+      "column": "role",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/admin-env-resolver.ts",
+      "table": "users",
+      "column": "is_admin",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/admin-extended-handlers.ts",
+      "table": "backup_snapshots",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/agent-tools/tool-handlers.ts",
+      "table": "site_sections",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/agent-tools/tool-handlers.ts",
+      "table": "content_revisions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/agent-tools/tool-handlers.ts",
+      "table": "site_settings",
+      "column": "id",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/agent-tools/tool-handlers.ts",
+      "table": "site_settings",
+      "column": "current_revision_id",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/agent-tools/tool-handlers.ts",
+      "table": "leads",
+      "column": "estimated_value",
+      "kind": "select"
+    },
+    {
+      "file": "lib/agent-tools/tool-handlers.ts",
+      "table": "bookings",
+      "column": "lead_id",
+      "kind": "select"
+    },
+    {
+      "file": "lib/agent-tools/tool-handlers.ts",
+      "table": "bookings",
+      "column": "total_amount",
+      "kind": "select"
+    },
+    {
+      "file": "lib/agent-tools/tool-handlers.ts",
+      "table": "agent_goals_v2",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/agents/SelfLearningEngine.ts",
+      "table": "agent_learnings",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/architect-tools.ts",
+      "table": "site_settings",
+      "column": "company_id",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/architect-tools.ts",
+      "table": "parallel_task_queue",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/architect-tools.ts",
+      "table": "conversions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/architect-tools.ts",
+      "table": "products",
+      "column": "price",
+      "kind": "select"
+    },
+    {
+      "file": "lib/atomic-state.ts",
+      "table": "system_snapshots",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/atomic-state.ts",
+      "table": "schema_migrations",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/auth/vault.ts",
+      "table": "recovery_vault",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/azenith-prime.ts",
+      "table": "swarm_keys",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/azenith-prime.ts",
+      "table": "time_capsules",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/azenith-prime.ts",
+      "table": "neural_cache",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/azenith-prime.ts",
+      "table": "imperial_notifications",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/azenith-sovereign.ts",
+      "table": "system_health_log",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/azenith-sovereign.ts",
+      "table": "parallel_task_queue",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/cron/purge-images.ts",
+      "table": "users",
+      "column": "last_activity_at",
+      "kind": "select"
+    },
+    {
+      "file": "lib/cron/purge-images.ts",
+      "table": "users",
+      "column": "last_activity_at",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/cron/purge-images.ts",
+      "table": "users",
+      "column": "special_requests",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/executive-persona.ts",
+      "table": "architect_memory",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/executive-persona.ts",
+      "table": "system_intelligence",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/executive-persona.ts",
+      "table": "architect_actions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/general-agent.ts",
+      "table": "general_suggestions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/market-simulator.ts",
+      "table": "market_scenarios",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/market-simulator.ts",
+      "table": "generated_pages",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/mastermind-core.ts",
+      "table": "architect_actions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/mastermind-core.ts",
+      "table": "system_intelligence",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/mastermind-core.ts",
+      "table": "system_snapshots",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/mastermind-core.ts",
+      "table": "semantic_cache",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/mastermind-core.ts",
+      "table": "architect_notifications",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/mastermind-core.ts",
+      "table": "room_sections",
+      "column": "seo_metadata",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/mastermind.ts",
+      "table": "system_intelligence",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/mastermind.ts",
+      "table": "architect_actions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/mastermind.ts",
+      "table": "system_snapshots",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/mastermind.ts",
+      "table": "architect_notifications",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/mastermind.ts",
+      "table": "room_sections",
+      "column": "seo_metadata",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/mastermind.ts",
+      "table": "semantic_cache",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/ops/cache-storage.ts",
+      "table": "semantic_cache",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/ops/memory/SwarmLearnings.ts",
+      "table": "ops_learning_applications",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/ops/memory/SyncLayer.ts",
+      "table": "ops_locks",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/pdf-generator.ts",
+      "table": "media_items",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/predatory-defense.ts",
+      "table": "blocked_ips",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/predatory-defense.ts",
+      "table": "security_threats",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/predatory-defense.ts",
+      "table": "defense_alerts",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/predictive-coding.ts",
+      "table": "code_patterns",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/predictive-coding.ts",
+      "table": "predicted_modules",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/proactive-agent.ts",
+      "table": "api_logs",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/proactive-agent.ts",
+      "table": "users",
+      "column": "last_active",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/proactive-agent.ts",
+      "table": "analytics_hourly",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/proactive-agent.ts",
+      "table": "monitoring_logs",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/proactive-agent.ts",
+      "table": "general_suggestions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/proactive-autonomy.ts",
+      "table": "architect_conversations",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/proactive-autonomy.ts",
+      "table": "system_intelligence",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/proactive-autonomy.ts",
+      "table": "architect_notifications",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/real-tool-executor.ts",
+      "table": "site_sections",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/real-tool-executor.ts",
+      "table": "content_revisions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/real-tool-executor.ts",
+      "table": "site_settings",
+      "column": "id",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/real-tool-executor.ts",
+      "table": "site_settings",
+      "column": "setting_value",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/real-tool-executor.ts",
+      "table": "site_settings",
+      "column": "current_revision_id",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/real-tool-executor.ts",
+      "table": "site_settings",
+      "column": "setting_key",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/real-tool-executor.ts",
+      "table": "site_settings",
+      "column": "setting_category",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/recursive-engine.ts",
+      "table": "evolution_log",
+      "column": "proposal",
+      "kind": "select"
+    },
+    {
+      "file": "lib/self-optimization.ts",
+      "table": "performance_bottlenecks",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/self-optimization.ts",
+      "table": "optimization_history",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/semantic-cache.ts",
+      "table": "semantic_cache",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/sentinel.ts",
+      "table": "api_keys",
+      "column": "status",
+      "kind": "select"
+    },
+    {
+      "file": "lib/sentinel.ts",
+      "table": "api_keys",
+      "column": "muted_until",
+      "kind": "select"
+    },
+    {
+      "file": "lib/sentinel.ts",
+      "table": "api_keys",
+      "column": "dedupe_key",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/sentinel.ts",
+      "table": "api_keys",
+      "column": "status",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/sentinel.ts",
+      "table": "api_keys",
+      "column": "applied_at",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/sentinel.ts",
+      "table": "api_keys",
+      "column": "resolved_at",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/sentinel.ts",
+      "table": "api_keys",
+      "column": "dedupe_key",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/sentinel.ts",
+      "table": "api_keys",
+      "column": "alert_id",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/sentinel.ts",
+      "table": "api_keys",
+      "column": "muted_until",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/seo-auto-fixer.ts",
+      "table": "site_sections",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/silent-architect.ts",
+      "table": "room_images",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/silent-architect.ts",
+      "table": "room_sections",
+      "column": "seo_metadata",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/silent-architect.ts",
+      "table": "intelligence_snapshots",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/silent-architect.ts",
+      "table": "parallel_task_queue",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/silent-architect.ts",
+      "table": "architect_notifications",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/site-config.ts",
+      "table": "site_config",
+      "column": "section_key",
+      "kind": "select"
+    },
+    {
+      "file": "lib/site-config.ts",
+      "table": "site_config",
+      "column": "content",
+      "kind": "select"
+    },
+    {
+      "file": "lib/site-config.ts",
+      "table": "site_config",
+      "column": "company_id",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/sovereign-os.ts",
+      "table": "semantic_cache",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/sovereign-os.ts",
+      "table": "cache_statistics",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/sovereign-os.ts",
+      "table": "api_keys_arsenal",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/sovereign-os.ts",
+      "table": "system_health_log",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/sovereign-status.ts",
+      "table": "sovereign_reports",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/supreme-architect.ts",
+      "table": "codebase_knowledge",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/supreme-architect.ts",
+      "table": "architect_actions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/supreme-architect.ts",
+      "table": "architect_conversations",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/swarm-consensus.ts",
+      "table": "swarm_nodes",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "id",
+      "kind": "select"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "category",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "key",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "id",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "value",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "confidence",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "source",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "last_confirmed",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "category",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "key",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "confidence",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "user_preferences",
+      "column": "value",
+      "kind": "select"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "title",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "description",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "target_metric",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "target_value",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "current_value",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "deadline",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "progress",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "steps",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "steps",
+      "kind": "select"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "progress",
+      "kind": "select"
+    },
+    {
+      "file": "lib/ultimate-agent/memory-store.ts",
+      "table": "agent_goals",
+      "column": "updated_at",
+      "kind": "insert"
+    },
+    {
+      "file": "lib/ultimate-agent/predictive-engine.ts",
+      "table": "page_views",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/ultimate-agent/predictive-engine.ts",
+      "table": "conversions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/ultimate-agent/predictive-engine.ts",
+      "table": "inquiries",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/ultimate-agent/predictive-engine.ts",
+      "table": "performance_metrics",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/analytics/analytics_engine.ts",
+      "table": "vanguard_leads",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/analytics/analytics_engine.ts",
+      "table": "vanguard_workflow_executions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/analytics/analytics_engine.ts",
+      "table": "vanguard_background_tasks",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/analytics/analytics_engine.ts",
+      "table": "vanguard_notifications",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/actions/lead_actions.ts",
+      "table": "vanguard_leads",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/actions/lead_actions.ts",
+      "table": "vanguard_opportunities",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/actions/task_actions.ts",
+      "table": "vanguard_tasks",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/event_bus.ts",
+      "table": "vanguard_api_usage",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/notifications/notification_engine.ts",
+      "table": "vanguard_notifications",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/routing/agent_loader.ts",
+      "table": "users",
+      "column": "role",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/vanguard/automation/routing/agent_loader.ts",
+      "table": "users",
+      "column": "is_active",
+      "kind": "filter"
+    },
+    {
+      "file": "lib/vanguard/automation/routing/agent_loader.ts",
+      "table": "vanguard_conversations",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/routing/agent_loader.ts",
+      "table": "vanguard_agent_metrics",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/routing/agent_loader.ts",
+      "table": "users",
+      "column": "metadata",
+      "kind": "select"
+    },
+    {
+      "file": "lib/vanguard/automation/routing/routing_actions.ts",
+      "table": "vanguard_leads",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/routing/routing_actions.ts",
+      "table": "vanguard_conversations",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/task_queue.ts",
+      "table": "vanguard_background_tasks",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/trigger_engine.ts",
+      "table": "vanguard_background_tasks",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/automation/workflow_engine.ts",
+      "table": "vanguard_background_tasks",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/channels/conversation_manager.ts",
+      "table": "vanguard_channel_identities",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/channels/conversation_manager.ts",
+      "table": "vanguard_conversations",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/evolution/evolution_engine.ts",
+      "table": "vanguard_evolution_history",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/execution/adapters/crm_adapter.ts",
+      "table": "vanguard_leads",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/execution/adapters/knowledge_adapter.ts",
+      "table": "vanguard_materials",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/execution/adapters/knowledge_adapter.ts",
+      "table": "vanguard_products",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/execution/adapters/knowledge_adapter.ts",
+      "table": "vanguard_learnings",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/execution/adapters/knowledge_adapter.ts",
+      "table": "vanguard_knowledge_relations",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/execution/execution_monitor.ts",
+      "table": "vanguard_api_usage",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/memory/memory_consolidator.ts",
+      "table": "vanguard_embeddings",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/memory/supabase_persistence.ts",
+      "table": "vanguard_consciousness_state",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/memory/supabase_persistence.ts",
+      "table": "vanguard_embeddings",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/memory/vector_store.ts",
+      "table": "vanguard_embeddings",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/observability/cache_manager.ts",
+      "table": "vanguard_cache",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/verification/citation_engine.ts",
+      "table": "vanguard_learnings",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "lib/vanguard/verification/citation_engine.ts",
+      "table": "vanguard_verification_log",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "services/crm/customer-communications.ts",
+      "table": "users",
+      "column": "name",
+      "kind": "select"
+    },
+    {
+      "file": "services/crm/customer-communications.ts",
+      "table": "sales_orders",
+      "column": "customer_id",
+      "kind": "select"
+    },
+    {
+      "file": "services/crm/customer-communications.ts",
+      "table": "payment_schedules",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "services/crm/customer-communications.ts",
+      "table": "sales_orders",
+      "column": "last_contact_at",
+      "kind": "filter"
+    },
+    {
+      "file": "services/crm/order-workflow.ts",
+      "table": "sales_orders",
+      "column": "request_id",
+      "kind": "insert"
+    },
+    {
+      "file": "services/crm/order-workflow.ts",
+      "table": "sales_orders",
+      "column": "customer_id",
+      "kind": "insert"
+    },
+    {
+      "file": "services/crm/order-workflow.ts",
+      "table": "sales_orders",
+      "column": "created_by_user_id",
+      "kind": "insert"
+    },
+    {
+      "file": "services/crm/order-workflow.ts",
+      "table": "payment_schedules",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "services/crm/order-workflow.ts",
+      "table": "sales_orders",
+      "column": "contract_signed_at",
+      "kind": "insert"
+    },
+    {
+      "file": "services/crm/order-workflow.ts",
+      "table": "production_jobs",
+      "column": "sales_order_id",
+      "kind": "insert"
+    },
+    {
+      "file": "services/crm/order-workflow.ts",
+      "table": "production_jobs",
+      "column": "sales_order_item_id",
+      "kind": "insert"
+    },
+    {
+      "file": "services/crm/order-workflow.ts",
+      "table": "sales_orders",
+      "column": "expected_delivery",
+      "kind": "filter"
+    },
+    {
+      "file": "services/local-storage.ts",
+      "table": "agent_memory",
+      "column": "value",
+      "kind": "select"
+    },
+    {
+      "file": "services/local-storage.ts",
+      "table": "agent_memory",
+      "column": "key",
+      "kind": "filter"
+    },
+    {
+      "file": "services/manufacturing/inventory.ts",
+      "table": "inventory_reservations",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "services/manufacturing/inventory.ts",
+      "table": "inventory_movements",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "services/manufacturing/production-scheduler.ts",
+      "table": "production_jobs",
+      "column": "scheduled_start",
+      "kind": "insert"
+    },
+    {
+      "file": "services/manufacturing/production-scheduler.ts",
+      "table": "production_jobs",
+      "column": "scheduled_end",
+      "kind": "insert"
+    },
+    {
+      "file": "services/manufacturing/production-scheduler.ts",
+      "table": "production_schedule_entries",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "services/manufacturing/production-scheduler.ts",
+      "table": "production_job_events",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "services/manufacturing/production-scheduler.ts",
+      "table": "production_jobs",
+      "column": "priority",
+      "kind": "filter"
+    },
+    {
+      "file": "services/manufacturing/production-scheduler.ts",
+      "table": "production_jobs",
+      "column": "assigned_to",
+      "kind": "insert"
+    },
+    {
+      "file": "services/manufacturing/production-scheduler.ts",
+      "table": "production_jobs",
+      "column": "quality_check_required",
+      "kind": "insert"
+    },
+    {
+      "file": "services/self-evolution.ts",
+      "table": "agent_learnings",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "services/self-evolution.ts",
+      "table": "agent_task_runs",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "services/workflow-learner.ts",
+      "table": "agent_learnings",
+      "column": "",
+      "kind": "missing-table"
+    }
+  ],
+  "deadCodePhantoms": [
+    {
+      "file": "app/api/auth/recovery/route.ts",
+      "table": "admin_profiles",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/channels/email/route.ts",
+      "table": "vanguard_leads",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/channels/email/route.ts",
+      "table": "vanguard_email_suppressions",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/channels/email/route.ts",
+      "table": "vanguard_email_engagement",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/cms/config/route.ts",
+      "table": "site_config",
+      "column": "section_key",
+      "kind": "select"
+    },
+    {
+      "file": "app/api/cms/config/route.ts",
+      "table": "site_config",
+      "column": "content",
+      "kind": "select"
+    },
+    {
+      "file": "app/api/cms/config/route.ts",
+      "table": "site_config",
+      "column": "company_id",
+      "kind": "filter"
+    },
+    {
+      "file": "app/api/cms/config/route.ts",
+      "table": "site_config",
+      "column": "section_key",
+      "kind": "filter"
+    },
+    {
+      "file": "app/api/cms/config/route.ts",
+      "table": "site_config",
+      "column": "content",
+      "kind": "insert"
+    },
+    {
+      "file": "app/api/cms/config/route.ts",
+      "table": "site_config",
+      "column": "published_at",
+      "kind": "insert"
+    },
+    {
+      "file": "app/api/cms/config/route.ts",
+      "table": "site_config",
+      "column": "company_id",
+      "kind": "insert"
+    },
+    {
+      "file": "app/api/cms/config/route.ts",
+      "table": "site_config",
+      "column": "section_key",
+      "kind": "insert"
+    },
+    {
+      "file": "app/api/cms/public-config/route.ts",
+      "table": "site_config",
+      "column": "section_key",
+      "kind": "select"
+    },
+    {
+      "file": "app/api/cms/public-config/route.ts",
+      "table": "site_config",
+      "column": "content",
+      "kind": "select"
+    },
+    {
+      "file": "app/api/cms/public-config/route.ts",
+      "table": "site_config",
+      "column": "company_id",
+      "kind": "filter"
+    },
+    {
+      "file": "app/api/curated-pages/route.ts",
+      "table": "curated_pages",
+      "column": "",
+      "kind": "missing-table"
+    },
+    {
+      "file": "app/api/orchestrator/route.ts",
+      "table": "ai_provider_health",
+      "column": "",
+      "kind": "missing-table"
+    }
+  ]
+}

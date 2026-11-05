@@ -24,10 +24,13 @@ export type PhaseView = {
   note: string | null;
 };
 
+export type RefusalRecord = { line: string | null; measuredAt: string | null } | null;
+
 export type RulerView = {
   line: string;
   phases: PhaseView[];
   deadLine: string;
+  refusalLine: string;
   missing: string[];
   asOf: string | null;
   gateWhen: string | null;
@@ -39,6 +42,8 @@ export function buildRulerView(input: {
   rows: LedgerRow[];
   dead: DeadTally | null;
   gate?: GateRecord;
+  refusal?: RefusalRecord;
+  columnsMeasuredAt?: string | null;
 }): RulerView {
   const gate = input.gate ?? null;
   const missing = [...input.ruler.missing.map((key) => MISSING_LABELS[key] ?? key)];
@@ -60,6 +65,14 @@ export function buildRulerView(input: {
     };
   });
 
+  const refusal = input.refusal ?? null;
+  let refusalLine = "ما اتقارش: مِقياس الرفض الصامت ما اتشغّلش";
+  if (refusal?.line) {
+    const stale =
+      refusal.measuredAt && input.columnsMeasuredAt && Date.parse(refusal.measuredAt) < Date.parse(input.columnsMeasuredAt);
+    refusalLine = stale ? `${refusal.line} — وده لقياس قديم مقابل خريطة الأعمدة` : refusal.line;
+  }
+
   return {
     line: formatRulerLine(input.ruler, {
       phase: input.phase,
@@ -68,6 +81,7 @@ export function buildRulerView(input: {
     }),
     phases,
     deadLine: input.dead ? formatDeadLine(input.dead) : "ما اتقارش: خريطة الميت — الأمر ما اتشغّلش",
+    refusalLine,
     missing,
     asOf: input.ruler.asOf ? arDigits(input.ruler.asOf) : null,
     gateWhen: gate?.when ? arDigits(gate.when) : null,
@@ -118,5 +132,19 @@ export function loadRulerView(options: {
       }
     : null;
 
-  return buildRulerView({ phase: options.phase ?? gateFile?.phase ?? 0, ruler, rows, dead, gate });
+  const columnsFile = readJson(join(dir, "record-columns.json"));
+  const scanFile = readJson(join(dir, "refusal-scan.json"));
+  const refusal: RefusalRecord = scanFile
+    ? { line: scanFile.line ?? null, measuredAt: scanFile.measuredAt ?? null }
+    : null;
+
+  return buildRulerView({
+    phase: options.phase ?? gateFile?.phase ?? 0,
+    ruler,
+    rows,
+    dead,
+    gate,
+    refusal,
+    columnsMeasuredAt: columnsFile?.measuredAt ?? null,
+  });
 }
