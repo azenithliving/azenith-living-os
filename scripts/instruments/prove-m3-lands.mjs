@@ -75,6 +75,11 @@ try {
   check("the measured tab logged no console error", consoleErrors.length === 0, consoleErrors.slice(0, 2).join(" | "));
   await screen.screenshot({ path: "scratch/m3-ruler-390.png", fullPage: true });
   say("screenshot", "scratch/m3-ruler-390.png");
+
+  // The card itself, framed — a full-page shot buries the thing the phase is about.
+  const card = screen.locator("div", { hasText: "الرفض الصامت" }).last();
+  await card.screenshot({ path: "scratch/m3-refusal-card-390.png" });
+  say("card screenshot", "scratch/m3-refusal-card-390.png");
 } catch (err) {
   check("the run completed", false, String(err).slice(0, 200));
 } finally {

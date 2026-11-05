@@ -1,13 +1,11 @@
 {
-  "generatedAt": "2026-11-05T12:34:39.474Z",
+  "generatedAt": "2026-11-05T12:48:42.378Z",
   "phase": 3,
-  "verdict": "REFUSED",
+  "verdict": "GREEN",
   "refused": [],
-  "notRun": [
-    "live"
-  ],
+  "notRun": [],
   "tests": 2575,
-  "live": null,
+  "live": "ردّ صفر",
   "gates": {
     "tests": {
       "exit": 0,
@@ -22,8 +20,8 @@
       "detail": "سليم"
     },
     "live": {
-      "exit": null,
-      "detail": "لم يُشغَّل"
+      "exit": 0,
+      "detail": "ردّ صفر"
     }
   }
 }
