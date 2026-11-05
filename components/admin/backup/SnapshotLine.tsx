@@ -9,7 +9,9 @@
  */
 import { useEffect, useState } from "react";
 
-import { arNum } from "@/lib/ops/metricLabels";
+import { arDigits } from "@/lib/ops/metricLabels";
+
+const ar = (value: unknown) => arDigits(String(value ?? ""));
 
 type BackupState = {
   success?: boolean;
@@ -62,17 +64,17 @@ export function SnapshotLine() {
 
   const stamp = state.stamp ?? null;
   const head = stamp?.day
-    ? `آخر نسخة ${arNum(stamp.day)} · ${arNum(stamp.tables ?? 0)} جدول · ${arNum(stamp.rows ?? 0)} سطر`
+    ? `آخر نسخة ${ar(stamp.day)} · ${ar(stamp.tables ?? 0)} جدول · ${ar(stamp.rows ?? 0)} سطر`
     : "آخر نسخة ما اتقارش: السجل ما فيهوش ختم النسخة";
   const when = stamp?.day ? (state.fresh ? " — النهاردة" : " — مش النهاردة") : "";
-  const trouble = stamp?.failures?.length ? ` · مرفوض ${arNum(stamp.failures.length)}` : "";
+  const trouble = stamp?.failures?.length ? ` · مرفوض ${ar(stamp.failures.length)}` : "";
 
   return (
     <p className="mt-2 text-[10px] leading-relaxed text-white/70" data-backup-line>
       {head}
       {when}
       {trouble}
-      {` · الطقم ${arNum(state.targets ?? 0)} جدول`}
+      {` · الطقم ${ar(state.targets ?? 0)} جدول`}
       {state.coverage?.line ? ` · ${state.coverage.line}` : state.coverageMissing ? ` · ${state.coverageMissing}` : ""}
     </p>
   );
