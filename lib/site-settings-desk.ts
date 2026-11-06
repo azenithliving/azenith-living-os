@@ -40,6 +40,7 @@ export type RollbackResult = {
   ok: boolean;
   appliedCount: number;
   keys: string[];
+  newKeys: string[];
   message: string;
   note?: string;
 };
@@ -53,8 +54,11 @@ async function readCurrentValue(supabase: SettingsClient, key: string) {
     .eq("key", key)
     .maybeSingle<{ value: unknown }>();
 
-  if (error) return { measured: false as const, value: null, reason: error };
-  return { measured: true as const, value: data ? data.value : null };
+  if (error) return { measured: false as const, existed: false, value: null, reason: error };
+  // `existed` is recorded because rolling back a key that did not exist before means DELETING a row,
+  // and deletion is the owner's word, not the desk's. Without this flag the rollback would have to
+  // guess from a null value — and a stored null is not the same fact as a missing row.
+  return { measured: true as const, existed: data !== null, value: data ? data.value : null };
 }
 
 /**
@@ -110,6 +114,7 @@ export async function writeSiteSetting(input: {
         settingKey: key,
         oldValue: current.value,
         newValue: input.value,
+        existedBefore: current.existed,
         reason: input.reason ?? null,
         category: input.category ?? "general",
         executionId: input.executionId ?? null,
@@ -159,6 +164,7 @@ export async function writeSiteSetting(input: {
       settingKey: key,
       oldValue: current.value,
       newValue: written.value,
+      existedBefore: current.existed,
       reason: input.reason ?? null,
       category: input.category ?? "general",
       executionId: input.executionId ?? null,
@@ -191,10 +197,10 @@ export async function rollbackSettingsForExecution(
   actor: string
 ): Promise<RollbackResult> {
   const id = String(executionId ?? "").trim();
-  if (!id) return { ok: false, appliedCount: 0, keys: [], message: "مفيش رقم تنفيذ — فما رجّعناش حاجة" };
+  if (!id) return { ok: false, appliedCount: 0, keys: [], newKeys: [], message: "مفيش رقم تنفيذ — فما رجّعناش حاجة" };
 
   const supabase = getSupabaseAdminClient();
-  if (!supabase) return { ok: false, appliedCount: 0, keys: [], message: "مفتاح المتجر مش ضابط — الرجوع ما اتعملش" };
+  if (!supabase) return { ok: false, appliedCount: 0, keys: [], newKeys: [], message: "مفتاح المتجر مش ضابط — الرجوع ما اتعملش" };
 
   const { data, error } = await supabase
     .from("audit_log")
@@ -206,7 +212,7 @@ export async function rollbackSettingsForExecution(
 
   if (error) {
     console.error("[SiteSettingsDesk] history read refused:", error);
-    return { ok: false, appliedCount: 0, keys: [], message: "سجل التغييرات ما ردّش — الرجوع ما اتقارش" };
+    return { ok: false, appliedCount: 0, keys: [], newKeys: [], message: "سجل التغييرات ما ردّش — الرجوع ما اتقارش" };
   }
 
   const newestPerKey = new Map<string, Record<string, unknown>>();
@@ -223,14 +229,24 @@ export async function rollbackSettingsForExecution(
       ok: false,
       appliedCount: 0,
       keys: [],
+      newKeys: [],
       message: "مفيش تغيير مسجّل للتنفيذ ده — فما رجّعناش حاجة",
     };
   }
 
   const keys: string[] = [];
+  const newKeys: string[] = [];
   const failures: string[] = [];
 
   for (const [key, details] of toRollback) {
+    if (details.existedBefore === false) {
+      // The key was created by this execution. Putting it back means deleting its row, and deleting
+      // from the record is the owner's decision — so the desk says which key is waiting for him
+      // instead of quietly writing a null the record would refuse, or erasing his data on its own.
+      newKeys.push(key);
+      continue;
+    }
+
     const out = await writeSiteSetting({
       key,
       value: details.oldValue,
@@ -244,15 +260,26 @@ export async function rollbackSettingsForExecution(
     else failures.push(key);
   }
 
+  const waitingSentence = newKeys.length
+    ? ` · ${newKeys.length} إعداد اتعمل جديد، والرجوع عنه حذف سطر وده قرار المالك`
+    : "";
   const message = keys.length
-    ? `رجّعنا ${keys.length} إعداد لقيمته قبل التنفيذ${failures.length ? ` · ${failures.length} ما رجعتش` : ""}.`
-    : "الرجوع ما اتعملش — المخزن رفض الكتابة.";
+    ? `رجّعنا ${keys.length} إعداد لقيمته قبل التنفيذ${failures.length ? ` · ${failures.length} ما رجعتش` : ""}${waitingSentence}.`
+    : newKeys.length
+      ? `الرجوع ما اتعملش: ${newKeys.length} إعداد اتعمل جديد، والرجوع عنه حذف سطر من المخزن — وده قرار المالك.`
+      : "الرجوع ما اتعملش — المخزن رفض الكتابة.";
+
+  const notes = [
+    ...(newKeys.length ? [`مستني كلمة المالك: ${newKeys.join("، ")}`] : []),
+    ...(failures.length ? [`ما رجعتش: ${failures.join("، ")}`] : []),
+  ];
 
   return {
-    ok: keys.length > 0 && failures.length === 0,
+    ok: keys.length > 0 && failures.length === 0 && newKeys.length === 0,
     appliedCount: keys.length,
     keys,
+    newKeys,
     message,
-    ...(failures.length ? { note: `ما رجعتش: ${failures.join("، ")}` } : {}),
+    ...(notes.length ? { note: notes.join(" · ") } : {}),
   };
 }

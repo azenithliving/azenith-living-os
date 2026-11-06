@@ -784,6 +784,8 @@ async function executeSettingUpdate(
     success: out.ok,
     executionId: context.executionId,
     message: out.message,
+    canRollback: out.applied && Boolean(out.historyId),
+    ...(out.historyId ? { rollbackId: out.historyId } : {}),
     ...(out.note ? { error: out.note } : {}),
     ...(!options.autoApprove && out.ok ? { requiresApproval: true } : {}),
     data: {

@@ -480,6 +480,10 @@ export async function executeSettingUpdate(
   return {
     success: out.ok,
     message: out.message,
+    // The door reads the rollback flag at the TOP of the result. A flag buried inside `data` is a
+    // button that never appears — a capability that works and still tells its owner it does not.
+    canRollback: out.applied && Boolean(out.historyId),
+    ...(out.historyId ? { rollbackId: out.historyId } : {}),
     ...(out.note ? { error: out.note } : {}),
     ...(!autoApprove && out.ok ? { requiresApproval: true } : {}),
     data: {

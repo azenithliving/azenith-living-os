@@ -209,6 +209,16 @@ describe("recording the change where the record already keeps history", () => {
     expect(event.outcome).toBe("success");
   });
 
+  it("records whether the key existed before, so a rollback never has to guess", async () => {
+    await desk.writeSiteSetting({ key: "theme", value: 1, actor: "ops-lead", executionId: "exec-a" });
+    expect(world.historyCalls[0].details.existedBefore).toBe(true);
+
+    world.existingRow = null;
+    world.historyCalls.length = 0;
+    await desk.writeSiteSetting({ key: "brand_new", value: 1, actor: "ops-lead", executionId: "exec-b" });
+    expect(world.historyCalls[0].details.existedBefore).toBe(false);
+  });
+
   it("records a waiting change without touching the live value", async () => {
     const out = await desk.writeSiteSetting({
       key: "theme",
@@ -221,13 +231,17 @@ describe("recording the change where the record already keeps history", () => {
     expect(world.upserts).toEqual([]);
     expect(world.historyCalls).toHaveLength(1);
     expect(world.historyCalls[0].details.status).toBe("waiting");
+    // A waiting change is rolled back the same way, so its row carries the same flag — measured by
+    // sabotage: without this assertion the desk could drop the flag from the waiting row and every
+    // test would stay green while a later rollback guessed about a key that never existed.
+    expect(world.historyCalls[0].details.existedBefore).toBe(true);
   });
 });
 
 describe("rolling a change back", () => {
   it("puts the recorded old value back through the same one key-based write", async () => {
     world.historyRows = [
-      { details: { table: "site_settings", settingKey: "theme", oldValue: { primary: "black" }, status: "applied" } },
+      { details: { table: "site_settings", settingKey: "theme", oldValue: { primary: "black" }, existedBefore: true, status: "applied" } },
     ];
 
     const out = await desk.rollbackSettingsForExecution("exec-1", "ops-lead");
@@ -237,6 +251,34 @@ describe("rolling a change back", () => {
     expect(world.upserts[0].payload.value).toEqual({ primary: "black" });
     expect(world.upserts[0].payload.key).toBe("theme");
     expect(world.upserts[0].onConflict).toBe("key");
+  });
+
+  it("refuses to roll back a setting that did not exist before, because that is a delete", async () => {
+    world.historyRows = [
+      { details: { table: "site_settings", settingKey: "qa_new_key", oldValue: null, existedBefore: false, status: "applied" } },
+    ];
+
+    const out = await desk.rollbackSettingsForExecution("exec-1", "ops-lead");
+
+    expect(out.ok).toBe(false);
+    expect(out.appliedCount).toBe(0);
+    expect(out.newKeys).toEqual(["qa_new_key"]);
+    expect(String(out.message)).toContain("قرار المالك");
+    expect(world.upserts).toEqual([]);
+  });
+
+  it("rolls back the ones it can and names the one that needs his word", async () => {
+    world.historyRows = [
+      { details: { table: "site_settings", settingKey: "qa_new_key", oldValue: null, existedBefore: false, status: "applied" } },
+      { details: { table: "site_settings", settingKey: "theme", oldValue: 3, existedBefore: true, status: "applied" } },
+    ];
+
+    const out = await desk.rollbackSettingsForExecution("exec-1", "ops-lead");
+
+    expect(out.appliedCount).toBe(1);
+    expect(out.keys).toEqual(["theme"]);
+    expect(out.newKeys).toEqual(["qa_new_key"]);
+    expect(String(out.note ?? "")).toContain("qa_new_key");
   });
 
   it("says nothing was recorded instead of pretending a rollback happened", async () => {

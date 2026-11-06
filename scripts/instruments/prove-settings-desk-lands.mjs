@@ -66,25 +66,30 @@ try {
   check("the gate opened for the instrument", !page.url().includes("/gate/login"), page.url());
 
   const newValue = { primary: "ذهبي-قياس" };
+  const secondValue = { primary: "نحاسي-قياس" };
 
-  const execRes = await ctx.request.fetch(`${SITE}/api/admin/agent/tools/execute`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: JSON.stringify({
-      toolName: "setting_update",
-      params: { key: MARKER_KEY, value: newValue, reason: "قياس مكتب الإعدادات", autoApprove: true },
-      skipApproval: true,
-    }),
-  });
-  const execBody = await execRes.json().catch(() => ({}));
-  say("tool answer", `status=${execRes.status()} success=${execBody.success} message=${String(execBody.message ?? "").slice(0, 120)}`);
-  const executionId = execBody.executionId ?? null;
+  const runTool = async (value) => {
+    const r = await ctx.request.fetch(`${SITE}/api/admin/agent/tools/execute`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: JSON.stringify({
+        toolName: "setting_update",
+        params: { key: MARKER_KEY, value, reason: "قياس مكتب الإعدادات", autoApprove: true },
+        skipApproval: true,
+      }),
+    });
+    return { status: r.status(), body: await r.json().catch(() => ({})) };
+  };
+
+  const first = await runTool(newValue);
+  say("tool answer (create)", `status=${first.status} success=${first.body.success} message=${String(first.body.message ?? "").slice(0, 120)}`);
+  const createExecutionId = first.body.executionId ?? null;
   check(
     "the employee tool changed the setting and said so in measured words",
-    execRes.status() === 200 && execBody.success === true && typeof executionId === "string",
-    `status=${execRes.status()} success=${execBody.success}`,
+    first.status === 200 && first.body.success === true && typeof createExecutionId === "string",
+    `status=${first.status} success=${first.body.success}`,
   );
-  check("the tool says the change can be rolled back", execBody.canRollback === true, `canRollback=${execBody.canRollback}`);
+  check("the tool says the change can be rolled back", first.body.canRollback === true, `canRollback=${first.body.canRollback}`);
 
   const applied = await readRow();
   say("row after the change", JSON.stringify({ value: applied?.value, by: applied?.updated_by }));
@@ -96,7 +101,7 @@ try {
 
   const history = await sql`
     select details, actor from public.audit_log
-    where event_type = 'setting_change' and details->>'executionId' = ${executionId}
+    where event_type = 'setting_change' and details->>'executionId' = ${createExecutionId}
     order by timestamp desc limit 5`;
   say("history rows for the execution", history.length);
   check("the change landed in the history drawer the store already keeps", history.length >= 1, `rows=${history.length}`);
@@ -106,11 +111,21 @@ try {
     JSON.stringify(history[0]?.details ?? null).slice(0, 160),
   );
   check("the history row names who changed it", Boolean(history[0]?.actor), history[0]?.actor ?? "(none)");
+  check("the history row says the key did not exist before", history[0]?.details?.existedBefore === false, JSON.stringify(history[0]?.details?.existedBefore));
+
+  // A second change, so the rollback target is a value that really existed.
+  const second = await runTool(secondValue);
+  const updateExecutionId = second.body.executionId ?? null;
+  say("tool answer (update)", `status=${second.status} success=${second.body.success}`);
+  const history2 = await sql`
+    select details from public.audit_log
+    where event_type = 'setting_change' and details->>'executionId' = ${updateExecutionId} limit 3`;
+  check("the second change recorded that the key already existed", history2[0]?.details?.existedBefore === true, JSON.stringify(history2[0]?.details ?? null).slice(0, 160));
 
   const rollback = await ctx.request.fetch(`${SITE}/api/admin/agent/rollback`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: JSON.stringify({ executionId }),
+    data: JSON.stringify({ executionId: updateExecutionId }),
   });
   const rollbackBody = await rollback.json().catch(() => ({}));
   say("rollback answer", `status=${rollback.status()} success=${rollbackBody.success} message=${String(rollbackBody.message ?? rollbackBody.error ?? "").slice(0, 140)}`);
@@ -118,15 +133,30 @@ try {
 
   const restored = await readRow();
   say("row after the rollback", JSON.stringify(restored?.value ?? null));
-  check("the value went back to what it was", restored === null || JSON.stringify(restored.value) === JSON.stringify(before?.value ?? null), JSON.stringify(restored?.value));
+  check("the value went back to what it was", JSON.stringify(restored?.value ?? null) === JSON.stringify(newValue), JSON.stringify(restored?.value));
+
+  // Rolling back the change that CREATED the key means deleting its row — the desk must refuse and
+  // name whose decision that is, not write a null the record would reject.
+  const rollbackCreate = await ctx.request.fetch(`${SITE}/api/admin/agent/rollback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: JSON.stringify({ executionId: createExecutionId }),
+  });
+  const rollbackCreateBody = await rollbackCreate.json().catch(() => ({}));
+  say("rollback of a new key", `status=${rollbackCreate.status()} error=${String(rollbackCreateBody.error ?? "").slice(0, 160)}`);
+  check(
+    "undoing a key that did not exist is refused as the owner's decision",
+    rollbackCreate.status() === 404 && String(rollbackCreateBody.error ?? "").includes("قرار المالك"),
+    `status=${rollbackCreate.status()}`,
+  );
 
   const secondRollback = await ctx.request.fetch(`${SITE}/api/admin/agent/rollback`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: JSON.stringify({ executionId }),
+    data: JSON.stringify({ executionId: updateExecutionId }),
   });
   const secondBody = await secondRollback.json().catch(() => ({}));
-  say("second rollback", `status=${secondRollback.status()} error=${String(secondBody.error ?? "").slice(0, 120)}`);
+  say("second rollback of the same execution", `status=${secondRollback.status()} error=${String(secondBody.error ?? "").slice(0, 120)}`);
   check(
     "pressing rollback twice is refused in words, not run again",
     secondRollback.status() === 404 && String(secondBody.error ?? "").includes("مفيش تغيير مسجّل"),
