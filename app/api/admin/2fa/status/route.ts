@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 
+/**
+ * What a drawer actually said, measured against the record 2026-11-06: an empty `.single()` is not
+ * `{data:null, error:null}` — it answers error `PGRST116` («Cannot coerce the result to a single JSON
+ * object»), which means the drawer answered and held nothing. `PGRST205` (no such table) and `42501`
+ * (locked) are refusals, and a refusal must never be printed as «off» or «none».
+ */
+function drawerOutcome(error: unknown, data: unknown): "answered" | "empty" | "refused" {
+  if (!error) return data ? "answered" : "empty";
+  if ((error as { code?: string })?.code === "PGRST116") return "empty";
+  return "refused";
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -31,11 +43,17 @@ export async function GET(request: NextRequest) {
       .eq("user_id", user.id)
       .single();
 
-    if (fetchError) console.error("[2FA Status] code drawer refused:", fetchError);
-    if (keyError) console.error("[2FA Status] keys drawer refused:", keyError);
+    if (drawerOutcome(fetchError, user2FA) === "refused") console.error("[2FA Status] code drawer refused:", fetchError);
+    if (drawerOutcome(keyError, publicKey) === "refused") console.error("[2FA Status] keys drawer refused:", keyError);
 
-    const twoFactorState = fetchError ? "not-measured" : user2FA?.is_enabled ? "on" : "off";
-    const publicKeyState = keyError ? "not-measured" : publicKey ? "enrolled" : "none";
+    const twoFactorState =
+      drawerOutcome(fetchError, user2FA) === "refused"
+        ? "not-measured"
+        : user2FA?.is_enabled
+          ? "on"
+          : "off";
+    const publicKeyState =
+      drawerOutcome(keyError, publicKey) === "refused" ? "not-measured" : publicKey ? "enrolled" : "none";
 
     const body: Record<string, unknown> = {
       twoFactorState,
