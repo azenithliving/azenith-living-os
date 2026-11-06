@@ -1,30 +1,30 @@
 {
-  "measuredAt": "2026-11-06T14:21:53.240Z",
-  "mapMeasuredAt": "2026-11-05T12:11:56.391Z",
-  "filesScanned": 836,
+  "measuredAt": "2026-11-06T17:14:00.460Z",
+  "mapMeasuredAt": "2026-11-06T17:13:48.801Z",
+  "filesScanned": 837,
   "entryFiles": 281,
   "refsSeen": 3641,
   "fromSites": 1345,
   "unresolvedFromSites": 195,
-  "tablesInRecord": 160,
+  "tablesInRecord": 161,
   "deadPathsConsidered": 101,
-  "total": 203,
-  "distinct": 139,
+  "total": 199,
+  "distinct": 138,
   "byKind": {
     "insert": 42,
-    "missing-table": 123,
+    "missing-table": 119,
     "filter": 22,
     "select": 16
   },
-  "line": "رفض صامت: ٢٠٣ موضع في الكود ما لوش ردّ عند المخزن، منها ١٣٩ اسم مختلف · إدخال ٤٢ · جدول مش موجود ١٢٣ · فلترة ٢٢ · اختيار ١٦",
+  "line": "رفض صامت: ١٩٩ موضع في الكود ما لوش ردّ عند المخزن، منها ١٣٨ اسم مختلف · إدخال ٤٢ · جدول مش موجود ١١٩ · فلترة ٢٢ · اختيار ١٦",
   "coverageLine": "تغطية المسح: ١٣٤٥ موضع سؤال في الكود · ١٩٥ منهم جدولهم مكتوب في متغيّر ما اتحلّش — دول ما اتقارش، مش مرفوضين",
   "classification": {
-    "live": 49,
+    "live": 45,
     "uncalled": 45,
     "unreached": 57,
     "unknown": 52
   },
-  "classificationLine": "فحص الكود مش إثبات تشغيل: مسار ظاهر ٤٩ · بلا استيراد ظاهر ٤٥ · مسار غير موصول ٥٧ · ما اتقارش ٥٢",
+  "classificationLine": "فحص الكود مش إثبات تشغيل: مسار ظاهر ٤٥ · بلا استيراد ظاهر ٤٥ · مسار غير موصول ٥٧ · ما اتقارش ٥٢",
   "deadCodeLine": "رفض صامت: ١٧ موضع في الكود ما لوش ردّ عند المخزن، منها ١٠ اسم مختلف · جدول مش موجود ٦ · اختيار ٤ · فلترة ٣ · إدخال ٤",
   "phantoms": [
     {
@@ -136,30 +136,6 @@
       "reach": "unreached"
     },
     {
-      "file": "app/api/admin/2fa/disable/route.ts",
-      "table": "user_public_keys",
-      "column": "",
-      "kind": "missing-table",
-      "at": 2570,
-      "sites": [
-        2570
-      ],
-      "symbol": "POST",
-      "reach": "live"
-    },
-    {
-      "file": "app/api/admin/2fa/status/route.ts",
-      "table": "user_public_keys",
-      "column": "",
-      "kind": "missing-table",
-      "at": 776,
-      "sites": [
-        776
-      ],
-      "symbol": "GET",
-      "reach": "live"
-    },
-    {
       "file": "app/api/admin/agent/goals/route.ts",
       "table": "agent_goals_v2",
       "column": "",
@@ -242,33 +218,6 @@
       "at": 2114,
       "sites": [
         2114
-      ],
-      "symbol": "POST",
-      "reach": "live"
-    },
-    {
-      "file": "app/api/admin/command/route.ts",
-      "table": "user_public_keys",
-      "column": "",
-      "kind": "missing-table",
-      "at": 2984,
-      "sites": [
-        2984,
-        8055
-      ],
-      "symbol": "POST",
-      "reach": "live"
-    },
-    {
-      "file": "app/api/admin/keys/public/route.ts",
-      "table": "user_public_keys",
-      "column": "",
-      "kind": "missing-table",
-      "at": 1435,
-      "sites": [
-        1435,
-        2073,
-        3684
       ],
       "symbol": "POST",
       "reach": "live"

@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-11-05T12:11:56.391Z",
+  "measuredAt": "2026-11-06T17:13:48.801Z",
   "measuredBy": "node scripts/instruments/record-columns.mjs",
   "note": "الأعمدة كما ردّ بها المخزن الآن — مش كما كتبتها الـmigrations",
   "tables": {
@@ -1943,6 +1943,23 @@
       "user_id",
       "preferences",
       "updated_at"
+    ],
+    "user_public_keys": [
+      "id",
+      "user_id",
+      "credential_id",
+      "credential_public_key",
+      "public_key",
+      "key_type",
+      "aaguid",
+      "counter",
+      "device_type",
+      "backed_up",
+      "transports",
+      "origin",
+      "label",
+      "created_at",
+      "last_used_at"
     ],
     "users": [
       "id",
