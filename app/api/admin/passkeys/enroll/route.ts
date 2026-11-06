@@ -3,10 +3,8 @@ import { cookies } from "next/headers";
 import { verifyRegistrationResponse } from "@simplewebauthn/server";
 
 import { requireAdminApi } from "@/lib/admin-api-guard";
-import { resolveSiteUrl } from "@/lib/admin-env-resolver";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-
-import { CHALLENGE_COOKIE, rpHost } from "../options/route";
+import { ENROLL_CHALLENGE_COOKIE, passkeyOrigin, passkeyRpId } from "@/lib/passkey-params";
 
 function refuse(status: number, message: string, extra: Record<string, unknown> = {}) {
   return NextResponse.json({ saved: false, message, ...extra }, { status });
@@ -26,14 +24,14 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => ({}));
   const store = await cookies();
-  const expectedChallenge = store.get(CHALLENGE_COOKIE)?.value;
+  const expectedChallenge = store.get(ENROLL_CHALLENGE_COOKIE)?.value;
 
   if (!expectedChallenge) {
     return refuse(400, "مفيش تحدي مطلوب من المتصفح — اطلب التحدي الأول");
   }
 
   // The challenge answers once. Leaving it set would let the same device answer be replayed.
-  const clearChallenge = () => store.delete(CHALLENGE_COOKIE);
+  const clearChallenge = () => store.delete(ENROLL_CHALLENGE_COOKIE);
 
   const label = typeof body?.label === "string" ? body.label.trim() : "";
   if (!label) {
@@ -52,8 +50,8 @@ export async function POST(request: NextRequest) {
     verification = await verifyRegistrationResponse({
       response: body?.response,
       expectedChallenge,
-      expectedOrigin: resolveSiteUrl(),
-      expectedRPID: rpHost(),
+      expectedOrigin: passkeyOrigin(),
+      expectedRPID: passkeyRpId(),
       requireUserVerification: true,
     });
   } catch (error) {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { WORDMARK_AR } from "@/lib/seo";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, AlertCircle, Shield, KeyRound } from "lucide-react";
+import PasskeyLoginButton from "@/components/gate/PasskeyLoginButton";
 
 export default function GateLoginPage() {
   const router = useRouter();
@@ -118,6 +119,16 @@ export default function GateLoginPage() {
 
             {step === "login" ? (
               <>
+                {/* The key is the front door now; the typed password stays underneath as the way out
+                    if a device is ever lost. Neither one replaces the other. */}
+                <PasskeyLoginButton />
+
+                <div className="flex items-center gap-3 pt-1 text-xs text-white/30">
+                  <span className="h-px flex-1 bg-white/10" />
+                  أو بكلمة السر
+                  <span className="h-px flex-1 bg-white/10" />
+                </div>
+
                 {/* Email Input */}
                 <div>
                   <label className="mb-2 block text-sm text-white/70">البريد الإلكتروني</label>

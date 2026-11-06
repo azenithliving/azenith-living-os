@@ -3,23 +3,13 @@ import { cookies } from "next/headers";
 import { generateRegistrationOptions } from "@simplewebauthn/server";
 
 import { requireAdminApi } from "@/lib/admin-api-guard";
-import { resolveSiteUrl } from "@/lib/admin-env-resolver";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
-
-/** The one cookie name the enrollment pair shares, and the one place its lifetime is decided. */
-export const CHALLENGE_COOKIE = "passkey_enroll_challenge";
-export const CHALLENGE_TTL_SECONDS = 300;
-
-/**
- * The address the browser will bind the key to.
- *
- * A passkey is minted for one origin and never works on another, so this comes from the store's own
- * site-url owner (`resolveSiteUrl`) rather than a second hardcoded host — the same fact already has an
- * owner, and a second one is how a key gets enrolled that can never be used.
- */
-export function rpHost(): string {
-  return new URL(resolveSiteUrl()).hostname;
-}
+import {
+  ENROLL_CHALLENGE_COOKIE,
+  PASSKEY_RP_NAME,
+  challengeCookieOptions,
+  passkeyRpId,
+} from "@/lib/passkey-params";
 
 /**
  * GET /api/admin/passkeys/options — the challenge the owner's device must answer.
@@ -44,8 +34,8 @@ export async function GET() {
       .eq("user_id", user?.id);
 
     const options = await generateRegistrationOptions({
-      rpName: "أزينث",
-      rpID: rpHost(),
+      rpName: PASSKEY_RP_NAME,
+      rpID: passkeyRpId(),
       userName: user?.email ?? "",
       userDisplayName: user?.email ?? "",
       attestationType: "none",
@@ -57,13 +47,7 @@ export async function GET() {
     });
 
     const store = await cookies();
-    store.set(CHALLENGE_COOKIE, options.challenge, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: CHALLENGE_TTL_SECONDS,
-      path: "/api/admin/passkeys",
-    });
+    store.set(ENROLL_CHALLENGE_COOKIE, options.challenge, challengeCookieOptions());
 
     return NextResponse.json(options);
   } catch (error) {
