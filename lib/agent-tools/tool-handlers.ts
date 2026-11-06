@@ -16,6 +16,7 @@ import type {
 } from "./tool-registry";
 import type { Json } from "@/lib/supabase/database.types";
 import { resolveMasterCompanyId } from "@/lib/admin-env-resolver";
+import { writeSiteSetting } from "@/lib/site-settings-desk";
 
 // ============================================
 // Helper Functions
@@ -458,115 +459,38 @@ export async function executeSettingUpdate(
   params: Record<string, unknown>,
   context: ToolExecutionContext
 ): Promise<ToolExecutionResult> {
-  const supabase = await getSupabase();
+  const key = String(params.key ?? "").trim();
+  const category = (params.category as string) || "general";
+  const reason = String(params.reason || "تحديث إعداد");
+  const autoApprove = Boolean(params.autoApprove);
 
-  try {
-    const key = params.key as string;
-    const value = params.value as Record<string, unknown>;
-    const category = (params.category as string) || "general";
-    const reason = String(params.reason || "تحديث إعداد");
-    const autoApprove = Boolean(params.autoApprove) || false;
+  // One desk owns the write, the read-back and the history row — this handler only translates the
+  // tool's parameters into its contract. The copy this replaced wrote columns the record does not
+  // have and a drawer that was never created, so every call failed on the first statement.
+  const out = await writeSiteSetting({
+    key,
+    value: params.value,
+    actor: context.actorUserId || "system",
+    reason,
+    category,
+    executionId: context.executionId ?? null,
+    apply: autoApprove,
+  });
 
-    // Get current setting
-    const { data: existingSetting, error: fetchError } = await supabase
-      .from("site_settings")
-      .select("*")
-      .eq("key", key)
-      .maybeSingle();
-
-    const oldValue = existingSetting?.value || null;
-
-    // Create revision
-    const { data: revision, error: revisionError } = await supabase
-      .from("content_revisions")
-      .insert({
-        execution_id: context.executionId,
-        company_id: context.companyId || null,
-        actor_user_id: context.actorUserId || null,
-        table_name: "site_settings",
-        record_id: existingSetting?.id || crypto.randomUUID(),
-        field_name: "setting_value",
-        old_value: oldValue as Json,
-        new_value: value as Json,
-        change_reason: reason,
-        change_category: category as "general" | "content" | "seo" | "technical" | "security" | "integration",
-        revision_status: autoApprove ? "applied" : "draft",
-      })
-      .select()
-      .single();
-
-    if (revisionError) {
-      throw revisionError;
-    }
-
-    // If not auto-approved, return approval required
-    if (!autoApprove) {
-      return {
-        success: true,
-        message: `تم إنشاء طلب تعديل الإعداد "${key}" - ينتظر الموافقة`,
-        requiresApproval: true,
-        approvalId: revision.id,
-        data: {
-          settingKey: key,
-          oldValue,
-          newValue: value,
-          revisionId: revision.id,
-        },
-        executionId: context.executionId,
-      };
-    }
-
-    // Apply setting update
-    let result;
-    if (existingSetting) {
-      // Update existing
-      result = await supabase
-        .from("site_settings")
-        .update({
-          value: value as Json,
-          current_revision_id: revision.id,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existingSetting.id)
-        .select()
-        .single();
-    } else {
-      // Create new
-      result = await supabase
-        .from("site_settings")
-        .insert({
-          key: key,
-          value: value as Json,
-          current_revision_id: revision.id,
-        })
-        .select()
-        .single();
-    }
-
-    if (result.error) {
-      throw result.error;
-    }
-
-    return {
-      success: true,
-      message: `تم تحديث الإعداد "${key}" بنجاح`,
-      data: {
-        settingKey: key,
-        oldValue,
-        newValue: value,
-        revisionId: revision.id,
-        canRollback: true,
-      },
-      executionId: context.executionId,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: `فشل تحديث الإعداد: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
-      error: error instanceof Error ? error.message : "Unknown error",
-      executionId: context.executionId,
-    };
-  }
+  return {
+    success: out.ok,
+    message: out.message,
+    ...(out.note ? { error: out.note } : {}),
+    ...(!autoApprove && out.ok ? { requiresApproval: true } : {}),
+    data: {
+      settingKey: out.key,
+      oldValue: out.oldValue,
+      newValue: out.newValue,
+      historyId: out.historyId,
+      canRollback: out.applied && Boolean(out.historyId),
+    },
+    executionId: context.executionId,
+  };
 }
 
 // ============================================

@@ -9,6 +9,7 @@
  * - Full audit trail and rollback support
  */
 
+import { writeSiteSetting } from "@/lib/site-settings-desk";
 import { createClient } from "./supabase-server";
 import { put } from "@vercel/blob";
 import { logAuditEvent, classifyRisk, createApprovalRequest } from "./ultimate-agent/security-manager";
@@ -754,165 +755,47 @@ async function executeSettingUpdate(
   params: Record<string, unknown>,
   context: ToolExecutionContext,
   options: ToolExecutionOptions
-): Promise<ExecutionResult<{ revisionId: string; oldValue: unknown; newValue: unknown; canRollback: boolean }>> {
-  const supabase = await createClient();
+): Promise<ExecutionResult<{ settingKey: string; oldValue: unknown; newValue: unknown; historyId: string | null; canRollback: boolean }>> {
   const startTime = Date.now();
-
-  const settingKey = params.key as string;
-  const newValue = params.value;
-  const reason = (params.reason as string) || "Setting update via agent";
-
-  if (!settingKey) {
+  const key = String(params.key ?? "").trim();
+  if (!key) {
     return {
       success: false,
       executionId: context.executionId,
-      message: "Setting key is required",
+      message: "اسم الإعداد مطلوب — مفيش حاجة تتغير",
       error: "Missing required parameter: key",
       executionTimeMs: Date.now() - startTime,
     };
   }
 
-  // Get current setting
-  const { data: existingSetting, error: fetchError } = await supabase
-    .from("site_settings")
-    .select("*")
-    .eq("key", settingKey)
-    .single();
-
-  if (fetchError && fetchError.code !== "PGRST116") {
-    // Not found is ok, we'll create it
-    return {
-      success: false,
-      executionId: context.executionId,
-      message: `Failed to fetch setting: ${fetchError.message}`,
-      error: fetchError.message,
-      executionTimeMs: Date.now() - startTime,
-    };
-  }
-
-  const oldValue = existingSetting?.setting_value || null;
-
-  // Create revision
-  const revisionData: ContentRevisionInsert = {
-    execution_id: context.executionId,
-    company_id: context.companyId || null,
-    actor_user_id: context.actorUserId || null,
-    table_name: "site_settings",
-    record_id: existingSetting?.id || crypto.randomUUID(),
-    field_name: "setting_value",
-    old_value: oldValue as Json,
-    new_value: newValue as Json,
-    change_reason: reason,
-    change_category: (params.category as ChangeCategory) || "general",
-    revision_status: options.autoApprove ? "applied" as RevisionStatus : "draft",
-  };
-
-  const { data: revision, error: revisionError } = await supabase
-    .from("content_revisions")
-    .insert(revisionData)
-    .select()
-    .single();
-
-  if (revisionError) {
-    return {
-      success: false,
-      executionId: context.executionId,
-      message: `Failed to create revision: ${revisionError.message}`,
-      error: revisionError.message,
-      executionTimeMs: Date.now() - startTime,
-    };
-  }
-
-  // If not auto-approved, require approval
-  if (!options.autoApprove) {
-    await supabase
-      .from("content_revisions")
-      .update({ revision_status: "pending_approval" as RevisionStatus })
-      .eq("id", revision.id);
-
-    return {
-      success: true,
-      executionId: context.executionId,
-      message: `Setting update requires approval. Revision ID: ${revision.id}`,
-      requiresApproval: true,
-      data: {
-        revisionId: revision.id,
-        oldValue,
-        newValue,
-        canRollback: true,
-      },
-      executionTimeMs: Date.now() - startTime,
-    };
-  }
-
-  // Apply the update
-  let updateResult;
-  if (existingSetting) {
-    updateResult = await supabase
-      .from("site_settings")
-      .update({
-        setting_value: newValue,
-        current_revision_id: revision.id,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", existingSetting.id)
-      .select()
-      .single();
-  } else {
-    updateResult = await supabase
-      .from("site_settings")
-      .insert({
-        setting_key: settingKey,
-        setting_value: newValue,
-        current_revision_id: revision.id,
-        setting_category: (params.category as string) || "general",
-      })
-      .select()
-      .single();
-  }
-
-  if (updateResult.error) {
-    return {
-      success: false,
-      executionId: context.executionId,
-      message: `Failed to update setting: ${updateResult.error.message}`,
-      error: updateResult.error.message,
-      executionTimeMs: Date.now() - startTime,
-    };
-  }
-
-  // Mark revision as applied
-  await supabase
-    .from("content_revisions")
-    .update({
-      revision_status: "applied" as RevisionStatus,
-      applied_at: new Date().toISOString(),
-      applied_by: context.actorUserId,
-    })
-    .eq("id", revision.id);
-
-  await logAuditEvent(
-    "setting_update",
-    `Updated setting "${settingKey}"`,
-    context.actorUserId || "system",
-    { settingKey, revisionId: revision.id },
-    "success",
-    { companyId: context.companyId, actorUserId: context.actorUserId, commandLogId: context.commandLogId }
-  );
+  // The same desk the employee tool calls. Two copies of this write is how the second one kept
+  // naming columns the record does not have, and a drawer that was never created.
+  const out = await writeSiteSetting({
+    key,
+    value: params.value,
+    actor: context.actorUserId || "system",
+    reason: String(params.reason || "تحديث إعداد عبر الوكيل"),
+    category: (params.category as string) || "general",
+    executionId: context.executionId ?? null,
+    apply: Boolean(options.autoApprove),
+  });
 
   return {
-    success: true,
+    success: out.ok,
     executionId: context.executionId,
-    message: `Successfully updated setting "${settingKey}"`,
+    message: out.message,
+    ...(out.note ? { error: out.note } : {}),
+    ...(!options.autoApprove && out.ok ? { requiresApproval: true } : {}),
     data: {
-      revisionId: revision.id,
-      oldValue,
-      newValue,
-      canRollback: true,
+      settingKey: out.key,
+      oldValue: out.oldValue,
+      newValue: out.newValue,
+      historyId: out.historyId,
+      canRollback: out.applied && Boolean(out.historyId),
     },
     executionTimeMs: Date.now() - startTime,
-    affectedTables: ["site_settings", "content_revisions"],
-    affectedRows: 1,
+    affectedTables: out.applied ? ["site_settings", "audit_log"] : ["audit_log"],
+    affectedRows: out.applied ? 1 : 0,
   };
 }
 
