@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AdsSettingsCard from "@/components/admin/settings/AdsSettingsCard";
 import ConsultantFaqCard from "@/components/admin/settings/ConsultantFaqCard";
+import PasskeysCard from "@/components/admin/settings/PasskeysCard";
 import { SettingsFactsDesk } from "@/components/admin/settings/SettingsFactsDesk";
 import { StoreNumbersCard } from "@/components/admin/settings/StoreNumbersCard";
 import { supabaseService } from "@/lib/supabase-service";
@@ -36,6 +37,7 @@ export default async function V2SettingsPage() {
         <div className="space-y-6">
           <AdsSettingsCard />
           <ConsultantFaqCard />
+          <PasskeysCard />
         </div>
 
         <Link
