@@ -96,7 +96,7 @@ beforeEach(() => {
 });
 
 describe("writing a setting", () => {
-  it("sends only the four columns the record actually has", async () => {
+  it("sends only the three columns the record accepts", async () => {
     await desk.writeSiteSetting({
       key: "theme",
       value: { primary: "gold" },
@@ -107,10 +107,20 @@ describe("writing a setting", () => {
 
     expect(world.upserts).toHaveLength(1);
     const payload = world.upserts[0].payload;
-    expect(new Set(Object.keys(payload))).toEqual(new Set(["key", "value", "updated_at", "updated_by"]));
-    for (const invented of ["id", "setting_value", "current_revision_id", "setting_key", "company_id"]) {
+    // Measured on the live store: `updated_by` is a uuid carrying a foreign key to `users(id)`, so
+    // writing an actor name there is refused (22P02) — and filling it would mean inventing a
+    // customer row. The actor belongs to the history drawer, which has an `actor` column for it.
+    expect(new Set(Object.keys(payload))).toEqual(new Set(["key", "value", "updated_at"]));
+    for (const invented of ["id", "setting_value", "current_revision_id", "setting_key", "company_id", "updated_by"]) {
       expect(payload, invented).not.toHaveProperty(invented);
     }
+  });
+
+  it("records who changed it in the history row, where the actor column accepts a name", async () => {
+    await desk.writeSiteSetting({ key: "theme", value: 1, actor: "ops-lead", executionId: "exec-2" });
+
+    expect(world.upserts[0].payload).not.toHaveProperty("updated_by");
+    expect(world.historyCalls[0].actor).toBe("ops-lead");
   });
 
   it("keys the row by its own key, never by a column the record does not have", async () => {

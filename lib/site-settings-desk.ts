@@ -6,9 +6,14 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 /**
  * The one owner of «change a store setting».
  *
- * The shape here is measured, not designed (live store, 2026-11-06): `site_settings` answers exactly
- * four columns — `key`, `value`, `updated_at`, `updated_by` — and its natural key is `key`. The code
- * that used to write settings spoke a different table: it filtered `site_settings.id`, wrote
+ * The shape here is measured, not designed (live store, 2026-11-06): `site_settings` is
+ * `key` text primary key · `value` jsonb · `updated_at` timestamptz · `updated_by` **uuid with a
+ * foreign key to `users(id)`**. So the desk writes three columns and leaves `updated_by` alone: the
+ * name of whoever changed the setting is not a customer row, and inventing one to fill a column is
+ * how the owner's customer table ends up holding an employee. The actor belongs to the history
+ * drawer instead, which has an `actor` column that accepts it.
+ *
+ * The code this replaces spoke a different table entirely: it filtered `site_settings.id`, wrote
  * `setting_value` and `current_revision_id`, and inserted its history into `content_revisions`, a
  * drawer the record has never heard of (PGRST205). Every one of those writes was refused, so the
  * employee tool «غيّر إعداد» failed on its first statement every time it was called.
@@ -17,7 +22,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
  * Inventing a second drawer for the same fact is how a store ends up with two answers to «what
  * changed, and what was it before».
  */
-export const SETTING_COLUMNS = ["key", "value", "updated_at", "updated_by"] as const;
+export const SETTING_WRITE_COLUMNS = ["key", "value", "updated_at"] as const;
 export const SETTING_HISTORY_KIND = "setting_change";
 
 export type SettingWriteResult = {
@@ -130,12 +135,11 @@ export async function writeSiteSetting(input: {
         key,
         value: input.value as never,
         updated_at: new Date().toISOString(),
-        updated_by: actor,
       } as never,
       { onConflict: "key" }
     )
-    .select("key, value")
-    .single<{ key: string; value: unknown }>();
+    .select("key, value, updated_at")
+    .single<{ key: string; value: unknown; updated_at: string }>();
 
   if (error) {
     console.error("[SiteSettingsDesk] write refused:", error);

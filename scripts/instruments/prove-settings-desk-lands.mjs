@@ -89,10 +89,13 @@ try {
   const applied = await readRow();
   say("row after the change", JSON.stringify({ value: applied?.value, by: applied?.updated_by }));
   check("the record holds the new value", JSON.stringify(applied?.value ?? null) === JSON.stringify(newValue), JSON.stringify(applied?.value));
-  check("the row says who changed it", Boolean(applied?.updated_by), applied?.updated_by ?? "(none)");
+  // `updated_by` is a uuid with a foreign key to `users(id)` (measured in the live schema), so the
+  // desk does not write it — the actor belongs to the history row. Asserting a name landed in the
+  // uuid column is how this proof failed its first run, and the refusal was correct.
+  check("the desk left the uuid column alone", applied?.updated_by === null, `updated_by=${applied?.updated_by}`);
 
   const history = await sql`
-    select details from public.audit_log
+    select details, actor from public.audit_log
     where event_type = 'setting_change' and details->>'executionId' = ${executionId}
     order by timestamp desc limit 5`;
   say("history rows for the execution", history.length);
@@ -102,6 +105,7 @@ try {
     history.some((h) => h.details?.settingKey === MARKER_KEY && h.details?.status === "applied" && h.details?.newValue),
     JSON.stringify(history[0]?.details ?? null).slice(0, 160),
   );
+  check("the history row names who changed it", Boolean(history[0]?.actor), history[0]?.actor ?? "(none)");
 
   const rollback = await ctx.request.fetch(`${SITE}/api/admin/agent/rollback`, {
     method: "POST",
