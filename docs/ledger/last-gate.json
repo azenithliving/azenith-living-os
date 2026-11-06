@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-06T14:33:33.111Z",
+  "generatedAt": "2026-11-06T16:55:18.589Z",
   "phase": 3,
   "verdict": "GREEN",
   "refused": [],
   "notRun": [],
-  "tests": 2608,
-  "live": "RESULT: 11 of 11 checks passed · failed=0",
+  "tests": 2617,
+  "live": "RESULT: 7 of 7 checks passed · failed=0",
   "gates": {
     "tests": {
       "exit": 0,
-      "detail": "2608 اختبار · 2605 أخضر · 0 أحمر · 3 متخطّى"
+      "detail": "2617 اختبار · 2614 أخضر · 0 أحمر · 3 متخطّى"
     },
     "typecheck": {
       "exit": 0,
@@ -21,7 +21,7 @@
     },
     "live": {
       "exit": 0,
-      "detail": "RESULT: 11 of 11 checks passed · failed=0"
+      "detail": "RESULT: 7 of 7 checks passed · failed=0"
     }
   }
 }
