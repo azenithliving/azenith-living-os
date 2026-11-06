@@ -10,6 +10,8 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextRequest } from "next/server";
 
+import { isAdminLoginPath } from "@/lib/admin-login-paths";
+
 // Check if Redis credentials are available
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
@@ -188,6 +190,15 @@ export function shouldRateLimit(
   // No verb at all is treated as a write: a caller that does not say what it is doing gets the
   // strict ceiling, never the loose one.
   const isRead = verb === "GET" || verb === "HEAD";
+
+  /**
+   * The admin doors a browser may knock on before it has a session. The outer gate lets exactly these
+   * addresses through unsigned, so the same list has to be capped here — an exposed front door with no
+   * ceiling is how a stranger spends the owner's free request quota on his login screen.
+   */
+  if (isAdminLoginPath(pathname)) {
+    return { shouldLimit: true, isSensitive: !isRead };
+  }
 
   // Check sensitive paths first (more specific)
   if (SENSITIVE_PATHS.some((path) => pathname.startsWith(path))) {

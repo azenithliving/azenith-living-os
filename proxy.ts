@@ -9,6 +9,7 @@ import {
 } from "@/lib/rate-limit";
 import { isValidRoomSlug } from "@/lib/rooms-catalog";
 import { isAuthorizedAdminEmail } from "@/lib/admin-access";
+import { isAdminLoginPath } from "@/lib/admin-login-paths";
 import { legacyAddressRedirect, legacyTabRedirect, retiredAgentQueryRedirect } from "@/lib/ops/legacy-address-table";
 
 /**
@@ -21,11 +22,10 @@ export async function proxy(request: NextRequest) {
   const referer = request.headers.get('referer');
   const host = request.headers.get("host")?.toLowerCase();
   let rateLimitHeaders: Record<string, string> | null = null;
-  const isAdminLoginApi =
-    pathname === "/api/admin/verify-2fa" ||
-    pathname === "/api/admin/gate/validate" ||
-    pathname === "/api/admin/gate/health" ||
-    pathname === "/api/admin/gate/reset-2fa";
+  // Doors a browser may knock on before it has a session — the list and its ceiling share one owner
+  // (`lib/admin-login-paths.ts`), because the passkey login door is the first of them that a stranger
+  // is supposed to reach.
+  const isAdminLoginApi = isAdminLoginPath(pathname);
 
   const applyResponseHeaders = (response: NextResponse) => {
     if (!rateLimitHeaders) return response;
