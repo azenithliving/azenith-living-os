@@ -1,18 +1,19 @@
 #!/usr/bin/env node
 /**
- * prove-2fa-truths-land.mjs — the protection door must say what it measured, on the published site.
+ * prove-2fa-truths-land.mjs — the protection door must agree with the record, on the published site.
  *
- * Two owner words are being checked here, both measured 2026-11-06:
- *  - «الورقة القديمة تتمسح»: the retired code-2FA row is gone, so the door must answer that the code
- *    lock is off because the drawer answered and held nothing — not because it refused.
- *  - «المفتاح أيوه»: the key desk is not installed yet, so the door must name the refusal
- *    («the record did not answer») instead of reporting `hasPublicKey:false` as a fact.
+ * Owner's words 2026-11-06: «الورقة القديمة تتمسح» and «المفتاح أيوه». This instrument asks the door
+ * what it says, counts the record's own rows beside it, and fails if the two disagree — because the
+ * defect this desk keeps dying of is a refusal or a locked drawer answering as «nothing here». A door
+ * that reads with the browser key passes while the record holds rows, and that is what the comparison
+ * catches.
  *
- * Read-only: it signs in and asks one GET. It writes no rows, so there is nothing to clean up.
+ * Read-only: one signed GET and two counts. It writes no rows, so there is nothing to clean up.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 
 import { chromium } from "@playwright/test";
+import postgres from "postgres";
 
 const SITE = "https://azenith-living.vercel.app";
 const env = Object.fromEntries(
@@ -51,12 +52,20 @@ try {
   const body = await res.json().catch(() => null);
   say("door answer", JSON.stringify(body ?? null).slice(0, 300));
 
+  // The record's own count, read beside the door's answer: if the door ever goes back to the browser
+  // key it will say «none» while rows exist, and this comparison is what catches it.
+  const sql = postgres(env.DIRECT_URL, { max: 1 });
+  const rows = await sql`select count(*)::int as n from public.user_public_keys`;
+  const codeRows = await sql`select count(*)::int as n from public.user_2fa`;
+  await sql.end();
+  const expectedKeyState = rows[0].n === 0 ? "none" : "enrolled";
+  const expectedCodeState = codeRows[0].n === 0 ? "off" : "on";
+  say("record counts", `keys=${rows[0].n} code-rows=${codeRows[0].n}`);
+
   check("the door answers the signed-in owner", res.status() === 200 && !!body, `status=${res.status()}`);
-  check("the retired code lock now reads off, not unmeasured", body?.twoFactorState === "off", body?.twoFactorState ?? "(none)");
-  check("the door does not claim the code lock is on", body?.enabled === false, body?.enabled ?? "(none)");
-  check("the missing key desk is named as unmeasured, not as no key", body?.publicKeyState === "not-measured", body?.publicKeyState ?? "(none)");
-  check("the refusal carries its own Arabic sentence", typeof body?.publicKeyNote === "string" && body.publicKeyNote.includes("ما ردّش"), body?.publicKeyNote ?? "(none)");
-  check("a refusal is never printed as a reassuring boolean", body && !("hasPublicKey" in body), Object.keys(body ?? {}).join(","));
+  check("the code lock answer matches the record's own rows", body?.twoFactorState === expectedCodeState, `${body?.twoFactorState} vs ${expectedCodeState}`);
+  check("the key answer matches the record's own rows", body?.publicKeyState === expectedKeyState, `${body?.publicKeyState} vs ${expectedKeyState}`);
+  check("a measured empty is printed as a boolean, a refusal never is", body?.publicKeyState === "not-measured" ? !("hasPublicKey" in body) : body?.hasPublicKey === (body?.publicKeyState === "enrolled"), Object.keys(body ?? {}).join(","));
 
   const screen = await ctx.newPage();
   const consoleErrors = [];
