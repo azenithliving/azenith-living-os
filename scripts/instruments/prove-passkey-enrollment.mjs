@@ -68,14 +68,16 @@ try {
 
   const cdp = await ctx.newCDPSession(page);
   await cdp.send("WebAuthn.enable");
+  // The parameter name is read from this Chromium build's own protocol (148.0.7778.96 answered
+  // `/json/protocol`: the field is `options`, and `transport` allows internal|usb|nfc|ble|cable).
+  // Guessing it produced «Invalid parameters» for every combination.
   const { authenticatorId } = await cdp.send("WebAuthn.addVirtualAuthenticator", {
-    authenticator: {
+    options: {
       protocol: "ctap2",
       transport: "internal",
       hasResidentKey: true,
       hasUserVerification: true,
       isUserVerified: true,
-      automaticVerifyAttestationChallenges: true,
     },
   });
   say("virtual authenticator", authenticatorId);
@@ -95,7 +97,7 @@ try {
       },
       { timeout: 45000 },
     )
-    .then((h) => h.textContent())
+    .then((h) => h.jsonValue())
     .catch(() => null);
   say("card answer", notice ?? "(null)");
   check("the device answered the challenge and the store accepted it", typeof notice === "string" && notice.includes("اتسجل") && !notice.includes("ما اتسجلش"), notice ?? "");

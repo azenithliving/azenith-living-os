@@ -1,11 +1,11 @@
 {
-  "measuredAt": "2026-11-06T17:14:00.460Z",
+  "measuredAt": "2026-11-06T17:58:17.087Z",
   "mapMeasuredAt": "2026-11-06T17:13:48.801Z",
-  "filesScanned": 837,
-  "entryFiles": 281,
-  "refsSeen": 3641,
-  "fromSites": 1345,
-  "unresolvedFromSites": 195,
+  "filesScanned": 841,
+  "entryFiles": 284,
+  "refsSeen": 3651,
+  "fromSites": 1350,
+  "unresolvedFromSites": 197,
   "tablesInRecord": 161,
   "deadPathsConsidered": 101,
   "total": 199,
@@ -17,7 +17,7 @@
     "select": 16
   },
   "line": "رفض صامت: ١٩٩ موضع في الكود ما لوش ردّ عند المخزن، منها ١٣٨ اسم مختلف · إدخال ٤٢ · جدول مش موجود ١١٩ · فلترة ٢٢ · اختيار ١٦",
-  "coverageLine": "تغطية المسح: ١٣٤٥ موضع سؤال في الكود · ١٩٥ منهم جدولهم مكتوب في متغيّر ما اتحلّش — دول ما اتقارش، مش مرفوضين",
+  "coverageLine": "تغطية المسح: ١٣٥٠ موضع سؤال في الكود · ١٩٧ منهم جدولهم مكتوب في متغيّر ما اتحلّش — دول ما اتقارش، مش مرفوضين",
   "classification": {
     "live": 45,
     "uncalled": 45,
