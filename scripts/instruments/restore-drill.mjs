@@ -129,9 +129,12 @@ try {
   if (swept.length) console.log(`swept ${swept.length} marker rows on the way out`);
   await sql.end();
   const failed = checks.filter((c) => !c.ok);
-  lines.push(`RESULT: ${checks.length - failed.length} of ${checks.length} checks passed · failed=${failed.length}`);
+  const result = `RESULT: ${checks.length - failed.length} of ${checks.length} checks passed · failed=${failed.length}`;
+  lines.push(result);
   if (failed.length) lines.push("FAILED CHECKS: " + failed.map((f) => f.name).join(" · "));
   writeFileSync("scratch/restore-drill.out", lines.join("\n") + "\n");
+  // The gate reads the live count off stdout; without this it can only record that the script exited.
+  console.log(result);
   console.log(failed.length ? "DRILL_FAILED" : "DRILL_PASSED");
   if (failed.length) process.exitCode = 1;
 }
