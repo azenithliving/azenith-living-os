@@ -421,16 +421,13 @@ export async function executeBackupCreate(
 ): Promise<ToolExecutionResult> {
   // The chat's «اعمل نسخة احتياطية» and the morning round now call the same module, so the store has
   // one copy with one measured shape instead of two owners disagreeing about what was saved.
-  const { runNightlySnapshot, SNAPSHOT_BUCKET } = await import("@/lib/ops/nightly-snapshot");
-  const { arNum } = await import("@/lib/ops/metricLabels");
+  const { runNightlySnapshot, snapshotReport, SNAPSHOT_BUCKET } = await import("@/lib/ops/nightly-snapshot");
   try {
     const snap = await runNightlySnapshot();
-    const ok = snap.failures.length === 0;
+    const report = snapshotReport(snap);
     return {
-      success: ok,
-      message: ok
-        ? `النسخة الاحتياطية اتعملت: ${arNum(snap.tables)} جداول و${arNum(snap.rows)} سطراً، ${arNum(Math.round(snap.bytes / 1024))} كيلوبايت في الدرج الخاص — وكل ملف اتمّت قراءته من الدرج تاني وعدّاده طابق السجل.`
-        : `النسخة الاحتياطية وقفت: ${snap.failures[0]}`,
+      success: report.ok,
+      message: report.message,
       data: {
         day: snap.day,
         bucket: SNAPSHOT_BUCKET,

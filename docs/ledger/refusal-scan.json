@@ -1,11 +1,11 @@
 {
-  "measuredAt": "2026-11-05T15:45:00.283Z",
+  "measuredAt": "2026-11-06T14:21:53.240Z",
   "mapMeasuredAt": "2026-11-05T12:11:56.391Z",
   "filesScanned": 836,
   "entryFiles": 281,
-  "refsSeen": 3644,
-  "fromSites": 1347,
-  "unresolvedFromSites": 196,
+  "refsSeen": 3641,
+  "fromSites": 1345,
+  "unresolvedFromSites": 195,
   "tablesInRecord": 160,
   "deadPathsConsidered": 101,
   "total": 203,
@@ -17,7 +17,7 @@
     "select": 16
   },
   "line": "رفض صامت: ٢٠٣ موضع في الكود ما لوش ردّ عند المخزن، منها ١٣٩ اسم مختلف · إدخال ٤٢ · جدول مش موجود ١٢٣ · فلترة ٢٢ · اختيار ١٦",
-  "coverageLine": "تغطية المسح: ١٣٤٧ موضع سؤال في الكود · ١٩٦ منهم جدولهم مكتوب في متغيّر ما اتحلّش — دول ما اتقارش، مش مرفوضين",
+  "coverageLine": "تغطية المسح: ١٣٤٥ موضع سؤال في الكود · ١٩٥ منهم جدولهم مكتوب في متغيّر ما اتحلّش — دول ما اتقارش، مش مرفوضين",
   "classification": {
     "live": 49,
     "uncalled": 45,
@@ -359,8 +359,8 @@
         8431,
         9640,
         9836,
-        48338,
-        48681
+        48040,
+        48383
       ],
       "symbol": "executeSectionCreate",
       "reach": "live"
@@ -370,9 +370,9 @@
       "table": "content_revisions",
       "column": "",
       "kind": "missing-table",
-      "at": 15079,
+      "at": 14781,
       "sites": [
-        15079
+        14781
       ],
       "symbol": "executeSettingUpdate",
       "reach": "live"
@@ -382,9 +382,9 @@
       "table": "site_settings",
       "column": "id",
       "kind": "filter",
-      "at": 16358,
+      "at": 16060,
       "sites": [
-        16358
+        16060
       ],
       "symbol": "executeSettingUpdate",
       "reach": "live"
@@ -394,10 +394,10 @@
       "table": "site_settings",
       "column": "current_revision_id",
       "kind": "insert",
-      "at": 16358,
+      "at": 16060,
       "sites": [
-        16358,
-        16680
+        16060,
+        16382
       ],
       "symbol": "executeSettingUpdate",
       "reach": "live"
@@ -407,9 +407,9 @@
       "table": "leads",
       "column": "estimated_value",
       "kind": "select",
-      "at": 18607,
+      "at": 18309,
       "sites": [
-        18607
+        18309
       ],
       "symbol": "executeRevenueAnalysis",
       "reach": "uncalled"
@@ -419,9 +419,9 @@
       "table": "bookings",
       "column": "lead_id",
       "kind": "select",
-      "at": 18910,
+      "at": 18612,
       "sites": [
-        18910
+        18612
       ],
       "symbol": "executeRevenueAnalysis",
       "reach": "uncalled"
@@ -431,9 +431,9 @@
       "table": "bookings",
       "column": "total_amount",
       "kind": "select",
-      "at": 18910,
+      "at": 18612,
       "sites": [
-        18910
+        18612
       ],
       "symbol": "executeRevenueAnalysis",
       "reach": "uncalled"
@@ -443,12 +443,12 @@
       "table": "agent_goals_v2",
       "column": "",
       "kind": "missing-table",
-      "at": 44364,
+      "at": 44066,
       "sites": [
-        44364,
-        45757,
-        46768,
-        46867
+        44066,
+        45459,
+        46470,
+        46569
       ],
       "symbol": "executeGoalCreate",
       "reach": "live"

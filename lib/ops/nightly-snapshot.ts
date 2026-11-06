@@ -24,6 +24,7 @@ import "server-only";
 import { gzipSync, gunzipSync } from "node:zlib";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 import { sendSecurityAlert } from "@/lib/telegram-notify";
+import { arNum } from "./metricLabels.ts";
 
 export const SNAPSHOT_BUCKET = "snapshots";
 
@@ -63,6 +64,20 @@ export interface SnapshotOutcome {
 
 export function snapshotObjectPath(day: string, table: string): string {
   return `${day}/${table}.jsonl.gz`;
+}
+
+/**
+ * The one sentence the store's copy answers with. The chat's command, the agent's tool and the
+ * morning round all report through this, so no surface can count its own tables and call that the job.
+ */
+export function snapshotReport(outcome: SnapshotOutcome): { ok: boolean; message: string } {
+  const ok = outcome.failures.length === 0;
+  return {
+    ok,
+    message: ok
+      ? `النسخة الاحتياطية اتعملت: ${arNum(outcome.tables)} جداول و${arNum(outcome.rows)} سطراً، ${arNum(Math.round(outcome.bytes / 1024))} كيلوبايت في الدرج الخاص — وكل ملف اتمّت قراءته من الدرج تاني وعدّاده طابق السجل.`
+      : `النسخة الاحتياطية وقفت: ${outcome.failures[0]}`,
+  };
 }
 
 export function snapshotDay(at: Date = new Date()): string {

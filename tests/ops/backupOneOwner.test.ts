@@ -30,8 +30,10 @@ const runNightlySnapshot = vi.fn(async () => {
 });
 
 vi.mock("@/lib/ops/nightly-snapshot", async () => {
-  const actual = await vi.importActual<{ SNAPSHOT_BUCKET: string }>("@/lib/ops/nightly-snapshot");
-  return { SNAPSHOT_BUCKET: actual.SNAPSHOT_BUCKET, runNightlySnapshot };
+  // The mock keeps the module's real shape: only the round itself is faked, so a surface that reads
+  // the copy's report from the owner module still gets the real sentence.
+  const actual = await vi.importActual<typeof import("@/lib/ops/nightly-snapshot")>("@/lib/ops/nightly-snapshot");
+  return { ...actual, runNightlySnapshot };
 });
 vi.mock("@/lib/supabase-server", () => ({ createClient: () => ({ auth: { getUser: async () => ({ data: { user: null } }) } }) }));
 vi.mock("@supabase/supabase-js", () => ({ createClient: () => null }));
@@ -40,6 +42,7 @@ vi.mock("@/lib/seo-analyzer", () => ({ analyzeSEO: vi.fn() }));
 vi.mock("@/lib/architect-tools", () => ({ getSystemHealth: vi.fn(), getAnalyticsReport: vi.fn() }));
 
 const { executeBackupCreate, executeBackupList } = await import("@/lib/agent-tools/tool-handlers");
+const { snapshotReport } = await import("@/lib/ops/nightly-snapshot");
 
 const context = { executionId: "test-exec", companyId: "test-company", actorUserId: "owner" } as never;
 
@@ -57,6 +60,8 @@ describe("the chat's backup tools and the nightly round share one implementation
     expect(out.message).toContain(`${arNum(9)} جداول`);
     expect(out.message).toContain(`${arNum(2112)} سطراً`);
     expect((out.data as { objects: string[] }).objects).toEqual(["2026-10-19/agent_messages.jsonl.gz"]);
+    // One owner for the sentence: the tool says exactly what the copy desk's report says.
+    expect(out.message).toBe(snapshotReport(await runNightlySnapshot()).message);
   });
 
   it("a copy that stopped is reported as stopped, not as a success", async () => {

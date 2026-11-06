@@ -629,75 +629,29 @@ export async function restartService(
 // 9. BACKUP DB - Create database backup
 // ============================================
 export async function backupDb(
-  args: string[],
-  context: CommandContext
+  _args: string[],
+  _context: CommandContext
 ): Promise<CommandResult> {
   try {
-    // Check if user is owner (email in MASTER_ADMIN_EMAILS)
-    const masterEmails = process.env.MASTER_ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
-    const isOwner = !!(context.userEmail && masterEmails.includes(context.userEmail));
-
-    // Check if in bypass mode (development, BYPASS env var, or owner)
-    const isBypassMode = context.bypassRls ||
-      process.env.NODE_ENV === "development" ||
-      process.env.BYPASS === "true" ||
-      isOwner;
-
-    // Use admin client for bypass mode to skip RLS
-    const { getSupabaseAdminClient } = await import("./supabase-admin");
-    const supabaseAdmin = isBypassMode ? getSupabaseAdminClient() : null;
-    const client = supabaseAdmin || context.supabase;
-
-    // Export critical tables
-    const tables = [
-      "api_keys",
-      "immutable_command_log",
-      "user_2fa",
-      "user_public_keys",
-    ];
-
-    const backup: Record<string, any[]> = {};
-
-    for (const table of tables) {
-      let query = client.from(table).select("*");
-      
-      // Only filter by user_id if NOT in bypass mode
-      if (!isBypassMode) {
-        query = query.eq("user_id", context.userId);
-      }
-      
-      const { data, error } = await query;
-
-      if (!error && data) {
-        backup[table] = data;
-      }
-    }
-
-    const backupData = {
-      timestamp: new Date().toISOString(),
-      userId: context.userId,
-      tables: backup,
-    };
-
-    // Store backup metadata using admin client in bypass mode
-    const insertClient = supabaseAdmin || context.supabase;
-    const { error } = await insertClient.from("backups").insert({
-      user_id: context.userId,
-      backup_data: backupData,
-      created_at: new Date().toISOString(),
-    });
-
-    if (error) {
-      return { success: false, message: commandFailed("ما قدرناش نعمل نسخة احتياطية", error) };
-    }
+    // The store's copy has had one owner since 2026-10-19: the measured desk that pages every table
+    // in scope, reads each file back from the private bucket, and stamps the day. This command used to
+    // read four tables by name — one of them never in the record — keep only what answered, and report
+    // the count that arrived as the whole job. The doors that reach it are admin-only either way.
+    const { runNightlySnapshot, snapshotReport, SNAPSHOT_BUCKET } = await import("./ops/nightly-snapshot");
+    const snap = await runNightlySnapshot();
+    const report = snapshotReport(snap);
 
     return {
-      success: true,
-      message: `النسخة الاحتياطية اتعملت من ${arNum(Object.keys(backup).length)} جدول.`,
+      success: report.ok,
+      message: report.message,
       data: {
-        tables: Object.keys(backup),
-        timestamp: backupData.timestamp,
-        recordCount: Object.values(backup).reduce((sum, arr) => sum + arr.length, 0),
+        day: snap.day,
+        bucket: SNAPSHOT_BUCKET,
+        tables: snap.tables,
+        rows: snap.rows,
+        bytes: snap.bytes,
+        failures: snap.failures,
+        objects: snap.writes.map((w) => w.path),
       },
     };
   } catch (error) {
