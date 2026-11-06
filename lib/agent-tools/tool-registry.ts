@@ -922,7 +922,11 @@ export async function executeTool(
     return {
       ...result,
       executionId: context.executionId,
-      canRollback: !!tool.rollbackHandler && result.success,
+      // A handler that measured whether its own change can be undone answers for itself. Overwriting
+      // it with `!!tool.rollbackHandler` discarded better evidence than the registry had: measured on
+      // the published site, the settings desk had just written the history row that makes a rollback
+      // possible, and the door still told the owner there was nothing to undo.
+      canRollback: result.canRollback ?? Boolean(tool.rollbackHandler && result.success),
     };
   } catch (error) {
     return {
