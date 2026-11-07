@@ -2,6 +2,8 @@ import "server-only";
 
 import { recordAuditEvent } from "@/lib/ops/audit-record";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+import { arDigits } from "@/lib/ops/metricLabels";
+import { factLabel } from "@/lib/settings/facts";
 
 /**
  * The one owner of «change a store setting».
@@ -28,6 +30,7 @@ export const SETTING_HISTORY_KIND = "setting_change";
 export type SettingWriteResult = {
   ok: boolean;
   applied: boolean;
+  canRollback: boolean;
   key: string;
   oldValue: unknown;
   newValue: unknown;
@@ -77,10 +80,12 @@ export async function writeSiteSetting(input: {
   status?: "applied" | "rolled_back";
 }): Promise<SettingWriteResult> {
   const key = String(input.key ?? "").trim();
+  const label = factLabel(key) ?? "الإعداد";
   const actor = String(input.actor ?? "").trim() || "system";
   const refused = (message: string, extra: Partial<SettingWriteResult> = {}): SettingWriteResult => ({
     ok: false,
     applied: false,
+    canRollback: false,
     key,
     oldValue: null,
     newValue: input.value,
@@ -98,7 +103,7 @@ export async function writeSiteSetting(input: {
   if (!current.measured) {
     // A value nobody could read is a change nobody can describe afterwards, and rollback would be
     // guessing. The refusal is named instead.
-    return refused(`المخزن ما ردّش على الإعداد «${key}» — فالتغيير ما اتعملش`);
+    return refused(`المخزن ما ردّش على ${label} — فالتغيير ما اتعملش`);
   }
 
   const apply = input.apply !== false;
@@ -121,15 +126,21 @@ export async function writeSiteSetting(input: {
         status: "waiting",
       },
     });
+    if (!history.ok) {
+      return refused(`طلب تغيير ${label} ما اتسجّلش — والقيمة لسه ما اتغيرتش`, {
+        oldValue: current.value,
+        note: `السجل ما استقبلش الطلب: ${history.error}`,
+      });
+    }
     return {
       ok: true,
       applied: false,
+      canRollback: false,
       key,
       oldValue: current.value,
       newValue: input.value,
-      historyId: history.ok ? history.id : null,
-      message: `طلب تغيير الإعداد «${key}» اتسجّل، والقيمة لسه ما اتغيرتش`,
-      ...(history.ok ? {} : { note: `السجل ما استقبلش الطلب: ${history.error}` }),
+      historyId: history.id,
+      message: `طلب تغيير ${label} اتسجّل، والقيمة لسه ما اتغيرتش`,
     };
   }
 
@@ -148,10 +159,10 @@ export async function writeSiteSetting(input: {
 
   if (error) {
     console.error("[SiteSettingsDesk] write refused:", error);
-    return refused(`الإعداد «${key}» ما اتغيرش — المخزن رفض الكتابة`);
+    return refused(`${label} ما اتغيرش — المخزن رفض الكتابة`, { oldValue: current.value });
   }
   if (!written) {
-    return refused(`الإعداد «${key}» ما اتأكدش إنه اتغير — فما بنقولش «اتغير» من غير قراية`);
+    return refused(`${label} ما اتأكدش إنه اتغير — فما بنقولش «اتغير» من غير قراية`, { oldValue: current.value });
   }
 
   const history = await recordAuditEvent({
@@ -172,14 +183,24 @@ export async function writeSiteSetting(input: {
     },
   });
 
+  const canRollback = current.existed && history.ok && Boolean(String(input.executionId ?? "").trim());
+  const undoNote = !current.existed
+    ? "الإعداد ده اتعمل جديد؛ الرجوع عنه محتاج مسح السطر بكلمة المالك."
+    : !history.ok
+      ? "السجل ما استقبلش التغيير، فالرجوع التلقائي مش متاح."
+      : !canRollback
+        ? "مفيش رقم تنفيذ للرجوع، فالرجوع التلقائي مش متاح."
+        : "";
+
   return {
     ok: true,
     applied: true,
+    canRollback,
     key,
     oldValue: current.value,
     newValue: written.value,
     historyId: history.ok ? history.id : null,
-    message: `الإعداد «${key}» اتغير، والقراية من المخزن أكّدته.`,
+    message: `${label} اتغير، والقراية من المخزن أكّدته.${undoNote ? ` ${undoNote}` : ""}`,
     ...(history.ok ? {} : { note: `السجل ما استقبلش التغيير: ${history.error} — القيمة اتغيرت فعلًا` }),
   };
 }
@@ -260,18 +281,19 @@ export async function rollbackSettingsForExecution(
     else failures.push(key);
   }
 
+  const settingName = (key: string) => factLabel(key) ?? "إعداد غير مسمّى";
   const waitingSentence = newKeys.length
-    ? ` · ${newKeys.length} إعداد اتعمل جديد، والرجوع عنه حذف سطر وده قرار المالك`
+    ? ` · ${arDigits(newKeys.length)} إعداد اتعمل جديد، والرجوع عنه حذف سطر وده قرار المالك`
     : "";
   const message = keys.length
-    ? `رجّعنا ${keys.length} إعداد لقيمته قبل التنفيذ${failures.length ? ` · ${failures.length} ما رجعتش` : ""}${waitingSentence}.`
+    ? `رجّعنا ${arDigits(keys.length)} إعداد لقيمته قبل التنفيذ${failures.length ? ` · ${arDigits(failures.length)} ما رجعتش` : ""}${waitingSentence}.`
     : newKeys.length
-      ? `الرجوع ما اتعملش: ${newKeys.length} إعداد اتعمل جديد، والرجوع عنه حذف سطر من المخزن — وده قرار المالك.`
+      ? `الرجوع ما اتعملش: ${arDigits(newKeys.length)} إعداد اتعمل جديد، والرجوع عنه حذف سطر من المخزن — وده قرار المالك.`
       : "الرجوع ما اتعملش — المخزن رفض الكتابة.";
 
   const notes = [
-    ...(newKeys.length ? [`مستني كلمة المالك: ${newKeys.join("، ")}`] : []),
-    ...(failures.length ? [`ما رجعتش: ${failures.join("، ")}`] : []),
+    ...(newKeys.length ? [`مستني كلمة المالك: ${newKeys.map(settingName).join("، ")}`] : []),
+    ...(failures.length ? [`ما رجعتش: ${failures.map(settingName).join("، ")}`] : []),
   ];
 
   return {

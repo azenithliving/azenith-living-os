@@ -31,6 +31,7 @@ beforeEach(() => {
   deskCall.out = {
     ok: true,
     applied: true,
+    canRollback: true,
     key: "theme",
     oldValue: { primary: "black" },
     newValue: { primary: "gold" },
@@ -40,6 +41,23 @@ beforeEach(() => {
 });
 
 describe("the settings tool's answer", () => {
+  it("does not advertise undo for a creation even though its history exists", async () => {
+    deskCall.out = { ...deskCall.out, canRollback: false };
+    const out = await handlers.executeSettingUpdate({ key: "theme", value: { primary: "gold" }, autoApprove: true }, context);
+    expect(out.success).toBe(true);
+    expect(out.canRollback).toBe(false);
+    expect(out.data?.canRollback).toBe(false);
+    expect(out.rollbackId).toBeUndefined();
+  });
+
+  it("does not request approval for an unrecorded waiting change", async () => {
+    deskCall.out = { ...deskCall.out, ok: false, applied: false, canRollback: false, historyId: null };
+    const out = await handlers.executeSettingUpdate({ key: "theme", value: { primary: "gold" } }, context);
+    expect(out.success).toBe(false);
+    expect(out.requiresApproval).not.toBe(true);
+    expect(out.canRollback).toBe(false);
+  });
+
   it("carries the rollback flag where the door reads it, not buried in data", async () => {
     const out = await handlers.executeSettingUpdate(
       { key: "theme", value: { primary: "gold" }, autoApprove: true },
@@ -52,7 +70,7 @@ describe("the settings tool's answer", () => {
   });
 
   it("does not promise a rollback the history row never covered", async () => {
-    deskCall.out = { ...deskCall.out, historyId: null, note: "السجل ما استقبلش التغيير" };
+    deskCall.out = { ...deskCall.out, canRollback: false, historyId: null, note: "السجل ما استقبلش التغيير" };
 
     const out = await handlers.executeSettingUpdate(
       { key: "theme", value: 1, autoApprove: true },
@@ -72,7 +90,7 @@ describe("the settings tool's answer", () => {
   });
 
   it("records a waiting change without applying it when approval is not waived", async () => {
-    deskCall.out = { ...deskCall.out, applied: false };
+    deskCall.out = { ...deskCall.out, applied: false, canRollback: false };
 
     const out = await handlers.executeSettingUpdate({ key: "theme", value: 1 }, context);
 

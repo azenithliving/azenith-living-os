@@ -96,6 +96,42 @@ beforeEach(() => {
 });
 
 describe("writing a setting", () => {
+  it("offers rollback only for a recorded update with an execution id", async () => {
+    const out = await desk.writeSiteSetting({ key: "theme", value: { primary: "gold" }, actor: "ops-lead", executionId: "exec-1" });
+    expect(out.canRollback).toBe(true);
+  });
+
+  it("does not offer deletion as rollback for a newly created setting", async () => {
+    world.existingRow = null;
+    const out = await desk.writeSiteSetting({ key: "theme", value: { primary: "gold" }, actor: "ops-lead", executionId: "exec-1" });
+    expect(out.applied).toBe(true);
+    expect(out.historyId).toBe("audit-1");
+    expect(out.canRollback).toBe(false);
+  });
+
+  it("does not offer rollback without an execution id the rollback door can use", async () => {
+    const out = await desk.writeSiteSetting({ key: "theme", value: { primary: "gold" }, actor: "ops-lead" });
+    expect(out.applied).toBe(true);
+    expect(out.canRollback).toBe(false);
+  });
+
+  it("does not offer rollback when recording the update failed", async () => {
+    world.historyResult = { ok: false, error: "سجل الأحداث رفض السطر" };
+    const out = await desk.writeSiteSetting({ key: "theme", value: { primary: "gold" }, actor: "ops-lead", executionId: "exec-1" });
+    expect(out.applied).toBe(true);
+    expect(out.canRollback).toBe(false);
+  });
+
+  it("reports a waiting request as failed when its only write was refused", async () => {
+    world.historyResult = { ok: false, error: "سجل الأحداث رفض السطر" };
+    const out = await desk.writeSiteSetting({ key: "theme", value: { primary: "gold" }, actor: "ops-lead", apply: false });
+    expect(out.ok).toBe(false);
+    expect(out.applied).toBe(false);
+    expect(out.historyId).toBeNull();
+    expect(out.message).toContain("ما اتسجّلش");
+    expect(world.upserts).toEqual([]);
+  });
+
   it("sends only the three columns the record accepts", async () => {
     await desk.writeSiteSetting({
       key: "theme",
@@ -138,7 +174,8 @@ describe("writing a setting", () => {
     expect(out.ok).toBe(true);
     expect(out.newValue).toEqual({ primary: "gold" });
     expect(out.oldValue).toEqual({ primary: "black" });
-    expect(String(out.message)).toContain("theme");
+    expect(String(out.message)).toContain("شكل الموقع");
+    expect(String(out.message)).not.toContain("theme");
   });
 
   it("never claims a change the record refused", async () => {
@@ -278,7 +315,8 @@ describe("rolling a change back", () => {
     expect(out.appliedCount).toBe(1);
     expect(out.keys).toEqual(["theme"]);
     expect(out.newKeys).toEqual(["qa_new_key"]);
-    expect(String(out.note ?? "")).toContain("qa_new_key");
+    expect(String(out.note ?? "")).toContain("إعداد غير مسمّى");
+    expect(String(out.note ?? "")).not.toContain("qa_new_key");
   });
 
   it("says nothing was recorded instead of pretending a rollback happened", async () => {

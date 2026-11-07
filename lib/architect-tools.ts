@@ -6,6 +6,8 @@
 
 import { supabaseService } from "./supabase-service";
 import { getSupabaseServerClient } from "./supabase";
+import { getSupabaseAdminClient } from "./supabase-admin";
+import { writeSiteSetting } from "./site-settings-desk";
 import { resolvePrimaryCompanyId } from "./company-resolver";
 import { arNum } from "./ops/metricLabels";
 import { load as loadHtml } from "cheerio";
@@ -74,14 +76,6 @@ export interface RevenueAnalysisInput {
 export interface SpeedAuditInput {
   url?: string;
   strategy?: "mobile" | "desktop";
-}
-
-interface ThemeValue {
-  primaryColor?: string;
-}
-
-interface SeoValue {
-  siteTitle?: string;
 }
 
 const STRICT_MODE = process.env.AGENT_STRICT_MODE
@@ -255,116 +249,54 @@ export async function createAutomationRule(input: AutomationRuleInput): Promise<
 }
 
 export async function updateSiteSetting(input: SiteSettingInput): Promise<ToolResult> {
-  try {
-    const { key, value } = input;
-
-    if (!key || !value) {
-      return { success: false, error: "key/value required", message: "فشل: مفتاح وقيمة مطلوبة" };
-    }
-
-    const companyId = await resolvePrimaryCompanyId().catch(() => null);
-
-    // Load existing value to merge (prevents wiping other keys).
-    let existingValue: unknown = undefined;
-    try {
-      if (companyId) {
-        const scoped = await supabaseService
-          .from("site_settings")
-          .select("value")
-          .eq("company_id", companyId)
-          .eq("key", key)
-          .maybeSingle();
-
-        if (!scoped.error && scoped.data) {
-          existingValue = (scoped.data as { value?: unknown }).value;
-        } else if (scoped.error?.message?.includes("company_id")) {
-          const legacy = await supabaseService
-            .from("site_settings")
-            .select("value")
-            .eq("key", key)
-            .maybeSingle();
-          if (!legacy.error && legacy.data) existingValue = (legacy.data as { value?: unknown }).value;
-        }
-      } else {
-        const legacy = await supabaseService
-          .from("site_settings")
-          .select("value")
-          .eq("key", key)
-          .maybeSingle();
-        if (!legacy.error && legacy.data) existingValue = (legacy.data as { value?: unknown }).value;
-      }
-    } catch {}
-
-    const canMerge =
-      existingValue &&
-      typeof existingValue === "object" &&
-      !Array.isArray(existingValue) &&
-      value &&
-      typeof value === "object" &&
-      !Array.isArray(value);
-
-    const mergedValue = canMerge
-      ? { ...(existingValue as Record<string, unknown>), ...(value as Record<string, unknown>) }
-      : value;
-
-    const basePayload: Record<string, unknown> = {
-      key,
-      value: mergedValue,
-      updated_at: new Date().toISOString(),
-    };
-
-    const tenantPayload = companyId ? { ...basePayload, company_id: companyId } : basePayload;
-    const primaryOnConflict = companyId ? "company_id,key" : "key";
-
-    let result = await supabaseService
-      .from("site_settings")
-      .upsert(tenantPayload as never, { onConflict: primaryOnConflict })
-      .select()
-      .single();
-
-    if (result.error && companyId) {
-      const msg = result.error.message || "";
-      const fallbackAllowed =
-        msg.includes("company_id") ||
-        result.error.code === "42P10" ||
-        msg.toLowerCase().includes("constraint");
-
-      if (fallbackAllowed) {
-        result = await supabaseService
-          .from("site_settings")
-          .upsert(basePayload as never, { onConflict: "key" })
-          .select()
-          .single();
-      }
-    }
-
-    if (result.error) {
-      const code = result.error.code;
-      const msg = result.error.message || "unknown error";
-      const isMissingTable = code === "42P01" || msg.toLowerCase().includes("does not exist");
-
-      if (isMissingTable) {
-        if (!STRICT_MODE) {
-          return { success: true, data: { key, value: mergedValue, simulated: true }, message: `⚠️ "${key}" محفوظ (محاكاة - جدول غير موجود)` };
-        }
-        return { success: false, error: msg, message: "فشل: جدول site_settings غير موجود." };
-      }
-
-      console.error("[updateSiteSetting]", result.error);
-      return { success: false, error: msg, message: `فشل تحديث "${key}": ${msg}` };
-    }
-
-    const themeValue = mergedValue as ThemeValue;
-    const seoValue = mergedValue as SeoValue;
-    let changeDesc = "تم تحديث الإعداد";
-    if (key === "theme" && themeValue.primaryColor) changeDesc = `اللون: ${themeValue.primaryColor}`;
-    else if (key === "seo" && seoValue.siteTitle) changeDesc = `العنوان: ${seoValue.siteTitle}`;
-
-    return { success: true, data: result.data, message: `✅ "${key}" محدث (${changeDesc})` };
-  } catch (err) {
-    const errorMsg = String(err);
-    return { success: false, error: errorMsg, message: "❌ خطأ تحديث إعداد" };
+  const { key, value } = input;
+  if (!key || !value) {
+    return { success: false, error: "key/value required", message: "فشل: مفتاح وقيمة مطلوبة" };
   }
+
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    return { success: false, message: "مفتاح المتجر مش ضابط — الإعداد ما اتغيرش" };
+  }
+
+  const { data: current, error: readError } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", key)
+    .maybeSingle<{ value: unknown }>();
+
+  if (readError) {
+    return { success: false, error: readError.message, message: `المخزن ما ردّش على الإعداد — فالتغيير ما اتعملش` };
+  }
+
+  const existingValue = current?.value;
+  const canMerge =
+    existingValue &&
+    typeof existingValue === "object" &&
+    !Array.isArray(existingValue) &&
+    typeof value === "object" &&
+    !Array.isArray(value);
+
+  const mergedValue = canMerge
+    ? { ...(existingValue as Record<string, unknown>), ...value }
+    : value;
+
+  const out = await writeSiteSetting({
+    key,
+    value: mergedValue,
+    actor: "architect",
+    reason: "تحديث إعداد من المعماري",
+  });
+
+  if (!out.ok) {
+    return { success: false, error: out.note, message: out.message };
+  }
+
+  return {
+    success: true,
+    data: { key: out.key, value: out.newValue },
+    message: out.message,
+  };
 }
 
 export async function getAnalyticsReport(period: AnalyticsPeriod = { days: 30 }): Promise<ToolResult> {

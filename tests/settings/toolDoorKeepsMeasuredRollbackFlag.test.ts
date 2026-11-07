@@ -13,6 +13,7 @@ import { describe, expect, it, vi } from "vitest";
 const writeSiteSetting = vi.fn(async () => ({
   ok: true,
   applied: true,
+  canRollback: true,
   key: "theme",
   oldValue: null,
   newValue: { primary: "gold" },
@@ -28,6 +29,17 @@ vi.mock("@vercel/blob", () => ({ put: vi.fn(async () => { throw new Error("blob 
 const { executeTool } = await import("@/lib/agent-tools/tool-registry");
 
 describe("the tool door's rollback flag", () => {
+  it("keeps the creation refusal even when the tool successfully stored history", async () => {
+    writeSiteSetting.mockResolvedValueOnce({
+      ok: true, applied: true, canRollback: false, key: "theme", oldValue: null,
+      newValue: { primary: "gold" }, historyId: "audit-create", message: "اتحفظ",
+    });
+    const out = await executeTool("setting_update", { key: "theme", value: { primary: "gold" }, autoApprove: true }, { executionId: "exec-create", actorUserId: "ops-lead" } as never);
+    expect(out.success).toBe(true);
+    expect(out.canRollback).toBe(false);
+    expect(out.rollbackId).toBeUndefined();
+  });
+
   it("keeps the flag the desk measured instead of recomputing it from a missing handler", async () => {
     const out = await executeTool(
       "setting_update",
@@ -44,6 +56,7 @@ describe("the tool door's rollback flag", () => {
     writeSiteSetting.mockResolvedValueOnce({
       ok: true,
       applied: true,
+      canRollback: false,
       key: "theme",
       oldValue: null,
       newValue: { primary: "gold" },

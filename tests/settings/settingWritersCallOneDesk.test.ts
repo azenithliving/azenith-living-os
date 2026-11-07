@@ -21,6 +21,7 @@ const strip = (source: string) =>
 const deskSource = strip(readFileSync("lib/site-settings-desk.ts", "utf8"));
 const toolHandlers = readFileSync("lib/agent-tools/tool-handlers.ts", "utf8");
 const realExecutor = readFileSync("lib/real-tool-executor.ts", "utf8");
+const architectTools = readFileSync("lib/architect-tools.ts", "utf8");
 const rollbackDoor = strip(readFileSync("app/api/admin/agent/rollback/route.ts", "utf8"));
 
 /** The body of one function, up to the next top-level function — not to the end of the file. */
@@ -32,7 +33,7 @@ function body(source: string, signature: string): string {
   return nextTopLevel < 0 ? source.slice(start) : source.slice(start, start + signature.length + nextTopLevel);
 }
 
-describe("the settings desk is the only writer", () => {
+describe("the agent setting writers share one desk", () => {
   it("the employee tool calls the desk and never names the invented columns", () => {
     const fn = strip(body(toolHandlers, "export async function executeSettingUpdate("));
 
@@ -49,6 +50,15 @@ describe("the settings desk is the only writer", () => {
     expect(fn).not.toContain("content_revisions");
     expect(fn).not.toContain("current_revision_id");
     expect(fn).not.toContain("setting_key");
+  });
+
+  it("the architect writer calls the same desk instead of filtering a company column", () => {
+    const fn = strip(body(architectTools, "export async function updateSiteSetting("));
+
+    expect(fn).toContain("writeSiteSetting");
+    expect(fn).not.toContain("company_id");
+    expect(fn).not.toContain("supabaseService");
+    expect(fn).not.toContain("محاكاة");
   });
 
   it("the rollback door asks the desk, by the execution the owner's chat actually sends", () => {
@@ -77,6 +87,7 @@ describe("the invented settings columns are gone from the code", () => {
       ["lib/site-settings-desk.ts", deskSource],
       ["lib/agent-tools/tool-handlers.ts", strip(body(toolHandlers, "export async function executeSettingUpdate("))],
       ["lib/real-tool-executor.ts", strip(body(realExecutor, "async function executeSettingUpdate("))],
+      ["lib/architect-tools.ts", strip(body(architectTools, "export async function updateSiteSetting("))],
       ["app/api/admin/agent/rollback/route.ts", rollbackDoor],
     ] as const) {
       for (const invented of ["current_revision_id", "setting_value", "setting_key", "setting_category"]) {

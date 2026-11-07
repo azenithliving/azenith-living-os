@@ -89,7 +89,16 @@ try {
     first.status === 200 && first.body.success === true && typeof createExecutionId === "string",
     `status=${first.status} success=${first.body.success}`,
   );
-  check("the tool says the change can be rolled back", first.body.canRollback === true, `canRollback=${first.body.canRollback}`);
+  check(
+    "the tool does not promise rollback for a newly created setting",
+    first.body.canRollback === false,
+    `canRollback=${first.body.canRollback}`,
+  );
+  check(
+    "the tool says undoing a new setting needs the owner's word",
+    String(first.body.message ?? "").includes("كلمة المالك"),
+    String(first.body.message ?? "").slice(0, 160),
+  );
 
   const applied = await readRow();
   say("row after the change", JSON.stringify({ value: applied?.value, by: applied?.updated_by }));
@@ -117,6 +126,11 @@ try {
   const second = await runTool(secondValue);
   const updateExecutionId = second.body.executionId ?? null;
   say("tool answer (update)", `status=${second.status} success=${second.body.success}`);
+  check(
+    "the tool offers rollback for an update to an existing setting",
+    second.status === 200 && second.body.success === true && second.body.canRollback === true,
+    `status=${second.status} canRollback=${second.body.canRollback}`,
+  );
   const history2 = await sql`
     select details from public.audit_log
     where event_type = 'setting_change' and details->>'executionId' = ${updateExecutionId} limit 3`;
@@ -130,6 +144,11 @@ try {
   const rollbackBody = await rollback.json().catch(() => ({}));
   say("rollback answer", `status=${rollback.status()} success=${rollbackBody.success} message=${String(rollbackBody.message ?? rollbackBody.error ?? "").slice(0, 140)}`);
   check("the door the owner's chat calls rolled the change back", rollback.status() === 200 && rollbackBody.success === true, `status=${rollback.status()}`);
+  check(
+    "the rollback answer speaks Arabic without the machine key",
+    !String(rollbackBody.message ?? "").includes(MARKER_KEY) && /[٠-٩]/.test(String(rollbackBody.message ?? "")),
+    String(rollbackBody.message ?? "").slice(0, 160),
+  );
 
   const restored = await readRow();
   say("row after the rollback", JSON.stringify(restored?.value ?? null));
@@ -148,6 +167,11 @@ try {
     "undoing a key that did not exist is refused as the owner's decision",
     rollbackCreate.status() === 404 && String(rollbackCreateBody.error ?? "").includes("قرار المالك"),
     `status=${rollbackCreate.status()}`,
+  );
+  check(
+    "the refusal does not print the machine key on the owner's screen",
+    !String(rollbackCreateBody.error ?? "").includes(MARKER_KEY),
+    String(rollbackCreateBody.error ?? "").slice(0, 160),
   );
 
   const secondRollback = await ctx.request.fetch(`${SITE}/api/admin/agent/rollback`, {

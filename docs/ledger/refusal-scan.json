@@ -1,30 +1,30 @@
 {
-  "measuredAt": "2026-11-06T18:40:08.293Z",
+  "measuredAt": "2026-11-07T21:16:17.522Z",
   "mapMeasuredAt": "2026-11-06T17:13:48.801Z",
-  "filesScanned": 846,
+  "filesScanned": 847,
   "entryFiles": 286,
-  "refsSeen": 3663,
-  "fromSites": 1354,
+  "refsSeen": 3622,
+  "fromSites": 1339,
   "unresolvedFromSites": 199,
   "tablesInRecord": 161,
   "deadPathsConsidered": 101,
-  "total": 199,
-  "distinct": 138,
+  "total": 186,
+  "distinct": 132,
   "byKind": {
-    "insert": 42,
-    "missing-table": 119,
-    "filter": 22,
+    "insert": 35,
+    "missing-table": 117,
+    "filter": 18,
     "select": 16
   },
-  "line": "رفض صامت: ١٩٩ موضع في الكود ما لوش ردّ عند المخزن، منها ١٣٨ اسم مختلف · إدخال ٤٢ · جدول مش موجود ١١٩ · فلترة ٢٢ · اختيار ١٦",
-  "coverageLine": "تغطية المسح: ١٣٥٤ موضع سؤال في الكود · ١٩٩ منهم جدولهم مكتوب في متغيّر ما اتحلّش — دول ما اتقارش، مش مرفوضين",
+  "line": "رفض صامت: ١٨٦ موضع في الكود ما لوش ردّ عند المخزن، منها ١٣٢ اسم مختلف · إدخال ٣٥ · جدول مش موجود ١١٧ · فلترة ١٨ · اختيار ١٦",
+  "coverageLine": "تغطية المسح: ١٣٣٩ موضع سؤال في الكود · ١٩٩ منهم جدولهم مكتوب في متغيّر ما اتحلّش — دول ما اتقارش، مش مرفوضين",
   "classification": {
-    "live": 45,
+    "live": 36,
     "uncalled": 45,
     "unreached": 57,
-    "unknown": 52
+    "unknown": 48
   },
-  "classificationLine": "فحص الكود مش إثبات تشغيل: مسار ظاهر ٤٥ · بلا استيراد ظاهر ٤٥ · مسار غير موصول ٥٧ · ما اتقارش ٥٢",
+  "classificationLine": "فحص الكود مش إثبات تشغيل: مسار ظاهر ٣٦ · بلا استيراد ظاهر ٤٥ · مسار غير موصول ٥٧ · ما اتقارش ٤٨",
   "deadCodeLine": "رفض صامت: ١٧ موضع في الكود ما لوش ردّ عند المخزن، منها ١٠ اسم مختلف · جدول مش موجود ٦ · اختيار ٤ · فلترة ٣ · إدخال ٤",
   "phantoms": [
     {
@@ -162,67 +162,6 @@
       "reach": "live"
     },
     {
-      "file": "app/api/admin/agent/rollback/route.ts",
-      "table": "content_revisions",
-      "column": "",
-      "kind": "missing-table",
-      "at": 964,
-      "sites": [
-        964,
-        2904
-      ],
-      "symbol": "POST",
-      "reach": "live"
-    },
-    {
-      "file": "app/api/admin/agent/rollback/route.ts",
-      "table": "site_settings",
-      "column": "id",
-      "kind": "filter",
-      "at": 1756,
-      "sites": [
-        1756
-      ],
-      "symbol": "POST",
-      "reach": "live"
-    },
-    {
-      "file": "app/api/admin/agent/rollback/route.ts",
-      "table": "site_settings",
-      "column": "setting_value",
-      "kind": "insert",
-      "at": 1756,
-      "sites": [
-        1756
-      ],
-      "symbol": "POST",
-      "reach": "live"
-    },
-    {
-      "file": "app/api/admin/agent/rollback/route.ts",
-      "table": "site_settings",
-      "column": "current_revision_id",
-      "kind": "insert",
-      "at": 1756,
-      "sites": [
-        1756
-      ],
-      "symbol": "POST",
-      "reach": "live"
-    },
-    {
-      "file": "app/api/admin/agent/rollback/route.ts",
-      "table": "site_sections",
-      "column": "",
-      "kind": "missing-table",
-      "at": 2114,
-      "sites": [
-        2114
-      ],
-      "symbol": "POST",
-      "reach": "live"
-    },
-    {
       "file": "app/api/admin/ops/draft/route.ts",
       "table": "site_sections",
       "column": "",
@@ -301,54 +240,17 @@
       "table": "site_sections",
       "column": "",
       "kind": "missing-table",
-      "at": 2305,
+      "at": 2366,
       "sites": [
-        2305,
-        5861,
-        8431,
-        9640,
-        9836,
-        48040,
-        48383
+        2366,
+        5922,
+        8492,
+        9701,
+        9897,
+        46447,
+        46790
       ],
       "symbol": "executeSectionCreate",
-      "reach": "live"
-    },
-    {
-      "file": "lib/agent-tools/tool-handlers.ts",
-      "table": "content_revisions",
-      "column": "",
-      "kind": "missing-table",
-      "at": 14781,
-      "sites": [
-        14781
-      ],
-      "symbol": "executeSettingUpdate",
-      "reach": "live"
-    },
-    {
-      "file": "lib/agent-tools/tool-handlers.ts",
-      "table": "site_settings",
-      "column": "id",
-      "kind": "filter",
-      "at": 16060,
-      "sites": [
-        16060
-      ],
-      "symbol": "executeSettingUpdate",
-      "reach": "live"
-    },
-    {
-      "file": "lib/agent-tools/tool-handlers.ts",
-      "table": "site_settings",
-      "column": "current_revision_id",
-      "kind": "insert",
-      "at": 16060,
-      "sites": [
-        16060,
-        16382
-      ],
-      "symbol": "executeSettingUpdate",
       "reach": "live"
     },
     {
@@ -356,9 +258,9 @@
       "table": "leads",
       "column": "estimated_value",
       "kind": "select",
-      "at": 18309,
+      "at": 16716,
       "sites": [
-        18309
+        16716
       ],
       "symbol": "executeRevenueAnalysis",
       "reach": "uncalled"
@@ -368,9 +270,9 @@
       "table": "bookings",
       "column": "lead_id",
       "kind": "select",
-      "at": 18612,
+      "at": 17019,
       "sites": [
-        18612
+        17019
       ],
       "symbol": "executeRevenueAnalysis",
       "reach": "uncalled"
@@ -380,9 +282,9 @@
       "table": "bookings",
       "column": "total_amount",
       "kind": "select",
-      "at": 18612,
+      "at": 17019,
       "sites": [
-        18612
+        17019
       ],
       "symbol": "executeRevenueAnalysis",
       "reach": "uncalled"
@@ -392,12 +294,12 @@
       "table": "agent_goals_v2",
       "column": "",
       "kind": "missing-table",
-      "at": 44066,
+      "at": 42473,
       "sites": [
-        44066,
-        45459,
-        46470,
-        46569
+        42473,
+        43866,
+        44877,
+        44976
       ],
       "symbol": "executeGoalCreate",
       "reach": "live"
@@ -417,24 +319,12 @@
     },
     {
       "file": "lib/architect-tools.ts",
-      "table": "site_settings",
-      "column": "company_id",
-      "kind": "filter",
-      "at": 7365,
-      "sites": [
-        7365
-      ],
-      "symbol": "updateSiteSetting",
-      "reach": "live"
-    },
-    {
-      "file": "lib/architect-tools.ts",
       "table": "parallel_task_queue",
       "column": "",
       "kind": "missing-table",
-      "at": 13692,
+      "at": 11120,
       "sites": [
-        13692
+        11120
       ],
       "symbol": "getSystemHealth",
       "reach": "live"
@@ -444,9 +334,9 @@
       "table": "conversions",
       "column": "",
       "kind": "missing-table",
-      "at": 24592,
+      "at": 22020,
       "sites": [
-        24592
+        22020
       ],
       "symbol": "analyzeRevenueOpportunitiesWithInput",
       "reach": "live"
@@ -456,9 +346,9 @@
       "table": "products",
       "column": "price",
       "kind": "select",
-      "at": 29903,
+      "at": 27331,
       "sites": [
-        29903
+        27331
       ],
       "symbol": "listProducts",
       "reach": "live"
@@ -1064,14 +954,26 @@
       "table": "site_sections",
       "column": "",
       "kind": "missing-table",
-      "at": 8179,
+      "at": 8240,
       "sites": [
-        8179,
-        11887,
-        14343,
-        17193
+        8240,
+        11948,
+        14404,
+        17254
       ],
       "symbol": "executeSectionCreate",
+      "reach": "unknown"
+    },
+    {
+      "file": "lib/real-tool-executor.ts",
+      "table": "backup_snapshots",
+      "column": "",
+      "kind": "missing-table",
+      "at": 22115,
+      "sites": [
+        22115
+      ],
+      "symbol": "executeBackupCreate",
       "reach": "unknown"
     },
     {
@@ -1079,76 +981,12 @@
       "table": "content_revisions",
       "column": "",
       "kind": "missing-table",
-      "at": 25803,
+      "at": 29686,
       "sites": [
-        25803,
-        27282,
-        32566,
-        33520
+        29686,
+        30640
       ],
-      "symbol": "executeSettingUpdate",
-      "reach": "unknown"
-    },
-    {
-      "file": "lib/real-tool-executor.ts",
-      "table": "site_settings",
-      "column": "id",
-      "kind": "filter",
-      "at": 26403,
-      "sites": [
-        26403
-      ],
-      "symbol": "executeSettingUpdate",
-      "reach": "unknown"
-    },
-    {
-      "file": "lib/real-tool-executor.ts",
-      "table": "site_settings",
-      "column": "setting_value",
-      "kind": "insert",
-      "at": 26403,
-      "sites": [
-        26403,
-        26692
-      ],
-      "symbol": "executeSettingUpdate",
-      "reach": "unknown"
-    },
-    {
-      "file": "lib/real-tool-executor.ts",
-      "table": "site_settings",
-      "column": "current_revision_id",
-      "kind": "insert",
-      "at": 26403,
-      "sites": [
-        26403,
-        26692
-      ],
-      "symbol": "executeSettingUpdate",
-      "reach": "unknown"
-    },
-    {
-      "file": "lib/real-tool-executor.ts",
-      "table": "site_settings",
-      "column": "setting_key",
-      "kind": "insert",
-      "at": 26692,
-      "sites": [
-        26692
-      ],
-      "symbol": "executeSettingUpdate",
-      "reach": "unknown"
-    },
-    {
-      "file": "lib/real-tool-executor.ts",
-      "table": "site_settings",
-      "column": "setting_category",
-      "kind": "insert",
-      "at": 26692,
-      "sites": [
-        26692
-      ],
-      "symbol": "executeSettingUpdate",
+      "symbol": "executeContentUpdate",
       "reach": "unknown"
     },
     {
